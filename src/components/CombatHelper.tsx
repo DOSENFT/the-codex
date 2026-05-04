@@ -56,6 +56,7 @@ import { Input } from './ui/Input'
 import { HPTracker } from './HPTracker'
 import { ActionMenu, type ActionChoice } from './ActionMenu'
 import { DamageTracker } from './DamageTracker'
+import { ConditionReminder } from './ConditionReminder'
 import { type CombatLog, type DamageEntry, createCombatLog, logDamage as logDamageEntry, endCombatLog, saveDamageLogs, loadDamageLogs } from '../lib/damage-log'
 
 // ---------------------------------------------------------------------------
@@ -1387,6 +1388,11 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
 
   return (
     <section className="flex flex-col gap-4" aria-label="Combat Helper">
+      {/* Condition Reminder Banner */}
+      {character.conditions.length > 0 && (
+        <ConditionReminder character={character} onOpenDiceRoller={onOpenDiceRoller} />
+      )}
+
       {/* 0. Combat Toggle + Round Counter */}
       <GlassCard className="p-4">
         <div className="flex items-center justify-between">

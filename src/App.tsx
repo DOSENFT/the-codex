@@ -4,7 +4,8 @@ import { Layout, type TabId } from './components/Layout'
 import { CharacterSetup } from './components/CharacterSetup'
 import { CombatHelper } from './components/CombatHelper'
 import { Spellbook } from './components/Spellbook'
-import { TrainingHub } from './components/TrainingHub'
+import { IdentityPage } from './components/IdentityPage'
+import { AcademyPage } from './components/AcademyPage'
 import { Settings } from './components/Settings'
 import type { Character } from './lib/character'
 
@@ -70,8 +71,11 @@ export default function App() {
           onCharacterUpdate={handleCharacterUpdate}
         />
       )}
-      {activeTab === 'train' && (
-        <TrainingHub character={character} onCharacterUpdate={handleCharacterUpdate} />
+      {activeTab === 'identity' && (
+        <IdentityPage character={character} onCharacterUpdate={handleCharacterUpdate} />
+      )}
+      {activeTab === 'academy' && (
+        <AcademyPage character={character} onCharacterUpdate={handleCharacterUpdate} />
       )}
       {activeTab === 'settings' && (
         <Settings

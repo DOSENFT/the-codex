@@ -1,5 +1,5 @@
 import { type ReactNode, useState, useEffect } from 'react'
-import { Swords, BookOpen, Brain, Settings, Dices, ChevronDown, Users, HelpCircle } from 'lucide-react'
+import { Swords, BookOpen, Theater, GraduationCap, Settings, Dices, ChevronDown, Users, HelpCircle } from 'lucide-react'
 import { cn } from '../lib/cn'
 import type { Character, RosterEntry } from '../lib/character'
 import { Badge } from './ui/Badge'
@@ -7,7 +7,7 @@ import { DiceRoller } from './DiceRoller'
 import { CharacterSheet } from './CharacterSheet'
 import { MechanicsDrawer } from './MechanicsDrawer'
 
-export type TabId = 'combat' | 'spells' | 'train' | 'settings'
+export type TabId = 'combat' | 'spells' | 'identity' | 'academy' | 'settings'
 
 interface LayoutProps {
   children: ReactNode
@@ -24,7 +24,8 @@ interface LayoutProps {
 const TABS: { id: TabId; label: string; icon: typeof Swords }[] = [
   { id: 'combat', label: 'Combat', icon: Swords },
   { id: 'spells', label: 'Spells', icon: BookOpen },
-  { id: 'train', label: 'Train', icon: Brain },
+  { id: 'identity', label: 'Identity', icon: Theater },
+  { id: 'academy', label: 'Academy', icon: GraduationCap },
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
 

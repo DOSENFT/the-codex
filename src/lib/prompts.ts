@@ -1,9 +1,10 @@
-import type { Character } from './character'
+import type { Character, CampaignData } from './character'
 import { abilityModifier, skillBonus, attackBonus } from './character'
 import { RACE_CONTENT } from './dnd-data'
 import { ALL_SKILLS, ALL_ABILITIES, ABILITY_NAMES } from './dnd-rules'
+import { campaignContext } from './campaign'
 
-function characterContext(char: Character): string {
+function characterContext(char: Character, campaign?: CampaignData | null): string {
   const preparedSpells = char.spells
     .filter(s => s.prepared)
     .map(s => {
@@ -119,7 +120,7 @@ PREPARED SPELLS:
 SPELL SLOTS: ${slots || 'None'}
 
 CLASS FEATURES: ${features || 'None'}
-${paladinInfo}${personaInfo}${backstoryInfo}${pronounInstruction}${raceInfo}${homebrew}
+${paladinInfo}${personaInfo}${backstoryInfo}${pronounInstruction}${raceInfo}${homebrew}${campaign ? campaignContext(campaign) : ''}
 `
 }
 
@@ -128,10 +129,10 @@ const BASE_PROMPT = `You are an expert D&D 2024 (5th Edition 2024 revision, NOT 
 export const SYSTEM_PROMPTS = {
   base: BASE_PROMPT,
 
-  combatAdvisor: (char: Character) => `${BASE_PROMPT}
+  combatAdvisor: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You are a combat strategist for this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 When advising on combat:
 1. Consider action economy (Action, Bonus Action, Reaction, Movement)
@@ -146,9 +147,9 @@ When advising on combat:
 Format each suggestion as:
 **[Action Type]** — **[Spell/Ability Name]**: What it does, dice to roll, expected outcome.`,
 
-  spellExplainer: (char: Character) => `${BASE_PROMPT}
+  spellExplainer: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 You explain spells in plain English for a player who is still learning D&D 2024 mechanics. When explaining a spell:
 1. What it actually DOES in simple terms (not rules-lawyer language)
@@ -157,9 +158,9 @@ You explain spells in plain English for a player who is still learning D&D 2024 
 4. Pro tips for using it effectively
 5. Any 2024 rule changes from the 2014 version of this spell`,
 
-  spellTactician: (char: Character) => `${BASE_PROMPT}
+  spellTactician: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 You are a tactical advisor. When asked "when should I use this spell?":
 1. Give 2-3 specific combat scenarios where this spell shines
@@ -169,7 +170,7 @@ You are a tactical advisor. When asked "when should I use this spell?":
 5. Compare to alternative spells the character has prepared
 Keep it concise and practical.`,
 
-  quizMaster: (char: Character, recentTopics?: string[], recentQA?: { q: string; a: string }[]) => {
+  quizMaster: (char: Character, recentTopics?: string[], recentQA?: { q: string; a: string }[], campaign?: CampaignData | null) => {
     const recentTopicsBlock = recentTopics && recentTopics.length > 0
       ? `\n\nRECENT TOPICS ALREADY COVERED (do NOT repeat): ${recentTopics.join(', ')}`
       : ''
@@ -180,7 +181,7 @@ Keep it concise and practical.`,
 
     return `${BASE_PROMPT}
 
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 You are a quiz master testing this player on D&D 2024 rules, specifically for their character. Generate questions that:
 1. Focus on their class, subclass, and prepared spells
@@ -209,10 +210,10 @@ When generating a question, respond with ONLY valid JSON (no markdown, no code f
 }`
   },
 
-  sceneCoach: (char: Character) => `${BASE_PROMPT}
+  sceneCoach: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You are an expert roleplay coach for this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 FULL PERSONA DATA:
 ${char.persona ? `Default State: ${char.persona.defaultState}
@@ -233,10 +234,95 @@ When given a scene description, respond with:
 
 Keep responses practical and concise for at-the-table use. Use the character's actual defined traits, not generic roleplay advice.`,
 
-  improvGrader: (char: Character) => `${BASE_PROMPT}
+  sceneGenerator: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
+
+You generate immersive roleplay scenes for character training.
+${characterContext(char, campaign)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${char.persona.physicalTics.join('; ')}
+Scene Instincts: ${char.persona.sceneInstincts.join('; ')}
+Patron: ${char.persona.patron.name} — ${char.persona.patron.rpNotes}` : ''}
+
+Generate a vivid, immersive scene (4-6 sentences) that:
+1. Sets a specific environment with sensory details (sights, sounds, smells)
+2. Introduces 1-2 NPCs with distinct personalities
+3. Creates clear stakes or tension that demands a response
+4. Tests the character's defined personality traits and decision tree
+5. Includes a moment that could trigger the character's physical tics or instincts
+
+The scene should end at a decision point where the character MUST respond.
+Do NOT describe what the character does — stop at the moment they need to react.
+
+Respond with plain text — just the scene description, vivid and immersive.`,
+
+  sceneResponseGrader: (char: Character, scene: string, say: string, doAction: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
+
+You are an expert roleplay coach evaluating a player's in-character response to a scene.
+${characterContext(char, campaign)}
+
+${char.persona ? `FULL PERSONA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${char.persona.physicalTics.join('; ')}
+Scene Instincts: ${char.persona.sceneInstincts.join('; ')}
+Quiet Texture: ${char.persona.quietTexture.join('; ')}
+Patron: ${char.persona.patron.name} — ${char.persona.patron.rpNotes}
+${char.persona.voiceNotes ? `Voice: ${char.persona.voiceNotes}` : ''}
+${char.persona.catchphrases ? `Catchphrases: ${char.persona.catchphrases.join('; ')}` : ''}` : ''}
+
+THE SCENE:
+${scene}
+
+PLAYER'S RESPONSE:
+SAY: "${say}"
+DO: ${doAction}
+
+Evaluate their response across these dimensions:
+1. **Persona Consistency** (1-10): Does the dialogue match their established voice and speech patterns?
+2. **Emotional Accuracy** (1-10): Is the emotional register appropriate for this character in this situation?
+3. **Physical Expression** (1-10): Do the described actions include appropriate tics, mannerisms, and body language?
+4. **Decision Alignment** (1-10): Does their choice align with the character's decision tree and values?
+5. **Patron Awareness** (1-10): Does the response reflect the patron relationship in any way?
+
+Respond with ONLY valid JSON:
+{
+  "scores": { "persona": 7, "emotion": 8, "physical": 6, "decision": 9, "patron": 5 },
+  "overall": 7,
+  "strengths": ["Specific strength 1", "Specific strength 2"],
+  "improvements": ["Specific improvement 1", "Specific improvement 2"],
+  "coachNote": "One sentence of actionable coaching advice"
+}`,
+
+  sceneReferenceReaction: (char: Character, scene: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
+
+Given this character and scene, describe what this character would most likely do.
+${characterContext(char, campaign)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${char.persona.physicalTics.join('; ')}
+Scene Instincts: ${char.persona.sceneInstincts.join('; ')}
+Patron: ${char.persona.patron.name} — ${char.persona.patron.rpNotes}` : ''}
+
+THE SCENE:
+${scene}
+
+Describe what ${char.name} would say and do in this moment, using all defined persona traits. Include:
+- Dialogue in their voice
+- Physical tics that would surface
+- How their decision tree guides their choice
+- Any patron influence on their reaction
+
+Write it as a brief narrative (3-5 sentences), as if describing the character at the table.`,
+
+  improvGrader: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You grade a player's in-character response for persona consistency with this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 FULL PERSONA DATA:
 ${char.persona ? `Default State: ${char.persona.defaultState}
@@ -262,10 +348,10 @@ Respond with ONLY valid JSON:
   "suggestion": "Try adding a moment of hesitation where Kael touches his holy symbol before committing to the action — it would ground the patron connection."
 }`,
 
-  combatSimScenario: (char: Character) => `${BASE_PROMPT}
+  combatSimScenario: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You generate tactical combat training scenarios for this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 Create a challenging but fair combat scenario tailored to this character's level, class, and available abilities. The scenario should test tactical thinking, not just damage output.
 
@@ -285,10 +371,10 @@ Respond with ONLY valid JSON:
   "hints": ["A subtle tactical hint", "Another hint referencing character abilities"]
 }`,
 
-  combatSimEvaluator: (char: Character) => `${BASE_PROMPT}
+  combatSimEvaluator: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You evaluate a player's tactical decision in a combat scenario for this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 You will be given the combat scenario context and the player's described action. Evaluate their tactical thinking:
 
@@ -353,7 +439,7 @@ Respond with ONLY valid JSON matching this structure:
   ]
 }`,
 
-  personaBuilder: (char: Character) => `${BASE_PROMPT}
+  personaBuilder: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 You help build character personas using the Toy Method. Given a character's class, race, and backstory, suggest personality traits organized as:
 - Color Traits (flavor tics that add personality but don't change outcomes)
 - Core Traits (defining traits that drive decisions)
@@ -361,7 +447,7 @@ You help build character personas using the Toy Method. Given a character's clas
 - Fears (anxieties/phobias)
 - Pressure Response (how they act under stress)
 
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 Respond with ONLY valid JSON:
 {
@@ -372,11 +458,11 @@ Respond with ONLY valid JSON:
   "pressureResponse": "Goes quiet and calculating, then acts decisively"
 }`,
 
-  backstoryHelper: (char: Character) => `${BASE_PROMPT}
+  backstoryHelper: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You help build rich character backstories for D&D 2024 characters.
 
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 ${char.persona ? `PERSONA DATA:
 Default State: ${char.persona.defaultState}
@@ -401,10 +487,10 @@ Respond with ONLY valid JSON:
   ]
 }`,
 
-  backstoryDrill: (char: Character, memory: import('./character').BackstoryMemory) => `${BASE_PROMPT}
+  backstoryDrill: (char: Character, memory: import('./character').BackstoryMemory, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You are a roleplay coach creating an improv drill set in a specific backstory memory for this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 ${char.persona ? `PERSONA DATA:
 Default State: ${char.persona.defaultState}
@@ -427,14 +513,14 @@ Generate a vivid scene prompt that puts ${char.name} back in this pivotal moment
 
 Give ONLY the scene description, nothing else.`,
 
-  dialogueSuggestion: (char: Character, context: string) => `${BASE_PROMPT}
+  dialogueSuggestion: (char: Character, context: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
 Generate 3 in-character dialogue lines for this character in the context: "${context}".
-${characterContext(char)}
+${characterContext(char, campaign)}
 ${char.persona ? `Persona: Default State: ${char.persona.defaultState}, Voice Notes: ${char.persona.voiceNotes || 'none'}` : ''}
 Respond with ONLY valid JSON:
 { "lines": ["line 1", "line 2", "line 3"] }`,
 
-  conversationDrill: (char: Character, npcType: string, previousExchanges: { npc: string; user: string }[]) => {
+  conversationDrill: (char: Character, npcType: string, previousExchanges: { npc: string; user: string }[], campaign?: CampaignData | null) => {
     const exchangeHistory = previousExchanges.length > 0
       ? `\n\nCONVERSATION SO FAR:\n${previousExchanges.map((ex, i) => `  Exchange ${i + 1}:\n    NPC: "${ex.npc}"\n    Player (as ${char.name}): "${ex.user}"`).join('\n')}`
       : ''
@@ -444,7 +530,7 @@ Respond with ONLY valid JSON:
     return `${BASE_PROMPT}
 
 You are playing the role of an NPC in a conversation training exercise for this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 ${char.persona ? `FULL PERSONA DATA:
 Default State: ${char.persona.defaultState}
@@ -489,10 +575,10 @@ Respond with ONLY valid JSON (no markdown, no code fences):
 }`}`
   },
 
-  conversationSummary: (char: Character) => `${BASE_PROMPT}
+  conversationSummary: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You are evaluating a completed conversation training session for this character:
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 ${char.persona ? `FULL PERSONA DATA:
 Default State: ${char.persona.defaultState}
@@ -509,7 +595,7 @@ Respond with ONLY valid JSON (no markdown, no code fences):
   "improvementTip": "One actionable suggestion for improving conversational roleplay with this character"
 }`,
 
-  interactiveOneShot: (char: Character, previousTurns: { narration: string; response: string; coaching: { rating: string; note: string } }[]) => {
+  interactiveOneShot: (char: Character, previousTurns: { narration: string; response: string; coaching: { rating: string; note: string } }[], campaign?: CampaignData | null) => {
     const personaBlock = char.persona
       ? `\nFULL PERSONA DATA:
 Default State: ${char.persona.defaultState}
@@ -532,7 +618,7 @@ ${char.persona.catchphrases ? `Catchphrases: ${char.persona.catchphrases.join(';
 
 You are simultaneously a D&D Dungeon Master running a short interactive one-shot adventure AND a character coach evaluating the player's roleplay.
 
-${characterContext(char)}
+${characterContext(char, campaign)}
 ${personaBlock}
 ${turnHistory}
 
@@ -570,11 +656,103 @@ For the final turn (when the adventure reaches a natural end):
 ${previousTurns.length === 0 ? 'This is the FIRST turn. Set up an intriguing scenario hook. The coaching field should have rating "green" and note "Adventure begins!" for the first turn.' : ''}`
   },
 
-  accentPhraseGenerator: (char: Character, accentName: string, accentRules: string) => `${BASE_PROMPT}
+  dialogueDeliveryCoach: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
+You are a Juilliard-trained acting coach specializing in character voice delivery for tabletop RPG players.
+${characterContext(char, campaign)}
+${char.persona ? `Voice Notes: ${char.persona.voiceNotes || 'none'}\nDefault State: ${char.persona.defaultState}` : ''}
+
+Given a specific dialogue line from this character, provide delivery coaching:
+1. **Tone**: The overall emotional quality (warm, icy, sardonic, reverent, etc.)
+2. **Pacing**: Where to slow down, speed up, or pause for effect
+3. **Emotion**: The underlying feeling driving the line
+4. **Body Language**: Physical actions that accompany the delivery
+5. **Vocal Dynamics**: Volume shifts, pitch changes, vocal texture
+6. **Variant**: Rewrite the line with delivery notes embedded (italics for pauses, CAPS for emphasis)
+
+Respond with ONLY valid JSON:
+{
+  "tone": "description",
+  "pacing": "description",
+  "emotion": "description",
+  "bodyLanguage": "description",
+  "vocalDynamics": "description",
+  "variant": "the line rewritten with delivery marks"
+}`,
+
+  dialoguePractice: (char: Character, context: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
+You create roleplay scenarios for dialogue practice.
+${characterContext(char, campaign)}
+
+Generate a vivid, brief scenario (2-3 sentences) where ${char.name} would need to speak in a "${context}" context. The scenario should be specific enough that some dialogue choices would be clearly better than others.
+
+Respond with ONLY valid JSON:
+{ "scenario": "the scenario description", "idealTone": "what tone fits best" }`,
+
+  dialogueEvaluate: (char: Character, context: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
+You evaluate dialogue choices for character voice consistency.
+${characterContext(char, campaign)}
+${char.persona ? `Voice Notes: ${char.persona.voiceNotes || 'none'}\nDefault State: ${char.persona.defaultState}` : ''}
+
+Given a scenario and the player's chosen dialogue line, evaluate how well it fits. Consider:
+- Does it match the character's voice and personality?
+- Does it fit the scenario context ("${context}")?
+- Is it dramatically interesting?
+
+Respond with ONLY valid JSON:
+{
+  "score": 8,
+  "fit": "How well the line fits the scenario",
+  "voiceMatch": "How well it matches the character's established voice",
+  "suggestion": "One brief improvement tip"
+}`,
+
+  dialogueQuickDraw: (char: Character, context: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
+You are a rapid-fire dialogue trainer for RPG character voice work.
+${characterContext(char, campaign)}
+${char.persona ? `Voice Notes: ${char.persona.voiceNotes || 'none'}\nDefault State: ${char.persona.defaultState}` : ''}
+
+Generate a one-sentence scenario prompt for ${char.name} in a "${context}" context. Keep it punchy — this is for timed response training.
+
+Respond with ONLY valid JSON:
+{ "prompt": "one-sentence scenario" }`,
+
+  dialogueQuickDrawEval: (char: Character, context: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
+You evaluate rapid-fire dialogue responses for RPG character voice work.
+${characterContext(char, campaign)}
+${char.persona ? `Voice Notes: ${char.persona.voiceNotes || 'none'}\nDefault State: ${char.persona.defaultState}` : ''}
+
+Given a scenario prompt and the player's timed response in a "${context}" context, evaluate:
+- voiceMatch (1-5): Does it sound like this character?
+- contextFit (1-5): Does it fit the scenario?
+- creativity (1-5): Is it interesting/surprising?
+
+Respond with ONLY valid JSON:
+{ "voiceMatch": 4, "contextFit": 5, "creativity": 3, "note": "Brief coaching note" }`,
+
+  conditionDrillGenerator: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
+
+You generate condition-focused quiz questions for D&D 2024 rules training.
+${characterContext(char, campaign)}
+
+Using this character's actual spells and abilities, generate a scenario that tests knowledge of D&D conditions. The scenario should:
+1. Reference a specific spell or ability this character has
+2. Ask about the condition it applies or interacts with
+3. Test mechanical knowledge (what the condition actually does in play)
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "scenario": "A vivid 1-2 sentence scenario using one of the character's actual spells/abilities",
+  "question": "The specific question about conditions",
+  "correctAnswer": "The correct condition or mechanical effect",
+  "distractors": ["Wrong answer 1", "Wrong answer 2", "Wrong answer 3"],
+  "explanation": "2-3 sentence explanation of why this is correct, including the full mechanical effect of the condition in D&D 2024 rules"
+}`,
+
+  accentPhraseGenerator: (char: Character, accentName: string, accentRules: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
 
 You generate in-character practice phrases for accent training.
 
-${characterContext(char)}
+${characterContext(char, campaign)}
 
 TARGET ACCENT: ${accentName}
 

@@ -17,6 +17,8 @@ import {
   Flame,
   BookOpen,
   Swords,
+  RotateCcw,
+  Star,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
@@ -26,7 +28,6 @@ import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { ParchmentCard } from './ui/ParchmentCard'
 import { OrnateHeader } from './ui/OrnateHeader'
-import { Input } from './ui/Input'
 import { Badge } from './ui/Badge'
 import { ImprovDrillEnhanced } from './ImprovDrillEnhanced'
 import { ConversationDrill } from './ConversationDrill'
@@ -38,6 +39,14 @@ import { MessageCircle } from 'lucide-react'
 
 interface RoleplayCoachProps {
   character: Character
+}
+
+interface SceneCoaching {
+  scores: { persona: number; emotion: number; physical: number; decision: number; patron: number }
+  overall: number
+  strengths: string[]
+  improvements: string[]
+  coachNote: string
 }
 
 type CoachMode = 'study' | 'session'
@@ -58,10 +67,16 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
   const [personaOpen, setPersonaOpen] = useState(true)
   const [catchphrase, setCatchphrase] = useState<string | null>(null)
 
-  /* ------ Scene Coach ------ */
-  const sceneAI = useAI()
-  const [sceneInput, setSceneInput] = useState('')
-  const [sceneResponse, setSceneResponse] = useState<string | null>(null)
+  /* ------ Scene Coach (reversed flow) ------ */
+  const [generatedScene, setGeneratedScene] = useState<string | null>(null)
+  const [sayInput, setSayInput] = useState('')
+  const [doInput, setDoInput] = useState('')
+  const [coaching, setCoaching] = useState<SceneCoaching | null>(null)
+  const [referenceReaction, setReferenceReaction] = useState<string | null>(null)
+  const [showReference, setShowReference] = useState(false)
+  const sceneGenAI = useAI()
+  const sceneGradeAI = useAI()
+  const sceneRefAI = useAI()
 
   /* ------ Mannerism Flashcards ------ */
   const allMannerisms = useMemo(() => {
@@ -83,19 +98,60 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
     setCatchphrase(random)
   }, [character.persona])
 
-  const submitScene = useCallback(async () => {
-    if (!sceneInput.trim() || !hasPersona) return
-    setSceneResponse(null)
+  const generateScene = useCallback(async () => {
+    if (!hasPersona) return
+    setGeneratedScene(null)
+    setSayInput('')
+    setDoInput('')
+    setCoaching(null)
+    setReferenceReaction(null)
+    setShowReference(false)
     try {
-      const result = await sceneAI.query(
-        SYSTEM_PROMPTS.sceneCoach(character),
-        sceneInput.trim(),
+      const result = await sceneGenAI.query(
+        SYSTEM_PROMPTS.sceneGenerator(character),
+        `Generate a new scene for ${character.name} to react to.`,
       )
-      setSceneResponse(result)
+      setGeneratedScene(result)
     } catch {
       // error is handled by useAI hook
     }
-  }, [sceneInput, character, hasPersona, sceneAI])
+  }, [character, hasPersona, sceneGenAI])
+
+  const submitResponse = useCallback(async () => {
+    if (!sayInput.trim() || !doInput.trim() || !generatedScene) return
+    setCoaching(null)
+    try {
+      const result = await sceneGradeAI.queryStructured<SceneCoaching>(
+        SYSTEM_PROMPTS.sceneResponseGrader(character, generatedScene, sayInput.trim(), doInput.trim()),
+        `Grade this response for ${character.name}.`,
+      )
+      setCoaching(result)
+    } catch {
+      // error is handled by useAI hook
+    }
+  }, [sayInput, doInput, generatedScene, character, sceneGradeAI])
+
+  const fetchReference = useCallback(async () => {
+    if (!generatedScene) return
+    if (referenceReaction) {
+      setShowReference(prev => !prev)
+      return
+    }
+    setShowReference(true)
+    try {
+      const result = await sceneRefAI.query(
+        SYSTEM_PROMPTS.sceneReferenceReaction(character, generatedScene),
+        `Show the reference reaction for ${character.name}.`,
+      )
+      setReferenceReaction(result)
+    } catch {
+      // error is handled by useAI hook
+    }
+  }, [generatedScene, referenceReaction, character, sceneRefAI])
+
+  const nextScene = useCallback(() => {
+    generateScene()
+  }, [generateScene])
 
   const nextFlashcard = useCallback(() => {
     if (allMannerisms.length === 0) return
@@ -285,67 +341,297 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
       </ParchmentCard>
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* Section 2: Scene Coach (Arcane theme - GlassCard + blue)  */}
+      {/* Section 2: Scene Coach (Reversed Flow)                    */}
+      {/* AI generates scene → user responds → AI coaches           */}
       {/* Only visible in Study mode                                */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {mode === 'study' && (
-        <GlassCard className="border-arcane/15">
+        <GlassCard className="border-eldritch/15">
           <div className="flex items-center gap-2.5 mb-4">
-            <Eye size={18} className="text-arcane" aria-hidden />
+            <Theater size={18} className="text-eldritch" aria-hidden />
             <OrnateHeader className="flex-1">Scene Coach</OrnateHeader>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <Input
-              value={sceneInput}
-              onChange={e => setSceneInput(e.target.value)}
-              placeholder="Describe the scene... (e.g., 'A dying soldier reaches out to you on the battlefield')"
-              disabled={sceneAI.loading}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !sceneAI.loading) submitScene()
-              }}
-            />
+          {/* --- Step 1: Generate Scene Button (no scene yet) --- */}
+          {!generatedScene && !sceneGenAI.loading && (
+            <div className="flex flex-col items-center py-6 gap-4">
+              <p className="text-sm text-forge-2 text-center max-w-xs leading-relaxed">
+                Generate an immersive scene, then respond in character.
+                The AI will coach your performance.
+              </p>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={generateScene}
+                className="w-full"
+              >
+                <Sparkles size={18} aria-hidden />
+                Generate Scene
+              </Button>
+            </div>
+          )}
 
-            <Button
-              variant="primary"
-              size="md"
-              onClick={submitScene}
-              loading={sceneAI.loading}
-              disabled={!sceneInput.trim()}
-              className="w-full"
-            >
-              <Sparkles size={16} aria-hidden />
-              Coach My Reaction
-            </Button>
-          </div>
+          {/* --- Scene Generation Loading --- */}
+          {sceneGenAI.loading && !generatedScene && (
+            <div className="flex flex-col items-center py-8 gap-3 animate-fade-in">
+              <Loader2 size={28} className="animate-spin text-eldritch" aria-hidden />
+              <p className="text-sm text-forge-2">
+                Conjuring a scene for {character.name}...
+              </p>
+            </div>
+          )}
 
-          {/* Error */}
-          {sceneAI.error && (
+          {/* --- Scene Generation Error --- */}
+          {sceneGenAI.error && !generatedScene && (
             <div className="mt-3 rounded-xl border border-red-500/30 p-3 flex items-start gap-3 animate-fade-in">
               <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
               <div>
-                <p className="text-sm text-red-400 font-semibold">Failed to generate coaching</p>
-                <p className="text-xs text-forge-2 mt-0.5">{sceneAI.error}</p>
+                <p className="text-sm text-red-400 font-semibold">Failed to generate scene</p>
+                <p className="text-xs text-forge-2 mt-0.5">{sceneGenAI.error}</p>
               </div>
+              <Button variant="ghost" size="sm" onClick={generateScene} className="ml-auto shrink-0">
+                <RotateCcw size={14} aria-hidden />
+                Retry
+              </Button>
             </div>
           )}
 
-          {/* Loading */}
-          {sceneAI.loading && (
-            <div className="mt-4 flex flex-col items-center py-6 gap-3">
-              <Loader2 size={24} className="animate-spin text-arcane" aria-hidden />
-              <p className="text-sm text-forge-2">Analyzing the scene through {character.name}&apos;s eyes...</p>
-            </div>
-          )}
+          {/* --- Step 2: Scene Display + User Response --- */}
+          {generatedScene && (
+            <div className="flex flex-col gap-4 animate-slide-up">
+              {/* Scene Card */}
+              <ParchmentCard className="border-eldritch/20 bg-gradient-to-br from-eldritch/[0.03] to-transparent">
+                <p className="text-xs font-semibold text-eldritch uppercase tracking-wider mb-2">
+                  The Scene
+                </p>
+                <p className="text-sm text-forge-0 leading-relaxed whitespace-pre-wrap">
+                  {generatedScene}
+                </p>
+              </ParchmentCard>
 
-          {/* Response */}
-          {sceneResponse && !sceneAI.loading && (
-            <div className="mt-4 animate-slide-up">
-              <div className="rounded-xl bg-arcane/[0.04] border border-arcane/15 p-4">
-                <div className="prose-sm text-forge-1 leading-relaxed whitespace-pre-wrap">
-                  {sceneResponse}
+              {/* SAY Input */}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="scene-say-input"
+                  className="text-xs font-semibold text-arcane uppercase tracking-wider"
+                >
+                  What does {character.name} SAY?
+                </label>
+                <textarea
+                  id="scene-say-input"
+                  value={sayInput}
+                  onChange={e => setSayInput(e.target.value)}
+                  placeholder="Speak in character..."
+                  disabled={sceneGradeAI.loading}
+                  rows={3}
+                  className={cn(
+                    'w-full rounded-xl border bg-white/[0.03] px-4 py-3',
+                    'text-sm text-forge-0 placeholder:text-forge-2/60',
+                    'border-white/10 focus:border-arcane/40 focus:ring-1 focus:ring-arcane/20',
+                    'transition-all duration-200 ease-forge resize-none',
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'min-h-[72px]',
+                  )}
+                />
+              </div>
+
+              {/* DO Input */}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="scene-do-input"
+                  className="text-xs font-semibold text-ember uppercase tracking-wider"
+                >
+                  What does {character.name} DO?
+                </label>
+                <textarea
+                  id="scene-do-input"
+                  value={doInput}
+                  onChange={e => setDoInput(e.target.value)}
+                  placeholder="Describe actions, body language, physical reactions..."
+                  disabled={sceneGradeAI.loading}
+                  rows={3}
+                  className={cn(
+                    'w-full rounded-xl border bg-white/[0.03] px-4 py-3',
+                    'text-sm text-forge-0 placeholder:text-forge-2/60',
+                    'border-white/10 focus:border-ember/40 focus:ring-1 focus:ring-ember/20',
+                    'transition-all duration-200 ease-forge resize-none',
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'min-h-[72px]',
+                  )}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                variant="primary"
+                size="md"
+                onClick={submitResponse}
+                loading={sceneGradeAI.loading}
+                disabled={!sayInput.trim() || !doInput.trim()}
+                className="w-full"
+              >
+                <Send size={16} aria-hidden />
+                Get Coaching
+              </Button>
+
+              {/* Grading Error */}
+              {sceneGradeAI.error && (
+                <div className="rounded-xl border border-red-500/30 p-3 flex items-start gap-3 animate-fade-in">
+                  <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
+                  <div>
+                    <p className="text-sm text-red-400 font-semibold">Coaching failed</p>
+                    <p className="text-xs text-forge-2 mt-0.5">{sceneGradeAI.error}</p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Grading Loading */}
+              {sceneGradeAI.loading && (
+                <div className="flex flex-col items-center py-4 gap-3 animate-fade-in">
+                  <Loader2 size={24} className="animate-spin text-arcane" aria-hidden />
+                  <p className="text-sm text-forge-2">
+                    Evaluating your performance...
+                  </p>
+                </div>
+              )}
+
+              {/* --- Step 3: Coaching Results --- */}
+              {coaching && !sceneGradeAI.loading && (
+                <GlassCard className="border-arcane/20 animate-slide-up">
+                  {/* Overall Score */}
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
+                      Coaching Results
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <Star size={16} className="text-arcane" aria-hidden />
+                      <span className={cn(
+                        'text-xl font-display font-bold',
+                        coaching.overall >= 8 ? 'text-verdant' :
+                        coaching.overall >= 5 ? 'text-arcane' :
+                        'text-ember',
+                      )}>
+                        {coaching.overall}
+                      </span>
+                      <span className="text-sm text-forge-2">/10</span>
+                    </div>
+                  </div>
+
+                  {/* Score Badges */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {([
+                      { key: 'persona', label: 'Persona' },
+                      { key: 'emotion', label: 'Emotion' },
+                      { key: 'physical', label: 'Physical' },
+                      { key: 'decision', label: 'Decision' },
+                      { key: 'patron', label: 'Patron' },
+                    ] as const).map(dim => {
+                      const score = coaching.scores[dim.key]
+                      const variant = score >= 8 ? 'verdant' : score >= 5 ? 'arcane' : 'ember'
+                      return (
+                        <Badge key={dim.key} variant={variant as 'verdant' | 'arcane' | 'ember'}>
+                          {dim.label}: {score}
+                        </Badge>
+                      )
+                    })}
+                  </div>
+
+                  {/* Strengths */}
+                  {coaching.strengths.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs font-semibold text-verdant uppercase tracking-wider mb-1.5">
+                        Strengths
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {coaching.strengths.map((s, i) => (
+                          <Badge key={i} variant="verdant">{s}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Improvements */}
+                  {coaching.improvements.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs font-semibold text-ember uppercase tracking-wider mb-1.5">
+                        Areas to Improve
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {coaching.improvements.map((imp, i) => (
+                          <Badge key={i} variant="ember">{imp}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Coach Note */}
+                  {coaching.coachNote && (
+                    <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                      <p className="text-sm text-forge-1 italic leading-relaxed">
+                        {coaching.coachNote}
+                      </p>
+                    </div>
+                  )}
+                </GlassCard>
+              )}
+
+              {/* --- Reference Reaction Toggle --- */}
+              {generatedScene && coaching && (
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={fetchReference}
+                    loading={sceneRefAI.loading}
+                    className="w-full"
+                  >
+                    <Eye size={14} aria-hidden />
+                    {showReference ? 'Hide' : 'Show'} Reference Reaction
+                  </Button>
+
+                  {sceneRefAI.error && (
+                    <div className="rounded-xl border border-red-500/30 p-3 flex items-start gap-3 animate-fade-in">
+                      <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
+                      <div>
+                        <p className="text-sm text-red-400 font-semibold">Failed to load reference</p>
+                        <p className="text-xs text-forge-2 mt-0.5">{sceneRefAI.error}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {showReference && referenceReaction && (
+                    <ParchmentCard className="border-arcane/15 animate-slide-up">
+                      <p className="text-xs font-semibold text-arcane uppercase tracking-wider mb-2">
+                        Reference: What {character.name} Would Do
+                      </p>
+                      <p className="text-sm text-forge-1 leading-relaxed whitespace-pre-wrap italic">
+                        {referenceReaction}
+                      </p>
+                    </ParchmentCard>
+                  )}
+
+                  {showReference && sceneRefAI.loading && (
+                    <div className="flex items-center justify-center py-3 gap-2 animate-fade-in">
+                      <Loader2 size={16} className="animate-spin text-arcane" aria-hidden />
+                      <p className="text-xs text-forge-2">Generating reference...</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* --- Next Scene Button --- */}
+              {coaching && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={nextScene}
+                  loading={sceneGenAI.loading}
+                  className="w-full"
+                >
+                  <ArrowRight size={16} aria-hidden />
+                  Next Scene
+                </Button>
+              )}
             </div>
           )}
         </GlassCard>

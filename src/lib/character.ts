@@ -3,6 +3,71 @@ import { type AbilityKey, type SkillName, SKILL_ABILITIES, CASTING_ABILITY } fro
 // Re-export for convenience
 export type { AbilityKey, SkillName }
 
+// ---------------------------------------------------------------------------
+// Identity System
+// ---------------------------------------------------------------------------
+
+export interface CharacterIdentity {
+  id: string
+  name: string              // "Elara" or "Barkeep Disguise"
+  isDefault: boolean
+  appearance?: string
+  accent?: string           // accent guide ID or freeform
+  mannerisms: string[]
+  voiceNotes: string
+  personalityTraits: string[]
+  triggers: string[]        // when to switch TO this identity
+  socialContext?: string    // "In court", "Undercover"
+  dialogueLines: DialogueLine[]
+}
+
+// ---------------------------------------------------------------------------
+// Campaign System
+// ---------------------------------------------------------------------------
+
+export interface CampaignData {
+  id: string
+  name: string
+  setting: string
+  worldDetails: string
+  currentQuest: string
+  partyMembers: PartyMember[]
+  notableNPCs: CampaignNPC[]
+  sessionNotes: SessionNote[]
+}
+
+export interface PartyMember {
+  name: string
+  class: string
+  race: string
+  personality: string
+  relationshipToPC: string
+}
+
+export interface CampaignNPC {
+  name: string
+  role: string
+  notes: string
+}
+
+export interface SessionNote {
+  id: string
+  date: string
+  summary: string
+}
+
+// ---------------------------------------------------------------------------
+// Dialogue Line (shared type)
+// ---------------------------------------------------------------------------
+
+export interface DialogueLine {
+  text: string
+  context: string           // combat, social, discovery, emotional, quiet
+  favorite: boolean
+  scenario?: string         // "entering a tavern", "interrogation"
+  deliveryNotes?: string    // AI-generated delivery coaching
+}
+
 export interface AbilityScores {
   STR: number; DEX: number; CON: number; INT: number; WIS: number; CHA: number
 }
@@ -159,6 +224,13 @@ export interface Character {
   // Backstory (optional)
   backstory?: Backstory
 
+  // Identity system (multi-persona)
+  identities?: CharacterIdentity[]
+  activeIdentityId?: string
+
+  // Campaign reference
+  campaignId?: string
+
   // Metadata
   createdAt: string
   updatedAt: string
@@ -282,6 +354,9 @@ export function loadCharacter(id: string): Character | null {
       pronouns: parsed.pronouns ?? '',
       equipment: parsed.equipment ?? [],
       supplies: parsed.supplies ?? [],
+      identities: parsed.identities ?? [],
+      activeIdentityId: parsed.activeIdentityId ?? undefined,
+      campaignId: parsed.campaignId ?? undefined,
     } as Character
   } catch {
     return null
@@ -639,5 +714,30 @@ export function resetDeathSaves(character: Character): Character {
   return {
     ...character,
     deathSaves: { successes: 0, failures: 0 },
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Spell CRUD
+// ---------------------------------------------------------------------------
+
+/** Add a new spell to the character's spell list. */
+export function addSpell(char: Character, spell: Spell): Character {
+  return { ...char, spells: [...char.spells, spell] }
+}
+
+/** Update a spell by its original name. */
+export function updateSpell(char: Character, oldName: string, spell: Spell): Character {
+  return {
+    ...char,
+    spells: char.spells.map(s => s.name === oldName ? spell : s),
+  }
+}
+
+/** Remove a spell from the character's spell list. */
+export function removeSpell(char: Character, spellName: string): Character {
+  return {
+    ...char,
+    spells: char.spells.filter(s => s.name !== spellName),
   }
 }

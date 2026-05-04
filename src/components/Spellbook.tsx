@@ -13,15 +13,19 @@ import {
   Filter,
   Lightbulb,
   SlidersHorizontal,
+  Plus,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
-import { type Character, type Spell, getPreparedSpells, toggleSpellPrepared } from '../lib/character'
+import { type Character, type Spell, getPreparedSpells, toggleSpellPrepared, removeSpell } from '../lib/character'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
 import { useAI } from '../hooks/useAI'
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { Input } from './ui/Input'
+import { SpellEditor } from './SpellEditor'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -229,6 +233,8 @@ interface SpellCardProps {
   onTogglePrepare: () => void
   onExplain: () => void
   onTactics: () => void
+  onEdit: () => void
+  onDelete: () => void
   aiLoading: boolean
 }
 
@@ -238,11 +244,21 @@ function SpellCard({
   onTogglePrepare,
   onExplain,
   onTactics,
+  onEdit,
+  onDelete,
   aiLoading,
 }: SpellCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const isCantrip = spell.level === 0
   const action = actionBadge(spell.castingTime)
+
+  // Auto-dismiss the confirm delete after 3 seconds
+  useEffect(() => {
+    if (!confirmDelete) return
+    const timer = setTimeout(() => setConfirmDelete(false), 3000)
+    return () => clearTimeout(timer)
+  }, [confirmDelete])
 
   // Determine if this card should appear dimmed (unprepared non-cantrip when class can prepare)
   const isUnprepared = canPrepare && !isCantrip && !spell.prepared
@@ -287,29 +303,89 @@ function SpellCard({
             </div>
           </div>
 
-          {/* Prepared toggle */}
-          {canPrepare && !isCantrip && (
+          {/* Action buttons: Edit, Delete, Prepared toggle */}
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Edit button */}
             <button
               type="button"
-              onClick={onTogglePrepare}
-              aria-label={spell.prepared ? `Unprepare ${spell.name}` : `Prepare ${spell.name}`}
+              onClick={onEdit}
+              aria-label={`Edit ${spell.name}`}
               className={cn(
-                'shrink-0 min-h-[44px] min-w-[44px]',
+                'min-h-[44px] min-w-[44px]',
                 'flex items-center justify-center rounded-lg',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.92]',
+                'text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                spell.prepared
-                  ? 'text-ember bg-ember/15'
-                  : 'text-forge-2 bg-white/5 hover:bg-white/8 hover:text-forge-1',
               )}
             >
-              <Star
-                size={20}
-                className={cn(spell.prepared && 'fill-ember')}
-              />
+              <Pencil size={15} />
             </button>
-          )}
+
+            {/* Delete button with inline confirmation */}
+            {confirmDelete ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onDelete()
+                  setConfirmDelete(false)
+                }}
+                aria-label={`Confirm delete ${spell.name}`}
+                className={cn(
+                  'min-h-[44px] px-2.5',
+                  'flex items-center justify-center rounded-lg',
+                  'transition-all duration-200 ease-forge',
+                  'active:scale-[0.92]',
+                  'text-red-400 bg-red-500/10 border border-red-500/25',
+                  'text-xs font-medium whitespace-nowrap',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400',
+                  'animate-fade-in',
+                )}
+              >
+                Confirm?
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                aria-label={`Delete ${spell.name}`}
+                className={cn(
+                  'min-h-[44px] min-w-[44px]',
+                  'flex items-center justify-center rounded-lg',
+                  'transition-all duration-200 ease-forge',
+                  'active:scale-[0.92]',
+                  'text-forge-2 hover:text-red-400 hover:bg-red-500/[0.08]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                )}
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
+
+            {/* Prepared toggle */}
+            {canPrepare && !isCantrip && (
+              <button
+                type="button"
+                onClick={onTogglePrepare}
+                aria-label={spell.prepared ? `Unprepare ${spell.name}` : `Prepare ${spell.name}`}
+                className={cn(
+                  'min-h-[44px] min-w-[44px]',
+                  'flex items-center justify-center rounded-lg',
+                  'transition-all duration-200 ease-forge',
+                  'active:scale-[0.92]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  spell.prepared
+                    ? 'text-ember bg-ember/15'
+                    : 'text-forge-2 bg-white/5 hover:bg-white/8 hover:text-forge-1',
+                )}
+              >
+                <Star
+                  size={20}
+                  className={cn(spell.prepared && 'fill-ember')}
+                />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Row 2: Compact stat row */}
@@ -594,6 +670,8 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
     spell: Spell
     mode: 'explain' | 'tactics'
   } | null>(null)
+  const [spellEditorOpen, setSpellEditorOpen] = useState(false)
+  const [editingSpell, setEditingSpell] = useState<Spell | null>(null)
 
   const { response, loading, error, query, clearResponse } = useAI()
 
@@ -717,6 +795,29 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
     setAiModal(null)
     clearResponse()
   }, [clearResponse])
+
+  const handleOpenAddSpell = useCallback(() => {
+    setEditingSpell(null)
+    setSpellEditorOpen(true)
+  }, [])
+
+  const handleOpenEditSpell = useCallback((spell: Spell) => {
+    setEditingSpell(spell)
+    setSpellEditorOpen(true)
+  }, [])
+
+  const handleCloseSpellEditor = useCallback(() => {
+    setSpellEditorOpen(false)
+    setEditingSpell(null)
+  }, [])
+
+  const handleDeleteSpell = useCallback(
+    (spellName: string) => {
+      const updated = removeSpell(character, spellName)
+      onCharacterUpdate(updated)
+    },
+    [character, onCharacterUpdate],
+  )
 
   // --- Render --------------------------------------------------------------
 
@@ -1056,12 +1157,34 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                 onTogglePrepare={() => handleTogglePrepare(spell.name)}
                 onExplain={() => handleAIQuery(spell, 'explain')}
                 onTactics={() => handleAIQuery(spell, 'tactics')}
+                onEdit={() => handleOpenEditSpell(spell)}
+                onDelete={() => handleDeleteSpell(spell.name)}
                 aiLoading={loading}
               />
             </div>
           ))}
         </div>
       )}
+
+      {/* ---- Add Spell Button --------------------------------------------- */}
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleOpenAddSpell}
+        className="w-full mt-2"
+      >
+        <Plus size={18} aria-hidden />
+        Add Spell
+      </Button>
+
+      {/* ---- Spell Editor Modal ------------------------------------------ */}
+      <SpellEditor
+        isOpen={spellEditorOpen}
+        onClose={handleCloseSpellEditor}
+        character={character}
+        onCharacterUpdate={onCharacterUpdate}
+        editSpell={editingSpell}
+      />
 
       {/* ---- AI Response Modal ------------------------------------------- */}
       {aiModal && (

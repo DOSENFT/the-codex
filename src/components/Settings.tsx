@@ -32,6 +32,7 @@ import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Input } from './ui/Input'
 import { Badge } from './ui/Badge'
+import { CampaignEditor } from './CampaignEditor'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -808,6 +809,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
 
       {renderAIConfig()}
       {renderCharacterInfo()}
+      {/* Campaign & World */}
+      <CampaignEditor character={character} onCharacterUpdate={onCharacterUpdate} />
       {renderRestManagement()}
       {renderAbout()}
     </div>
