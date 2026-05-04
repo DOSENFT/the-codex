@@ -25,7 +25,7 @@ import {
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
 import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, GEMINI_MODELS, type AIProvider } from '../lib/ai'
-import { generateId, type Character, type Spell, type ClassFeature, type SpellSlots, type RosterEntry } from '../lib/character'
+import { generateId, type Character, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
 import {
   CLASSES,
   RACES,
@@ -371,6 +371,11 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         maxPreparedSpells: result.maxPreparedSpells ?? 0,
         features,
         homebrewNotes: resolvedHomebrew || undefined,
+        abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+        skillProficiencies: [],
+        skillExpertise: [],
+        savingThrowProficiencies: [],
+        weapons: [],
         createdAt: now,
         updatedAt: now,
       }

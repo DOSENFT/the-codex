@@ -1,3 +1,25 @@
+import { type AbilityKey, type SkillName, SKILL_ABILITIES, CASTING_ABILITY } from './dnd-rules'
+
+// Re-export for convenience
+export type { AbilityKey, SkillName }
+
+export interface AbilityScores {
+  STR: number; DEX: number; CON: number; INT: number; WIS: number; CHA: number
+}
+
+export interface Weapon {
+  name: string
+  attackType: 'melee' | 'ranged'
+  abilityMod: AbilityKey
+  proficient: boolean
+  damageDice: string
+  damageType: string
+  properties: string[]
+  magical?: boolean
+  bonusToHit?: number
+  bonusDamage?: number
+}
+
 export interface Spell {
   name: string
   level: number // 0 = cantrip
@@ -40,6 +62,16 @@ export interface CharacterPersona {
   }
   voiceNotes?: string
   catchphrases?: string[]
+  // Toy Method fields
+  colorTraits?: { text: string; category: 'color' }[]
+  coreTraits?: { text: string; category: 'core' }[]
+  sceneResponses?: { situation: string; responses: string[] }[]
+  dialogueBank?: { text: string; context: string; favorite: boolean }[]
+  wants?: string[]
+  fears?: string[]
+  pressureResponse?: string
+  relationships?: string[]
+  lastEditedAt?: string
 }
 
 export interface ClassFeature {
@@ -90,6 +122,13 @@ export interface Character {
   // Paladin-specific resources (optional)
   paladinResources?: PaladinResources
 
+  // Ability scores & proficiencies
+  abilityScores: AbilityScores
+  skillProficiencies: SkillName[]
+  skillExpertise: SkillName[]
+  savingThrowProficiencies: AbilityKey[]
+  weapons: Weapon[]
+
   // Character persona for roleplay (optional)
   persona?: CharacterPersona
 
@@ -97,6 +136,64 @@ export interface Character {
   createdAt: string
   updatedAt: string
 }
+
+// ---------------------------------------------------------------------------
+// Ability Score Calculations
+// ---------------------------------------------------------------------------
+
+const DEFAULT_ABILITY_SCORES: AbilityScores = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
+
+/** Standard D&D ability modifier formula */
+export function abilityModifier(score: number): number {
+  return Math.floor((score - 10) / 2)
+}
+
+/** Calculate skill bonus: ability mod + proficiency (×2 for expertise) */
+export function skillBonus(char: Character, skill: SkillName): number {
+  const ability = SKILL_ABILITIES[skill]
+  const mod = abilityModifier(char.abilityScores[ability])
+  if (char.skillExpertise.includes(skill)) return mod + char.proficiencyBonus * 2
+  if (char.skillProficiencies.includes(skill)) return mod + char.proficiencyBonus
+  return mod
+}
+
+/** Calculate saving throw bonus */
+export function savingThrowBonus(char: Character, ability: AbilityKey): number {
+  const mod = abilityModifier(char.abilityScores[ability])
+  if (char.savingThrowProficiencies.includes(ability)) return mod + char.proficiencyBonus
+  return mod
+}
+
+/** Passive perception = 10 + perception skill bonus */
+export function passivePerception(char: Character): number {
+  return 10 + skillBonus(char, 'Perception')
+}
+
+/** Attack bonus for a weapon */
+export function attackBonus(char: Character, weapon: Weapon): number {
+  const mod = abilityModifier(char.abilityScores[weapon.abilityMod])
+  const prof = weapon.proficient ? char.proficiencyBonus : 0
+  const magic = weapon.bonusToHit ?? 0
+  return mod + prof + magic
+}
+
+/** Compute spell save DC from ability scores */
+export function computeSpellSaveDC(char: Character): number {
+  const castingAbility = CASTING_ABILITY[char.class]
+  if (!castingAbility) return char.spellSaveDC
+  return 8 + char.proficiencyBonus + abilityModifier(char.abilityScores[castingAbility])
+}
+
+/** Compute spell attack bonus from ability scores */
+export function computeSpellAttackBonus(char: Character): number {
+  const castingAbility = CASTING_ABILITY[char.class]
+  if (!castingAbility) return char.spellAttackBonus
+  return char.proficiencyBonus + abilityModifier(char.abilityScores[castingAbility])
+}
+
+// ---------------------------------------------------------------------------
+// ID Generation
+// ---------------------------------------------------------------------------
 
 /** Generate a unique ID. Falls back to a manual implementation when crypto.randomUUID is unavailable (e.g. non-HTTPS on mobile). */
 export function generateId(): string {
@@ -137,7 +234,7 @@ export function saveCharacter(character: Character): void {
   updateRosterEntry(character)
 }
 
-/** Load a specific character by id. */
+/** Load a specific character by id. Applies migration defaults for new fields. */
 export function loadCharacter(id: string): Character | null {
   const saved = localStorage.getItem(CHAR_PREFIX + id)
   if (!saved) return null
@@ -149,15 +246,21 @@ export function loadCharacter(id: string): Character | null {
       conditions: parsed.conditions ?? [],
       deathSaves: parsed.deathSaves ?? { successes: 0, failures: 0 },
       tempHP: parsed.tempHP ?? 0,
+      abilityScores: parsed.abilityScores ?? { ...DEFAULT_ABILITY_SCORES },
+      skillProficiencies: parsed.skillProficiencies ?? [],
+      skillExpertise: parsed.skillExpertise ?? [],
+      savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
+      weapons: parsed.weapons ?? [],
     } as Character
   } catch {
     return null
   }
 }
 
-/** Delete a character by id — removes per-id key and roster entry. */
+/** Delete a character by id — removes per-id key, training data, and roster entry. */
 export function deleteCharacter(id: string): void {
   localStorage.removeItem(CHAR_PREFIX + id)
+  localStorage.removeItem(`codex-training-${id}`)
   const roster = loadRoster().filter(e => e.id !== id)
   localStorage.setItem(ROSTER_KEY, JSON.stringify(roster))
   // If this was the active character, clear active id
@@ -233,6 +336,11 @@ export function migrateFromLegacy(): boolean {
       conditions: parsed.conditions ?? [],
       deathSaves: parsed.deathSaves ?? { successes: 0, failures: 0 },
       tempHP: parsed.tempHP ?? 0,
+      abilityScores: parsed.abilityScores ?? { ...DEFAULT_ABILITY_SCORES },
+      skillProficiencies: parsed.skillProficiencies ?? [],
+      skillExpertise: parsed.skillExpertise ?? [],
+      savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
+      weapons: parsed.weapons ?? [],
     } as Character
     character.id = id
     saveCharacter(character)

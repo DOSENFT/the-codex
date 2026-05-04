@@ -1,5 +1,7 @@
 import type { Character } from './character'
+import { abilityModifier, skillBonus, attackBonus } from './character'
 import { RACE_CONTENT } from './dnd-data'
+import { ALL_SKILLS, ALL_ABILITIES, ABILITY_NAMES } from './dnd-rules'
 
 function characterContext(char: Character): string {
   const preparedSpells = char.spells
@@ -46,6 +48,31 @@ function characterContext(char: Character): string {
   Patron: ${char.persona.patron.name} (${char.persona.patron.domains.join(', ')})`
     : ''
 
+  // Ability scores
+  const abilityInfo = char.abilityScores
+    ? `\n\nABILITY SCORES:\n  ` + ALL_ABILITIES.map(a =>
+        `${a}: ${char.abilityScores[a]} (${abilityModifier(char.abilityScores[a]) >= 0 ? '+' : ''}${abilityModifier(char.abilityScores[a])})`
+      ).join(', ')
+    : ''
+
+  // Skills with proficiency
+  const skillInfo = char.skillProficiencies?.length
+    ? `\n\nSKILL PROFICIENCIES: ${char.skillProficiencies.map(s => {
+        const bonus = skillBonus(char, s)
+        const exp = char.skillExpertise?.includes(s) ? ' [EXPERTISE]' : ''
+        return `${s} ${bonus >= 0 ? '+' : ''}${bonus}${exp}`
+      }).join(', ')}`
+    : ''
+
+  // Weapons
+  const weaponInfo = char.weapons?.length
+    ? `\n\nWEAPONS:\n  ` + char.weapons.map(w => {
+        const toHit = attackBonus(char, w)
+        const dmgMod = abilityModifier(char.abilityScores[w.abilityMod]) + (w.bonusDamage ?? 0)
+        return `${w.name}: +${toHit} to hit, ${w.damageDice}${dmgMod >= 0 ? '+' : ''}${dmgMod} ${w.damageType}${w.magical ? ' (magical)' : ''}`
+      }).join('\n  ')
+    : ''
+
   return `
 CHARACTER:
   Name: ${char.name}
@@ -57,6 +84,7 @@ CHARACTER:
   Spell Save DC: ${char.spellSaveDC}
   Spell Attack: +${char.spellAttackBonus}
   Proficiency: +${char.proficiencyBonus}
+${abilityInfo}${skillInfo}${weaponInfo}
 
 PREPARED SPELLS:
   - ${preparedSpells || 'None'}
@@ -278,5 +306,31 @@ Respond with ONLY valid JSON matching this structure:
       "usesMax": null
     }
   ]
-}`
+}`,
+
+  personaBuilder: (char: Character) => `${BASE_PROMPT}
+You help build character personas using the Toy Method. Given a character's class, race, and backstory, suggest personality traits organized as:
+- Color Traits (flavor tics that add personality but don't change outcomes)
+- Core Traits (defining traits that drive decisions)
+- Wants (motivations)
+- Fears (anxieties/phobias)
+- Pressure Response (how they act under stress)
+
+${characterContext(char)}
+
+Respond with ONLY valid JSON:
+{
+  "colorTraits": ["speaks in third person when nervous", "always fidgets with a coin"],
+  "coreTraits": ["fiercely loyal to chosen family", "distrusts organized religion"],
+  "wants": ["find their missing sibling", "earn enough to buy a farm"],
+  "fears": ["abandonment", "fire"],
+  "pressureResponse": "Goes quiet and calculating, then acts decisively"
+}`,
+
+  dialogueSuggestion: (char: Character, context: string) => `${BASE_PROMPT}
+Generate 3 in-character dialogue lines for this character in the context: "${context}".
+${characterContext(char)}
+${char.persona ? `Persona: Default State: ${char.persona.defaultState}, Voice Notes: ${char.persona.voiceNotes || 'none'}` : ''}
+Respond with ONLY valid JSON:
+{ "lines": ["line 1", "line 2", "line 3"] }`,
 }

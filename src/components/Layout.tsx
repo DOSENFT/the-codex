@@ -1,9 +1,11 @@
 import { type ReactNode, useState } from 'react'
-import { Swords, BookOpen, Brain, Settings, Dices, ChevronDown, Users } from 'lucide-react'
+import { Swords, BookOpen, Brain, Settings, Dices, ChevronDown, Users, HelpCircle } from 'lucide-react'
 import { cn } from '../lib/cn'
 import type { Character, RosterEntry } from '../lib/character'
 import { Badge } from './ui/Badge'
 import { DiceRoller } from './DiceRoller'
+import { CharacterSheet } from './CharacterSheet'
+import { MechanicsDrawer } from './MechanicsDrawer'
 
 export type TabId = 'combat' | 'spells' | 'train' | 'settings'
 
@@ -14,6 +16,7 @@ interface LayoutProps {
   onTabChange: (tab: TabId) => void
   roster: RosterEntry[]
   onSwitchCharacter: (id: string) => void
+  onUpdateCharacter: (char: Character) => void
 }
 
 const TABS: { id: TabId; label: string; icon: typeof Swords }[] = [
@@ -31,9 +34,11 @@ const TABS: { id: TabId; label: string; icon: typeof Swords }[] = [
  * The main content area fills the space between header (h-14 / 56px) and
  * bottom nav (h-16 / 64px + safe-area inset) so children scroll independently.
  */
-export function Layout({ children, character, activeTab, onTabChange, roster, onSwitchCharacter }: LayoutProps) {
+export function Layout({ children, character, activeTab, onTabChange, roster, onSwitchCharacter, onUpdateCharacter }: LayoutProps) {
   const [diceOpen, setDiceOpen] = useState(false)
   const [switcherOpen, setSwitcherOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [mechanicsOpen, setMechanicsOpen] = useState(false)
 
   const hpPercent = character.hitPoints.max > 0
     ? (character.hitPoints.current / character.hitPoints.max) * 100
@@ -65,25 +70,42 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
           </span>
         </div>
 
-        <button
-          onClick={() => roster.length > 1 && setSwitcherOpen(!switcherOpen)}
-          className={cn(
-            'flex items-center gap-2',
-            roster.length > 1 && 'cursor-pointer hover:opacity-80 transition-opacity',
-          )}
-          aria-label={roster.length > 1 ? 'Switch character' : undefined}
-          disabled={roster.length <= 1}
-        >
-          <span className="text-sm text-forge-1 truncate max-w-[100px]">
-            {character.name}
-          </span>
-          <Badge variant="eldritch">
-            {character.class}
-          </Badge>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setMechanicsOpen(true)}
+            className={cn(
+              'min-h-[44px] min-w-[44px] flex items-center justify-center',
+              'rounded-xl text-forge-2 hover:text-arcane hover:bg-white/[0.06]',
+              'transition-all duration-200 ease-forge',
+              'active:scale-95',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            )}
+            aria-label="Open mechanics reference"
+          >
+            <HelpCircle size={18} aria-hidden />
+          </button>
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            aria-label="Open character sheet"
+          >
+            <span className="text-sm text-forge-1 truncate max-w-[100px]">
+              {character.name}
+            </span>
+            <Badge variant="eldritch">
+              {character.class}
+            </Badge>
+          </button>
           {roster.length > 1 && (
-            <ChevronDown size={14} className={cn('text-forge-2 transition-transform duration-200', switcherOpen && 'rotate-180')} aria-hidden />
+            <button
+              onClick={() => setSwitcherOpen(!switcherOpen)}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center text-forge-2 hover:text-forge-1 transition-colors"
+              aria-label="Switch character"
+            >
+              <ChevronDown size={14} className={cn('transition-transform duration-200', switcherOpen && 'rotate-180')} aria-hidden />
+            </button>
           )}
-        </button>
+        </div>
       </header>
 
       {/* Character Switcher Dropdown */}
@@ -146,7 +168,13 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
       </button>
 
       {/* ─── Dice Roller Panel ─── */}
-      <DiceRoller isOpen={diceOpen} onClose={() => setDiceOpen(false)} />
+      <DiceRoller isOpen={diceOpen} onClose={() => setDiceOpen(false)} character={character} />
+
+      {/* ─── Character Sheet Panel ─── */}
+      <CharacterSheet isOpen={sheetOpen} onClose={() => setSheetOpen(false)} character={character} onUpdate={onUpdateCharacter} />
+
+      {/* ─── Mechanics Drawer Panel ─── */}
+      <MechanicsDrawer isOpen={mechanicsOpen} onClose={() => setMechanicsOpen(false)} />
 
       {/* ─── Fixed Bottom Tab Navigation ─── */}
       <nav

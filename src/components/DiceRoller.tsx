@@ -1,33 +1,22 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Minus, Plus, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Minus, Plus, X } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
+import { DiceAnimation } from './DiceAnimation'
+import { secureDie, rollDice, formatRollNotation } from '../lib/dice'
+import type { DieType, AdvantageState, RollResult } from '../lib/dice'
+import { attackBonus, abilityModifier, savingThrowBonus } from '../lib/character'
+import type { Character, Weapon, AbilityKey } from '../lib/character'
+import { ALL_ABILITIES, ABILITY_NAMES } from '../lib/dnd-rules'
 
 /* ─── Types ─── */
-
-type DieType = 4 | 6 | 8 | 10 | 12 | 20 | 100
-type AdvantageState = 'normal' | 'advantage' | 'disadvantage'
 
 interface DiceRollerProps {
   isOpen: boolean
   onClose: () => void
-}
-
-interface RollResult {
-  id: number
-  dieType: DieType
-  quantity: number
-  modifier: number
-  advantage: AdvantageState
-  /** Individual die values (before advantage filtering) */
-  rawDice: number[]
-  /** Individual die values used in the total (after advantage filtering) */
-  keptDice: number[]
-  /** Dice that were dropped by advantage/disadvantage */
-  droppedDice: number[]
-  total: number
+  character?: Character
 }
 
 /* ─── Constants ─── */
@@ -65,66 +54,6 @@ const QUICK_PRESETS: QuickPreset[] = [
   { label: 'd20+mod', dieType: 20, quantity: 1, modifier: 0, advantage: 'normal', immediate: false },
   { label: '2d6', dieType: 6, quantity: 2, modifier: 0, advantage: 'normal', immediate: true },
 ]
-
-/* ─── Utility Functions ─── */
-
-function rollDie(sides: DieType): number {
-  return Math.floor(Math.random() * sides) + 1
-}
-
-function rollDice(
-  dieType: DieType,
-  quantity: number,
-  modifier: number,
-  advantage: AdvantageState,
-): Omit<RollResult, 'id'> {
-  let rawDice: number[]
-  let keptDice: number[]
-  let droppedDice: number[] = []
-
-  if (dieType === 20 && advantage !== 'normal' && quantity === 1) {
-    // Roll 2d20, keep higher or lower
-    const die1 = rollDie(20)
-    const die2 = rollDie(20)
-    rawDice = [die1, die2]
-
-    if (advantage === 'advantage') {
-      const kept = Math.max(die1, die2)
-      const dropped = Math.min(die1, die2)
-      keptDice = [kept]
-      droppedDice = [dropped]
-    } else {
-      const kept = Math.min(die1, die2)
-      const dropped = Math.max(die1, die2)
-      keptDice = [kept]
-      droppedDice = [dropped]
-    }
-  } else {
-    rawDice = Array.from({ length: quantity }, () => rollDie(dieType))
-    keptDice = rawDice
-  }
-
-  const diceSum = keptDice.reduce((sum, val) => sum + val, 0)
-
-  return {
-    dieType,
-    quantity,
-    modifier,
-    advantage,
-    rawDice,
-    keptDice,
-    droppedDice,
-    total: diceSum + modifier,
-  }
-}
-
-/** Format a roll as "2d6+3" style notation */
-function formatRollNotation(quantity: number, dieType: DieType, modifier: number): string {
-  let notation = `${quantity}d${dieType}`
-  if (modifier > 0) notation += `+${modifier}`
-  else if (modifier < 0) notation += `${modifier}`
-  return notation
-}
 
 /* ─── Sub-Components ─── */
 
@@ -290,9 +219,11 @@ function AdvantageToggle({
 function RollResultDisplay({
   result,
   animatingTotal,
+  isAnimating,
 }: {
   result: RollResult
   animatingTotal: number | null
+  isAnimating: boolean
 }) {
   const displayTotal = animatingTotal !== null ? animatingTotal : result.total
   const isNat20 = result.dieType === 20 && result.keptDice.length === 1 && result.keptDice[0] === 20
@@ -300,6 +231,13 @@ function RollResultDisplay({
 
   return (
     <div className="flex flex-col items-center gap-3 py-3">
+      {/* Dice Animation */}
+      <DiceAnimation
+        value={displayTotal}
+        dieType={result.dieType}
+        isAnimating={isAnimating}
+      />
+
       {/* Total */}
       <div
         className={cn(
@@ -423,6 +361,211 @@ function HistoryCard({ result }: { result: RollResult }) {
   )
 }
 
+/* ─── Collapsible Section ─── */
+
+function DisclosureSection({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string
+  children: React.ReactNode
+  defaultOpen?: boolean
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        className={cn(
+          'flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-lg',
+          'text-sm font-semibold text-forge-1',
+          'transition-all duration-200 ease-forge',
+          'hover:bg-white/[0.04] hover:text-forge-0',
+          'active:scale-[0.98]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+        )}
+      >
+        {isOpen ? (
+          <ChevronDown size={16} aria-hidden className="text-forge-2" />
+        ) : (
+          <ChevronRight size={16} aria-hidden className="text-forge-2" />
+        )}
+        {title}
+      </button>
+      {isOpen && (
+        <div className="flex flex-col gap-2 pl-1 pt-1 animate-fade-in">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Character Presets Section ─── */
+
+function CharacterPresets({
+  character,
+  onRoll,
+  isRolling,
+}: {
+  character: Character
+  onRoll: (dieType: DieType, quantity: number, modifier: number, advantage: AdvantageState) => void
+  isRolling: boolean
+}) {
+  /** Parse damage dice string like "2d8" into { quantity, dieType } */
+  function parseDamageDice(dice: string): { quantity: number; dieType: DieType } | null {
+    const match = dice.match(/^(\d+)d(\d+)$/)
+    if (!match) return null
+    const quantity = parseInt(match[1], 10)
+    const sides = parseInt(match[2], 10)
+    // Validate it's a valid die type
+    if ([4, 6, 8, 10, 12, 20, 100].includes(sides)) {
+      return { quantity, dieType: sides as DieType }
+    }
+    return null
+  }
+
+  /** Calculate damage modifier for a weapon */
+  function weaponDamageMod(weapon: Weapon): number {
+    const mod = abilityModifier(character.abilityScores[weapon.abilityMod])
+    const bonus = weapon.bonusDamage ?? 0
+    return mod + bonus
+  }
+
+  const presetButtonClass = cn(
+    'min-h-[44px] px-3 py-2 rounded-xl',
+    'text-xs font-semibold text-left',
+    'transition-all duration-200 ease-forge',
+    'active:scale-95',
+    'disabled:opacity-40 disabled:pointer-events-none',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+  )
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-sm font-medium text-forge-1 select-none">
+        Character Presets
+      </span>
+
+      {/* Attacks */}
+      <DisclosureSection title="Attacks">
+        <div className="flex flex-wrap gap-2">
+          {character.weapons.map((weapon) => {
+            const bonus = attackBonus(character, weapon)
+            return (
+              <button
+                key={`attack-${weapon.name}`}
+                type="button"
+                disabled={isRolling}
+                onClick={() => onRoll(20, 1, bonus, 'normal')}
+                className={cn(
+                  presetButtonClass,
+                  'bg-arcane/10 text-arcane border border-arcane/25',
+                  'hover:bg-arcane/20 hover:border-arcane/40',
+                )}
+                aria-label={`Attack with ${weapon.name}: d20 + ${bonus}`}
+              >
+                <span className="block">{weapon.name}</span>
+                <span className="block text-[10px] text-arcane/70 font-mono">
+                  d20{bonus >= 0 ? `+${bonus}` : bonus}
+                </span>
+              </button>
+            )
+          })}
+
+          {/* Spell Attack */}
+          <button
+            type="button"
+            disabled={isRolling}
+            onClick={() => onRoll(20, 1, character.spellAttackBonus, 'normal')}
+            className={cn(
+              presetButtonClass,
+              'bg-eldritch/10 text-eldritch border border-eldritch/25',
+              'hover:bg-eldritch/20 hover:border-eldritch/40',
+            )}
+            aria-label={`Spell Attack: d20 + ${character.spellAttackBonus}`}
+          >
+            <span className="block">Spell Attack</span>
+            <span className="block text-[10px] text-eldritch/70 font-mono">
+              d20{character.spellAttackBonus >= 0 ? `+${character.spellAttackBonus}` : character.spellAttackBonus}
+            </span>
+          </button>
+        </div>
+      </DisclosureSection>
+
+      {/* Saving Throws */}
+      <DisclosureSection title="Saving Throws">
+        <div className="grid grid-cols-3 gap-2">
+          {ALL_ABILITIES.map((ability: AbilityKey) => {
+            const bonus = savingThrowBonus(character, ability)
+            const isProficient = character.savingThrowProficiencies.includes(ability)
+            return (
+              <button
+                key={`save-${ability}`}
+                type="button"
+                disabled={isRolling}
+                onClick={() => onRoll(20, 1, bonus, 'normal')}
+                className={cn(
+                  presetButtonClass,
+                  'text-center',
+                  isProficient
+                    ? 'bg-verdant/10 text-verdant border border-verdant/25 hover:bg-verdant/20 hover:border-verdant/40'
+                    : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:text-forge-0',
+                )}
+                aria-label={`${ABILITY_NAMES[ability]} saving throw: d20 + ${bonus}`}
+              >
+                <span className="block">{ability}</span>
+                <span className={cn(
+                  'block text-[10px] font-mono',
+                  isProficient ? 'text-verdant/70' : 'text-forge-2',
+                )}>
+                  {bonus >= 0 ? `+${bonus}` : bonus}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </DisclosureSection>
+
+      {/* Damage */}
+      {character.weapons.length > 0 && (
+        <DisclosureSection title="Damage">
+          <div className="flex flex-wrap gap-2">
+            {character.weapons.map((weapon) => {
+              const parsed = parseDamageDice(weapon.damageDice)
+              if (!parsed) return null
+              const damageMod = weaponDamageMod(weapon)
+              return (
+                <button
+                  key={`damage-${weapon.name}`}
+                  type="button"
+                  disabled={isRolling}
+                  onClick={() => onRoll(parsed.dieType, parsed.quantity, damageMod, 'normal')}
+                  className={cn(
+                    presetButtonClass,
+                    'bg-ember/10 text-ember border border-ember/25',
+                    'hover:bg-ember/20 hover:border-ember/40',
+                  )}
+                  aria-label={`${weapon.name} damage: ${weapon.damageDice} + ${damageMod}`}
+                >
+                  <span className="block">{weapon.name}</span>
+                  <span className="block text-[10px] text-ember/70 font-mono">
+                    {weapon.damageDice}{damageMod >= 0 ? `+${damageMod}` : damageMod} {weapon.damageType}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </DisclosureSection>
+      )}
+    </div>
+  )
+}
+
 /* ─── Main Component ─── */
 
 /**
@@ -432,11 +575,14 @@ function HistoryCard({ result }: { result: RollResult }) {
  * quantity and modifier controls, advantage/disadvantage toggle for d20,
  * animated roll results, roll history, and quick-roll presets.
  *
+ * When a character is provided, shows character-aware preset sections for
+ * attacks, saving throws, and damage rolls.
+ *
  * The parent component (Layout.tsx) controls visibility via `isOpen` and
  * provides an `onClose` callback. This component manages all roller state
  * internally.
  */
-export function DiceRoller({ isOpen, onClose }: DiceRollerProps) {
+export function DiceRoller({ isOpen, onClose, character }: DiceRollerProps) {
   /* ── Roller State ── */
   const [dieType, setDieType] = useState<DieType>(20)
   const [quantity, setQuantity] = useState(1)
@@ -537,15 +683,15 @@ export function DiceRoller({ isOpen, onClose }: DiceRollerProps) {
       rollIdRef.current += 1
       const newResult: RollResult = { ...result, id: rollIdRef.current }
 
-      // Counting-up animation
+      // Animation using DiceAnimation + number cycling
       const startTime = performance.now()
       const maxRandom = d * q + Math.abs(m)
 
       function animate(now: number) {
         const elapsed = now - startTime
         if (elapsed < ROLL_ANIMATION_MS) {
-          // Show random numbers while "rolling"
-          const randomTotal = Math.floor(Math.random() * maxRandom) + 1
+          // Show random numbers while "rolling" using secureDie for randomness
+          const randomTotal = secureDie(maxRandom || 1)
           setAnimatingTotal(randomTotal)
           animationFrameRef.current = requestAnimationFrame(animate)
         } else {
@@ -580,6 +726,14 @@ export function DiceRoller({ isOpen, onClose }: DiceRollerProps) {
         executeRoll(preset.dieType, preset.quantity, preset.modifier, preset.advantage)
       }
       // For 'd20+mod', we just set the state so the user can pick their modifier then roll
+    },
+    [executeRoll],
+  )
+
+  /* ── Character Preset Roll Handler ── */
+  const handleCharacterRoll = useCallback(
+    (die: DieType, qty: number, mod: number, adv: AdvantageState) => {
+      executeRoll(die, qty, mod, adv)
     },
     [executeRoll],
   )
@@ -690,6 +844,15 @@ export function DiceRoller({ isOpen, onClose }: DiceRollerProps) {
             </div>
           </div>
 
+          {/* ── Character Presets (only when character is provided) ── */}
+          {character && (
+            <CharacterPresets
+              character={character}
+              onRoll={handleCharacterRoll}
+              isRolling={isRolling}
+            />
+          )}
+
           {/* ── Die Type Selector ── */}
           <div className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-forge-1 select-none">Die Type</span>
@@ -750,6 +913,7 @@ export function DiceRoller({ isOpen, onClose }: DiceRollerProps) {
               <RollResultDisplay
                 result={currentResult}
                 animatingTotal={animatingTotal}
+                isAnimating={isRolling}
               />
             </GlassCard>
           )}

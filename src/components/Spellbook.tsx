@@ -12,6 +12,7 @@ import {
   BookOpen,
   Filter,
   Lightbulb,
+  SlidersHorizontal,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { type Character, type Spell, getPreparedSpells, toggleSpellPrepared } from '../lib/character'
@@ -82,6 +83,78 @@ function filterTabLabel(level: number): string {
   if (level === 0) return 'Cantrips'
   const suffixes: Record<number, string> = { 1: 'st', 2: 'nd', 3: 'rd' }
   return `${level}${suffixes[level] ?? 'th'}`
+}
+
+// ---------------------------------------------------------------------------
+// Advanced Filter Types & Constants
+// ---------------------------------------------------------------------------
+
+type CastingTimeFilter = 'Action' | 'Bonus Action' | 'Reaction' | 'Other'
+type DamageTypeFilter =
+  | 'Fire' | 'Cold' | 'Lightning' | 'Thunder' | 'Radiant'
+  | 'Necrotic' | 'Force' | 'Poison' | 'Acid' | 'Psychic'
+type RangeFilter = 'Self' | 'Touch' | '30ft+' | '60ft+' | '120ft+'
+
+const CASTING_TIME_OPTIONS: CastingTimeFilter[] = ['Action', 'Bonus Action', 'Reaction', 'Other']
+const DAMAGE_TYPE_OPTIONS: DamageTypeFilter[] = [
+  'Fire', 'Cold', 'Lightning', 'Thunder', 'Radiant',
+  'Necrotic', 'Force', 'Poison', 'Acid', 'Psychic',
+]
+const RANGE_OPTIONS: RangeFilter[] = ['Self', 'Touch', '30ft+', '60ft+', '120ft+']
+
+interface AdvancedFilters {
+  concentration: boolean | null // null = don't filter
+  ritual: boolean | null
+  castingTimes: CastingTimeFilter[]
+  damageTypes: DamageTypeFilter[]
+  ranges: RangeFilter[]
+}
+
+const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
+  concentration: null,
+  ritual: null,
+  castingTimes: [],
+  damageTypes: [],
+  ranges: [],
+}
+
+/** Count how many advanced filter criteria are active. */
+function countActiveAdvancedFilters(filters: AdvancedFilters): number {
+  let count = 0
+  if (filters.concentration !== null) count++
+  if (filters.ritual !== null) count++
+  count += filters.castingTimes.length
+  count += filters.damageTypes.length
+  count += filters.ranges.length
+  return count
+}
+
+/** Check if a spell's casting time matches a filter option. */
+function matchesCastingTime(spellCastingTime: string, filter: CastingTimeFilter): boolean {
+  switch (filter) {
+    case 'Action': return spellCastingTime === '1 Action'
+    case 'Bonus Action': return spellCastingTime.includes('Bonus Action')
+    case 'Reaction': return spellCastingTime.includes('Reaction')
+    case 'Other': return !spellCastingTime.includes('Action') && !spellCastingTime.includes('Reaction')
+  }
+}
+
+/** Extract numeric feet from a range string. */
+function extractFeet(range: string): number {
+  const match = range.match(/(\d+)\s*(?:feet|ft|foot)/i)
+  return match ? Number(match[1]) : 0
+}
+
+/** Check if a spell's range matches a filter option. */
+function matchesRange(spellRange: string, filter: RangeFilter): boolean {
+  const lower = spellRange.toLowerCase()
+  switch (filter) {
+    case 'Self': return lower.startsWith('self')
+    case 'Touch': return lower === 'touch'
+    case '30ft+': return extractFeet(spellRange) >= 30
+    case '60ft+': return extractFeet(spellRange) >= 60
+    case '120ft+': return extractFeet(spellRange) >= 120
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -515,6 +588,8 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
   const searchQuery = useDebouncedValue(searchRaw, 250)
   const [activeLevel, setActiveLevel] = useState<number | null>(null) // null = "All"
   const [preparedOnly, setPreparedOnly] = useState(character.canPrepareSpells)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_ADVANCED_FILTERS)
   const [aiModal, setAiModal] = useState<{
     spell: Spell
     mode: 'explain' | 'tactics'
@@ -538,7 +613,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
     [character],
   )
 
-  /** Filtered spells based on search, level, and prepared filters. */
+  /** Count of active advanced filters for the badge. */
+  const advancedFilterCount = useMemo(() => countActiveAdvancedFilters(advancedFilters), [advancedFilters])
+
+  /** Filtered spells based on search, level, prepared, and advanced filters. */
   const filteredSpells = useMemo(() => {
     let spells = character.spells
 
@@ -561,14 +639,47 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
       )
     }
 
+    // Advanced filters: Concentration
+    if (advancedFilters.concentration !== null) {
+      spells = spells.filter(s => s.concentration === advancedFilters.concentration)
+    }
+
+    // Advanced filters: Ritual
+    if (advancedFilters.ritual !== null) {
+      spells = spells.filter(s => s.ritual === advancedFilters.ritual)
+    }
+
+    // Advanced filters: Casting time
+    if (advancedFilters.castingTimes.length > 0) {
+      spells = spells.filter(s =>
+        advancedFilters.castingTimes.some(ct => matchesCastingTime(s.castingTime, ct)),
+      )
+    }
+
+    // Advanced filters: Damage type
+    if (advancedFilters.damageTypes.length > 0) {
+      spells = spells.filter(s =>
+        s.damageType && advancedFilters.damageTypes.some(dt =>
+          s.damageType!.toLowerCase() === dt.toLowerCase(),
+        ),
+      )
+    }
+
+    // Advanced filters: Range
+    if (advancedFilters.ranges.length > 0) {
+      spells = spells.filter(s =>
+        advancedFilters.ranges.some(r => matchesRange(s.range, r)),
+      )
+    }
+
     // Sort: cantrips first, then by level, then alphabetically within level
     return spells.sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level
       return a.name.localeCompare(b.name)
     })
-  }, [character.spells, activeLevel, preparedOnly, searchQuery])
+  }, [character.spells, activeLevel, preparedOnly, searchQuery, advancedFilters])
 
-  const hasActiveFilters = searchQuery.trim() !== '' || activeLevel !== null || preparedOnly
+  const hasActiveFilters = searchQuery.trim() !== '' || activeLevel !== null || preparedOnly || advancedFilterCount > 0
 
   // --- Handlers ------------------------------------------------------------
 
@@ -675,6 +786,227 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
             {filterTabLabel(level)}
           </button>
         ))}
+      </div>
+
+      {/* ---- Advanced Filters ---------------------------------------------- */}
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => setAdvancedOpen(prev => !prev)}
+          className={cn(
+            'min-h-[44px] flex items-center gap-2.5 px-4 rounded-xl',
+            'text-sm font-medium',
+            'transition-all duration-200 ease-forge',
+            'active:scale-[0.97]',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            advancedFilterCount > 0
+              ? 'bg-eldritch/15 text-eldritch border border-eldritch/25'
+              : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+          )}
+          aria-expanded={advancedOpen}
+          aria-label={`Advanced filters${advancedFilterCount > 0 ? ` (${advancedFilterCount} active)` : ''}`}
+        >
+          <SlidersHorizontal size={14} aria-hidden />
+          Advanced Filters
+          {advancedFilterCount > 0 && (
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-eldritch/30 text-eldritch text-[10px] font-bold">
+              {advancedFilterCount}
+            </span>
+          )}
+          <span className="ml-auto">
+            {advancedOpen ? <ChevronUp size={14} aria-hidden /> : <ChevronDown size={14} aria-hidden />}
+          </span>
+        </button>
+
+        {advancedOpen && (
+          <div className="flex flex-col gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 animate-fade-in">
+            {/* Concentration toggle */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-forge-2 select-none">Concentration</span>
+              <div className="flex gap-1.5">
+                {([
+                  { value: null, label: 'Any' },
+                  { value: true, label: 'Yes' },
+                  { value: false, label: 'No' },
+                ] as const).map(opt => (
+                  <button
+                    key={String(opt.value)}
+                    type="button"
+                    onClick={() => setAdvancedFilters(f => ({ ...f, concentration: opt.value }))}
+                    aria-pressed={advancedFilters.concentration === opt.value}
+                    className={cn(
+                      'flex-1 min-h-[44px] px-3 rounded-xl',
+                      'text-xs font-medium',
+                      'transition-all duration-200 ease-forge',
+                      'active:scale-[0.95]',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      advancedFilters.concentration === opt.value
+                        ? 'bg-ember/15 text-ember border border-ember/25'
+                        : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Ritual toggle */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-forge-2 select-none">Ritual</span>
+              <div className="flex gap-1.5">
+                {([
+                  { value: null, label: 'Any' },
+                  { value: true, label: 'Yes' },
+                  { value: false, label: 'No' },
+                ] as const).map(opt => (
+                  <button
+                    key={String(opt.value)}
+                    type="button"
+                    onClick={() => setAdvancedFilters(f => ({ ...f, ritual: opt.value }))}
+                    aria-pressed={advancedFilters.ritual === opt.value}
+                    className={cn(
+                      'flex-1 min-h-[44px] px-3 rounded-xl',
+                      'text-xs font-medium',
+                      'transition-all duration-200 ease-forge',
+                      'active:scale-[0.95]',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      advancedFilters.ritual === opt.value
+                        ? 'bg-verdant/15 text-verdant border border-verdant/25'
+                        : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Casting Time filter */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-forge-2 select-none">Casting Time</span>
+              <div className="flex flex-wrap gap-1.5">
+                {CASTING_TIME_OPTIONS.map(ct => {
+                  const isActive = advancedFilters.castingTimes.includes(ct)
+                  return (
+                    <button
+                      key={ct}
+                      type="button"
+                      onClick={() => setAdvancedFilters(f => ({
+                        ...f,
+                        castingTimes: isActive
+                          ? f.castingTimes.filter(x => x !== ct)
+                          : [...f.castingTimes, ct],
+                      }))}
+                      aria-pressed={isActive}
+                      className={cn(
+                        'min-h-[44px] px-3 rounded-xl',
+                        'text-xs font-medium whitespace-nowrap',
+                        'transition-all duration-200 ease-forge',
+                        'active:scale-[0.95]',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        isActive
+                          ? 'bg-arcane/15 text-arcane border border-arcane/25'
+                          : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                      )}
+                    >
+                      {ct}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Damage Type multi-select */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-forge-2 select-none">Damage Type</span>
+              <div className="flex flex-wrap gap-1.5">
+                {DAMAGE_TYPE_OPTIONS.map(dt => {
+                  const isActive = advancedFilters.damageTypes.includes(dt)
+                  return (
+                    <button
+                      key={dt}
+                      type="button"
+                      onClick={() => setAdvancedFilters(f => ({
+                        ...f,
+                        damageTypes: isActive
+                          ? f.damageTypes.filter(x => x !== dt)
+                          : [...f.damageTypes, dt],
+                      }))}
+                      aria-pressed={isActive}
+                      className={cn(
+                        'min-h-[44px] px-3 rounded-xl',
+                        'text-xs font-medium whitespace-nowrap',
+                        'transition-all duration-200 ease-forge',
+                        'active:scale-[0.95]',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        isActive
+                          ? 'bg-ember/15 text-ember border border-ember/25'
+                          : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                      )}
+                    >
+                      {dt}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Range filter */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-forge-2 select-none">Range</span>
+              <div className="flex flex-wrap gap-1.5">
+                {RANGE_OPTIONS.map(r => {
+                  const isActive = advancedFilters.ranges.includes(r)
+                  return (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setAdvancedFilters(f => ({
+                        ...f,
+                        ranges: isActive
+                          ? f.ranges.filter(x => x !== r)
+                          : [...f.ranges, r],
+                      }))}
+                      aria-pressed={isActive}
+                      className={cn(
+                        'min-h-[44px] px-3 rounded-xl',
+                        'text-xs font-medium whitespace-nowrap',
+                        'transition-all duration-200 ease-forge',
+                        'active:scale-[0.95]',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        isActive
+                          ? 'bg-eldritch/15 text-eldritch border border-eldritch/25'
+                          : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                      )}
+                    >
+                      {r}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Clear all advanced filters */}
+            {advancedFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setAdvancedFilters(DEFAULT_ADVANCED_FILTERS)}
+                className={cn(
+                  'min-h-[44px] px-4 rounded-xl',
+                  'text-xs font-medium text-forge-2',
+                  'bg-white/5 border border-white/5',
+                  'hover:bg-white/8 hover:text-forge-1',
+                  'transition-all duration-200 ease-forge',
+                  'active:scale-[0.97]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                )}
+              >
+                Clear Advanced Filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ---- Prepared filter toggle -------------------------------------- */}

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   Swords,
   BookOpen,
@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Trophy,
   Send,
+  Target,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
@@ -39,6 +40,9 @@ type QuizMode = 'spells' | 'combat' | 'rules' | 'class_features'
 
 interface QuizArenaProps {
   character: Character
+  onQuizAnswer?: (category: string, difficulty: string, correct: boolean) => void
+  suggestedDifficulty?: 'apprentice' | 'journeyman' | 'master'
+  weakCategories?: string[]
 }
 
 /* ------------------------------------------------------------------ */
@@ -87,7 +91,12 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D'] as const
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function QuizArena({ character }: QuizArenaProps) {
+export function QuizArena({
+  character,
+  onQuizAnswer,
+  suggestedDifficulty,
+  weakCategories,
+}: QuizArenaProps) {
   const { loading, error, queryStructured, clearResponse } = useAI()
 
   const [mode, setMode] = useState<QuizMode>('spells')
@@ -96,6 +105,12 @@ export function QuizArena({ character }: QuizArenaProps) {
   const [openAnswer, setOpenAnswer] = useState('')
   const [hasAnswered, setHasAnswered] = useState(false)
   const [score, setScore] = useState({ correct: 0, total: 0 })
+  const [practiceWeakMode, setPracticeWeakMode] = useState(false)
+
+  // Apply suggested difficulty when it changes (only if no active question)
+  useEffect(() => {
+    // We just track suggestedDifficulty for prompt generation, no state needed
+  }, [suggestedDifficulty])
 
   /* ------ derived ------ */
   const isCorrect =
@@ -104,7 +119,7 @@ export function QuizArena({ character }: QuizArenaProps) {
       : false
 
   /* ------ handlers ------ */
-  const generateQuestion = useCallback(async () => {
+  const generateQuestion = useCallback(async (targetCategories?: string[]) => {
     clearResponse()
     setQuestion(null)
     setSelectedAnswer(null)
@@ -113,16 +128,26 @@ export function QuizArena({ character }: QuizArenaProps) {
 
     const modeConfig = MODES.find((m) => m.id === mode)!
 
+    // Build difficulty hint
+    const diffHint = suggestedDifficulty
+      ? ` Aim for "${suggestedDifficulty}" difficulty level.`
+      : ''
+
+    // Build category targeting hint
+    const categoryHint = targetCategories && targetCategories.length > 0
+      ? ` Focus on these weak areas: ${targetCategories.join(', ')}.`
+      : ''
+
     try {
       const result = await queryStructured<QuizQuestion>(
         SYSTEM_PROMPTS.quizMaster(character),
-        modeConfig.prompt,
+        modeConfig.prompt + diffHint + categoryHint,
       )
       setQuestion(result)
     } catch {
       // error state is handled by useAI hook
     }
-  }, [character, mode, queryStructured, clearResponse])
+  }, [character, mode, queryStructured, clearResponse, suggestedDifficulty])
 
   const submitAnswer = useCallback(
     (answer: string) => {
@@ -136,8 +161,13 @@ export function QuizArena({ character }: QuizArenaProps) {
         correct: prev.correct + (correct ? 1 : 0),
         total: prev.total + 1,
       }))
+
+      // Report to training system
+      if (onQuizAnswer) {
+        onQuizAnswer(question.category || mode, question.difficulty, correct)
+      }
     },
-    [hasAnswered, question],
+    [hasAnswered, question, onQuizAnswer, mode],
   )
 
   const submitOpenAnswer = useCallback(() => {
@@ -146,8 +176,12 @@ export function QuizArena({ character }: QuizArenaProps) {
   }, [openAnswer, submitAnswer])
 
   const nextQuestion = useCallback(() => {
-    generateQuestion()
-  }, [generateQuestion])
+    if (practiceWeakMode && weakCategories && weakCategories.length > 0) {
+      generateQuestion(weakCategories)
+    } else {
+      generateQuestion()
+    }
+  }, [generateQuestion, practiceWeakMode, weakCategories])
 
   const resetScore = useCallback(() => {
     setScore({ correct: 0, total: 0 })
@@ -155,8 +189,14 @@ export function QuizArena({ character }: QuizArenaProps) {
     setSelectedAnswer(null)
     setOpenAnswer('')
     setHasAnswered(false)
+    setPracticeWeakMode(false)
     clearResponse()
   }, [clearResponse])
+
+  const handlePracticeWeaknesses = useCallback(() => {
+    setPracticeWeakMode(true)
+    generateQuestion(weakCategories)
+  }, [generateQuestion, weakCategories])
 
   /* ------ render helpers ------ */
   const renderModeChips = () => (
@@ -164,11 +204,15 @@ export function QuizArena({ character }: QuizArenaProps) {
       {MODES.map((m) => {
         const Icon = m.icon
         const isActive = mode === m.id
+        const isWeak = weakCategories?.includes(m.id)
         return (
           <button
             key={m.id}
             type="button"
-            onClick={() => setMode(m.id)}
+            onClick={() => {
+              setMode(m.id)
+              setPracticeWeakMode(false)
+            }}
             className={cn(
               'inline-flex items-center gap-2 min-h-[44px] px-4 rounded-xl',
               'text-sm font-medium select-none',
@@ -178,10 +222,14 @@ export function QuizArena({ character }: QuizArenaProps) {
               isActive
                 ? 'bg-arcane/15 text-arcane border border-arcane/30'
                 : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+              isWeak && !isActive && 'border-red-500/30',
             )}
           >
             <Icon size={16} aria-hidden />
             {m.label}
+            {isWeak && (
+              <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" aria-label="Weak category" />
+            )}
           </button>
         )
       })}
@@ -375,12 +423,42 @@ export function QuizArena({ character }: QuizArenaProps) {
       {/* Mode selector */}
       {renderModeChips()}
 
+      {/* Practice Weaknesses button */}
+      {weakCategories && weakCategories.length > 0 && !practiceWeakMode && (
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={handlePracticeWeaknesses}
+          className="w-full"
+        >
+          <Target size={16} aria-hidden />
+          Practice Weaknesses ({weakCategories.length} area{weakCategories.length !== 1 ? 's' : ''})
+        </Button>
+      )}
+
+      {/* Weakness practice active indicator */}
+      {practiceWeakMode && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-ember/[0.08] border border-ember/20">
+          <Target size={14} className="text-ember shrink-0" aria-hidden />
+          <span className="text-xs text-ember font-medium">
+            Targeting weak areas: {weakCategories?.join(', ')}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPracticeWeakMode(false)}
+            className="ml-auto text-xs text-forge-2 hover:text-forge-1 min-h-[44px] px-2 transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       {/* Generate button */}
       <Button
         variant="primary"
         size="lg"
         loading={loading}
-        onClick={generateQuestion}
+        onClick={() => practiceWeakMode ? generateQuestion(weakCategories) : generateQuestion()}
         className="w-full"
       >
         {question ? 'Generate New Question' : 'Generate Question'}
@@ -394,7 +472,7 @@ export function QuizArena({ character }: QuizArenaProps) {
             <div>
               <p className="text-sm font-semibold text-red-400 mb-1">Failed to generate question</p>
               <p className="text-xs text-forge-2">{error}</p>
-              <Button variant="ghost" size="sm" onClick={generateQuestion} className="mt-3">
+              <Button variant="ghost" size="sm" onClick={() => generateQuestion()} className="mt-3">
                 Try Again
               </Button>
             </div>

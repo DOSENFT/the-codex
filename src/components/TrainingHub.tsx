@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   Brain,
   Theater,
   Swords,
+  Sparkles,
   Loader2,
   AlertTriangle,
   Send,
@@ -12,9 +13,11 @@ import {
   Target,
   Lightbulb,
   Map,
+  BookOpen,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
+import { useTraining } from '../hooks/useTraining'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
 import type { Character } from '../lib/character'
 import { Button } from './ui/Button'
@@ -22,6 +25,9 @@ import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { QuizArena } from './QuizArena'
 import { RoleplayCoach } from './RoleplayCoach'
+import { PersonaEngine } from './PersonaEngine'
+import { TrainingProgress } from './TrainingProgress'
+import { SpacedFlashcards } from './SpacedFlashcards'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -29,9 +35,10 @@ import { RoleplayCoach } from './RoleplayCoach'
 
 interface TrainingHubProps {
   character: Character
+  onCharacterUpdate?: (char: Character) => void
 }
 
-type TrainingMode = 'rules_quiz' | 'roleplay_coach' | 'combat_sims'
+type TrainingMode = 'rules_quiz' | 'roleplay_coach' | 'combat_sims' | 'persona' | 'flashcards'
 
 interface CombatScenario {
   scenario: string
@@ -54,14 +61,40 @@ const MODES: { id: TrainingMode; label: string; icon: typeof Brain }[] = [
   { id: 'rules_quiz', label: 'Rules Quiz', icon: Brain },
   { id: 'roleplay_coach', label: 'Roleplay Coach', icon: Theater },
   { id: 'combat_sims', label: 'Combat Sims', icon: Swords },
+  { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
+  { id: 'persona', label: 'Persona', icon: Sparkles },
 ]
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function TrainingHub({ character }: TrainingHubProps) {
+export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) {
   const [mode, setMode] = useState<TrainingMode>('rules_quiz')
+
+  /* ------ Training Profile ------ */
+  const {
+    profile,
+    recordQuiz,
+    recordDrill,
+    reviewCard,
+    getDueCards,
+    suggestedDifficulty,
+    weakCategories,
+    initFlashcard,
+  } = useTraining(character.id)
+
+  // Initialize flashcards from persona on load
+  useEffect(() => {
+    if (!character.persona) return
+    const traits = [
+      ...(character.persona.physicalTics ?? []).map((_, i) => `physicalTic-${i}`),
+      ...(character.persona.sceneInstincts ?? []).map((_, i) => `sceneInstinct-${i}`),
+      ...(character.persona.quietTexture ?? []).map((_, i) => `quietTexture-${i}`),
+      ...(character.persona.catchphrases ?? []).map((_, i) => `catchphrase-${i}`),
+    ]
+    traits.forEach((id) => initFlashcard(id))
+  }, [character.persona, initFlashcard])
 
   /* ------ Combat Sim State ------ */
   const scenarioAI = useAI()
@@ -98,40 +131,52 @@ export function TrainingHub({ character }: TrainingHubProps) {
         context,
       )
       setEvaluation(result)
+
+      // Record drill with a score based on having completed it
+      recordDrill(scenario.scenario.slice(0, 50), 8)
     } catch {
       // error handled by hook
     }
-  }, [scenario, playerAction, character, evaluateAI])
+  }, [scenario, playerAction, character, evaluateAI, recordDrill])
 
   /* ------ Render Mode Chips ------ */
-  const renderModeChips = () => (
-    <div className="flex flex-wrap gap-2">
-      {MODES.map(m => {
-        const Icon = m.icon
-        const isActive = mode === m.id
-        return (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => setMode(m.id)}
-            className={cn(
-              'inline-flex items-center gap-2 min-h-[44px] px-4 rounded-xl',
-              'text-sm font-medium select-none',
-              'transition-all duration-200 ease-forge',
-              'active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-              isActive
-                ? 'bg-arcane/15 text-arcane border border-arcane/30'
-                : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
-            )}
-          >
-            <Icon size={16} aria-hidden />
-            {m.label}
-          </button>
-        )
-      })}
-    </div>
-  )
+  const renderModeChips = () => {
+    const dueCount = getDueCards().length
+    return (
+      <div className="flex flex-wrap gap-2">
+        {MODES.map(m => {
+          const Icon = m.icon
+          const isActive = mode === m.id
+          const showDueBadge = m.id === 'flashcards' && dueCount > 0
+          return (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => setMode(m.id)}
+              className={cn(
+                'inline-flex items-center gap-2 min-h-[44px] px-4 rounded-xl',
+                'text-sm font-medium select-none',
+                'transition-all duration-200 ease-forge',
+                'active:scale-[0.97]',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                isActive
+                  ? 'bg-arcane/15 text-arcane border border-arcane/30'
+                  : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+              )}
+            >
+              <Icon size={16} aria-hidden />
+              {m.label}
+              {showDueBadge && (
+                <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-eldritch/20 text-eldritch text-[10px] font-bold">
+                  {dueCount}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
 
   /* ------ Render Combat Sims ------ */
   const renderCombatSims = () => (
@@ -382,13 +427,33 @@ export function TrainingHub({ character }: TrainingHubProps) {
       {/* Header */}
       <h2 className="font-display text-xl font-semibold text-forge-0">Training Hall</h2>
 
+      {/* Training Progress — always visible */}
+      {profile && <TrainingProgress profile={profile} />}
+
       {/* Sub-mode chips */}
       {renderModeChips()}
 
       {/* Content area */}
-      {mode === 'rules_quiz' && <QuizArena character={character} />}
+      {mode === 'rules_quiz' && (
+        <QuizArena
+          character={character}
+          onQuizAnswer={recordQuiz}
+          suggestedDifficulty={suggestedDifficulty()}
+          weakCategories={weakCategories}
+        />
+      )}
       {mode === 'roleplay_coach' && <RoleplayCoach character={character} />}
       {mode === 'combat_sims' && renderCombatSims()}
+      {mode === 'flashcards' && profile && (
+        <SpacedFlashcards
+          character={character}
+          profile={profile}
+          onReviewCard={reviewCard}
+        />
+      )}
+      {mode === 'persona' && onCharacterUpdate && (
+        <PersonaEngine character={character} onUpdate={onCharacterUpdate} />
+      )}
     </div>
   )
 }

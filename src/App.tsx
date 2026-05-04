@@ -52,6 +52,7 @@ export default function App() {
       onTabChange={setActiveTab}
       roster={roster}
       onSwitchCharacter={switchCharacter}
+      onUpdateCharacter={handleCharacterUpdate}
     >
       {activeTab === 'combat' && (
         <CombatHelper
@@ -66,7 +67,7 @@ export default function App() {
         />
       )}
       {activeTab === 'train' && (
-        <TrainingHub character={character} />
+        <TrainingHub character={character} onCharacterUpdate={handleCharacterUpdate} />
       )}
       {activeTab === 'settings' && (
         <Settings

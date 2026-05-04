@@ -29,6 +29,8 @@
   --animate-fade-in: fadeIn 0.3s ease-out forwards;
   --animate-slide-up: slideUp 0.3s ease-out forwards;
   --animate-pulse-glow: pulseGlow 2s ease-in-out infinite;
+  --animate-dice-tumble: diceTumble 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --animate-dice-land: diceLand 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes fadeIn {
@@ -44,6 +46,19 @@
 @keyframes pulseGlow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(61, 210, 255, 0); }
   50% { box-shadow: 0 0 16px 2px rgba(61, 210, 255, 0.25); }
+}
+
+@keyframes diceTumble {
+  0% { transform: rotateX(0) rotateZ(0) scale(0.6); opacity: 0 }
+  40% { transform: rotateX(360deg) rotateZ(180deg) scale(1.1); opacity: 1 }
+  70% { transform: rotateX(540deg) rotateZ(270deg) scale(1.05) }
+  100% { transform: rotateX(720deg) rotateZ(360deg) scale(1) }
+}
+
+@keyframes diceLand {
+  0% { transform: scale(1.15) }
+  50% { transform: scale(0.95) }
+  100% { transform: scale(1) }
 }
 
 @layer base {
@@ -98,4 +113,56 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+
+  .font-lore {
+    font-family: 'Playfair Display', serif;
+  }
 }
+
+/* ─── Parchment Card ─── */
+
+.parchment-card {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(244, 181, 69, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(244, 181, 69, 0.03) 0%, transparent 50%),
+    linear-gradient(160deg, rgba(20, 29, 40, 0.95) 0%, rgba(13, 20, 29, 0.98) 100%);
+}
+
+.parchment-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+
+.parchment-corner::before,
+.parchment-corner::after {
+  content: '';
+  position: absolute;
+  background: var(--color-ember);
+  border-radius: 999px;
+  opacity: 0.5;
+}
+
+/* Horizontal stroke */
+.parchment-corner::before {
+  width: 12px;
+  height: 1.5px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+/* Vertical stroke */
+.parchment-corner::after {
+  width: 1.5px;
+  height: 12px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.parchment-corner--tl { top: 6px; left: 6px; }
+.parchment-corner--tr { top: 6px; right: 6px; }
+.parchment-corner--bl { bottom: 6px; left: 6px; }
+.parchment-corner--br { bottom: 6px; right: 6px; }
