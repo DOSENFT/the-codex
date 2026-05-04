@@ -48,6 +48,22 @@ export interface PaladinResources {
   auraRange: number
 }
 
+export interface BackstoryMemory {
+  id: string
+  title: string
+  description: string
+  emotionalCore: string    // "grief", "betrayal", "hope", etc.
+  npcInvolved?: string
+}
+
+export interface Backstory {
+  origin: string
+  keyMemories: BackstoryMemory[]
+  relationships: { name: string; relation: string; status: string }[]
+  unresolvedThreads: string[]
+  personalitySeeds: string[]
+}
+
 export interface CharacterPersona {
   defaultState: string
   decisionTree: string
@@ -129,8 +145,19 @@ export interface Character {
   savingThrowProficiencies: AbilityKey[]
   weapons: Weapon[]
 
+  // Identity
+  gender: string              // "Male", "Female", "Non-binary", or freeform
+  pronouns: string            // "he/him", "she/her", "they/them", or freeform
+
+  // Inventory
+  equipment: string[]         // general gear (rope, torch, rations, etc.)
+  supplies: string[]          // consumables with optional qty ("Health Potion x3")
+
   // Character persona for roleplay (optional)
   persona?: CharacterPersona
+
+  // Backstory (optional)
+  backstory?: Backstory
 
   // Metadata
   createdAt: string
@@ -251,6 +278,10 @@ export function loadCharacter(id: string): Character | null {
       skillExpertise: parsed.skillExpertise ?? [],
       savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
       weapons: parsed.weapons ?? [],
+      gender: parsed.gender ?? '',
+      pronouns: parsed.pronouns ?? '',
+      equipment: parsed.equipment ?? [],
+      supplies: parsed.supplies ?? [],
     } as Character
   } catch {
     return null
@@ -341,6 +372,10 @@ export function migrateFromLegacy(): boolean {
       skillExpertise: parsed.skillExpertise ?? [],
       savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
       weapons: parsed.weapons ?? [],
+      gender: parsed.gender ?? '',
+      pronouns: parsed.pronouns ?? '',
+      equipment: parsed.equipment ?? [],
+      supplies: parsed.supplies ?? [],
     } as Character
     character.id = id
     saveCharacter(character)

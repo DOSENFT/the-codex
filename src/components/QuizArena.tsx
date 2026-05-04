@@ -4,6 +4,7 @@ import {
   BookOpen,
   Scroll,
   Shield,
+  Dices,
   Loader2,
   AlertTriangle,
   CheckCircle2,
@@ -30,13 +31,15 @@ interface QuizQuestion {
   question: string
   type: 'multiple_choice' | 'true_false' | 'open_ended' | 'scenario'
   options?: string[]
+  distractors?: string[]
   correctAnswer: string
   explanation: string
   difficulty: 'apprentice' | 'journeyman' | 'master'
   category: string
+  topic?: string
 }
 
-type QuizMode = 'spells' | 'combat' | 'rules' | 'class_features'
+type QuizMode = 'spells' | 'combat' | 'rules' | 'class_features' | 'dice_rolls'
 
 interface QuizArenaProps {
   character: Character
@@ -74,6 +77,12 @@ const MODES: { id: QuizMode; label: string; icon: typeof Swords; prompt: string 
     icon: Shield,
     prompt: 'Generate a question about one of my character\'s class or subclass features. Focus on exact mechanics, uses per rest, interactions, and tactical applications per D&D 2024 rules.',
   },
+  {
+    id: 'dice_rolls',
+    label: 'Dice Rolls',
+    icon: Dices,
+    prompt: 'Generate a dice roll practice question. Ask what dice to roll for a specific action using my character\'s actual weapons and spell stats. Include the exact answer (e.g. "d20 + 6" or "8d6 fire damage").',
+  },
 ]
 
 const DIFFICULTY_CONFIG: Record<
@@ -106,6 +115,8 @@ export function QuizArena({
   const [hasAnswered, setHasAnswered] = useState(false)
   const [score, setScore] = useState({ correct: 0, total: 0 })
   const [practiceWeakMode, setPracticeWeakMode] = useState(false)
+  const [recentTopics, setRecentTopics] = useState<string[]>([])
+  const [recentQA, setRecentQA] = useState<{ q: string; a: string }[]>([])
 
   // Apply suggested difficulty when it changes (only if no active question)
   useEffect(() => {
@@ -140,14 +151,36 @@ export function QuizArena({
 
     try {
       const result = await queryStructured<QuizQuestion>(
-        SYSTEM_PROMPTS.quizMaster(character),
+        SYSTEM_PROMPTS.quizMaster(character, recentTopics, recentQA),
         modeConfig.prompt + diffHint + categoryHint,
       )
+
+      // Handle new JSON format: if `distractors` present but `options` missing,
+      // build shuffled options from correctAnswer + distractors
+      if (result.distractors && result.distractors.length > 0 && !result.options) {
+        const allOptions = [result.correctAnswer, ...result.distractors]
+        // Fisher-Yates shuffle
+        for (let i = allOptions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]]
+        }
+        result.options = allOptions
+        // Ensure type is multiple_choice when we have options
+        if (!result.type) {
+          result.type = 'multiple_choice'
+        }
+      }
+
+      // Default type to multiple_choice if options exist but type is missing
+      if (result.options && result.options.length > 0 && !result.type) {
+        result.type = 'multiple_choice'
+      }
+
       setQuestion(result)
     } catch {
       // error state is handled by useAI hook
     }
-  }, [character, mode, queryStructured, clearResponse, suggestedDifficulty])
+  }, [character, mode, queryStructured, clearResponse, suggestedDifficulty, recentTopics, recentQA])
 
   const submitAnswer = useCallback(
     (answer: string) => {
@@ -161,6 +194,17 @@ export function QuizArena({
         correct: prev.correct + (correct ? 1 : 0),
         total: prev.total + 1,
       }))
+
+      // Track recent topics for dedup (keep last 10)
+      if (question.topic) {
+        setRecentTopics((prev) => [...prev, question.topic!].slice(-10))
+      }
+
+      // Track recent Q&A for context consistency (keep last 3)
+      setRecentQA((prev) => [
+        ...prev,
+        { q: question.question, a: question.correctAnswer },
+      ].slice(-3))
 
       // Report to training system
       if (onQuizAnswer) {
@@ -190,6 +234,8 @@ export function QuizArena({
     setOpenAnswer('')
     setHasAnswered(false)
     setPracticeWeakMode(false)
+    setRecentTopics([])
+    setRecentQA([])
     clearResponse()
   }, [clearResponse])
 

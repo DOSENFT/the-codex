@@ -14,17 +14,25 @@ export interface AIConfig {
   geminiModel?: string
   ollamaUrl?: string
   ollamaModel?: string
+  /** When true, if the primary provider fails with a network error, try the other */
+  fallbackEnabled?: boolean
 }
 
 // Load/save config from localStorage
 export function loadAIConfig(): AIConfig {
   const saved = localStorage.getItem('codex-ai-config')
-  if (saved) return JSON.parse(saved)
+  if (saved) {
+    const parsed = JSON.parse(saved)
+    // Migration: default fallback to true
+    if (parsed.fallbackEnabled === undefined) parsed.fallbackEnabled = true
+    return parsed
+  }
   return {
     provider: 'ollama',
     geminiModel: 'gemini-2.0-flash',
     ollamaUrl: 'http://192.168.1.174:11434',
     ollamaModel: 'gemma3-27b-abliterated:latest',
+    fallbackEnabled: true,
   }
 }
 
@@ -44,7 +52,25 @@ export function saveAIConfig(config: AIConfig): void {
   localStorage.setItem('codex-ai-config', JSON.stringify(config))
 }
 
-// Main query function
+/** Returns true if an error looks like a network/connection failure (not an API error). */
+function isNetworkError(err: unknown): boolean {
+  if (err instanceof TypeError) return true // fetch() throws TypeError on network failure
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase()
+    return msg.includes('failed to fetch') ||
+      msg.includes('network') ||
+      msg.includes('econnrefused') ||
+      msg.includes('timeout') ||
+      msg.includes('abort')
+  }
+  return false
+}
+
+/** Track which provider actually served the last request (for UI feedback). */
+let _lastUsedProvider: AIProvider | null = null
+export function getLastUsedProvider(): AIProvider | null { return _lastUsedProvider }
+
+// Main query function — with automatic fallback
 export async function queryAI(
   systemPrompt: string,
   userMessage: string,
@@ -52,10 +78,35 @@ export async function queryAI(
 ): Promise<string> {
   const cfg = config || loadAIConfig()
 
-  if (cfg.provider === 'gemini') {
-    return queryGemini(cfg.geminiApiKey!, cfg.geminiModel || 'gemini-2.0-flash', systemPrompt, userMessage)
-  } else {
-    return queryOllama(cfg.ollamaUrl!, cfg.ollamaModel!, systemPrompt, userMessage)
+  const primaryQuery = cfg.provider === 'gemini'
+    ? () => queryGemini(cfg.geminiApiKey!, cfg.geminiModel || 'gemini-2.0-flash', systemPrompt, userMessage)
+    : () => queryOllama(cfg.ollamaUrl!, cfg.ollamaModel!, systemPrompt, userMessage)
+
+  try {
+    const result = await primaryQuery()
+    _lastUsedProvider = cfg.provider
+    return result
+  } catch (primaryErr) {
+    // Only fallback on network errors, not API errors (rate limits, bad keys, etc.)
+    const canFallback = cfg.fallbackEnabled !== false &&
+      isNetworkError(primaryErr) &&
+      cfg.provider === 'ollama'
+        ? !!cfg.geminiApiKey  // need a Gemini key to fall back to Gemini
+        : !!cfg.ollamaUrl     // need an Ollama URL to fall back to Ollama
+
+    if (!canFallback) throw primaryErr
+
+    const fallbackProvider: AIProvider = cfg.provider === 'gemini' ? 'ollama' : 'gemini'
+    try {
+      const result = fallbackProvider === 'gemini'
+        ? await queryGemini(cfg.geminiApiKey!, cfg.geminiModel || 'gemini-2.0-flash', systemPrompt, userMessage)
+        : await queryOllama(cfg.ollamaUrl!, cfg.ollamaModel!, systemPrompt, userMessage)
+      _lastUsedProvider = fallbackProvider
+      return result
+    } catch {
+      // Fallback also failed — throw the original error (more useful to the user)
+      throw primaryErr
+    }
   }
 }
 

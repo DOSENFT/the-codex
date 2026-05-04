@@ -21,6 +21,21 @@ export interface DrillRecord {
   timestamp: string
 }
 
+export interface OneShotRecord {
+  id: string
+  turns: number
+  score: number
+  timestamp: string
+}
+
+export interface ConversationRecord {
+  id: string
+  npcType: string
+  exchanges: number
+  score: number
+  timestamp: string
+}
+
 export interface FlashcardProgress {
   cardId: string
   easeFactor: number     // SM-2: starts at 2.5
@@ -35,6 +50,8 @@ export interface TrainingProfile {
   quizHistory: QuizRecord[]
   quizStreaks: { current: number; best: number }
   drillHistory: DrillRecord[]
+  oneShotHistory: OneShotRecord[]
+  conversationHistory: ConversationRecord[]
   flashcardProgress: FlashcardProgress[]
   totalXP: number
   level: number
@@ -94,6 +111,8 @@ function createDefaultProfile(characterId: string): TrainingProfile {
     quizHistory: [],
     quizStreaks: { current: 0, best: 0 },
     drillHistory: [],
+    oneShotHistory: [],
+    conversationHistory: [],
     flashcardProgress: [],
     totalXP: 0,
     level: 1,
@@ -116,6 +135,8 @@ export function loadTrainingProfile(characterId: string): TrainingProfile {
       quizHistory: parsed.quizHistory ?? [],
       quizStreaks: parsed.quizStreaks ?? { current: 0, best: 0 },
       drillHistory: parsed.drillHistory ?? [],
+      oneShotHistory: parsed.oneShotHistory ?? [],
+      conversationHistory: parsed.conversationHistory ?? [],
       flashcardProgress: parsed.flashcardProgress ?? [],
       totalXP: parsed.totalXP ?? 0,
       level: parsed.level ?? computeTrainingLevel(parsed.totalXP ?? 0),
@@ -369,6 +390,35 @@ export function recordQuiz(
   return updated
 }
 
+/** Record a one-shot adventure completion — adds record, awards XP (score x 5). */
+export function recordOneShot(
+  profile: TrainingProfile,
+  turns: number,
+  score: number,
+): TrainingProfile {
+  const record: OneShotRecord = {
+    id: generateRecordId(),
+    turns,
+    score,
+    timestamp: new Date().toISOString(),
+  }
+
+  const today = todayISO()
+  const isNewSession = profile.lastSessionDate !== today
+
+  let updated: TrainingProfile = {
+    ...profile,
+    oneShotHistory: [...profile.oneShotHistory, record],
+    lastSessionDate: today,
+    totalSessions: isNewSession ? profile.totalSessions + 1 : profile.totalSessions,
+  }
+
+  // Award XP: score x 5
+  updated = awardDrillXP(updated, score)
+
+  return updated
+}
+
 /** Record a drill completion — adds record, awards XP. */
 export function recordDrill(
   profile: TrainingProfile,
@@ -393,6 +443,37 @@ export function recordDrill(
   }
 
   // Award XP
+  updated = awardDrillXP(updated, score)
+
+  return updated
+}
+
+/** Record a conversation drill completion — adds record, awards XP (score x 5). */
+export function recordConversation(
+  profile: TrainingProfile,
+  npcType: string,
+  exchanges: number,
+  score: number,
+): TrainingProfile {
+  const record: ConversationRecord = {
+    id: generateRecordId(),
+    npcType,
+    exchanges,
+    score,
+    timestamp: new Date().toISOString(),
+  }
+
+  const today = todayISO()
+  const isNewSession = profile.lastSessionDate !== today
+
+  let updated: TrainingProfile = {
+    ...profile,
+    conversationHistory: [...profile.conversationHistory, record],
+    lastSessionDate: today,
+    totalSessions: isNewSession ? profile.totalSessions + 1 : profile.totalSessions,
+  }
+
+  // Award XP: score x 5
   updated = awardDrillXP(updated, score)
 
   return updated

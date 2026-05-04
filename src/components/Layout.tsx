@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useState, useEffect } from 'react'
 import { Swords, BookOpen, Brain, Settings, Dices, ChevronDown, Users, HelpCircle } from 'lucide-react'
 import { cn } from '../lib/cn'
 import type { Character, RosterEntry } from '../lib/character'
@@ -17,6 +17,8 @@ interface LayoutProps {
   roster: RosterEntry[]
   onSwitchCharacter: (id: string) => void
   onUpdateCharacter: (char: Character) => void
+  dicePrefill?: { notation: string; label: string } | null
+  onClearDicePrefill?: () => void
 }
 
 const TABS: { id: TabId; label: string; icon: typeof Swords }[] = [
@@ -34,8 +36,15 @@ const TABS: { id: TabId; label: string; icon: typeof Swords }[] = [
  * The main content area fills the space between header (h-14 / 56px) and
  * bottom nav (h-16 / 64px + safe-area inset) so children scroll independently.
  */
-export function Layout({ children, character, activeTab, onTabChange, roster, onSwitchCharacter, onUpdateCharacter }: LayoutProps) {
+export function Layout({ children, character, activeTab, onTabChange, roster, onSwitchCharacter, onUpdateCharacter, dicePrefill, onClearDicePrefill }: LayoutProps) {
   const [diceOpen, setDiceOpen] = useState(false)
+
+  // Auto-open dice roller when a prefill is provided
+  useEffect(() => {
+    if (dicePrefill) {
+      setDiceOpen(true)
+    }
+  }, [dicePrefill])
   const [switcherOpen, setSwitcherOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [mechanicsOpen, setMechanicsOpen] = useState(false)
@@ -168,7 +177,12 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
       </button>
 
       {/* ─── Dice Roller Panel ─── */}
-      <DiceRoller isOpen={diceOpen} onClose={() => setDiceOpen(false)} character={character} />
+      <DiceRoller
+        isOpen={diceOpen}
+        onClose={() => { setDiceOpen(false); onClearDicePrefill?.() }}
+        character={character}
+        prefill={dicePrefill}
+      />
 
       {/* ─── Character Sheet Panel ─── */}
       <CharacterSheet isOpen={sheetOpen} onClose={() => setSheetOpen(false)} character={character} onUpdate={onUpdateCharacter} />

@@ -10,15 +10,17 @@ import {
   CheckCircle2,
   Mic,
   MicOff,
+  BookOpen,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
-import type { Character } from '../lib/character'
+import type { Character, BackstoryMemory } from '../lib/character'
 import { Button } from './ui/Button'
 import { ParchmentCard } from './ui/ParchmentCard'
 import { HexFrame } from './ui/HexFrame'
 import { OrnateHeader } from './ui/OrnateHeader'
+import { InteractiveOneShot } from './InteractiveOneShot'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -43,6 +45,8 @@ type Difficulty = 'apprentice' | 'journeyman' | 'master'
 interface ImprovDrillEnhancedProps {
   character: Character
   onDrillComplete?: (grade: ImprovGrade) => void
+  onOneShotComplete?: (score: number) => void
+  backstoryMemory?: BackstoryMemory
 }
 
 /* ------------------------------------------------------------------ */
@@ -82,12 +86,13 @@ function hasSpeechRecognition(): boolean {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function ImprovDrillEnhanced({ character, onDrillComplete }: ImprovDrillEnhancedProps) {
+export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotComplete, backstoryMemory }: ImprovDrillEnhancedProps) {
   /* ------ AI hooks ------ */
   const sceneAI = useAI()
   const gradeAI = useAI()
 
   /* ------ State ------ */
+  const [showOneShot, setShowOneShot] = useState(false)
   const [difficulty, setDifficulty] = useState<Difficulty>('journeyman')
   const [drillScene, setDrillScene] = useState<string | null>(null)
   const [sayInput, setSayInput] = useState('')
@@ -165,6 +170,9 @@ export function ImprovDrillEnhanced({ character, onDrillComplete }: ImprovDrillE
     }
   }, [])
 
+  // Track the backstory memory ID to auto-trigger drill only on change
+  const prevBackstoryMemoryId = useRef<string | undefined>(undefined)
+
   /* ------ Handlers ------ */
 
   const startDrill = useCallback(async () => {
@@ -173,15 +181,32 @@ export function ImprovDrillEnhanced({ character, onDrillComplete }: ImprovDrillE
     setDoInput('')
     setGrade(null)
     try {
-      const result = await sceneAI.query(
-        SYSTEM_PROMPTS.sceneCoach(character),
-        `Generate a brief, vivid scene prompt for ${character.name} to respond to in-character. ${difficultyPrompts[difficulty]} The scene should test their defined personality traits, decision tree, and patron relationship. Give ONLY the scene description in 2-3 sentences, nothing else. Make it specific and dramatic.`,
-      )
-      setDrillScene(result)
+      // Use backstory drill prompt when a memory is provided
+      if (backstoryMemory) {
+        const result = await sceneAI.query(
+          SYSTEM_PROMPTS.backstoryDrill(character, backstoryMemory),
+          `Generate a scene that puts ${character.name} back in the pivotal moment of "${backstoryMemory.title}". The emotional core is ${backstoryMemory.emotionalCore}.`,
+        )
+        setDrillScene(result)
+      } else {
+        const result = await sceneAI.query(
+          SYSTEM_PROMPTS.sceneCoach(character),
+          `Generate a brief, vivid scene prompt for ${character.name} to respond to in-character. ${difficultyPrompts[difficulty]} The scene should test their defined personality traits, decision tree, and patron relationship. Give ONLY the scene description in 2-3 sentences, nothing else. Make it specific and dramatic.`,
+        )
+        setDrillScene(result)
+      }
     } catch {
       // error handled by hook
     }
-  }, [character, difficulty, sceneAI])
+  }, [character, difficulty, sceneAI, backstoryMemory])
+
+  // Auto-start drill when backstoryMemory changes
+  useEffect(() => {
+    if (backstoryMemory && backstoryMemory.id !== prevBackstoryMemoryId.current) {
+      prevBackstoryMemoryId.current = backstoryMemory.id
+      startDrill()
+    }
+  }, [backstoryMemory, startDrill])
 
   const submitResponse = useCallback(async () => {
     if (!drillScene || (!sayInput.trim() && !doInput.trim())) return
@@ -216,9 +241,35 @@ export function ImprovDrillEnhanced({ character, onDrillComplete }: ImprovDrillE
     setGrade(null)
   }, [])
 
+  /* ------ One-Shot mode ------ */
+  if (showOneShot) {
+    return (
+      <InteractiveOneShot
+        character={character}
+        onComplete={(score) => {
+          onOneShotComplete?.(score)
+        }}
+        onBack={() => setShowOneShot(false)}
+      />
+    )
+  }
+
   /* ------ Render ------ */
   return (
     <div className="flex flex-col gap-4">
+      {/* Start One-Shot Button */}
+      {character.persona && (
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={() => setShowOneShot(true)}
+          className="w-full"
+        >
+          <BookOpen size={16} aria-hidden />
+          Start One-Shot Adventure
+        </Button>
+      )}
+
       {/* Header + Session Score */}
       <div className="flex items-center justify-between">
         <OrnateHeader>Improv Drills</OrnateHeader>

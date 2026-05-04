@@ -29,6 +29,8 @@ import { OrnateHeader } from './ui/OrnateHeader'
 import { Input } from './ui/Input'
 import { Badge } from './ui/Badge'
 import { ImprovDrillEnhanced } from './ImprovDrillEnhanced'
+import { ConversationDrill } from './ConversationDrill'
+import { MessageCircle } from 'lucide-react'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -39,6 +41,7 @@ interface RoleplayCoachProps {
 }
 
 type CoachMode = 'study' | 'session'
+type DrillType = 'improv' | 'conversation'
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
@@ -49,6 +52,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
 
   /* ------ Mode Toggle ------ */
   const [mode, setMode] = useState<CoachMode>('study')
+  const [drillType, setDrillType] = useState<DrillType>('improv')
 
   /* ------ Persona Quick Reference ------ */
   const [personaOpen, setPersonaOpen] = useState(true)
@@ -348,11 +352,54 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
       )}
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* Section 3: Improv Drills (Ember theme - ParchmentCard)    */}
+      {/* Section 3: Drill Type Selector + Drills                   */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <ParchmentCard className="border-ember/25">
-        <ImprovDrillEnhanced character={character} />
-      </ParchmentCard>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setDrillType('improv')}
+          className={cn(
+            'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-3 rounded-xl',
+            'text-sm font-medium transition-all duration-200 ease-forge active:scale-[0.97]',
+            'border',
+            drillType === 'improv'
+              ? 'bg-ember/15 text-ember border-ember/30'
+              : 'bg-white/[0.04] text-forge-2 border-white/10 hover:bg-white/[0.08]',
+          )}
+        >
+          <Theater size={16} aria-hidden />
+          Improv Drills
+        </button>
+        <button
+          type="button"
+          onClick={() => setDrillType('conversation')}
+          className={cn(
+            'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-3 rounded-xl',
+            'text-sm font-medium transition-all duration-200 ease-forge active:scale-[0.97]',
+            'border',
+            drillType === 'conversation'
+              ? 'bg-eldritch/15 text-eldritch border-eldritch/30'
+              : 'bg-white/[0.04] text-forge-2 border-white/10 hover:bg-white/[0.08]',
+          )}
+        >
+          <MessageCircle size={16} aria-hidden />
+          Conversation
+        </button>
+      </div>
+
+      {drillType === 'improv' && (
+        <ParchmentCard className="border-ember/25">
+          <ImprovDrillEnhanced character={character} />
+        </ParchmentCard>
+      )}
+
+      {drillType === 'conversation' && (
+        <ConversationDrill
+          character={character}
+          onComplete={() => {}}
+          onBack={() => setDrillType('improv')}
+        />
+      )}
 
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* Section 4: Mannerism Flashcards (Verdant theme)           */}

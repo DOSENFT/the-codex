@@ -14,12 +14,14 @@ import {
   Lightbulb,
   Map,
   BookOpen,
+  BookHeart,
+  Mic,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
 import { useTraining } from '../hooks/useTraining'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
-import type { Character } from '../lib/character'
+import type { Character, BackstoryMemory } from '../lib/character'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
@@ -28,6 +30,8 @@ import { RoleplayCoach } from './RoleplayCoach'
 import { PersonaEngine } from './PersonaEngine'
 import { TrainingProgress } from './TrainingProgress'
 import { SpacedFlashcards } from './SpacedFlashcards'
+import { BackstoryBuilder } from './BackstoryBuilder'
+import { AccentCoach } from './AccentCoach'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -38,7 +42,7 @@ interface TrainingHubProps {
   onCharacterUpdate?: (char: Character) => void
 }
 
-type TrainingMode = 'rules_quiz' | 'roleplay_coach' | 'combat_sims' | 'persona' | 'flashcards'
+type TrainingMode = 'rules_quiz' | 'roleplay_coach' | 'combat_sims' | 'persona' | 'flashcards' | 'backstory' | 'accent'
 
 interface CombatScenario {
   scenario: string
@@ -63,6 +67,8 @@ const MODES: { id: TrainingMode; label: string; icon: typeof Brain }[] = [
   { id: 'combat_sims', label: 'Combat Sims', icon: Swords },
   { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
   { id: 'persona', label: 'Persona', icon: Sparkles },
+  { id: 'backstory', label: 'Backstory', icon: BookHeart },
+  { id: 'accent', label: 'Accent', icon: Mic },
 ]
 
 /* ------------------------------------------------------------------ */
@@ -71,6 +77,7 @@ const MODES: { id: TrainingMode; label: string; icon: typeof Brain }[] = [
 
 export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) {
   const [mode, setMode] = useState<TrainingMode>('rules_quiz')
+  const [backstoryDrillMemory, setBackstoryDrillMemory] = useState<BackstoryMemory | undefined>(undefined)
 
   /* ------ Training Profile ------ */
   const {
@@ -453,6 +460,19 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
       )}
       {mode === 'persona' && onCharacterUpdate && (
         <PersonaEngine character={character} onUpdate={onCharacterUpdate} />
+      )}
+      {mode === 'backstory' && onCharacterUpdate && (
+        <BackstoryBuilder
+          character={character}
+          onUpdate={onCharacterUpdate}
+          onStartDrill={(memory) => {
+            setBackstoryDrillMemory(memory)
+            setMode('roleplay_coach')
+          }}
+        />
+      )}
+      {mode === 'accent' && (
+        <AccentCoach character={character} />
       )}
     </div>
   )

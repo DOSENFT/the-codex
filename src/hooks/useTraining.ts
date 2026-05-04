@@ -6,6 +6,8 @@ import {
   saveTrainingProfile,
   recordQuiz as recordQuizFn,
   recordDrill as recordDrillFn,
+  recordOneShot as recordOneShotFn,
+  recordConversation as recordConversationFn,
   reviewFlashcard,
   getDueFlashcards,
   suggestDifficulty,
@@ -63,6 +65,28 @@ export function useTraining(characterId: string | null) {
     [],
   )
 
+  /** Record a one-shot adventure completion and update profile. Awards XP (score x 5). */
+  const recordOneShot = useCallback(
+    (turns: number, score: number) => {
+      setProfile((prev) => {
+        if (!prev) return prev
+        return recordOneShotFn(prev, turns, score)
+      })
+    },
+    [],
+  )
+
+  /** Record a conversation drill completion and update profile. Awards XP (score x 5). */
+  const recordConversation = useCallback(
+    (npcType: string, exchanges: number, score: number) => {
+      setProfile((prev) => {
+        if (!prev) return prev
+        return recordConversationFn(prev, npcType, exchanges, score)
+      })
+    },
+    [],
+  )
+
   /** Review a flashcard with a rating (SM-2). */
   const reviewCard = useCallback(
     (cardId: string, rating: 'again' | 'hard' | 'good' | 'easy') => {
@@ -115,6 +139,8 @@ export function useTraining(characterId: string | null) {
     profile,
     recordQuiz,
     recordDrill,
+    recordOneShot,
+    recordConversation,
     reviewCard,
     getDueCards,
     suggestedDifficulty,

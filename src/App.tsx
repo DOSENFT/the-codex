@@ -26,6 +26,7 @@ export default function App() {
   } = useCharacter()
 
   const [activeTab, setActiveTab] = useState<TabId>('combat')
+  const [dicePrefill, setDicePrefill] = useState<{ notation: string; label: string } | null>(null)
 
   // Don't render until boot sequence completes (migration + roster load)
   if (!ready) return null
@@ -53,11 +54,14 @@ export default function App() {
       roster={roster}
       onSwitchCharacter={switchCharacter}
       onUpdateCharacter={handleCharacterUpdate}
+      dicePrefill={dicePrefill}
+      onClearDicePrefill={() => setDicePrefill(null)}
     >
       {activeTab === 'combat' && (
         <CombatHelper
           character={character}
           onCharacterUpdate={handleCharacterUpdate}
+          onOpenDiceRoller={setDicePrefill}
         />
       )}
       {activeTab === 'spells' && (

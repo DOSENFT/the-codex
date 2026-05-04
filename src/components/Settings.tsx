@@ -57,6 +57,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   const [geminiModel, setGeminiModel] = useState('gemini-2.0-flash')
   const [ollamaUrl, setOllamaUrl] = useState('http://192.168.1.174:11434')
   const [ollamaModel, setOllamaModel] = useState('gemma3-27b-abliterated:latest')
+  const [fallbackEnabled, setFallbackEnabled] = useState(true)
 
   /* ------ Ollama model discovery ------ */
   const [ollamaModels, setOllamaModels] = useState<Array<{ name: string; size: string; family: string }>>([])
@@ -86,6 +87,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
     if (config.geminiModel) setGeminiModel(config.geminiModel)
     if (config.ollamaUrl) setOllamaUrl(config.ollamaUrl)
     if (config.ollamaModel) setOllamaModel(config.ollamaModel)
+    setFallbackEnabled(config.fallbackEnabled !== false)
   }, [])
 
   /* ------ auto-fetch Ollama models when provider is ollama ------ */
@@ -109,17 +111,19 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
 
   /* ------ handlers ------ */
   const handleSaveConfig = useCallback(() => {
+    // Always save BOTH provider configs so fallback works
     saveAIConfig({
       provider,
-      geminiApiKey: provider === 'gemini' ? geminiKey : undefined,
-      geminiModel: provider === 'gemini' ? geminiModel : undefined,
-      ollamaUrl: provider === 'ollama' ? ollamaUrl : undefined,
-      ollamaModel: provider === 'ollama' ? ollamaModel : undefined,
+      geminiApiKey: geminiKey || undefined,
+      geminiModel: geminiModel,
+      ollamaUrl: ollamaUrl || undefined,
+      ollamaModel: ollamaModel || undefined,
+      fallbackEnabled,
     })
     setConfigSaved(true)
     setTestSuccess(false)
     setTimeout(() => setConfigSaved(false), 2500)
-  }, [provider, geminiKey, geminiModel, ollamaUrl, ollamaModel])
+  }, [provider, geminiKey, geminiModel, ollamaUrl, ollamaModel, fallbackEnabled])
 
   const handleTestConnection = useCallback(async () => {
     setTestSuccess(false)
@@ -397,6 +401,120 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
               />
             )}
           </div>
+        </div>
+      )}
+
+      {/* Fallback toggle */}
+      <div className="flex items-center justify-between min-h-[44px] mb-5">
+        <div className="flex-1">
+          <span className="text-sm font-medium text-forge-1">Auto-Fallback</span>
+          <p className="text-xs text-forge-2 mt-0.5">
+            {provider === 'ollama'
+              ? 'Use Gemini automatically when Ollama is unreachable (away from home WiFi)'
+              : 'Use Ollama automatically when Gemini is unavailable'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setFallbackEnabled(!fallbackEnabled)}
+          className={cn(
+            'relative w-12 h-7 rounded-full transition-colors duration-200 shrink-0 ml-3',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            fallbackEnabled ? 'bg-arcane/40' : 'bg-white/10',
+          )}
+          role="switch"
+          aria-checked={fallbackEnabled}
+          aria-label="Toggle auto-fallback"
+        >
+          <span
+            className={cn(
+              'absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white transition-transform duration-200',
+              fallbackEnabled && 'translate-x-5',
+            )}
+          />
+        </button>
+      </div>
+
+      {fallbackEnabled && provider === 'ollama' && !geminiKey && (
+        <div className="flex items-start gap-2 mb-5 p-3 rounded-lg bg-ember/10 border border-ember/25">
+          <AlertTriangle size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
+          <p className="text-xs text-ember">
+            Add a Gemini API key below for fallback to work away from home.
+            Get one free at{' '}
+            <span className="underline">aistudio.google.com/apikey</span>
+          </p>
+        </div>
+      )}
+
+      {/* Show secondary provider config when fallback is on */}
+      {fallbackEnabled && provider === 'ollama' && (
+        <div className="mb-5 p-3 rounded-xl bg-white/[0.02] border border-white/8">
+          <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-2">
+            Fallback: Gemini
+          </span>
+          <div className="flex flex-col gap-3">
+            <div className="relative">
+              <input
+                type={showKey ? 'text' : 'password'}
+                value={geminiKey}
+                onChange={(e) => setGeminiKey(e.target.value)}
+                placeholder="Gemini API key"
+                className={cn(
+                  'min-h-[44px] w-full rounded-xl',
+                  'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
+                  'border border-white/10 font-mono text-sm',
+                  'pl-4 pr-12',
+                  'transition-all duration-200 ease-forge',
+                  'focus:border-arcane/60 focus:bg-void-2/80',
+                  'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                  'focus:outline-none',
+                )}
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey(!showKey)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-forge-2 hover:text-forge-1 transition-colors duration-200"
+                aria-label={showKey ? 'Hide API key' : 'Show API key'}
+              >
+                {showKey ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
+              </button>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-forge-2">Model</span>
+              <div className="flex gap-1.5 flex-wrap">
+                {GEMINI_MODELS.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setGeminiModel(m.id)}
+                    className={cn(
+                      'min-h-[36px] px-3 rounded-lg text-xs font-medium transition-all duration-200 active:scale-[0.97] border',
+                      geminiModel === m.id
+                        ? 'bg-arcane/10 border-arcane/30 text-arcane'
+                        : 'bg-white/[0.03] border-white/8 text-forge-2 hover:text-forge-1',
+                    )}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {fallbackEnabled && provider === 'gemini' && (
+        <div className="mb-5 p-3 rounded-xl bg-white/[0.02] border border-white/8">
+          <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-2">
+            Fallback: Ollama
+          </span>
+          <Input
+            icon={Server}
+            label="Ollama URL"
+            value={ollamaUrl}
+            onChange={(e) => setOllamaUrl(e.target.value)}
+            placeholder="http://192.168.1.174:11434"
+          />
         </div>
       )}
 

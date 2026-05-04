@@ -73,9 +73,36 @@ function characterContext(char: Character): string {
       }).join('\n  ')
     : ''
 
+  // Gender & pronouns
+  const genderInfo = char.gender
+    ? `\n  Gender: ${char.gender}${char.pronouns ? ` (${char.pronouns})` : ''}`
+    : ''
+
+  const pronounInstruction = char.pronouns
+    ? `\n\nIMPORTANT: This character uses ${char.pronouns} pronouns. Always use these pronouns when referring to the character.`
+    : ''
+
+  // Equipment & supplies
+  const equipmentInfo = char.equipment?.length
+    ? `\n\nEQUIPMENT: ${char.equipment.join(', ')}`
+    : ''
+
+  const suppliesInfo = char.supplies?.length
+    ? `\nSUPPLIES: ${char.supplies.join(', ')}`
+    : ''
+
+  // Backstory
+  const backstoryInfo = char.backstory
+    ? `\n\nBACKSTORY:
+  Origin: ${char.backstory.origin || 'Unknown'}
+  ${char.backstory.keyMemories?.length ? `Key Memories: ${char.backstory.keyMemories.map(m => m.title).join(', ')}` : ''}
+  ${char.backstory.relationships?.length ? `Relationships: ${char.backstory.relationships.map(r => `${r.name} (${r.relation})`).join(', ')}` : ''}
+  ${char.backstory.unresolvedThreads?.length ? `Unresolved Threads: ${char.backstory.unresolvedThreads.join(', ')}` : ''}`
+    : ''
+
   return `
 CHARACTER:
-  Name: ${char.name}
+  Name: ${char.name}${genderInfo}
   Class: ${char.class} (${char.subclass})
   Race: ${char.race}
   Level: ${char.level}
@@ -84,7 +111,7 @@ CHARACTER:
   Spell Save DC: ${char.spellSaveDC}
   Spell Attack: +${char.spellAttackBonus}
   Proficiency: +${char.proficiencyBonus}
-${abilityInfo}${skillInfo}${weaponInfo}
+${abilityInfo}${skillInfo}${weaponInfo}${equipmentInfo}${suppliesInfo}
 
 PREPARED SPELLS:
   - ${preparedSpells || 'None'}
@@ -92,7 +119,7 @@ PREPARED SPELLS:
 SPELL SLOTS: ${slots || 'None'}
 
 CLASS FEATURES: ${features || 'None'}
-${paladinInfo}${personaInfo}${raceInfo}${homebrew}
+${paladinInfo}${personaInfo}${backstoryInfo}${pronounInstruction}${raceInfo}${homebrew}
 `
 }
 
@@ -142,7 +169,16 @@ You are a tactical advisor. When asked "when should I use this spell?":
 5. Compare to alternative spells the character has prepared
 Keep it concise and practical.`,
 
-  quizMaster: (char: Character) => `${BASE_PROMPT}
+  quizMaster: (char: Character, recentTopics?: string[], recentQA?: { q: string; a: string }[]) => {
+    const recentTopicsBlock = recentTopics && recentTopics.length > 0
+      ? `\n\nRECENT TOPICS ALREADY COVERED (do NOT repeat): ${recentTopics.join(', ')}`
+      : ''
+
+    const recentQABlock = recentQA && recentQA.length > 0
+      ? `\n\nPREVIOUS Q&A (maintain consistency, never contradict):\n${recentQA.map((qa, i) => `  ${i + 1}. Q: ${qa.q}\n     A: ${qa.a}`).join('\n')}`
+      : ''
+
+    return `${BASE_PROMPT}
 
 ${characterContext(char)}
 
@@ -151,18 +187,27 @@ You are a quiz master testing this player on D&D 2024 rules, specifically for th
 2. Cover combat mechanics, spell effects, action economy
 3. Include practical scenario-based questions, not just trivia
 4. Vary difficulty from basic recall to tactical reasoning
-5. Always provide the correct answer with a brief explanation after they answer
 
-When generating a question, respond with ONLY valid JSON:
+DIVERSITY ENFORCEMENT: NEVER repeat a spell, ability, or scenario you've used in a previous question this session.${recentTopicsBlock}${recentQABlock}
+
+TACTICAL RUBRIC FOR COMBAT QUESTIONS:
+- Always consider action economy (Action, Bonus Action, Reaction, Movement)
+- Account for the character's exact modifiers, spell save DC, and attack bonuses
+- For dice roll questions, use the character's actual weapons and spell stats
+
+ANSWER-FIRST GENERATION: Decide the correct answer FIRST, then write the question and distractors around it. This ensures the correct answer is always unambiguously right.
+
+When generating a question, respond with ONLY valid JSON (no markdown, no code fences):
 {
   "question": "the question text",
-  "type": "multiple_choice" | "scenario" | "true_false" | "open_ended",
-  "options": ["A", "B", "C", "D"] (for multiple_choice only),
   "correctAnswer": "the correct answer",
+  "distractors": ["wrong answer 1", "wrong answer 2", "wrong answer 3"],
   "explanation": "brief explanation of why this is correct (2024 rules)",
   "difficulty": "apprentice" | "journeyman" | "master",
-  "category": "spells" | "combat" | "rules" | "tactics" | "class_features"
-}`,
+  "category": "spells" | "combat" | "rules" | "tactics" | "class_features" | "dice_rolls",
+  "topic": "short label for what this question covers, e.g. Faerie Fire, Attack of Opportunity"
+}`
+  },
 
   sceneCoach: (char: Character) => `${BASE_PROMPT}
 
@@ -327,10 +372,222 @@ Respond with ONLY valid JSON:
   "pressureResponse": "Goes quiet and calculating, then acts decisively"
 }`,
 
+  backstoryHelper: (char: Character) => `${BASE_PROMPT}
+
+You help build rich character backstories for D&D 2024 characters.
+
+${characterContext(char)}
+
+${char.persona ? `PERSONA DATA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Wants: ${(char.persona.wants ?? []).join('; ')}
+Fears: ${(char.persona.fears ?? []).join('; ')}` : ''}
+
+Given this character's class, race, subclass, and any persona traits, generate a compelling backstory with:
+- A vivid origin story (2-3 paragraphs) that explains how they became this class
+- 3-4 key memories that shaped who they are, each with an emotional core
+- 3-4 important relationships with NPCs
+- The emotional core for each memory MUST be one of: grief, betrayal, hope, joy, fear, rage, wonder, shame, pride, loss
+
+Respond with ONLY valid JSON:
+{
+  "origin": "Born in the mountain fortress of...",
+  "memories": [
+    { "title": "The Day the Temple Fell", "description": "A vivid 2-3 sentence description of this pivotal moment...", "emotionalCore": "grief", "npcInvolved": "Elder Mara" }
+  ],
+  "relationships": [
+    { "name": "Elder Mara", "relation": "Mentor", "status": "dead" }
+  ]
+}`,
+
+  backstoryDrill: (char: Character, memory: import('./character').BackstoryMemory) => `${BASE_PROMPT}
+
+You are a roleplay coach creating an improv drill set in a specific backstory memory for this character:
+${characterContext(char)}
+
+${char.persona ? `PERSONA DATA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${char.persona.physicalTics.join('; ')}
+Scene Instincts: ${char.persona.sceneInstincts.join('; ')}` : ''}
+
+THE MEMORY TO RELIVE:
+Title: ${memory.title}
+Description: ${memory.description}
+Emotional Core: ${memory.emotionalCore}
+${memory.npcInvolved ? `NPC Involved: ${memory.npcInvolved}` : ''}
+
+Generate a vivid scene prompt that puts ${char.name} back in this pivotal moment. The scene should:
+1. Recreate the emotional atmosphere of the memory
+2. Present a critical choice point from that moment
+3. Include the NPC if one is involved
+4. Test whether the player can channel the specific emotion (${memory.emotionalCore})
+5. Be 2-3 sentences, dramatic and immersive
+
+Give ONLY the scene description, nothing else.`,
+
   dialogueSuggestion: (char: Character, context: string) => `${BASE_PROMPT}
 Generate 3 in-character dialogue lines for this character in the context: "${context}".
 ${characterContext(char)}
 ${char.persona ? `Persona: Default State: ${char.persona.defaultState}, Voice Notes: ${char.persona.voiceNotes || 'none'}` : ''}
 Respond with ONLY valid JSON:
 { "lines": ["line 1", "line 2", "line 3"] }`,
+
+  conversationDrill: (char: Character, npcType: string, previousExchanges: { npc: string; user: string }[]) => {
+    const exchangeHistory = previousExchanges.length > 0
+      ? `\n\nCONVERSATION SO FAR:\n${previousExchanges.map((ex, i) => `  Exchange ${i + 1}:\n    NPC: "${ex.npc}"\n    Player (as ${char.name}): "${ex.user}"`).join('\n')}`
+      : ''
+
+    const isFirstMessage = previousExchanges.length === 0
+
+    return `${BASE_PROMPT}
+
+You are playing the role of an NPC in a conversation training exercise for this character:
+${characterContext(char)}
+
+${char.persona ? `FULL PERSONA DATA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${char.persona.physicalTics.join('; ')}
+Scene Instincts: ${char.persona.sceneInstincts.join('; ')}
+Quiet Texture: ${char.persona.quietTexture.join('; ')}
+Patron: ${char.persona.patron.name} — ${char.persona.patron.rpNotes}
+${char.persona.voiceNotes ? `Voice Notes: ${char.persona.voiceNotes}` : ''}
+${char.persona.catchphrases ? `Catchphrases: ${char.persona.catchphrases.join('; ')}` : ''}` : 'No persona data available.'}
+
+NPC TYPE: ${npcType}
+
+YOUR ROLE: Play this NPC with a distinct, memorable personality. Give them speech patterns, mannerisms, and an attitude that fits their type. Stay in character throughout the conversation.
+
+GRADING: After each player response, grade their dialogue for:
+- voiceConsistency (1-5): Does the player's dialogue match their character's established voice, speech patterns, and mannerisms?
+- vocabularyMatch (1-5): Does the word choice fit the character's background, class, and personality?
+- emotionalRegister (1-5): Is the emotional tone appropriate for the character in this situation?
+
+Maintain conversation continuity from previous exchanges. React naturally to what the player says.${exchangeHistory}
+
+${isFirstMessage ? `This is the START of the conversation. Introduce your NPC character and deliver an opening line of dialogue.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "npcName": "A fitting name for this ${npcType}",
+  "npcPersonality": "A brief personality description (1-2 sentences)",
+  "npcReply": "Your opening dialogue line, in character",
+  "coaching": null
+}` : `The player just responded. Reply in character as the NPC and grade their response.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "npcReply": "What the NPC says next (in-character dialogue)",
+  "coaching": {
+    "voiceConsistency": 4,
+    "vocabularyMatch": 3,
+    "emotionalRegister": 5,
+    "note": "Brief coaching note about their dialogue"
+  }
+}`}`
+  },
+
+  conversationSummary: (char: Character) => `${BASE_PROMPT}
+
+You are evaluating a completed conversation training session for this character:
+${characterContext(char)}
+
+${char.persona ? `FULL PERSONA DATA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Voice Notes: ${char.persona.voiceNotes || 'none'}
+${char.persona.catchphrases ? `Catchphrases: ${char.persona.catchphrases.join('; ')}` : ''}` : 'No persona data available.'}
+
+Given the conversation history with per-exchange coaching scores, produce a final summary.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "overallScore": 7,
+  "bestMoment": "A specific quote or moment from the conversation that was the strongest example of in-character dialogue",
+  "improvementTip": "One actionable suggestion for improving conversational roleplay with this character"
+}`,
+
+  interactiveOneShot: (char: Character, previousTurns: { narration: string; response: string; coaching: { rating: string; note: string } }[]) => {
+    const personaBlock = char.persona
+      ? `\nFULL PERSONA DATA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${char.persona.physicalTics.join('; ')}
+Scene Instincts: ${char.persona.sceneInstincts.join('; ')}
+Quiet Texture: ${char.persona.quietTexture.join('; ')}
+Patron: ${char.persona.patron.name} — ${char.persona.patron.rpNotes}
+${char.persona.voiceNotes ? `Voice Notes: ${char.persona.voiceNotes}` : ''}
+${char.persona.catchphrases ? `Catchphrases: ${char.persona.catchphrases.join('; ')}` : ''}`
+      : ''
+
+    const turnHistory = previousTurns.length > 0
+      ? `\n\nSTORY SO FAR (${previousTurns.length} turns):\n${previousTurns.map((t, i) => `--- Turn ${i + 1} ---\nNarration: ${t.narration}\nPlayer Response: ${t.response}\nCoaching: [${t.coaching.rating}] ${t.coaching.note}`).join('\n\n')}`
+      : ''
+
+    const turnCount = previousTurns.length
+
+    return `${BASE_PROMPT}
+
+You are simultaneously a D&D Dungeon Master running a short interactive one-shot adventure AND a character coach evaluating the player's roleplay.
+
+${characterContext(char)}
+${personaBlock}
+${turnHistory}
+
+YOUR DUAL ROLE:
+1. **As DM**: Narrate vivid, immersive scenes (2-4 sentences). Present meaningful choices that test the character's personality, values, and relationships. Build on previous turns for continuity. Create escalating tension.
+2. **As Coach**: After each player response, evaluate how well they stayed in character. Rate their characterization based on defined persona traits, decision tree, physical tics, voice, and patron relationship.
+
+${turnCount >= 7 ? 'IMPORTANT: The adventure has been going on for a while. Start wrapping toward a dramatic conclusion within the next 1-3 turns. Set "isConclusion" to true when you deliver the final scene.' : ''}
+${turnCount >= 9 ? 'CRITICAL: This MUST be the final turn. Set "isConclusion" to true and include the "summary" field.' : ''}
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+
+For a normal turn:
+{
+  "narration": "What happens next in the story (2-4 sentences, vivid and immersive)",
+  "coaching": { "rating": "green|amber|red", "note": "Brief coaching note about characterization" },
+  "options": ["Option 1", "Option 2", "Option 3"],
+  "isConclusion": false
+}
+
+For the final turn (when the adventure reaches a natural end):
+{
+  "narration": "Final scene wrap-up (2-4 sentences, satisfying conclusion)",
+  "coaching": { "rating": "green|amber|red", "note": "Final coaching note" },
+  "options": [],
+  "isConclusion": true,
+  "summary": {
+    "score": 8,
+    "strengths": ["Specific strength 1", "Specific strength 2"],
+    "improvements": ["Specific improvement 1"],
+    "highlight": "The single most memorable in-character moment from the adventure"
+  }
+}
+
+${previousTurns.length === 0 ? 'This is the FIRST turn. Set up an intriguing scenario hook. The coaching field should have rating "green" and note "Adventure begins!" for the first turn.' : ''}`
+  },
+
+  accentPhraseGenerator: (char: Character, accentName: string, accentRules: string) => `${BASE_PROMPT}
+
+You generate in-character practice phrases for accent training.
+
+${characterContext(char)}
+
+TARGET ACCENT: ${accentName}
+
+ACCENT RULES TO EXERCISE:
+${accentRules}
+
+Generate 5 practice phrases that:
+1. Are written in-character for ${char.name} (a level ${char.level} ${char.race} ${char.class})
+2. Exercise the specific accent rules listed above (each phrase should use at least 2 rules)
+3. Are appropriate for D&D fantasy settings
+4. Vary in length from short (5-8 words) to medium (12-18 words)
+5. Include words that specifically test the accent's phonetic patterns
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{ "phrases": ["phrase 1", "phrase 2", "phrase 3", "phrase 4", "phrase 5"] }`,
 }

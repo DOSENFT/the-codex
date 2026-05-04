@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 
@@ -43,22 +43,26 @@ const sizeStyles: Record<ButtonSize, string> = {
 
 /**
  * Multi-variant button with press feedback, loading spinner, and 44px+ touch
- * targets across all sizes.
+ * targets across all sizes. Supports ref forwarding.
  */
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  loading = false,
-  disabled,
-  children,
-  className,
-  type = 'button',
-  ...rest
-}: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = 'primary',
+    size = 'md',
+    loading = false,
+    disabled,
+    children,
+    className,
+    type = 'button',
+    ...rest
+  },
+  ref,
+) {
   const isDisabled = disabled || loading
 
   return (
     <button
+      ref={ref}
       type={type}
       disabled={isDisabled}
       className={cn(
@@ -89,4 +93,4 @@ export function Button({
       {children}
     </button>
   )
-}
+})

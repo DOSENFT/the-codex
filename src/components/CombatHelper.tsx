@@ -19,6 +19,9 @@ import {
   Flame,
   User,
   Minus,
+  Play,
+  Square,
+  SkipForward,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import {
@@ -31,6 +34,18 @@ import {
   shortRest,
   longRest,
 } from '../lib/character'
+import {
+  type CombatState,
+  createCombatState,
+  startCombat,
+  endCombat,
+  nextTurn,
+  useAction,
+  setConcentration as setCombatConcentration,
+  saveCombatState,
+  loadCombatState,
+  clearCombatState,
+} from '../lib/combat-state'
 import { BASIC_ACTIONS, PALADIN_ACTIONS } from '../lib/dnd-data'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
 import { useAI } from '../hooks/useAI'
@@ -39,6 +54,9 @@ import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { Input } from './ui/Input'
 import { HPTracker } from './HPTracker'
+import { ActionMenu, type ActionChoice } from './ActionMenu'
+import { DamageTracker } from './DamageTracker'
+import { type CombatLog, type DamageEntry, createCombatLog, logDamage as logDamageEntry, endCombatLog, saveDamageLogs, loadDamageLogs } from '../lib/damage-log'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -47,6 +65,7 @@ import { HPTracker } from './HPTracker'
 interface CombatHelperProps {
   character: Character
   onCharacterUpdate: (character: Character) => void
+  onOpenDiceRoller?: (prefill: { notation: string; label: string }) => void
 }
 
 interface ActionEconomy {
@@ -1125,24 +1144,137 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
 // Main Component
 // ---------------------------------------------------------------------------
 
-export function CombatHelper({ character, onCharacterUpdate }: CombatHelperProps) {
-  // Action economy state (local, resets each encounter)
-  const [economy, setEconomy] = useState<ActionEconomy>(INITIAL_ECONOMY)
+export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }: CombatHelperProps) {
+  // ── Combat State (persisted) ──
+  const [combatState, setCombatState] = useState<CombatState>(() => {
+    const saved = loadCombatState(character.id)
+    return saved ?? createCombatState(character)
+  })
 
-  // Concentration state (local, resets on rest)
-  const [concentrationSpell, setConcentrationSpell] = useState<string | null>(null)
+  // Action menu slide-up panel
+  const [actionMenuOpen, setActionMenuOpen] = useState(false)
+
+  // Concentration warning dialog
+  const [concWarning, setConcWarning] = useState<{ newSpell: string; action: ActionChoice } | null>(null)
+
+  // Damage tracking
+  const [currentDamageLog, setCurrentDamageLog] = useState<CombatLog | null>(
+    combatState.inCombat ? createCombatLog() : null
+  )
+
+  // Derive economy from combatState for the ActionEconomyBar
+  const economy: ActionEconomy = combatState.turnActions
+
+  // Concentration state derived from combat state
+  const concentrationSpell = combatState.concentrating
 
   // AI hook
   const { response, loading, error, query, clearResponse } = useAI()
 
+  // Persist combat state whenever it changes
+  useEffect(() => {
+    saveCombatState(character.id, combatState)
+  }, [character.id, combatState])
+
+  // --- Combat lifecycle handlers ---
+
+  const handleStartCombat = useCallback(() => {
+    const newState = startCombat(character)
+    setCombatState(newState)
+    setCurrentDamageLog(createCombatLog())
+  }, [character])
+
+  const handleEndCombat = useCallback(() => {
+    // Save damage log to history
+    if (currentDamageLog && currentDamageLog.entries.length > 0) {
+      const finished = endCombatLog(currentDamageLog)
+      const history = loadDamageLogs(character.id)
+      saveDamageLogs(character.id, [...history, finished])
+    }
+    setCurrentDamageLog(null)
+    const newState = endCombat(character)
+    setCombatState(newState)
+    clearCombatState(character.id)
+  }, [character, currentDamageLog])
+
+  const handleNextTurn = useCallback(() => {
+    setCombatState((prev) => nextTurn(prev))
+  }, [])
+
   // --- Action Economy handlers ---
 
   const toggleEconomy = useCallback((key: keyof ActionEconomy) => {
-    setEconomy((prev) => ({ ...prev, [key]: !prev[key] }))
+    setCombatState((prev) => ({
+      ...prev,
+      turnActions: { ...prev.turnActions, [key]: !prev.turnActions[key] },
+    }))
   }, [])
 
   const resetEconomy = useCallback(() => {
-    setEconomy(INITIAL_ECONOMY)
+    setCombatState((prev) => ({
+      ...prev,
+      turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
+    }))
+  }, [])
+
+  // --- Action Menu handler ---
+
+  const applyAction = useCallback(
+    (action: ActionChoice) => {
+      let newState = useAction(combatState, action.type)
+
+      // Use spell slot if applicable
+      if (action.slotLevel) {
+        const updated = expendSpellSlot(character, action.slotLevel)
+        onCharacterUpdate(updated)
+      }
+
+      // Set concentration if the spell is concentration
+      if (action.category === 'Spell' || action.category === 'Cantrip') {
+        const spell = character.spells.find((s) => s.name === action.name)
+        if (spell?.concentration) {
+          newState = setCombatConcentration(newState, action.name)
+        }
+      }
+
+      setCombatState(newState)
+
+      // Open dice roller with prefill if there's a roll notation
+      if (action.rollNotation && action.rollLabel && onOpenDiceRoller) {
+        onOpenDiceRoller({ notation: action.rollNotation, label: action.rollLabel })
+      }
+    },
+    [combatState, character, onCharacterUpdate, onOpenDiceRoller],
+  )
+
+  const handleUseAction = useCallback(
+    (action: ActionChoice) => {
+      // Check concentration conflict
+      if (
+        action.category === 'Spell' &&
+        action.slotLevel &&
+        character.spells.find((s) => s.name === action.name)?.concentration &&
+        combatState.concentrating
+      ) {
+        setConcWarning({ newSpell: action.name, action })
+        setActionMenuOpen(false)
+        return
+      }
+
+      applyAction(action)
+      setActionMenuOpen(false)
+    },
+    [combatState.concentrating, character.spells, applyAction],
+  )
+
+  const handleConfirmConcentrationSwitch = useCallback(() => {
+    if (!concWarning) return
+    applyAction(concWarning.action)
+    setConcWarning(null)
+  }, [concWarning, applyAction])
+
+  const handleCancelConcentrationSwitch = useCallback(() => {
+    setConcWarning(null)
   }, [])
 
   // --- Spell Slot handlers ---
@@ -1197,11 +1329,11 @@ export function CombatHelper({ character, onCharacterUpdate }: CombatHelperProps
   // --- Concentration handlers ---
 
   const handleSetConcentration = useCallback((spellName: string) => {
-    setConcentrationSpell(spellName)
+    setCombatState((prev) => setCombatConcentration(prev, spellName))
   }, [])
 
   const handleDropConcentration = useCallback(() => {
-    setConcentrationSpell(null)
+    setCombatState((prev) => setCombatConcentration(prev, null))
   }, [])
 
   // --- AI handlers ---
@@ -1222,27 +1354,147 @@ export function CombatHelper({ character, onCharacterUpdate }: CombatHelperProps
     [handleAIQuery],
   )
 
+  // --- Damage log handler ---
+
+  const handleLogDamage = useCallback(
+    (entry: Omit<DamageEntry, 'timestamp'>) => {
+      if (!currentDamageLog) return
+      const updated = logDamageEntry(currentDamageLog, entry)
+      setCurrentDamageLog(updated)
+    },
+    [currentDamageLog],
+  )
+
   // --- Rest handlers ---
 
   const handleShortRest = useCallback(() => {
     const updated = shortRest(character)
     onCharacterUpdate(updated)
-    // Reset action economy on rest
-    setEconomy(INITIAL_ECONOMY)
+    setCombatState((prev) => ({
+      ...prev,
+      turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
+    }))
   }, [character, onCharacterUpdate])
 
   const handleLongRest = useCallback(() => {
     const updated = longRest(character)
     onCharacterUpdate(updated)
-    // Reset everything on long rest
-    setEconomy(INITIAL_ECONOMY)
-    setConcentrationSpell(null)
+    const newState = createCombatState(updated)
+    setCombatState(newState)
+    clearCombatState(character.id)
     clearResponse()
   }, [character, onCharacterUpdate, clearResponse])
 
   return (
     <section className="flex flex-col gap-4" aria-label="Combat Helper">
-      {/* 0. HP Tracker */}
+      {/* 0. Combat Toggle + Round Counter */}
+      <GlassCard className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant={combatState.inCombat ? 'secondary' : 'primary'}
+              size="sm"
+              onClick={combatState.inCombat ? handleEndCombat : handleStartCombat}
+              className={cn(
+                combatState.inCombat && 'border-red-400/30 text-red-400 hover:bg-red-400/10 hover:border-red-400/50',
+              )}
+            >
+              {combatState.inCombat ? (
+                <><Square size={14} aria-hidden /> End Combat</>
+              ) : (
+                <><Play size={14} aria-hidden /> Start Combat</>
+              )}
+            </Button>
+
+            {combatState.inCombat && (
+              <div className="flex items-center gap-2">
+                <Badge variant="arcane">
+                  Round {combatState.round}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNextTurn}
+                  aria-label="Next turn"
+                  className="gap-1"
+                >
+                  <SkipForward size={14} aria-hidden />
+                  Next Turn
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {combatState.inCombat && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setActionMenuOpen(true)}
+              className="gap-1.5"
+            >
+              <Sword size={14} aria-hidden />
+              Action
+            </Button>
+          )}
+        </div>
+
+        {/* Action economy status row (compact, shown only in combat) */}
+        {combatState.inCombat && (
+          <div className="flex gap-1.5 mt-3 flex-wrap">
+            {[
+              { key: 'action' as const, label: 'Action', icon: Sword },
+              { key: 'bonusAction' as const, label: 'Bonus', icon: Zap },
+              { key: 'reaction' as const, label: 'Reaction', icon: Shield },
+              { key: 'movement' as const, label: 'Move', icon: Footprints },
+            ].map(({ key, label, icon: Icon }) => {
+              const used = combatState.turnActions[key]
+              return (
+                <span
+                  key={key}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium',
+                    'border select-none transition-colors duration-200',
+                    used
+                      ? 'bg-white/[0.02] border-white/5 text-forge-2/50 line-through'
+                      : 'bg-arcane/8 border-arcane/20 text-arcane',
+                  )}
+                >
+                  <Icon size={10} aria-hidden />
+                  {label}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </GlassCard>
+
+      {/* Concentration Warning Dialog */}
+      {concWarning && (
+        <GlassCard className="p-4 ring-2 ring-ember/40 animate-fade-in">
+          <div className="flex items-start gap-2 mb-3">
+            <AlertTriangle size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
+            <div>
+              <p className="text-sm font-semibold text-forge-0">
+                Drop Concentration?
+              </p>
+              <p className="text-xs text-forge-2 mt-1">
+                You are concentrating on <strong className="text-ember">{combatState.concentrating}</strong>.
+                Casting <strong className="text-eldritch">{concWarning.newSpell}</strong> will end that concentration.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="primary" size="sm" onClick={handleConfirmConcentrationSwitch} className="flex-1">
+              Switch Concentration
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleCancelConcentrationSwitch} className="flex-1">
+              Cancel
+            </Button>
+          </div>
+        </GlassCard>
+      )}
+
+      {/* 0b. HP Tracker */}
       <HPTracker
         character={character}
         onCharacterUpdate={onCharacterUpdate}
@@ -1281,6 +1533,14 @@ export function CombatHelper({ character, onCharacterUpdate }: CombatHelperProps
         onDropConcentration={handleDropConcentration}
       />
 
+      {/* 4b. Damage Tracker (shown during and after combat) */}
+      <DamageTracker
+        characterId={character.id}
+        currentLog={currentDamageLog}
+        round={combatState.round}
+        onLogDamage={handleLogDamage}
+      />
+
       {/* 5. AI Combat Advisor */}
       <AICombatAdvisor
         character={character}
@@ -1304,6 +1564,15 @@ export function CombatHelper({ character, onCharacterUpdate }: CombatHelperProps
 
       {/* 8. Persona Card (conditional) */}
       {character.persona && <PersonaCard persona={character.persona} />}
+
+      {/* 9. Action Menu (slide-up panel) */}
+      <ActionMenu
+        isOpen={actionMenuOpen}
+        onClose={() => setActionMenuOpen(false)}
+        character={character}
+        combatState={combatState}
+        onUseAction={handleUseAction}
+      />
     </section>
   )
 }

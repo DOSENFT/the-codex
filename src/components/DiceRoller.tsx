@@ -17,6 +17,7 @@ interface DiceRollerProps {
   isOpen: boolean
   onClose: () => void
   character?: Character
+  prefill?: { notation: string; label: string } | null
 }
 
 /* ─── Constants ─── */
@@ -582,7 +583,7 @@ function CharacterPresets({
  * provides an `onClose` callback. This component manages all roller state
  * internally.
  */
-export function DiceRoller({ isOpen, onClose, character }: DiceRollerProps) {
+export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerProps) {
   /* ── Roller State ── */
   const [dieType, setDieType] = useState<DieType>(20)
   const [quantity, setQuantity] = useState(1)
@@ -592,11 +593,44 @@ export function DiceRoller({ isOpen, onClose, character }: DiceRollerProps) {
   const [history, setHistory] = useState<RollResult[]>([])
   const [isRolling, setIsRolling] = useState(false)
   const [animatingTotal, setAnimatingTotal] = useState<number | null>(null)
+  const [prefillLabel, setPrefillLabel] = useState<string | null>(null)
 
   const rollIdRef = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const animationFrameRef = useRef<number | null>(null)
+  const rollButtonRef = useRef<HTMLButtonElement>(null)
+
+  /* ── Prefill Handler ── */
+  useEffect(() => {
+    if (!isOpen || !prefill) {
+      if (!isOpen) setPrefillLabel(null)
+      return
+    }
+
+    // Parse notation like "d20+6", "2d8+4", "1d10-1", "d20", "2d6"
+    const match = prefill.notation.match(/^(\d*)d(\d+)([+-]\d+)?$/)
+    if (!match) return
+
+    const qty = match[1] ? parseInt(match[1], 10) : 1
+    const sides = parseInt(match[2], 10)
+    const mod = match[3] ? parseInt(match[3], 10) : 0
+
+    // Validate die type
+    const validDice: DieType[] = [4, 6, 8, 10, 12, 20, 100]
+    if (validDice.includes(sides as DieType)) {
+      setDieType(sides as DieType)
+      setQuantity(qty)
+      setModifier(mod)
+      setAdvantage('normal')
+      setPrefillLabel(prefill.label)
+
+      // Auto-focus the roll button on next frame
+      requestAnimationFrame(() => {
+        rollButtonRef.current?.focus()
+      })
+    }
+  }, [isOpen, prefill])
 
   /* ── Focus Trap ── */
   useEffect(() => {
@@ -894,12 +928,22 @@ export function DiceRoller({ isOpen, onClose, character }: DiceRollerProps) {
             </div>
           )}
 
+          {/* ── Prefill Label ── */}
+          {prefillLabel && (
+            <div className="text-center animate-fade-in">
+              <Badge variant="arcane" className="text-sm px-3 py-1">
+                {prefillLabel}
+              </Badge>
+            </div>
+          )}
+
           {/* ── ROLL Button ── */}
           <Button
+            ref={rollButtonRef}
             variant="primary"
             size="lg"
             className="w-full text-base font-bold tracking-wide"
-            onClick={() => executeRoll()}
+            onClick={() => { executeRoll(); setPrefillLabel(null) }}
             disabled={isRolling}
             loading={isRolling}
             aria-label={rollButtonLabel}

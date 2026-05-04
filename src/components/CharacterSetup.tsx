@@ -21,6 +21,7 @@ import {
   Wifi,
   Upload,
   Plus,
+  UserCircle,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
@@ -93,6 +94,7 @@ const STEPS: StepConfig[] = [
   { title: 'Class',             subtitle: 'Choose your calling',       icon: Shield },
   { title: 'Subclass',          subtitle: 'Specialize your path',      icon: Sparkles },
   { title: 'Race',              subtitle: 'Choose your lineage',       icon: Globe },
+  { title: 'Identity',          subtitle: 'Gender & pronouns',         icon: UserCircle },
   { title: 'Level',             subtitle: 'How seasoned are you?',     icon: TrendingUp },
   { title: 'Spell Save DC',     subtitle: 'Your spell difficulty',     icon: Target },
   { title: 'Spell Attack',      subtitle: 'Your spell attack bonus',   icon: Zap },
@@ -150,6 +152,8 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
   const [charClass, setCharClass] = useState<string>(CLASSES[0])
   const [subclass, setSubclass] = useState<string>(SUBCLASSES[CLASSES[0]][0])
   const [race, setRace] = useState<string>(RACES[0])
+  const [gender, setGender] = useState('')
+  const [pronouns, setPronouns] = useState('')
   const [level, setLevel] = useState(5)
   const [spellSaveDC, setSpellSaveDC] = useState(13)
   const [spellAttackBonus, setSpellAttackBonus] = useState(5)
@@ -195,7 +199,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
 
   // Auto-fetch Ollama models when on the AI step with Ollama selected
   useEffect(() => {
-    if (aiProvider === 'ollama' && ollamaUrl && step === 9) {
+    if (aiProvider === 'ollama' && ollamaUrl && step === 10) {
       refreshOllamaModels(ollamaUrl)
     }
   }, [aiProvider, ollamaUrl, step, refreshOllamaModels])
@@ -263,12 +267,13 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
       case 1: return !!charClass
       case 2: return isCustom ? customSubclassName.trim().length >= 2 : !!subclass
       case 3: return !!race
-      case 4: return level >= 1 && level <= 20
-      case 5: return spellSaveDC >= 1
-      case 6: return true // spell attack bonus can be 0
-      case 7: return armorClass >= 1
-      case 8: return hitPointsMax >= 1
-      case 9: return hasApiKey
+      case 4: return true // gender/pronouns are optional
+      case 5: return level >= 1 && level <= 20
+      case 6: return spellSaveDC >= 1
+      case 7: return true // spell attack bonus can be 0
+      case 8: return armorClass >= 1
+      case 9: return hitPointsMax >= 1
+      case 10: return hasApiKey
       default: return false
     }
   }
@@ -376,6 +381,10 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         skillExpertise: [],
         savingThrowProficiencies: [],
         weapons: [],
+        gender: gender.trim(),
+        pronouns: pronouns.trim(),
+        equipment: [],
+        supplies: [],
         createdAt: now,
         updatedAt: now,
       }
@@ -475,6 +484,74 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         )
       case 4:
         return (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-forge-1">Gender</label>
+              <div className="flex flex-wrap gap-2">
+                {['Male', 'Female', 'Non-binary'].map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={cn(
+                      'min-h-[44px] px-4 rounded-xl text-sm font-medium',
+                      'transition-all duration-200 ease-forge active:scale-[0.97]',
+                      'border',
+                      gender === g
+                        ? 'bg-arcane/15 text-arcane border-arcane/30'
+                        : 'bg-white/[0.04] text-forge-1 border-white/10 hover:bg-white/[0.08]',
+                    )}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+              <Input
+                icon={UserCircle}
+                label=""
+                placeholder="Or type your own..."
+                value={!['Male', 'Female', 'Non-binary'].includes(gender) ? gender : ''}
+                onChange={(e) => setGender(e.target.value)}
+                maxLength={40}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-forge-1">Pronouns</label>
+              <div className="flex flex-wrap gap-2">
+                {['he/him', 'she/her', 'they/them'].map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPronouns(p)}
+                    className={cn(
+                      'min-h-[44px] px-4 rounded-xl text-sm font-medium',
+                      'transition-all duration-200 ease-forge active:scale-[0.97]',
+                      'border',
+                      pronouns === p
+                        ? 'bg-arcane/15 text-arcane border-arcane/30'
+                        : 'bg-white/[0.04] text-forge-1 border-white/10 hover:bg-white/[0.08]',
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+              <Input
+                icon={UserCircle}
+                label=""
+                placeholder="Or type your own..."
+                value={!['he/him', 'she/her', 'they/them'].includes(pronouns) ? pronouns : ''}
+                onChange={(e) => setPronouns(e.target.value)}
+                maxLength={40}
+              />
+            </div>
+            <p className="text-xs text-forge-2">
+              Optional. Helps the AI use correct pronouns when referring to your character.
+            </p>
+          </div>
+        )
+      case 5:
+        return (
           <div className="flex flex-col gap-3">
             <label className="text-sm font-medium text-forge-1 select-none">
               Level
@@ -511,7 +588,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             />
           </div>
         )
-      case 5:
+      case 6:
         return (
           <Input
             icon={Target}
@@ -524,7 +601,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             placeholder="e.g. 13"
           />
         )
-      case 6:
+      case 7:
         return (
           <Input
             icon={Zap}
@@ -537,7 +614,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             placeholder="e.g. +5"
           />
         )
-      case 7:
+      case 8:
         return (
           <Input
             icon={ShieldCheck}
@@ -550,7 +627,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             placeholder="e.g. 16"
           />
         )
-      case 8:
+      case 9:
         return (
           <Input
             icon={Heart}
@@ -563,7 +640,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             placeholder="e.g. 45"
           />
         )
-      case 9:
+      case 10:
         return (
           <div className="flex flex-col gap-4">
             {/* Provider toggle */}
@@ -954,7 +1031,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
               <span className="text-forge-2 text-xs">{race}</span>
             </>
           )}
-          {step >= 4 && (
+          {step >= 5 && (
             <>
               <span aria-hidden>&middot;</span>
               <span className="text-forge-2 text-xs">Lvl {level}</span>
