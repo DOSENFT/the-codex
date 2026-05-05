@@ -741,18 +741,23 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
           </div>
         )}
 
-        {/* All lines */}
-        {filteredLines.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {filteredLines.map(line => renderLineCard(line))}
-          </div>
-        ) : (
-          <GlassCard className="p-6">
-            <p className="text-sm text-forge-2 text-center italic">
-              No {activeContext} lines yet{scenarioFilter ? ` matching "${scenarioFilter}"` : ''}. Add one below or use AI Suggest.
-            </p>
-          </GlassCard>
-        )}
+        {/* All lines (exclude favorites already shown in Quick Access) */}
+        {(() => {
+          const linesToShow = favoriteLines.length > 0
+            ? filteredLines.filter(line => !line.favorite)
+            : filteredLines
+          return linesToShow.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {linesToShow.map(line => renderLineCard(line))}
+            </div>
+          ) : favoriteLines.length === 0 ? (
+            <GlassCard className="p-6">
+              <p className="text-sm text-forge-2 text-center italic">
+                No {activeContext} lines yet{scenarioFilter ? ` matching "${scenarioFilter}"` : ''}. Add one below or use AI Suggest.
+              </p>
+            </GlassCard>
+          ) : null
+        })()}
 
         {/* Add new line */}
         <div className="flex gap-2">

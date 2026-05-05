@@ -229,6 +229,7 @@ function ComponentPills({ components }: { components: string }) {
 
 interface SpellCardProps {
   spell: Spell
+  character: Character
   canPrepare: boolean
   onTogglePrepare: () => void
   onExplain: () => void
@@ -240,6 +241,7 @@ interface SpellCardProps {
 
 function SpellCard({
   spell,
+  character,
   canPrepare,
   onTogglePrepare,
   onExplain,
@@ -263,8 +265,6 @@ function SpellCard({
   // Determine if this card should appear dimmed (unprepared non-cantrip when class can prepare)
   const isUnprepared = canPrepare && !isCantrip && !spell.prepared
 
-  // Combat stats row should only render when there is combat-relevant data
-  const hasCombatStats = spell.damageType || spell.saveType || spell.areaOfEffect
 
   return (
     <GlassCard
@@ -397,28 +397,26 @@ function SpellCard({
           <span className="whitespace-nowrap">{spell.duration}</span>
         </div>
 
-        {/* Row 2.5: Combat stats row — only if spell has combat-relevant data */}
-        {hasCombatStats && (
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
-            {spell.damageDice && spell.damageType && (
-              <span className="whitespace-nowrap text-ember font-medium">
-                <Swords size={12} className="inline -mt-0.5 mr-1" aria-hidden />
-                {spell.damageDice} {spell.damageType}
-              </span>
-            )}
-            {spell.damageDice && spell.damageType && (spell.saveType || spell.areaOfEffect) && (
-              <span className="text-white/20 select-none" aria-hidden>|</span>
-            )}
+        {/* Row 2.5: Attack/Damage dice — always visible for combat-ready spells */}
+        {(spell.damageDice || spell.saveType) && (
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
             {spell.saveType && (
-              <span className="whitespace-nowrap text-arcane font-medium">
-                {spell.saveType} Save
+              <span className="inline-flex items-center gap-1 text-xs font-mono text-arcane">
+                DC {character.spellSaveDC} {spell.saveType}
               </span>
             )}
-            {spell.saveType && spell.areaOfEffect && (
-              <span className="text-white/20 select-none" aria-hidden>|</span>
+            {!spell.saveType && spell.level > 0 && (
+              <span className="inline-flex items-center gap-1 text-xs font-mono text-arcane">
+                +{character.spellAttackBonus} to hit
+              </span>
+            )}
+            {spell.damageDice && (
+              <span className="inline-flex items-center gap-1 text-xs font-mono text-ember font-medium">
+                {spell.damageDice}{spell.damageType ? ` ${spell.damageType}` : ''}
+              </span>
             )}
             {spell.areaOfEffect && (
-              <span className="whitespace-nowrap text-forge-2">
+              <span className="text-xs text-forge-2">
                 {spell.areaOfEffect}
               </span>
             )}
@@ -734,12 +732,17 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
       )
     }
 
-    // Advanced filters: Damage type
+    // Advanced filters: Damage type (check explicit field AND description text)
     if (advancedFilters.damageTypes.length > 0) {
       spells = spells.filter(s =>
-        s.damageType && advancedFilters.damageTypes.some(dt =>
-          s.damageType!.toLowerCase() === dt.toLowerCase(),
-        ),
+        advancedFilters.damageTypes.some(dt => {
+          const dtLower = dt.toLowerCase()
+          // Check explicit damageType field
+          if (s.damageType && s.damageType.toLowerCase() === dtLower) return true
+          // Fallback: search description for "{type} damage" pattern
+          if (s.description?.toLowerCase().includes(`${dtLower} damage`)) return true
+          return false
+        }),
       )
     }
 
@@ -1153,6 +1156,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
             <div key={spell.name} role="listitem">
               <SpellCard
                 spell={spell}
+                character={character}
                 canPrepare={character.canPrepareSpells}
                 onTogglePrepare={() => handleTogglePrepare(spell.name)}
                 onExplain={() => handleAIQuery(spell, 'explain')}

@@ -888,24 +888,52 @@ function SmartActionsPanel({
                               highlightNonConc && 'border-arcane/20',
                             )}
                           >
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-semibold text-forge-0 group-hover:text-eldritch transition-colors">
-                                {spell.name}
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-xs font-semibold text-forge-0 group-hover:text-eldritch transition-colors truncate">
+                                  {spell.name}
+                                </span>
+                                <Badge
+                                  variant={
+                                    spell.level === 0 ? 'neutral' : 'eldritch'
+                                  }
+                                >
+                                  {spell.level === 0
+                                    ? 'Cantrip'
+                                    : `Lvl ${spell.level}`}
+                                </Badge>
+                                {spell.concentration && (
+                                  <span
+                                    className="w-2 h-2 rounded-full bg-ember shrink-0"
+                                    title="Concentration"
+                                  />
+                                )}
+                              </div>
+                              <span className="text-[10px] font-mono text-forge-2 shrink-0 whitespace-nowrap">
+                                {spell.range}
                               </span>
-                              <Badge
-                                variant={
-                                  spell.level === 0 ? 'neutral' : 'eldritch'
-                                }
-                              >
-                                {spell.level === 0
-                                  ? 'Cantrip'
-                                  : `Lvl ${spell.level}`}
-                              </Badge>
-                              {spell.concentration && (
-                                <span
-                                  className="w-2 h-2 rounded-full bg-ember shrink-0"
-                                  title="Concentration"
-                                />
+                            </div>
+                            {/* Mechanics row */}
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              {spell.saveType ? (
+                                <span className="text-[10px] font-mono text-arcane">
+                                  DC {character.spellSaveDC} {spell.saveType}
+                                </span>
+                              ) : spell.level > 0 ? (
+                                <span className="text-[10px] font-mono text-arcane">
+                                  +{character.spellAttackBonus} hit
+                                </span>
+                              ) : null}
+                              {spell.damageDice && (
+                                <span className="text-[10px] font-mono text-ember font-medium">
+                                  {spell.damageDice}{spell.damageType ? ` ${spell.damageType}` : ''}
+                                </span>
+                              )}
+                              {spell.castingTime.toLowerCase().includes('bonus') && (
+                                <Badge variant="ember" className="text-[9px] px-1.5 py-0">BA</Badge>
+                              )}
+                              {spell.castingTime.toLowerCase().includes('reaction') && (
+                                <Badge variant="ember" className="text-[9px] px-1.5 py-0">Rx</Badge>
                               )}
                             </div>
                           </button>
