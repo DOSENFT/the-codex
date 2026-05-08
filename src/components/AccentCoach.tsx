@@ -27,6 +27,7 @@ import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { ParchmentCard } from './ui/ParchmentCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -277,24 +278,15 @@ export function AccentCoach({ character }: AccentCoachProps) {
     return (
       <div className="flex flex-col gap-5 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-arcane/10 flex items-center justify-center">
-            <Mic size={20} className="text-arcane" aria-hidden />
-          </div>
-          <div>
-            <h3 className="font-display text-base font-semibold text-forge-0">
-              Accent Library
-            </h3>
-            <p className="text-xs text-forge-2">
-              Choose an accent to practice for your character
-            </p>
-          </div>
-        </div>
+        <OrnateHeader>Accent Library</OrnateHeader>
+        <p className="text-xs text-forge-2 text-center -mt-2">
+          Choose an accent to practice for your character
+        </p>
 
         {/* Accent Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {ACCENT_GUIDES.map((accent) => (
-            <GlassCard key={accent.id} hover>
+            <GlassCard key={accent.id} hover className="combat-card">
               <button
                 type="button"
                 onClick={() => selectAccent(accent.id)}
@@ -338,30 +330,21 @@ export function AccentCoach({ character }: AccentCoachProps) {
             'inline-flex items-center gap-2 min-h-[44px] px-3 self-start',
             'text-sm font-medium text-forge-1 rounded-xl',
             'transition-all duration-200 ease-forge',
-            'hover:bg-white/[0.06] hover:text-forge-0',
+            'hover:bg-gold/[0.06] hover:text-forge-0',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
           <ArrowLeft size={16} aria-hidden />
           Back to Library
         </button>
 
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-arcane/10 flex items-center justify-center">
-            <Mic size={20} className="text-arcane" aria-hidden />
-          </div>
-          <div>
-            <h3 className="font-display text-base font-semibold text-forge-0">
-              {selectedAccent.name}
-            </h3>
-            <p className="text-xs text-forge-2">{selectedAccent.description}</p>
-          </div>
-        </div>
+        <OrnateHeader>{selectedAccent.name}</OrnateHeader>
+        <p className="text-xs text-forge-2 text-center -mt-2">{selectedAccent.description}</p>
       </div>
 
       {/* ------ Rules Section (collapsible) ------ */}
-      <GlassCard>
+      <GlassCard className="ornate-border">
         <button
           type="button"
           onClick={() => setRulesOpen((v) => !v)}
@@ -388,7 +371,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
             {selectedAccent.rules.map((r, i) => (
               <div
                 key={i}
-                className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3 py-2 border-b border-white/5 last:border-b-0"
+                className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3 py-2 border-b border-bronze/15 last:border-b-0"
               >
                 <span className="text-sm text-forge-0 font-medium shrink-0">
                   {r.rule}
@@ -403,8 +386,8 @@ export function AccentCoach({ character }: AccentCoachProps) {
       {/* ------ Phrases Section ------ */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
-          <Music size={16} className="text-ember" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0">
+          <Music size={16} className="text-gold" aria-hidden />
+          <span className="font-display text-sm font-semibold text-forge-0 tracking-wide">
             Practice Phrases
           </span>
         </div>
@@ -445,10 +428,10 @@ export function AccentCoach({ character }: AccentCoachProps) {
       </div>
 
       {/* ------ Recording Section ------ */}
-      <GlassCard>
+      <GlassCard className="border-gold/25">
         <div className="flex items-center gap-2.5 mb-3">
-          <Mic size={16} className="text-arcane" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0">
+          <Mic size={16} className="text-gold" aria-hidden />
+          <span className="font-display text-sm font-semibold text-forge-0 tracking-wide">
             Record Yourself
           </span>
         </div>
@@ -523,7 +506,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
 
             {/* Self-rating */}
             {audioUrl && !recording && (
-              <div className="flex flex-col gap-2 pt-2 border-t border-white/5">
+              <div className="flex flex-col gap-2 pt-2 border-t border-bronze/15">
                 <span className="text-xs text-forge-2 font-medium">
                   How did it sound?
                 </span>
@@ -537,7 +520,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
                         'min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg',
                         'transition-all duration-200 ease-forge',
                         'active:scale-[0.95]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         selfRating !== null && n <= selfRating
                           ? 'text-ember'
                           : 'text-forge-2 hover:text-forge-1',
@@ -552,7 +535,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
                   ))}
                 </div>
                 {selfRating !== null && (
-                  <div className="flex items-start gap-2 mt-1 p-3 rounded-lg bg-white/[0.03] border border-white/5 animate-fade-in">
+                  <div className="flex items-start gap-2 mt-1 p-3 rounded-lg bg-gold/[0.03] border border-bronze/15 animate-fade-in">
                     <Lightbulb
                       size={14}
                       className="text-ember shrink-0 mt-0.5"
@@ -567,7 +550,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
             )}
           </div>
         ) : (
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/5">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-gold/[0.03] border border-bronze/15">
             <AlertTriangle
               size={16}
               className="text-ember shrink-0 mt-0.5"
@@ -582,7 +565,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
       </GlassCard>
 
       {/* ------ AI Custom Phrases (collapsible) ------ */}
-      <GlassCard>
+      <GlassCard className="ornate-border">
         <button
           type="button"
           onClick={() => setAiOpen((v) => !v)}
@@ -676,11 +659,11 @@ export function AccentCoach({ character }: AccentCoachProps) {
                     className={cn(
                       'w-full text-left p-3 rounded-lg min-h-[44px]',
                       'text-sm text-forge-1 leading-relaxed',
-                      'bg-white/[0.02] border border-white/5',
+                      'bg-gold/[0.02] border border-bronze/15',
                       'transition-all duration-200 ease-forge',
-                      'hover:bg-white/[0.06] hover:border-white/10',
+                      'hover:bg-gold/[0.06] hover:border-bronze/25',
                       'active:scale-[0.99]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                       currentPhrase === (selectedAccent?.phrases.length ?? 0) + i &&
                         'border-arcane/30 bg-arcane/5',
                     )}
@@ -709,7 +692,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
       </GlassCard>
 
       {/* ------ Tips Section (collapsible) ------ */}
-      <GlassCard>
+      <GlassCard className="ornate-border">
         <button
           type="button"
           onClick={() => setTipsOpen((v) => !v)}
@@ -751,7 +734,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
             </div>
 
             {/* Rhythm */}
-            <div className="pt-3 border-t border-white/5">
+            <div className="pt-3 border-t border-bronze/15">
               <div className="flex items-center gap-2 mb-2">
                 <Music size={13} className="text-eldritch" aria-hidden />
                 <span className="text-xs font-semibold text-forge-0 uppercase tracking-wider">

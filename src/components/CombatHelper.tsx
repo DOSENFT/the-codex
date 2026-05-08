@@ -53,6 +53,7 @@ import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { Input } from './ui/Input'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { HPTracker } from './HPTracker'
 import { ActionMenu, type ActionChoice } from './ActionMenu'
 import { DamageTracker } from './DamageTracker'
@@ -152,16 +153,14 @@ function ActionEconomyBar({
   ]
 
   return (
-    <GlassCard className="p-4">
+    <GlassCard className="p-4 ornate-border">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
-          Action Economy
-        </h3>
+        <OrnateHeader className="flex-1">Action Economy</OrnateHeader>
         <button
           onClick={onReset}
           className={cn(
             'min-h-[44px] min-w-[44px] flex items-center justify-center',
-            'rounded-lg text-forge-2 hover:text-arcane hover:bg-white/[0.06]',
+            'rounded-lg text-forge-2 hover:text-arcane hover:bg-gold/[0.06]',
             'transition-all duration-200 active:scale-[0.95]',
           )}
           aria-label="Reset action economy"
@@ -183,9 +182,9 @@ function ActionEconomyBar({
                 'flex items-center gap-2',
                 'border transition-all duration-200 ease-forge',
                 'active:scale-[0.97] select-none',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 used
-                  ? 'bg-white/[0.03] border-white/5 text-forge-2 opacity-40'
+                  ? 'bg-gold/[0.03] border-bronze/15 text-forge-2 opacity-40'
                   : 'bg-arcane/10 border-arcane/25 text-arcane',
               )}
             >
@@ -219,10 +218,8 @@ function SpellSlotsDisplay({
   }
 
   return (
-    <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-3">
-        Spell Slots
-      </h3>
+    <GlassCard className="p-4 ornate-border">
+      <OrnateHeader className="mb-3">Spell Slots</OrnateHeader>
 
       <div className="flex flex-col gap-3">
         {levels.map(({ level, max, current }) => (
@@ -252,7 +249,7 @@ function SpellSlotsDisplay({
                       'p-0 flex items-center justify-center',
                       'rounded-full border-2 transition-all duration-200 ease-forge',
                       'active:scale-[0.9]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                       available
                         ? [
                             'bg-eldritch/30 border-eldritch/60',
@@ -260,8 +257,8 @@ function SpellSlotsDisplay({
                             'hover:bg-eldritch/40 hover:border-eldritch/80',
                           ]
                         : [
-                            'bg-white/[0.03] border-white/10',
-                            'hover:bg-white/[0.06] hover:border-white/20',
+                            'bg-gold/[0.03] border-bronze/25',
+                            'hover:bg-gold/[0.06] hover:border-gold/30',
                           ],
                     )}
                   >
@@ -316,10 +313,8 @@ function PaladinResourceTracker({
   ]
 
   return (
-    <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-4">
-        Paladin Resources
-      </h3>
+    <GlassCard className="p-4 ornate-border">
+      <OrnateHeader className="mb-4">Paladin Resources</OrnateHeader>
 
       {/* Lay on Hands Pool */}
       <div className="mb-5">
@@ -353,7 +348,7 @@ function PaladinResourceTracker({
                 'bg-verdant/10 border border-verdant/25 text-verdant',
                 'hover:bg-verdant/20 hover:border-verdant/40',
                 'transition-all duration-200 active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 'disabled:opacity-30 disabled:pointer-events-none',
               )}
             >
@@ -380,7 +375,7 @@ function PaladinResourceTracker({
               }}
               className={cn(
                 'w-full min-h-[44px] px-3 py-2 rounded-lg text-sm',
-                'bg-white/[0.04] border border-white/10 text-forge-1',
+                'bg-gold/[0.04] border border-bronze/25 text-forge-1',
                 'placeholder:text-forge-2/50',
                 'focus:outline-none focus:ring-2 focus:ring-verdant/40 focus:border-verdant/40',
                 'transition-all duration-200',
@@ -395,7 +390,7 @@ function PaladinResourceTracker({
               'bg-verdant/10 border border-verdant/25 text-verdant',
               'hover:bg-verdant/20 hover:border-verdant/40',
               'transition-all duration-200 active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               'disabled:opacity-30 disabled:pointer-events-none',
             )}
           >
@@ -404,6 +399,9 @@ function PaladinResourceTracker({
           </button>
         </div>
       </div>
+
+      {/* Divider between Lay on Hands and Channel Divinity */}
+      <div className="ornate-divider my-1" aria-hidden />
 
       {/* Channel Divinity */}
       <div className="mb-4">
@@ -437,7 +435,7 @@ function PaladinResourceTracker({
                     'p-0 flex items-center justify-center',
                     'rounded-full border-2 transition-all duration-200 ease-forge',
                     'active:scale-[0.9]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                     available
                       ? [
                           'bg-ember/30 border-ember/60',
@@ -445,8 +443,8 @@ function PaladinResourceTracker({
                           'hover:bg-ember/40 hover:border-ember/80',
                         ]
                       : [
-                          'bg-white/[0.03] border-white/10',
-                          'hover:bg-white/[0.06] hover:border-white/20',
+                          'bg-gold/[0.03] border-bronze/25',
+                          'hover:bg-gold/[0.06] hover:border-gold/30',
                         ],
                   )}
                 >
@@ -500,11 +498,9 @@ function ConcentrationTracker({
       )}
     >
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           <Focus size={16} className={cn(concentrationSpell ? 'text-ember' : 'text-forge-2')} aria-hidden />
-          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
-            Concentration
-          </h3>
+          <OrnateHeader className="flex-1">Concentration</OrnateHeader>
         </div>
 
         {concentrationSpell && (
@@ -535,10 +531,10 @@ function ConcentrationTracker({
               onClick={() => onSetConcentration(spell.name)}
               className={cn(
                 'min-h-[44px] px-3 py-1.5 rounded-lg',
-                'bg-white/[0.04] border border-white/10 text-forge-1 text-xs',
+                'bg-gold/[0.04] border border-bronze/25 text-forge-1 text-xs',
                 'hover:bg-ember/10 hover:border-ember/30 hover:text-ember',
                 'transition-all duration-200 active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               )}
             >
               {spell.name}
@@ -596,20 +592,18 @@ function AICombatAdvisor({
   }, [response])
 
   return (
-    <GlassCard className="p-4">
+    <GlassCard className="p-4 ornate-border">
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           <Sparkles size={16} className="text-arcane" aria-hidden />
-          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
-            Combat Advisor
-          </h3>
+          <OrnateHeader className="flex-1">Combat Advisor</OrnateHeader>
         </div>
         {response && (
           <button
             onClick={onClear}
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center',
-              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
+              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
               'transition-all duration-200 active:scale-[0.95]',
             )}
             aria-label="Clear AI response"
@@ -654,7 +648,7 @@ function AICombatAdvisor({
 
       {/* Loading state */}
       {loading && !response && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02]">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-gold/[0.02]">
           <Loader2 size={18} className="animate-spin text-arcane" aria-hidden />
           <p className="text-sm text-forge-2">Analyzing the battlefield...</p>
         </div>
@@ -753,10 +747,8 @@ function SmartActionsPanel({
   )
 
   return (
-    <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-3">
-        Actions
-      </h3>
+    <GlassCard className="p-4 ornate-border">
+      <OrnateHeader className="mb-3">Actions</OrnateHeader>
 
       {/* Section 1: Class Actions (Paladin only) */}
       {isPaladin && (
@@ -791,11 +783,10 @@ function SmartActionsPanel({
                     onClick={() => onSelectAction(action.name, action.description)}
                     disabled={loading || empty}
                     className={cn(
-                      'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
-                      'bg-white/[0.03] border border-white/8',
+                      'combat-card min-h-[44px] px-3 py-2.5 text-left',
                       'hover:bg-ember/8 hover:border-ember/20',
-                      'transition-all duration-200 active:scale-[0.97]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      'active:scale-[0.97]',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                       'disabled:opacity-40 disabled:pointer-events-none',
                       'group',
                     )}
@@ -828,6 +819,9 @@ function SmartActionsPanel({
           )}
         </div>
       )}
+
+      {/* Divider */}
+      {isPaladin && hasAnySpells && <div className="ornate-divider my-1" aria-hidden />}
 
       {/* Section 2: Prepared Spell Quick-Cast */}
       {hasAnySpells && (
@@ -879,10 +873,10 @@ function SmartActionsPanel({
                             disabled={loading}
                             className={cn(
                               'min-h-[44px] px-3 py-2 rounded-lg text-left',
-                              'bg-white/[0.03] border border-white/8',
+                              'bg-gold/[0.03] border border-bronze/20',
                               'hover:bg-eldritch/8 hover:border-eldritch/20',
                               'transition-all duration-200 active:scale-[0.97]',
-                              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                               'disabled:opacity-40 disabled:pointer-events-none',
                               'group',
                               highlightNonConc && 'border-arcane/20',
@@ -948,6 +942,9 @@ function SmartActionsPanel({
         </div>
       )}
 
+      {/* Divider */}
+      <div className="ornate-divider my-1" aria-hidden />
+
       {/* Section 3: Basic Actions (collapsed by default) */}
       <div>
         <button
@@ -977,11 +974,10 @@ function SmartActionsPanel({
                 onClick={() => onSelectAction(action.name, action.description)}
                 disabled={loading}
                 className={cn(
-                  'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
-                  'bg-white/[0.03] border border-white/8',
+                  'combat-card min-h-[44px] px-3 py-2.5 text-left',
                   'hover:bg-arcane/8 hover:border-arcane/20',
-                  'transition-all duration-200 active:scale-[0.97]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'active:scale-[0.97]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   'disabled:opacity-40 disabled:pointer-events-none',
                   'group',
                 )}
@@ -1073,7 +1069,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
   }, [persona.catchphrases])
 
   return (
-    <GlassCard className="p-4">
+    <GlassCard className="p-4 ornate-border">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -1081,11 +1077,9 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
           'transition-all duration-200 active:scale-[0.97]',
         )}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           <User size={16} className="text-eldritch" aria-hidden />
-          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
-            Character Persona
-          </h3>
+          <OrnateHeader className="flex-1">Character Persona</OrnateHeader>
         </div>
         {isOpen ? (
           <ChevronUp size={14} className="text-forge-2" aria-hidden />
@@ -1115,7 +1109,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
                   <span
                     key={i}
                     className={cn(
-                      'bg-white/5 text-forge-1 rounded-full px-3 py-1.5',
+                      'bg-void-2/60 text-forge-1 rounded-full px-3 py-1.5',
                       'text-xs select-none cursor-default',
                       'transition-all duration-200 active:scale-[0.95]',
                     )}
@@ -1422,7 +1416,7 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
       )}
 
       {/* 0. Combat Toggle + Round Counter */}
-      <GlassCard className="p-4">
+      <GlassCard className="p-4 ornate-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
@@ -1430,6 +1424,7 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
               size="sm"
               onClick={combatState.inCombat ? handleEndCombat : handleStartCombat}
               className={cn(
+                !combatState.inCombat && 'from-gold to-bronze shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)]',
                 combatState.inCombat && 'border-red-400/30 text-red-400 hover:bg-red-400/10 hover:border-red-400/50',
               )}
             >
@@ -1486,10 +1481,10 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
                 <span
                   key={key}
                   className={cn(
-                    'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium',
-                    'border select-none transition-colors duration-200',
+                    'stat-frame inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium',
+                    'select-none transition-colors duration-200',
                     used
-                      ? 'bg-white/[0.02] border-white/5 text-forge-2/50 line-through'
+                      ? 'bg-gold/[0.02] border-bronze/15 text-forge-2/50 line-through'
                       : 'bg-arcane/8 border-arcane/20 text-arcane',
                   )}
                 >

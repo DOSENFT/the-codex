@@ -22,6 +22,8 @@ import {
 } from '../lib/identity'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
+import { ParchmentCard } from './ui/ParchmentCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { Badge } from './ui/Badge'
 import { Input } from './ui/Input'
 
@@ -73,11 +75,11 @@ function TagInput({
               className={cn(
                 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs',
                 'border transition-colors',
-                variant === 'arcane' && 'bg-arcane/10 border-arcane/20 text-arcane',
-                variant === 'eldritch' && 'bg-eldritch/10 border-eldritch/20 text-eldritch',
-                variant === 'ember' && 'bg-ember/10 border-ember/20 text-ember',
+                variant === 'arcane' && 'bg-gold/[0.08] border-gold/25 text-gold',
+                variant === 'eldritch' && 'bg-gold/[0.06] border-bronze/25 text-bronze',
+                variant === 'ember' && 'bg-gold/[0.08] border-gold/20 text-gold',
                 variant === 'verdant' && 'bg-verdant/10 border-verdant/20 text-verdant',
-                variant === 'neutral' && 'bg-white/[0.06] border-white/10 text-forge-1',
+                variant === 'neutral' && 'bg-gold/[0.06] border-bronze/25 text-forge-1',
               )}
             >
               <span className="leading-snug">{item}</span>
@@ -102,11 +104,11 @@ function TagInput({
           className={cn(
             'min-h-[44px] flex-1 rounded-xl',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-            'border border-white/10',
+            'border border-bronze/25',
             'font-body text-sm px-4',
             'transition-all duration-200 ease-forge',
             'focus:border-arcane/60 focus:bg-void-2/80',
-            'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+            'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
             'focus:outline-none',
           )}
           onKeyDown={e => {
@@ -158,11 +160,11 @@ function TextArea({
         className={cn(
           'w-full rounded-xl resize-none',
           'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-          'border border-white/10',
+          'border border-bronze/25',
           'font-body text-sm px-4 py-3',
           'transition-all duration-200 ease-forge',
           'focus:border-arcane/60 focus:bg-void-2/80',
-          'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+          'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
           'focus:outline-none',
         )}
       />
@@ -182,7 +184,7 @@ function IdentityEditForm({
   onUpdate: (updates: Partial<CharacterIdentity>) => void
 }) {
   return (
-    <div className="flex flex-col gap-4 pt-4 border-t border-white/[0.06]">
+    <div className="flex flex-col gap-4 pt-4 border-t border-gold/25">
       {/* Name */}
       <Input
         label="Name"
@@ -284,10 +286,10 @@ function IdentityCard({
   return (
     <GlassCard
       className={cn(
-        'transition-all duration-200 ease-forge',
+        'combat-card ornate-border transition-all duration-200 ease-forge',
         isActive && [
-          'border-eldritch/40',
-          'shadow-[0_0_20px_-4px_rgba(160,100,255,0.25)]',
+          'border-gold/40',
+          'shadow-[0_0_20px_-4px_rgba(197,165,90,0.25)]',
         ],
       )}
     >
@@ -298,8 +300,8 @@ function IdentityCard({
           className={cn(
             'shrink-0 w-10 h-10 rounded-lg flex items-center justify-center',
             isActive
-              ? 'bg-eldritch/20 text-eldritch'
-              : 'bg-white/[0.06] text-forge-2',
+              ? 'bg-gold/[0.15] text-gold'
+              : 'bg-gold/[0.06] text-forge-2',
           )}
         >
           <Theater size={18} aria-hidden />
@@ -348,7 +350,7 @@ function IdentityCard({
             onClick={onToggleActive}
             className={cn(
               'text-xs',
-              isActive && 'text-eldritch',
+              isActive && 'text-gold',
             )}
             aria-label={isActive ? 'Deactivate identity' : 'Set as active identity'}
           >
@@ -373,7 +375,7 @@ function IdentityCard({
           <IdentityEditForm identity={identity} onUpdate={onUpdate} />
 
           {/* Delete section */}
-          <div className="mt-6 pt-4 border-t border-white/[0.06]">
+          <div className="mt-6 pt-4 border-t border-gold/15">
             {!confirmDelete ? (
               <Button
                 variant="ghost"
@@ -472,34 +474,20 @@ export function IdentityManager({ character, onCharacterUpdate }: IdentityManage
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div
-          className={cn(
-            'w-10 h-10 rounded-lg flex items-center justify-center',
-            isMultiPersona
-              ? 'bg-eldritch/20 text-eldritch'
-              : 'bg-white/[0.06] text-forge-2',
-          )}
-        >
-          {isMultiPersona ? <Sparkles size={20} aria-hidden /> : <Users size={20} aria-hidden />}
-        </div>
-        <div>
-          <h2 className="text-forge-0 font-semibold text-lg leading-tight">
-            {isMultiPersona ? 'Multi-Persona Mode' : 'Situational Personas'}
-          </h2>
-          <p className="text-xs text-forge-2 mt-0.5">
-            {isMultiPersona
-              ? 'Manage distinct identities your character adopts'
-              : 'Define alternate presentations for different situations'}
-          </p>
-        </div>
-      </div>
+      <OrnateHeader>
+        {isMultiPersona ? 'Multi-Persona Mode' : 'Situational Personas'}
+      </OrnateHeader>
+      <p className="text-xs text-forge-2 text-center -mt-3">
+        {isMultiPersona
+          ? 'Manage distinct identities your character adopts'
+          : 'Define alternate presentations for different situations'}
+      </p>
 
       {/* Identity Cards */}
       {identities.length === 0 ? (
-        <GlassCard className="flex flex-col items-center justify-center py-10 text-center">
-          <Theater size={32} className="text-forge-2 mb-3" aria-hidden />
-          <p className="text-forge-1 text-sm font-medium">No identities defined</p>
+        <ParchmentCard className="flex flex-col items-center justify-center py-10 text-center">
+          <Theater size={32} className="text-gold mb-3" aria-hidden />
+          <p className="text-forge-0 text-sm font-display font-semibold tracking-wide">No identities defined</p>
           <p className="text-forge-2 text-xs mt-1 max-w-[280px]">
             Add an identity to track disguises, alternate forms, or situational personas.
           </p>
@@ -512,7 +500,7 @@ export function IdentityManager({ character, onCharacterUpdate }: IdentityManage
             <Plus size={16} aria-hidden />
             Add First Identity
           </Button>
-        </GlassCard>
+        </ParchmentCard>
       ) : (
         <div className="flex flex-col gap-3">
           {identities.map(identity => (

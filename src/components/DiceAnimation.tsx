@@ -58,6 +58,6 @@ function getColorClass(dieType: number): string {
     case 100:
       return 'bg-eldritch/15 text-eldritch border-eldritch/30'
     default:
-      return 'bg-white/10 text-forge-0 border-white/20'
+      return 'bg-void-2/60 text-forge-0 border-gold/30'
   }
 }

@@ -18,6 +18,7 @@ import type { Character, CampaignData, PartyMember, CampaignNPC, SessionNote } f
 import { generateId, saveCharacter } from '../lib/character'
 import { createDefaultCampaign, saveCampaign, loadCampaign } from '../lib/campaign'
 import { GlassCard } from './ui/GlassCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 
@@ -50,16 +51,16 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <div className="border border-white/8 rounded-xl overflow-hidden">
+    <div className="ornate-border border border-bronze/20 rounded-xl overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
         className={cn(
           'flex items-center gap-2.5 w-full min-h-[44px] px-4 py-3 text-left',
           'transition-all duration-200 ease-forge active:scale-[0.98]',
-          'hover:bg-white/[0.04]',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-          open && 'bg-white/[0.02]',
+          'hover:bg-gold/[0.04]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+          open && 'bg-gold/[0.02]',
         )}
       >
         <Icon size={16} className="text-arcane shrink-0" />
@@ -68,9 +69,9 @@ function Section({
           <Badge variant="arcane">{count}</Badge>
         )}
         {open ? (
-          <ChevronDown size={16} className="text-forge-2 shrink-0" />
+          <ChevronDown size={16} className="text-gold shrink-0" />
         ) : (
-          <ChevronRight size={16} className="text-forge-2 shrink-0" />
+          <ChevronRight size={16} className="text-gold/60 shrink-0" />
         )}
       </button>
       {open && <div className="px-4 pb-4 pt-2">{children}</div>}
@@ -85,22 +86,22 @@ function Section({
 const inputClasses = cn(
   'min-h-[44px] w-full rounded-xl',
   'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-  'border border-white/10',
+  'border border-bronze/25',
   'px-4 py-3 text-sm font-body',
   'transition-all duration-200 ease-forge',
   'focus:border-arcane/60 focus:bg-void-2/80',
-  'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+  'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
   'focus:outline-none',
 )
 
 const textareaClasses = cn(
   'w-full rounded-xl resize-none',
   'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-  'border border-white/10',
+  'border border-bronze/25',
   'px-4 py-3 text-sm font-body',
   'transition-all duration-200 ease-forge',
   'focus:border-arcane/60 focus:bg-void-2/80',
-  'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+  'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
   'focus:outline-none',
 )
 
@@ -262,12 +263,7 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
   /* ------ Render ------ */
   return (
     <GlassCard>
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-arcane/10 flex items-center justify-center shrink-0">
-          <Globe size={18} className="text-arcane" aria-hidden />
-        </div>
-        <h3 className="font-display text-base font-semibold text-forge-0">Campaign & World</h3>
-      </div>
+      <OrnateHeader className="mb-5">Campaign & World</OrnateHeader>
 
       <div className="flex flex-col gap-3">
         {/* Basics Section */}
@@ -351,7 +347,7 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
             {campaign.partyMembers.map((member, idx) => (
               <div
                 key={`party-${idx}`}
-                className="p-3 rounded-lg bg-white/[0.02] border border-white/8"
+                className="p-3 rounded-lg bg-gold/[0.02] border border-bronze/20"
               >
                 {editingPartyIdx === idx ? (
                   <PartyMemberForm
@@ -395,7 +391,7 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
                       <button
                         type="button"
                         onClick={() => setEditingPartyIdx(idx)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-forge-2 hover:text-forge-0 hover:bg-white/[0.06] transition-colors duration-200"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06] transition-colors duration-200"
                         aria-label={`Edit ${member.name}`}
                       >
                         <Scroll size={14} />
@@ -450,7 +446,7 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
             {campaign.notableNPCs.map((npc, idx) => (
               <div
                 key={`npc-${idx}`}
-                className="p-3 rounded-lg bg-white/[0.02] border border-white/8"
+                className="p-3 rounded-lg bg-gold/[0.02] border border-bronze/20"
               >
                 {editingNPCIdx === idx ? (
                   <NPCForm
@@ -489,7 +485,7 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
                       <button
                         type="button"
                         onClick={() => setEditingNPCIdx(idx)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-forge-2 hover:text-forge-0 hover:bg-white/[0.06] transition-colors duration-200"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06] transition-colors duration-200"
                         aria-label={`Edit ${npc.name}`}
                       >
                         <Scroll size={14} />
@@ -598,7 +594,7 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
             {campaign.sessionNotes.map((note) => (
               <div
                 key={note.id}
-                className="p-3 rounded-lg bg-white/[0.02] border border-white/8"
+                className="p-3 rounded-lg bg-gold/[0.02] border border-bronze/20"
               >
                 {deleteSessionId === note.id ? (
                   <div className="flex flex-col gap-2">

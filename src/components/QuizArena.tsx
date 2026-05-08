@@ -22,6 +22,8 @@ import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Input } from './ui/Input'
 import { Badge } from './ui/Badge'
+import { OrnateHeader } from './ui/OrnateHeader'
+import { ParchmentCard } from './ui/ParchmentCard'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -264,10 +266,10 @@ export function QuizArena({
               'text-sm font-medium select-none',
               'transition-all duration-200 ease-forge',
               'active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               isActive
                 ? 'bg-arcane/15 text-arcane border border-arcane/30'
-                : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+                : 'combat-card text-forge-1 hover:bg-gold/[0.08] hover:border-gold/30',
               isWeak && !isActive && 'border-red-500/30',
             )}
           >
@@ -284,13 +286,13 @@ export function QuizArena({
 
   const renderScoreboard = () => (
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 text-sm text-forge-1">
+      <div className="stat-frame">
         <Trophy size={16} className="text-ember" aria-hidden />
         <span className="font-mono text-forge-0">
           {score.correct}/{score.total}
         </span>
         {score.total > 0 && (
-          <span className="text-forge-2">
+          <span className="text-forge-2 text-xs">
             ({Math.round((score.correct / score.total) * 100)}%)
           </span>
         )}
@@ -304,7 +306,7 @@ export function QuizArena({
             'text-xs text-forge-2 hover:text-forge-1',
             'transition-colors duration-200',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
           aria-label="Reset score"
         >
@@ -334,24 +336,24 @@ export function QuizArena({
               'text-sm text-left font-body',
               'border transition-all duration-200 ease-forge',
               'active:scale-[0.98]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               'disabled:cursor-default',
               // Default state
-              !hasAnswered && 'bg-white/[0.04] border-white/10 text-forge-0 hover:bg-white/[0.08] hover:border-white/20',
+              !hasAnswered && 'combat-card text-forge-0 hover:border-gold/40',
               // After answering
               hasAnswered && isCorrectOption && 'bg-verdant/10 border-verdant/40 text-verdant',
-              hasAnswered && isSelected && !isCorrectOption && 'bg-red-500/10 border-red-500/40 text-red-400',
-              hasAnswered && !isSelected && !isCorrectOption && 'bg-white/[0.02] border-white/5 text-forge-2',
+              hasAnswered && isSelected && !isCorrectOption && 'bg-red-400/10 border-red-400/40 text-red-400',
+              hasAnswered && !isSelected && !isCorrectOption && 'bg-gold/[0.02] border-bronze/15 text-forge-2',
             )}
           >
             <span
               className={cn(
                 'shrink-0 w-7 h-7 rounded-lg flex items-center justify-center',
                 'text-xs font-semibold',
-                !hasAnswered && 'bg-white/10 text-forge-1',
+                !hasAnswered && 'bg-void-2/60 text-forge-1',
                 hasAnswered && isCorrectOption && 'bg-verdant/20 text-verdant',
                 hasAnswered && isSelected && !isCorrectOption && 'bg-red-500/20 text-red-400',
-                hasAnswered && !isSelected && !isCorrectOption && 'bg-white/5 text-forge-2',
+                hasAnswered && !isSelected && !isCorrectOption && 'bg-void-2/60 text-forge-2',
               )}
             >
               {label}
@@ -380,12 +382,12 @@ export function QuizArena({
               'min-h-[52px] rounded-xl text-base font-semibold',
               'border transition-all duration-200 ease-forge',
               'active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               'disabled:cursor-default',
-              !hasAnswered && 'bg-white/[0.04] border-white/10 text-forge-0 hover:bg-white/[0.08] hover:border-white/20',
+              !hasAnswered && 'combat-card text-forge-0 hover:border-gold/40',
               hasAnswered && isCorrectOption && 'bg-verdant/10 border-verdant/40 text-verdant',
-              hasAnswered && isSelected && !isCorrectOption && 'bg-red-500/10 border-red-500/40 text-red-400',
-              hasAnswered && !isSelected && !isCorrectOption && 'bg-white/[0.02] border-white/5 text-forge-2',
+              hasAnswered && isSelected && !isCorrectOption && 'bg-red-400/10 border-red-400/40 text-red-400',
+              hasAnswered && !isSelected && !isCorrectOption && 'bg-gold/[0.02] border-bronze/15 text-forge-2',
             )}
           >
             {option}
@@ -462,12 +464,14 @@ export function QuizArena({
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="font-display text-xl font-semibold text-forge-0">Quiz Arena</h2>
+        <OrnateHeader>Quiz Arena</OrnateHeader>
         {renderScoreboard()}
       </div>
 
       {/* Mode selector */}
       {renderModeChips()}
+
+      <div className="ornate-divider" aria-hidden />
 
       {/* Practice Weaknesses button */}
       {weakCategories && weakCategories.length > 0 && !practiceWeakMode && (
@@ -538,7 +542,7 @@ export function QuizArena({
 
       {/* Question card */}
       {question && !loading && (
-        <GlassCard className="animate-slide-up">
+        <ParchmentCard className="animate-slide-up">
           {/* Question header */}
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             <Badge variant={DIFFICULTY_CONFIG[question.difficulty].variant}>
@@ -569,7 +573,7 @@ export function QuizArena({
               </Button>
             </div>
           )}
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Empty state */}

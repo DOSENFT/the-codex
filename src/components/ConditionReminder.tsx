@@ -65,7 +65,7 @@ export function ConditionReminder({ character, onOpenDiceRoller }: ConditionRemi
   return (
     <div
       className={cn(
-        'rounded-xl border transition-all duration-300 ease-forge overflow-hidden',
+        'rounded-xl border transition-all duration-300 ease-forge overflow-hidden ornate-border',
         'border-ember/20 bg-gradient-to-r from-ember/5 via-transparent to-ember/5',
         expanded ? 'p-4' : 'p-3',
       )}
@@ -78,7 +78,7 @@ export function ConditionReminder({ character, onOpenDiceRoller }: ConditionRemi
         onClick={() => setExpanded(!expanded)}
         className={cn(
           'w-full flex items-center gap-2 min-h-[44px]',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           'active:scale-[0.98] transition-transform duration-200',
         )}
         aria-expanded={expanded}
@@ -105,7 +105,7 @@ export function ConditionReminder({ character, onOpenDiceRoller }: ConditionRemi
 
       {/* ─── Expanded Details ─── */}
       {expanded && (
-        <div className="mt-3 pt-3 border-t border-white/[0.06] flex flex-col gap-2.5 animate-fade-in">
+        <div className="mt-3 pt-3 border-t border-gold/15 flex flex-col gap-2.5 animate-fade-in">
           {character.conditions.map((condition) => {
             const data = CONDITION_EFFECTS[condition]
             if (!data) {
@@ -152,7 +152,7 @@ export function ConditionReminder({ character, onOpenDiceRoller }: ConditionRemi
                       'hover:bg-arcane/10 hover:border-arcane/30',
                       'transition-all duration-200 ease-forge',
                       'active:scale-[0.95]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                     )}
                   >
                     <Dice5 size={12} aria-hidden />

@@ -193,7 +193,9 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* Mode Toggle: Study / In-Session                           */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <div className="flex gap-2 p-1 rounded-xl bg-void-2/60 border border-white/[0.06]">
+      <OrnateHeader>Roleplay Coach</OrnateHeader>
+
+      <div className="flex gap-2 p-1 rounded-xl bg-void-2/60 border border-gold/15 ornate-border">
         <button
           type="button"
           onClick={() => setMode('study')}
@@ -201,9 +203,9 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg',
             'text-sm font-medium transition-all duration-200 ease-forge',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             mode === 'study'
-              ? 'bg-white/[0.08] text-forge-0 shadow-sm border border-white/10'
+              ? 'bg-gold/[0.08] text-forge-0 shadow-sm border border-bronze/25'
               : 'text-forge-2 hover:text-forge-1',
           )}
         >
@@ -217,7 +219,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg',
             'text-sm font-medium transition-all duration-200 ease-forge',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             mode === 'session'
               ? 'bg-ember/10 text-ember shadow-sm border border-ember/25'
               : 'text-forge-2 hover:text-forge-1',
@@ -239,7 +241,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             'w-full flex items-center justify-between min-h-[44px]',
             'text-left',
             'active:scale-[0.99]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
           <div className="flex items-center gap-2.5">
@@ -312,7 +314,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             )}
 
             {/* Patron */}
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-gold/[0.03] border border-gold/15">
               <Flame size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
               <div>
                 <p className="text-sm font-medium text-forge-0">{persona.patron.name}</p>
@@ -425,9 +427,9 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
                   disabled={sceneGradeAI.loading}
                   rows={3}
                   className={cn(
-                    'w-full rounded-xl border bg-white/[0.03] px-4 py-3',
+                    'w-full rounded-xl border bg-gold/[0.03] px-4 py-3',
                     'text-sm text-forge-0 placeholder:text-forge-2/60',
-                    'border-white/10 focus:border-arcane/40 focus:ring-1 focus:ring-arcane/20',
+                    'border-bronze/25 focus:border-arcane/40 focus:ring-1 focus:ring-arcane/20',
                     'transition-all duration-200 ease-forge resize-none',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                     'min-h-[72px]',
@@ -451,9 +453,9 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
                   disabled={sceneGradeAI.loading}
                   rows={3}
                   className={cn(
-                    'w-full rounded-xl border bg-white/[0.03] px-4 py-3',
+                    'w-full rounded-xl border bg-gold/[0.03] px-4 py-3',
                     'text-sm text-forge-0 placeholder:text-forge-2/60',
-                    'border-white/10 focus:border-ember/40 focus:ring-1 focus:ring-ember/20',
+                    'border-bronze/25 focus:border-ember/40 focus:ring-1 focus:ring-ember/20',
                     'transition-all duration-200 ease-forge resize-none',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                     'min-h-[72px]',
@@ -500,10 +502,8 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
                 <GlassCard className="border-arcane/20 animate-slide-up">
                   {/* Overall Score */}
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                      Coaching Results
-                    </p>
-                    <div className="flex items-center gap-1.5">
+                    <OrnateHeader>Coaching Results</OrnateHeader>
+                    <div className="stat-frame">
                       <Star size={16} className="text-arcane" aria-hidden />
                       <span className={cn(
                         'text-xl font-display font-bold',
@@ -566,7 +566,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
 
                   {/* Coach Note */}
                   {coaching.coachNote && (
-                    <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                    <div className="mt-3 pt-3 border-t border-gold/15">
                       <p className="text-sm text-forge-1 italic leading-relaxed">
                         {coaching.coachNote}
                       </p>
@@ -640,6 +640,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* Section 3: Drill Type Selector + Drills                   */}
       {/* ═══════════════════════════════════════════════════════════ */}
+      <div className="ornate-divider" aria-hidden />
       <div className="flex gap-2">
         <button
           type="button"
@@ -650,7 +651,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             'border',
             drillType === 'improv'
               ? 'bg-ember/15 text-ember border-ember/30'
-              : 'bg-white/[0.04] text-forge-2 border-white/10 hover:bg-white/[0.08]',
+              : 'combat-card text-forge-2 hover:border-gold/40',
           )}
         >
           <Theater size={16} aria-hidden />
@@ -665,7 +666,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             'border',
             drillType === 'conversation'
               ? 'bg-eldritch/15 text-eldritch border-eldritch/30'
-              : 'bg-white/[0.04] text-forge-2 border-white/10 hover:bg-white/[0.08]',
+              : 'combat-card text-forge-2 hover:border-gold/40',
           )}
         >
           <MessageCircle size={16} aria-hidden />
@@ -690,6 +691,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* Section 4: Mannerism Flashcards (Verdant theme)           */}
       {/* ═══════════════════════════════════════════════════════════ */}
+      {allMannerisms.length > 0 && <div className="ornate-divider" aria-hidden />}
       {allMannerisms.length > 0 && (
         <GlassCard className={cn(
           'border-verdant/15',

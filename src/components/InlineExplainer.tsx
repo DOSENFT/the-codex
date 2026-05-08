@@ -130,7 +130,7 @@ export function InlineExplainer({ term, explanation }: InlineExplainerProps) {
           'text-forge-2 hover:text-arcane',
           'transition-all duration-200 ease-forge',
           'active:scale-90',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         )}
       >
         <HelpCircle size={14} aria-hidden />
@@ -145,9 +145,9 @@ export function InlineExplainer({ term, explanation }: InlineExplainerProps) {
           style={popoverStyle}
           className={cn(
             'z-[60]',
-            'glass-card p-3 rounded-xl',
-            'border border-white/10',
-            'shadow-[0_0_24px_-4px_rgba(61,210,255,0.15)]',
+            'glass-card p-3 rounded-xl ornate-border',
+            'border border-bronze/25',
+            'shadow-[0_0_24px_-4px_rgba(197,165,90,0.15)]',
             'animate-fade-in',
           )}
         >
@@ -157,7 +157,7 @@ export function InlineExplainer({ term, explanation }: InlineExplainerProps) {
               'absolute left-1/2 -translate-x-1/2',
               'bottom-[-6px]',
               'w-3 h-3 rotate-45',
-              'bg-void-1 border-r border-b border-white/10',
+              'bg-void-1 border-r border-b border-bronze/25',
             )}
             aria-hidden
           />

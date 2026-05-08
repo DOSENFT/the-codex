@@ -43,6 +43,7 @@ import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { Select } from './ui/Select'
 import { GlassCard } from './ui/GlassCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 interface CharacterSetupProps {
   onComplete: (character: Character) => void
@@ -452,7 +453,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                     Subclass Description
                   </label>
                   <textarea
-                    className="w-full min-h-[120px] rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-forge-0 placeholder:text-forge-2/50 focus:outline-none focus:border-arcane/50 focus:shadow-[0_0_0_3px_rgba(61,210,255,0.1)] transition-all duration-200 resize-y font-mono text-xs leading-relaxed"
+                    className="w-full min-h-[120px] rounded-xl bg-gold/[0.04] border border-bronze/25 px-4 py-3 text-forge-0 placeholder:text-forge-2/50 focus:outline-none focus:border-arcane/50 focus:shadow-[0_0_0_3px_rgba(197,165,90,0.1)] transition-all duration-200 resize-y font-mono text-xs leading-relaxed"
                     placeholder="Paste your homebrew subclass features, spells, and abilities here..."
                     value={homebrewNotes}
                     onChange={(e) => setHomebrewNotes(e.target.value)}
@@ -498,8 +499,8 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                       'transition-all duration-200 ease-forge active:scale-[0.97]',
                       'border',
                       gender === g
-                        ? 'bg-arcane/15 text-arcane border-arcane/30'
-                        : 'bg-white/[0.04] text-forge-1 border-white/10 hover:bg-white/[0.08]',
+                        ? 'bg-arcane/15 text-arcane border-arcane/30 ornate-border'
+                        : 'bg-gold/[0.04] text-forge-1 border-bronze/25 hover:bg-gold/[0.08]',
                     )}
                   >
                     {g}
@@ -528,8 +529,8 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                       'transition-all duration-200 ease-forge active:scale-[0.97]',
                       'border',
                       pronouns === p
-                        ? 'bg-arcane/15 text-arcane border-arcane/30'
-                        : 'bg-white/[0.04] text-forge-1 border-white/10 hover:bg-white/[0.08]',
+                        ? 'bg-arcane/15 text-arcane border-arcane/30 ornate-border'
+                        : 'bg-gold/[0.04] text-forge-1 border-bronze/25 hover:bg-gold/[0.08]',
                     )}
                   >
                     {p}
@@ -560,7 +561,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
               <button
                 type="button"
                 onClick={() => setLevel(Math.max(1, level - 1))}
-                className="min-h-[44px] min-w-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-forge-0 flex items-center justify-center hover:border-white/20 active:scale-95 transition-all duration-200 ease-forge"
+                className="min-h-[44px] min-w-[44px] rounded-xl bg-gold/[0.04] border border-bronze/25 text-forge-0 flex items-center justify-center hover:border-gold/30 active:scale-95 transition-all duration-200 ease-forge"
                 aria-label="Decrease level"
               >
                 -
@@ -571,7 +572,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
               <button
                 type="button"
                 onClick={() => setLevel(Math.min(20, level + 1))}
-                className="min-h-[44px] min-w-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-forge-0 flex items-center justify-center hover:border-white/20 active:scale-95 transition-all duration-200 ease-forge"
+                className="min-h-[44px] min-w-[44px] rounded-xl bg-gold/[0.04] border border-bronze/25 text-forge-0 flex items-center justify-center hover:border-gold/30 active:scale-95 transition-all duration-200 ease-forge"
                 aria-label="Increase level"
               >
                 +
@@ -646,7 +647,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             {/* Provider toggle */}
             <div className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-forge-1">Provider</span>
-              <div className="flex rounded-xl overflow-hidden border border-white/10">
+              <div className="flex rounded-xl overflow-hidden border border-bronze/25">
                 {(['gemini', 'ollama'] as const).map((p) => (
                   <button
                     key={p}
@@ -657,7 +658,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                       'transition-all duration-200 ease-forge active:scale-[0.98]',
                       aiProvider === p
                         ? 'bg-arcane/15 text-arcane'
-                        : 'bg-white/[0.04] text-forge-2 hover:bg-white/[0.08] hover:text-forge-1',
+                        : 'bg-gold/[0.04] text-forge-2 hover:bg-gold/[0.08] hover:text-forge-1',
                     )}
                   >
                     {p === 'gemini' ? 'Gemini (Free)' : 'Ollama (Local)'}
@@ -681,11 +682,11 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                       placeholder="Paste your Gemini API key"
                       className={cn(
                         'min-h-[44px] w-full rounded-xl',
-                        'bg-white/[0.04] text-forge-0 placeholder:text-forge-2/50',
-                        'border border-white/10',
+                        'bg-gold/[0.04] text-forge-0 placeholder:text-forge-2/50',
+                        'border border-bronze/25',
                         'font-mono text-sm pl-4 pr-12',
                         'transition-all duration-200 ease-forge',
-                        'focus:border-arcane/50 focus:shadow-[0_0_0_3px_rgba(61,210,255,0.1)] focus:outline-none',
+                        'focus:border-arcane/50 focus:shadow-[0_0_0_3px_rgba(197,165,90,0.1)] focus:outline-none',
                       )}
                     />
                     <button
@@ -724,8 +725,8 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                           'transition-all duration-200 ease-forge active:scale-[0.98]',
                           'border',
                           geminiModel === m.id
-                            ? 'bg-arcane/10 border-arcane/30 text-forge-0'
-                            : 'bg-white/[0.03] border-white/8 text-forge-2 hover:bg-white/[0.06] hover:text-forge-1',
+                            ? 'bg-arcane/10 border-arcane/30 text-forge-0 ornate-border'
+                            : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:bg-gold/[0.06] hover:text-forge-1',
                         )}
                       >
                         <span className="text-sm font-medium">{m.label}</span>
@@ -767,8 +768,8 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                             'transition-all duration-200 ease-forge active:scale-[0.98]',
                             'border',
                             ollamaModel === m.name
-                              ? 'bg-arcane/10 border-arcane/30 text-forge-0'
-                              : 'bg-white/[0.03] border-white/8 text-forge-2 hover:bg-white/[0.06] hover:text-forge-1',
+                              ? 'bg-arcane/10 border-arcane/30 text-forge-0 ornate-border'
+                              : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:bg-gold/[0.06] hover:text-forge-1',
                           )}
                         >
                           <span className="text-sm font-medium">{m.name.replace(':latest', '')}</span>
@@ -868,7 +869,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
           </div>
 
           {roster.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-white/[0.06]">
+            <div className="mt-6 pt-6 border-t border-gold/15">
               <h3 className="text-sm font-medium text-forge-1 mb-3">Your Characters</h3>
               <div className="flex flex-col gap-2">
                 {roster.map((entry) => (
@@ -876,12 +877,12 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                     key={entry.id}
                     onClick={() => onSelectCharacter(entry.id)}
                     className={cn(
-                      'flex items-center justify-between w-full min-h-[56px] px-4 py-3 rounded-xl text-left',
-                      'bg-white/[0.03] border border-white/8',
+                      'ornate-border flex items-center justify-between w-full min-h-[56px] px-4 py-3 rounded-xl text-left',
+                      'bg-gold/[0.03] border border-bronze/20',
                       'transition-all duration-200 ease-forge',
-                      'hover:bg-white/[0.06] hover:border-white/12',
+                      'hover:bg-gold/[0.06] hover:border-gold/20',
                       'active:scale-[0.98]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                     )}
                   >
                     <div className="flex flex-col gap-0.5">
@@ -914,9 +915,9 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[100dvh] px-4 py-8 bg-void-0">
-      {/* Progress bar */}
+      {/* Progress — ornate gold connected dots */}
       <div className="w-full max-w-md mb-8">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-forge-2 font-mono">
             Step {step + 1} of {TOTAL_STEPS}
           </span>
@@ -924,27 +925,50 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             {Math.round(((step + 1) / TOTAL_STEPS) * 100)}%
           </span>
         </div>
-        <div className="h-1 w-full rounded-full bg-void-2 overflow-hidden">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-arcane to-eldritch transition-all duration-500 ease-forge"
-            style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
-          />
+        <div className="flex items-center gap-0">
+          {STEPS.map((_, i) => (
+            <div key={i} className="flex items-center flex-1 last:flex-none">
+              {/* Dot */}
+              <div
+                className={cn(
+                  'w-3 h-3 rounded-full border-2 shrink-0 transition-all duration-300 ease-forge',
+                  i < step
+                    ? 'bg-gold border-gold shadow-[0_0_6px_rgba(197,165,90,0.4)]'
+                    : i === step
+                      ? 'bg-gold/40 border-gold animate-pulse'
+                      : 'bg-void-2 border-bronze/30',
+                )}
+              />
+              {/* Connecting line (not after last dot) */}
+              {i < STEPS.length - 1 && (
+                <div
+                  className={cn(
+                    'h-px flex-1 transition-all duration-300 ease-forge',
+                    i < step ? 'bg-gold/50' : 'bg-bronze/20',
+                  )}
+                />
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Step card */}
       <GlassCard className="w-full max-w-md animate-fade-in">
         {/* Step header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-arcane/10 text-arcane">
-            <StepIcon size={20} aria-hidden />
+        <div className="flex flex-col gap-2 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-arcane/10 text-arcane">
+              <StepIcon size={20} aria-hidden />
+            </div>
+            <div>
+              <h2 className="font-display text-lg font-semibold text-forge-0">
+                {title}
+              </h2>
+              <p className="text-sm text-forge-2">{subtitle}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-display text-lg font-semibold text-forge-0">
-              {title}
-            </h2>
-            <p className="text-sm text-forge-2">{subtitle}</p>
-          </div>
+          <div className="ornate-divider" />
         </div>
 
         {/* Step content */}
@@ -985,7 +1009,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
               onClick={forgeCharacter}
               loading={loading}
               disabled={!canGoNext()}
-              className="gap-2"
+              className="gap-2 bg-gradient-to-r from-gold/90 to-bronze/90 hover:from-gold hover:to-bronze text-void-0 font-bold shadow-[0_0_16px_-2px_rgba(197,165,90,0.3)]"
             >
               {loading ? (
                 <>

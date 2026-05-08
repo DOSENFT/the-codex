@@ -276,7 +276,7 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
 
         {history.length > 0 && (
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm">
+            <div className="stat-frame">
               <Trophy size={14} className="text-ember" aria-hidden />
               <span className="font-mono text-forge-0">{averageScore}/10</span>
               <span className="text-forge-2 text-xs">
@@ -291,7 +291,7 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
                 'text-xs text-forge-2 hover:text-forge-1',
                 'transition-colors duration-200',
                 'active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               )}
               aria-label="Reset drill scores"
             >
@@ -301,6 +301,8 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
           </div>
         )}
       </div>
+
+      <div className="ornate-divider" aria-hidden />
 
       {/* Difficulty Selector */}
       <div className="flex gap-2">
@@ -313,10 +315,10 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
               'flex-1 min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium',
               'transition-all duration-200 ease-forge',
               'active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               d === difficulty
                 ? 'bg-ember/15 border border-ember/40 text-ember'
-                : 'bg-white/[0.03] border border-white/10 text-forge-2 hover:text-forge-1 hover:border-white/20',
+                : 'combat-card text-forge-2 hover:text-forge-1 hover:border-gold/40',
             )}
           >
             {difficultyLabels[d]}
@@ -363,10 +365,10 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
       {drillScene && (
         <div className="flex flex-col gap-4 animate-fade-in">
           {/* Scene Prompt */}
-          <div className="rounded-xl bg-ember/[0.06] border border-ember/20 p-4">
+          <ParchmentCard className="border-ember/20">
             <p className="text-xs font-semibold text-ember uppercase tracking-wider mb-2">The Scene</p>
             <p className="text-sm text-forge-0 leading-relaxed">{drillScene}</p>
-          </div>
+          </ParchmentCard>
 
           {/* Response Inputs */}
           {!grade && (
@@ -388,10 +390,10 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
                         'inline-flex items-center justify-center w-11 h-11 rounded-lg',
                         'transition-all duration-200',
                         'active:scale-[0.95]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         isListening && activeField === 'say'
                           ? 'bg-red-500/15 text-red-400 border border-red-500/30'
-                          : 'bg-white/[0.04] text-forge-2 hover:text-forge-1 border border-white/10',
+                          : 'bg-gold/[0.04] text-forge-2 hover:text-forge-1 border border-bronze/25',
                       )}
                       aria-label={isListening && activeField === 'say' ? 'Stop recording' : 'Start voice input for speech'}
                     >
@@ -415,7 +417,7 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
                   className={cn(
                     'min-h-[80px] w-full rounded-xl resize-y',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4 py-3',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',
@@ -443,10 +445,10 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
                         'inline-flex items-center justify-center w-11 h-11 rounded-lg',
                         'transition-all duration-200',
                         'active:scale-[0.95]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         isListening && activeField === 'do'
                           ? 'bg-red-500/15 text-red-400 border border-red-500/30'
-                          : 'bg-white/[0.04] text-forge-2 hover:text-forge-1 border border-white/10',
+                          : 'bg-gold/[0.04] text-forge-2 hover:text-forge-1 border border-bronze/25',
                       )}
                       aria-label={isListening && activeField === 'do' ? 'Stop recording' : 'Start voice input for actions'}
                     >
@@ -470,7 +472,7 @@ export function ImprovDrillEnhanced({ character, onDrillComplete, onOneShotCompl
                   className={cn(
                     'min-h-[80px] w-full rounded-xl resize-y',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4 py-3',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',

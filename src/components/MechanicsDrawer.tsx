@@ -7,7 +7,7 @@ import {
   MECHANICS_CATEGORIES,
   searchMechanics,
 } from '../lib/mechanics-reference'
-import { GlassCard } from './ui/GlassCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -49,10 +49,10 @@ function CategoryChip({
         'text-xs font-medium whitespace-nowrap',
         'transition-all duration-200 ease-forge',
         'active:scale-[0.95]',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         active
-          ? 'bg-arcane/15 text-arcane border border-arcane/25'
-          : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+          ? 'bg-arcane/15 text-arcane border border-arcane/25 ornate-border'
+          : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
       )}
     >
       {label}
@@ -64,7 +64,7 @@ function MechanicsEntryCard({ entry }: { entry: MechanicsEntry }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <GlassCard className="p-0 overflow-hidden">
+    <div className="combat-card p-0 overflow-hidden rounded-xl">
       {/* Header — always visible */}
       <button
         type="button"
@@ -74,9 +74,9 @@ function MechanicsEntryCard({ entry }: { entry: MechanicsEntry }) {
         className={cn(
           'w-full text-left p-4 min-h-[44px]',
           'transition-colors duration-200',
-          'hover:bg-white/[0.02]',
+          'hover:bg-gold/[0.02]',
           'active:scale-[0.99]',
-          'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gold',
         )}
       >
         <h3 className="font-display text-sm font-bold text-forge-0 leading-tight">
@@ -109,20 +109,20 @@ function MechanicsEntryCard({ entry }: { entry: MechanicsEntry }) {
 
       {/* Expanded explanation */}
       {expanded && (
-        <div className="border-t border-white/5 p-4 pt-3 animate-fade-in">
+        <div className="border-t border-bronze/15 p-4 pt-3 animate-fade-in">
           <p className="text-sm text-forge-1 leading-relaxed whitespace-pre-line">
             {entry.fullExplanation}
           </p>
         </div>
       )}
-    </GlassCard>
+    </div>
   )
 }
 
 function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-      <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+      <div className="p-4 rounded-2xl bg-gold/[0.03] border border-bronze/15">
         <BookOpen size={32} className="text-forge-2" />
       </div>
       <p className="text-sm font-medium text-forge-1">
@@ -268,10 +268,10 @@ export function MechanicsDrawer({ isOpen, onClose }: MechanicsDrawerProps) {
             onClick={onClose}
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
-              'text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
+              'text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
               'transition-all duration-200 ease-forge',
               'active:scale-95',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             )}
           >
             <X size={20} aria-hidden />
@@ -280,9 +280,7 @@ export function MechanicsDrawer({ isOpen, onClose }: MechanicsDrawerProps) {
 
         <div className="px-4 pb-6 safe-bottom flex flex-col gap-4">
           {/* ── Title ── */}
-          <h2 className="font-display text-lg font-bold text-forge-0 tracking-tight">
-            Mechanics Reference
-          </h2>
+          <OrnateHeader>Mechanics Reference</OrnateHeader>
 
           {/* ── Search input ── */}
           <div className="relative">
@@ -301,12 +299,12 @@ export function MechanicsDrawer({ isOpen, onClose }: MechanicsDrawerProps) {
               className={cn(
                 'min-h-[44px] w-full rounded-xl',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                'border border-white/10',
+                'border border-bronze/25',
                 'font-body text-sm',
                 'pl-10 pr-4',
                 'transition-all duration-200 ease-forge',
                 'focus:border-arcane/60 focus:bg-void-2/80',
-                'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                 'focus:outline-none',
               )}
             />

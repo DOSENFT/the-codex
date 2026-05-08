@@ -15,7 +15,7 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 /**
- * Native <select> themed for the dark glass aesthetic.
+ * Native <select> themed for the dark grimoire aesthetic.
  * ChevronDown icon overlays the right side. 44px min height for touch targets.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
@@ -44,15 +44,15 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               // Appearance — remove native arrow
               'appearance-none',
               'bg-void-2/60 text-forge-0',
-              'border border-white/10',
+              'border border-bronze/30',
               'font-body text-sm',
               // Padding — room for chevron on right
               'pl-4 pr-10',
               // Transitions
               'transition-all duration-200 ease-forge',
               // Focus
-              'focus:border-arcane/60 focus:bg-void-2/80',
-              'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+              'focus:border-gold/60 focus:bg-void-2/80',
+              'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               'focus:outline-none',
               // Disabled
               'disabled:opacity-50 disabled:cursor-not-allowed',

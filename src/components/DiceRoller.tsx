@@ -4,6 +4,7 @@ import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { DiceAnimation } from './DiceAnimation'
 import { secureDie, rollDice, formatRollNotation } from '../lib/dice'
 import type { DieType, AdvantageState, RollResult } from '../lib/dice'
@@ -82,14 +83,14 @@ function DieButton({
       aria-pressed={selected}
       onClick={() => onSelect(die)}
       className={cn(
-        'min-h-[44px] min-w-[44px] px-2.5 rounded-xl',
+        'min-h-[44px] min-w-[44px] w-[44px] h-[44px] rounded-full',
         'font-mono text-sm font-semibold',
         'transition-all duration-200 ease-forge',
         'active:scale-95',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         selected
-          ? 'bg-arcane/20 text-arcane border border-arcane/40 shadow-[0_0_12px_-2px_rgba(61,210,255,0.3)]'
-          : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:text-forge-0',
+          ? 'bg-arcane/20 text-arcane border-2 border-gold shadow-[0_0_12px_-2px_rgba(197,165,90,0.25)] ornate-border'
+          : 'bg-gold/[0.04] text-forge-1 border border-bronze/25 hover:bg-gold/[0.08] hover:text-forge-0',
       )}
     >
       {DIE_LABELS[die]}
@@ -125,12 +126,12 @@ function StepperControl({
           onClick={() => onChange(Math.max(min, value - 1))}
           className={cn(
             'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
-            'bg-white/[0.04] border border-white/10 text-forge-1',
+            'bg-gold/[0.04] border border-bronze/25 text-forge-1',
             'transition-all duration-200 ease-forge',
-            'hover:bg-white/[0.08] hover:text-forge-0',
+            'hover:bg-gold/[0.08] hover:text-forge-0',
             'active:scale-95',
             'disabled:opacity-40 disabled:pointer-events-none',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
           <Minus size={18} aria-hidden />
@@ -150,12 +151,12 @@ function StepperControl({
           onClick={() => onChange(Math.min(max, value + 1))}
           className={cn(
             'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
-            'bg-white/[0.04] border border-white/10 text-forge-1',
+            'bg-gold/[0.04] border border-bronze/25 text-forge-1',
             'transition-all duration-200 ease-forge',
-            'hover:bg-white/[0.08] hover:text-forge-0',
+            'hover:bg-gold/[0.08] hover:text-forge-0',
             'active:scale-95',
             'disabled:opacity-40 disabled:pointer-events-none',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
           <Plus size={18} aria-hidden />
@@ -197,15 +198,15 @@ function AdvantageToggle({
                 'text-xs font-semibold',
                 'transition-all duration-200 ease-forge',
                 'active:scale-95',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 isActive && state === 'normal' &&
-                  'bg-white/[0.08] text-forge-0 border border-white/20',
+                  'bg-gold/15 text-gold border border-gold/40 shadow-[0_0_12px_-2px_rgba(197,165,90,0.25)]',
                 isActive && state === 'advantage' &&
                   'bg-verdant/20 text-verdant border border-verdant/40 shadow-[0_0_12px_-2px_rgba(57,217,138,0.25)]',
                 isActive && state === 'disadvantage' &&
                   'bg-red-400/20 text-red-400 border border-red-400/40 shadow-[0_0_12px_-2px_rgba(248,113,113,0.25)]',
                 !isActive &&
-                  'bg-white/[0.04] text-forge-2 border border-white/10 hover:bg-white/[0.06] hover:text-forge-1',
+                  'bg-gold/[0.04] text-forge-2 border border-bronze/25 hover:bg-gold/[0.06] hover:text-forge-1',
               )}
             >
               {label}
@@ -242,7 +243,7 @@ function RollResultDisplay({
       {/* Total */}
       <div
         className={cn(
-          'font-display text-5xl font-bold tabular-nums transition-all duration-200 ease-forge',
+          'stat-frame font-display text-5xl font-bold tabular-nums transition-all duration-200 ease-forge px-6 py-2',
           isNat20 && 'text-verdant drop-shadow-[0_0_16px_rgba(57,217,138,0.6)]',
           isNat1 && 'text-red-400 drop-shadow-[0_0_16px_rgba(248,113,113,0.6)]',
           !isNat20 && !isNat1 && 'text-forge-0',
@@ -299,7 +300,7 @@ function RollResultDisplay({
             className={cn(
               'inline-flex items-center justify-center min-w-[32px] h-8 px-2',
               'rounded-lg font-mono text-sm font-medium',
-              'bg-white/[0.03] text-forge-2/60 border border-white/5 line-through',
+              'bg-gold/[0.03] text-forge-2/60 border border-bronze/15 line-through',
               'animate-fade-in',
             )}
             style={{ animationDelay: `${(result.keptDice.length + i) * 60}ms` }}
@@ -312,7 +313,7 @@ function RollResultDisplay({
         {/* Modifier display */}
         {result.modifier !== 0 && (
           <span
-            className="inline-flex items-center h-8 px-2 font-mono text-sm font-semibold text-ember animate-fade-in"
+            className="stat-frame inline-flex items-center h-8 px-2 font-mono text-sm font-semibold text-ember animate-fade-in"
             style={{ animationDelay: `${(result.keptDice.length + result.droppedDice.length) * 60}ms` }}
           >
             {result.modifier > 0 ? `+${result.modifier}` : result.modifier}
@@ -338,8 +339,7 @@ function HistoryCard({ result }: { result: RollResult }) {
   return (
     <div
       className={cn(
-        'flex items-center justify-between px-3 py-2 rounded-lg',
-        'bg-white/[0.03] border border-white/[0.06]',
+        'combat-card flex items-center justify-between px-3 py-2 rounded-lg',
         'animate-fade-in',
       )}
     >
@@ -385,9 +385,9 @@ function DisclosureSection({
           'flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-lg',
           'text-sm font-semibold text-forge-1',
           'transition-all duration-200 ease-forge',
-          'hover:bg-white/[0.04] hover:text-forge-0',
+          'hover:bg-gold/[0.04] hover:text-forge-0',
           'active:scale-[0.98]',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         )}
       >
         {isOpen ? (
@@ -443,7 +443,7 @@ function CharacterPresets({
     'transition-all duration-200 ease-forge',
     'active:scale-95',
     'disabled:opacity-40 disabled:pointer-events-none',
-    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
   )
 
   return (
@@ -515,7 +515,7 @@ function CharacterPresets({
                   'text-center',
                   isProficient
                     ? 'bg-verdant/10 text-verdant border border-verdant/25 hover:bg-verdant/20 hover:border-verdant/40'
-                    : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:text-forge-0',
+                    : 'bg-gold/[0.04] text-forge-1 border border-bronze/25 hover:bg-gold/[0.08] hover:text-forge-0',
                 )}
                 aria-label={`${ABILITY_NAMES[ability]} saving throw: d20 + ${bonus}`}
               >
@@ -839,10 +839,10 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
             onClick={onClose}
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
-              'text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
+              'text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
               'transition-all duration-200 ease-forge',
               'active:scale-95',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             )}
           >
             <X size={20} aria-hidden />
@@ -850,6 +850,8 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
         </div>
 
         <div className="px-4 pb-6 safe-bottom flex flex-col gap-5">
+          <OrnateHeader>Dice Roller</OrnateHeader>
+
           {/* ── Quick Roll Presets ── */}
           <div className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-forge-1 select-none">Quick Roll</span>
@@ -869,7 +871,7 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
                     'hover:bg-eldritch/20 hover:border-eldritch/40',
                     'active:scale-95',
                     'disabled:opacity-40 disabled:pointer-events-none',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   )}
                 >
                   {preset.label}

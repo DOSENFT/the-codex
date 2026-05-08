@@ -117,7 +117,7 @@ function renderDots(count: number, max: number = 5): JSX.Element {
           key={i}
           className={cn(
             'w-1.5 h-1.5 rounded-full transition-colors',
-            i < count ? 'bg-arcane' : 'bg-white/10',
+            i < count ? 'bg-arcane' : 'bg-void-2/60',
           )}
         />
       ))}
@@ -325,14 +325,14 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
             'text-sm text-forge-2 hover:text-forge-1',
             'transition-colors duration-200',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
           <ArrowLeft size={16} aria-hidden />
           Back to Roleplay Coach
         </button>
 
-        <GlassCard className="border-arcane/15">
+        <GlassCard className="border-arcane/15 ornate-border">
           <div className="flex items-center gap-2.5 mb-4">
             <MessageCircle size={18} className="text-arcane" aria-hidden />
             <OrnateHeader className="flex-1">Conversation Practice</OrnateHeader>
@@ -358,10 +358,10 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
                     'min-h-[44px] px-4 py-2 rounded-xl text-sm font-medium',
                     'transition-all duration-200 ease-forge',
                     'active:scale-[0.97]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                     selectedNpcType === type
                       ? 'bg-arcane/15 border border-arcane/40 text-arcane'
-                      : 'bg-white/[0.03] border border-white/10 text-forge-2 hover:text-forge-1 hover:border-white/20',
+                      : 'combat-card text-forge-2 hover:text-forge-1 hover:border-gold/40',
                   )}
                 >
                   {type}
@@ -413,7 +413,7 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
             'text-sm text-forge-2 hover:text-forge-1',
             'transition-colors duration-200',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
           <ArrowLeft size={16} aria-hidden />
@@ -454,21 +454,21 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
 
           {/* Metric Averages */}
           <div className="grid grid-cols-3 gap-3 mb-5">
-            <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="stat-frame">
               <p className="text-xs text-forge-2 font-medium">Voice</p>
               <p className={cn('text-lg font-display font-bold', getScoreColor(averages.voice * 2))}>
                 {averages.voice}
               </p>
               <p className="text-[10px] text-forge-2">/5</p>
             </div>
-            <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="stat-frame">
               <p className="text-xs text-forge-2 font-medium">Vocab</p>
               <p className={cn('text-lg font-display font-bold', getScoreColor(averages.vocab * 2))}>
                 {averages.vocab}
               </p>
               <p className="text-[10px] text-forge-2">/5</p>
             </div>
-            <div className="flex flex-col items-center gap-1 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="stat-frame">
               <p className="text-xs text-forge-2 font-medium">Register</p>
               <p className={cn('text-lg font-display font-bold', getScoreColor(averages.emotion * 2))}>
                 {averages.emotion}
@@ -533,10 +533,10 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
           className={cn(
             'inline-flex items-center justify-center w-11 h-11 rounded-lg',
             'text-forge-2 hover:text-forge-1',
-            'bg-white/[0.04] border border-white/10 hover:border-white/20',
+            'bg-gold/[0.04] border border-bronze/25 hover:border-gold/30',
             'transition-all duration-200',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
           aria-label="Back to roleplay coach"
         >
@@ -571,7 +571,7 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
               </div>
               <div className={cn(
                 'rounded-2xl rounded-tl-sm px-4 py-3',
-                'bg-white/[0.06] border border-white/[0.08]',
+                'bg-gold/[0.06] border border-gold/15',
               )}>
                 <p className="text-sm text-forge-0 leading-relaxed">
                   {exchange.npcMessage}
@@ -628,7 +628,7 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
             </div>
             <div className={cn(
               'rounded-2xl rounded-tl-sm px-4 py-3',
-              'bg-white/[0.06] border border-white/[0.08]',
+              'bg-gold/[0.06] border border-gold/15',
             )}>
               <p className="text-sm text-forge-0 leading-relaxed">
                 {currentNpcMessage}
@@ -649,7 +649,7 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
             </div>
             <div className={cn(
               'rounded-2xl rounded-tl-sm px-4 py-3',
-              'bg-white/[0.06] border border-white/[0.08]',
+              'bg-gold/[0.06] border border-gold/15',
             )}>
               <div className="flex items-center gap-2">
                 <Loader2 size={14} className="animate-spin text-arcane" aria-hidden />
@@ -686,7 +686,7 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
 
       {/* Input Area (fixed at bottom of component) */}
       {!isAtMax && !summaryAI.loading && (
-        <div className="flex flex-col gap-2 pt-3 border-t border-white/[0.06]">
+        <div className="flex flex-col gap-2 pt-3 border-t border-gold/15">
           {/* End conversation button (available after MIN_EXCHANGES_TO_END) */}
           {canEndConversation && (
             <Button
@@ -713,11 +713,11 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
               className={cn(
                 'flex-1 min-h-[52px] max-h-[120px] w-full rounded-xl resize-y',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                'border border-white/10',
+                'border border-bronze/25',
                 'font-body text-sm px-4 py-3',
                 'transition-all duration-200 ease-forge',
                 'focus:border-arcane/60 focus:bg-void-2/80',
-                'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                 'focus:outline-none',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
               )}
@@ -742,7 +742,7 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
 
       {/* Auto-end message when at max */}
       {isAtMax && !summaryAI.loading && conversation.phase === 'active' && (
-        <div className="flex flex-col items-center gap-3 pt-3 border-t border-white/[0.06]">
+        <div className="flex flex-col items-center gap-3 pt-3 border-t border-gold/15">
           <p className="text-sm text-forge-2 text-center">
             Maximum exchanges reached.
           </p>

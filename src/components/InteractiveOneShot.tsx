@@ -112,9 +112,9 @@ function CoachingDot({ coaching }: { coaching: OneShotCoaching }) {
           'inline-flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg',
           'transition-all duration-200 ease-forge',
           'active:scale-[0.97]',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-          'bg-white/[0.03] border border-white/[0.06]',
-          'hover:bg-white/[0.06]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+          'bg-gold/[0.03] border border-gold/15',
+          'hover:bg-gold/[0.06]',
         )}
         aria-label={`Coaching: ${coaching.rating}. ${expanded ? 'Collapse' : 'Expand'} note`}
       >
@@ -301,7 +301,7 @@ export function InteractiveOneShot({ character, onComplete, onBack }: Interactiv
               'text-forge-2 hover:text-forge-1',
               'transition-all duration-200 ease-forge',
               'active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             )}
             aria-label="Back to drills"
           >
@@ -311,7 +311,7 @@ export function InteractiveOneShot({ character, onComplete, onBack }: Interactiv
         </div>
 
         {phase === 'playing' && (
-          <div className="flex items-center gap-2">
+          <div className="stat-frame">
             <Scroll size={14} className="text-ember" aria-hidden />
             <span className="text-sm font-mono text-forge-0">
               Turn {turnNumber}/{MAX_TURNS}
@@ -398,11 +398,11 @@ export function InteractiveOneShot({ character, onComplete, onBack }: Interactiv
                   onClick={() => toggleTurnExpand(i)}
                   className={cn(
                     'w-full text-left min-h-[44px] px-3 py-2 rounded-lg',
-                    'bg-white/[0.02] border border-white/[0.06]',
+                    'combat-card',
                     'transition-all duration-200 ease-forge',
-                    'hover:bg-white/[0.04]',
+                    'hover:border-gold/40',
                     'active:scale-[0.99]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   )}
                   aria-expanded={expandedTurns.has(i)}
                   aria-label={`Turn ${i + 1} details`}
@@ -470,12 +470,12 @@ export function InteractiveOneShot({ character, onComplete, onBack }: Interactiv
                 disabled={ai.loading}
                 className={cn(
                   'w-full min-h-[44px] px-4 py-3 rounded-xl text-left',
-                  'bg-white/[0.04] border border-white/10',
+                  'combat-card',
                   'text-sm text-forge-0 font-medium',
                   'transition-all duration-200 ease-forge',
-                  'hover:bg-white/[0.08] hover:border-white/20',
+                  'hover:border-gold/40',
                   'active:scale-[0.98]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                 )}
               >
@@ -496,7 +496,7 @@ export function InteractiveOneShot({ character, onComplete, onBack }: Interactiv
                 className={cn(
                   'min-h-[60px] w-full rounded-xl resize-y',
                   'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                  'border border-white/10',
+                  'border border-bronze/25',
                   'font-body text-sm px-4 py-3',
                   'transition-all duration-200 ease-forge',
                   'focus:border-ember/60 focus:bg-void-2/80',
@@ -558,7 +558,7 @@ export function InteractiveOneShot({ character, onComplete, onBack }: Interactiv
           )}
 
           {/* Score card */}
-          <GlassCard className="border-ember/20">
+          <GlassCard className="border-ember/20 ornate-border">
             <div className="flex flex-col items-center gap-4">
               <div className="flex items-center gap-4">
                 <HexFrame
@@ -632,7 +632,7 @@ export function InteractiveOneShot({ character, onComplete, onBack }: Interactiv
 
           {/* Turn-by-turn coaching recap */}
           {turns.length > 0 && (
-            <GlassCard className="border-white/[0.06]">
+            <GlassCard className="border-gold/15">
               <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-3">
                 Turn-by-Turn Coaching
               </p>

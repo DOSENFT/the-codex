@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Theater, BookHeart, MessageSquare, Mic, Users } from 'lucide-react'
 import { cn } from '../lib/cn'
 import type { Character } from '../lib/character'
+import { OrnateHeader } from './ui/OrnateHeader'
+import { ParchmentCard } from './ui/ParchmentCard'
 import { PersonaEngine } from './PersonaEngine'
 import { BackstoryBuilder } from './BackstoryBuilder'
 import { DialogueBank } from './DialogueBank'
@@ -47,6 +49,9 @@ export function IdentityPage({ character, onCharacterUpdate }: IdentityPageProps
 
   return (
     <section className="flex flex-col gap-4 animate-fade-in" aria-label="Identity">
+      {/* ─── Section Header ─── */}
+      <OrnateHeader>Identity</OrnateHeader>
+
       {/* ─── Mode Chips ─── */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1 snap-x snap-mandatory">
         {MODES.map(({ id, label, icon: Icon }) => (
@@ -60,10 +65,10 @@ export function IdentityPage({ character, onCharacterUpdate }: IdentityPageProps
               'text-sm font-medium whitespace-nowrap select-none',
               'transition-all duration-200 ease-forge',
               'active:scale-[0.95]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               mode === id
-                ? 'bg-eldritch/15 text-eldritch border border-eldritch/25'
-                : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                ? 'ornate-border bg-eldritch/15 text-eldritch border border-eldritch/25'
+                : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
             )}
           >
             <Icon size={14} aria-hidden />
@@ -71,6 +76,9 @@ export function IdentityPage({ character, onCharacterUpdate }: IdentityPageProps
           </button>
         ))}
       </div>
+
+      {/* ─── Divider ─── */}
+      <div className="ornate-divider" />
 
       {/* ─── Content ─── */}
       {mode === 'persona' && (
@@ -86,18 +94,20 @@ export function IdentityPage({ character, onCharacterUpdate }: IdentityPageProps
         <AccentCoach character={character} />
       )}
       {mode === 'identities' && (
-        <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
-            <Users size={28} className="text-forge-2" />
+        <ParchmentCard className="py-12">
+          <div className="flex flex-col items-center justify-center gap-3 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gold/[0.06] border border-gold/25 flex items-center justify-center">
+              <Users size={28} className="text-gold" />
+            </div>
+            <div className="flex flex-col gap-1.5 max-w-xs">
+              <p className="text-sm font-display font-semibold text-forge-0 tracking-wide">Identity Manager</p>
+              <p className="text-xs text-forge-2 leading-relaxed">
+                Manage multiple identities for {character.name} — disguises,
+                alternate personas, and social masks. Coming soon.
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5 max-w-xs">
-            <p className="text-sm font-medium text-forge-1">Identity Manager</p>
-            <p className="text-xs text-forge-2 leading-relaxed">
-              Manage multiple identities for {character.name} — disguises,
-              alternate personas, and social masks. Coming soon.
-            </p>
-          </div>
-        </div>
+        </ParchmentCard>
       )}
     </section>
   )

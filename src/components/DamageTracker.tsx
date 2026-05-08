@@ -20,6 +20,7 @@ import {
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -82,7 +83,7 @@ const DAMAGE_TYPE_CSS_COLORS: Record<DamageTypeName, string> = {
   Acid: '#a3e635',
   Necrotic: '#9ca3af',
   Psychic: '#f472b6',
-  Force: '#3dd2ff',
+  Force: '#d4a74a',
   Slashing: '#f87171',
   Piercing: '#fb923c',
   Bludgeoning: '#a8a29e',
@@ -165,10 +166,10 @@ function QuickAddForm({
           className={cn(
             'min-h-[44px] w-full rounded-xl px-4',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-            'border border-white/10 text-sm font-body',
+            'border border-bronze/25 text-sm font-body',
             'transition-all duration-200 ease-forge',
             'focus:border-arcane/60 focus:bg-void-2/80',
-            'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+            'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
             'focus:outline-none',
           )}
         />
@@ -182,10 +183,10 @@ function QuickAddForm({
           className={cn(
             'min-h-[44px] w-full rounded-xl px-3 text-center',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-            'border border-white/10 text-sm font-mono',
+            'border border-bronze/25 text-sm font-mono',
             'transition-all duration-200 ease-forge',
             'focus:border-arcane/60 focus:bg-void-2/80',
-            'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+            'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
             'focus:outline-none',
           )}
         />
@@ -200,11 +201,11 @@ function QuickAddForm({
             className={cn(
               'min-h-[44px] w-full rounded-xl appearance-none',
               'bg-void-2/60 text-forge-0',
-              'border border-white/10 text-sm font-body',
+              'border border-bronze/25 text-sm font-body',
               'pl-4 pr-10 cursor-pointer',
               'transition-all duration-200 ease-forge',
               'focus:border-arcane/60 focus:bg-void-2/80',
-              'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+              'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               'focus:outline-none',
             )}
           >
@@ -230,10 +231,10 @@ function QuickAddForm({
             'flex items-center justify-center gap-1.5',
             'border transition-all duration-200 ease-forge',
             'active:scale-[0.97] select-none text-xs font-semibold',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             critical
               ? 'bg-red-500/20 border-red-500/40 text-red-400'
-              : 'bg-white/[0.04] border-white/10 text-forge-2 hover:bg-white/[0.08]',
+              : 'bg-gold/[0.04] border-bronze/25 text-forge-2 hover:bg-gold/[0.08]',
           )}
         >
           <Zap size={14} aria-hidden />
@@ -249,10 +250,10 @@ function QuickAddForm({
           className={cn(
             'min-h-[44px] w-full rounded-xl px-4',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-            'border border-white/10 text-sm font-body',
+            'border border-bronze/25 text-sm font-body',
             'transition-all duration-200 ease-forge',
             'focus:border-arcane/60 focus:bg-void-2/80',
-            'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+            'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
             'focus:outline-none',
           )}
         />
@@ -307,7 +308,7 @@ function LiveView({ log }: { log: CombatLog }) {
                 key={`${entry.timestamp}-${i}`}
                 className={cn(
                   'flex items-center justify-between',
-                  'px-3 py-2 rounded-lg bg-white/[0.03]',
+                  'px-3 py-2 rounded-lg bg-gold/[0.03]',
                   i === 0 && 'animate-fade-in',
                 )}
               >
@@ -379,7 +380,7 @@ function PostCombatSummary({
     <div className="flex flex-col gap-4">
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03]">
+        <div className="stat-frame p-3">
           <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider mb-1">
             Total Damage
           </span>
@@ -387,7 +388,7 @@ function PostCombatSummary({
             {log.totalDamage}
           </span>
         </div>
-        <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03]">
+        <div className="stat-frame p-3">
           <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider mb-1">
             DPR
           </span>
@@ -418,7 +419,7 @@ function PostCombatSummary({
 
       {/* Pie chart + breakdown */}
       {breakdown.length > 0 && (
-        <div className="flex items-center gap-4">
+        <div className="combat-card flex items-center gap-4">
           {/* CSS pie chart */}
           <div
             className="w-20 h-20 rounded-full shrink-0"
@@ -468,7 +469,7 @@ function PostCombatSummary({
                     {src.total} ({src.count}x)
                   </span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-gold/[0.06] overflow-hidden">
                   <div
                     className="h-full rounded-full bg-arcane/50 transition-all duration-300 ease-forge"
                     style={{ width: `${widthPct}%` }}
@@ -518,14 +519,14 @@ function CombatHistory({ characterId }: { characterId: string }) {
         return (
           <div
             key={log.id}
-            className="rounded-xl bg-white/[0.03] border border-white/5 overflow-hidden"
+            className="rounded-xl bg-gold/[0.03] border border-bronze/15 overflow-hidden"
           >
             <button
               onClick={() => setExpandedId(isExpanded ? null : log.id)}
               className={cn(
                 'w-full min-h-[44px] flex items-center justify-between px-3 py-2.5',
                 'transition-all duration-200 active:scale-[0.98]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               )}
             >
               <div className="flex items-center gap-2 min-w-0">
@@ -550,7 +551,7 @@ function CombatHistory({ characterId }: { characterId: string }) {
                     'text-forge-1'
                   const barBg =
                     DAMAGE_TYPE_BAR_BG[item.type as DamageTypeName] ??
-                    'bg-white/10'
+                    'bg-void-2/60'
                   return (
                     <div key={item.type} className="flex flex-col gap-0.5">
                       <div className="flex items-center justify-between">
@@ -561,7 +562,7 @@ function CombatHistory({ characterId }: { characterId: string }) {
                           {item.total} ({item.percentage}%)
                         </span>
                       </div>
-                      <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div className="w-full h-1.5 rounded-full bg-gold/[0.06] overflow-hidden">
                         <div
                           className={cn('h-full rounded-full', barBg)}
                           style={{ width: `${item.percentage}%` }}
@@ -651,7 +652,7 @@ export function DamageTracker({
   const isEnded = currentLog?.endedAt != null
 
   return (
-    <GlassCard className="p-4">
+    <GlassCard className="p-4 ornate-border">
       {/* Header — collapsible */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -660,15 +661,13 @@ export function DamageTracker({
           'transition-all duration-200 active:scale-[0.97]',
         )}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           <Swords
             size={16}
             className={cn(hasEntries ? 'text-ember' : 'text-forge-2')}
             aria-hidden
           />
-          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
-            Damage Tracker
-          </h3>
+          <OrnateHeader className="flex-1">Damage Tracker</OrnateHeader>
           {hasEntries && !isEnded && (
             <Badge variant="ember">{currentLog!.totalDamage} dmg</Badge>
           )}

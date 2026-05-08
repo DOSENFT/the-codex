@@ -29,6 +29,7 @@ import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { ParchmentCard } from './ui/ParchmentCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -442,7 +443,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
     const isCoachTarget = coachingIdx === globalIdx
 
     return (
-      <GlassCard
+      <ParchmentCard
         key={globalIdx}
         className={cn(
           'p-3',
@@ -458,11 +459,11 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
               className={cn(
                 'min-h-[60px] w-full rounded-lg resize-y',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                'border border-white/10',
+                'border border-bronze/25',
                 'font-body text-sm px-3 py-2',
                 'transition-all duration-200 ease-forge',
                 'focus:border-arcane/60 focus:bg-void-2/80',
-                'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                 'focus:outline-none',
               )}
             />
@@ -473,11 +474,11 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
               className={cn(
                 'min-h-[44px] w-full rounded-lg',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                'border border-white/10',
+                'border border-bronze/25',
                 'font-body text-sm px-3 py-2',
                 'transition-all duration-200 ease-forge',
                 'focus:border-arcane/60 focus:bg-void-2/80',
-                'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                 'focus:outline-none',
               )}
             />
@@ -493,7 +494,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-white/[0.04] text-forge-2 hover:bg-white/[0.08] transition-colors"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-gold/[0.04] text-forge-2 hover:bg-gold/[0.08] transition-colors"
                 aria-label="Cancel edit"
               >
                 <X size={16} aria-hidden />
@@ -510,7 +511,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
           >
             <div className="flex items-start gap-2">
               <p className="flex-1 text-sm text-forge-1 leading-relaxed italic">
-                &ldquo;{text}&rdquo;
+                <span className="text-gold/40 text-2xl font-display leading-none mr-1">&ldquo;</span>{text}<span className="text-gold/40 text-2xl font-display leading-none ml-1">&rdquo;</span>
               </p>
               {!options?.selectable && (
                 <div className="flex gap-0.5 shrink-0">
@@ -587,7 +588,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
             )}
             {/* Show coaching results inline */}
             {isCoachTarget && coaching && activeMode === 'delivery' && (
-              <div className="mt-3 pt-3 border-t border-white/10 flex flex-col gap-3">
+              <div className="mt-3 pt-3 border-t border-bronze/25 flex flex-col gap-3">
                 <div className="flex items-center gap-2">
                   <Volume2 size={14} className="text-arcane shrink-0" aria-hidden />
                   <div>
@@ -639,7 +640,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
             )}
           </div>
         )}
-      </GlassCard>
+      </ParchmentCard>
     )
   }
 
@@ -680,7 +681,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
             className={cn(
               'min-h-[36px] flex-1 rounded-lg',
               'bg-void-2/40 text-forge-0 placeholder:text-forge-2',
-              'border border-white/5',
+              'border border-bronze/15',
               'font-body text-xs px-3 py-1.5',
               'transition-all duration-200 ease-forge',
               'focus:border-arcane/40 focus:bg-void-2/60',
@@ -768,11 +769,11 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
             className={cn(
               'min-h-[44px] flex-1 rounded-xl resize-none',
               'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-              'border border-white/10',
+              'border border-bronze/25',
               'font-body text-sm px-4 py-3',
               'transition-all duration-200 ease-forge',
               'focus:border-arcane/60 focus:bg-void-2/80',
-              'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+              'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               'focus:outline-none',
             )}
             onKeyDown={e => {
@@ -866,7 +867,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                         'transition-all duration-200',
                         practiceSelected === line.globalIdx
                           ? 'border-arcane bg-arcane/20'
-                          : 'border-white/20',
+                          : 'border-gold/30',
                       )}>
                         {practiceSelected === line.globalIdx && (
                           <div className="w-2 h-2 rounded-full bg-arcane" />
@@ -897,11 +898,11 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                   className={cn(
                     'min-h-[60px] w-full rounded-xl resize-none',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4 py-3',
                     'transition-all duration-200 ease-forge',
                     'focus:border-arcane/60 focus:bg-void-2/80',
-                    'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                    'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                     'focus:outline-none',
                   )}
                 />
@@ -994,7 +995,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
           <>
             {/* Timer bar */}
             {qdRunning && (
-              <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-void-2/60 overflow-hidden">
                 <div
                   className={cn(
                     'h-full rounded-full transition-all duration-100 ease-linear',
@@ -1030,7 +1031,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                   className={cn(
                     'min-h-[44px] flex-1 rounded-xl',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4 py-3',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',
@@ -1078,7 +1079,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                   </div>
 
                   {/* Note */}
-                  <div className="pt-2 border-t border-white/10">
+                  <div className="pt-2 border-t border-bronze/25">
                     <p className="text-xs text-forge-1">{qdEval.note}</p>
                   </div>
 
@@ -1162,16 +1163,14 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="font-display text-base font-semibold text-forge-0">
-          Dialogue Bank
-        </h3>
+        <OrnateHeader>Dialogue Bank</OrnateHeader>
         <Badge variant="neutral">
           {dialogueBank.length} line{dialogueBank.length !== 1 ? 's' : ''}
         </Badge>
       </div>
 
       {/* Mode Selector — segmented pill */}
-      <div className="flex bg-white/[0.03] border border-white/10 rounded-xl p-1 gap-1">
+      <div className="flex bg-gold/[0.03] border border-gold/25 rounded-xl p-1 gap-1">
         {(Object.keys(MODE_CONFIG) as BankMode[]).map(mode => {
           const { label, icon: Icon } = MODE_CONFIG[mode]
           const isActive = activeMode === mode
@@ -1186,10 +1185,10 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                 'text-xs font-medium select-none',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold',
                 isActive
-                  ? 'bg-white/[0.08] text-forge-0 border border-white/15 shadow-sm'
-                  : 'text-forge-2 hover:text-forge-1 hover:bg-white/[0.04]',
+                  ? 'bg-gold/[0.12] text-gold border border-gold/30 shadow-sm'
+                  : 'text-forge-2 hover:text-forge-1 hover:bg-gold/[0.04]',
               )}
             >
               <Icon size={13} aria-hidden />
@@ -1217,10 +1216,10 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                 'text-sm font-medium capitalize select-none',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 isActive
-                  ? `bg-${color}/15 text-${color} border border-${color}/30`
-                  : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+                  ? `ornate-border bg-${color}/15 text-${color} border border-${color}/30`
+                  : 'bg-gold/[0.04] text-forge-1 border border-bronze/25 hover:bg-gold/[0.08] hover:border-gold/30',
               )}
             >
               {ctx}
@@ -1228,6 +1227,9 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
           )
         })}
       </div>
+
+      {/* Divider */}
+      <div className="ornate-divider" />
 
       {/* Mode Content */}
       {activeMode === 'library' && renderLibraryMode()}

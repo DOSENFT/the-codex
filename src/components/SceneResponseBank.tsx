@@ -13,6 +13,7 @@ import type { Character } from '../lib/character'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -130,12 +131,11 @@ export function SceneResponseBank({ character, onUpdate }: SceneResponseBankProp
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-display text-base font-semibold text-forge-0">
-          Scene Responses
-        </h3>
-        <Badge variant="neutral">
-          {sceneResponses.reduce((sum, s) => sum + s.responses.length, 0)} banked
-        </Badge>
+        <OrnateHeader>Scene Responses</OrnateHeader>
+        <div className="stat-frame">
+          <span className="text-xs text-forge-2">Banked</span>
+          <span className="font-mono text-forge-0 text-sm">{sceneResponses.reduce((sum, s) => sum + s.responses.length, 0)}</span>
+        </div>
       </div>
 
       {/* Situation Grid */}
@@ -159,10 +159,10 @@ export function SceneResponseBank({ character, onUpdate }: SceneResponseBankProp
                   'flex items-center justify-between',
                   'border transition-all duration-200 ease-forge',
                   'active:scale-[0.97]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   isExpanded
                     ? `bg-${color === 'arcane' ? 'arcane' : color === 'ember' ? 'ember' : color === 'verdant' ? 'verdant' : color === 'eldritch' ? 'eldritch' : 'white'}/10 border-${color === 'arcane' ? 'arcane' : color === 'ember' ? 'ember' : color === 'verdant' ? 'verdant' : color === 'eldritch' ? 'eldritch' : 'white'}/30`
-                    : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+                    : 'combat-card hover:border-gold/40',
                 )}
               >
                 <div className="flex flex-col items-start gap-0.5">
@@ -194,11 +194,11 @@ export function SceneResponseBank({ character, onUpdate }: SceneResponseBankProp
                                 className={cn(
                                   'min-h-[60px] w-full rounded-lg resize-y',
                                   'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                                  'border border-white/10',
+                                  'border border-bronze/25',
                                   'font-body text-sm px-3 py-2',
                                   'transition-all duration-200 ease-forge',
                                   'focus:border-arcane/60 focus:bg-void-2/80',
-                                  'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                                  'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                                   'focus:outline-none',
                                 )}
                               />
@@ -214,7 +214,7 @@ export function SceneResponseBank({ character, onUpdate }: SceneResponseBankProp
                                 <button
                                   type="button"
                                   onClick={cancelEdit}
-                                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-white/[0.04] text-forge-2 hover:bg-white/[0.08] transition-colors"
+                                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-gold/[0.04] text-forge-2 hover:bg-gold/[0.08] transition-colors"
                                   aria-label="Cancel edit"
                                 >
                                   <X size={16} aria-hidden />
@@ -264,11 +264,11 @@ export function SceneResponseBank({ character, onUpdate }: SceneResponseBankProp
                       className={cn(
                         'min-h-[44px] flex-1 rounded-xl resize-none',
                         'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                        'border border-white/10',
+                        'border border-bronze/25',
                         'font-body text-sm px-4 py-3',
                         'transition-all duration-200 ease-forge',
                         'focus:border-arcane/60 focus:bg-void-2/80',
-                        'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                        'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                         'focus:outline-none',
                       )}
                       onKeyDown={e => {

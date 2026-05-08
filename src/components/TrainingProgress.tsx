@@ -10,6 +10,7 @@ import { cn } from '../lib/cn'
 import { type TrainingProfile, xpForLevel, getDueFlashcards } from '../lib/training'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -56,19 +57,15 @@ export function TrainingProgress({ profile }: TrainingProgressProps) {
   const categoryStats = computeCategoryStats(profile)
 
   return (
-    <GlassCard className="p-4">
+    <GlassCard className="p-4 ornate-border">
       <div className="flex flex-col gap-4">
         {/* Top row: Level + XP bar + Streak */}
         <div className="flex items-center gap-3 flex-wrap">
           {/* Level badge */}
-          <div
-            className={cn(
-              'shrink-0 w-10 h-10 rounded-xl flex items-center justify-center',
-              'bg-arcane/15 border border-arcane/30',
-            )}
-          >
+          <div className="stat-frame">
+            <span className="text-xs text-forge-2">Level</span>
             <span className="text-arcane font-display font-bold text-sm">
-              L{profile.level}
+              {profile.level}
             </span>
           </div>
 
@@ -82,16 +79,16 @@ export function TrainingProgress({ profile }: TrainingProgressProps) {
                 {nextLevelXP} XP
               </span>
             </div>
-            <div className="h-2.5 rounded-full bg-white/[0.06] border border-white/10 overflow-hidden">
+            <div className="h-2.5 rounded-full bg-gold/[0.06] border border-bronze/25 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-arcane/80 to-arcane transition-all duration-500 ease-out"
+                className="h-full rounded-full bg-gradient-to-r from-gold/60 to-gold transition-all duration-500 ease-out"
                 style={{ width: `${progressPct}%` }}
               />
             </div>
           </div>
 
           {/* Streak */}
-          <div className="shrink-0 flex items-center gap-1.5">
+          <div className="stat-frame">
             <Flame size={16} className="text-ember" aria-hidden />
             <span className="font-mono text-sm text-forge-0">
               {profile.quizStreaks.current}
@@ -122,21 +119,19 @@ export function TrainingProgress({ profile }: TrainingProgressProps) {
         {/* Category accuracy bars */}
         {categoryStats.length > 0 && (
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium text-forge-2 uppercase tracking-wider">
-              Accuracy by Category
-            </span>
+            <OrnateHeader>Accuracy by Category</OrnateHeader>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {categoryStats.map((cat) => (
                 <div key={cat.category} className="flex items-center gap-2">
                   <span className="text-xs text-forge-1 w-20 truncate">
                     {CATEGORY_LABELS[cat.category] ?? cat.category}
                   </span>
-                  <div className="flex-1 h-2 rounded-full bg-white/[0.06] border border-white/10 overflow-hidden">
+                  <div className="flex-1 h-2 rounded-full bg-gold/[0.06] border border-bronze/25 overflow-hidden">
                     <div
                       className={cn(
                         'h-full rounded-full transition-all duration-300',
                         cat.accuracy >= 0.6
-                          ? (CATEGORY_COLORS[cat.category] ?? 'bg-arcane')
+                          ? 'bg-gradient-to-r from-gold/60 to-gold'
                           : 'bg-red-400',
                       )}
                       style={{ width: `${Math.round(cat.accuracy * 100)}%` }}

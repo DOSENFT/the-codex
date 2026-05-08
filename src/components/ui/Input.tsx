@@ -12,8 +12,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 /**
- * Glass-styled text input with optional leading icon, label, and error state.
- * Min height 44px for touch-target compliance. Border glows arcane on focus
+ * Warm-themed text input with optional leading icon, label, and error state.
+ * Min height 44px for touch-target compliance. Border glows gold on focus
  * and shifts to red on error.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -51,15 +51,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'min-h-[44px] w-full rounded-xl',
               // Appearance
               'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-              'border border-white/10',
+              'border border-bronze/30',
               'font-body text-sm',
               // Padding — shift right when icon present
               Icon ? 'pl-10 pr-4' : 'px-4',
               // Transitions
               'transition-all duration-200 ease-forge',
               // Focus
-              'focus:border-arcane/60 focus:bg-void-2/80',
-              'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+              'focus:border-gold/60 focus:bg-void-2/80',
+              'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               'focus:outline-none',
               // Error state
               error && [

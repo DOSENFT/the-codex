@@ -12,6 +12,8 @@ import type { TrainingProfile } from '../lib/training'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
+import { OrnateHeader } from './ui/OrnateHeader'
+import { ParchmentCard } from './ui/ParchmentCard'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -193,19 +195,17 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
     <div className="flex flex-col gap-4 animate-fade-in">
       {/* Progress header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <BookOpen size={16} className="text-eldritch" aria-hidden />
-          <span className="text-sm font-medium text-forge-1">Spaced Review</span>
+        <OrnateHeader>Spaced Review</OrnateHeader>
+        <div className="stat-frame">
+          <span className="text-xs text-forge-2">Progress</span>
+          <span className="font-mono text-forge-0">{currentIndex + 1}/{totalDue}</span>
         </div>
-        <Badge variant="eldritch">
-          {currentIndex + 1} / {totalDue}
-        </Badge>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 rounded-full bg-white/[0.06] border border-white/10 overflow-hidden">
+      <div className="h-1.5 rounded-full bg-gold/[0.06] border border-bronze/25 overflow-hidden">
         <div
-          className="h-full rounded-full bg-eldritch/70 transition-all duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-gold/60 to-gold transition-all duration-300"
           style={{ width: `${((currentIndex) / totalDue) * 100}%` }}
         />
       </div>
@@ -216,14 +216,14 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
           type="button"
           onClick={handleFlip}
           className={cn(
-            'relative w-full min-h-[200px] rounded-2xl border p-6',
+            'relative w-full min-h-[200px] rounded-2xl border p-6 ornate-border',
             'flex flex-col items-center justify-center text-center',
             'transition-all duration-300 ease-forge cursor-pointer select-none',
             'active:scale-[0.98]',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eldritch',
             isFlipped
               ? 'bg-eldritch/[0.06] border-eldritch/30 shadow-[0_0_20px_-4px_rgba(138,43,226,0.15)]'
-              : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.06] hover:border-white/20',
+              : 'bg-gold/[0.04] border-bronze/25 hover:bg-gold/[0.06] hover:border-gold/30',
           )}
           aria-label={isFlipped ? 'Showing answer, tap to flip back' : 'Tap to reveal answer'}
         >
@@ -322,7 +322,7 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
               'flex flex-col items-center gap-1 min-h-[52px] px-2 py-2.5 rounded-xl',
               'text-xs font-medium border transition-all duration-200 ease-forge',
               'active:scale-[0.95]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               'bg-arcane/[0.08] border-arcane/25 text-arcane',
               'hover:bg-arcane/[0.15]',
             )}

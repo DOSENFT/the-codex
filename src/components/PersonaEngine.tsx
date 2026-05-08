@@ -23,6 +23,8 @@ import { SYSTEM_PROMPTS } from '../lib/prompts'
 import type { Character, CharacterPersona } from '../lib/character'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
+import { ParchmentCard } from './ui/ParchmentCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { Badge } from './ui/Badge'
 import { DialogueBank } from './DialogueBank'
 import { SceneResponseBank } from './SceneResponseBank'
@@ -96,7 +98,7 @@ function EditableList({
                 variant === 'ember' && 'bg-ember/10 border-ember/20 text-ember',
                 variant === 'verdant' && 'bg-verdant/10 border-verdant/20 text-verdant',
                 variant === 'eldritch' && 'bg-eldritch/10 border-eldritch/20 text-eldritch',
-                variant === 'neutral' && 'bg-white/[0.06] border-white/10 text-forge-1',
+                variant === 'neutral' && 'bg-gold/[0.06] border-bronze/25 text-forge-1',
               )}
             >
               <span className="leading-snug">{item}</span>
@@ -121,11 +123,11 @@ function EditableList({
           className={cn(
             'min-h-[44px] flex-1 rounded-xl',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-            'border border-white/10',
+            'border border-bronze/25',
             'font-body text-sm px-4',
             'transition-all duration-200 ease-forge',
             'focus:border-arcane/60 focus:bg-void-2/80',
-            'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+            'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
             'focus:outline-none',
           )}
           onKeyDown={e => {
@@ -339,11 +341,11 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
             className={cn(
               'min-h-[80px] w-full rounded-xl resize-y',
               'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-              'border border-white/10',
+              'border border-bronze/25',
               'font-body text-sm px-4 py-3',
               'transition-all duration-200 ease-forge',
               'focus:border-arcane/60 focus:bg-void-2/80',
-              'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+              'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               'focus:outline-none',
             )}
           />
@@ -382,11 +384,11 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
             className={cn(
               'min-h-[88px] w-full rounded-xl resize-y',
               'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-              'border border-white/10',
+              'border border-bronze/25',
               'font-body text-sm px-4 py-3',
               'transition-all duration-200 ease-forge',
               'focus:border-arcane/60 focus:bg-void-2/80',
-              'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+              'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               'focus:outline-none',
             )}
           />
@@ -407,11 +409,11 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
             className={cn(
               'min-h-[80px] w-full rounded-xl resize-y',
               'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-              'border border-white/10',
+              'border border-bronze/25',
               'font-body text-sm px-4 py-3',
               'transition-all duration-200 ease-forge',
               'focus:border-arcane/60 focus:bg-void-2/80',
-              'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+              'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               'focus:outline-none',
             )}
           />
@@ -435,52 +437,52 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
     <div className="flex flex-col gap-4 animate-fade-in overflow-y-auto max-h-[70vh] pr-1">
       {/* Default State */}
       {persona.defaultState && (
-        <GlassCard>
+        <ParchmentCard>
           <div className="flex items-center gap-2 mb-2">
-            <Eye size={16} className="text-arcane" aria-hidden />
-            <h4 className="text-sm font-semibold text-forge-0">Default State</h4>
+            <Eye size={16} className="text-gold" aria-hidden />
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Default State</h4>
           </div>
           <p className="text-sm text-forge-1 leading-relaxed">{persona.defaultState}</p>
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Core Traits */}
       {(persona.coreTraits?.length ?? 0) > 0 && (
-        <GlassCard>
+        <ParchmentCard>
           <div className="flex items-center gap-2 mb-3">
-            <Shield size={16} className="text-ember" aria-hidden />
-            <h4 className="text-sm font-semibold text-forge-0">Core Traits</h4>
+            <Shield size={16} className="text-gold" aria-hidden />
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Core Traits</h4>
           </div>
           <div className="flex flex-wrap gap-2">
             {persona.coreTraits!.map((t, i) => (
               <Badge key={i} variant="ember">{t.text}</Badge>
             ))}
           </div>
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Color Traits */}
       {(persona.colorTraits?.length ?? 0) > 0 && (
-        <GlassCard>
+        <ParchmentCard>
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles size={16} className="text-arcane" aria-hidden />
-            <h4 className="text-sm font-semibold text-forge-0">Color Traits</h4>
+            <Sparkles size={16} className="text-gold" aria-hidden />
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Color Traits</h4>
           </div>
           <div className="flex flex-wrap gap-2">
             {persona.colorTraits!.map((t, i) => (
               <Badge key={i} variant="arcane">{t.text}</Badge>
             ))}
           </div>
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Wants & Fears */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {(persona.wants?.length ?? 0) > 0 && (
-          <GlassCard>
+          <ParchmentCard>
             <div className="flex items-center gap-2 mb-3">
               <Heart size={16} className="text-verdant" aria-hidden />
-              <h4 className="text-sm font-semibold text-forge-0">Wants</h4>
+              <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Wants</h4>
             </div>
             <ul className="flex flex-col gap-1.5">
               {persona.wants!.map((w, i) => (
@@ -489,13 +491,13 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                 </li>
               ))}
             </ul>
-          </GlassCard>
+          </ParchmentCard>
         )}
         {(persona.fears?.length ?? 0) > 0 && (
-          <GlassCard>
+          <ParchmentCard>
             <div className="flex items-center gap-2 mb-3">
               <Zap size={16} className="text-eldritch" aria-hidden />
-              <h4 className="text-sm font-semibold text-forge-0">Fears</h4>
+              <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Fears</h4>
             </div>
             <ul className="flex flex-col gap-1.5">
               {persona.fears!.map((f, i) => (
@@ -504,72 +506,72 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                 </li>
               ))}
             </ul>
-          </GlassCard>
+          </ParchmentCard>
         )}
       </div>
 
       {/* Pressure Response */}
       {persona.pressureResponse && (
-        <GlassCard>
+        <ParchmentCard>
           <div className="flex items-center gap-2 mb-2">
             <Zap size={16} className="text-ember" aria-hidden />
-            <h4 className="text-sm font-semibold text-forge-0">Under Pressure</h4>
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Under Pressure</h4>
           </div>
           <p className="text-sm text-forge-1 leading-relaxed">{persona.pressureResponse}</p>
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Relationships */}
       {(persona.relationships?.length ?? 0) > 0 && (
-        <GlassCard>
+        <ParchmentCard>
           <div className="flex items-center gap-2 mb-3">
-            <Users size={16} className="text-arcane" aria-hidden />
-            <h4 className="text-sm font-semibold text-forge-0">Relationships</h4>
+            <Users size={16} className="text-gold" aria-hidden />
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Relationships</h4>
           </div>
           <ul className="flex flex-col gap-1.5">
             {persona.relationships!.map((r, i) => (
-              <li key={i} className="text-sm text-forge-1 pl-2 border-l-2 border-arcane/30">
+              <li key={i} className="text-sm text-forge-1 pl-2 border-l-2 border-gold/30">
                 {r}
               </li>
             ))}
           </ul>
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Decision Tree */}
       {persona.decisionTree && (
-        <GlassCard>
+        <ParchmentCard>
           <div className="flex items-center gap-2 mb-2">
             <BookOpen size={16} className="text-verdant" aria-hidden />
-            <h4 className="text-sm font-semibold text-forge-0">Decision Tree</h4>
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Decision Tree</h4>
           </div>
           <p className="text-sm text-forge-1 leading-relaxed whitespace-pre-wrap">
             {persona.decisionTree}
           </p>
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Catchphrases (study mode - just displayed) */}
       {(persona.catchphrases?.length ?? 0) > 0 && (
-        <GlassCard>
+        <ParchmentCard>
           <div className="flex items-center gap-2 mb-3">
-            <MessageSquare size={16} className="text-eldritch" aria-hidden />
-            <h4 className="text-sm font-semibold text-forge-0">Catchphrases</h4>
+            <MessageSquare size={16} className="text-gold" aria-hidden />
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Catchphrases</h4>
           </div>
           <div className="flex flex-col gap-2">
             {persona.catchphrases!.map((phrase, i) => (
-              <p key={i} className="text-sm text-forge-1 italic pl-3 border-l-2 border-eldritch/30">
-                &ldquo;{phrase}&rdquo;
+              <p key={i} className="text-sm text-forge-1 italic pl-3 border-l-2 border-gold/30">
+                <span className="text-gold/40 text-2xl font-display leading-none mr-1">&ldquo;</span>{phrase}<span className="text-gold/40 text-2xl font-display leading-none ml-1">&rdquo;</span>
               </p>
             ))}
           </div>
-        </GlassCard>
+        </ParchmentCard>
       )}
 
       {/* Patron */}
       {persona.patron.name && (
-        <GlassCard>
-          <h4 className="text-sm font-semibold text-forge-0 mb-2">
+        <ParchmentCard>
+          <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide mb-2">
             Patron: {persona.patron.name}
           </h4>
           {persona.patron.domains.length > 0 && (
@@ -582,16 +584,19 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
           {persona.patron.rpNotes && (
             <p className="text-sm text-forge-2 leading-relaxed">{persona.patron.rpNotes}</p>
           )}
-        </GlassCard>
+        </ParchmentCard>
       )}
 
+      {/* Divider before Dialogue Bank */}
+      <div className="ornate-divider" />
+
       {/* Dialogue Bank in study mode */}
-      <GlassCard>
+      <GlassCard className="ornate-border">
         <DialogueBank character={character} onUpdate={onUpdate} />
       </GlassCard>
 
       {/* Scene Responses in study mode */}
-      <GlassCard>
+      <GlassCard className="ornate-border">
         <SceneResponseBank character={character} onUpdate={onUpdate} />
       </GlassCard>
     </div>
@@ -606,8 +611,8 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
       <div className="flex flex-col gap-4 animate-fade-in">
         {/* Quick-reference: Core + Color Traits */}
         {((persona.coreTraits?.length ?? 0) > 0 || (persona.colorTraits?.length ?? 0) > 0) && (
-          <GlassCard>
-            <h4 className="text-sm font-semibold text-forge-0 mb-3">Quick Traits</h4>
+          <ParchmentCard>
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide mb-3">Quick Traits</h4>
             <div className="flex flex-wrap gap-2">
               {(persona.coreTraits ?? []).map((t, i) => (
                 <Badge key={`core-${i}`} variant="ember">{t.text}</Badge>
@@ -616,13 +621,13 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                 <Badge key={`color-${i}`} variant="arcane">{t.text}</Badge>
               ))}
             </div>
-          </GlassCard>
+          </ParchmentCard>
         )}
 
         {/* Tap-to-copy Catchphrases */}
         {allCatchphrases.length > 0 && (
-          <GlassCard>
-            <h4 className="text-sm font-semibold text-forge-0 mb-3">Catchphrases</h4>
+          <ParchmentCard>
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide mb-3">Catchphrases</h4>
             <div className="flex flex-col gap-2">
               {allCatchphrases.map((phrase, idx) => (
                 <button
@@ -630,17 +635,17 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                   type="button"
                   onClick={() => copyCatchphrase(idx, phrase)}
                   className={cn(
-                    'w-full min-h-[48px] px-4 py-3 rounded-xl text-left',
-                    'bg-white/[0.04] border border-white/10',
+                    'w-full min-h-[48px] px-4 py-3 rounded-xl text-left combat-card',
+                    'bg-gold/[0.04] border border-bronze/25',
                     'text-sm text-forge-1 italic',
                     'transition-all duration-200 ease-forge',
                     'active:scale-[0.97]',
-                    'hover:bg-white/[0.08] hover:border-white/20',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                    'hover:bg-gold/[0.08] hover:border-gold/30',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span>&ldquo;{phrase}&rdquo;</span>
+                    <span><span className="text-gold/40 text-2xl font-display leading-none mr-1">&ldquo;</span>{phrase}<span className="text-gold/40 text-2xl font-display leading-none ml-1">&rdquo;</span></span>
                     {copiedPhrase === idx ? (
                       <Check size={14} className="text-verdant shrink-0" aria-hidden />
                     ) : (
@@ -650,13 +655,13 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                 </button>
               ))}
             </div>
-          </GlassCard>
+          </ParchmentCard>
         )}
 
         {/* Favorite Dialogue Lines (tap-to-copy) */}
         {favoriteDialogues.length > 0 && (
-          <GlassCard>
-            <h4 className="text-sm font-semibold text-forge-0 mb-3">Favorite Lines</h4>
+          <ParchmentCard>
+            <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide mb-3">Favorite Lines</h4>
             <div className="flex flex-col gap-2">
               {favoriteDialogues.map((line, idx) => (
                 <button
@@ -664,18 +669,18 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                   type="button"
                   onClick={() => copyCatchphrase(100 + idx, line.text)}
                   className={cn(
-                    'w-full min-h-[48px] px-4 py-3 rounded-xl text-left',
-                    'bg-white/[0.04] border border-white/10',
+                    'w-full min-h-[48px] px-4 py-3 rounded-xl text-left combat-card',
+                    'bg-gold/[0.04] border border-bronze/25',
                     'text-sm text-forge-1 italic',
                     'transition-all duration-200 ease-forge',
                     'active:scale-[0.97]',
-                    'hover:bg-white/[0.08] hover:border-white/20',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                    'hover:bg-gold/[0.08] hover:border-gold/30',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1">
-                      <span>&ldquo;{line.text}&rdquo;</span>
+                      <span><span className="text-gold/40 text-2xl font-display leading-none mr-1">&ldquo;</span>{line.text}<span className="text-gold/40 text-2xl font-display leading-none ml-1">&rdquo;</span></span>
                       <Badge variant="neutral" className="ml-2">{line.context}</Badge>
                     </div>
                     {copiedPhrase === 100 + idx ? (
@@ -687,14 +692,14 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                 </button>
               ))}
             </div>
-          </GlassCard>
+          </ParchmentCard>
         )}
 
         {/* Patron quick card */}
         {persona.patron.name && (
-          <GlassCard>
+          <ParchmentCard>
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-forge-0">Patron</h4>
+              <h4 className="text-sm font-display font-semibold text-forge-0 tracking-wide">Patron</h4>
               <Badge variant="eldritch">{persona.patron.name}</Badge>
             </div>
             {persona.patron.domains.length > 0 && (
@@ -704,23 +709,23 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
                 ))}
               </div>
             )}
-          </GlassCard>
+          </ParchmentCard>
         )}
 
         {/* Empty state for in-session */}
         {allCatchphrases.length === 0 && favoriteDialogues.length === 0 &&
           (persona.coreTraits?.length ?? 0) === 0 && (persona.colorTraits?.length ?? 0) === 0 && (
-          <GlassCard className="p-8">
+          <ParchmentCard className="p-8">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 rounded-xl bg-arcane/10 flex items-center justify-center">
-                <Sparkles size={24} className="text-arcane" aria-hidden />
+              <div className="w-12 h-12 rounded-xl bg-gold/[0.06] flex items-center justify-center">
+                <Sparkles size={24} className="text-gold" aria-hidden />
               </div>
               <p className="text-sm text-forge-2 max-w-xs">
                 Build your persona in the Builder tab first. Your traits, catchphrases, and
                 favorite dialogue lines will appear here for quick reference during play.
               </p>
             </div>
-          </GlassCard>
+          </ParchmentCard>
         )}
       </div>
     )
@@ -730,7 +735,7 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
   const renderRPAid = () => (
     <div className="flex flex-col gap-4">
       {/* Study / In-Session toggle */}
-      <div className="flex rounded-xl border border-white/10 overflow-hidden">
+      <div className="flex rounded-xl border border-gold/25 overflow-hidden">
         <button
           type="button"
           onClick={() => setRPMode('study')}
@@ -738,10 +743,10 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
             'flex-1 min-h-[44px] px-4 text-sm font-medium',
             'flex items-center justify-center gap-2',
             'transition-all duration-200 ease-forge',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             rpMode === 'study'
-              ? 'bg-arcane/15 text-arcane'
-              : 'bg-white/[0.02] text-forge-2 hover:text-forge-1 hover:bg-white/[0.04]',
+              ? 'bg-gold/[0.12] text-gold border-r border-gold/25'
+              : 'bg-gold/[0.02] text-forge-2 hover:text-forge-1 hover:bg-gold/[0.04] border-r border-gold/25',
           )}
         >
           <BookOpen size={14} aria-hidden />
@@ -754,10 +759,10 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
             'flex-1 min-h-[44px] px-4 text-sm font-medium',
             'flex items-center justify-center gap-2',
             'transition-all duration-200 ease-forge',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             rpMode === 'in_session'
-              ? 'bg-ember/15 text-ember'
-              : 'bg-white/[0.02] text-forge-2 hover:text-forge-1 hover:bg-white/[0.04]',
+              ? 'bg-gold/[0.12] text-gold'
+              : 'bg-gold/[0.02] text-forge-2 hover:text-forge-1 hover:bg-gold/[0.04]',
           )}
         >
           <Wand2 size={14} aria-hidden />
@@ -774,16 +779,14 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-display text-lg font-semibold text-forge-0">
-          Persona Engine
-        </h2>
-        {persona.lastEditedAt && (
+      <OrnateHeader>Persona Engine</OrnateHeader>
+      {persona.lastEditedAt && (
+        <div className="flex justify-end -mt-3">
           <span className="text-xs text-forge-2">
             Last edited: {new Date(persona.lastEditedAt).toLocaleDateString()}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Tab switcher */}
       <div className="flex gap-2">
@@ -795,10 +798,10 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
             'text-sm font-medium select-none',
             'transition-all duration-200 ease-forge',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             activeTab === 'builder'
-              ? 'bg-arcane/15 text-arcane border border-arcane/30'
-              : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+              ? 'ornate-border bg-arcane/15 text-arcane border border-arcane/30'
+              : 'bg-gold/[0.04] text-forge-1 border border-bronze/25 hover:bg-gold/[0.08] hover:border-gold/30',
           )}
         >
           <Pencil size={14} aria-hidden />
@@ -812,10 +815,10 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
             'text-sm font-medium select-none',
             'transition-all duration-200 ease-forge',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             activeTab === 'rp_aid'
-              ? 'bg-eldritch/15 text-eldritch border border-eldritch/30'
-              : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+              ? 'ornate-border bg-eldritch/15 text-eldritch border border-eldritch/30'
+              : 'bg-gold/[0.04] text-forge-1 border border-bronze/25 hover:bg-gold/[0.08] hover:border-gold/30',
           )}
         >
           <Eye size={14} aria-hidden />

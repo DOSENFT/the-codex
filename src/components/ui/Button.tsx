@@ -14,23 +14,23 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: [
-    'bg-gradient-to-r from-arcane to-eldritch text-void-0 font-semibold',
-    'shadow-[0_0_16px_-4px_rgba(61,210,255,0.35)]',
-    'hover:shadow-[0_0_24px_-2px_rgba(61,210,255,0.45)]',
+    'bg-gradient-to-r from-gold to-arcane text-void-0 font-semibold',
+    'shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)]',
+    'hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)]',
     'hover:brightness-110',
     'disabled:from-forge-2/40 disabled:to-forge-2/40 disabled:text-forge-2 disabled:shadow-none',
   ].join(' '),
 
   secondary: [
-    'bg-white/[0.04] text-forge-0 font-medium',
-    'border border-white/10',
-    'hover:bg-white/[0.08] hover:border-white/20',
-    'disabled:text-forge-2 disabled:border-white/5 disabled:bg-transparent',
+    'bg-void-2/60 text-forge-0 font-medium',
+    'border border-gold/20',
+    'hover:bg-void-2/80 hover:border-gold/40',
+    'disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent',
   ].join(' '),
 
   ghost: [
     'bg-transparent text-forge-1 font-medium',
-    'hover:bg-white/[0.06] hover:text-forge-0',
+    'hover:bg-gold/[0.06] hover:text-forge-0',
     'disabled:text-forge-2 disabled:bg-transparent',
   ].join(' '),
 }
@@ -73,7 +73,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         // Press feedback
         'active:scale-[0.97]',
         // Focus ring
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         // Disabled cursor
         'disabled:pointer-events-none disabled:cursor-not-allowed',
         // Variant + size

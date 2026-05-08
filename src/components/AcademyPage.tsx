@@ -8,6 +8,7 @@ import { ConditionDrill } from './ConditionDrill'
 import { RoleplayCoach } from './RoleplayCoach'
 import { SpacedFlashcards } from './SpacedFlashcards'
 import { TrainingProgress } from './TrainingProgress'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -65,12 +66,15 @@ export function AcademyPage({ character, onCharacterUpdate }: AcademyPageProps) 
   const dueCount = getDueCards().length
 
   return (
-    <section className="flex flex-col gap-4 animate-fade-in" aria-label="Academy">
+    <section className="flex flex-col gap-5 animate-fade-in" aria-label="Academy">
+      {/* ─── Section Header ─── */}
+      <OrnateHeader>Academy</OrnateHeader>
+
       {/* ─── Training Progress ─── */}
       {profile && <TrainingProgress profile={profile} />}
 
       {/* ─── Segmented Control ─── */}
-      <div className="flex gap-2 p-1 rounded-xl bg-void-2/60 border border-white/[0.06]">
+      <div className="flex gap-2 p-1 rounded-xl bg-void-2/60 border border-gold/15 ornate-border">
         <button
           type="button"
           onClick={() => setTab('training')}
@@ -78,9 +82,9 @@ export function AcademyPage({ character, onCharacterUpdate }: AcademyPageProps) 
             'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg',
             'text-sm font-medium transition-all duration-200 ease-forge',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             tab === 'training'
-              ? 'bg-white/[0.08] text-forge-0 shadow-sm border border-white/10'
+              ? 'bg-gold/[0.08] text-forge-0 shadow-sm border border-bronze/25'
               : 'text-forge-2 hover:text-forge-1',
           )}
         >
@@ -94,9 +98,9 @@ export function AcademyPage({ character, onCharacterUpdate }: AcademyPageProps) 
             'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg',
             'text-sm font-medium transition-all duration-200 ease-forge relative',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             tab === 'quizzes'
-              ? 'bg-white/[0.08] text-forge-0 shadow-sm border border-white/10'
+              ? 'bg-gold/[0.08] text-forge-0 shadow-sm border border-bronze/25'
               : 'text-forge-2 hover:text-forge-1',
           )}
         >
@@ -109,6 +113,9 @@ export function AcademyPage({ character, onCharacterUpdate }: AcademyPageProps) 
           )}
         </button>
       </div>
+
+      {/* ─── Divider ─── */}
+      <div className="ornate-divider" aria-hidden />
 
       {/* ─── Content ─── */}
       {tab === 'training' && (

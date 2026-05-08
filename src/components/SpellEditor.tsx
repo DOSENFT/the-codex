@@ -6,6 +6,7 @@ import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { Select } from './ui/Select'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 // ---------------------------------------------------------------------------
 // Types & Constants
@@ -129,10 +130,10 @@ function ToggleChip({
         'border',
         'transition-all duration-200 ease-forge',
         'active:scale-[0.95]',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         active
           ? activeStyles[variant]
-          : 'bg-white/5 text-forge-2 border-white/5 hover:bg-white/8 hover:text-forge-1',
+          : 'bg-void-2/60 text-forge-2 border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
       )}
     >
       {label}
@@ -254,14 +255,15 @@ export function SpellEditor({
       <div
         className={cn(
           'relative w-full sm:max-w-lg max-h-[90vh]',
-          'bg-void-1 border border-white/10 rounded-t-2xl sm:rounded-2xl',
-          'shadow-[0_0_48px_-12px_rgba(61,210,255,0.15)]',
+          'bg-void-1 border border-bronze/25 rounded-t-2xl sm:rounded-2xl',
+          'shadow-[0_0_48px_-12px_rgba(197,165,90,0.15)]',
           'flex flex-col overflow-hidden',
           'animate-in slide-in-from-bottom-4 duration-300',
+          'ornate-border',
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-bronze/15 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <Wand2 size={16} className="text-arcane shrink-0" aria-hidden />
             <h2 className="font-display text-sm font-bold text-forge-0 truncate">
@@ -274,10 +276,10 @@ export function SpellEditor({
             aria-label="Close spell editor"
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center',
-              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
+              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
               'transition-colors duration-200',
               'active:scale-[0.92]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             )}
           >
             <X size={18} />
@@ -296,10 +298,10 @@ export function SpellEditor({
                 'text-sm font-medium',
                 'border transition-all duration-200 ease-forge',
                 'active:scale-[0.95]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 !showFullDetails
                   ? 'bg-arcane/15 text-arcane border-arcane/25'
-                  : 'bg-white/5 text-forge-2 border-white/5 hover:bg-white/8 hover:text-forge-1',
+                  : 'bg-void-2/60 text-forge-2 border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
               )}
             >
               Quick Add
@@ -312,10 +314,10 @@ export function SpellEditor({
                 'text-sm font-medium',
                 'border transition-all duration-200 ease-forge',
                 'active:scale-[0.95]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 showFullDetails
                   ? 'bg-arcane/15 text-arcane border-arcane/25'
-                  : 'bg-white/5 text-forge-2 border-white/5 hover:bg-white/8 hover:text-forge-1',
+                  : 'bg-void-2/60 text-forge-2 border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
               )}
             >
               Full Details
@@ -378,9 +380,7 @@ export function SpellEditor({
             <div className="space-y-4 animate-fade-in">
               {/* Casting Details */}
               <GlassCard className="p-4 space-y-3">
-                <h3 className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                  Casting Details
-                </h3>
+                <OrnateHeader>Casting Details</OrnateHeader>
 
                 <Select
                   label="Casting Time"
@@ -414,9 +414,7 @@ export function SpellEditor({
 
               {/* Description */}
               <GlassCard className="p-4 space-y-3">
-                <h3 className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                  Description
-                </h3>
+                <OrnateHeader>Description</OrnateHeader>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-forge-1 select-none">
@@ -430,11 +428,11 @@ export function SpellEditor({
                     className={cn(
                       'min-h-[88px] w-full rounded-xl resize-y',
                       'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                      'border border-white/10',
+                      'border border-bronze/25',
                       'font-body text-sm px-4 py-3',
                       'transition-all duration-200 ease-forge',
                       'focus:border-arcane/60 focus:bg-void-2/80',
-                      'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                      'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                       'focus:outline-none',
                     )}
                   />
@@ -452,11 +450,11 @@ export function SpellEditor({
                     className={cn(
                       'min-h-[60px] w-full rounded-xl resize-y',
                       'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                      'border border-white/10',
+                      'border border-bronze/25',
                       'font-body text-sm px-4 py-3',
                       'transition-all duration-200 ease-forge',
                       'focus:border-arcane/60 focus:bg-void-2/80',
-                      'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                      'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                       'focus:outline-none',
                     )}
                   />
@@ -472,9 +470,7 @@ export function SpellEditor({
 
               {/* Combat Stats */}
               <GlassCard className="p-4 space-y-3">
-                <h3 className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                  Combat Stats
-                </h3>
+                <OrnateHeader>Combat Stats</OrnateHeader>
 
                 <div className="grid grid-cols-2 gap-3">
                   <Select
@@ -523,11 +519,11 @@ export function SpellEditor({
               onClick={() => setShowFullDetails(true)}
               className={cn(
                 'w-full min-h-[44px] flex items-center justify-center gap-1.5',
-                'rounded-xl border border-white/5 text-xs font-medium text-forge-2',
-                'hover:bg-white/[0.03] hover:text-forge-1',
+                'rounded-xl border border-bronze/15 text-xs font-medium text-forge-2',
+                'hover:bg-gold/[0.03] hover:text-forge-1',
                 'transition-colors duration-200',
                 'active:scale-[0.98]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               )}
             >
               <ChevronDown size={14} aria-hidden />
@@ -537,7 +533,7 @@ export function SpellEditor({
         </div>
 
         {/* Footer — action buttons */}
-        <div className="flex gap-3 p-4 border-t border-white/5 shrink-0">
+        <div className="flex gap-3 p-4 border-t border-bronze/15 shrink-0">
           <Button
             variant="secondary"
             size="md"
@@ -550,7 +546,7 @@ export function SpellEditor({
             variant="primary"
             size="md"
             onClick={handleSave}
-            className="flex-1"
+            className="flex-1 bg-gradient-to-r from-gold/90 via-bronze to-gold/90 hover:from-gold hover:via-bronze/90 hover:to-gold text-void-0 font-bold"
           >
             {isEditMode ? 'Save Changes' : 'Add Spell'}
           </Button>

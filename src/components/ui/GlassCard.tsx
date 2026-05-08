@@ -9,9 +9,8 @@ interface GlassCardProps {
 }
 
 /**
- * Glass-morphism card built on the `.glass-card` base class from index.css.
- * When `hover` is true the card gains a subtle border brightening + shadow
- * on hover via the `.glass-card-hover` utility and an arcane glow ring.
+ * Dark ornate card with gold/bronze border accents.
+ * When `hover` is true the card gains a warm gold border brightening + shadow.
  */
 export function GlassCard({ children, className, hover = false }: GlassCardProps) {
   return (
@@ -20,7 +19,7 @@ export function GlassCard({ children, className, hover = false }: GlassCardProps
         'glass-card p-5 transition-all duration-300 ease-forge',
         hover && [
           'glass-card-hover cursor-pointer',
-          'hover:shadow-[0_0_24px_-4px_rgba(61,210,255,0.12)]',
+          'hover:shadow-[0_0_24px_-4px_rgba(197,165,90,0.12)]',
         ],
         className,
       )}

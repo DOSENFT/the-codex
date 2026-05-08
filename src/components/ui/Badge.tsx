@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
-type BadgeVariant = 'arcane' | 'eldritch' | 'ember' | 'verdant' | 'neutral'
+type BadgeVariant = 'arcane' | 'eldritch' | 'ember' | 'verdant' | 'neutral' | 'gold'
 
 interface BadgeProps {
   variant?: BadgeVariant
@@ -14,7 +14,8 @@ const variantStyles: Record<BadgeVariant, string> = {
   eldritch: 'bg-eldritch/15 text-eldritch border-eldritch/25',
   ember:    'bg-ember/15 text-ember border-ember/25',
   verdant:  'bg-verdant/15 text-verdant border-verdant/25',
-  neutral:  'bg-white/8 text-forge-1 border-white/10',
+  gold:     'bg-gold/15 text-gold border-gold/25',
+  neutral:  'bg-void-2/60 text-forge-1 border-bronze/20',
 }
 
 /**

@@ -8,14 +8,14 @@ interface ParchmentCardProps {
 
 /**
  * Dark-fantasy parchment card with warm radial gradient texture,
- * ember/gold border, and ornamental corner flourishes via pseudo-elements.
+ * gold border, and ornamental corner flourishes via pseudo-elements.
  */
 export function ParchmentCard({ children, className }: ParchmentCardProps) {
   return (
     <div
       className={cn(
         'parchment-card relative p-5 rounded-xl',
-        'border border-ember/25',
+        'border border-gold/25',
         'transition-all duration-300 ease-forge',
         className,
       )}

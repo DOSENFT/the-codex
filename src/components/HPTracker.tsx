@@ -23,6 +23,7 @@ import {
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
+import { OrnateHeader } from './ui/OrnateHeader'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -187,36 +188,36 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
   // -------------------------------------------
 
   return (
-    <GlassCard className="space-y-4">
+    <GlassCard className="space-y-4 ornate-border">
       {/* Section Header */}
       <div className="flex items-center gap-2">
         <Heart size={18} className="text-red-400 shrink-0" aria-hidden />
-        <h3 className="font-display text-sm font-semibold text-forge-0 tracking-wide uppercase">
-          Hit Points
-        </h3>
+        <OrnateHeader className="flex-1">Hit Points</OrnateHeader>
       </div>
 
       {/* HP Display */}
-      <div className="flex items-center justify-center gap-2">
-        <span
-          className={cn(
-            'font-mono text-4xl font-bold tabular-nums transition-colors duration-300',
-            hpColor,
-            isCritical && 'animate-pulse',
-          )}
-          aria-label={`${currentHP} of ${maxHP} hit points`}
-        >
-          {currentHP}
-          <span className="text-forge-2 text-2xl mx-1">/</span>
-          <span className="text-forge-1 text-2xl">{maxHP}</span>
-        </span>
+      <div className="stat-frame mx-auto px-6 py-3">
+        <div className="flex items-center justify-center gap-2">
+          <span
+            className={cn(
+              'font-mono text-4xl font-bold tabular-nums transition-colors duration-300',
+              hpColor,
+              isCritical && 'animate-pulse',
+            )}
+            aria-label={`${currentHP} of ${maxHP} hit points`}
+          >
+            {currentHP}
+            <span className="text-forge-2 text-2xl mx-1">/</span>
+            <span className="text-forge-1 text-2xl">{maxHP}</span>
+          </span>
 
-        {/* Temp HP Badge */}
-        {tempHP > 0 && (
-          <Badge variant="arcane" className="ml-1 text-xs font-mono">
-            +{tempHP} temp
-          </Badge>
-        )}
+          {/* Temp HP Badge */}
+          {tempHP > 0 && (
+            <Badge variant="arcane" className="ml-1 text-xs font-mono">
+              +{tempHP} temp
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* HP Bar */}
@@ -313,10 +314,10 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
               className={cn(
                 'min-h-[44px] flex-1 rounded-xl px-4',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                'border border-white/10 font-mono text-lg',
+                'border border-bronze/25 font-mono text-lg',
                 'transition-all duration-200 ease-forge',
                 'focus:outline-none focus:border-arcane/60 focus:bg-void-2/80',
-                'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
               )}
               aria-label={`${inputMode} amount`}
             />
@@ -329,12 +330,12 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                 onClick={() => handleQuickValue(v)}
                 className={cn(
                   'min-h-[44px] min-w-[44px] rounded-xl',
-                  'bg-void-2/60 border border-white/10',
+                  'bg-void-2/60 border border-bronze/25',
                   'font-mono text-sm text-forge-1',
                   'transition-all duration-200 ease-forge',
-                  'hover:bg-white/[0.08] hover:border-white/20 hover:text-forge-0',
+                  'hover:bg-gold/[0.08] hover:border-gold/30 hover:text-forge-0',
                   'active:scale-[0.95]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   inputValue === String(v) && 'border-arcane/40 text-arcane bg-arcane/10',
                 )}
                 aria-label={`Set value to ${v}`}
@@ -355,7 +356,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                 inputMode === 'heal' &&
                   'from-verdant to-emerald-500 shadow-[0_0_16px_-4px_rgba(57,217,138,0.35)]',
                 inputMode === 'temp' &&
-                  'from-arcane to-cyan-500 shadow-[0_0_16px_-4px_rgba(61,210,255,0.35)]',
+                  'from-arcane to-gold shadow-[0_0_16px_-4px_rgba(197,165,90,0.3)]',
               )}
               onClick={handleApply}
               disabled={!inputValue || parseInt(inputValue, 10) <= 0}
@@ -373,7 +374,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
 
       {/* Death Saves — only visible at 0 HP */}
       {isDead && (
-        <div className="animate-slide-up space-y-3 pt-2 border-t border-white/5">
+        <div className="animate-slide-up space-y-3 pt-2 border-t border-bronze/15">
           {isFullDead ? (
             <div className="flex items-center justify-center gap-2 py-3">
               <Skull size={20} className="text-red-400" aria-hidden />
@@ -406,7 +407,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                       disabled={character.deathSaves.successes > i}
                       className={cn(
                         'w-8 h-8 rounded-full border-2 transition-all duration-200 ease-forge',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         character.deathSaves.successes > i
                           ? 'bg-verdant/30 border-verdant shadow-[0_0_8px_-2px_rgba(57,217,138,0.4)]'
                           : 'bg-transparent border-forge-2/40 hover:border-verdant/60 active:scale-90 cursor-pointer',
@@ -437,7 +438,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                       disabled={character.deathSaves.failures > i}
                       className={cn(
                         'w-8 h-8 rounded-full border-2 transition-all duration-200 ease-forge',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         character.deathSaves.failures > i
                           ? 'bg-red-400/30 border-red-400 shadow-[0_0_8px_-2px_rgba(248,113,113,0.4)]'
                           : 'bg-transparent border-forge-2/40 hover:border-red-400/60 active:scale-90 cursor-pointer',
@@ -468,7 +469,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
       )}
 
       {/* Conditions Section */}
-      <div className="space-y-3 pt-2 border-t border-white/5">
+      <div className="space-y-3 pt-2 border-t border-bronze/15">
         <h4 className="font-display text-xs font-semibold text-forge-2 uppercase tracking-wider">
           Active Conditions
         </h4>
@@ -492,7 +493,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                   'min-h-[44px] rounded-xl px-3 py-2 text-left',
                   'border transition-all duration-200 ease-forge',
                   'active:scale-[0.97]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   isActive
                     ? CATEGORY_ACTIVE_COLORS[condition.category]
                     : cn(

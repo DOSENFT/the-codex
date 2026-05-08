@@ -25,6 +25,8 @@ import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { Input } from './ui/Input'
+import { OrnateHeader } from './ui/OrnateHeader'
+import { ParchmentCard } from './ui/ParchmentCard'
 import { SpellEditor } from './SpellEditor'
 
 // ---------------------------------------------------------------------------
@@ -208,7 +210,7 @@ function ComponentPills({ components }: { components: string }) {
           className={cn(
             'inline-flex items-center justify-center',
             'h-5 w-5 rounded text-[10px] font-mono font-bold',
-            'bg-white/8 text-forge-1 border border-white/10',
+            'bg-void-2/60 text-forge-1 border border-bronze/25',
           )}
         >
           {l}
@@ -269,7 +271,7 @@ function SpellCard({
   return (
     <GlassCard
       className={cn(
-        'p-0 overflow-hidden',
+        'p-0 overflow-hidden combat-card',
         // Concentration left border strip
         spell.concentration && 'border-l-2 border-l-ember',
         // Unprepared spells are visually dimmed
@@ -315,8 +317,8 @@ function SpellCard({
                 'flex items-center justify-center rounded-lg',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.92]',
-                'text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               )}
             >
               <Pencil size={15} />
@@ -355,7 +357,7 @@ function SpellCard({
                   'transition-all duration-200 ease-forge',
                   'active:scale-[0.92]',
                   'text-forge-2 hover:text-red-400 hover:bg-red-500/[0.08]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 )}
               >
                 <Trash2 size={15} />
@@ -373,15 +375,15 @@ function SpellCard({
                   'flex items-center justify-center rounded-lg',
                   'transition-all duration-200 ease-forge',
                   'active:scale-[0.92]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   spell.prepared
-                    ? 'text-ember bg-ember/15'
-                    : 'text-forge-2 bg-white/5 hover:bg-white/8 hover:text-forge-1',
+                    ? 'text-gold bg-gold/15 border border-gold/30'
+                    : 'text-bronze/50 bg-void-2/60 border border-bronze/15 hover:bg-void-2/60 hover:text-bronze',
                 )}
               >
                 <Star
                   size={20}
-                  className={cn(spell.prepared && 'fill-ember')}
+                  className={cn(spell.prepared && 'fill-gold')}
                 />
               </button>
             )}
@@ -445,11 +447,11 @@ function SpellCard({
         aria-label={expanded ? `Collapse ${spell.name} details` : `Expand ${spell.name} details`}
         className={cn(
           'w-full min-h-[44px] flex items-center justify-center gap-1.5',
-          'border-t border-white/5 text-xs font-medium text-forge-2',
+          'border-t border-bronze/15 text-xs font-medium text-forge-2',
           'transition-colors duration-200',
-          'hover:bg-white/[0.03] hover:text-forge-1',
+          'hover:bg-gold/[0.03] hover:text-forge-1',
           'active:scale-[0.98]',
-          'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gold',
         )}
       >
         {expanded ? (
@@ -467,7 +469,7 @@ function SpellCard({
 
       {/* Expanded body */}
       {expanded && (
-        <div className="border-t border-white/5 p-4 pt-3 space-y-3">
+        <div className="border-t border-bronze/15 p-4 pt-3 space-y-3">
           {/* Description */}
           <p className="text-sm text-forge-1 leading-relaxed whitespace-pre-line">
             {spell.description}
@@ -475,7 +477,7 @@ function SpellCard({
 
           {/* Higher levels */}
           {spell.higherLevels && (
-            <div className="rounded-lg bg-white/[0.03] border border-white/5 p-3">
+            <div className="rounded-lg bg-gold/[0.03] border border-bronze/15 p-3">
               <p className="text-xs font-semibold text-ember mb-1">At Higher Levels</p>
               <p className="text-xs text-forge-1 leading-relaxed">
                 {spell.higherLevels}
@@ -566,14 +568,14 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
       <div
         className={cn(
           'relative w-full sm:max-w-lg max-h-[85vh]',
-          'bg-void-1 border border-white/10 rounded-t-2xl sm:rounded-2xl',
-          'shadow-[0_0_48px_-12px_rgba(61,210,255,0.15)]',
+          'bg-void-1 border border-bronze/25 rounded-t-2xl sm:rounded-2xl',
+          'shadow-[0_0_48px_-12px_rgba(197,165,90,0.15)]',
           'flex flex-col overflow-hidden',
           'animate-in slide-in-from-bottom-4 duration-300',
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-bronze/15 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             {mode === 'explain' ? (
               <Sparkles size={16} className="text-arcane shrink-0" aria-hidden />
@@ -590,10 +592,10 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
             aria-label="Close AI response"
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center',
-              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
+              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
               'transition-colors duration-200',
               'active:scale-[0.92]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             )}
           >
             <X size={18} />
@@ -620,9 +622,11 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
           )}
 
           {response && !loading && (
-            <div className="prose prose-sm prose-invert max-w-none text-forge-1 leading-relaxed whitespace-pre-line text-sm">
-              {response}
-            </div>
+            <ParchmentCard className="p-4">
+              <div className="prose prose-sm prose-invert max-w-none text-forge-1 leading-relaxed whitespace-pre-line text-sm">
+                {response}
+              </div>
+            </ParchmentCard>
           )}
         </div>
       </div>
@@ -637,7 +641,7 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+      <div className="p-4 rounded-2xl bg-gold/[0.03] border border-bronze/15">
         <BookOpen size={32} className="text-forge-2" />
       </div>
       <p className="text-sm font-medium text-forge-1">
@@ -859,10 +863,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
             'text-sm font-medium whitespace-nowrap',
             'transition-all duration-200 ease-forge',
             'active:scale-[0.95]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             activeLevel === null
-              ? 'bg-arcane/15 text-arcane border border-arcane/25'
-              : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+              ? 'bg-arcane/15 text-arcane border border-arcane/25 ornate-border'
+              : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
           )}
         >
           All
@@ -881,10 +885,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
               'text-sm font-medium whitespace-nowrap',
               'transition-all duration-200 ease-forge',
               'active:scale-[0.95]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               activeLevel === level
-                ? 'bg-arcane/15 text-arcane border border-arcane/25'
-                : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                ? 'bg-arcane/15 text-arcane border border-arcane/25 ornate-border'
+                : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
             )}
           >
             {filterTabLabel(level)}
@@ -902,10 +906,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
             'text-sm font-medium',
             'transition-all duration-200 ease-forge',
             'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             advancedFilterCount > 0
-              ? 'bg-eldritch/15 text-eldritch border border-eldritch/25'
-              : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+              ? 'bg-eldritch/15 text-eldritch border border-eldritch/25 ornate-border'
+              : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
           )}
           aria-expanded={advancedOpen}
           aria-label={`Advanced filters${advancedFilterCount > 0 ? ` (${advancedFilterCount} active)` : ''}`}
@@ -923,7 +927,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
         </button>
 
         {advancedOpen && (
-          <div className="flex flex-col gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 animate-fade-in">
+          <div className="flex flex-col gap-3 p-3 rounded-xl bg-gold/[0.02] border border-bronze/15 animate-fade-in">
             {/* Concentration toggle */}
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-forge-2 select-none">Concentration</span>
@@ -943,10 +947,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                       'text-xs font-medium',
                       'transition-all duration-200 ease-forge',
                       'active:scale-[0.95]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                       advancedFilters.concentration === opt.value
-                        ? 'bg-ember/15 text-ember border border-ember/25'
-                        : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                        ? 'bg-ember/15 text-ember border border-ember/25 ornate-border'
+                        : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
                     )}
                   >
                     {opt.label}
@@ -974,10 +978,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                       'text-xs font-medium',
                       'transition-all duration-200 ease-forge',
                       'active:scale-[0.95]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                       advancedFilters.ritual === opt.value
-                        ? 'bg-verdant/15 text-verdant border border-verdant/25'
-                        : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                        ? 'bg-verdant/15 text-verdant border border-verdant/25 ornate-border'
+                        : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
                     )}
                   >
                     {opt.label}
@@ -1008,10 +1012,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                         'text-xs font-medium whitespace-nowrap',
                         'transition-all duration-200 ease-forge',
                         'active:scale-[0.95]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         isActive
-                          ? 'bg-arcane/15 text-arcane border border-arcane/25'
-                          : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                          ? 'bg-arcane/15 text-arcane border border-arcane/25 ornate-border'
+                          : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
                       )}
                     >
                       {ct}
@@ -1043,10 +1047,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                         'text-xs font-medium whitespace-nowrap',
                         'transition-all duration-200 ease-forge',
                         'active:scale-[0.95]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         isActive
-                          ? 'bg-ember/15 text-ember border border-ember/25'
-                          : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                          ? 'bg-ember/15 text-ember border border-ember/25 ornate-border'
+                          : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
                       )}
                     >
                       {dt}
@@ -1078,10 +1082,10 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                         'text-xs font-medium whitespace-nowrap',
                         'transition-all duration-200 ease-forge',
                         'active:scale-[0.95]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         isActive
-                          ? 'bg-eldritch/15 text-eldritch border border-eldritch/25'
-                          : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                          ? 'bg-eldritch/15 text-eldritch border border-eldritch/25 ornate-border'
+                          : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
                       )}
                     >
                       {r}
@@ -1099,11 +1103,11 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                 className={cn(
                   'min-h-[44px] px-4 rounded-xl',
                   'text-xs font-medium text-forge-2',
-                  'bg-white/5 border border-white/5',
-                  'hover:bg-white/8 hover:text-forge-1',
+                  'bg-void-2/60 border border-bronze/15',
+                  'hover:bg-void-2/60 hover:text-forge-1',
                   'transition-all duration-200 ease-forge',
                   'active:scale-[0.97]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 )}
               >
                 Clear Advanced Filters
@@ -1125,17 +1129,17 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
               'text-sm font-medium',
               'transition-all duration-200 ease-forge',
               'active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
               preparedOnly
-                ? 'bg-ember/15 text-ember border border-ember/25'
-                : 'bg-white/5 text-forge-2 border border-white/5 hover:bg-white/8 hover:text-forge-1',
+                ? 'bg-ember/15 text-ember border border-ember/25 ornate-border'
+                : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
             )}
           >
             <Filter size={14} aria-hidden />
             Prepared Only
           </button>
 
-          <span className="text-xs font-mono text-forge-2">
+          <span className="text-xs font-mono text-forge-2 stat-frame">
             <span className={cn(
               'font-bold',
               preparedCount >= character.maxPreparedSpells ? 'text-ember' : 'text-arcane',
@@ -1152,21 +1156,34 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
         <EmptyState hasFilters={hasActiveFilters} />
       ) : (
         <div className="flex flex-col gap-3" role="list" aria-label="Spell list">
-          {filteredSpells.map(spell => (
-            <div key={spell.name} role="listitem">
-              <SpellCard
-                spell={spell}
-                character={character}
-                canPrepare={character.canPrepareSpells}
-                onTogglePrepare={() => handleTogglePrepare(spell.name)}
-                onExplain={() => handleAIQuery(spell, 'explain')}
-                onTactics={() => handleAIQuery(spell, 'tactics')}
-                onEdit={() => handleOpenEditSpell(spell)}
-                onDelete={() => handleDeleteSpell(spell.name)}
-                aiLoading={loading}
-              />
-            </div>
-          ))}
+          {filteredSpells.map((spell, idx) => {
+            const prevSpell = idx > 0 ? filteredSpells[idx - 1] : null
+            const showLevelDivider = prevSpell !== null && prevSpell.level !== spell.level
+            return (
+              <div key={spell.name}>
+                {showLevelDivider && (
+                  <div className="ornate-divider my-2" aria-hidden>
+                    <span className="text-[10px] font-display uppercase tracking-widest text-gold/60">
+                      {spell.level === 0 ? 'Cantrips' : `Level ${spell.level}`}
+                    </span>
+                  </div>
+                )}
+                <div role="listitem">
+                  <SpellCard
+                    spell={spell}
+                    character={character}
+                    canPrepare={character.canPrepareSpells}
+                    onTogglePrepare={() => handleTogglePrepare(spell.name)}
+                    onExplain={() => handleAIQuery(spell, 'explain')}
+                    onTactics={() => handleAIQuery(spell, 'tactics')}
+                    onEdit={() => handleOpenEditSpell(spell)}
+                    onDelete={() => handleDeleteSpell(spell.name)}
+                    aiLoading={loading}
+                  />
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 

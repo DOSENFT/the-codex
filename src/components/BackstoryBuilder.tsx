@@ -21,6 +21,7 @@ import type { Character, Backstory, BackstoryMemory } from '../lib/character'
 import { generateId } from '../lib/character'
 import { Button } from './ui/Button'
 import { ParchmentCard } from './ui/ParchmentCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { Badge } from './ui/Badge'
 
 /* ------------------------------------------------------------------ */
@@ -120,7 +121,7 @@ function CollapsibleSection({
           'w-full flex items-center gap-3 min-h-[44px]',
           'text-left select-none',
           'transition-colors duration-200',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           'active:scale-[0.99]',
         )}
       >
@@ -175,8 +176,8 @@ function SimpleListEditor({
             <li
               key={idx}
               className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2',
-                'bg-white/[0.03] border border-white/[0.06]',
+                'combat-card flex items-center gap-2 rounded-lg px-3 py-2',
+                'bg-gold/[0.03] border border-gold/20',
                 'text-sm text-forge-1',
               )}
             >
@@ -189,7 +190,7 @@ function SimpleListEditor({
                   'text-forge-2 hover:text-red-400',
                   'transition-colors duration-200',
                   'active:scale-[0.95]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 )}
                 aria-label={`Remove "${item}"`}
               >
@@ -208,11 +209,11 @@ function SimpleListEditor({
           className={cn(
             'min-h-[44px] flex-1 rounded-xl',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-            'border border-white/10',
+            'border border-bronze/25',
             'font-body text-sm px-4',
             'transition-all duration-200 ease-forge',
             'focus:border-arcane/60 focus:bg-void-2/80',
-            'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+            'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
             'focus:outline-none',
           )}
           onKeyDown={e => {
@@ -378,11 +379,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-display text-lg font-semibold text-forge-0">
-          Backstory Builder
-        </h2>
-      </div>
+      <OrnateHeader>Backstory Builder</OrnateHeader>
 
       {/* AI Generate Button */}
       <Button
@@ -409,6 +406,9 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
           <p className="text-sm text-forge-2">Weaving your tale...</p>
         </div>
       )}
+
+      {/* Divider */}
+      <div className="ornate-divider" />
 
       {/* ================================================================ */}
       {/* Section 1: Origin                                                */}
@@ -438,7 +438,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
           className={cn(
             'min-h-[110px] w-full rounded-xl resize-y',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-            'border border-white/10',
+            'border border-bronze/25',
             'font-body text-sm px-4 py-3',
             'transition-all duration-200 ease-forge',
             'focus:border-ember/60 focus:bg-void-2/80',
@@ -465,8 +465,8 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
               <div
                 key={memory.id}
                 className={cn(
-                  'rounded-xl p-4',
-                  'bg-white/[0.03] border border-white/[0.08]',
+                  'combat-card rounded-xl p-4',
+                  'bg-gold/[0.03] border border-gold/20',
                   'transition-all duration-200',
                 )}
               >
@@ -498,7 +498,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                           'hover:bg-ember/20 hover:border-ember/30',
                           'transition-all duration-200',
                           'active:scale-[0.95]',
-                          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         )}
                         aria-label={`Relive memory: ${memory.title}`}
                         title="Relive This"
@@ -514,7 +514,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                         'text-forge-2 hover:text-red-400',
                         'transition-colors duration-200',
                         'active:scale-[0.95]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                       )}
                       aria-label={`Delete memory: ${memory.title}`}
                     >
@@ -529,7 +529,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
 
         {/* Add memory form */}
         {showMemoryForm ? (
-          <div className="flex flex-col gap-3 rounded-xl p-4 bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex flex-col gap-3 rounded-xl p-4 bg-gold/[0.02] border border-gold/15">
             <input
               type="text"
               value={memoryTitle}
@@ -538,7 +538,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
               className={cn(
                 'min-h-[44px] w-full rounded-xl',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                'border border-white/10',
+                'border border-bronze/25',
                 'font-body text-sm px-4',
                 'transition-all duration-200 ease-forge',
                 'focus:border-ember/60 focus:bg-void-2/80',
@@ -554,7 +554,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
               className={cn(
                 'min-h-[80px] w-full rounded-xl resize-y',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                'border border-white/10',
+                'border border-bronze/25',
                 'font-body text-sm px-4 py-3',
                 'transition-all duration-200 ease-forge',
                 'focus:border-ember/60 focus:bg-void-2/80',
@@ -571,7 +571,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                   className={cn(
                     'min-h-[44px] w-full rounded-xl appearance-none',
                     'bg-void-2/60 text-forge-0',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',
@@ -597,7 +597,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                   className={cn(
                     'min-h-[44px] w-full rounded-xl',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',
@@ -663,8 +663,8 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
               <div
                 key={idx}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5',
-                  'bg-white/[0.03] border border-white/[0.06]',
+                  'ornate-border flex items-center gap-3 rounded-lg px-3 py-2.5',
+                  'bg-gold/[0.03] border border-gold/20',
                 )}
               >
                 <div className="flex-1 min-w-0">
@@ -684,7 +684,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                     'text-forge-2 hover:text-red-400',
                     'transition-colors duration-200',
                     'active:scale-[0.95]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   )}
                   aria-label={`Remove relationship with ${rel.name}`}
                 >
@@ -697,7 +697,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
 
         {/* Add relationship form */}
         {showRelForm ? (
-          <div className="flex flex-col gap-3 rounded-xl p-4 bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex flex-col gap-3 rounded-xl p-4 bg-gold/[0.02] border border-gold/15">
             <div className="flex gap-2 flex-wrap">
               <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
                 <label className="text-xs text-forge-2 select-none">Name</label>
@@ -709,7 +709,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                   className={cn(
                     'min-h-[44px] w-full rounded-xl',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',
@@ -728,7 +728,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                   className={cn(
                     'min-h-[44px] w-full rounded-xl',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',
@@ -745,7 +745,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                   className={cn(
                     'min-h-[44px] w-full rounded-xl appearance-none',
                     'bg-void-2/60 text-forge-0',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4',
                     'transition-all duration-200 ease-forge',
                     'focus:border-ember/60 focus:bg-void-2/80',

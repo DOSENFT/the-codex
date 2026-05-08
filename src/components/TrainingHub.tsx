@@ -25,6 +25,7 @@ import type { Character, BackstoryMemory } from '../lib/character'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { QuizArena } from './QuizArena'
 import { RoleplayCoach } from './RoleplayCoach'
 import { PersonaEngine } from './PersonaEngine'
@@ -165,10 +166,10 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
                 'text-sm font-medium select-none',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 isActive
                   ? 'bg-arcane/15 text-arcane border border-arcane/30'
-                  : 'bg-white/[0.04] text-forge-1 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+                  : 'combat-card text-forge-1 hover:border-gold/40',
               )}
             >
               <Icon size={16} aria-hidden />
@@ -233,7 +234,7 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
           <GlassCard>
             <div className="flex items-center gap-2.5 mb-3">
               <Map size={18} className="text-arcane" aria-hidden />
-              <h3 className="font-display text-base font-semibold text-forge-0">The Situation</h3>
+              <OrnateHeader className="flex-1">The Situation</OrnateHeader>
             </div>
             <p className="text-sm text-forge-1 leading-relaxed">{scenario.scenario}</p>
           </GlassCard>
@@ -298,10 +299,10 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
                 'text-sm font-medium select-none',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 hintsRevealed
                   ? 'bg-ember/15 text-ember border border-ember/30'
-                  : 'bg-white/[0.04] text-forge-2 border border-white/10 hover:bg-white/[0.08] hover:border-white/20',
+                  : 'bg-gold/[0.04] text-forge-2 border border-bronze/25 hover:bg-gold/[0.08] hover:border-gold/30',
               )}
             >
               <Lightbulb size={14} aria-hidden />
@@ -339,11 +340,11 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
                   className={cn(
                     'min-h-[88px] w-full rounded-xl resize-y',
                     'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                    'border border-white/10',
+                    'border border-bronze/25',
                     'font-body text-sm px-4 py-3',
                     'transition-all duration-200 ease-forge',
                     'focus:border-arcane/60 focus:bg-void-2/80',
-                    'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                    'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                     'focus:outline-none',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
@@ -432,13 +433,15 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* Header */}
-      <h2 className="font-display text-xl font-semibold text-forge-0">Training Hall</h2>
+      <OrnateHeader>Training Hall</OrnateHeader>
 
       {/* Training Progress — always visible */}
       {profile && <TrainingProgress profile={profile} />}
 
       {/* Sub-mode chips */}
       {renderModeChips()}
+
+      <div className="ornate-divider" aria-hidden />
 
       {/* Content area */}
       {mode === 'rules_quiz' && (

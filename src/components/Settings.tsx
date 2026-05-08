@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
 import {
-  Settings as SettingsIcon,
   Eye,
   EyeOff,
   Wifi,
@@ -11,12 +10,9 @@ import {
   Trash2,
   Moon,
   Sunrise,
-  Info,
   Server,
   Sparkles,
-  User,
   Users,
-  Shield,
   Download,
   Upload,
   TrendingUp,
@@ -30,8 +26,9 @@ import { shortRest, longRest, generateId, type Character, type RosterEntry, comp
 import { ASTERA_PERSONA } from '../lib/dnd-data'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
+import { ParchmentCard } from './ui/ParchmentCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { Input } from './ui/Input'
-import { Badge } from './ui/Badge'
 import { CampaignEditor } from './CampaignEditor'
 
 /* ------------------------------------------------------------------ */
@@ -247,18 +244,13 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
 
   /* ------ sections ------ */
   const renderAIConfig = () => (
-    <GlassCard>
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-arcane/10 flex items-center justify-center shrink-0">
-          <Sparkles size={18} className="text-arcane" aria-hidden />
-        </div>
-        <h3 className="font-display text-base font-semibold text-forge-0">AI Configuration</h3>
-      </div>
+    <GlassCard className="ornate-border">
+      <OrnateHeader className="mb-5">AI Configuration</OrnateHeader>
 
       {/* Provider toggle */}
       <div className="flex flex-col gap-1.5 mb-5">
         <span className="text-sm font-medium text-forge-1">Provider</span>
-        <div className="flex rounded-xl overflow-hidden border border-white/10">
+        <div className="flex rounded-xl overflow-hidden border border-bronze/25">
           {(['gemini', 'ollama'] as const).map((p) => (
             <button
               key={p}
@@ -268,10 +260,10 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                 'flex-1 min-h-[44px] text-sm font-medium',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.98]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 provider === p
                   ? 'bg-arcane/15 text-arcane'
-                  : 'bg-white/[0.04] text-forge-2 hover:bg-white/[0.08] hover:text-forge-1',
+                  : 'bg-gold/[0.04] text-forge-2 hover:bg-gold/[0.08] hover:text-forge-1',
               )}
             >
               {p === 'gemini' ? 'Gemini' : 'Ollama'}
@@ -297,12 +289,12 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                 className={cn(
                   'min-h-[44px] w-full rounded-xl',
                   'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                  'border border-white/10',
+                  'border border-bronze/25',
                   'font-mono text-sm',
                   'pl-4 pr-12',
                   'transition-all duration-200 ease-forge',
                   'focus:border-arcane/60 focus:bg-void-2/80',
-                  'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                  'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                   'focus:outline-none',
                 )}
               />
@@ -314,7 +306,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                   'w-9 h-9 flex items-center justify-center rounded-lg',
                   'text-forge-2 hover:text-forge-1',
                   'transition-colors duration-200',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                 )}
                 aria-label={showKey ? 'Hide API key' : 'Show API key'}
               >
@@ -337,8 +329,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                     'transition-all duration-200 ease-forge active:scale-[0.98]',
                     'border',
                     geminiModel === m.id
-                      ? 'bg-arcane/10 border-arcane/30 text-forge-0'
-                      : 'bg-white/[0.03] border-white/8 text-forge-2 hover:bg-white/[0.06] hover:text-forge-1',
+                      ? 'bg-arcane/10 border-arcane/30 text-forge-0 ornate-border'
+                      : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:bg-gold/[0.06] hover:text-forge-1',
                   )}
                 >
                   <span className="text-sm font-medium">{m.label}</span>
@@ -384,8 +376,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                       'transition-all duration-200 ease-forge active:scale-[0.98]',
                       'border',
                       ollamaModel === m.name
-                        ? 'bg-arcane/10 border-arcane/30 text-forge-0'
-                        : 'bg-white/[0.03] border-white/8 text-forge-2 hover:bg-white/[0.06] hover:text-forge-1',
+                        ? 'bg-arcane/10 border-arcane/30 text-forge-0 ornate-border'
+                        : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:bg-gold/[0.06] hover:text-forge-1',
                     )}
                   >
                     <span className="text-sm font-medium">{m.name}</span>
@@ -406,7 +398,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       )}
 
       {/* Fallback toggle */}
-      <div className="flex items-center justify-between min-h-[44px] mb-5">
+      <div className="combat-card flex items-center justify-between min-h-[44px] mb-5 p-3 rounded-xl">
         <div className="flex-1">
           <span className="text-sm font-medium text-forge-1">Auto-Fallback</span>
           <p className="text-xs text-forge-2 mt-0.5">
@@ -420,8 +412,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
           onClick={() => setFallbackEnabled(!fallbackEnabled)}
           className={cn(
             'relative w-12 h-7 rounded-full transition-colors duration-200 shrink-0 ml-3',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-            fallbackEnabled ? 'bg-arcane/40' : 'bg-white/10',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+            fallbackEnabled ? 'bg-arcane/40' : 'bg-void-2/60',
           )}
           role="switch"
           aria-checked={fallbackEnabled}
@@ -449,7 +441,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
 
       {/* Show secondary provider config when fallback is on */}
       {fallbackEnabled && provider === 'ollama' && (
-        <div className="mb-5 p-3 rounded-xl bg-white/[0.02] border border-white/8">
+        <div className="mb-5 p-3 rounded-xl bg-gold/[0.02] border border-bronze/20">
           <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-2">
             Fallback: Gemini
           </span>
@@ -463,11 +455,11 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                 className={cn(
                   'min-h-[44px] w-full rounded-xl',
                   'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                  'border border-white/10 font-mono text-sm',
+                  'border border-bronze/25 font-mono text-sm',
                   'pl-4 pr-12',
                   'transition-all duration-200 ease-forge',
                   'focus:border-arcane/60 focus:bg-void-2/80',
-                  'focus:shadow-[0_0_0_3px_rgba(61,210,255,0.12)]',
+                  'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
                   'focus:outline-none',
                 )}
               />
@@ -491,8 +483,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                     className={cn(
                       'min-h-[36px] px-3 rounded-lg text-xs font-medium transition-all duration-200 active:scale-[0.97] border',
                       geminiModel === m.id
-                        ? 'bg-arcane/10 border-arcane/30 text-arcane'
-                        : 'bg-white/[0.03] border-white/8 text-forge-2 hover:text-forge-1',
+                        ? 'bg-arcane/10 border-arcane/30 text-arcane ornate-border'
+                        : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:text-forge-1',
                     )}
                   >
                     {m.label}
@@ -505,7 +497,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       )}
 
       {fallbackEnabled && provider === 'gemini' && (
-        <div className="mb-5 p-3 rounded-xl bg-white/[0.02] border border-white/8">
+        <div className="mb-5 p-3 rounded-xl bg-gold/[0.02] border border-bronze/20">
           <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-2">
             Fallback: Ollama
           </span>
@@ -567,13 +559,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   )
 
   const renderCharacterInfo = () => (
-    <GlassCard>
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-eldritch/10 flex items-center justify-center shrink-0">
-          <User size={18} className="text-eldritch" aria-hidden />
-        </div>
-        <h3 className="font-display text-base font-semibold text-forge-0">Character Info</h3>
-      </div>
+    <ParchmentCard>
+      <OrnateHeader className="mb-5">Character Info</OrnateHeader>
 
       <div className="space-y-3 mb-5">
         {[
@@ -656,7 +643,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
             <button
               key={entry.id}
               onClick={() => { onSwitchCharacter(entry.id); setShowSwitcher(false) }}
-              className="flex items-center justify-between w-full min-h-[52px] px-4 py-3 rounded-xl text-left bg-white/[0.03] border border-white/8 transition-all duration-200 ease-forge hover:bg-white/[0.06] hover:border-white/12 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane"
+              className="flex items-center justify-between w-full min-h-[52px] px-4 py-3 rounded-xl text-left bg-gold/[0.03] border border-bronze/20 transition-all duration-200 ease-forge hover:bg-gold/[0.06] hover:border-gold/20 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium text-forge-0">{entry.name}</span>
@@ -708,17 +695,12 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
           </div>
         </div>
       )}
-    </GlassCard>
+    </ParchmentCard>
   )
 
   const renderRestManagement = () => (
     <GlassCard>
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-ember/10 flex items-center justify-center shrink-0">
-          <Shield size={18} className="text-ember" aria-hidden />
-        </div>
-        <h3 className="font-display text-base font-semibold text-forge-0">Rest Management</h3>
-      </div>
+      <OrnateHeader className="mb-5">Rest Management</OrnateHeader>
 
       {/* Rest feedback */}
       {restFeedback && (
@@ -730,7 +712,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
 
       {/* Short Rest */}
       <div className="mb-4">
-        <Button variant="secondary" size="md" onClick={handleShortRest} className="w-full mb-2">
+        <Button variant="secondary" size="md" onClick={handleShortRest} className="w-full mb-2 border-gold/30 hover:border-gold/50 hover:bg-gold/[0.06]">
           <Sunrise size={16} aria-hidden />
           Short Rest
         </Button>
@@ -747,7 +729,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
             variant="secondary"
             size="md"
             onClick={() => setShowLongRestConfirm(true)}
-            className="w-full mb-2"
+            className="w-full mb-2 border-gold/30 hover:border-gold/50 hover:bg-gold/[0.06]"
           >
             <Moon size={16} aria-hidden />
             Long Rest
@@ -783,12 +765,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
 
   const renderAbout = () => (
     <GlassCard>
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-verdant/10 flex items-center justify-center shrink-0">
-          <Info size={18} className="text-verdant" aria-hidden />
-        </div>
-        <h3 className="font-display text-base font-semibold text-forge-0">About</h3>
-      </div>
+      <OrnateHeader className="mb-5">About</OrnateHeader>
 
       <div className="space-y-2 text-sm">
         <p className="text-forge-0 font-display font-semibold text-lg">The Codex v2.0</p>
@@ -802,10 +779,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-2.5">
-        <SettingsIcon size={20} className="text-forge-2" aria-hidden />
-        <h2 className="font-display text-xl font-semibold text-forge-0">Settings</h2>
-      </div>
+      <OrnateHeader className="mb-1">Settings</OrnateHeader>
 
       {renderAIConfig()}
       {renderCharacterInfo()}

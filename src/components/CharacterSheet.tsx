@@ -3,6 +3,7 @@ import { X, Plus, Trash2, Edit3, Check, Shield, Swords, Brain, Eye, Backpack } f
 import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import { Badge } from './ui/Badge'
 import type { Character, Weapon, AbilityScores, AbilityKey, SkillName } from '../lib/character'
 import { abilityModifier, skillBonus, savingThrowBonus, passivePerception, attackBonus, computeSpellSaveDC, computeSpellAttackBonus } from '../lib/character'
@@ -49,10 +50,10 @@ function AbilityScoreGrid({ character, onUpdate }: { character: Character; onUpd
             type="button"
             onClick={() => !isEditing && startEdit(ability)}
             className={cn(
-              'flex flex-col items-center gap-0.5 p-3 rounded-xl',
-              'border transition-all duration-200 ease-forge',
+              'stat-frame flex flex-col items-center gap-0.5 p-3 rounded-xl',
+              'transition-all duration-200 ease-forge',
               'active:scale-95',
-              'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]',
+              'hover:bg-gold/[0.06]',
             )}
           >
             <span className="text-[10px] font-mono font-bold text-forge-2 uppercase tracking-wider">
@@ -108,14 +109,14 @@ function SavingThrowsList({ character, onUpdate }: { character: Character; onUpd
               'flex items-center justify-between min-h-[40px] px-3 py-1.5 rounded-lg',
               'transition-all duration-200 ease-forge active:scale-[0.98]',
               proficient
-                ? 'bg-verdant/8 border border-verdant/20'
-                : 'bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04]',
+                ? 'bg-verdant/8 border border-verdant/20 ornate-border'
+                : 'bg-gold/[0.02] border border-gold/15 hover:bg-gold/[0.04]',
             )}
           >
             <div className="flex items-center gap-2">
               <div className={cn(
                 'w-3 h-3 rounded-full border-2',
-                proficient ? 'bg-verdant border-verdant' : 'border-forge-2',
+                proficient ? 'bg-gold border-gold' : 'border-forge-2',
               )} />
               <span className="text-sm text-forge-1">{ABILITY_NAMES[ability]}</span>
             </div>
@@ -167,19 +168,19 @@ function SkillsList({ character, onUpdate }: { character: Character; onUpdate: (
             type="button"
             onClick={() => toggleSkill(skill)}
             className={cn(
-              'flex items-center justify-between min-h-[36px] px-3 py-1 rounded-lg',
+              'combat-card flex items-center justify-between min-h-[36px] px-3 py-1 rounded-lg',
               'transition-all duration-200 ease-forge active:scale-[0.98]',
               expertise
                 ? 'bg-arcane/8 border border-arcane/20'
                 : proficient
                   ? 'bg-verdant/8 border border-verdant/20'
-                  : 'bg-transparent hover:bg-white/[0.03]',
+                  : '',
             )}
           >
             <div className="flex items-center gap-2">
               <div className={cn(
                 'w-2.5 h-2.5 rounded-full border-2',
-                expertise ? 'bg-arcane border-arcane' : proficient ? 'bg-verdant border-verdant' : 'border-forge-2/50',
+                expertise ? 'bg-gold border-gold' : proficient ? 'bg-bronze border-bronze' : 'border-forge-2/50',
               )} />
               <span className="text-sm text-forge-1">{skill}</span>
               <span className="text-[10px] text-forge-2/60 font-mono">{ability}</span>
@@ -235,7 +236,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
         const dmgMod = abilityModifier(character.abilityScores[weapon.abilityMod]) + (weapon.bonusDamage ?? 0)
 
         return (
-          <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+          <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-gold/[0.03] border border-gold/15">
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-forge-0">{weapon.name}</span>
@@ -263,20 +264,20 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
       })}
 
       {adding ? (
-        <div className="p-3 rounded-xl bg-white/[0.04] border border-arcane/20 flex flex-col gap-3">
+        <div className="p-3 rounded-xl bg-gold/[0.04] border border-arcane/20 flex flex-col gap-3">
           <input
             type="text"
             placeholder="Weapon name"
             value={newWeapon.name}
             onChange={(e) => setNewWeapon({ ...newWeapon, name: e.target.value })}
-            className="min-h-[40px] w-full rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
+            className="min-h-[40px] w-full rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
             autoFocus
           />
           <div className="grid grid-cols-2 gap-2">
             <select
               value={newWeapon.abilityMod}
               onChange={(e) => setNewWeapon({ ...newWeapon, abilityMod: e.target.value as AbilityKey })}
-              className="min-h-[40px] rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 outline-none"
+              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 outline-none"
             >
               {ALL_ABILITIES.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
@@ -285,7 +286,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
               placeholder="Damage (e.g. 1d8)"
               value={newWeapon.damageDice}
               onChange={(e) => setNewWeapon({ ...newWeapon, damageDice: e.target.value })}
-              className="min-h-[40px] rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -294,12 +295,12 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
               placeholder="Damage type"
               value={newWeapon.damageType}
               onChange={(e) => setNewWeapon({ ...newWeapon, damageType: e.target.value })}
-              className="min-h-[40px] rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
             />
             <select
               value={newWeapon.attackType}
               onChange={(e) => setNewWeapon({ ...newWeapon, attackType: e.target.value as 'melee' | 'ranged' })}
-              className="min-h-[40px] rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 outline-none"
+              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 outline-none"
             >
               <option value="melee">Melee</option>
               <option value="ranged">Ranged</option>
@@ -321,14 +322,14 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
                 placeholder="+Hit bonus"
                 value={newWeapon.bonusToHit ?? ''}
                 onChange={(e) => setNewWeapon({ ...newWeapon, bonusToHit: Number(e.target.value) || 0 })}
-                className="min-h-[40px] rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+                className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
               />
               <input
                 type="number"
                 placeholder="+Dmg bonus"
                 value={newWeapon.bonusDamage ?? ''}
                 onChange={(e) => setNewWeapon({ ...newWeapon, bonusDamage: Number(e.target.value) || 0 })}
-                className="min-h-[40px] rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+                className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
               />
             </div>
           )}
@@ -343,7 +344,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="flex items-center justify-center gap-2 min-h-[44px] rounded-xl border border-dashed border-white/10 text-sm text-forge-2 hover:bg-white/[0.03] hover:text-forge-1 transition-all active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 min-h-[44px] rounded-xl border border-dashed border-bronze/25 text-sm text-forge-2 hover:bg-gold/[0.03] hover:text-forge-1 transition-all active:scale-[0.98]"
         >
           <Plus size={16} /> Add Weapon
         </button>
@@ -378,7 +379,7 @@ function EquipmentList({ character, onUpdate }: { character: Character; onUpdate
           <p className="text-xs text-forge-2/60 italic">No {label.toLowerCase()} yet</p>
         )}
         {items.map((item: string, i: number) => (
-          <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+          <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gold/[0.03] border border-gold/15">
             <span className="text-sm text-forge-1">{item}</span>
             <button
               type="button"
@@ -398,7 +399,7 @@ function EquipmentList({ character, onUpdate }: { character: Character; onUpdate
               onChange={(e) => setNewItem(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addItem(type)}
               placeholder={type === 'equipment' ? 'Rope, torch, etc.' : 'Health Potion x3'}
-              className="flex-1 min-h-[40px] rounded-lg bg-white/[0.04] border border-white/10 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
+              className="flex-1 min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
               autoFocus
             />
             <Button variant="primary" size="sm" onClick={() => addItem(type)} className="gap-1">
@@ -412,7 +413,7 @@ function EquipmentList({ character, onUpdate }: { character: Character; onUpdate
           <button
             type="button"
             onClick={() => { setAddingTo(type); setNewItem('') }}
-            className="flex items-center justify-center gap-2 min-h-[44px] rounded-xl border border-dashed border-white/10 text-sm text-forge-2 hover:bg-white/[0.03] hover:text-forge-1 transition-all active:scale-[0.98]"
+            className="flex items-center justify-center gap-2 min-h-[44px] rounded-xl border border-dashed border-bronze/25 text-sm text-forge-2 hover:bg-gold/[0.03] hover:text-forge-1 transition-all active:scale-[0.98]"
           >
             <Plus size={16} /> Add {label.slice(0, -1)}
           </button>
@@ -425,7 +426,7 @@ function EquipmentList({ character, onUpdate }: { character: Character; onUpdate
     <div className="flex flex-col gap-5">
       {/* Gender/Pronouns display */}
       {(character.gender || character.pronouns) && (
-        <div className="flex flex-col gap-1 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+        <div className="flex flex-col gap-1 p-3 rounded-xl bg-gold/[0.03] border border-gold/15">
           {character.gender && (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-forge-2">Gender:</span>
@@ -496,7 +497,7 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-0 hover:bg-white/[0.06] transition-all active:scale-95"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06] transition-all active:scale-95"
             aria-label="Close character sheet"
           >
             <X size={20} />
@@ -506,19 +507,19 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
         {/* Quick Stats Row */}
         <div className="px-4 pb-4">
           <div className="grid grid-cols-4 gap-2">
-            <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
               <span className="text-[9px] font-mono text-forge-2 uppercase">AC</span>
               <span className="text-lg font-bold text-forge-0">{character.armorClass}</span>
             </div>
-            <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
               <span className="text-[9px] font-mono text-forge-2 uppercase">Prof</span>
               <span className="text-lg font-bold text-arcane">{formatMod(character.proficiencyBonus)}</span>
             </div>
-            <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
               <span className="text-[9px] font-mono text-forge-2 uppercase">DC</span>
               <span className="text-lg font-bold text-ember">{spellDC}</span>
             </div>
-            <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
               <span className="text-[9px] font-mono text-forge-2 uppercase">Spell</span>
               <span className="text-lg font-bold text-eldritch">{formatMod(spellAtk)}</span>
             </div>
@@ -531,7 +532,7 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
 
         {/* Section tabs */}
         <div className="px-4 pb-3">
-          <div className="flex gap-1.5 p-1 rounded-xl bg-white/[0.03]">
+          <div className="flex gap-1.5 p-1 rounded-xl bg-gold/[0.03]">
             {sections.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -542,7 +543,7 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
                   'transition-all duration-200 ease-forge active:scale-[0.97]',
                   activeSection === id
                     ? 'bg-arcane/15 text-arcane border border-arcane/25'
-                    : 'text-forge-2 hover:text-forge-1 hover:bg-white/[0.04]',
+                    : 'text-forge-2 hover:text-forge-1 hover:bg-gold/[0.04]',
                 )}
               >
                 <Icon size={14} />
@@ -555,25 +556,36 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
         {/* Section content */}
         <div className="px-4 pb-8 safe-bottom">
           {activeSection === 'abilities' && (
-            <AbilityScoreGrid character={character} onUpdate={onUpdate} />
+            <div className="flex flex-col gap-3">
+              <OrnateHeader>Ability Scores</OrnateHeader>
+              <AbilityScoreGrid character={character} onUpdate={onUpdate} />
+            </div>
           )}
           {activeSection === 'saves' && (
             <div className="flex flex-col gap-3">
+              <OrnateHeader>Saving Throws</OrnateHeader>
               <p className="text-xs text-forge-2">Tap to toggle proficiency</p>
               <SavingThrowsList character={character} onUpdate={onUpdate} />
             </div>
           )}
           {activeSection === 'skills' && (
             <div className="flex flex-col gap-2">
+              <OrnateHeader>Skills</OrnateHeader>
               <p className="text-xs text-forge-2">Tap: none → proficient → expertise → none</p>
               <SkillsList character={character} onUpdate={onUpdate} />
             </div>
           )}
           {activeSection === 'weapons' && (
-            <WeaponsList character={character} onUpdate={onUpdate} />
+            <div className="flex flex-col gap-3">
+              <OrnateHeader>Weapons</OrnateHeader>
+              <WeaponsList character={character} onUpdate={onUpdate} />
+            </div>
           )}
           {activeSection === 'gear' && (
-            <EquipmentList character={character} onUpdate={onUpdate} />
+            <div className="flex flex-col gap-3">
+              <OrnateHeader>Equipment & Gear</OrnateHeader>
+              <EquipmentList character={character} onUpdate={onUpdate} />
+            </div>
           )}
         </div>
       </div>

@@ -17,6 +17,7 @@ import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
+import { OrnateHeader } from './ui/OrnateHeader'
 import type { Character } from '../lib/character'
 import { attackBonus, abilityModifier } from '../lib/character'
 import type { CombatState } from '../lib/combat-state'
@@ -73,9 +74,9 @@ function MenuSection({
           'flex items-center gap-2 min-h-[44px] px-2 -mx-2 rounded-lg',
           'text-sm font-semibold text-forge-1',
           'transition-all duration-200 ease-forge',
-          'hover:bg-white/[0.04] hover:text-forge-0',
+          'hover:bg-gold/[0.04] hover:text-forge-0',
           'active:scale-[0.98]',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         )}
       >
         {isOpen ? (
@@ -118,7 +119,7 @@ function ActionItem({
   badge?: React.ReactNode
 }) {
   const variantMap: Record<string, string> = {
-    default: 'hover:bg-white/[0.06] hover:border-white/15',
+    default: 'hover:bg-gold/[0.06] hover:border-gold/25',
     arcane: 'hover:bg-arcane/8 hover:border-arcane/25',
     eldritch: 'hover:bg-eldritch/8 hover:border-eldritch/25',
     ember: 'hover:bg-ember/8 hover:border-ember/25',
@@ -130,10 +131,9 @@ function ActionItem({
       onClick={onSelect}
       disabled={disabled}
       className={cn(
-        'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
-        'bg-white/[0.03] border border-white/8',
-        'transition-all duration-200 active:scale-[0.97]',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+        'combat-card min-h-[44px] px-3 py-2.5 text-left',
+        'active:scale-[0.97]',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         'disabled:opacity-30 disabled:pointer-events-none',
         'group',
         variantMap[variant],
@@ -382,7 +382,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
         className={cn(
           'fixed inset-x-0 bottom-0 z-50',
           'max-h-[85dvh] overflow-y-auto overscroll-contain',
-          'glass-card rounded-t-2xl border-b-0',
+          'glass-card rounded-t-2xl border-b-0 ornate-border',
           'outline-none',
           'transition-transform duration-300 ease-forge',
           isOpen ? 'translate-y-0' : 'translate-y-full',
@@ -396,19 +396,17 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-2">
-          <h2 className="font-display text-base font-semibold text-forge-0 tracking-tight">
-            Choose Action
-          </h2>
+          <OrnateHeader className="flex-1">Choose Action</OrnateHeader>
           <button
             type="button"
             aria-label="Close action menu"
             onClick={onClose}
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
-              'text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
+              'text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
               'transition-all duration-200 ease-forge',
               'active:scale-95',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             )}
           >
             <X size={20} aria-hidden />
@@ -440,6 +438,11 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
                 )
               })}
             </MenuSection>
+          )}
+
+          {/* Divider */}
+          {character.weapons.length > 0 && cantrips.length > 0 && (
+            <div className="ornate-divider" aria-hidden />
           )}
 
           {/* ── Cantrips ── */}
@@ -525,6 +528,11 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
               )
             })}
 
+          {/* Divider */}
+          {(cantrips.length > 0 || spellsByLevel.size > 0) && classFeatures.length > 0 && (
+            <div className="ornate-divider" aria-hidden />
+          )}
+
           {/* ── Class Features ── */}
           {classFeatures.length > 0 && (
             <MenuSection
@@ -567,6 +575,9 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
               })}
             </MenuSection>
           )}
+
+          {/* Divider */}
+          <div className="ornate-divider" aria-hidden />
 
           {/* ── Other Actions (Dash, Dodge, etc.) ── */}
           <MenuSection
