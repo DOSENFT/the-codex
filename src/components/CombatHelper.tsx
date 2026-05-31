@@ -1536,6 +1536,8 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
           onEndCombat={handleEndCombat}
           onOpenDiceRoller={onOpenDiceRoller}
           onOpenLookup={() => setLookupOpen(true)}
+          onCombatStateChange={setCombatState}
+          onCharacterUpdate={onCharacterUpdate}
         />
       )}
 
@@ -1593,70 +1595,21 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
         onCharacterUpdate={onCharacterUpdate}
       />
 
-      {/* ── Collapsible: Action Economy ── */}
-      <CollapsibleCombatSection
-        title="Action Economy"
-        icon={Sword}
-        isOpen={actionDetails.isOpen}
-        onToggle={actionDetails.toggle}
-      >
-        <ActionEconomyBar
-          economy={economy}
-          onToggle={toggleEconomy}
-          onReset={resetEconomy}
-        />
-
-        {/* Three Action Entry Points */}
-        {combatState.inCombat && (
-          <div className="flex gap-2 mt-3">
-            {([
-              { key: 'action' as const, label: 'Action', icon: Sword, color: 'arcane' },
-              { key: 'bonusAction' as const, label: 'Bonus', icon: Zap, color: 'ember' },
-              { key: 'reaction' as const, label: 'Reaction', icon: Shield, color: 'eldritch' },
-            ] as const).map(({ key, label, icon: Icon, color }) => {
-              const used = combatState.turnActions[key]
-              const count = actionMenuCounts[key]
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => openActionMenu(key)}
-                  disabled={used}
-                  className={cn(
-                    'flex-1 min-h-[44px] flex items-center justify-center gap-1.5 rounded-xl',
-                    'text-xs font-semibold border',
-                    'transition-all duration-200 ease-forge',
-                    'active:scale-[0.96]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2',
-                    'disabled:opacity-35 disabled:pointer-events-none disabled:line-through',
-                    used
-                      ? 'bg-white/[0.02] border-white/5 text-forge-2/50'
-                      : color === 'arcane'
-                        ? 'bg-arcane/10 border-arcane/25 text-arcane hover:bg-arcane/15 focus-visible:outline-arcane'
-                        : color === 'ember'
-                          ? 'bg-ember/10 border-ember/25 text-ember hover:bg-ember/15 focus-visible:outline-ember'
-                          : 'bg-eldritch/10 border-eldritch/25 text-eldritch hover:bg-eldritch/15 focus-visible:outline-eldritch',
-                  )}
-                  aria-label={`${label} — ${count} options`}
-                >
-                  <Icon size={14} aria-hidden />
-                  {label}
-                  {count > 0 && !used && (
-                    <span className={cn(
-                      'inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full text-[10px] font-bold',
-                      color === 'arcane' ? 'bg-arcane/20 text-arcane' :
-                      color === 'ember' ? 'bg-ember/20 text-ember' :
-                      'bg-eldritch/20 text-eldritch',
-                    )}>
-                      {count}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </CollapsibleCombatSection>
+      {/* ── Collapsible: Action Economy (only when NOT in combat — TurnSummary handles it during combat) ── */}
+      {!combatState.inCombat && (
+        <CollapsibleCombatSection
+          title="Action Economy"
+          icon={Sword}
+          isOpen={actionDetails.isOpen}
+          onToggle={actionDetails.toggle}
+        >
+          <ActionEconomyBar
+            economy={economy}
+            onToggle={toggleEconomy}
+            onReset={resetEconomy}
+          />
+        </CollapsibleCombatSection>
+      )}
 
       {/* ── Collapsible: Spell Slots ── */}
       {Object.values(character.spellSlots).some(s => s.max > 0) && (
@@ -1692,21 +1645,23 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
         </CollapsibleCombatSection>
       )}
 
-      {/* ── Collapsible: Concentration ── */}
-      <CollapsibleCombatSection
-        title="Concentration"
-        icon={Focus}
-        isOpen={concentrationSection.isOpen}
-        onToggle={concentrationSection.toggle}
-        badge={concentrationSpell || undefined}
-      >
-        <ConcentrationTracker
-          concentrationSpell={concentrationSpell}
-          availableSpells={character.spells}
-          onSetConcentration={handleSetConcentration}
-          onDropConcentration={handleDropConcentration}
-        />
-      </CollapsibleCombatSection>
+      {/* ── Collapsible: Concentration (only when NOT in combat — TurnSummary handles it during combat) ── */}
+      {!combatState.inCombat && (
+        <CollapsibleCombatSection
+          title="Concentration"
+          icon={Focus}
+          isOpen={concentrationSection.isOpen}
+          onToggle={concentrationSection.toggle}
+          badge={concentrationSpell || undefined}
+        >
+          <ConcentrationTracker
+            concentrationSpell={concentrationSpell}
+            availableSpells={character.spells}
+            onSetConcentration={handleSetConcentration}
+            onDropConcentration={handleDropConcentration}
+          />
+        </CollapsibleCombatSection>
+      )}
 
       {/* ── Collapsible: Damage Log ── */}
       <CollapsibleCombatSection

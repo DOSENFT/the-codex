@@ -106,8 +106,8 @@ export function ToyboxPanel({
   onUseSlot,
   concentratingOn,
 }: ToyboxPanelProps) {
-  // ── Core state ──
-  const [data, setData] = useState<ToyboxData>({ combos: [], tactics: [], personaPlays: [] })
+  // ── Core state — load from localStorage immediately so data survives remounts ──
+  const [data, setData] = useState<ToyboxData>(() => loadToybox(character.id))
   const [activeTab, setActiveTab] = useState<TabId>('combos')
   const [comboFilter, setComboFilter] = useState<ComboCategory | 'all'>('all')
   const [tacticFilter, setTacticFilter] = useState<TacticCategory | 'all'>('all')
@@ -161,12 +161,10 @@ export function ToyboxPanel({
 
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // ── Load data on open / character change ──
+  // ── Reload data when character changes (always, not just when open) ──
   useEffect(() => {
-    if (isOpen) {
-      setData(loadToybox(character.id))
-    }
-  }, [isOpen, character.id])
+    setData(loadToybox(character.id))
+  }, [character.id])
 
   // ── Persist helper ──
   const persist = useCallback(
