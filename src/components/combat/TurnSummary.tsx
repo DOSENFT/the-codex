@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   Sword,
   Zap,
@@ -18,6 +18,11 @@ import {
   Square,
   Sparkles,
   Info,
+  Pencil,
+  Plus,
+  Check,
+  Minus,
+  Trash2,
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import {
@@ -27,6 +32,7 @@ import {
   abilityModifier,
   attackBonus,
   expendSpellSlot,
+  restoreSpellSlot,
 } from '../../lib/character'
 import {
   type CombatState,
@@ -38,6 +44,35 @@ import {
 } from '../../lib/combat-state'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
+
+// ---------------------------------------------------------------------------
+// Action Notes — persistent custom notes per action per character
+// ---------------------------------------------------------------------------
+
+interface ActionNote {
+  label: string
+  text: string
+}
+
+interface ActionNotesData {
+  [actionName: string]: {
+    customTip?: string        // overrides auto-generated strategicTip
+    notes: ActionNote[]       // custom note categories
+  }
+}
+
+function loadActionNotes(characterId: string): ActionNotesData {
+  try {
+    const raw = localStorage.getItem(`codex-action-notes-${characterId}`)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveActionNotes(characterId: string, notes: ActionNotesData): void {
+  localStorage.setItem(`codex-action-notes-${characterId}`, JSON.stringify(notes))
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -172,6 +207,12 @@ export function TurnSummary({
   onCharacterUpdate,
 }: TurnSummaryProps) {
   const [expandedAction, setExpandedAction] = useState<string | null>(null)
+  const [actionNotes, setActionNotes] = useState<ActionNotesData>(() => loadActionNotes(character.id))
+
+  // Persist action notes when they change
+  useEffect(() => {
+    saveActionNotes(character.id, actionNotes)
+  }, [character.id, actionNotes])
 
   // Categorize available options by action type
   const { actions, bonusActions, reactions } = useMemo(() => {
@@ -332,6 +373,25 @@ export function TurnSummary({
     onCombatStateChange(setConcentration(combatState, null))
   }, [combatState, onCombatStateChange])
 
+  // Spell slot manual controls
+  const handleExpendSlot = useCallback((level: number) => {
+    const updated = expendSpellSlot(character, level)
+    onCharacterUpdate(updated)
+  }, [character, onCharacterUpdate])
+
+  const handleRestoreSlot = useCallback((level: number) => {
+    const updated = restoreSpellSlot(character, level)
+    onCharacterUpdate(updated)
+  }, [character, onCharacterUpdate])
+
+  // Action notes CRUD
+  const updateActionNote = useCallback((actionName: string, customTip: string | undefined, notes: ActionNote[]) => {
+    setActionNotes(prev => ({
+      ...prev,
+      [actionName]: { customTip, notes },
+    }))
+  }, [])
+
   const MAX_SHOW = 4
 
   return (
@@ -475,6 +535,8 @@ export function TurnSummary({
           expandedAction={expandedAction}
           onToggleExpand={setExpandedAction}
           color="arcane"
+          actionNotes={actionNotes}
+          onUpdateNotes={updateActionNote}
         />
 
         {/* Bonus Actions */}
@@ -489,6 +551,8 @@ export function TurnSummary({
             expandedAction={expandedAction}
             onToggleExpand={setExpandedAction}
             color="ember"
+            actionNotes={actionNotes}
+            onUpdateNotes={updateActionNote}
           />
         )}
 
@@ -504,34 +568,48 @@ export function TurnSummary({
             expandedAction={expandedAction}
             onToggleExpand={setExpandedAction}
             color="eldritch"
+            actionNotes={actionNotes}
+            onUpdateNotes={updateActionNote}
           />
         )}
       </div>
 
-      {/* ── Spell Slots Row ── */}
+      {/* ── Spell Slots Row — tappable pips ── */}
       {Object.keys(character.spellSlots).length > 0 && (
-        <div className="px-4 py-2.5 border-t border-white/5 flex flex-wrap gap-2">
+        <div className="px-4 py-2.5 border-t border-white/5 flex flex-wrap gap-3">
           {Object.entries(character.spellSlots)
             .filter(([_, slot]) => slot.max > 0)
             .sort(([a], [b]) => Number(a) - Number(b))
-            .map(([level, slot]) => (
-              <div key={level} className="flex items-center gap-1">
-                <span className="text-[10px] text-forge-2 font-medium">{levelLabel(Number(level))}:</span>
-                <div className="flex gap-0.5">
-                  {Array.from({ length: slot.max }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={cn(
-                        'w-2.5 h-2.5 rounded-full',
-                        i < slot.current
-                          ? 'bg-arcane shadow-[0_0_4px_rgba(61,210,255,0.4)]'
-                          : 'bg-white/10',
-                      )}
-                    />
-                  ))}
+            .map(([level, slot]) => {
+              const lvl = Number(level)
+              return (
+                <div key={level} className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-forge-2 font-medium">{levelLabel(lvl)}:</span>
+                  <div className="flex gap-1">
+                    {Array.from({ length: slot.max }).map((_, i) => {
+                      const isFilled = i < slot.current
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => isFilled ? handleExpendSlot(lvl) : handleRestoreSlot(lvl)}
+                          aria-label={`${levelLabel(lvl)} slot ${i + 1}: ${isFilled ? 'expend' : 'restore'}`}
+                          className={cn(
+                            'w-4 h-4 rounded-full',
+                            'transition-all duration-200 ease-forge',
+                            'active:scale-90',
+                            'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-arcane',
+                            isFilled
+                              ? 'bg-arcane shadow-[0_0_6px_rgba(61,210,255,0.5)] hover:bg-arcane/70'
+                              : 'bg-white/10 hover:bg-white/20',
+                          )}
+                        />
+                      )
+                    })}
+                  </div>
+                  <span className="text-[9px] font-mono text-forge-2/60">{slot.current}/{slot.max}</span>
                 </div>
-              </div>
-            ))}
+              )
+            })}
         </div>
       )}
 
@@ -580,6 +658,8 @@ function ActionSection({
   expandedAction,
   onToggleExpand,
   color,
+  actionNotes,
+  onUpdateNotes,
 }: {
   label: string
   icon: typeof Sword
@@ -590,6 +670,8 @@ function ActionSection({
   expandedAction: string | null
   onToggleExpand: (name: string | null) => void
   color: 'arcane' | 'ember' | 'eldritch'
+  actionNotes: ActionNotesData
+  onUpdateNotes: (actionName: string, customTip: string | undefined, notes: ActionNote[]) => void
 }) {
   const [showAll, setShowAll] = useState(false)
   const visible = showAll ? options : options.slice(0, maxShow)
@@ -627,6 +709,7 @@ function ActionSection({
         <div className="flex flex-col gap-1.5 pl-5">
           {visible.map((opt) => {
             const isExpanded = expandedAction === opt.name
+            const notes = actionNotes[opt.name]
 
             return (
               <div key={opt.name} className="flex flex-col">
@@ -659,6 +742,9 @@ function ActionSection({
                       {opt.isConcentration && (
                         <Focus size={10} className="text-ember shrink-0" aria-label="Concentration" />
                       )}
+                      {notes && notes.notes.length > 0 && (
+                        <Pencil size={9} className="text-forge-2/40 shrink-0" aria-label="Has custom notes" />
+                      )}
                     </div>
                     {/* Quick mechanics preview when collapsed */}
                     {!isExpanded && (
@@ -681,77 +767,14 @@ function ActionSection({
 
                 {/* Expanded detail panel */}
                 {isExpanded && (
-                  <div className={cn(
-                    'mt-0 px-3 py-3 rounded-b-lg border border-t-0',
-                    cs.border, cs.bg,
-                    'animate-fade-in',
-                  )}>
-                    {/* Summary */}
-                    <p className="text-xs text-forge-1 leading-relaxed mb-2">
-                      {opt.summary}
-                    </p>
-
-                    {/* Mechanics breakdown */}
-                    <div className="flex flex-col gap-1 mb-2">
-                      <div className="flex items-start gap-2">
-                        <Dices size={11} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
-                        <span className="text-[11px] font-mono text-forge-0">{opt.mechanicsLine}</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <Info size={11} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
-                        <span className="text-[11px] text-forge-2">{opt.effectsLine}</span>
-                      </div>
-                      {opt.usesRemaining && (
-                        <div className="flex items-center gap-2">
-                          <Sparkles size={11} className="text-forge-2 shrink-0" aria-hidden />
-                          <span className="text-[11px] text-forge-2">Uses: {opt.usesRemaining}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Strategic tip */}
-                    {opt.strategicTip && (
-                      <div className={cn(
-                        'px-2.5 py-1.5 rounded-md mb-2',
-                        'bg-white/[0.03] border border-white/5',
-                        'text-[10px] text-forge-2 italic leading-relaxed',
-                      )}>
-                        {opt.strategicTip}
-                      </div>
-                    )}
-
-                    {/* USE IT button */}
-                    <button
-                      onClick={() => onUseAction(opt)}
-                      className={cn(
-                        'w-full min-h-[44px] px-4 rounded-lg',
-                        'flex items-center justify-center gap-2',
-                        'text-sm font-semibold',
-                        'transition-all duration-200 ease-forge',
-                        'active:scale-[0.96]',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                        color === 'arcane'
-                          ? 'bg-arcane/20 text-arcane border border-arcane/30 hover:bg-arcane/30'
-                          : color === 'ember'
-                            ? 'bg-ember/20 text-ember border border-ember/30 hover:bg-ember/30'
-                            : 'bg-eldritch/20 text-eldritch border border-eldritch/30 hover:bg-eldritch/30',
-                      )}
-                    >
-                      {opt.rollNotation ? (
-                        <>
-                          <Dices size={16} aria-hidden />
-                          Use {opt.name}
-                          {opt.spellLevel && opt.spellLevel > 0 ? ` (${levelLabel(opt.spellLevel)} slot)` : ''}
-                        </>
-                      ) : (
-                        <>
-                          <Sword size={16} aria-hidden />
-                          Use {opt.name}
-                          {opt.spellLevel && opt.spellLevel > 0 ? ` (${levelLabel(opt.spellLevel)} slot)` : ''}
-                        </>
-                      )}
-                    </button>
-                  </div>
+                  <ExpandedActionPanel
+                    opt={opt}
+                    cs={cs}
+                    color={color}
+                    notes={notes}
+                    onUseAction={onUseAction}
+                    onUpdateNotes={onUpdateNotes}
+                  />
                 )}
               </div>
             )
@@ -782,6 +805,289 @@ function ActionSection({
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// ExpandedActionPanel — detail view with editable notes
+// ---------------------------------------------------------------------------
+
+function ExpandedActionPanel({
+  opt,
+  cs,
+  color,
+  notes,
+  onUseAction,
+  onUpdateNotes,
+}: {
+  opt: ActionOption
+  cs: { border: string; bg: string; text: string }
+  color: 'arcane' | 'ember' | 'eldritch'
+  notes: ActionNotesData[string] | undefined
+  onUseAction: (option: ActionOption) => void
+  onUpdateNotes: (actionName: string, customTip: string | undefined, notes: ActionNote[]) => void
+}) {
+  const [editingTip, setEditingTip] = useState(false)
+  const [tipDraft, setTipDraft] = useState('')
+  const [addingNote, setAddingNote] = useState(false)
+  const [newNoteLabel, setNewNoteLabel] = useState('')
+  const [newNoteText, setNewNoteText] = useState('')
+  const tipInputRef = useRef<HTMLTextAreaElement>(null)
+  const noteLabelRef = useRef<HTMLInputElement>(null)
+
+  const customTip = notes?.customTip
+  const customNotes = notes?.notes ?? []
+  const displayTip = customTip ?? opt.strategicTip
+
+  // Focus on inputs when toggled
+  useEffect(() => {
+    if (editingTip && tipInputRef.current) tipInputRef.current.focus()
+  }, [editingTip])
+  useEffect(() => {
+    if (addingNote && noteLabelRef.current) noteLabelRef.current.focus()
+  }, [addingNote])
+
+  const handleSaveTip = () => {
+    const trimmed = tipDraft.trim()
+    onUpdateNotes(opt.name, trimmed || undefined, customNotes)
+    setEditingTip(false)
+  }
+
+  const handleAddNote = () => {
+    const label = newNoteLabel.trim()
+    const text = newNoteText.trim()
+    if (!label || !text) return
+    onUpdateNotes(opt.name, customTip, [...customNotes, { label, text }])
+    setNewNoteLabel('')
+    setNewNoteText('')
+    setAddingNote(false)
+  }
+
+  const handleDeleteNote = (index: number) => {
+    const updated = customNotes.filter((_, i) => i !== index)
+    onUpdateNotes(opt.name, customTip, updated)
+  }
+
+  return (
+    <div className={cn(
+      'mt-0 px-3 py-3 rounded-b-lg border border-t-0',
+      cs.border, cs.bg,
+      'animate-fade-in',
+    )}>
+      {/* Summary */}
+      <p className="text-xs text-forge-1 leading-relaxed mb-2">
+        {opt.summary}
+      </p>
+
+      {/* Mechanics breakdown */}
+      <div className="flex flex-col gap-1 mb-2">
+        <div className="flex items-start gap-2">
+          <Dices size={11} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
+          <span className="text-[11px] font-mono text-forge-0">{opt.mechanicsLine}</span>
+        </div>
+        <div className="flex items-start gap-2">
+          <Info size={11} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
+          <span className="text-[11px] text-forge-2">{opt.effectsLine}</span>
+        </div>
+        {opt.usesRemaining && (
+          <div className="flex items-center gap-2">
+            <Sparkles size={11} className="text-forge-2 shrink-0" aria-hidden />
+            <span className="text-[11px] text-forge-2">Uses: {opt.usesRemaining}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Strategic tip — editable */}
+      <div className={cn(
+        'px-2.5 py-1.5 rounded-md mb-2',
+        'bg-white/[0.03] border border-white/5',
+      )}>
+        {editingTip ? (
+          <div className="flex flex-col gap-1.5">
+            <textarea
+              ref={tipInputRef}
+              value={tipDraft}
+              onChange={(e) => setTipDraft(e.target.value)}
+              placeholder="Write a custom strategic tip..."
+              rows={2}
+              className={cn(
+                'w-full bg-transparent text-[11px] text-forge-1 leading-relaxed',
+                'border-none outline-none resize-none placeholder:text-forge-2/30',
+              )}
+            />
+            <div className="flex items-center gap-1.5 justify-end">
+              <button
+                onClick={() => setEditingTip(false)}
+                className="min-h-[32px] px-2.5 rounded text-[10px] text-forge-2 hover:text-forge-0 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveTip}
+                className={cn(
+                  'min-h-[32px] px-2.5 rounded text-[10px] font-medium',
+                  'bg-arcane/20 text-arcane hover:bg-arcane/30 transition-colors',
+                  'flex items-center gap-1',
+                )}
+              >
+                <Check size={10} aria-hidden />
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[10px] text-forge-2 italic leading-relaxed flex-1">
+              {displayTip || 'No strategic tip — tap edit to add one'}
+            </p>
+            <button
+              onClick={() => {
+                setTipDraft(customTip ?? opt.strategicTip ?? '')
+                setEditingTip(true)
+              }}
+              className={cn(
+                'min-w-[28px] min-h-[28px] flex items-center justify-center shrink-0',
+                'rounded text-forge-2/40 hover:text-arcane hover:bg-white/[0.06]',
+                'transition-all duration-200',
+              )}
+              aria-label="Edit strategic tip"
+            >
+              <Pencil size={10} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Custom notes */}
+      {customNotes.length > 0 && (
+        <div className="flex flex-col gap-1.5 mb-2">
+          {customNotes.map((note, i) => (
+            <div
+              key={i}
+              className={cn(
+                'px-2.5 py-1.5 rounded-md',
+                'bg-white/[0.02] border border-white/5',
+              )}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] font-semibold text-forge-1 uppercase tracking-wider">
+                  {note.label}
+                </span>
+                <button
+                  onClick={() => handleDeleteNote(i)}
+                  className={cn(
+                    'min-w-[24px] min-h-[24px] flex items-center justify-center',
+                    'rounded text-forge-2/30 hover:text-red-400 hover:bg-red-400/10',
+                    'transition-colors',
+                  )}
+                  aria-label={`Delete ${note.label} note`}
+                >
+                  <Trash2 size={9} />
+                </button>
+              </div>
+              <p className="text-[10px] text-forge-2 leading-relaxed">{note.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add custom note */}
+      {addingNote ? (
+        <div className={cn(
+          'px-2.5 py-2 rounded-md mb-2',
+          'bg-white/[0.03] border border-arcane/20',
+        )}>
+          <input
+            ref={noteLabelRef}
+            value={newNoteLabel}
+            onChange={(e) => setNewNoteLabel(e.target.value)}
+            placeholder="Category (e.g., Combo, Synergy, Reminder)"
+            className={cn(
+              'w-full bg-transparent text-[11px] font-semibold text-forge-0 mb-1.5',
+              'border-none outline-none placeholder:text-forge-2/30',
+            )}
+          />
+          <textarea
+            value={newNoteText}
+            onChange={(e) => setNewNoteText(e.target.value)}
+            placeholder="Your note..."
+            rows={2}
+            className={cn(
+              'w-full bg-transparent text-[10px] text-forge-1 leading-relaxed',
+              'border-none outline-none resize-none placeholder:text-forge-2/30',
+            )}
+          />
+          <div className="flex items-center gap-1.5 justify-end mt-1">
+            <button
+              onClick={() => { setAddingNote(false); setNewNoteLabel(''); setNewNoteText('') }}
+              className="min-h-[32px] px-2.5 rounded text-[10px] text-forge-2 hover:text-forge-0 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddNote}
+              disabled={!newNoteLabel.trim() || !newNoteText.trim()}
+              className={cn(
+                'min-h-[32px] px-2.5 rounded text-[10px] font-medium',
+                'bg-arcane/20 text-arcane hover:bg-arcane/30 transition-colors',
+                'flex items-center gap-1',
+                'disabled:opacity-30 disabled:pointer-events-none',
+              )}
+            >
+              <Check size={10} aria-hidden />
+              Add
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setAddingNote(true)}
+          className={cn(
+            'w-full min-h-[32px] px-2.5 rounded-md mb-2',
+            'flex items-center justify-center gap-1.5',
+            'text-[10px] text-forge-2/50 hover:text-arcane',
+            'border border-dashed border-white/5 hover:border-arcane/20',
+            'bg-transparent hover:bg-arcane/[0.04]',
+            'transition-all duration-200',
+          )}
+        >
+          <Plus size={10} aria-hidden />
+          Add custom note
+        </button>
+      )}
+
+      {/* USE IT button */}
+      <button
+        onClick={() => onUseAction(opt)}
+        className={cn(
+          'w-full min-h-[44px] px-4 rounded-lg',
+          'flex items-center justify-center gap-2',
+          'text-sm font-semibold',
+          'transition-all duration-200 ease-forge',
+          'active:scale-[0.96]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          color === 'arcane'
+            ? 'bg-arcane/20 text-arcane border border-arcane/30 hover:bg-arcane/30'
+            : color === 'ember'
+              ? 'bg-ember/20 text-ember border border-ember/30 hover:bg-ember/30'
+              : 'bg-eldritch/20 text-eldritch border border-eldritch/30 hover:bg-eldritch/30',
+        )}
+      >
+        {opt.rollNotation ? (
+          <>
+            <Dices size={16} aria-hidden />
+            Use {opt.name}
+            {opt.spellLevel && opt.spellLevel > 0 ? ` (${levelLabel(opt.spellLevel)} slot)` : ''}
+          </>
+        ) : (
+          <>
+            <Sword size={16} aria-hidden />
+            Use {opt.name}
+            {opt.spellLevel && opt.spellLevel > 0 ? ` (${levelLabel(opt.spellLevel)} slot)` : ''}
+          </>
+        )}
+      </button>
     </div>
   )
 }
