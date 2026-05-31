@@ -18,6 +18,18 @@ export interface AIConfig {
   fallbackEnabled?: boolean
 }
 
+/** Resolve the Ollama URL: use the proxy path when accessed remotely. */
+export function getDefaultOllamaUrl(): string {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    // If not on localhost/LAN, use the same-origin proxy to avoid CORS
+    if (host !== 'localhost' && host !== '127.0.0.1' && !host.startsWith('192.168.')) {
+      return `${window.location.origin}/ollama`
+    }
+  }
+  return 'http://192.168.1.174:11434'
+}
+
 // Load/save config from localStorage
 export function loadAIConfig(): AIConfig {
   const saved = localStorage.getItem('codex-ai-config')
@@ -25,12 +37,19 @@ export function loadAIConfig(): AIConfig {
     const parsed = JSON.parse(saved)
     // Migration: default fallback to true
     if (parsed.fallbackEnabled === undefined) parsed.fallbackEnabled = true
+    // Migration: swap direct Ollama URL for proxy when accessed remotely
+    if (parsed.ollamaUrl && parsed.ollamaUrl.includes('192.168.') && typeof window !== 'undefined') {
+      const host = window.location.hostname
+      if (host !== 'localhost' && host !== '127.0.0.1' && !host.startsWith('192.168.')) {
+        parsed.ollamaUrl = `${window.location.origin}/ollama`
+      }
+    }
     return parsed
   }
   return {
     provider: 'ollama',
     geminiModel: 'gemini-2.0-flash',
-    ollamaUrl: 'http://192.168.1.174:11434',
+    ollamaUrl: getDefaultOllamaUrl(),
     ollamaModel: 'gemma3-27b-abliterated:latest',
     fallbackEnabled: true,
   }

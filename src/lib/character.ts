@@ -162,11 +162,27 @@ export interface ClassFeature {
   usesPerRest?: 'short' | 'long' | 'unlimited'
   usesMax?: number
   usesCurrent?: number
+  actionType?: 'action' | 'bonusAction' | 'reaction' | 'passive' | 'none'
+  range?: string           // "30 feet", "Self", "Touch"
+  damageDice?: string      // "2d8", "3d6"
+  damageType?: string      // "Radiant", "Fire"
+  saveType?: string        // "DEX", "WIS"
+  duration?: string        // "Instantaneous", "1 minute"
+  source?: string          // "PHB p.84", "Homebrew"
+  tacticalNote?: string    // Brief combat tip
+  category?: 'class' | 'subclass' | 'racial' | 'feat'
 }
 
 export interface SpellSlots {
   [level: number]: { max: number; current: number }
   // e.g. { 1: { max: 4, current: 3 }, 2: { max: 3, current: 3 } }
+}
+
+export interface CustomRPHook {
+  id: string
+  category: 'ask' | 'observe' | 'connect' | 'offer' | 'muse'
+  text: string
+  createdAt: string
 }
 
 export interface Character {
@@ -230,6 +246,9 @@ export interface Character {
 
   // Campaign reference
   campaignId?: string
+
+  // Custom RP hooks
+  customHooks?: CustomRPHook[]
 
   // Metadata
   createdAt: string
@@ -357,6 +376,7 @@ export function loadCharacter(id: string): Character | null {
       identities: parsed.identities ?? [],
       activeIdentityId: parsed.activeIdentityId ?? undefined,
       campaignId: parsed.campaignId ?? undefined,
+      customHooks: parsed.customHooks ?? [],
     } as Character
   } catch {
     return null

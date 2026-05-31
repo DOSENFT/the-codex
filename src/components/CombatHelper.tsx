@@ -36,6 +36,7 @@ import {
 } from '../lib/character'
 import {
   type CombatState,
+  type ActionEconomyType,
   createCombatState,
   startCombat,
   endCombat,
@@ -45,6 +46,8 @@ import {
   saveCombatState,
   loadCombatState,
   clearCombatState,
+  spellActionType,
+  featureActionType,
 } from '../lib/combat-state'
 import { BASIC_ACTIONS, PALADIN_ACTIONS } from '../lib/dnd-data'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
@@ -53,11 +56,13 @@ import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { Input } from './ui/Input'
-import { OrnateHeader } from './ui/OrnateHeader'
 import { HPTracker } from './HPTracker'
 import { ActionMenu, type ActionChoice } from './ActionMenu'
 import { DamageTracker } from './DamageTracker'
 import { ConditionReminder } from './ConditionReminder'
+import { TurnSummary } from './combat/TurnSummary'
+import { QuickLookup } from './combat/QuickLookup'
+import { useCollapsible } from '../hooks/useCollapsible'
 import { type CombatLog, type DamageEntry, createCombatLog, logDamage as logDamageEntry, endCombatLog, saveDamageLogs, loadDamageLogs } from '../lib/damage-log'
 
 // ---------------------------------------------------------------------------
@@ -153,14 +158,16 @@ function ActionEconomyBar({
   ]
 
   return (
-    <GlassCard className="p-4 ornate-border">
+    <GlassCard className="p-4">
       <div className="flex items-center justify-between mb-3">
-        <OrnateHeader className="flex-1">Action Economy</OrnateHeader>
+        <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+          Action Economy
+        </h3>
         <button
           onClick={onReset}
           className={cn(
             'min-h-[44px] min-w-[44px] flex items-center justify-center',
-            'rounded-lg text-forge-2 hover:text-arcane hover:bg-gold/[0.06]',
+            'rounded-lg text-forge-2 hover:text-arcane hover:bg-white/[0.06]',
             'transition-all duration-200 active:scale-[0.95]',
           )}
           aria-label="Reset action economy"
@@ -182,9 +189,9 @@ function ActionEconomyBar({
                 'flex items-center gap-2',
                 'border transition-all duration-200 ease-forge',
                 'active:scale-[0.97] select-none',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                 used
-                  ? 'bg-gold/[0.03] border-bronze/15 text-forge-2 opacity-40'
+                  ? 'bg-white/[0.03] border-white/5 text-forge-2 opacity-40'
                   : 'bg-arcane/10 border-arcane/25 text-arcane',
               )}
             >
@@ -218,8 +225,10 @@ function SpellSlotsDisplay({
   }
 
   return (
-    <GlassCard className="p-4 ornate-border">
-      <OrnateHeader className="mb-3">Spell Slots</OrnateHeader>
+    <GlassCard className="p-4">
+      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-3">
+        Spell Slots
+      </h3>
 
       <div className="flex flex-col gap-3">
         {levels.map(({ level, max, current }) => (
@@ -249,7 +258,7 @@ function SpellSlotsDisplay({
                       'p-0 flex items-center justify-center',
                       'rounded-full border-2 transition-all duration-200 ease-forge',
                       'active:scale-[0.9]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                       available
                         ? [
                             'bg-eldritch/30 border-eldritch/60',
@@ -257,8 +266,8 @@ function SpellSlotsDisplay({
                             'hover:bg-eldritch/40 hover:border-eldritch/80',
                           ]
                         : [
-                            'bg-gold/[0.03] border-bronze/25',
-                            'hover:bg-gold/[0.06] hover:border-gold/30',
+                            'bg-white/[0.03] border-white/10',
+                            'hover:bg-white/[0.06] hover:border-white/20',
                           ],
                     )}
                   >
@@ -313,8 +322,10 @@ function PaladinResourceTracker({
   ]
 
   return (
-    <GlassCard className="p-4 ornate-border">
-      <OrnateHeader className="mb-4">Paladin Resources</OrnateHeader>
+    <GlassCard className="p-4">
+      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-4">
+        Paladin Resources
+      </h3>
 
       {/* Lay on Hands Pool */}
       <div className="mb-5">
@@ -348,7 +359,7 @@ function PaladinResourceTracker({
                 'bg-verdant/10 border border-verdant/25 text-verdant',
                 'hover:bg-verdant/20 hover:border-verdant/40',
                 'transition-all duration-200 active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                 'disabled:opacity-30 disabled:pointer-events-none',
               )}
             >
@@ -375,7 +386,7 @@ function PaladinResourceTracker({
               }}
               className={cn(
                 'w-full min-h-[44px] px-3 py-2 rounded-lg text-sm',
-                'bg-gold/[0.04] border border-bronze/25 text-forge-1',
+                'bg-white/[0.04] border border-white/10 text-forge-1',
                 'placeholder:text-forge-2/50',
                 'focus:outline-none focus:ring-2 focus:ring-verdant/40 focus:border-verdant/40',
                 'transition-all duration-200',
@@ -390,7 +401,7 @@ function PaladinResourceTracker({
               'bg-verdant/10 border border-verdant/25 text-verdant',
               'hover:bg-verdant/20 hover:border-verdant/40',
               'transition-all duration-200 active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
               'disabled:opacity-30 disabled:pointer-events-none',
             )}
           >
@@ -399,9 +410,6 @@ function PaladinResourceTracker({
           </button>
         </div>
       </div>
-
-      {/* Divider between Lay on Hands and Channel Divinity */}
-      <div className="ornate-divider my-1" aria-hidden />
 
       {/* Channel Divinity */}
       <div className="mb-4">
@@ -435,7 +443,7 @@ function PaladinResourceTracker({
                     'p-0 flex items-center justify-center',
                     'rounded-full border-2 transition-all duration-200 ease-forge',
                     'active:scale-[0.9]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                     available
                       ? [
                           'bg-ember/30 border-ember/60',
@@ -443,8 +451,8 @@ function PaladinResourceTracker({
                           'hover:bg-ember/40 hover:border-ember/80',
                         ]
                       : [
-                          'bg-gold/[0.03] border-bronze/25',
-                          'hover:bg-gold/[0.06] hover:border-gold/30',
+                          'bg-white/[0.03] border-white/10',
+                          'hover:bg-white/[0.06] hover:border-white/20',
                         ],
                   )}
                 >
@@ -498,9 +506,11 @@ function ConcentrationTracker({
       )}
     >
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2">
           <Focus size={16} className={cn(concentrationSpell ? 'text-ember' : 'text-forge-2')} aria-hidden />
-          <OrnateHeader className="flex-1">Concentration</OrnateHeader>
+          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+            Concentration
+          </h3>
         </div>
 
         {concentrationSpell && (
@@ -531,10 +541,10 @@ function ConcentrationTracker({
               onClick={() => onSetConcentration(spell.name)}
               className={cn(
                 'min-h-[44px] px-3 py-1.5 rounded-lg',
-                'bg-gold/[0.04] border border-bronze/25 text-forge-1 text-xs',
+                'bg-white/[0.04] border border-white/10 text-forge-1 text-xs',
                 'hover:bg-ember/10 hover:border-ember/30 hover:text-ember',
                 'transition-all duration-200 active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
               )}
             >
               {spell.name}
@@ -592,18 +602,20 @@ function AICombatAdvisor({
   }, [response])
 
   return (
-    <GlassCard className="p-4 ornate-border">
+    <GlassCard className="p-4">
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-arcane" aria-hidden />
-          <OrnateHeader className="flex-1">Combat Advisor</OrnateHeader>
+          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+            Combat Advisor
+          </h3>
         </div>
         {response && (
           <button
             onClick={onClear}
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center',
-              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06]',
+              'rounded-lg text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
               'transition-all duration-200 active:scale-[0.95]',
             )}
             aria-label="Clear AI response"
@@ -648,7 +660,7 @@ function AICombatAdvisor({
 
       {/* Loading state */}
       {loading && !response && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-gold/[0.02]">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02]">
           <Loader2 size={18} className="animate-spin text-arcane" aria-hidden />
           <p className="text-sm text-forge-2">Analyzing the battlefield...</p>
         </div>
@@ -747,8 +759,10 @@ function SmartActionsPanel({
   )
 
   return (
-    <GlassCard className="p-4 ornate-border">
-      <OrnateHeader className="mb-3">Actions</OrnateHeader>
+    <GlassCard className="p-4">
+      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-3">
+        Actions
+      </h3>
 
       {/* Section 1: Class Actions (Paladin only) */}
       {isPaladin && (
@@ -783,10 +797,11 @@ function SmartActionsPanel({
                     onClick={() => onSelectAction(action.name, action.description)}
                     disabled={loading || empty}
                     className={cn(
-                      'combat-card min-h-[44px] px-3 py-2.5 text-left',
+                      'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
+                      'bg-white/[0.03] border border-white/8',
                       'hover:bg-ember/8 hover:border-ember/20',
-                      'active:scale-[0.97]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                      'transition-all duration-200 active:scale-[0.97]',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                       'disabled:opacity-40 disabled:pointer-events-none',
                       'group',
                     )}
@@ -819,9 +834,6 @@ function SmartActionsPanel({
           )}
         </div>
       )}
-
-      {/* Divider */}
-      {isPaladin && hasAnySpells && <div className="ornate-divider my-1" aria-hidden />}
 
       {/* Section 2: Prepared Spell Quick-Cast */}
       {hasAnySpells && (
@@ -873,10 +885,10 @@ function SmartActionsPanel({
                             disabled={loading}
                             className={cn(
                               'min-h-[44px] px-3 py-2 rounded-lg text-left',
-                              'bg-gold/[0.03] border border-bronze/20',
+                              'bg-white/[0.03] border border-white/8',
                               'hover:bg-eldritch/8 hover:border-eldritch/20',
                               'transition-all duration-200 active:scale-[0.97]',
-                              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                               'disabled:opacity-40 disabled:pointer-events-none',
                               'group',
                               highlightNonConc && 'border-arcane/20',
@@ -942,9 +954,6 @@ function SmartActionsPanel({
         </div>
       )}
 
-      {/* Divider */}
-      <div className="ornate-divider my-1" aria-hidden />
-
       {/* Section 3: Basic Actions (collapsed by default) */}
       <div>
         <button
@@ -974,10 +983,11 @@ function SmartActionsPanel({
                 onClick={() => onSelectAction(action.name, action.description)}
                 disabled={loading}
                 className={cn(
-                  'combat-card min-h-[44px] px-3 py-2.5 text-left',
+                  'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
+                  'bg-white/[0.03] border border-white/8',
                   'hover:bg-arcane/8 hover:border-arcane/20',
-                  'active:scale-[0.97]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                  'transition-all duration-200 active:scale-[0.97]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                   'disabled:opacity-40 disabled:pointer-events-none',
                   'group',
                 )}
@@ -1069,7 +1079,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
   }, [persona.catchphrases])
 
   return (
-    <GlassCard className="p-4 ornate-border">
+    <GlassCard className="p-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -1077,9 +1087,11 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
           'transition-all duration-200 active:scale-[0.97]',
         )}
       >
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2">
           <User size={16} className="text-eldritch" aria-hidden />
-          <OrnateHeader className="flex-1">Character Persona</OrnateHeader>
+          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+            Character Persona
+          </h3>
         </div>
         {isOpen ? (
           <ChevronUp size={14} className="text-forge-2" aria-hidden />
@@ -1109,7 +1121,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
                   <span
                     key={i}
                     className={cn(
-                      'bg-void-2/60 text-forge-1 rounded-full px-3 py-1.5',
+                      'bg-white/5 text-forge-1 rounded-full px-3 py-1.5',
                       'text-xs select-none cursor-default',
                       'transition-all duration-200 active:scale-[0.95]',
                     )}
@@ -1164,6 +1176,62 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
 }
 
 // ---------------------------------------------------------------------------
+// Collapsible Section Wrapper
+// ---------------------------------------------------------------------------
+
+function CollapsibleCombatSection({
+  title,
+  icon: Icon,
+  isOpen,
+  onToggle,
+  badge,
+  children,
+}: {
+  title: string
+  icon: typeof Sword
+  isOpen: boolean
+  onToggle: () => void
+  badge?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={cn(
+          'w-full min-h-[48px] px-4 py-2.5 rounded-xl',
+          'flex items-center justify-between',
+          'bg-white/[0.03] border border-white/8',
+          'transition-all duration-200 ease-forge',
+          'active:scale-[0.97]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          isOpen && 'bg-white/[0.05] border-white/12',
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <Icon size={14} className="text-forge-1" aria-hidden />
+          <span className="text-xs font-semibold text-forge-0 uppercase tracking-wider">{title}</span>
+          {badge && (
+            <Badge variant="ember">{badge}</Badge>
+          )}
+        </div>
+        {isOpen ? (
+          <ChevronUp size={14} className="text-forge-2" aria-hidden />
+        ) : (
+          <ChevronDown size={14} className="text-forge-2" aria-hidden />
+        )}
+      </button>
+      {isOpen && (
+        <div className="mt-2 animate-fade-in">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 
@@ -1176,6 +1244,7 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
 
   // Action menu slide-up panel
   const [actionMenuOpen, setActionMenuOpen] = useState(false)
+  const [actionMenuFilter, setActionMenuFilter] = useState<ActionEconomyType>('action')
 
   // Concentration warning dialog
   const [concWarning, setConcWarning] = useState<{ newSpell: string; action: ActionChoice } | null>(null)
@@ -1184,6 +1253,20 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
   const [currentDamageLog, setCurrentDamageLog] = useState<CombatLog | null>(
     combatState.inCombat ? createCombatLog() : null
   )
+
+  // Quick lookup panel
+  const [lookupOpen, setLookupOpen] = useState(false)
+
+  // Collapsible section hooks
+  const actionDetails = useCollapsible('combat-action-details', character.id, true)
+  const spellSlotsSection = useCollapsible('combat-spell-slots', character.id, true)
+  const classResourcesSection = useCollapsible('combat-class-resources', character.id, true)
+  const concentrationSection = useCollapsible('combat-concentration', character.id, true)
+  const conditionsSection = useCollapsible('combat-conditions', character.id, false)
+  const aiAdvisorSection = useCollapsible('combat-ai-advisor', character.id, false)
+  const damageLogSection = useCollapsible('combat-damage-log', character.id, false)
+  const actionsRefSection = useCollapsible('combat-actions-ref', character.id, false)
+  const restSection = useCollapsible('combat-rest', character.id, false)
 
   // Derive economy from combatState for the ActionEconomyBar
   const economy: ActionEconomy = combatState.turnActions
@@ -1408,94 +1491,77 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
     clearResponse()
   }, [character, onCharacterUpdate, clearResponse])
 
+  // ── Count available options per action economy type (for badges) ──
+  const actionMenuCounts = useMemo(() => {
+    const counts: Record<ActionEconomyType, number> = { action: 0, bonusAction: 0, reaction: 0 }
+
+    // Weapons = action only
+    counts.action += character.weapons.length
+
+    // Spells (cantrips + leveled, filtered by casting time)
+    for (const spell of character.spells) {
+      if (!spell.prepared) continue
+      const type = spellActionType(spell.castingTime)
+      counts[type]++
+    }
+
+    // Class features
+    for (const feature of character.features) {
+      if (feature.level > character.level) continue
+      const type = featureActionType(feature)
+      counts[type]++
+    }
+
+    // Other universal actions: 6 standard actions + bonus actions + reactions
+    counts.action += 6 // Dash, Dodge, Disengage, Help, Hide, Ready
+    counts.bonusAction += 1 // Two-Weapon Attack
+    counts.reaction += 2 // Opportunity Attack, Readied Action
+
+    return counts
+  }, [character.weapons, character.spells, character.features, character.level])
+
+  const openActionMenu = useCallback((filter: ActionEconomyType) => {
+    setActionMenuFilter(filter)
+    setActionMenuOpen(true)
+  }, [])
+
   return (
     <section className="flex flex-col gap-4" aria-label="Combat Helper">
+      {/* ── Always visible: TurnSummary (when in combat) ── */}
+      {combatState.inCombat && (
+        <TurnSummary
+          character={character}
+          combatState={combatState}
+          onNextTurn={handleNextTurn}
+          onEndCombat={handleEndCombat}
+          onOpenDiceRoller={onOpenDiceRoller}
+          onOpenLookup={() => setLookupOpen(true)}
+          onCombatStateChange={setCombatState}
+          onCharacterUpdate={onCharacterUpdate}
+        />
+      )}
+
+      {/* ── Always visible: Combat Toggle (when NOT in combat) ── */}
+      {!combatState.inCombat && (
+        <GlassCard className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleStartCombat}
+              >
+                <Play size={14} aria-hidden /> Start Combat
+              </Button>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
       {/* Condition Reminder Banner */}
       {character.conditions.length > 0 && (
         <ConditionReminder character={character} onOpenDiceRoller={onOpenDiceRoller} />
       )}
-
-      {/* 0. Combat Toggle + Round Counter */}
-      <GlassCard className="p-4 ornate-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant={combatState.inCombat ? 'secondary' : 'primary'}
-              size="sm"
-              onClick={combatState.inCombat ? handleEndCombat : handleStartCombat}
-              className={cn(
-                !combatState.inCombat && 'from-gold to-bronze shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)]',
-                combatState.inCombat && 'border-red-400/30 text-red-400 hover:bg-red-400/10 hover:border-red-400/50',
-              )}
-            >
-              {combatState.inCombat ? (
-                <><Square size={14} aria-hidden /> End Combat</>
-              ) : (
-                <><Play size={14} aria-hidden /> Start Combat</>
-              )}
-            </Button>
-
-            {combatState.inCombat && (
-              <div className="flex items-center gap-2">
-                <Badge variant="arcane">
-                  Round {combatState.round}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNextTurn}
-                  aria-label="Next turn"
-                  className="gap-1"
-                >
-                  <SkipForward size={14} aria-hidden />
-                  Next Turn
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {combatState.inCombat && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setActionMenuOpen(true)}
-              className="gap-1.5"
-            >
-              <Sword size={14} aria-hidden />
-              Action
-            </Button>
-          )}
-        </div>
-
-        {/* Action economy status row (compact, shown only in combat) */}
-        {combatState.inCombat && (
-          <div className="flex gap-1.5 mt-3 flex-wrap">
-            {[
-              { key: 'action' as const, label: 'Action', icon: Sword },
-              { key: 'bonusAction' as const, label: 'Bonus', icon: Zap },
-              { key: 'reaction' as const, label: 'Reaction', icon: Shield },
-              { key: 'movement' as const, label: 'Move', icon: Footprints },
-            ].map(({ key, label, icon: Icon }) => {
-              const used = combatState.turnActions[key]
-              return (
-                <span
-                  key={key}
-                  className={cn(
-                    'stat-frame inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium',
-                    'select-none transition-colors duration-200',
-                    used
-                      ? 'bg-gold/[0.02] border-bronze/15 text-forge-2/50 line-through'
-                      : 'bg-arcane/8 border-arcane/20 text-arcane',
-                  )}
-                >
-                  <Icon size={10} aria-hidden />
-                  {label}
-                </span>
-              )
-            })}
-          </div>
-        )}
-      </GlassCard>
 
       {/* Concentration Warning Dialog */}
       {concWarning && (
@@ -1523,73 +1589,136 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
         </GlassCard>
       )}
 
-      {/* 0b. HP Tracker */}
+      {/* ── Always visible: HP Tracker ── */}
       <HPTracker
         character={character}
         onCharacterUpdate={onCharacterUpdate}
       />
 
-      {/* 1. Action Economy Bar */}
-      <ActionEconomyBar
-        economy={economy}
-        onToggle={toggleEconomy}
-        onReset={resetEconomy}
-      />
-
-      {/* 2. Spell Slots Display */}
-      <SpellSlotsDisplay
-        spellSlots={character.spellSlots}
-        onExpend={handleExpendSlot}
-        onRestore={handleRestoreSlot}
-      />
-
-      {/* 3. Paladin Resource Tracker (conditional) */}
-      {character.paladinResources && (
-        <PaladinResourceTracker
-          resources={character.paladinResources}
-          spellSlots={character.spellSlots}
-          onExpendLayOnHands={handleExpendLayOnHands}
-          onExpendChannelDivinity={handleExpendChannelDivinity}
-          onRestoreChannelDivinity={handleRestoreChannelDivinity}
-        />
+      {/* ── Collapsible: Action Economy (only when NOT in combat — TurnSummary handles it during combat) ── */}
+      {!combatState.inCombat && (
+        <CollapsibleCombatSection
+          title="Action Economy"
+          icon={Sword}
+          isOpen={actionDetails.isOpen}
+          onToggle={actionDetails.toggle}
+        >
+          <ActionEconomyBar
+            economy={economy}
+            onToggle={toggleEconomy}
+            onReset={resetEconomy}
+          />
+        </CollapsibleCombatSection>
       )}
 
-      {/* 4. Concentration Tracker */}
-      <ConcentrationTracker
-        concentrationSpell={concentrationSpell}
-        availableSpells={character.spells}
-        onSetConcentration={handleSetConcentration}
-        onDropConcentration={handleDropConcentration}
-      />
+      {/* ── Collapsible: Spell Slots ── */}
+      {Object.values(character.spellSlots).some(s => s.max > 0) && (
+        <CollapsibleCombatSection
+          title="Spell Slots"
+          icon={Sparkles}
+          isOpen={spellSlotsSection.isOpen}
+          onToggle={spellSlotsSection.toggle}
+        >
+          <SpellSlotsDisplay
+            spellSlots={character.spellSlots}
+            onExpend={handleExpendSlot}
+            onRestore={handleRestoreSlot}
+          />
+        </CollapsibleCombatSection>
+      )}
 
-      {/* 4b. Damage Tracker (shown during and after combat) */}
-      <DamageTracker
-        characterId={character.id}
-        currentLog={currentDamageLog}
-        round={combatState.round}
-        onLogDamage={handleLogDamage}
-      />
+      {/* ── Collapsible: Class Resources ── */}
+      {character.paladinResources && (
+        <CollapsibleCombatSection
+          title="Class Resources"
+          icon={Flame}
+          isOpen={classResourcesSection.isOpen}
+          onToggle={classResourcesSection.toggle}
+        >
+          <PaladinResourceTracker
+            resources={character.paladinResources}
+            spellSlots={character.spellSlots}
+            onExpendLayOnHands={handleExpendLayOnHands}
+            onExpendChannelDivinity={handleExpendChannelDivinity}
+            onRestoreChannelDivinity={handleRestoreChannelDivinity}
+          />
+        </CollapsibleCombatSection>
+      )}
 
-      {/* 5. AI Combat Advisor */}
-      <AICombatAdvisor
-        character={character}
-        response={response}
-        loading={loading}
-        error={error}
-        onQuery={handleAIQuery}
-        onClear={clearResponse}
-      />
+      {/* ── Collapsible: Concentration (only when NOT in combat — TurnSummary handles it during combat) ── */}
+      {!combatState.inCombat && (
+        <CollapsibleCombatSection
+          title="Concentration"
+          icon={Focus}
+          isOpen={concentrationSection.isOpen}
+          onToggle={concentrationSection.toggle}
+          badge={concentrationSpell || undefined}
+        >
+          <ConcentrationTracker
+            concentrationSpell={concentrationSpell}
+            availableSpells={character.spells}
+            onSetConcentration={handleSetConcentration}
+            onDropConcentration={handleDropConcentration}
+          />
+        </CollapsibleCombatSection>
+      )}
 
-      {/* 6. Smart Actions Panel (replaces QuickActionsGrid) */}
-      <SmartActionsPanel
-        character={character}
-        concentrationSpell={concentrationSpell}
-        onSelectAction={handleQuickAction}
-        loading={loading}
-      />
+      {/* ── Collapsible: Damage Log ── */}
+      <CollapsibleCombatSection
+        title="Damage Log"
+        icon={Flame}
+        isOpen={damageLogSection.isOpen}
+        onToggle={damageLogSection.toggle}
+      >
+        <DamageTracker
+          characterId={character.id}
+          currentLog={currentDamageLog}
+          round={combatState.round}
+          onLogDamage={handleLogDamage}
+        />
+      </CollapsibleCombatSection>
 
-      {/* 7. Rest Buttons */}
-      <RestButtons onShortRest={handleShortRest} onLongRest={handleLongRest} />
+      {/* ── Collapsible: AI Combat Advisor ── */}
+      <CollapsibleCombatSection
+        title="Combat Advisor"
+        icon={Sparkles}
+        isOpen={aiAdvisorSection.isOpen}
+        onToggle={aiAdvisorSection.toggle}
+      >
+        <AICombatAdvisor
+          character={character}
+          response={response}
+          loading={loading}
+          error={error}
+          onQuery={handleAIQuery}
+          onClear={clearResponse}
+        />
+      </CollapsibleCombatSection>
+
+      {/* ── Collapsible: Actions Reference ── */}
+      <CollapsibleCombatSection
+        title="Actions Reference"
+        icon={Sword}
+        isOpen={actionsRefSection.isOpen}
+        onToggle={actionsRefSection.toggle}
+      >
+        <SmartActionsPanel
+          character={character}
+          concentrationSpell={concentrationSpell}
+          onSelectAction={handleQuickAction}
+          loading={loading}
+        />
+      </CollapsibleCombatSection>
+
+      {/* ── Collapsible: Rest Management ── */}
+      <CollapsibleCombatSection
+        title="Rest Management"
+        icon={Moon}
+        isOpen={restSection.isOpen}
+        onToggle={restSection.toggle}
+      >
+        <RestButtons onShortRest={handleShortRest} onLongRest={handleLongRest} />
+      </CollapsibleCombatSection>
 
       {/* 8. Persona Card (conditional) */}
       {character.persona && <PersonaCard persona={character.persona} />}
@@ -1601,6 +1730,15 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
         character={character}
         combatState={combatState}
         onUseAction={handleUseAction}
+        filter={actionMenuFilter}
+      />
+
+      {/* 10. Quick Lookup (slide-up panel) */}
+      <QuickLookup
+        isOpen={lookupOpen}
+        onClose={() => setLookupOpen(false)}
+        character={character}
+        onRollDice={onOpenDiceRoller}
       />
     </section>
   )

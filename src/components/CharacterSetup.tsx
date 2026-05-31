@@ -79,6 +79,7 @@ interface AICharacterResponse {
     description: string
     usesPerRest?: 'short' | 'long' | 'unlimited' | null
     usesMax?: number | null
+    actionType?: 'action' | 'bonusAction' | 'reaction' | 'none' | null
   }>
 }
 
@@ -352,6 +353,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         usesPerRest: f.usesPerRest ?? undefined,
         usesMax: f.usesMax ?? undefined,
         usesCurrent: f.usesMax ?? undefined,
+        actionType: f.actionType ?? undefined,
       }))
 
       const now = new Date().toISOString()

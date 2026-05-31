@@ -32,7 +32,7 @@ import { PersonaEngine } from './PersonaEngine'
 import { TrainingProgress } from './TrainingProgress'
 import { SpacedFlashcards } from './SpacedFlashcards'
 import { BackstoryBuilder } from './BackstoryBuilder'
-import { AccentCoach } from './AccentCoach'
+import { AccentForge } from './accent-forge'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -475,7 +475,7 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
         />
       )}
       {mode === 'accent' && (
-        <AccentCoach character={character} />
+        <AccentForge character={character} />
       )}
     </div>
   )
