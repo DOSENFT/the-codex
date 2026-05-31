@@ -12,6 +12,7 @@ import {
   Hand,
   Clock,
   BookOpen,
+  Info,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
@@ -20,13 +21,15 @@ import { GlassCard } from './ui/GlassCard'
 import type { Character } from '../lib/character'
 import { attackBonus, abilityModifier } from '../lib/character'
 import type { CombatState } from '../lib/combat-state'
+import { type ActionEconomyType, spellActionType, featureActionType } from '../lib/combat-state'
+import { BONUS_ACTIONS, REACTIONS } from '../lib/dnd-data'
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export interface ActionChoice {
-  type: 'action' | 'bonusAction'
+  type: ActionEconomyType
   name: string
   category: string
   slotLevel?: number
@@ -40,6 +43,7 @@ interface ActionMenuProps {
   character: Character
   combatState: CombatState
   onUseAction: (action: ActionChoice) => void
+  filter: ActionEconomyType
 }
 
 // ---------------------------------------------------------------------------
@@ -160,7 +164,7 @@ function ActionItem({
 }
 
 // ---------------------------------------------------------------------------
-// Other Actions (Dash, Dodge, etc.)
+// Other Actions (Dash, Dodge, etc.) — action-cost only
 // ---------------------------------------------------------------------------
 
 const OTHER_ACTIONS: { name: string; effect: string; icon: typeof Sword }[] = [
@@ -173,10 +177,26 @@ const OTHER_ACTIONS: { name: string; effect: string; icon: typeof Sword }[] = [
 ]
 
 // ---------------------------------------------------------------------------
+// Header labels by filter
+// ---------------------------------------------------------------------------
+
+const FILTER_HEADERS: { [K in ActionEconomyType]: string } = {
+  action: 'Choose Action',
+  bonusAction: 'Choose Bonus Action',
+  reaction: 'Choose Reaction',
+}
+
+const FILTER_COST_LABELS: { [K in ActionEconomyType]: string } = {
+  action: 'Action',
+  bonusAction: 'Bonus Action',
+  reaction: 'Reaction',
+}
+
+// ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 
-export function ActionMenu({ isOpen, onClose, character, combatState, onUseAction }: ActionMenuProps) {
+export function ActionMenu({ isOpen, onClose, character, combatState, onUseAction, filter }: ActionMenuProps) {
   const panelRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
 
@@ -244,26 +264,28 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
 
   // ── Derived data ──
 
+  const isActionSlotUsed = combatState.turnActions[filter]
+
   const cantrips = useMemo(
-    () => character.spells.filter((s) => s.level === 0 && s.prepared),
-    [character.spells],
+    () => character.spells.filter((s) => s.level === 0 && s.prepared && spellActionType(s.castingTime) === filter),
+    [character.spells, filter],
   )
 
   const spellsByLevel = useMemo(() => {
     const map = new Map<number, typeof character.spells>()
     for (const spell of character.spells) {
-      if (spell.level > 0 && spell.prepared) {
+      if (spell.level > 0 && spell.prepared && spellActionType(spell.castingTime) === filter) {
         const list = map.get(spell.level) || []
         list.push(spell)
         map.set(spell.level, list)
       }
     }
     return map
-  }, [character.spells])
+  }, [character.spells, filter])
 
   const classFeatures = useMemo(
-    () => character.features.filter((f) => f.level <= character.level),
-    [character.features, character.level],
+    () => character.features.filter((f) => f.level <= character.level && featureActionType(f) === filter),
+    [character.features, character.level, filter],
   )
 
   // Remaining spell slots (from character's actual current spell slots)
@@ -285,9 +307,6 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
   const handleWeaponAttack = useCallback(
     (weapon: Character['weapons'][number]) => {
       const bonus = attackBonus(character, weapon)
-      const mod = abilityModifier(character.abilityScores[weapon.abilityMod])
-      const bonusDmg = weapon.bonusDamage ?? 0
-      const dmgMod = mod + bonusDmg
       onUseAction({
         type: 'action',
         name: weapon.name,
@@ -305,7 +324,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
         ? `${spell.damageDice}${spell.saveType ? '' : `+${character.spellAttackBonus}`}`
         : `d20+${character.spellAttackBonus}`
       onUseAction({
-        type: 'action',
+        type: spellActionType(spell.castingTime),
         name: spell.name,
         category: 'Cantrip',
         rollNotation: notation,
@@ -317,14 +336,13 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
 
   const handleSpell = useCallback(
     (spell: Character['spells'][number], slotLevel: number) => {
-      const isBonusAction = spell.castingTime.toLowerCase().includes('bonus')
       const notation = spell.damageDice
         ? spell.damageDice
         : spell.saveType
           ? undefined
           : `d20+${character.spellAttackBonus}`
       onUseAction({
-        type: isBonusAction ? 'bonusAction' : 'action',
+        type: spellActionType(spell.castingTime),
         name: spell.name,
         category: 'Spell',
         slotLevel,
@@ -338,7 +356,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
   const handleClassFeature = useCallback(
     (feature: Character['features'][number]) => {
       onUseAction({
-        type: 'action',
+        type: featureActionType(feature),
         name: feature.name,
         category: 'Class Feature',
       })
@@ -347,15 +365,31 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
   )
 
   const handleOtherAction = useCallback(
-    (name: string) => {
+    (name: string, type: ActionEconomyType) => {
       onUseAction({
-        type: 'action',
+        type,
         name,
         category: 'Other',
       })
     },
     [onUseAction],
   )
+
+  // ── Count sections to detect empty state ──
+
+  const showWeapons = filter === 'action' && character.weapons.length > 0
+  const showCantrips = cantrips.length > 0
+  const showSpells = spellsByLevel.size > 0
+  const showFeatures = classFeatures.length > 0
+  const showOtherActions = filter === 'action'
+  const showBonusActions = filter === 'bonusAction'
+  const showReactions = filter === 'reaction'
+
+  const hasContent = showWeapons || showCantrips || showSpells || showFeatures
+    || showOtherActions || showBonusActions || showReactions
+
+  // Pre-compute label outside narrowing scope (TS narrows `filter` to `never` inside !hasContent)
+  const costLabel = FILTER_COST_LABELS[filter]
 
   // ── Render ──
 
@@ -377,7 +411,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Action Menu"
+        aria-label={FILTER_HEADERS[filter]}
         tabIndex={-1}
         className={cn(
           'fixed inset-x-0 bottom-0 z-50',
@@ -397,7 +431,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-2">
           <h2 className="font-display text-base font-semibold text-forge-0 tracking-tight">
-            Choose Action
+            {FILTER_HEADERS[filter]}
           </h2>
           <button
             type="button"
@@ -416,8 +450,21 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
         </div>
 
         <div className="px-4 pb-6 safe-bottom flex flex-col gap-3">
-          {/* ── Weapon Attacks ── */}
-          {character.weapons.length > 0 && (
+          {/* ── Empty State ── */}
+          {!hasContent && (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <Info size={24} className="text-forge-2/50" aria-hidden />
+              <p className="text-sm text-forge-2">
+                No {costLabel.toLowerCase()} options available.
+              </p>
+              <p className="text-xs text-forge-2/60">
+                Your character has no abilities that cost a {costLabel.toLowerCase()}.
+              </p>
+            </div>
+          )}
+
+          {/* ── Weapon Attacks (action only) ── */}
+          {showWeapons && (
             <MenuSection
               title="Weapon Attacks"
               icon={Sword}
@@ -432,7 +479,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
                     name={weapon.name}
                     cost="Action"
                     effect={`d20+${bonus} to hit | ${weapon.damageDice} ${weapon.damageType}`}
-                    disabled={combatState.turnActions.action}
+                    disabled={isActionSlotUsed}
                     onSelect={() => handleWeaponAttack(weapon)}
                     variant="arcane"
                     badge={<Badge variant="arcane">Attack</Badge>}
@@ -443,7 +490,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
           )}
 
           {/* ── Cantrips ── */}
-          {cantrips.length > 0 && (
+          {showCantrips && (
             <MenuSection
               title="Cantrips"
               icon={Sparkles}
@@ -454,7 +501,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
                 <ActionItem
                   key={spell.name}
                   name={spell.name}
-                  cost="Action"
+                  cost={FILTER_COST_LABELS[filter]}
                   effect={
                     [
                       spell.damageDice && `${spell.damageDice} ${spell.damageType ?? ''}`,
@@ -464,7 +511,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
                       .filter(Boolean)
                       .join(' | ') || spell.description.slice(0, 80)
                   }
-                  disabled={combatState.turnActions.action}
+                  disabled={isActionSlotUsed}
                   onSelect={() => handleCantrip(spell)}
                   variant="eldritch"
                   badge={<Badge variant="neutral">Cantrip</Badge>}
@@ -492,41 +539,36 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
                     </Badge>
                   }
                 >
-                  {spells.map((spell) => {
-                    const isBonusAction = spell.castingTime.toLowerCase().includes('bonus')
-                    const actionType = isBonusAction ? 'bonusAction' : 'action'
-                    const isUsed = combatState.turnActions[actionType]
-                    return (
-                      <ActionItem
-                        key={spell.name}
-                        name={spell.name}
-                        cost={isBonusAction ? 'Bonus Action' : 'Action'}
-                        effect={
-                          [
-                            spell.damageDice && `${spell.damageDice} ${spell.damageType ?? ''}`,
-                            spell.concentration && 'Concentration',
-                            spell.range && spell.range !== 'Self' && `Range: ${spell.range}`,
-                          ]
-                            .filter(Boolean)
-                            .join(' | ') || spell.description.slice(0, 80)
-                        }
-                        disabled={remaining <= 0 || isUsed}
-                        onSelect={() => handleSpell(spell, level)}
-                        variant="eldritch"
-                        badge={
-                          <Badge variant={spell.concentration ? 'ember' : 'eldritch'}>
-                            Lvl {level}
-                          </Badge>
-                        }
-                      />
-                    )
-                  })}
+                  {spells.map((spell) => (
+                    <ActionItem
+                      key={spell.name}
+                      name={spell.name}
+                      cost={FILTER_COST_LABELS[filter]}
+                      effect={
+                        [
+                          spell.damageDice && `${spell.damageDice} ${spell.damageType ?? ''}`,
+                          spell.concentration && 'Concentration',
+                          spell.range && spell.range !== 'Self' && `Range: ${spell.range}`,
+                        ]
+                          .filter(Boolean)
+                          .join(' | ') || spell.description.slice(0, 80)
+                      }
+                      disabled={remaining <= 0 || isActionSlotUsed}
+                      onSelect={() => handleSpell(spell, level)}
+                      variant="eldritch"
+                      badge={
+                        <Badge variant={spell.concentration ? 'ember' : 'eldritch'}>
+                          Lvl {level}
+                        </Badge>
+                      }
+                    />
+                  ))}
                 </MenuSection>
               )
             })}
 
           {/* ── Class Features ── */}
-          {classFeatures.length > 0 && (
+          {showFeatures && (
             <MenuSection
               title="Class Features"
               icon={Zap}
@@ -548,7 +590,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
                           : undefined
                     }
                     effect={feature.description.slice(0, 100)}
-                    disabled={hasUses && remaining !== undefined && remaining <= 0}
+                    disabled={(hasUses && remaining !== undefined && remaining <= 0) || isActionSlotUsed}
                     onSelect={() => handleClassFeature(feature)}
                     variant="ember"
                     badge={
@@ -568,24 +610,71 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
             </MenuSection>
           )}
 
-          {/* ── Other Actions (Dash, Dodge, etc.) ── */}
-          <MenuSection
-            title="Other Actions"
-            icon={Shield}
-            iconColor="text-forge-2"
-            defaultOpen={false}
-          >
-            {OTHER_ACTIONS.map((action) => (
-              <ActionItem
-                key={action.name}
-                name={action.name}
-                cost="Action"
-                effect={action.effect}
-                disabled={combatState.turnActions.action}
-                onSelect={() => handleOtherAction(action.name)}
-              />
-            ))}
-          </MenuSection>
+          {/* ── Other Actions — action filter only (Dash, Dodge, etc.) ── */}
+          {showOtherActions && (
+            <MenuSection
+              title="Other Actions"
+              icon={Shield}
+              iconColor="text-forge-2"
+              defaultOpen={false}
+            >
+              {OTHER_ACTIONS.map((action) => (
+                <ActionItem
+                  key={action.name}
+                  name={action.name}
+                  cost="Action"
+                  effect={action.effect}
+                  disabled={isActionSlotUsed}
+                  onSelect={() => handleOtherAction(action.name, 'action')}
+                />
+              ))}
+            </MenuSection>
+          )}
+
+          {/* ── Universal Bonus Actions — bonusAction filter only ── */}
+          {showBonusActions && (
+            <MenuSection
+              title="Bonus Actions"
+              icon={Zap}
+              iconColor="text-ember"
+              defaultOpen={true}
+            >
+              {BONUS_ACTIONS.map((ba) => (
+                <ActionItem
+                  key={ba.name}
+                  name={ba.name}
+                  cost="Bonus Action"
+                  effect={ba.description}
+                  disabled={isActionSlotUsed}
+                  onSelect={() => handleOtherAction(ba.name, 'bonusAction')}
+                  variant="ember"
+                  badge={ba.condition ? <Badge variant="neutral">Conditional</Badge> : undefined}
+                />
+              ))}
+            </MenuSection>
+          )}
+
+          {/* ── Universal Reactions — reaction filter only ── */}
+          {showReactions && (
+            <MenuSection
+              title="Reactions"
+              icon={Shield}
+              iconColor="text-eldritch"
+              defaultOpen={true}
+            >
+              {REACTIONS.map((rxn) => (
+                <ActionItem
+                  key={rxn.name}
+                  name={rxn.name}
+                  cost="Reaction"
+                  effect={rxn.description}
+                  disabled={isActionSlotUsed}
+                  onSelect={() => handleOtherAction(rxn.name, 'reaction')}
+                  variant="eldritch"
+                />
+              ))}
+            </MenuSection>
+          )}
         </div>
       </div>
     </>

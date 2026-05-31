@@ -22,9 +22,11 @@ import {
   TrendingUp,
   ArrowLeftRight,
   Plus,
+  ClipboardCopy,
+  ClipboardPaste,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
-import { loadAIConfig, saveAIConfig, fetchOllamaModels, GEMINI_MODELS, type AIProvider } from '../lib/ai'
+import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, GEMINI_MODELS, type AIProvider } from '../lib/ai'
 import { useAI } from '../hooks/useAI'
 import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
 import { ASTERA_PERSONA } from '../lib/dnd-data'
@@ -56,7 +58,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   const [provider, setProvider] = useState<AIProvider>('ollama')
   const [geminiKey, setGeminiKey] = useState('')
   const [geminiModel, setGeminiModel] = useState('gemini-2.0-flash')
-  const [ollamaUrl, setOllamaUrl] = useState('http://192.168.1.174:11434')
+  const [ollamaUrl, setOllamaUrl] = useState(getDefaultOllamaUrl())
   const [ollamaModel, setOllamaModel] = useState('gemma3-27b-abliterated:latest')
   const [fallbackEnabled, setFallbackEnabled] = useState(true)
 
@@ -217,6 +219,56 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
     input.click()
   }, [onCharacterUpdate])
 
+  /* ------ backstory transfer ------ */
+  const [backstoryPasteOpen, setBackstoryPasteOpen] = useState(false)
+  const [backstoryCopyOpen, setBackstoryCopyOpen] = useState(false)
+  const [backstoryPasteText, setBackstoryPasteText] = useState('')
+  const [backstoryCopied, setBackstoryCopied] = useState(false)
+  const [backstoryMerged, setBackstoryMerged] = useState(false)
+  const [backstoryError, setBackstoryError] = useState<string | null>(null)
+
+  const handleCopyBackstory = useCallback(async () => {
+    if (!character.backstory) {
+      setBackstoryError('No backstory data to copy.')
+      setTimeout(() => setBackstoryError(null), 3000)
+      return
+    }
+    const json = JSON.stringify(character.backstory, null, 2)
+    try {
+      await navigator.clipboard.writeText(json)
+      setBackstoryCopied(true)
+      setTimeout(() => setBackstoryCopied(false), 3000)
+    } catch {
+      // Clipboard failed — show the data in a selectable textarea instead
+      setBackstoryCopyOpen(true)
+    }
+  }, [character.backstory])
+
+  const handlePasteBackstory = useCallback(() => {
+    setBackstoryError(null)
+    setBackstoryMerged(false)
+    try {
+      const parsed = JSON.parse(backstoryPasteText.trim())
+      // Validate it looks like a Backstory object
+      if (!parsed.origin && !parsed.keyMemories && !parsed.relationships && !parsed.unresolvedThreads) {
+        setBackstoryError('Invalid backstory data — missing origin, keyMemories, relationships, or unresolvedThreads.')
+        return
+      }
+      const updated: Character = {
+        ...character,
+        backstory: parsed,
+        updatedAt: new Date().toISOString(),
+      }
+      onCharacterUpdate(updated)
+      setBackstoryMerged(true)
+      setBackstoryPasteOpen(false)
+      setBackstoryPasteText('')
+      setTimeout(() => setBackstoryMerged(false), 4000)
+    } catch {
+      setBackstoryError('Could not parse — make sure you pasted valid JSON.')
+    }
+  }, [backstoryPasteText, character, onCharacterUpdate])
+
   /* ------ level up ------ */
   const handleLevelUp = useCallback(() => {
     if (character.level >= 20) return
@@ -356,13 +408,29 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       {/* Ollama config */}
       {provider === 'ollama' && (
         <div className="flex flex-col gap-4 mb-5">
-          <Input
-            icon={Server}
-            label="Ollama URL"
-            value={ollamaUrl}
-            onChange={(e) => setOllamaUrl(e.target.value)}
-            placeholder="http://192.168.1.174:11434"
-          />
+          <div className="flex flex-col gap-1.5">
+            <Input
+              icon={Server}
+              label="Ollama URL"
+              value={ollamaUrl}
+              onChange={(e) => setOllamaUrl(e.target.value)}
+              placeholder={getDefaultOllamaUrl()}
+            />
+            {typeof window !== 'undefined' && !window.location.hostname.startsWith('192.168.') && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !ollamaUrl.includes(window.location.origin) && (
+              <button
+                type="button"
+                onClick={() => setOllamaUrl(`${window.location.origin}/ollama`)}
+                className={cn(
+                  'flex items-center gap-2 min-h-[40px] px-3 rounded-lg text-left text-sm',
+                  'bg-verdant/10 border border-verdant/25 text-verdant',
+                  'transition-all duration-200 active:scale-[0.98]',
+                )}
+              >
+                <Wifi size={14} aria-hidden />
+                Use built-in proxy (recommended for remote access)
+              </button>
+            )}
+          </div>
 
           {/* Model picker */}
           <div className="flex flex-col gap-1.5">
@@ -635,6 +703,100 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
         <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/25 animate-fade-in">
           <AlertTriangle size={16} className="text-red-400 shrink-0" aria-hidden />
           <span className="text-sm text-red-400">{importError}</span>
+        </div>
+      )}
+
+      {/* Backstory Transfer */}
+      <div className="mb-4">
+        <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-2">
+          Backstory Transfer
+        </p>
+        <div className="flex gap-2.5">
+          <Button variant="secondary" size="md" onClick={handleCopyBackstory} className="flex-1">
+            <ClipboardCopy size={16} aria-hidden />
+            {backstoryCopied ? 'Copied!' : 'Copy Backstory'}
+          </Button>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => { setBackstoryPasteOpen(!backstoryPasteOpen); setBackstoryError(null) }}
+            className="flex-1"
+          >
+            <ClipboardPaste size={16} aria-hidden />
+            Paste Backstory
+          </Button>
+        </div>
+        <p className="text-xs text-forge-2 pl-1 mt-2">
+          Copy backstory on one device, text it to yourself, paste on the other. Only backstory is affected — nothing else changes.
+        </p>
+      </div>
+
+      {backstoryCopyOpen && character.backstory && (
+        <div className="mb-4 animate-fade-in">
+          <p className="text-xs text-forge-2 mb-2">Select all and copy this text:</p>
+          <textarea
+            readOnly
+            value={JSON.stringify(character.backstory, null, 2)}
+            rows={6}
+            onFocus={(e) => e.target.select()}
+            className={cn(
+              'w-full min-h-[120px] px-3 py-2.5 mb-2',
+              'bg-white/[0.04] border border-white/10 rounded-xl',
+              'text-sm text-forge-0 font-mono',
+              'resize-y select-all',
+              'focus:outline-none focus:border-arcane/50 focus:ring-1 focus:ring-arcane/25',
+            )}
+          />
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setBackstoryCopyOpen(false)}
+            className="w-full"
+          >
+            Done
+          </Button>
+        </div>
+      )}
+
+      {backstoryPasteOpen && (
+        <div className="mb-4 animate-fade-in">
+          <textarea
+            value={backstoryPasteText}
+            onChange={(e) => setBackstoryPasteText(e.target.value)}
+            placeholder='Paste backstory JSON here...'
+            rows={5}
+            className={cn(
+              'w-full min-h-[120px] px-3 py-2.5 mb-2',
+              'bg-white/[0.04] border border-white/10 rounded-xl',
+              'text-sm text-forge-0 placeholder:text-forge-2 font-mono',
+              'resize-y',
+              'transition-all duration-200 ease-forge',
+              'focus:outline-none focus:border-arcane/50 focus:ring-1 focus:ring-arcane/25',
+            )}
+          />
+          <Button
+            variant="primary"
+            size="md"
+            onClick={handlePasteBackstory}
+            disabled={!backstoryPasteText.trim()}
+            className="w-full"
+          >
+            Apply Backstory
+          </Button>
+        </div>
+      )}
+
+      {backstoryMerged && (
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-verdant/10 border border-verdant/25 animate-fade-in">
+          <CheckCircle2 size={16} className="text-verdant shrink-0" aria-hidden />
+          <span className="text-sm text-verdant">Backstory merged — everything else untouched</span>
+        </div>
+      )}
+
+      {backstoryError && (
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/25 animate-fade-in">
+          <AlertTriangle size={16} className="text-red-400 shrink-0" aria-hidden />
+          <span className="text-sm text-red-400">{backstoryError}</span>
         </div>
       )}
 

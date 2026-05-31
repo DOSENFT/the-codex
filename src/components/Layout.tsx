@@ -1,44 +1,68 @@
 import { type ReactNode, useState, useEffect } from 'react'
-import { Swords, BookOpen, Theater, GraduationCap, Settings, Dices, ChevronDown, Users, HelpCircle } from 'lucide-react'
+import { Swords, BookOpen, Theater, GraduationCap, Settings as SettingsIcon, Dices, ChevronDown, Users, HelpCircle, Puzzle, User, Flame, Compass } from 'lucide-react'
 import { cn } from '../lib/cn'
 import type { Character, RosterEntry } from '../lib/character'
 import { Badge } from './ui/Badge'
 import { DiceRoller } from './DiceRoller'
 import { CharacterSheet } from './CharacterSheet'
 import { MechanicsDrawer } from './MechanicsDrawer'
+import { ToyboxPanel } from './ToyboxPanel'
+import { Settings } from './Settings'
 
-export type TabId = 'combat' | 'spells' | 'identity' | 'academy' | 'settings'
+export type AppMode = 'session' | 'prep'
+export type TabId = 'combat' | 'grimoire' | 'roleplay' | 'character' | 'persona' | 'academy'
 
 interface LayoutProps {
   children: ReactNode
   character: Character
   activeTab: TabId
   onTabChange: (tab: TabId) => void
+  appMode: AppMode
+  onModeChange: (mode: AppMode) => void
   roster: RosterEntry[]
   onSwitchCharacter: (id: string) => void
   onUpdateCharacter: (char: Character) => void
+  onResetCharacter: () => void
+  onCreateNew: () => void
   dicePrefill?: { notation: string; label: string } | null
   onClearDicePrefill?: () => void
+  onRequestDice?: (prefill: { notation: string; label: string }) => void
 }
 
-const TABS: { id: TabId; label: string; icon: typeof Swords }[] = [
+interface TabDef { id: TabId; label: string; icon: typeof Swords }
+
+const SESSION_TABS: TabDef[] = [
   { id: 'combat', label: 'Combat', icon: Swords },
-  { id: 'spells', label: 'Spells', icon: BookOpen },
-  { id: 'identity', label: 'Identity', icon: Theater },
-  { id: 'academy', label: 'Academy', icon: GraduationCap },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'grimoire', label: 'Grimoire', icon: BookOpen },
+  { id: 'roleplay', label: 'Roleplay', icon: Theater },
 ]
 
-/**
- * App shell with a fixed header, scrollable main content area, and fixed
- * bottom tab navigation. Renders the character name and class badge in the
- * header. Active tab is highlighted with the arcane accent color.
- *
- * The main content area fills the space between header (h-14 / 56px) and
- * bottom nav (h-16 / 64px + safe-area inset) so children scroll independently.
- */
-export function Layout({ children, character, activeTab, onTabChange, roster, onSwitchCharacter, onUpdateCharacter, dicePrefill, onClearDicePrefill }: LayoutProps) {
+const PREP_TABS: TabDef[] = [
+  { id: 'character', label: 'Character', icon: User },
+  { id: 'grimoire', label: 'Grimoire', icon: BookOpen },
+  { id: 'persona', label: 'Persona', icon: Theater },
+  { id: 'academy', label: 'Academy', icon: GraduationCap },
+]
+
+export function Layout({
+  children,
+  character,
+  activeTab,
+  onTabChange,
+  appMode,
+  onModeChange,
+  roster,
+  onSwitchCharacter,
+  onUpdateCharacter,
+  onResetCharacter,
+  onCreateNew,
+  dicePrefill,
+  onClearDicePrefill,
+  onRequestDice,
+}: LayoutProps) {
   const [diceOpen, setDiceOpen] = useState(false)
+  const [toyboxOpen, setToyboxOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   // Auto-open dice roller when a prefill is provided
   useEffect(() => {
@@ -54,14 +78,51 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
     ? (character.hitPoints.current / character.hitPoints.max) * 100
     : 0
 
+  const tabs = appMode === 'session' ? SESSION_TABS : PREP_TABS
+
   return (
     <div className="flex flex-col h-full min-h-[100dvh] bg-void-0">
       {/* ─── Fixed Header ─── */}
-      <header className="fixed top-0 inset-x-0 z-40 h-14 flex items-center justify-between px-4 bg-void-0/90 backdrop-blur-md border-b border-white/[0.06]">
-        <div className="flex items-center gap-3">
-          <h1 className="font-display text-lg font-semibold text-forge-0 tracking-tight">
-            The Codex
-          </h1>
+      <header className="fixed top-0 inset-x-0 z-40 h-14 flex items-center justify-between px-3 bg-void-0/90 backdrop-blur-md border-b border-white/[0.06]">
+        <div className="flex items-center gap-2">
+          {/* Mode Toggle */}
+          <div className="flex rounded-lg overflow-hidden border border-white/10 h-8">
+            <button
+              type="button"
+              onClick={() => onModeChange('session')}
+              className={cn(
+                'px-2.5 text-[10px] font-bold uppercase tracking-wider',
+                'flex items-center gap-1',
+                'transition-all duration-200 ease-forge',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                appMode === 'session'
+                  ? 'bg-ember/15 text-ember'
+                  : 'bg-white/[0.02] text-forge-2 hover:text-forge-1',
+              )}
+              aria-label="Switch to session mode"
+            >
+              <Flame size={12} aria-hidden />
+              Play
+            </button>
+            <button
+              type="button"
+              onClick={() => onModeChange('prep')}
+              className={cn(
+                'px-2.5 text-[10px] font-bold uppercase tracking-wider',
+                'flex items-center gap-1',
+                'transition-all duration-200 ease-forge',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                appMode === 'prep'
+                  ? 'bg-arcane/15 text-arcane'
+                  : 'bg-white/[0.02] text-forge-2 hover:text-forge-1',
+              )}
+              aria-label="Switch to prep mode"
+            >
+              <Compass size={12} aria-hidden />
+              Prep
+            </button>
+          </div>
+
           {/* Persistent HP display */}
           <span
             className={cn(
@@ -81,6 +142,33 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
         </div>
 
         <div className="flex items-center gap-1">
+          {/* Settings */}
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className={cn(
+              'min-h-[44px] min-w-[44px] flex items-center justify-center',
+              'rounded-xl text-forge-2 hover:text-forge-1 hover:bg-white/[0.06]',
+              'transition-all duration-200 ease-forge',
+              'active:scale-95',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            )}
+            aria-label="Open settings"
+          >
+            <SettingsIcon size={18} aria-hidden />
+          </button>
+          <button
+            onClick={() => setToyboxOpen(true)}
+            className={cn(
+              'min-h-[44px] min-w-[44px] flex items-center justify-center',
+              'rounded-xl text-forge-2 hover:text-ember hover:bg-white/[0.06]',
+              'transition-all duration-200 ease-forge',
+              'active:scale-95',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            )}
+            aria-label="Open The Toybox"
+          >
+            <Puzzle size={18} aria-hidden />
+          </button>
           <button
             onClick={() => setMechanicsOpen(true)}
             className={cn(
@@ -99,7 +187,7 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             aria-label="Open character sheet"
           >
-            <span className="text-sm text-forge-1 truncate max-w-[100px]">
+            <span className="text-sm text-forge-1 truncate max-w-[80px]">
               {character.name}
             </span>
             <Badge variant="eldritch">
@@ -191,6 +279,53 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
       {/* ─── Mechanics Drawer Panel ─── */}
       <MechanicsDrawer isOpen={mechanicsOpen} onClose={() => setMechanicsOpen(false)} />
 
+      {/* ─── Toybox Panel ─── */}
+      <ToyboxPanel
+        isOpen={toyboxOpen}
+        onClose={() => setToyboxOpen(false)}
+        character={character}
+        onOpenDice={onRequestDice}
+      />
+
+      {/* ─── Settings Drawer ─── */}
+      {settingsOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-[55] bg-void-0/60 backdrop-blur-sm"
+            onClick={() => setSettingsOpen(false)}
+            aria-hidden
+          />
+          <div className="fixed inset-y-0 right-0 z-[56] w-full max-w-md overflow-y-auto bg-void-1 border-l border-white/[0.08] shadow-2xl animate-in slide-in-from-right duration-300">
+            <div className="flex items-center justify-between p-4 border-b border-white/[0.06] sticky top-0 bg-void-1/90 backdrop-blur-md z-10">
+              <h2 className="font-display text-lg font-semibold text-forge-0">Settings</h2>
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className={cn(
+                  'min-h-[44px] min-w-[44px] flex items-center justify-center',
+                  'rounded-xl text-forge-2 hover:text-forge-0 hover:bg-white/[0.06]',
+                  'transition-colors duration-200',
+                  'active:scale-95',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                )}
+                aria-label="Close settings"
+              >
+                <span className="text-xl">&times;</span>
+              </button>
+            </div>
+            <div className="p-4">
+              <Settings
+                character={character}
+                onCharacterUpdate={onUpdateCharacter}
+                onResetCharacter={onResetCharacter}
+                roster={roster}
+                onSwitchCharacter={onSwitchCharacter}
+                onCreateNew={onCreateNew}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ─── Fixed Bottom Tab Navigation ─── */}
       <nav
         className="fixed bottom-0 inset-x-0 z-40 bg-void-0/90 backdrop-blur-md border-t border-white/[0.06] safe-bottom"
@@ -198,7 +333,7 @@ export function Layout({ children, character, activeTab, onTabChange, roster, on
         aria-label="Main navigation"
       >
         <div className="flex items-stretch h-16">
-          {TABS.map(({ id, label, icon: Icon }) => {
+          {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id
             return (
               <button

@@ -272,6 +272,30 @@ export const ASTERA_PERSONA = {
   ],
 }
 
+// Universal bonus actions available to all characters
+export const BONUS_ACTIONS: { name: string; type: 'Bonus Action'; description: string; condition?: string }[] = [
+  {
+    name: 'Two-Weapon Attack',
+    type: 'Bonus Action',
+    description: 'When you take the Attack action with a Light weapon, you can make one extra attack with a different Light weapon as a Bonus Action. No ability modifier to damage unless negative.',
+    condition: 'Requires a Light weapon in each hand',
+  },
+]
+
+// Universal reactions available to all characters
+export const REACTIONS: { name: string; type: 'Reaction'; description: string }[] = [
+  {
+    name: 'Opportunity Attack',
+    type: 'Reaction',
+    description: 'When a hostile creature leaves your reach, you can use your Reaction to make one melee attack against it.',
+  },
+  {
+    name: 'Readied Action',
+    type: 'Reaction',
+    description: 'When the trigger you specified with the Ready action occurs, you use your Reaction to perform the prepared action.',
+  },
+]
+
 // Custom subclass sentinel value
 export const CUSTOM_SUBCLASS = 'Custom (Homebrew)'
 

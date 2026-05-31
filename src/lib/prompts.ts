@@ -1,4 +1,5 @@
-import type { Character, CampaignData } from './character'
+import type { Character, CampaignData, PartyMember, CampaignNPC } from './character'
+import type { ComboBlock } from './toybox'
 import { abilityModifier, skillBonus, attackBonus } from './character'
 import { RACE_CONTENT } from './dnd-data'
 import { ALL_SKILLS, ALL_ABILITIES, ABILITY_NAMES } from './dnd-rules'
@@ -41,12 +42,27 @@ function characterContext(char: Character, campaign?: CampaignData | null): stri
   Aura of Protection: ${char.paladinResources.auraRange}ft range`
     : ''
 
-  // Persona context for roleplay-aware advice
+  // Persona context for roleplay-aware advice — FULL depth
   const personaInfo = char.persona
-    ? `\n\nCHARACTER PERSONA:
-  Default State: ${char.persona.defaultState}
-  Decision Tree: ${char.persona.decisionTree}
-  Patron: ${char.persona.patron.name} (${char.persona.patron.domains.join(', ')})`
+    ? (() => {
+        const lines: string[] = [
+          `Default State: ${char.persona.defaultState}`,
+          `Decision Tree: ${char.persona.decisionTree}`,
+        ]
+        if (char.persona.coreTraits?.length) lines.push(`Core Traits: ${char.persona.coreTraits.map(t => t.text).join('; ')}`)
+        if (char.persona.colorTraits?.length) lines.push(`Color Traits: ${char.persona.colorTraits.map(t => t.text).join('; ')}`)
+        if (char.persona.wants?.length) lines.push(`Wants: ${char.persona.wants.join('; ')}`)
+        if (char.persona.fears?.length) lines.push(`Fears: ${char.persona.fears.join('; ')}`)
+        if (char.persona.pressureResponse) lines.push(`Pressure Response: ${char.persona.pressureResponse}`)
+        if (char.persona.physicalTics?.length) lines.push(`Physical Tics: ${char.persona.physicalTics.join('; ')}`)
+        if (char.persona.sceneInstincts?.length) lines.push(`Scene Instincts: ${char.persona.sceneInstincts.join('; ')}`)
+        if (char.persona.quietTexture?.length) lines.push(`Quiet Texture: ${char.persona.quietTexture.join('; ')}`)
+        if (char.persona.voiceNotes) lines.push(`Voice Notes: ${char.persona.voiceNotes}`)
+        if (char.persona.catchphrases?.length) lines.push(`Catchphrases: ${char.persona.catchphrases.join('; ')}`)
+        lines.push(`Patron: ${char.persona.patron.name} (${char.persona.patron.domains.join(', ')})${char.persona.patron.rpNotes ? ` — ${char.persona.patron.rpNotes}` : ''}${char.persona.patron.symbol ? `, Symbol: ${char.persona.patron.symbol}` : ''}`)
+        if (char.persona.relationships?.length) lines.push(`Persona Relationships: ${char.persona.relationships.join('; ')}`)
+        return `\n\nCHARACTER PERSONA:\n  ${lines.join('\n  ')}`
+      })()
     : ''
 
   // Ability scores
@@ -92,13 +108,49 @@ function characterContext(char: Character, campaign?: CampaignData | null): stri
     ? `\nSUPPLIES: ${char.supplies.join(', ')}`
     : ''
 
-  // Backstory
+  // Backstory — FULL depth with memory descriptions, emotional cores, relationship statuses
   const backstoryInfo = char.backstory
-    ? `\n\nBACKSTORY:
-  Origin: ${char.backstory.origin || 'Unknown'}
-  ${char.backstory.keyMemories?.length ? `Key Memories: ${char.backstory.keyMemories.map(m => m.title).join(', ')}` : ''}
-  ${char.backstory.relationships?.length ? `Relationships: ${char.backstory.relationships.map(r => `${r.name} (${r.relation})`).join(', ')}` : ''}
-  ${char.backstory.unresolvedThreads?.length ? `Unresolved Threads: ${char.backstory.unresolvedThreads.join(', ')}` : ''}`
+    ? (() => {
+        const sections: string[] = []
+        if (char.backstory.origin) sections.push(`Origin: ${char.backstory.origin}`)
+        if (char.backstory.keyMemories?.length) {
+          sections.push(`Key Memories:\n${char.backstory.keyMemories.map(m =>
+            `    - ${m.title} [${m.emotionalCore}]${m.npcInvolved ? ` (${m.npcInvolved})` : ''}: ${m.description}`
+          ).join('\n')}`)
+        }
+        if (char.backstory.relationships?.length) {
+          sections.push(`Relationships:\n${char.backstory.relationships.map(r =>
+            `    - ${r.name} (${r.relation}) [${r.status}]`
+          ).join('\n')}`)
+        }
+        if (char.backstory.unresolvedThreads?.length) {
+          sections.push(`Unresolved Threads:\n${char.backstory.unresolvedThreads.map(t => `    - ${t}`).join('\n')}`)
+        }
+        if (char.backstory.personalitySeeds?.length) {
+          sections.push(`Personality Seeds:\n${char.backstory.personalitySeeds.map(s => `    - ${s}`).join('\n')}`)
+        }
+        return `\n\nBACKSTORY:\n  ${sections.join('\n  ')}`
+      })()
+    : ''
+
+  // Active identity (multi-persona system)
+  const identityInfo = (() => {
+    if (!char.activeIdentityId || !char.identities) return ''
+    const active = char.identities.find(i => i.id === char.activeIdentityId)
+    if (!active) return ''
+    const lines: string[] = [`ACTIVE IDENTITY: ${active.name}`]
+    if (active.accent) lines.push(`  Accent: ${active.accent}`)
+    if (active.mannerisms?.length) lines.push(`  Mannerisms: ${active.mannerisms.join(', ')}`)
+    if (active.voiceNotes) lines.push(`  Voice: ${active.voiceNotes}`)
+    if (active.personalityTraits?.length) lines.push(`  Personality: ${active.personalityTraits.join(', ')}`)
+    if (active.socialContext) lines.push(`  Social Context: ${active.socialContext}`)
+    if (active.triggers?.length) lines.push(`  Identity Triggers: ${active.triggers.join(', ')}`)
+    return `\n\n${lines.join('\n')}`
+  })()
+
+  // Active conditions (combat-critical)
+  const conditionsInfo = char.conditions?.length
+    ? `\n\nACTIVE CONDITIONS: ${char.conditions.join(', ')}`
     : ''
 
   return `
@@ -120,7 +172,7 @@ PREPARED SPELLS:
 SPELL SLOTS: ${slots || 'None'}
 
 CLASS FEATURES: ${features || 'None'}
-${paladinInfo}${personaInfo}${backstoryInfo}${pronounInstruction}${raceInfo}${homebrew}${campaign ? campaignContext(campaign) : ''}
+${paladinInfo}${conditionsInfo}${personaInfo}${backstoryInfo}${identityInfo}${pronounInstruction}${raceInfo}${homebrew}${campaign ? campaignContext(campaign) : ''}
 `
 }
 
@@ -768,4 +820,444 @@ Generate 5 practice phrases that:
 
 Respond with ONLY valid JSON (no markdown, no code fences):
 { "phrases": ["phrase 1", "phrase 2", "phrase 3", "phrase 4", "phrase 5"] }`,
+
+  voiceForge: (char: Character) => `${BASE_PROMPT}
+
+You are a voice characterization expert helping a Dungeon Master create NPC voices.
+
+${characterContext(char)}
+
+Given a detailed voice description with parameters, generate:
+1. A vivid 2-3 sentence summary of what this voice sounds like in practice (how a listener would experience it)
+2. 5 in-character dialogue lines that demonstrate this voice's unique qualities
+
+The dialogue lines should:
+- Be appropriate for a D&D fantasy setting
+- Vary in length (short quips to longer statements)
+- Exercise the voice's distinctive qualities (speed, gravel, warmth, etc.)
+- Feel like lines an NPC would actually say at a game table
+- Match the specified vocabulary level and sentence structure
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "description": "A vivid summary of what this voice sounds like",
+  "lines": ["line 1", "line 2", "line 3", "line 4", "line 5"]
+}`,
+
+  phraseBreakdown: (accentName: string, accentRules: string, eyeDialectExamples: string) => `You are an elite Hollywood dialect coach — the kind who trains actors for Oscar-winning roles. You break down phrases into pronunciation guides that anyone can follow.
+
+ACCENT: ${accentName}
+
+ACCENT RULES:
+${accentRules}
+
+EYE DIALECT EXAMPLES (how this accent spells words phonetically):
+${eyeDialectExamples}
+
+Given a phrase, produce a detailed pronunciation coaching breakdown:
+
+1. **Full Accented Version** — Rewrite the entire phrase in eye dialect (phonetic spelling that shows how it sounds in this accent)
+2. **Word-by-Word Breakdown** — For each word that changes:
+   - Original word
+   - Accented pronunciation (eye dialect spelling)
+   - Mouth instruction (what your mouth/tongue/jaw does — e.g., "drop your jaw", "tongue touches back of top teeth", "lips rounded")
+   - Which accent rule applies
+3. **Rhythm Coaching** — Where to stress, where to pause, where to speed up. Use CAPS for stress and ... for pauses.
+4. **Common Mistake** — One thing people get wrong with this phrase in this accent
+
+Be specific about mouth mechanics. Think of yourself coaching an actor through a take — not explaining linguistics, but directing physical performance.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "accentedPhrase": "the full phrase rewritten in eye dialect",
+  "words": [
+    {
+      "original": "the",
+      "accented": "thuh",
+      "mouth": "Tongue between teeth, quick and light",
+      "rule": "Soften articles"
+    }
+  ],
+  "rhythm": "Stress pattern with CAPS and pauses marked with ...",
+  "commonMistake": "One specific thing to watch for"
+}`,
+
+  accentTranslator: (accentName: string, accentRules: string, eyeDialectExamples: string) => `You are an elite dialect coach who translates any text into a specific accent's phonetic spelling (eye dialect). You show EXACTLY how to say the words.
+
+ACCENT: ${accentName}
+
+ACCENT RULES:
+${accentRules}
+
+EYE DIALECT REFERENCE:
+${eyeDialectExamples}
+
+Given any input text, translate it into this accent:
+
+1. **Accented Text** — The full text rewritten in eye dialect. Every word that changes should be respelled phonetically. Words that don't change stay as-is.
+2. **Key Shifts** — List the 3-5 most important sound changes you applied, with the rule name
+3. **Performance Note** — One sentence of coaching on how to deliver this text in the accent (rhythm, energy, attitude)
+
+Be generous with the eye dialect — show EVERY sound shift, not just the obvious ones. The goal is: if someone reads the accented text aloud exactly as spelled, they sound like the accent.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "accentedText": "the full translated text in eye dialect",
+  "keyShifts": [
+    { "from": "original sound", "to": "accented sound", "rule": "rule name" }
+  ],
+  "performanceNote": "One-line delivery coaching"
+}`,
+
+  accentScenePartner: (char: Character, accentName: string, accentRules: string, scenario: string, previousExchanges: { npc: string; player: string }[], campaign?: CampaignData | null) => {
+    const history = previousExchanges.length > 0
+      ? `\n\nCONVERSATION SO FAR:\n${previousExchanges.map((ex, i) => `  ${i + 1}. NPC: "${ex.npc}"\n     Player: "${ex.player}"`).join('\n')}`
+      : ''
+
+    return `${BASE_PROMPT}
+
+You are SIMULTANEOUSLY an NPC in a D&D scene AND a Hollywood dialect coach evaluating accent performance.
+
+${characterContext(char, campaign)}
+
+ACCENT BEING PRACTICED: ${accentName}
+ACCENT RULES:
+${accentRules}
+
+SCENARIO: ${scenario}
+${history}
+
+YOUR DUAL ROLE:
+1. **As NPC**: Play a memorable character in this scene. Give them personality, attitude, and a distinct voice. Keep your lines to 1-3 sentences. Create moments that FORCE the player to respond with emotion (anger, pleading, humor) — because maintaining an accent under emotional pressure is the real test.
+
+2. **As Dialect Coach**: After the player responds, evaluate their text for accent consistency. Look for:
+   - Did they use the accent's key sound shifts?
+   - Did they maintain the accent's rhythm and cadence?
+   - Did emotional moments cause accent "slippage"?
+   - Specific words they could have accented more
+
+${previousExchanges.length === 0 ? `This is the START. Set the scene vividly (1-2 sentences) and deliver your NPC's opening line.
+
+Respond with ONLY valid JSON:
+{
+  "npcName": "A fitting name",
+  "sceneSetting": "1-2 sentence scene description",
+  "npcLine": "Your opening dialogue",
+  "coaching": null
+}` : `The player just responded. Continue the scene and coach their accent work.
+
+Respond with ONLY valid JSON:
+{
+  "npcLine": "Your next line of dialogue",
+  "coaching": {
+    "accentScore": 4,
+    "whatWorked": "Specific accent elements they nailed",
+    "whatToFix": "Specific words or sounds they missed",
+    "rewrite": "Their line rewritten with better accent application"
+  }
+}`}`
+  },
+
+  sessionAssist: (char: Character, campaign?: CampaignData | null, sceneContext?: string) => `${BASE_PROMPT}
+
+You are an at-the-table roleplay assistant for this character:
+${characterContext(char, campaign)}
+
+${sceneContext ? `CURRENT SCENE CONTEXT: ${sceneContext}` : ''}
+
+This is for AT-THE-TABLE use during an active D&D session. Keep everything SHORT and SCANNABLE — the player needs to glance and go.
+
+Use the character's ACTUAL persona traits, backstory, relationships, fears, wants, physical tics, voice, and catchphrases. Reference party members by name. Dialogue must sound like THIS character — not generic fantasy.
+
+Given any scene description or "What would I say?" prompt, respond with ONLY valid JSON:
+{
+  "sayOptions": ["2-3 short in-character dialogue options"],
+  "doAction": "A brief physical action/reaction suggestion using the character's defined tics and instincts",
+  "innerThought": "A one-sentence inner monologue referencing backstory, fears, or unresolved threads"
+}`,
+
+  comboSuggester: (char: Character, existingBlocks: ComboBlock[], campaign?: CampaignData | null) => {
+    const blocksDesc = existingBlocks.length > 0
+      ? `\n\nCURRENT COMBO BLOCKS:\n${existingBlocks.map((b, i) => `  ${i + 1}. [${b.type.toUpperCase()}] ${b.label}${b.notes ? ` — ${b.notes}` : ''}`).join('\n')}`
+      : '\n\nNo blocks added yet — suggest a complete combo from scratch.'
+
+    return `${BASE_PROMPT}
+
+You are a combat combo architect for this character:
+${characterContext(char, campaign)}
+${blocksDesc}
+
+Design 2-3 action combos using this character's actual spells, weapons, and features. Each combo should be a sequence of blocks using the D&D 2024 action economy.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "suggestions": [
+    {
+      "name": "Nova Round",
+      "description": "Maximum single-target burst damage in one turn",
+      "blocks": [
+        { "type": "bonus", "label": "Hex (1st level)", "source": "spell", "sourceName": "Hex", "notes": "Apply to primary target first" },
+        { "type": "action", "label": "Eldritch Blast (2 beams)", "source": "feature", "sourceName": "Eldritch Blast", "notes": "Each beam adds Hex damage" }
+      ],
+      "tags": ["burst", "single-target"],
+      "category": "burst"
+    }
+  ]
+}`
+  },
+
+  tacticSuggester: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
+
+You are a tactical advisor creating situational playbooks for this character:
+${characterContext(char, campaign)}
+
+Generate 2-3 tactical playbooks — conditional plans for common combat situations.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "suggestions": [
+    {
+      "name": "Cornered — Low HP Protocol",
+      "trigger": "When HP drops below 25%",
+      "actions": [
+        "Disengage (Action) — break melee contact",
+        "Move full speed toward nearest cover or ally",
+        "If Healing Word available, cast on self (Bonus Action)"
+      ],
+      "priority": "critical",
+      "tags": ["survival", "emergency"],
+      "requirements": ["HP below 25%"],
+      "category": "survival"
+    }
+  ]
+}`,
+
+  personaPlaySuggester: (char: Character, campaign?: CampaignData | null) => `${BASE_PROMPT}
+
+You are a social strategist creating roleplay playbooks for this character:
+${characterContext(char, campaign)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+${char.persona.voiceNotes ? `Voice: ${char.persona.voiceNotes}` : ''}` : ''}
+
+Generate 2-3 social strategy plays for common roleplay situations.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "suggestions": [
+    {
+      "name": "The Pious Deflection",
+      "situation": "When accused of wrongdoing",
+      "approach": "Appeal to divine authority and redirect focus",
+      "keyPhrases": ["My actions serve a purpose beyond what mortal eyes can see."],
+      "skillCheck": "Persuasion",
+      "tags": ["social", "defense"]
+    }
+  ]
+}`,
+
+  tacticDiagram: (tacticDescription: string) => `You are a tactical diagram generator for D&D combat scenarios.
+
+Given this tactic description, generate a simplified battlefield diagram as JSON data.
+
+TACTIC: ${tacticDescription}
+
+Position entities on a 0-100 coordinate grid where (0,0) is top-left and (100,100) is bottom-right.
+
+Rules:
+- Use "player" role for the main character
+- Use "ally" role for friendly NPCs/party members
+- Use "enemy" role for hostile creatures
+- Use "objective" for terrain features, cover, or goals
+- Arrow styles: "move" for movement, "attack" for melee, "spell" for ranged/magic, "aoe" for area effects
+- Keep diagrams simple: 3-7 nodes, 1-4 arrows
+- Position nodes with clear spacing (at least 15 units apart)
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "nodes": [
+    { "id": "p", "x": 50, "y": 70, "role": "player", "label": "You" },
+    { "id": "e1", "x": 50, "y": 30, "role": "enemy", "label": "E1" }
+  ],
+  "arrows": [
+    { "from": "p", "to": "e1", "style": "attack", "label": "Charge" }
+  ],
+  "labels": [
+    { "x": 50, "y": 90, "text": "Brief tactical note" }
+  ]
+}`,
+
+  rpHookGenerator: (char: Character, campaign?: CampaignData | null, sceneContext?: string) => `${BASE_PROMPT}
+
+You are an expert D&D 5e roleplay coach specializing in collaborative storytelling. You create prompts that enhance roleplay without stealing the spotlight from other players.
+
+CHARACTER:
+${characterContext(char, campaign)}
+
+FULL PERSONA:
+${char.persona ? `Default State: ${char.persona.defaultState}
+Core Traits: ${(char.persona.coreTraits ?? []).map(t => t.text).join(', ')}
+Wants: ${(char.persona.wants ?? []).join(', ')}
+Fears: ${(char.persona.fears ?? []).join(', ')}
+Physical Tics: ${(char.persona.physicalTics ?? []).join(', ')}` : 'No persona data.'}
+
+${char.backstory ? `BACKSTORY:
+Key Memories: ${char.backstory.keyMemories.map(m => m.title).join(', ')}
+Relationships: ${char.backstory.relationships.map(r => `${r.name} (${r.relation})`).join(', ')}
+Unresolved Threads: ${char.backstory.unresolvedThreads.join(', ')}` : ''}
+
+${sceneContext ? `CURRENT SCENE CONTEXT: ${sceneContext}` : ''}
+
+Generate 8 roleplay hooks for this character in the current scene context. Each hook should be a short, actionable prompt the player can use immediately at the table.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "hooks": [
+    {
+      "category": "ask",
+      "text": "The hook text here",
+      "targetPartyMember": "Optional party member name"
+    }
+  ]
+}
+
+Categories (distribute 1-2 per category):
+- "ask": Questions that invite other players to roleplay ("yes, and..." prompts)
+- "observe": In-character physical/emotional beats the player can perform
+- "connect": Party-directed conversation starters referencing specific members by name
+- "offer": Generous, spotlight-sharing actions driven by character traits
+- "muse": Internal monologue moments that others at the table can notice
+
+Rules:
+- NEVER steal the spotlight from other players
+- Use the character's ACTUAL traits, relationships, backstory — not generic prompts
+- Match the scene context tone (combat hooks differ from social hooks)
+- "ask" hooks should be genuine questions that invite others to RP
+- "observe" hooks should be in-character physical/emotional beats
+- "connect" hooks MUST reference specific party members by name
+- "offer" hooks should be generous, character-driven actions
+- "muse" hooks should be internal moments that others can notice
+- Keep each hook under 120 characters`,
+
+  rpHookForPartyMember: (char: Character, member: PartyMember, campaign?: CampaignData | null, sceneContext?: string) => `${BASE_PROMPT}
+
+You are an expert D&D 5e roleplay coach. Generate hooks specifically about engaging ONE party member.
+
+CHARACTER:
+${characterContext(char, campaign)}
+
+TARGET PARTY MEMBER:
+Name: ${member.name}
+Class: ${member.class}
+Race: ${member.race}
+Personality: ${member.personality}
+Relationship to PC: ${member.relationshipToPC}
+
+${sceneContext ? `CURRENT SCENE CONTEXT: ${sceneContext}` : ''}
+
+Generate 6 roleplay hooks specifically about interacting with ${member.name}. Every hook should involve ${member.name} directly — asking them something, reacting to them, connecting over shared experiences, or doing something for them.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "hooks": [
+    {
+      "category": "ask",
+      "text": "The hook text here",
+      "targetPartyMember": "${member.name}"
+    }
+  ]
+}
+
+Categories (aim for variety):
+- "ask": Questions directed at ${member.name}
+- "observe": Notice something about ${member.name}'s behavior or state
+- "connect": Share something personal with ${member.name}
+- "offer": Do something helpful for ${member.name}
+- "muse": Reflect internally on your relationship with ${member.name}
+
+Rules:
+- Every hook MUST involve ${member.name} by name
+- Use their personality ("${member.personality}") to make hooks specific
+- Reference the relationship ("${member.relationshipToPC}") where natural
+- Keep each hook under 120 characters
+- Make hooks feel like genuine moments, not generic prompts`,
+
+  rpHookForParty: (char: Character, campaign: CampaignData, sceneType: string, sceneContext?: string) => `${BASE_PROMPT}
+
+You are an expert D&D 5e roleplay coach. Generate hooks for group engagement during a specific scene type.
+
+CHARACTER:
+${characterContext(char, campaign)}
+
+PARTY MEMBERS:
+${campaign.partyMembers.map(pm => `- ${pm.name} (${pm.class}, ${pm.race}) — ${pm.personality}`).join('\n')}
+
+SCENE TYPE: ${sceneType}
+${sceneContext ? `ADDITIONAL CONTEXT: ${sceneContext}` : ''}
+
+Generate 6 roleplay hooks for a "${sceneType}" scene involving the whole party. These should be moments that draw multiple party members into interaction.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "hooks": [
+    {
+      "category": "connect",
+      "text": "The hook text here"
+    }
+  ]
+}
+
+Categories (aim for variety):
+- "ask": Questions to the group or that invite group discussion
+- "observe": Notice something about the group dynamic
+- "connect": Shared group moments (toasts, confessions, plans)
+- "offer": Do something for the whole party
+- "muse": Reflect on what this group means to you
+
+Rules:
+- Hooks should feel natural for a "${sceneType}" scene
+- Reference at least 2 different party members across the 6 hooks
+- Keep each hook under 120 characters
+- Focus on moments that create group interaction, not solo spotlight`,
+
+  rpHookForNPC: (char: Character, npc: CampaignNPC, campaign?: CampaignData | null, sceneContext?: string) => `${BASE_PROMPT}
+
+You are an expert D&D 5e roleplay coach. Generate hooks about engaging a specific NPC.
+
+CHARACTER:
+${characterContext(char, campaign)}
+
+TARGET NPC:
+Name: ${npc.name}
+Role: ${npc.role}
+Notes: ${npc.notes}
+
+${sceneContext ? `CURRENT SCENE CONTEXT: ${sceneContext}` : ''}
+
+Generate 6 roleplay hooks specifically about interacting with the NPC "${npc.name}" (${npc.role}). Every hook should involve this NPC directly.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "hooks": [
+    {
+      "category": "ask",
+      "text": "The hook text here"
+    }
+  ]
+}
+
+Categories (aim for variety):
+- "ask": Questions to ask ${npc.name} or about them
+- "observe": Notice something about ${npc.name}
+- "connect": Find common ground with ${npc.name}
+- "offer": Propose something to ${npc.name}
+- "muse": Reflect on what ${npc.name} represents or means
+
+Rules:
+- Every hook MUST involve ${npc.name}
+- Use their role ("${npc.role}") and notes to make hooks specific
+- Keep each hook under 120 characters
+- Make hooks feel like genuine in-world moments`,
 }

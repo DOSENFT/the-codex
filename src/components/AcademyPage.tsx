@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Dumbbell, GraduationCap } from 'lucide-react'
+import { Dumbbell, GraduationCap, Mic } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useTraining } from '../hooks/useTraining'
 import type { Character } from '../lib/character'
@@ -8,12 +8,13 @@ import { ConditionDrill } from './ConditionDrill'
 import { RoleplayCoach } from './RoleplayCoach'
 import { SpacedFlashcards } from './SpacedFlashcards'
 import { TrainingProgress } from './TrainingProgress'
+import { AccentForge } from './accent-forge'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-type AcademyTab = 'training' | 'quizzes'
+type AcademyTab = 'training' | 'quizzes' | 'accent'
 
 interface AcademyPageProps {
   character: Character
@@ -25,7 +26,7 @@ interface AcademyPageProps {
 /* ------------------------------------------------------------------ */
 
 /**
- * Academy tab container. Splits training content into two clear segments:
+ * Academy tab container. Splits training content into three segments:
  *
  * - **Training** — Roleplay Coach (scene practice, improv drills,
  *   conversation practice). Experiential learning through AI interaction.
@@ -33,6 +34,9 @@ interface AcademyPageProps {
  * - **Quizzes** — Quiz Arena (rules/mechanics questions) and Spaced
  *   Flashcards (SRS review of persona traits and rules). Knowledge testing
  *   with progress tracking.
+ *
+ * - **Accent** — Accent Forge (accent library, DM rapid mode, voice forge
+ *   with AI preview). Voice performance training system.
  *
  * A persistent TrainingProgress bar sits above the segmented control,
  * showing XP, level, streak, and category accuracy.
@@ -64,50 +68,40 @@ export function AcademyPage({ character, onCharacterUpdate }: AcademyPageProps) 
 
   const dueCount = getDueCards().length
 
+  const tabButton = (id: AcademyTab, label: string, Icon: typeof Dumbbell, badge?: number) => (
+    <button
+      type="button"
+      onClick={() => setTab(id)}
+      className={cn(
+        'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-3 rounded-lg',
+        'text-sm font-medium transition-all duration-200 ease-forge relative',
+        'active:scale-[0.97]',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+        tab === id
+          ? 'bg-white/[0.08] text-forge-0 shadow-sm border border-white/10'
+          : 'text-forge-2 hover:text-forge-1',
+      )}
+    >
+      <Icon size={16} aria-hidden />
+      {label}
+      {badge !== undefined && badge > 0 && tab !== id && (
+        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-eldritch/20 text-eldritch text-[10px] font-bold border border-eldritch/30">
+          {badge}
+        </span>
+      )}
+    </button>
+  )
+
   return (
     <section className="flex flex-col gap-4 animate-fade-in" aria-label="Academy">
       {/* ─── Training Progress ─── */}
       {profile && <TrainingProgress profile={profile} />}
 
       {/* ─── Segmented Control ─── */}
-      <div className="flex gap-2 p-1 rounded-xl bg-void-2/60 border border-white/[0.06]">
-        <button
-          type="button"
-          onClick={() => setTab('training')}
-          className={cn(
-            'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg',
-            'text-sm font-medium transition-all duration-200 ease-forge',
-            'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-            tab === 'training'
-              ? 'bg-white/[0.08] text-forge-0 shadow-sm border border-white/10'
-              : 'text-forge-2 hover:text-forge-1',
-          )}
-        >
-          <Dumbbell size={16} aria-hidden />
-          Training
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('quizzes')}
-          className={cn(
-            'flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg',
-            'text-sm font-medium transition-all duration-200 ease-forge relative',
-            'active:scale-[0.97]',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-            tab === 'quizzes'
-              ? 'bg-white/[0.08] text-forge-0 shadow-sm border border-white/10'
-              : 'text-forge-2 hover:text-forge-1',
-          )}
-        >
-          <GraduationCap size={16} aria-hidden />
-          Quizzes
-          {dueCount > 0 && tab !== 'quizzes' && (
-            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-eldritch/20 text-eldritch text-[10px] font-bold border border-eldritch/30">
-              {dueCount}
-            </span>
-          )}
-        </button>
+      <div className="flex gap-1.5 p-1 rounded-xl bg-void-2/60 border border-white/[0.06]">
+        {tabButton('training', 'Training', Dumbbell)}
+        {tabButton('quizzes', 'Quizzes', GraduationCap, dueCount)}
+        {tabButton('accent', 'Accent', Mic)}
       </div>
 
       {/* ─── Content ─── */}
@@ -131,6 +125,9 @@ export function AcademyPage({ character, onCharacterUpdate }: AcademyPageProps) 
             />
           )}
         </div>
+      )}
+      {tab === 'accent' && (
+        <AccentForge character={character} />
       )}
     </section>
   )

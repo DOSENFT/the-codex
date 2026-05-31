@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Codex - Export Character Data</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { max-width: 600px; width: 100%; background: #222; border: 1px solid #444; border-radius: 16px; padding: 32px; }
+  h1 { font-size: 24px; margin-bottom: 8px; color: #d4af37; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 24px; }
+  .stats { background: #2a2a2a; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; line-height: 1.8; }
+  .stats strong { color: #d4af37; }
+  .btn { display: block; width: 100%; padding: 16px; border-radius: 12px; border: 2px solid #d4af37; background: rgba(212,175,55,0.1); color: #d4af37; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+  .btn:hover { background: rgba(212,175,55,0.2); }
+  .btn:active { transform: scale(0.98); }
+  .btn.success { border-color: #4ade80; color: #4ade80; background: rgba(74,222,128,0.1); }
+  .note { font-size: 12px; color: #666; text-align: center; margin-top: 16px; line-height: 1.5; }
+  textarea { width: 100%; height: 120px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; color: #e0e0e0; font-family: monospace; font-size: 11px; padding: 12px; resize: vertical; margin-bottom: 12px; }
+  .char-list { list-style: none; padding: 0; }
+  .char-list li { padding: 8px 12px; background: #2a2a2a; border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
+  .char-list li span { color: #d4af37; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Export Character Data</h1>
+  <p class="subtitle">Transfer your characters from The Codex to The Codex AAA</p>
+
+  <div id="stats" class="stats">Scanning localStorage...</div>
+
+  <div id="characters"></div>
+
+  <button id="copyBtn" class="btn" onclick="copyData()">Copy All Data to Clipboard</button>
+  <button id="downloadBtn" class="btn" onclick="downloadData()">Download as JSON File</button>
+
+  <textarea id="dataPreview" readonly placeholder="Data will appear here..."></textarea>
+
+  <p class="note">
+    After copying, go to <strong>http://localhost:5173</strong> and open the browser console (F12).<br>
+    Then paste this script:<br>
+    <code style="color:#d4af37;">fetch('/import-data.html').then(r=>r.text())</code><br>
+    Or just open: <strong>http://localhost:5173/import-data.html</strong>
+  </p>
+</div>
+
+<script>
+// Collect ALL codex-related localStorage keys
+function getAllCodexData() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.startsWith('codex-') || key === 'codex-character')) {
+      try {
+        data[key] = JSON.parse(localStorage.getItem(key));
+      } catch {
+        data[key] = localStorage.getItem(key);
+      }
+    }
+  }
+  return data;
+}
+
+// Display stats
+function showStats() {
+  const data = getAllCodexData();
+  const keys = Object.keys(data);
+  const roster = data['codex-roster'] || [];
+
+  let html = `<strong>${keys.length}</strong> localStorage keys found<br>`;
+  html += `<strong>${roster.length}</strong> characters in roster<br>`;
+
+  // Count identity/persona data
+  let personaCount = 0;
+  let dialogueCount = 0;
+  let backstoryCount = 0;
+
+  for (const key of keys) {
+    if (key.startsWith('codex-character-')) {
+      const char = data[key];
+      if (char?.persona) personaCount++;
+      if (char?.persona?.dialogueBank?.length) dialogueCount += char.persona.dialogueBank.length;
+      if (char?.persona?.sceneResponses?.length) dialogueCount += char.persona.sceneResponses.length;
+      if (char?.backstory) backstoryCount++;
+      if (char?.identities?.length) personaCount += char.identities.length;
+    }
+  }
+
+  html += `<strong>${personaCount}</strong> personas/identities<br>`;
+  html += `<strong>${dialogueCount}</strong> dialogue lines & scene responses<br>`;
+  html += `<strong>${backstoryCount}</strong> backstories<br>`;
+
+  document.getElementById('stats').innerHTML = html;
+
+  // Show character list
+  if (roster.length > 0) {
+    let listHtml = '<ul class="char-list">';
+    for (const entry of roster) {
+      listHtml += `<li><span>${entry.name}</span> — Lv ${entry.level} ${entry.class}</li>`;
+    }
+    listHtml += '</ul><br>';
+    document.getElementById('characters').innerHTML = listHtml;
+  }
+
+  // Preview
+  const json = JSON.stringify(data, null, 2);
+  document.getElementById('dataPreview').value = json.slice(0, 2000) + (json.length > 2000 ? '\n... (truncated preview)' : '');
+
+  return data;
+}
+
+function copyData() {
+  const data = getAllCodexData();
+  const json = JSON.stringify(data);
+  navigator.clipboard.writeText(json).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied to Clipboard!';
+    btn.classList.add('success');
+    setTimeout(() => {
+      btn.textContent = 'Copy All Data to Clipboard';
+      btn.classList.remove('success');
+    }, 3000);
+  });
+}
+
+function downloadData() {
+  const data = getAllCodexData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'codex-character-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  const btn = document.getElementById('downloadBtn');
+  btn.textContent = 'Downloaded!';
+  btn.classList.add('success');
+  setTimeout(() => {
+    btn.textContent = 'Download as JSON File';
+    btn.classList.remove('success');
+  }, 3000);
+}
+
+showStats();
+</script>
+</body>
+</html>

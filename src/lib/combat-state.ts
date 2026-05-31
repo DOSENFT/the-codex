@@ -1,4 +1,39 @@
-import type { Character } from './character'
+import type { Character, ClassFeature } from './character'
+
+// ---------------------------------------------------------------------------
+// Action Economy Types & Helpers
+// ---------------------------------------------------------------------------
+
+export type ActionEconomyType = 'action' | 'bonusAction' | 'reaction'
+
+/** Parse a spell's castingTime string into an ActionEconomyType. */
+export function spellActionType(castingTime: string): ActionEconomyType {
+  const lower = castingTime.toLowerCase()
+  if (lower.includes('bonus')) return 'bonusAction'
+  if (lower.includes('reaction')) return 'reaction'
+  return 'action'
+}
+
+/** Determine the ActionEconomyType for a class feature. Defaults to 'action'. */
+export function featureActionType(feature: ClassFeature): ActionEconomyType {
+  if (feature.actionType === 'bonusAction') return 'bonusAction'
+  if (feature.actionType === 'reaction') return 'reaction'
+  if (feature.actionType === 'none' || feature.actionType === 'passive') return 'action' // passive/none features show under action
+  return 'action'
+}
+
+// ---------------------------------------------------------------------------
+// Initiative Tracker
+// ---------------------------------------------------------------------------
+
+export interface InitiativeEntry {
+  id: string
+  name: string
+  initiative: number
+  hp?: string
+  ac?: number
+  isPC: boolean
+}
 
 // ---------------------------------------------------------------------------
 // Combat State — turn-level action economy & resource tracking
