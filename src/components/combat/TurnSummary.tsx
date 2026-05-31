@@ -17,6 +17,7 @@ import {
   ChevronUp,
   Square,
   Sparkles,
+  Radio,
   Info,
   Pencil,
   Plus,
@@ -42,6 +43,7 @@ import {
   useAction,
   setConcentration,
 } from '../../lib/combat-state'
+import { getFeatTips } from '../../lib/skill-guide'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 
@@ -215,10 +217,11 @@ export function TurnSummary({
   }, [character.id, actionNotes])
 
   // Categorize available options by action type
-  const { actions, bonusActions, reactions } = useMemo(() => {
+  const { actions, bonusActions, reactions, passives } = useMemo(() => {
     const actions: ActionOption[] = []
     const bonusActions: ActionOption[] = []
     const reactions: ActionOption[] = []
+    const passives: ActionOption[] = []
 
     // Weapons → action
     for (const weapon of character.weapons) {
@@ -226,16 +229,46 @@ export function TurnSummary({
       const abilityName = weapon.abilityMod
       const dmgMod = abilityModifier(character.abilityScores[weapon.abilityMod]) + (weapon.bonusDamage ?? 0)
 
+      // Build mechanics line, including range if present
+      const mechanicsParts = [
+        `${formatMod(bonus)} to hit (${abilityName} ${formatMod(abilityModifier(character.abilityScores[weapon.abilityMod]))}${weapon.proficient ? ' + prof' : ''}${weapon.bonusToHit ? ` ${formatMod(weapon.bonusToHit)} magic` : ''})`,
+        `${weapon.damageDice}${formatMod(dmgMod)} ${weapon.damageType}`,
+      ]
+      if (weapon.range) {
+        mechanicsParts.push(weapon.range)
+      }
+
+      // Build effects line, including mastery property
+      const effectsParts = [
+        weapon.magical ? 'Magical' : null,
+        weapon.masteryProperty ? `Mastery: ${weapon.masteryProperty}` : null,
+        ...weapon.properties,
+      ].filter(Boolean)
+
+      // Build strategic tip from special abilities + feat tips
+      const tipParts: string[] = []
+      if (weapon.specialAbilities && weapon.specialAbilities.length > 0) {
+        tipParts.push(
+          weapon.specialAbilities
+            .map(a => `${a.name} (${a.trigger}): ${a.effect}`)
+            .join(' | ')
+        )
+      }
+
+      // Merge feat tips for this weapon
+      const weaponFeatTips = getFeatTips(character, weapon.name, 'weapon')
+      tipParts.push(...weaponFeatTips)
+
+      const strategicTip = tipParts.length > 0 ? tipParts.join(' | ') : undefined
+
       actions.push({
         name: weapon.name,
         type: 'weapon',
         actionEconomy: 'action',
         summary: `${weapon.attackType === 'melee' ? 'Melee' : 'Ranged'} weapon attack with ${weapon.properties.join(', ') || 'no special properties'}.`,
-        mechanicsLine: `${formatMod(bonus)} to hit (${abilityName} ${formatMod(abilityModifier(character.abilityScores[weapon.abilityMod]))}${weapon.proficient ? ' + prof' : ''}${weapon.bonusToHit ? ` ${formatMod(weapon.bonusToHit)} magic` : ''}) · ${weapon.damageDice}${formatMod(dmgMod)} ${weapon.damageType}`,
-        effectsLine: [
-          weapon.magical ? 'Magical' : null,
-          ...weapon.properties,
-        ].filter(Boolean).join(' · ') || 'Standard attack',
+        mechanicsLine: mechanicsParts.join(' · '),
+        effectsLine: effectsParts.join(' · ') || 'Standard attack',
+        strategicTip,
         rollNotation: `1d20${bonus >= 0 ? `+${bonus}` : bonus}`,
         rollLabel: `${weapon.name} Attack`,
       })
@@ -266,6 +299,13 @@ export function TurnSummary({
         rollLabel = `${spell.name} Attack`
       }
 
+      // Merge feat tips for this spell
+      const spellFeatTips = getFeatTips(character, spell.name, 'spell')
+      const spellTipParts: string[] = []
+      if (spell.tacticalNote) spellTipParts.push(spell.tacticalNote)
+      spellTipParts.push(...spellFeatTips)
+      const spellStrategicTip = spellTipParts.length > 0 ? spellTipParts.join(' | ') : undefined
+
       const option: ActionOption = {
         name: spell.name,
         type: 'spell',
@@ -273,7 +313,7 @@ export function TurnSummary({
         summary: spellSummary(spell),
         mechanicsLine: spellMechanics(spell, character),
         effectsLine: spellEffects(spell),
-        strategicTip: spell.tacticalNote || undefined,
+        strategicTip: spellStrategicTip,
         rollNotation,
         rollLabel,
         spellLevel: spell.level,
@@ -293,6 +333,8 @@ export function TurnSummary({
       if (feature.usesMax !== undefined && (feature.usesCurrent ?? 0) <= 0) continue
 
       const actionType = featureActionType(feature)
+      const isPassive = feature.actionType === 'passive' || feature.actionType === 'none'
+        || feature.name.toLowerCase().includes('aura')
 
       // Determine roll info
       let rollNotation: string | undefined
@@ -301,6 +343,13 @@ export function TurnSummary({
         rollNotation = feature.damageDice
         rollLabel = `${feature.name}`
       }
+
+      // Merge feat tips for this feature
+      const featureFeatTips = getFeatTips(character, feature.name, 'feature')
+      const featureTipParts: string[] = []
+      if (feature.tacticalNote) featureTipParts.push(feature.tacticalNote)
+      featureTipParts.push(...featureFeatTips)
+      const featureStrategicTip = featureTipParts.length > 0 ? featureTipParts.join(' | ') : undefined
 
       const option: ActionOption = {
         name: feature.name,
@@ -313,18 +362,19 @@ export function TurnSummary({
           feature.range || null,
         ].filter(Boolean).join(' · ') || 'See description',
         effectsLine: featureEffects(feature),
-        strategicTip: feature.tacticalNote || undefined,
+        strategicTip: featureStrategicTip,
         rollNotation,
         rollLabel,
         usesRemaining: feature.usesMax !== undefined ? `${feature.usesCurrent ?? 0}/${feature.usesMax}` : undefined,
       }
 
-      if (actionType === 'bonusAction') bonusActions.push(option)
+      if (isPassive) passives.push(option)
+      else if (actionType === 'bonusAction') bonusActions.push(option)
       else if (actionType === 'reaction') reactions.push(option)
       else actions.push(option)
     }
 
-    return { actions, bonusActions, reactions }
+    return { actions, bonusActions, reactions, passives }
   }, [character])
 
   // Handle using an action — this actually does things
@@ -521,6 +571,59 @@ export function TurnSummary({
           </span>
         )}
       </div>
+
+      {/* ── Auras & Passives (always-on, no action cost) ── */}
+      {passives.length > 0 && (
+        <div className="px-4 py-2 border-b border-white/5">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Radio size={10} className="text-verdant/60" aria-hidden />
+            <span className="text-[10px] font-semibold text-forge-2/60 uppercase tracking-wider">Always Active</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {passives.map(p => (
+              <button
+                key={p.name}
+                onClick={() => setExpandedAction(expandedAction === p.name ? null : p.name)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg',
+                  'text-[11px] font-medium border min-h-[32px]',
+                  'transition-all duration-200 active:scale-[0.96]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verdant',
+                  expandedAction === p.name
+                    ? 'bg-verdant/10 border-verdant/25 text-verdant'
+                    : 'bg-white/[0.02] border-white/8 text-forge-2 hover:text-forge-1 hover:border-white/15',
+                )}
+              >
+                <Radio size={9} aria-hidden />
+                {p.name}
+                {p.usesRemaining && (
+                  <span className="text-[9px] font-mono opacity-60">{p.usesRemaining}</span>
+                )}
+              </button>
+            ))}
+          </div>
+          {/* Expanded passive detail */}
+          {passives.map(p => expandedAction === p.name && (
+            <div
+              key={`${p.name}-detail`}
+              className={cn(
+                'mt-2 px-3 py-2.5 rounded-lg',
+                'bg-verdant/[0.04] border border-verdant/15',
+                'animate-fade-in',
+              )}
+            >
+              <p className="text-xs text-forge-1 leading-relaxed mb-1.5">{p.summary}</p>
+              <div className="flex items-start gap-2 mb-1">
+                <Info size={10} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
+                <span className="text-[11px] text-forge-2">{p.effectsLine}</span>
+              </div>
+              {p.strategicTip && (
+                <p className="text-[10px] text-forge-2/70 italic mt-1">{p.strategicTip}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ── Action Sections ── */}
       <div className="px-4 py-3 space-y-3">

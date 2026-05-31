@@ -388,6 +388,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         pronouns: pronouns.trim(),
         equipment: [],
         supplies: [],
+        feats: [],
         createdAt: now,
         updatedAt: now,
       }

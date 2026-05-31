@@ -11,6 +11,11 @@ import {
   Trash2,
   Filter,
   X,
+  Shield,
+  Lock,
+  Unlock,
+  Swords,
+  Zap,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import {
@@ -23,6 +28,8 @@ import {
   restoreSpellSlot,
 } from '../lib/character'
 import { GrimoireCard } from './grimoire/GrimoireCard'
+import { LoadoutPanel } from './grimoire/LoadoutPanel'
+import { SessionReadyCard } from './grimoire/SessionReadyCard'
 import { SpellEditor } from './SpellEditor'
 import { FeatureEditor } from './FeatureEditor'
 import { Badge } from './ui/Badge'
@@ -82,6 +89,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
   const [preparedOnly, setPreparedOnly] = useState(false)
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [lockAndLoadActive, setLockAndLoadActive] = useState(false)
 
   // Spell Editor state
   const [spellEditorOpen, setSpellEditorOpen] = useState(false)
@@ -161,6 +169,22 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
   const spellCount = allItems.filter(i => i.type === 'spell').length
   const featureCount = allItems.filter(i => i.type === 'feature').length
 
+  // Loadout summary counts
+  const preparedSpellCount = useMemo(
+    () => character.spells.filter(s => s.prepared || s.level === 0).length,
+    [character.spells],
+  )
+  const featuresReadyCount = useMemo(
+    () => character.features.filter(f =>
+      !f.usesMax || !f.usesCurrent || f.usesCurrent > 0
+    ).length,
+    [character.features],
+  )
+  const combatWeaponsCount = useMemo(
+    () => character.weapons.filter(w => w.magical || (w.specialAbilities && w.specialAbilities.length > 0)).length,
+    [character.weapons],
+  )
+
   // Handlers
   const handleTogglePrepared = useCallback((spellName: string) => {
     onCharacterUpdate(toggleSpellPrepared(character, spellName))
@@ -239,6 +263,87 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
           </div>
         )}
       </div>
+
+      {/* ─── Lock & Load Bar (prep mode only) ─── */}
+      {mode === 'prep' && (
+        <div
+          className={cn(
+            'rounded-xl border p-3 transition-all duration-300 ease-forge',
+            lockAndLoadActive
+              ? 'bg-gold/[0.06] border-gold/25 shadow-[0_0_20px_-6px_rgba(197,165,90,0.2)]'
+              : 'bg-white/[0.03] border-white/8',
+          )}
+        >
+          <div className="flex items-center justify-between gap-3">
+            {/* Summary text */}
+            <div className="flex items-center gap-3 min-w-0 flex-wrap">
+              {character.spells.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-arcane shrink-0" aria-hidden />
+                  <span className="text-xs text-forge-1">
+                    <span className="font-semibold text-arcane">{preparedSpellCount}</span> {preparedSpellCount === 1 ? 'spell' : 'spells'} prepared
+                  </span>
+                </div>
+              )}
+              {character.features.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Zap size={12} className="text-eldritch shrink-0" aria-hidden />
+                  <span className="text-xs text-forge-1">
+                    <span className="font-semibold text-eldritch">{featuresReadyCount}</span> {featuresReadyCount === 1 ? 'feature' : 'features'} ready
+                  </span>
+                </div>
+              )}
+              {combatWeaponsCount > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Swords size={12} className="text-ember shrink-0" aria-hidden />
+                  <span className="text-xs text-forge-1">
+                    <span className="font-semibold text-ember">{combatWeaponsCount}</span> {combatWeaponsCount === 1 ? 'item' : 'items'} equipped
+                  </span>
+                </div>
+              )}
+              {character.spells.length === 0 && character.features.length === 0 && combatWeaponsCount === 0 && (
+                <span className="text-xs text-forge-2">No loadout items yet</span>
+              )}
+            </div>
+
+            {/* Lock & Load toggle */}
+            <button
+              type="button"
+              onClick={() => setLockAndLoadActive(!lockAndLoadActive)}
+              className={cn(
+                'flex items-center gap-2 min-h-[44px] px-4 rounded-lg shrink-0',
+                'text-xs font-semibold',
+                'border transition-all duration-200 ease-forge',
+                'active:scale-[0.95]',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                lockAndLoadActive
+                  ? [
+                      'bg-gold/15 text-gold border-gold/30',
+                      'shadow-[0_0_12px_-4px_rgba(197,165,90,0.3)]',
+                    ]
+                  : 'bg-white/[0.04] text-forge-1 border-white/10 hover:bg-white/[0.06] hover:border-white/15',
+              )}
+              aria-pressed={lockAndLoadActive}
+              aria-label={lockAndLoadActive ? 'Close loadout panel' : 'Open loadout panel'}
+            >
+              {lockAndLoadActive ? (
+                <Lock size={14} aria-hidden />
+              ) : (
+                <Unlock size={14} aria-hidden />
+              )}
+              Lock & Load
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Loadout Panel (expanded, prep mode only) ─── */}
+      {mode === 'prep' && lockAndLoadActive && (
+        <LoadoutPanel
+          character={character}
+          onTogglePrepared={handleTogglePrepared}
+        />
+      )}
 
       {/* ─── Search ─── */}
       <div className="relative">
@@ -414,6 +519,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
                 item={item}
                 character={character}
                 expanded={expandedItem === key}
+                mode={mode}
                 onToggleExpand={() => setExpandedItem(expandedItem === key ? null : key)}
                 onRollDice={handleRollDice}
                 onTogglePrepared={item.type === 'spell' ? () => handleTogglePrepared(item.data.name) : undefined}
@@ -431,6 +537,11 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
             )
           })}
         </div>
+      )}
+
+      {/* ─── Session Ready Card (prep mode only) ─── */}
+      {mode === 'prep' && (
+        <SessionReadyCard character={character} />
       )}
 
       {/* ─── Editors ─── */}

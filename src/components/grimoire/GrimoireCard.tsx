@@ -32,6 +32,7 @@ interface GrimoireCardProps {
   item: AbilityItem
   character: Character
   expanded: boolean
+  mode?: 'session' | 'prep'
   onToggleExpand: () => void
   onRollDice: (notation: string, label: string) => void
   onTogglePrepared?: () => void
@@ -93,6 +94,7 @@ export function GrimoireCard({
   item,
   character,
   expanded,
+  mode = 'session',
   onToggleExpand,
   onRollDice,
   onTogglePrepared,
@@ -131,13 +133,29 @@ export function GrimoireCard({
   const spellLevel = spell?.level ?? 0
   const spellSlot = spellLevel > 0 ? character.spellSlots[spellLevel] : null
 
+  // Prep-mode readiness: determine if this item is "combat ready"
+  const isPrep = mode === 'prep'
+  const isItemReady = isSpell
+    ? (spell?.prepared || spell?.level === 0)
+    : !hasUses || (feature!.usesCurrent! > 0)
+  const featureCharged = hasUses && feature!.usesCurrent! > 0
+
   return (
     <div
       className={cn(
         'rounded-xl border transition-all duration-200 ease-forge overflow-hidden',
-        expanded
-          ? 'bg-white/[0.05] border-white/15'
-          : 'bg-white/[0.03] border-white/8 hover:bg-white/[0.04]',
+        // Prep-mode: dim unprepared spells, highlight prepared ones
+        isPrep && isSpell && !isItemReady && !expanded
+          ? 'bg-white/[0.015] border-white/5 opacity-70'
+          : isPrep && isSpell && isItemReady && !expanded
+            ? 'bg-arcane/[0.04] border-arcane/20 shadow-[0_0_12px_-4px_rgba(212,167,74,0.15)]'
+            : isPrep && !isSpell && hasUses && featureCharged && !expanded
+              ? 'bg-verdant/[0.03] border-verdant/15'
+              : isPrep && !isSpell && hasUses && !featureCharged && !expanded
+                ? 'bg-white/[0.015] border-white/5 opacity-70'
+                : expanded
+                  ? 'bg-white/[0.05] border-white/15'
+                  : 'bg-white/[0.03] border-white/8 hover:bg-white/[0.04]',
       )}
     >
       {/* ─── Header (always visible) ─── */}
@@ -245,8 +263,60 @@ export function GrimoireCard({
           )}
         </div>
 
-        {/* Expand chevron */}
-        <div className="ml-2 mt-1 shrink-0">
+        {/* Prep-mode quick toggle + Expand chevron */}
+        <div className="flex items-center gap-1 ml-2 mt-1 shrink-0">
+          {/* Quick prepare toggle (prep mode, spells only) */}
+          {isPrep && isSpell && onTogglePrepared && spell && spell.level > 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onTogglePrepared()
+              }}
+              className={cn(
+                'min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg',
+                'transition-all duration-200 ease-forge',
+                'active:scale-[0.9]',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                spell.prepared
+                  ? 'text-arcane'
+                  : 'text-forge-2 hover:text-forge-1',
+              )}
+              aria-label={spell.prepared ? `Unprepare ${spell.name}` : `Prepare ${spell.name}`}
+              aria-pressed={spell.prepared}
+            >
+              <Star
+                size={18}
+                className={cn(
+                  'transition-all duration-200',
+                  spell.prepared && 'fill-arcane drop-shadow-[0_0_4px_rgba(212,167,74,0.5)]',
+                )}
+                aria-hidden
+              />
+            </button>
+          )}
+
+          {/* Charged indicator (prep mode, features with uses) */}
+          {isPrep && !isSpell && hasUses && (
+            <div
+              className={cn(
+                'min-w-[44px] min-h-[44px] flex items-center justify-center',
+              )}
+              aria-label={featureCharged ? 'Charged' : 'Expended'}
+            >
+              <Zap
+                size={16}
+                className={cn(
+                  'transition-all duration-200',
+                  featureCharged
+                    ? 'text-verdant fill-verdant drop-shadow-[0_0_4px_rgba(57,217,138,0.5)]'
+                    : 'text-forge-2',
+                )}
+                aria-hidden
+              />
+            </div>
+          )}
+
           {expanded ? (
             <ChevronUp size={16} className="text-forge-2" aria-hidden />
           ) : (
@@ -382,18 +452,31 @@ export function GrimoireCard({
               <button
                 onClick={onTogglePrepared}
                 className={cn(
-                  'flex items-center gap-1.5 min-h-[36px] px-3 rounded-lg',
-                  'text-xs font-medium',
+                  'flex items-center gap-1.5 min-h-[44px] px-4 rounded-lg',
+                  'text-xs font-semibold',
                   'border transition-all duration-200 ease-forge',
                   'active:scale-[0.95]',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
                   spell?.prepared
-                    ? 'bg-verdant/15 text-verdant border-verdant/25'
-                    : 'bg-white/[0.04] text-forge-2 border-white/8 hover:bg-white/[0.06]',
+                    ? [
+                        'bg-arcane/15 text-arcane border-arcane/30',
+                        'shadow-[0_0_12px_-4px_rgba(212,167,74,0.25)]',
+                      ]
+                    : 'bg-white/[0.04] text-forge-2 border-white/8 hover:bg-white/[0.06] hover:text-forge-1',
                 )}
               >
-                <Star size={14} className={spell?.prepared ? 'fill-verdant' : ''} aria-hidden />
-                {spell?.prepared ? 'Prepared' : 'Prepare'}
+                <Star
+                  size={14}
+                  className={cn(
+                    'transition-all duration-200',
+                    spell?.prepared && 'fill-arcane',
+                  )}
+                  aria-hidden
+                />
+                {isPrep
+                  ? spell?.prepared ? 'Prepared for Session' : 'Prepare for Session'
+                  : spell?.prepared ? 'Prepared' : 'Prepare'
+                }
               </button>
             )}
 

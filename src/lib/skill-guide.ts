@@ -2,6 +2,7 @@
 // Concise study aids — not full rulebook entries
 
 import type { AbilityKey, SkillName } from './dnd-rules'
+import { SKILL_ABILITIES, CASTING_ABILITY } from './dnd-rules'
 
 // ---------------------------------------------------------------------------
 // Type definitions
@@ -666,4 +667,255 @@ export const FEAT_SYNERGIES: Record<string, FeatSynergyEntry> = {
     combatTip:
       'Free Invisibility once per day is powerful for scouting, escaping, or setting up an ambush. On a martial, it guarantees Advantage on your first attack of the next fight.',
   },
+}
+
+// ---------------------------------------------------------------------------
+// 5. WEAPON_MASTERY_OPTIONS — 2024 weapon mastery properties
+// ---------------------------------------------------------------------------
+
+export const WEAPON_MASTERY_OPTIONS = ['Nick', 'Topple', 'Graze', 'Vex', 'Cleave', 'Push', 'Slow', 'Sap'] as const
+export type WeaponMastery = (typeof WEAPON_MASTERY_OPTIONS)[number]
+
+// ---------------------------------------------------------------------------
+// 6. CHARACTER SKILL RATING — dynamic, character-aware skill assessment
+// ---------------------------------------------------------------------------
+
+export type CharacterSkillRatingLevel = 'essential' | 'strong' | 'useful' | 'situational' | 'weak'
+
+export interface CharacterSkillRatingResult {
+  rating: CharacterSkillRatingLevel
+  reason: string
+}
+
+/** Map generic rating to a numeric score for baseline calculation */
+const GENERIC_RATING_SCORE: Record<string, number> = {
+  essential: 4,
+  strong: 3,
+  useful: 2,
+  situational: 1,
+}
+
+/** Map numeric score back to rating label */
+function scoreToRating(score: number): CharacterSkillRatingLevel {
+  if (score >= 4) return 'essential'
+  if (score >= 3) return 'strong'
+  if (score >= 2) return 'useful'
+  if (score >= 1) return 'situational'
+  return 'weak'
+}
+
+/**
+ * Compute a character-specific skill rating by combining:
+ * - The ability modifier for the skill's governing ability
+ * - Whether the character has proficiency or expertise
+ * - Whether the skill's ability matches the character's class primary ability
+ * - The generic SKILL_GUIDE rating as a baseline
+ */
+export function characterSkillRating(
+  char: {
+    class: string
+    abilityScores: Record<AbilityKey, number>
+    skillProficiencies: string[]
+    skillExpertise: string[]
+  },
+  skill: SkillName,
+): CharacterSkillRatingResult {
+  const governingAbility = SKILL_ABILITIES[skill]
+  const score = char.abilityScores[governingAbility] ?? 10
+  const mod = Math.floor((score - 10) / 2)
+  const hasProficiency = char.skillProficiencies.includes(skill)
+  const hasExpertise = char.skillExpertise.includes(skill)
+  const classPrimaryAbility = CASTING_ABILITY[char.class] as AbilityKey | undefined
+
+  // Start from generic baseline
+  const genericEntry = SKILL_GUIDE[skill]
+  let baseScore = genericEntry ? (GENERIC_RATING_SCORE[genericEntry.rating] ?? 2) : 2
+
+  // Modifier adjustments
+  if (mod >= 4) {
+    baseScore += 2
+  } else if (mod >= 2) {
+    baseScore += 1
+  } else if (mod === 0) {
+    baseScore -= 0.5
+  } else if (mod <= -2) {
+    baseScore -= 2
+  } else if (mod <= -1) {
+    baseScore -= 1
+  }
+
+  // Proficiency / expertise boost
+  if (hasExpertise) {
+    baseScore += 2
+  } else if (hasProficiency) {
+    baseScore += 1
+  }
+
+  // Class primary ability match
+  if (classPrimaryAbility && governingAbility === classPrimaryAbility) {
+    baseScore += 0.5
+  }
+
+  // Clamp to valid range
+  const finalScore = Math.max(0, Math.min(5, baseScore))
+  const rating = scoreToRating(finalScore)
+
+  // Build reason string
+  const reasons: string[] = []
+  const modStr = mod >= 0 ? `+${mod}` : `${mod}`
+
+  if (hasExpertise && mod >= 3) {
+    reasons.push(`Expertise + ${governingAbility} ${modStr} makes ${skill} exceptional`)
+  } else if (hasExpertise) {
+    reasons.push(`Expertise compensates for ${governingAbility} ${modStr}`)
+  } else if (hasProficiency && mod >= 3) {
+    reasons.push(`Proficiency + ${governingAbility} ${modStr} gives a strong edge`)
+  } else if (hasProficiency && mod <= -1) {
+    reasons.push(`Proficiency partially offsets ${governingAbility} ${modStr}`)
+  } else if (hasProficiency) {
+    reasons.push(`Proficient in ${skill}`)
+  }
+
+  if (mod <= -1 && !hasProficiency) {
+    reasons.push(`${governingAbility} ${modStr} limits ${skill} despite its general utility`)
+  } else if (mod >= 4 && !hasProficiency) {
+    reasons.push(`${governingAbility} ${modStr} makes up for no proficiency`)
+  }
+
+  if (classPrimaryAbility && governingAbility === classPrimaryAbility) {
+    reasons.push(`${governingAbility} is your class primary ability`)
+  }
+
+  // Fallback reason
+  if (reasons.length === 0) {
+    if (mod >= 2) {
+      reasons.push(`${governingAbility} ${modStr} provides a decent foundation`)
+    } else if (mod <= -1) {
+      reasons.push(`Low ${governingAbility} (${modStr}) weakens this skill`)
+    } else {
+      reasons.push(`Average ${governingAbility} (${modStr}) — no special advantage`)
+    }
+  }
+
+  return { rating, reason: reasons.join('. ') }
+}
+
+// ---------------------------------------------------------------------------
+// 7. FEAT TIPS — merge feat knowledge into combat actions
+// ---------------------------------------------------------------------------
+
+interface FeatTipChar {
+  feats: { name: string; effects: string[]; tacticalNote?: string }[]
+  weapons: { name: string; properties: string[] }[]
+}
+
+/** Feat-to-action relevance rules */
+const FEAT_ACTION_RULES: {
+  featName: string
+  matches: (actionName: string, actionType: string, char: FeatTipChar) => boolean
+  tip: (char: FeatTipChar) => string
+}[] = [
+  {
+    featName: 'Great Weapon Master',
+    matches: (_actionName, actionType, char) => {
+      if (actionType !== 'weapon') return false
+      const weapon = char.weapons.find(w => w.name === _actionName)
+      return !!weapon && weapon.properties.some(p => p.toLowerCase() === 'heavy')
+    },
+    tip: () => 'GWM: Add proficiency bonus to damage with this Heavy weapon. No penalty in 2024 rules — always active.',
+  },
+  {
+    featName: 'Sentinel',
+    matches: (_actionName, actionType) => actionType === 'weapon',
+    tip: () => 'Sentinel: OA drops enemy speed to 0. Position between enemies and your backline. Enemies cannot Disengage from you.',
+  },
+  {
+    featName: 'Polearm Master',
+    matches: (_actionName, actionType, char) => {
+      if (actionType !== 'weapon') return false
+      const weapon = char.weapons.find(w => w.name === _actionName)
+      if (!weapon) return false
+      const polearms = ['glaive', 'halberd', 'quarterstaff', 'spear', 'pike']
+      return polearms.some(p => weapon.name.toLowerCase().includes(p)) ||
+        weapon.properties.some(p => p.toLowerCase() === 'reach')
+    },
+    tip: () => 'PAM: Bonus action d4 butt-end attack. Enemies entering your reach trigger OA — combine with Sentinel to lock them down.',
+  },
+  {
+    featName: 'War Caster',
+    matches: (_actionName, actionType) => actionType === 'spell',
+    tip: () => 'War Caster: Advantage on CON saves to maintain Concentration. You can cast a spell as your Opportunity Attack.',
+  },
+  {
+    featName: 'Shield Master',
+    matches: (_actionName, actionType, char) => {
+      if (actionType !== 'weapon') return false
+      const weapon = char.weapons.find(w => w.name === _actionName)
+      return !!weapon && !weapon.properties.some(p => p.toLowerCase() === 'two-handed')
+    },
+    tip: () => 'Shield Master: Bonus Action shove (Prone) before your Extra Attack, then swing with Advantage on remaining attacks.',
+  },
+  {
+    featName: 'Lucky',
+    matches: () => true,
+    tip: () => 'Lucky: Spend a Luck Point to reroll this d20. Save points for saving throws against devastating effects.',
+  },
+  {
+    featName: 'Alert',
+    matches: () => false, // Only relevant at combat start, not per-action
+    tip: () => '',
+  },
+  {
+    featName: 'Resilient',
+    matches: () => false,
+    tip: () => '',
+  },
+  {
+    featName: 'Tough',
+    matches: () => false,
+    tip: () => '',
+  },
+]
+
+/**
+ * Given a character, action name, and action type, return an array of
+ * relevant feat tips to append to the action's strategic tip.
+ */
+export function getFeatTips(
+  character: FeatTipChar,
+  actionName: string,
+  actionType: string,
+): string[] {
+  const tips: string[] = []
+
+  for (const feat of character.feats) {
+    // Check rules-based tips
+    const rule = FEAT_ACTION_RULES.find(r => r.featName.toLowerCase() === feat.name.toLowerCase())
+    if (rule && rule.matches(actionName, actionType, character)) {
+      const tip = rule.tip(character)
+      if (tip) tips.push(tip)
+      continue
+    }
+
+    // Check FEAT_SYNERGIES for combat tips on known feats
+    const synergy = FEAT_SYNERGIES[feat.name]
+    if (synergy && actionType === 'weapon') {
+      // Only add generic synergy tip if it seems relevant to melee/weapon context
+      const lowerCombatTip = synergy.combatTip.toLowerCase()
+      if (lowerCombatTip.includes('attack') || lowerCombatTip.includes('hit') || lowerCombatTip.includes('damage')) {
+        tips.push(`${feat.name}: ${synergy.combatTip}`)
+      }
+    }
+
+    // If the feat has a custom tactical note, include it for matching weapon/spell
+    if (feat.tacticalNote) {
+      const lowerNote = feat.tacticalNote.toLowerCase()
+      const lowerAction = actionName.toLowerCase()
+      if (lowerNote.includes(lowerAction) || lowerNote.includes(actionType)) {
+        tips.push(`${feat.name}: ${feat.tacticalNote}`)
+      }
+    }
+  }
+
+  return tips
 }

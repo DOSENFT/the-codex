@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import {
   Plus,
   Star,
@@ -20,6 +20,17 @@ import {
   Brain,
   Mic2,
   RotateCcw,
+  Sunrise,
+  BarChart3,
+  Lock,
+  Award,
+  Flame,
+  Crown,
+  Compass,
+  Sword,
+  MessageSquare,
+  Trophy,
+  ChevronRight,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
@@ -30,6 +41,19 @@ import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { ParchmentCard } from './ui/ParchmentCard'
 import { OrnateHeader } from './ui/OrnateHeader'
+import {
+  type MasteryProfile,
+  MASTERY_LEVELS,
+  MASTERY_BADGES,
+  loadMasteryProfile,
+  saveMasteryProfile,
+  getMasteryForLine,
+  recordPractice,
+  masteryColor,
+  masteryBgColor,
+  checkBadges,
+  recordWarmup,
+} from '../lib/dialogue-mastery'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -51,13 +75,37 @@ const CONTEXT_COLORS: Record<DialogueContext, 'ember' | 'arcane' | 'verdant' | '
   quiet: 'neutral',
 }
 
-type BankMode = 'library' | 'practice' | 'quickdraw' | 'delivery'
+type BankMode = 'library' | 'practice' | 'quickdraw' | 'rehearsal' | 'warmup' | 'journal'
 
 const MODE_CONFIG: Record<BankMode, { label: string; icon: typeof BookOpen }> = {
   library: { label: 'Library', icon: BookOpen },
   practice: { label: 'Practice', icon: Target },
   quickdraw: { label: 'Quick-Draw', icon: Zap },
-  delivery: { label: 'Delivery Coach', icon: Theater },
+  rehearsal: { label: 'Rehearsal', icon: Theater },
+  warmup: { label: 'Warmup', icon: Sunrise },
+  journal: { label: 'Journal', icon: BarChart3 },
+}
+
+type RehearsalLevel = 1 | 2 | 3
+const REHEARSAL_LEVEL_LABELS: Record<RehearsalLevel, string> = {
+  1: 'Guided',
+  2: 'Solo',
+  3: 'Improv',
+}
+
+/* Warmup step constants */
+const WARMUP_TOTAL_STEPS = 5
+
+/* Badge icon mapping for lucide components */
+const BADGE_ICONS: Record<string, typeof Star> = {
+  MessageSquare,
+  Sword,
+  Flame,
+  Crown,
+  Compass,
+  Star,
+  Sunrise,
+  Trophy,
 }
 
 /* ------------------------------------------------------------------ */
@@ -92,6 +140,30 @@ interface QuickDrawEvaluation {
   note: string
 }
 
+interface RehearsalImprovResult {
+  situation: string
+  idealLineIndex: number
+  hint: string
+}
+
+interface WarmupSceneResult {
+  scene: string
+  prompt: string
+  suggestedTone: string
+}
+
+interface ImprovSparkResult {
+  spark: string
+  trait: string
+  difficulty: string
+}
+
+interface JournalInsightResult {
+  insight: string
+  suggestion: string
+  focusArea: string
+}
+
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
@@ -123,17 +195,52 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
   const qdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const qdInputRef = useRef<HTMLInputElement>(null)
 
-  // Delivery Coach mode state
+  // Delivery Coach mode state (reused in Rehearsal Guided mode)
   const [coachingIdx, setCoachingIdx] = useState<number | null>(null)
   const [coaching, setCoaching] = useState<DeliveryCoaching | null>(null)
+
+  // Rehearsal mode state
+  const [rehearsalLevel, setRehearsalLevel] = useState<RehearsalLevel>(1)
+  const [rehearsalLineIdx, setRehearsalLineIdx] = useState<number | null>(null)
+  const [rehearsalDelivered, setRehearsalDelivered] = useState(false)
+  const [rehearsalRating, setRehearsalRating] = useState<'nailed' | 'close' | 'off' | null>(null)
+  const [rehearsalCoachingVisible, setRehearsalCoachingVisible] = useState(false)
+  const [improvResult, setImprovResult] = useState<RehearsalImprovResult | null>(null)
+  const [improvSubset, setImprovSubset] = useState<(DialogueLine & { globalIdx: number })[]>([])
+  const [improvSelectedIdx, setImprovSelectedIdx] = useState<number | null>(null)
+
+  // Warmup mode state
+  const [warmupStep, setWarmupStep] = useState(0) // 0 = not started, 1-5 = steps
+  const [warmupLines, setWarmupLines] = useState<(DialogueLine & { globalIdx: number })[]>([])
+  const [warmupScene, setWarmupScene] = useState<WarmupSceneResult | null>(null)
+  const [warmupSpark, setWarmupSpark] = useState<ImprovSparkResult | null>(null)
+  const [warmupLinesRehearsed, setWarmupLinesRehearsed] = useState(0)
+  const [warmupCompleted, setWarmupCompleted] = useState(false)
+  const [warmupStepRated, setWarmupStepRated] = useState(false)
+
+  // Journal mode state
+  const [journalInsight, setJournalInsight] = useState<JournalInsightResult | null>(null)
+
+  // Mastery profile
+  const [masteryProfile, setMasteryProfile] = useState<MasteryProfile>(() =>
+    loadMasteryProfile(character.id),
+  )
 
   // AI hooks
   const suggestAI = useAI()
   const practiceAI = useAI()
   const quickDrawAI = useAI()
   const deliveryAI = useAI()
+  const rehearsalAI = useAI()
+  const warmupAI = useAI()
+  const journalAI = useAI()
 
   const dialogueBank: DialogueLine[] = character.persona?.dialogueBank ?? []
+
+  // Reload mastery profile when character changes
+  useEffect(() => {
+    setMasteryProfile(loadMasteryProfile(character.id))
+  }, [character.id])
 
   /* ------------------------------------------------------------------ */
   /*  Utility Functions                                                  */
@@ -400,6 +507,201 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
   }, [character, dialogueBank, deliveryAI])
 
   /* ------------------------------------------------------------------ */
+  /*  Mastery Helpers                                                    */
+  /* ------------------------------------------------------------------ */
+
+  /** Save a practice rating, update mastery profile, check badges, persist. */
+  function handleMasteryRating(text: string, rating: 'nailed' | 'close' | 'off') {
+    let updated = recordPractice(masteryProfile, text, rating)
+    updated = checkBadges(updated)
+    setMasteryProfile(updated)
+    saveMasteryProfile(updated)
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Rehearsal Mode Logic                                               */
+  /* ------------------------------------------------------------------ */
+
+  function resetRehearsal() {
+    setRehearsalLineIdx(null)
+    setRehearsalDelivered(false)
+    setRehearsalRating(null)
+    setRehearsalCoachingVisible(false)
+    setCoachingIdx(null)
+    setCoaching(null)
+    setImprovResult(null)
+    setImprovSubset([])
+    setImprovSelectedIdx(null)
+  }
+
+  /** Guided mode: Select a line, get coaching, practice, rate. */
+  function selectRehearsalLine(globalIdx: number) {
+    resetRehearsal()
+    setRehearsalLineIdx(globalIdx)
+    if (rehearsalLevel === 1) {
+      // Auto-fetch coaching for Guided level
+      getDeliveryCoaching(globalIdx, dialogueBank[globalIdx].text)
+    }
+  }
+
+  function handleRehearsalDelivered() {
+    setRehearsalDelivered(true)
+    if (rehearsalLevel === 2) {
+      // Solo mode: reveal coaching after delivery
+      if (rehearsalLineIdx !== null) {
+        getDeliveryCoaching(rehearsalLineIdx, dialogueBank[rehearsalLineIdx].text)
+      }
+      setRehearsalCoachingVisible(true)
+    }
+  }
+
+  function handleRehearsalRate(rating: 'nailed' | 'close' | 'off') {
+    setRehearsalRating(rating)
+    if (rehearsalLineIdx !== null) {
+      handleMasteryRating(dialogueBank[rehearsalLineIdx].text, rating)
+    } else if (improvResult && improvSelectedIdx !== null && improvSubset[improvSelectedIdx]) {
+      handleMasteryRating(improvSubset[improvSelectedIdx].text, rating)
+    }
+  }
+
+  /** Improv mode: AI generates a situation, player picks the right line. */
+  const startImprovRehearsal = useCallback(async () => {
+    resetRehearsal()
+    const allLines = dialogueBank.map((line, idx) => ({ ...line, globalIdx: idx }))
+    if (allLines.length < 2) return
+
+    // Pick 3-5 random lines as the subset
+    const shuffled = [...allLines].sort(() => Math.random() - 0.5)
+    const subset = shuffled.slice(0, Math.min(5, shuffled.length))
+    setImprovSubset(subset)
+
+    try {
+      const result = await rehearsalAI.queryStructured<RehearsalImprovResult>(
+        SYSTEM_PROMPTS.rehearsalImprov(character, subset),
+        `Create an improv situation for ${character.name} where one of the given lines is the best choice.`,
+      )
+      setImprovResult(result)
+    } catch {
+      // error handled by hook
+    }
+  }, [character, dialogueBank, rehearsalAI])
+
+  function handleImprovSelect(subsetIdx: number) {
+    setImprovSelectedIdx(subsetIdx)
+    setRehearsalDelivered(true)
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Warmup Mode Logic                                                  */
+  /* ------------------------------------------------------------------ */
+
+  function resetWarmup() {
+    setWarmupStep(0)
+    setWarmupLines([])
+    setWarmupScene(null)
+    setWarmupSpark(null)
+    setWarmupLinesRehearsed(0)
+    setWarmupCompleted(false)
+    setWarmupStepRated(false)
+  }
+
+  const startWarmup = useCallback(() => {
+    resetWarmup()
+    // Pick 3 random lines for steps 1-3
+    const allLines = dialogueBank.map((line, idx) => ({ ...line, globalIdx: idx }))
+    const shuffled = [...allLines].sort(() => Math.random() - 0.5)
+    const picked = shuffled.slice(0, Math.min(3, shuffled.length))
+    setWarmupLines(picked)
+    setWarmupStep(1)
+  }, [dialogueBank])
+
+  const advanceWarmup = useCallback(async () => {
+    const nextStep = warmupStep + 1
+    setWarmupStepRated(false)
+    if (nextStep > WARMUP_TOTAL_STEPS) {
+      // Complete warmup
+      let updated = recordWarmup(masteryProfile, warmupLinesRehearsed)
+      updated = checkBadges(updated)
+      setMasteryProfile(updated)
+      saveMasteryProfile(updated)
+      setWarmupCompleted(true)
+      return
+    }
+
+    setWarmupStep(nextStep)
+
+    if (nextStep === 4) {
+      // Step 4: Scene response
+      try {
+        const result = await warmupAI.queryStructured<WarmupSceneResult>(
+          SYSTEM_PROMPTS.warmupScene(character, activeContext),
+          `Generate a warmup scene for ${character.name}.`,
+        )
+        setWarmupScene(result)
+      } catch {
+        // error handled by hook
+      }
+    } else if (nextStep === 5) {
+      // Step 5: Improv spark
+      try {
+        const result = await warmupAI.queryStructured<ImprovSparkResult>(
+          SYSTEM_PROMPTS.improvSpark(character, activeContext),
+          `Generate an improv spark challenge for ${character.name}.`,
+        )
+        setWarmupSpark(result)
+      } catch {
+        // error handled by hook
+      }
+    }
+  }, [warmupStep, character, activeContext, warmupAI, warmupLinesRehearsed, masteryProfile])
+
+  function handleWarmupLineRate(text: string, rating: 'nailed' | 'close' | 'off') {
+    handleMasteryRating(text, rating)
+    setWarmupLinesRehearsed(prev => prev + 1)
+    setWarmupStepRated(true)
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Journal Mode Logic                                                 */
+  /* ------------------------------------------------------------------ */
+
+  const fetchJournalInsight = useCallback(async () => {
+    setJournalInsight(null)
+    try {
+      const result = await journalAI.queryStructured<JournalInsightResult>(
+        SYSTEM_PROMPTS.journalInsight(character, masteryProfile),
+        `Analyze mastery data for ${character.name} and provide coaching insight.`,
+      )
+      setJournalInsight(result)
+    } catch {
+      // error handled by hook
+    }
+  }, [character, masteryProfile, journalAI])
+
+  /** Compute journal stats from mastery profile. */
+  const journalStats = useMemo(() => {
+    const allRatings = masteryProfile.lines.flatMap(l => l.ratings)
+    const nailed = allRatings.filter(r => r === 'nailed').length
+    const close = allRatings.filter(r => r === 'close').length
+    const off = allRatings.filter(r => r === 'off').length
+    const totalPracticed = masteryProfile.lines.filter(l => l.practiceCount > 0).length
+    const totalLines = dialogueBank.length
+    const unused = totalLines - totalPracticed
+
+    // Context distribution of practiced lines
+    const practicedKeys = new Set(masteryProfile.lines.filter(l => l.practiceCount > 0).map(l => l.lineKey))
+    const contextCounts: Record<string, number> = {}
+    for (const line of dialogueBank) {
+      const key = line.text.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').slice(0, 40)
+      if (practicedKeys.has(key)) {
+        contextCounts[line.context] = (contextCounts[line.context] ?? 0) + 1
+      }
+    }
+
+    return { nailed, close, off, totalPracticed, totalLines, unused, contextCounts }
+  }, [masteryProfile, dialogueBank])
+
+  /* ------------------------------------------------------------------ */
   /*  Computed Data                                                      */
   /* ------------------------------------------------------------------ */
 
@@ -436,11 +738,14 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
       onSelect?: () => void
       showCoaching?: boolean
       onCoach?: () => void
+      showMastery?: boolean
     },
   ) {
     const { text, favorite, globalIdx, scenario } = line
     const isEditing = editingIdx === globalIdx
     const isCoachTarget = coachingIdx === globalIdx
+    const mastery = options?.showMastery ? getMasteryForLine(masteryProfile, text) : undefined
+    const mLevel = mastery?.level ?? 0
 
     return (
       <ParchmentCard
@@ -510,6 +815,18 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
             onKeyDown={options?.selectable ? (e) => { if (e.key === 'Enter' || e.key === ' ') options.onSelect?.() } : undefined}
           >
             <div className="flex items-start gap-2">
+              {options?.showMastery && (
+                <div
+                  className={cn(
+                    'w-3 h-3 rounded-full shrink-0 mt-1.5 border',
+                    mLevel === 0
+                      ? 'border-forge-2 bg-transparent'
+                      : cn('border-transparent', masteryBgColor(mLevel)),
+                  )}
+                  title={`Mastery: ${MASTERY_LEVELS[mLevel]}`}
+                  aria-label={`Mastery level: ${MASTERY_LEVELS[mLevel]}`}
+                />
+              )}
               <p className="flex-1 text-sm text-forge-1 leading-relaxed italic">
                 <span className="text-gold/40 text-2xl font-display leading-none mr-1">&ldquo;</span>{text}<span className="text-gold/40 text-2xl font-display leading-none ml-1">&rdquo;</span>
               </p>
@@ -586,58 +903,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                 Get Coaching
               </button>
             )}
-            {/* Show coaching results inline */}
-            {isCoachTarget && coaching && activeMode === 'delivery' && (
-              <div className="mt-3 pt-3 border-t border-bronze/25 flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <Volume2 size={14} className="text-arcane shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-xs font-medium text-forge-0">Tone</p>
-                    <p className="text-xs text-forge-1">{coaching.tone}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Footprints size={14} className="text-verdant shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-xs font-medium text-forge-0">Pacing</p>
-                    <p className="text-xs text-forge-1">{coaching.pacing}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Brain size={14} className="text-eldritch shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-xs font-medium text-forge-0">Emotion</p>
-                    <p className="text-xs text-forge-1">{coaching.emotion}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Footprints size={14} className="text-ember shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-xs font-medium text-forge-0">Body Language</p>
-                    <p className="text-xs text-forge-1">{coaching.bodyLanguage}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mic2 size={14} className="text-arcane shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-xs font-medium text-forge-0">Vocal Dynamics</p>
-                    <p className="text-xs text-forge-1">{coaching.vocalDynamics}</p>
-                  </div>
-                </div>
-                <ParchmentCard className="p-3">
-                  <p className="text-xs font-medium text-ember mb-1">Try it this way:</p>
-                  <p className="text-sm text-forge-0 italic leading-relaxed">
-                    &ldquo;{coaching.variant}&rdquo;
-                  </p>
-                </ParchmentCard>
-              </div>
-            )}
-            {isCoachTarget && deliveryAI.loading && activeMode === 'delivery' && (
-              <div className="mt-3 flex items-center gap-2 text-forge-2">
-                <Loader2 size={14} className="animate-spin" aria-hidden />
-                <span className="text-xs">Analyzing delivery...</span>
-              </div>
-            )}
+            {/* Coaching results now rendered within Rehearsal mode directly */}
           </div>
         )}
       </ParchmentCard>
@@ -749,7 +1015,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
             : filteredLines
           return linesToShow.length > 0 ? (
             <div className="flex flex-col gap-2">
-              {linesToShow.map(line => renderLineCard(line))}
+              {linesToShow.map(line => renderLineCard(line, { showMastery: true }))}
             </div>
           ) : favoriteLines.length === 0 ? (
             <GlassCard className="p-6">
@@ -1114,43 +1380,861 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
     )
   }
 
-  function renderDeliveryCoachMode() {
-    // Show all lines in current context, favorites first
+  /* ------------------------------------------------------------------ */
+  /*  Rehearsal Mode Renderer                                            */
+  /* ------------------------------------------------------------------ */
+
+  function renderRehearsalMode() {
     const allLines = getFilteredLines()
     const sorted = [
       ...allLines.filter(l => l.favorite),
       ...allLines.filter(l => !l.favorite),
     ]
 
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="text-xs text-forge-2">
-          Tap &ldquo;Get Coaching&rdquo; on any line to receive AI delivery guidance.
-        </p>
+    /** Rating buttons shared between Guided/Solo/Improv after delivery. */
+    function renderRatingButtons(lineText: string) {
+      if (rehearsalRating) {
+        // Already rated — show result
+        const colorMap = { nailed: 'text-verdant', close: 'text-ember', off: 'text-red-400' }
+        const labelMap = { nailed: 'Nailed It', close: 'Close', off: 'Off' }
+        return (
+          <div className="flex items-center gap-2 mt-3">
+            <Check size={14} className={colorMap[rehearsalRating]} aria-hidden />
+            <span className={cn('text-sm font-medium', colorMap[rehearsalRating])}>
+              {labelMap[rehearsalRating]}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                resetRehearsal()
+              }}
+              className={cn(
+                'ml-auto min-h-[44px] px-4 rounded-xl',
+                'text-xs font-medium text-forge-1',
+                'bg-gold/[0.04] border border-bronze/25',
+                'hover:bg-gold/[0.08] hover:border-gold/30',
+                'transition-all duration-200 ease-forge',
+                'active:scale-[0.97]',
+              )}
+            >
+              Next Line
+            </button>
+          </div>
+        )
+      }
 
-        {deliveryAI.error && (
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+      return (
+        <div className="flex flex-col gap-2 mt-3">
+          <p className="text-xs text-forge-2 font-medium uppercase tracking-wider">Rate your delivery:</p>
+          <div className="flex gap-2">
+            {(['nailed', 'close', 'off'] as const).map(r => {
+              const colors = {
+                nailed: 'bg-verdant/15 text-verdant border-verdant/30 hover:bg-verdant/25',
+                close: 'bg-ember/15 text-ember border-ember/30 hover:bg-ember/25',
+                off: 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20',
+              }
+              const labels = { nailed: 'Nailed It', close: 'Close', off: 'Off' }
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => handleRehearsalRate(r)}
+                  className={cn(
+                    'flex-1 min-h-[44px] px-3 rounded-xl',
+                    'text-sm font-medium border',
+                    'transition-all duration-200 ease-forge',
+                    'active:scale-[0.97]',
+                    colors[r],
+                  )}
+                >
+                  {labels[r]}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+
+    /** Render the coaching display (shared between Guided and Solo reveal). */
+    function renderCoachingDisplay() {
+      if (deliveryAI.loading) {
+        return (
+          <div className="mt-3 flex items-center gap-2 text-forge-2">
+            <Loader2 size={14} className="animate-spin" aria-hidden />
+            <span className="text-xs">Analyzing delivery...</span>
+          </div>
+        )
+      }
+      if (deliveryAI.error) {
+        return (
+          <div className="mt-3 flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
             <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
             <p className="text-xs text-red-400">{deliveryAI.error}</p>
           </div>
+        )
+      }
+      if (!coaching) return null
+      return (
+        <div className="mt-3 pt-3 border-t border-bronze/25 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Volume2 size={14} className="text-arcane shrink-0" aria-hidden />
+            <div>
+              <p className="text-xs font-medium text-forge-0">Tone</p>
+              <p className="text-xs text-forge-1">{coaching.tone}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Footprints size={14} className="text-verdant shrink-0" aria-hidden />
+            <div>
+              <p className="text-xs font-medium text-forge-0">Pacing</p>
+              <p className="text-xs text-forge-1">{coaching.pacing}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Brain size={14} className="text-eldritch shrink-0" aria-hidden />
+            <div>
+              <p className="text-xs font-medium text-forge-0">Emotion</p>
+              <p className="text-xs text-forge-1">{coaching.emotion}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Footprints size={14} className="text-ember shrink-0" aria-hidden />
+            <div>
+              <p className="text-xs font-medium text-forge-0">Body Language</p>
+              <p className="text-xs text-forge-1">{coaching.bodyLanguage}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Mic2 size={14} className="text-arcane shrink-0" aria-hidden />
+            <div>
+              <p className="text-xs font-medium text-forge-0">Vocal Dynamics</p>
+              <p className="text-xs text-forge-1">{coaching.vocalDynamics}</p>
+            </div>
+          </div>
+          <ParchmentCard className="p-3">
+            <p className="text-xs font-medium text-ember mb-1">Try it this way:</p>
+            <p className="text-sm text-forge-0 italic leading-relaxed">
+              &ldquo;{coaching.variant}&rdquo;
+            </p>
+          </ParchmentCard>
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex flex-col gap-4">
+        {/* Rehearsal level selector */}
+        <div className="flex gap-2">
+          {([1, 2, 3] as RehearsalLevel[]).map(lvl => (
+            <button
+              key={lvl}
+              type="button"
+              onClick={() => {
+                setRehearsalLevel(lvl)
+                resetRehearsal()
+              }}
+              className={cn(
+                'flex-1 min-h-[44px] px-3 rounded-xl',
+                'text-sm font-medium border select-none',
+                'transition-all duration-200 ease-forge',
+                'active:scale-[0.97]',
+                rehearsalLevel === lvl
+                  ? 'bg-arcane/15 text-arcane border-arcane/30'
+                  : 'bg-gold/[0.04] text-forge-2 border-bronze/25 hover:bg-gold/[0.08] hover:text-forge-1',
+              )}
+            >
+              {REHEARSAL_LEVEL_LABELS[lvl]}
+            </button>
+          ))}
+        </div>
+
+        {/* Level description */}
+        <p className="text-xs text-forge-2">
+          {rehearsalLevel === 1 && 'Select a line to get full coaching, then practice and rate yourself.'}
+          {rehearsalLevel === 2 && 'Select a line and deliver it blind, then reveal coaching to compare.'}
+          {rehearsalLevel === 3 && 'AI generates a situation \u2014 pick the right line from a random subset.'}
+        </p>
+
+        {rehearsalAI.error && (
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
+            <p className="text-xs text-red-400">{rehearsalAI.error}</p>
+          </div>
         )}
 
-        {sorted.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {sorted.map(line =>
-              renderLineCard(line, {
-                showCoaching: true,
-                onCoach: () => getDeliveryCoaching(line.globalIdx, line.text),
-              }),
+        {/* IMPROV level (3) */}
+        {rehearsalLevel === 3 && (
+          <div className="flex flex-col gap-3">
+            {!improvResult && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={startImprovRehearsal}
+                loading={rehearsalAI.loading}
+                disabled={dialogueBank.length < 2}
+                className="self-start"
+              >
+                <Sparkles size={14} aria-hidden />
+                Generate Improv Scenario
+              </Button>
+            )}
+
+            {dialogueBank.length < 2 && (
+              <p className="text-xs text-forge-2 italic">
+                Add at least 2 lines to your dialogue bank to use Improv mode.
+              </p>
+            )}
+
+            {improvResult && (
+              <>
+                <ParchmentCard className="p-4">
+                  <p className="text-xs font-semibold text-ember uppercase tracking-wider mb-2">
+                    Situation
+                  </p>
+                  <p className="text-sm text-forge-0 leading-relaxed">
+                    {improvResult.situation}
+                  </p>
+                  {!rehearsalDelivered && (
+                    <p className="text-xs text-forge-2 mt-2 italic">
+                      Hint: {improvResult.hint}
+                    </p>
+                  )}
+                </ParchmentCard>
+
+                {/* Line choices */}
+                <div className="flex flex-col gap-2">
+                  <h4 className="text-xs font-semibold text-forge-1 uppercase tracking-wider">
+                    Pick the best line:
+                  </h4>
+                  {improvSubset.map((line, subIdx) => {
+                    const isIdeal = rehearsalDelivered && subIdx === improvResult.idealLineIndex
+                    const isSelected = improvSelectedIdx === subIdx
+                    return (
+                      <GlassCard
+                        key={`improv-${subIdx}`}
+                        className={cn(
+                          'p-3 transition-all duration-200 ease-forge',
+                          !rehearsalDelivered && 'cursor-pointer active:scale-[0.98]',
+                          isSelected && 'border-arcane/40 bg-arcane/5',
+                          rehearsalDelivered && isIdeal && 'border-verdant/40 bg-verdant/5',
+                        )}
+                      >
+                        <div
+                          role={!rehearsalDelivered ? 'button' : undefined}
+                          tabIndex={!rehearsalDelivered ? 0 : undefined}
+                          onClick={!rehearsalDelivered ? () => handleImprovSelect(subIdx) : undefined}
+                          onKeyDown={!rehearsalDelivered ? (e) => { if (e.key === 'Enter' || e.key === ' ') handleImprovSelect(subIdx) } : undefined}
+                          className="flex items-center gap-2"
+                        >
+                          <div className={cn(
+                            'w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center',
+                            'transition-all duration-200',
+                            isSelected ? 'border-arcane bg-arcane/20' : 'border-gold/30',
+                          )}>
+                            {isSelected && <div className="w-2 h-2 rounded-full bg-arcane" />}
+                          </div>
+                          <p className="text-sm text-forge-1 italic leading-relaxed">
+                            &ldquo;{line.text}&rdquo;
+                          </p>
+                          {rehearsalDelivered && isIdeal && (
+                            <Badge variant="verdant" className="ml-auto shrink-0 text-[10px]">Ideal</Badge>
+                          )}
+                        </div>
+                      </GlassCard>
+                    )
+                  })}
+                </div>
+
+                {/* Rating after selection */}
+                {rehearsalDelivered && improvSelectedIdx !== null && (
+                  <div className="flex flex-col gap-2">
+                    {improvSelectedIdx === improvResult.idealLineIndex ? (
+                      <p className="text-xs text-verdant font-medium">
+                        Correct choice! Now rate your delivery.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-ember font-medium">
+                        The ideal line was #{improvResult.idealLineIndex + 1}. Rate your overall attempt.
+                      </p>
+                    )}
+                    {renderRatingButtons(improvSubset[improvSelectedIdx]?.text ?? '')}
+                  </div>
+                )}
+              </>
             )}
           </div>
-        ) : (
-          <GlassCard className="p-6">
-            <p className="text-sm text-forge-2 text-center italic">
-              No {activeContext} lines to coach. Add some in Library mode first.
+        )}
+
+        {/* GUIDED (1) and SOLO (2) modes — line list */}
+        {(rehearsalLevel === 1 || rehearsalLevel === 2) && (
+          <div className="flex flex-col gap-3">
+            {sorted.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {sorted.map(line => {
+                  const isActive = rehearsalLineIdx === line.globalIdx
+                  const mastery = getMasteryForLine(masteryProfile, line.text)
+                  const mLevel = mastery?.level ?? 0
+
+                  return (
+                    <ParchmentCard
+                      key={line.globalIdx}
+                      className={cn(
+                        'p-3 transition-all duration-200 ease-forge',
+                        !isActive && 'cursor-pointer active:scale-[0.98]',
+                        isActive && 'border-arcane/40 bg-arcane/5',
+                      )}
+                    >
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => !isActive && selectRehearsalLine(line.globalIdx)}
+                        onKeyDown={e => { if (!isActive && (e.key === 'Enter' || e.key === ' ')) selectRehearsalLine(line.globalIdx) }}
+                        className="flex items-start gap-2"
+                      >
+                        {/* Mastery dot */}
+                        <div
+                          className={cn(
+                            'w-3 h-3 rounded-full shrink-0 mt-1.5 border',
+                            mLevel === 0
+                              ? 'border-forge-2 bg-transparent'
+                              : cn('border-transparent', masteryBgColor(mLevel)),
+                          )}
+                          title={`Mastery: ${MASTERY_LEVELS[mLevel]}`}
+                        />
+                        <p className="flex-1 text-sm text-forge-1 leading-relaxed italic">
+                          <span className="text-gold/40 text-2xl font-display leading-none mr-1">&ldquo;</span>
+                          {line.text}
+                          <span className="text-gold/40 text-2xl font-display leading-none ml-1">&rdquo;</span>
+                        </p>
+                      </div>
+
+                      {/* Expanded rehearsal area */}
+                      {isActive && (
+                        <div className="mt-3 pt-3 border-t border-bronze/25">
+                          {/* Guided: coaching visible immediately */}
+                          {rehearsalLevel === 1 && renderCoachingDisplay()}
+
+                          {/* Solo: hidden coaching until delivery */}
+                          {rehearsalLevel === 2 && !rehearsalDelivered && (
+                            <p className="text-xs text-forge-2 italic mb-3">
+                              Deliver this line in character, then tap the button below.
+                            </p>
+                          )}
+                          {rehearsalLevel === 2 && rehearsalCoachingVisible && renderCoachingDisplay()}
+
+                          {/* Delivery button */}
+                          {!rehearsalDelivered && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={handleRehearsalDelivered}
+                              className="self-start mt-3"
+                              disabled={rehearsalLevel === 1 && deliveryAI.loading}
+                            >
+                              <Mic2 size={14} aria-hidden />
+                              I Delivered It
+                            </Button>
+                          )}
+
+                          {/* Rating buttons after delivery */}
+                          {rehearsalDelivered && renderRatingButtons(line.text)}
+                        </div>
+                      )}
+                    </ParchmentCard>
+                  )
+                })}
+              </div>
+            ) : (
+              <GlassCard className="p-6">
+                <p className="text-sm text-forge-2 text-center italic">
+                  No {activeContext} lines to rehearse. Add some in Library mode first.
+                </p>
+              </GlassCard>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Warmup Mode Renderer                                               */
+  /* ------------------------------------------------------------------ */
+
+  function renderWarmupMode() {
+    // Not started
+    if (warmupStep === 0 && !warmupCompleted) {
+      return (
+        <div className="flex flex-col gap-4 items-center py-6">
+          <Sunrise size={40} className="text-ember" aria-hidden />
+          <h3 className="text-lg font-display text-forge-0">Pre-Session Warmup</h3>
+          <p className="text-sm text-forge-2 text-center max-w-xs">
+            A quick 5-step routine to get you into character before your session.
+          </p>
+          {dialogueBank.length === 0 ? (
+            <p className="text-xs text-forge-2 italic text-center">
+              Add dialogue lines in Library mode to start warmups.
             </p>
+          ) : (
+            <Button variant="primary" size="md" onClick={startWarmup}>
+              <Sunrise size={16} aria-hidden />
+              Start Warmup
+            </Button>
+          )}
+          {/* Streak display */}
+          {masteryProfile.warmupStreak > 0 && (
+            <div className="flex items-center gap-2">
+              <Flame size={16} className="text-ember" aria-hidden />
+              <span className="text-sm font-bold text-ember">{masteryProfile.warmupStreak}</span>
+              <span className="text-xs text-forge-2">day streak</span>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    // Completed
+    if (warmupCompleted) {
+      return (
+        <div className="flex flex-col gap-4 items-center py-6">
+          <div className="w-16 h-16 rounded-full bg-verdant/15 border border-verdant/30 flex items-center justify-center">
+            <Check size={32} className="text-verdant" aria-hidden />
+          </div>
+          <h3 className="text-lg font-display text-verdant">Ready for Session</h3>
+          <p className="text-sm text-forge-2 text-center">
+            You rehearsed {warmupLinesRehearsed} line{warmupLinesRehearsed !== 1 ? 's' : ''} and completed your warmup.
+          </p>
+          {masteryProfile.warmupStreak > 0 && (
+            <div className="flex items-center gap-2">
+              <Flame size={16} className="text-ember" aria-hidden />
+              <span className="text-sm font-bold text-ember">{masteryProfile.warmupStreak}</span>
+              <span className="text-xs text-forge-2">day streak</span>
+            </div>
+          )}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={resetWarmup}
+          >
+            <RotateCcw size={14} aria-hidden />
+            Start Another
+          </Button>
+        </div>
+      )
+    }
+
+    // Active warmup
+    const progressPercent = (warmupStep / WARMUP_TOTAL_STEPS) * 100
+
+    return (
+      <div className="flex flex-col gap-4">
+        {/* Progress bar */}
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-forge-2 font-medium">Step {warmupStep} of {WARMUP_TOTAL_STEPS}</span>
+            <span className="text-xs text-forge-2">{Math.round(progressPercent)}%</span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-void-2/60 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-ember transition-all duration-300 ease-forge"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+
+        {warmupAI.error && (
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
+            <p className="text-xs text-red-400">{warmupAI.error}</p>
+          </div>
+        )}
+
+        {/* Steps 1-3: Random line with coaching hint */}
+        {warmupStep >= 1 && warmupStep <= 3 && (() => {
+          const lineIdx = warmupStep - 1
+          const warmupLine = warmupLines[lineIdx]
+          if (!warmupLine) {
+            return (
+              <GlassCard className="p-6">
+                <p className="text-sm text-forge-2 text-center italic">
+                  No more lines available. Add more lines in Library mode.
+                </p>
+                <Button variant="secondary" size="sm" onClick={advanceWarmup} className="self-center mt-3">
+                  Skip <ChevronRight size={14} aria-hidden />
+                </Button>
+              </GlassCard>
+            )
+          }
+          return (
+            <div className="flex flex-col gap-3">
+              <ParchmentCard className="p-4">
+                <p className="text-xs font-semibold text-arcane uppercase tracking-wider mb-2">
+                  Deliver this line in character
+                </p>
+                <p className="text-base text-forge-0 font-medium italic leading-relaxed text-center">
+                  <span className="text-gold/40 text-2xl font-display leading-none mr-1">&ldquo;</span>
+                  {warmupLine.text}
+                  <span className="text-gold/40 text-2xl font-display leading-none ml-1">&rdquo;</span>
+                </p>
+                <p className="text-xs text-forge-2 mt-2 text-center capitalize">
+                  Context: {warmupLine.context}
+                </p>
+              </ParchmentCard>
+
+              {!warmupStepRated ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs text-forge-2 font-medium uppercase tracking-wider">Rate your delivery:</p>
+                  <div className="flex gap-2">
+                    {(['nailed', 'close', 'off'] as const).map(r => {
+                      const colors = {
+                        nailed: 'bg-verdant/15 text-verdant border-verdant/30 hover:bg-verdant/25',
+                        close: 'bg-ember/15 text-ember border-ember/30 hover:bg-ember/25',
+                        off: 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20',
+                      }
+                      const labels = { nailed: 'Nailed It', close: 'Close', off: 'Off' }
+                      return (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => handleWarmupLineRate(warmupLine.text, r)}
+                          className={cn(
+                            'flex-1 min-h-[44px] px-3 rounded-xl',
+                            'text-sm font-medium border',
+                            'transition-all duration-200 ease-forge',
+                            'active:scale-[0.97]',
+                            colors[r],
+                          )}
+                        >
+                          {labels[r]}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <Button variant="secondary" size="sm" onClick={advanceWarmup} className="self-center">
+                  Next Step <ChevronRight size={14} className="ml-1" aria-hidden />
+                </Button>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* Step 4: Scene response */}
+        {warmupStep === 4 && (
+          <div className="flex flex-col gap-3">
+            {warmupAI.loading && !warmupScene && (
+              <div className="flex items-center justify-center gap-2 py-6 text-forge-2">
+                <Loader2 size={16} className="animate-spin" aria-hidden />
+                <span className="text-xs">Generating scene...</span>
+              </div>
+            )}
+
+            {warmupScene && (
+              <>
+                <ParchmentCard className="p-4">
+                  <p className="text-xs font-semibold text-eldritch uppercase tracking-wider mb-2">
+                    Scene
+                  </p>
+                  <p className="text-sm text-forge-0 leading-relaxed">
+                    {warmupScene.scene}
+                  </p>
+                  <div className="mt-3 pt-2 border-t border-bronze/20">
+                    <p className="text-xs text-forge-2">
+                      <span className="font-medium text-forge-1">Prompt:</span> {warmupScene.prompt}
+                    </p>
+                    <p className="text-xs text-forge-2 mt-1">
+                      <span className="font-medium text-forge-1">Suggested tone:</span>{' '}
+                      <span className="text-eldritch">{warmupScene.suggestedTone}</span>
+                    </p>
+                  </div>
+                </ParchmentCard>
+
+                <p className="text-xs text-forge-2 text-center italic">
+                  Respond in character, then move to the next step.
+                </p>
+
+                <Button variant="secondary" size="sm" onClick={advanceWarmup} className="self-center">
+                  Next Step <ChevronRight size={14} className="ml-1" aria-hidden />
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Step 5: Improv spark */}
+        {warmupStep === 5 && (
+          <div className="flex flex-col gap-3">
+            {warmupAI.loading && !warmupSpark && (
+              <div className="flex items-center justify-center gap-2 py-6 text-forge-2">
+                <Loader2 size={16} className="animate-spin" aria-hidden />
+                <span className="text-xs">Generating spark...</span>
+              </div>
+            )}
+
+            {warmupSpark && (
+              <>
+                <ParchmentCard className="p-4">
+                  <p className="text-xs font-semibold text-ember uppercase tracking-wider mb-2">
+                    Improv Spark
+                  </p>
+                  <p className="text-sm text-forge-0 leading-relaxed">
+                    {warmupSpark.spark}
+                  </p>
+                  <div className="flex items-center gap-3 mt-3 pt-2 border-t border-bronze/20">
+                    <Badge variant="arcane" className="text-[10px]">{warmupSpark.trait}</Badge>
+                    <Badge variant="ember" className="text-[10px]">{warmupSpark.difficulty}</Badge>
+                  </div>
+                </ParchmentCard>
+
+                <p className="text-xs text-forge-2 text-center italic">
+                  Try this improv challenge in your head, then finish your warmup.
+                </p>
+
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={advanceWarmup}
+                  className="self-center"
+                >
+                  <Check size={14} aria-hidden />
+                  Complete Warmup
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Journal Mode Renderer                                              */
+  /* ------------------------------------------------------------------ */
+
+  function renderJournalMode() {
+    const { nailed, close, off, totalPracticed, totalLines, unused, contextCounts } = journalStats
+    const totalRatings = nailed + close + off
+
+    return (
+      <div className="flex flex-col gap-4">
+        {/* Usage stats */}
+        <GlassCard className="p-4">
+          <h4 className="text-xs font-semibold text-forge-0 uppercase tracking-wider mb-3">
+            Usage Overview
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-2xl font-display text-forge-0">{totalPracticed}</span>
+              <span className="text-xs text-forge-2">Lines practiced</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-2xl font-display text-forge-2">{unused}</span>
+              <span className="text-xs text-forge-2">Unused</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-2xl font-display text-ember">{masteryProfile.warmupStreak}</span>
+              <span className="text-xs text-forge-2">Day streak</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-2xl font-display text-arcane">
+                {masteryProfile.warmups.filter(w => w.completed).length}
+              </span>
+              <span className="text-xs text-forge-2">Warmups done</span>
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* Rating distribution */}
+        {totalRatings > 0 && (
+          <GlassCard className="p-4">
+            <h4 className="text-xs font-semibold text-forge-0 uppercase tracking-wider mb-3">
+              Rating Distribution
+            </h4>
+            <div className="flex flex-col gap-2">
+              {([
+                { label: 'Nailed It', count: nailed, color: 'bg-verdant', textColor: 'text-verdant' },
+                { label: 'Close', count: close, color: 'bg-ember', textColor: 'text-ember' },
+                { label: 'Off', count: off, color: 'bg-red-500', textColor: 'text-red-400' },
+              ] as const).map(item => {
+                const pct = totalRatings > 0 ? (item.count / totalRatings) * 100 : 0
+                return (
+                  <div key={item.label} className="flex items-center gap-2">
+                    <span className={cn('text-xs font-medium w-16', item.textColor)}>{item.label}</span>
+                    <div className="flex-1 h-3 rounded-full bg-void-2/60 overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full transition-all duration-300', item.color)}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-forge-2 w-8 text-right">{item.count}</span>
+                  </div>
+                )
+              })}
+            </div>
           </GlassCard>
         )}
+
+        {/* Context distribution */}
+        {Object.keys(contextCounts).length > 0 && (
+          <GlassCard className="p-4">
+            <h4 className="text-xs font-semibold text-forge-0 uppercase tracking-wider mb-3">
+              Context Distribution
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {CONTEXTS.map(ctx => {
+                const count = contextCounts[ctx] ?? 0
+                const pct = totalPracticed > 0 ? Math.round((count / totalPracticed) * 100) : 0
+                const color = CONTEXT_COLORS[ctx]
+                return (
+                  <div
+                    key={ctx}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border',
+                      count > 0
+                        ? `bg-${color}/10 border-${color}/25 text-${color}`
+                        : 'bg-gold/[0.02] border-bronze/15 text-forge-2',
+                    )}
+                  >
+                    <span className="text-xs font-medium capitalize">{ctx}</span>
+                    <span className="text-[10px]">{pct}%</span>
+                  </div>
+                )
+              })}
+            </div>
+          </GlassCard>
+        )}
+
+        {/* Growth: Practice trend */}
+        <GlassCard className="p-4">
+          <h4 className="text-xs font-semibold text-forge-0 uppercase tracking-wider mb-3">
+            Growth
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-lg font-display text-forge-0">
+                {masteryProfile.lines.reduce((sum, l) => sum + l.practiceCount, 0)}
+              </span>
+              <span className="text-xs text-forge-2">Total practices</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-lg font-display text-forge-0">
+                {masteryProfile.bestStreak}
+              </span>
+              <span className="text-xs text-forge-2">Best streak</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-lg font-display text-ember">
+                {masteryProfile.lines.filter(l => l.level >= 1).length}
+              </span>
+              <span className="text-xs text-forge-2">Guided+</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-lg font-display text-verdant">
+                {masteryProfile.lines.filter(l => l.level >= 3).length}
+              </span>
+              <span className="text-xs text-forge-2">Improv level</span>
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* AI Insight button */}
+        <div className="flex flex-col gap-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={fetchJournalInsight}
+            loading={journalAI.loading}
+            disabled={masteryProfile.lines.length === 0}
+            className="self-start"
+          >
+            <Sparkles size={14} aria-hidden />
+            AI Coaching Insight
+          </Button>
+
+          {journalAI.error && (
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+              <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
+              <p className="text-xs text-red-400">{journalAI.error}</p>
+            </div>
+          )}
+
+          {journalInsight && (
+            <ParchmentCard className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="arcane" className="text-[10px]">{journalInsight.focusArea}</Badge>
+              </div>
+              <p className="text-sm text-forge-0 leading-relaxed mb-2">
+                {journalInsight.insight}
+              </p>
+              <p className="text-xs text-forge-1 italic">
+                {journalInsight.suggestion}
+              </p>
+            </ParchmentCard>
+          )}
+
+          {masteryProfile.lines.length === 0 && (
+            <p className="text-xs text-forge-2 italic">
+              Practice some lines first to get AI coaching insights.
+            </p>
+          )}
+        </div>
+
+        {/* Badge grid */}
+        <GlassCard className="p-4">
+          <h4 className="text-xs font-semibold text-forge-0 uppercase tracking-wider mb-3">
+            Badges
+          </h4>
+          {MASTERY_BADGES.length > 0 ? (
+            <div className="grid grid-cols-2 gap-2">
+              {MASTERY_BADGES.map(badge => {
+                const earned = masteryProfile.badges.includes(badge.id)
+                const IconComp = BADGE_ICONS[badge.icon] ?? Award
+                return (
+                  <div
+                    key={badge.id}
+                    className={cn(
+                      'flex items-start gap-2 p-3 rounded-xl border',
+                      'transition-all duration-200',
+                      earned
+                        ? 'bg-gold/[0.06] border-gold/25'
+                        : 'bg-void-2/30 border-bronze/10 opacity-50',
+                    )}
+                  >
+                    <div className={cn(
+                      'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                      earned
+                        ? 'bg-gold/15 text-gold'
+                        : 'bg-void-2/40 text-forge-2',
+                    )}>
+                      {earned ? (
+                        <IconComp size={16} aria-hidden />
+                      ) : (
+                        <Lock size={14} aria-hidden />
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className={cn(
+                        'text-xs font-medium leading-tight',
+                        earned ? 'text-forge-0' : 'text-forge-2',
+                      )}>
+                        {badge.name}
+                      </span>
+                      <span className="text-[10px] text-forge-2 leading-tight">
+                        {badge.description}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-forge-2 italic text-center">
+              No badges available yet.
+            </p>
+          )}
+        </GlassCard>
       </div>
     )
   }
@@ -1169,33 +2253,35 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
         </Badge>
       </div>
 
-      {/* Mode Selector — segmented pill */}
-      <div className="flex bg-gold/[0.03] border border-gold/25 rounded-xl p-1 gap-1">
-        {(Object.keys(MODE_CONFIG) as BankMode[]).map(mode => {
-          const { label, icon: Icon } = MODE_CONFIG[mode]
-          const isActive = activeMode === mode
-          return (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setActiveMode(mode)}
-              className={cn(
-                'flex-1 inline-flex items-center justify-center gap-1.5',
-                'min-h-[40px] px-2 rounded-lg',
-                'text-xs font-medium select-none',
-                'transition-all duration-200 ease-forge',
-                'active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold',
-                isActive
-                  ? 'bg-gold/[0.12] text-gold border border-gold/30 shadow-sm'
-                  : 'text-forge-2 hover:text-forge-1 hover:bg-gold/[0.04]',
-              )}
-            >
-              <Icon size={13} aria-hidden />
-              <span className="hidden sm:inline">{label}</span>
-            </button>
-          )
-        })}
+      {/* Mode Selector — horizontal scroll strip for 6 modes at 375px */}
+      <div className="overflow-x-auto -mx-1 px-1 scrollbar-none">
+        <div className="inline-flex bg-gold/[0.03] border border-gold/25 rounded-xl p-1 gap-1 min-w-max">
+          {(Object.keys(MODE_CONFIG) as BankMode[]).map(mode => {
+            const { label, icon: Icon } = MODE_CONFIG[mode]
+            const isActive = activeMode === mode
+            return (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setActiveMode(mode)}
+                className={cn(
+                  'inline-flex items-center justify-center gap-1.5',
+                  'min-h-[40px] px-3 rounded-lg whitespace-nowrap',
+                  'text-xs font-medium select-none',
+                  'transition-all duration-200 ease-forge',
+                  'active:scale-[0.97]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold',
+                  isActive
+                    ? 'bg-gold/[0.12] text-gold border border-gold/30 shadow-sm'
+                    : 'text-forge-2 hover:text-forge-1 hover:bg-gold/[0.04]',
+                )}
+              >
+                <Icon size={13} aria-hidden />
+                {label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Context tabs */}
@@ -1235,7 +2321,9 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
       {activeMode === 'library' && renderLibraryMode()}
       {activeMode === 'practice' && renderPracticeMode()}
       {activeMode === 'quickdraw' && renderQuickDrawMode()}
-      {activeMode === 'delivery' && renderDeliveryCoachMode()}
+      {activeMode === 'rehearsal' && renderRehearsalMode()}
+      {activeMode === 'warmup' && renderWarmupMode()}
+      {activeMode === 'journal' && renderJournalMode()}
     </div>
   )
 }

@@ -13,6 +13,8 @@ import {
   Plus,
   X,
   ChevronDown,
+  Loader2,
+  Timer,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
@@ -21,8 +23,10 @@ import { saveCharacter, generateId } from '../../lib/character'
 import { loadCampaign } from '../../lib/campaign'
 import { generateStaticHooks, shuffleHooks, type RPHook, type HookCategory } from '../../lib/rp-hooks'
 import { ActionCard } from './ActionCard'
+import { Badge } from '../ui/Badge'
 import { useAI } from '../../hooks/useAI'
 import { SYSTEM_PROMPTS } from '../../lib/prompts'
+import type { RPMoment } from '../../lib/session-log'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -34,6 +38,13 @@ interface EngageCardProps {
   expanded: boolean
   onToggle: () => void
   onCharacterUpdate: (char: Character) => void
+  onMomentLogged?: (moment: Omit<RPMoment, 'id' | 'timestamp'>) => void
+}
+
+interface SparkResult {
+  spark: string
+  trait: string
+  difficulty: 'easy' | 'medium' | 'hard'
 }
 
 type TargetTab = 'member' | 'party' | 'npc'
@@ -58,12 +69,18 @@ const FILTER_CATEGORIES = ['all', 'ask', 'observe', 'connect', 'offer', 'muse'] 
 // Component
 // ---------------------------------------------------------------------------
 
-export function EngageCard({ character, sceneContext, expanded, onToggle, onCharacterUpdate }: EngageCardProps) {
+export function EngageCard({ character, sceneContext, expanded, onToggle, onCharacterUpdate, onMomentLogged }: EngageCardProps) {
   const [activeCategory, setActiveCategory] = useState<HookCategory | 'all'>('all')
   const [hooks, setHooks] = useState<RPHook[]>([])
   const [aiHooks, setAiHooks] = useState<RPHook[]>([])
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Spark feature state ───────────────────────────────────────────────
+  const [sparkResult, setSparkResult] = useState<SparkResult | null>(null)
+  const [sparkTimerActive, setSparkTimerActive] = useState(false)
+  const [sparkTimeLeft, setSparkTimeLeft] = useState(20)
+  const sparkTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // ── Session-only deleted static hook IDs ────────────────────────────
   const [deletedStaticIds, setDeletedStaticIds] = useState<Set<string>>(new Set())
@@ -180,6 +197,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
 
   // ── AI hook generation ──────────────────────────────────────────────
   const { loading: aiLoading, error: aiError, queryStructured } = useAI()
+  const { loading: sparkLoading, error: sparkError, queryStructured: sparkQuery } = useAI()
 
   const handleAISuggest = useCallback(async () => {
     const prompt = SYSTEM_PROMPTS.rpHookGenerator(character, campaign, sceneContext)
@@ -252,6 +270,69 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
     const random = all[Math.floor(Math.random() * all.length)]
     handleCopy(random.text, `quick-${random.id}`)
   }, [allDisplayHooks, aiHooks, handleCopy])
+
+  // ── Spark handlers ────────────────────────────────────────────────────
+  const handleSpark = useCallback(async () => {
+    setSparkResult(null)
+    setSparkTimerActive(false)
+    setSparkTimeLeft(20)
+    if (sparkTimerRef.current) {
+      clearInterval(sparkTimerRef.current)
+      sparkTimerRef.current = null
+    }
+    try {
+      const prompt = SYSTEM_PROMPTS.improvSpark(character, sceneContext)
+      const result = await sparkQuery<SparkResult>(prompt, 'Generate a creativity spark challenge')
+      setSparkResult(result)
+    } catch {
+      // Error handled by useAI
+    }
+  }, [character, sceneContext, sparkQuery])
+
+  const handleSparkTimer = useCallback(() => {
+    if (sparkTimerActive) {
+      // Stop timer
+      if (sparkTimerRef.current) {
+        clearInterval(sparkTimerRef.current)
+        sparkTimerRef.current = null
+      }
+      setSparkTimerActive(false)
+      setSparkTimeLeft(20)
+      return
+    }
+    // Start 20-second countdown
+    setSparkTimeLeft(20)
+    setSparkTimerActive(true)
+    sparkTimerRef.current = setInterval(() => {
+      setSparkTimeLeft(prev => {
+        if (prev <= 1) {
+          if (sparkTimerRef.current) {
+            clearInterval(sparkTimerRef.current)
+            sparkTimerRef.current = null
+          }
+          setSparkTimerActive(false)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }, [sparkTimerActive])
+
+  const handleSparkComplete = useCallback(() => {
+    if (!sparkResult) return
+    if (sparkTimerRef.current) {
+      clearInterval(sparkTimerRef.current)
+      sparkTimerRef.current = null
+    }
+    setSparkTimerActive(false)
+    onMomentLogged?.({
+      type: 'spark',
+      text: sparkResult.spark.length > 80 ? sparkResult.spark.slice(0, 77) + '...' : sparkResult.spark,
+      context: sceneContext,
+    })
+    setSparkResult(null)
+    setSparkTimeLeft(20)
+  }, [sparkResult, sceneContext, onMomentLogged])
 
   // ── Can generate check ──────────────────────────────────────────────
   const canGenerate =
@@ -719,24 +800,119 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
           </div>
         )}
 
-        {/* ── Quick Hook panic button ── */}
-        <button
-          type="button"
-          onClick={handleQuickHook}
-          className={cn(
-            'w-full inline-flex items-center justify-center gap-2',
-            'min-h-[52px] px-4 py-3 rounded-xl',
-            'bg-verdant/15 border border-verdant/30',
-            'text-sm font-semibold text-verdant',
-            'transition-all duration-200 ease-forge',
-            'active:scale-[0.97]',
-            'hover:bg-verdant/20',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verdant',
-          )}
-        >
-          <Zap size={18} aria-hidden />
-          Quick Hook
-        </button>
+        {/* ── Quick Hook + Spark row ── */}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleQuickHook}
+            className={cn(
+              'flex-1 inline-flex items-center justify-center gap-2',
+              'min-h-[52px] px-4 py-3 rounded-xl',
+              'bg-verdant/15 border border-verdant/30',
+              'text-sm font-semibold text-verdant',
+              'transition-all duration-200 ease-forge',
+              'active:scale-[0.97]',
+              'hover:bg-verdant/20',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verdant',
+            )}
+          >
+            <Zap size={18} aria-hidden />
+            Quick Hook
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSpark}
+            disabled={sparkLoading}
+            className={cn(
+              'flex-1 inline-flex items-center justify-center gap-2',
+              'min-h-[52px] px-4 py-3 rounded-xl',
+              'bg-eldritch/15 border border-eldritch/30',
+              'text-sm font-semibold text-eldritch',
+              'transition-all duration-200 ease-forge',
+              'active:scale-[0.97]',
+              'hover:bg-eldritch/20',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eldritch',
+              sparkLoading && 'opacity-50 cursor-not-allowed',
+            )}
+          >
+            {sparkLoading ? (
+              <Loader2 size={18} className="animate-spin" aria-hidden />
+            ) : (
+              <Sparkles size={18} aria-hidden />
+            )}
+            {sparkLoading ? 'Sparking...' : 'Spark'}
+          </button>
+        </div>
+
+        {/* ── Spark result card ── */}
+        {sparkError && (
+          <p className="text-sm text-red-400 px-1">{sparkError}</p>
+        )}
+
+        {sparkLoading && !sparkResult && (
+          <div className="space-y-1.5">
+            <div className="h-[80px] rounded-xl bg-white/[0.04] animate-pulse" />
+          </div>
+        )}
+
+        {sparkResult && (
+          <div className="space-y-3 rounded-xl border border-eldritch/20 bg-eldritch/[0.03] p-3 animate-fade-in">
+            <p className="text-sm text-forge-0 leading-relaxed">
+              {sparkResult.spark}
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="eldritch">{sparkResult.trait}</Badge>
+              <Badge variant={
+                sparkResult.difficulty === 'easy' ? 'verdant'
+                : sparkResult.difficulty === 'medium' ? 'ember'
+                : 'eldritch'
+              }>
+                {sparkResult.difficulty}
+              </Badge>
+            </div>
+
+            {/* Timer toggle + complete */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleSparkTimer}
+                className={cn(
+                  'inline-flex items-center justify-center gap-1.5',
+                  'min-h-[44px] px-3 py-2 rounded-xl',
+                  'border',
+                  'text-sm font-medium',
+                  'transition-all duration-200 ease-forge',
+                  'active:scale-[0.97]',
+                  sparkTimerActive
+                    ? 'bg-ember/15 border-ember/30 text-ember'
+                    : 'bg-white/[0.04] border-white/10 text-forge-2 hover:bg-white/[0.06]',
+                )}
+              >
+                <Timer size={16} aria-hidden />
+                {sparkTimerActive ? `${sparkTimeLeft}s` : '20s Timer'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSparkComplete}
+                className={cn(
+                  'flex-1 inline-flex items-center justify-center gap-2',
+                  'min-h-[44px] px-3 py-2 rounded-xl',
+                  'bg-verdant/15 border border-verdant/30',
+                  'text-sm font-semibold text-verdant',
+                  'transition-all duration-200 ease-forge',
+                  'active:scale-[0.95]',
+                  'hover:bg-verdant/20',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verdant',
+                )}
+              >
+                <Check size={16} aria-hidden />
+                Completed
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </ActionCard>
   )

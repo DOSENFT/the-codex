@@ -1,9 +1,16 @@
-import { useState, useCallback, useRef } from 'react'
-import { MessageSquare, Zap, BookOpen, Copy, Check } from 'lucide-react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { BookOpen, Copy, Check } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { Character } from '../../lib/character'
-import { ACCENT_GUIDES } from '../../lib/accent-data'
 import { setActiveIdentity } from '../../lib/identity'
+import type { RPMoment, SessionRPLog } from '../../lib/session-log'
+import {
+  createSession,
+  addMoment,
+  endSession,
+  loadSessionLogs,
+  saveSessionLogs,
+} from '../../lib/session-log'
 
 import { ActionCard } from './ActionCard'
 import { PersonaStrip } from './PersonaStrip'
@@ -11,6 +18,9 @@ import { SceneContextFilter, type SceneContext } from './SceneContextFilter'
 import { IdentitySwitcher } from './IdentitySwitcher'
 import { AIAssistPanel } from './AIAssistPanel'
 import { EngageCard } from './EngageCard'
+import { PerformPanel } from './PerformPanel'
+import { ImpulseEngine } from './ImpulseEngine'
+import { SessionTimeline } from './SessionTimeline'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -22,43 +32,8 @@ interface SessionCockpitProps {
 }
 
 // ---------------------------------------------------------------------------
-// Context filter maps
-// ---------------------------------------------------------------------------
-
-/** Maps scene context to dialogue bank context strings */
-const DIALOGUE_CONTEXT_MAP: Record<Exclude<SceneContext, 'all'>, string[]> = {
-  combat: ['combat'],
-  social: ['social'],
-  discovery: ['discovery'],
-  emotional: ['emotional'],
-}
-
-/** Maps scene context to sceneResponses situation labels */
-const SCENE_RESPONSE_MAP: Record<Exclude<SceneContext, 'all'>, string[]> = {
-  combat: ['Confrontation', 'Victory', 'Fear'],
-  social: ['Betrayal', 'Mercy', 'Joy'],
-  discovery: ['Discovery'],
-  emotional: ['Loss', 'Fear', 'Joy'],
-}
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/** Find matching accent profile by checking voiceNotes or active identity accent */
-function findAccentProfile(char: Character) {
-  const activeIdentity = char.activeIdentityId && char.identities
-    ? char.identities.find(i => i.id === char.activeIdentityId)
-    : null
-
-  const accentHint = activeIdentity?.accent ?? char.persona?.voiceNotes ?? ''
-  if (!accentHint) return null
-
-  const lower = accentHint.toLowerCase()
-  return ACCENT_GUIDES.find(
-    a => lower.includes(a.id.toLowerCase()) || lower.includes(a.name.toLowerCase()),
-  ) ?? null
-}
 
 /** Deduplicate string arrays by lowercased value */
 function dedupeStrings(arr: string[]): string[] {
@@ -79,10 +54,18 @@ function dedupeStrings(arr: string[]): string[] {
 // ---------------------------------------------------------------------------
 
 export function SessionCockpit({ character, onCharacterUpdate }: SessionCockpitProps) {
-  const [expandedCard, setExpandedCard] = useState<'speak' | 'react' | 'recall' | 'engage' | null>('speak')
+  const [expandedCard, setExpandedCard] = useState<'perform' | 'impulse' | 'recall' | 'engage' | null>('perform')
   const [sceneContext, setSceneContext] = useState<SceneContext>('all')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Session log state ──────────────────────────────────────────────────
+  const [currentSession, setCurrentSession] = useState<SessionRPLog | null>(null)
+
+  // Auto-create session on mount if none exists
+  useEffect(() => {
+    setCurrentSession(createSession(character.id))
+  }, [character.id])
 
   // ── Copy handler ─────────────────────────────────────────────────────
   const handleCopy = useCallback(async (text: string, id: string) => {
@@ -97,7 +80,7 @@ export function SessionCockpit({ character, onCharacterUpdate }: SessionCockpitP
   }, [])
 
   // ── Toggle handler ───────────────────────────────────────────────────
-  const toggleCard = useCallback((card: 'speak' | 'react' | 'recall' | 'engage') => {
+  const toggleCard = useCallback((card: 'perform' | 'impulse' | 'recall' | 'engage') => {
     setExpandedCard(prev => (prev === card ? null : card))
   }, [])
 
@@ -106,41 +89,28 @@ export function SessionCockpit({ character, onCharacterUpdate }: SessionCockpitP
     onCharacterUpdate(setActiveIdentity(character, identityId))
   }, [character, onCharacterUpdate])
 
-  // ====================================================================
-  // SPEAK DATA
-  // ====================================================================
-  const catchphrases = character.persona?.catchphrases ?? []
+  // ── Moment logging ────────────────────────────────────────────────────
+  const handleMomentLogged = useCallback((moment: Omit<RPMoment, 'id' | 'timestamp'>) => {
+    setCurrentSession(prev => {
+      if (!prev) return prev
+      return addMoment(prev, moment)
+    })
+  }, [])
 
-  const allDialogueLines = character.persona?.dialogueBank ?? []
-  const filteredDialogueLines = sceneContext === 'all'
-    ? allDialogueLines.filter(d => d.favorite)
-    : allDialogueLines.filter(d => {
-        const contextMatch = DIALOGUE_CONTEXT_MAP[sceneContext].includes(d.context)
-        return contextMatch || d.favorite
-      })
+  // ── End session ───────────────────────────────────────────────────────
+  const handleEndSession = useCallback(() => {
+    if (!currentSession) return
 
-  const accentProfile = findAccentProfile(character)
-  const accentRules = accentProfile ? accentProfile.rules.slice(0, 3) : []
+    // End the current session and compute patterns
+    const ended = endSession(currentSession)
 
-  const speakCount = catchphrases.length + filteredDialogueLines.length
+    // Save to logs
+    const existingLogs = loadSessionLogs(character.id)
+    saveSessionLogs(character.id, [...existingLogs, ended])
 
-  // ====================================================================
-  // REACT DATA
-  // ====================================================================
-  const allSceneResponses = character.persona?.sceneResponses ?? []
-  const filteredSceneResponses = sceneContext === 'all'
-    ? allSceneResponses
-    : allSceneResponses.filter(sr =>
-        SCENE_RESPONSE_MAP[sceneContext].some(
-          situation => sr.situation.toLowerCase().includes(situation.toLowerCase()),
-        ),
-      )
-
-  const pressureResponse = character.persona?.pressureResponse
-  const wants = character.persona?.wants ?? []
-  const fears = character.persona?.fears ?? []
-
-  const reactCount = filteredSceneResponses.length + wants.length + fears.length
+    // Start a fresh session
+    setCurrentSession(createSession(character.id))
+  }, [currentSession, character.id])
 
   // ====================================================================
   // RECALL DATA
@@ -199,155 +169,29 @@ export function SessionCockpit({ character, onCharacterUpdate }: SessionCockpitP
       <SceneContextFilter value={sceneContext} onChange={setSceneContext} />
 
       {/* ══════════════════════════════════════════════════════════════════
-          SPEAK CARD
+          PERFORM CARD (replaces Speak)
       ══════════════════════════════════════════════════════════════════ */}
-      <ActionCard
-        title="Speak"
-        icon={MessageSquare}
-        color="arcane"
-        count={speakCount}
-        expanded={expandedCard === 'speak'}
-        onToggle={() => toggleCard('speak')}
-        emptyMessage="Add catchphrases and dialogue lines in Prep mode to see them here"
-      >
-        <div className="space-y-4">
-          {/* Catchphrases */}
-          {catchphrases.length > 0 && (
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                Catchphrases
-              </p>
-              <div className="space-y-1.5">
-                {catchphrases.map((phrase, i) => (
-                  <CopyButton key={`catch-${i}`} text={phrase} id={`catch-${i}`} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Dialogue lines */}
-          {filteredDialogueLines.length > 0 && (
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                Dialogue Lines
-              </p>
-              <div className="space-y-1.5">
-                {filteredDialogueLines.map((d, i) => (
-                  <CopyButton
-                    key={`dialogue-${i}`}
-                    text={d.text}
-                    id={`dialogue-${i}`}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Accent quick rules */}
-          {accentRules.length > 0 && (
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                Accent Quick Rules ({accentProfile?.name})
-              </p>
-              <div className="space-y-1.5">
-                {accentRules.map((r, i) => (
-                  <div
-                    key={`accent-${i}`}
-                    className={cn(
-                      'glass-card rounded-xl px-3 py-2',
-                      'text-sm',
-                    )}
-                  >
-                    <p className="text-forge-0 font-medium">{r.rule}</p>
-                    <p className="text-forge-2 text-xs mt-0.5">{r.example}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </ActionCard>
+      <PerformPanel
+        character={character}
+        sceneContext={sceneContext}
+        expanded={expandedCard === 'perform'}
+        onToggle={() => toggleCard('perform')}
+        onMomentLogged={handleMomentLogged}
+      />
 
       {/* ══════════════════════════════════════════════════════════════════
-          REACT CARD
+          IMPULSE CARD (replaces React)
       ══════════════════════════════════════════════════════════════════ */}
-      <ActionCard
-        title="React"
-        icon={Zap}
-        color="ember"
-        count={reactCount}
-        expanded={expandedCard === 'react'}
-        onToggle={() => toggleCard('react')}
-        emptyMessage="Add scene responses, wants, and fears in Prep mode to see them here"
-      >
-        <div className="space-y-4">
-          {/* Scene responses */}
-          {filteredSceneResponses.length > 0 && (
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                Scene Responses
-              </p>
-              <div className="space-y-2">
-                {filteredSceneResponses.map((sr, i) => (
-                  <div key={`sr-${i}`} className="space-y-1">
-                    <p className="text-xs font-medium text-ember px-1">
-                      {sr.situation}
-                    </p>
-                    {sr.responses.map((resp, j) => (
-                      <CopyButton
-                        key={`sr-${i}-r-${j}`}
-                        text={resp}
-                        id={`sr-${i}-r-${j}`}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Pressure response */}
-          {pressureResponse && (
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                Under Pressure
-              </p>
-              <CopyButton text={pressureResponse} id="pressure" />
-            </div>
-          )}
-
-          {/* Wants */}
-          {wants.length > 0 && (
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                Wants
-              </p>
-              <div className="space-y-1.5">
-                {wants.map((w, i) => (
-                  <CopyButton key={`want-${i}`} text={w} id={`want-${i}`} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Fears */}
-          {fears.length > 0 && (
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-                Fears
-              </p>
-              <div className="space-y-1.5">
-                {fears.map((f, i) => (
-                  <CopyButton key={`fear-${i}`} text={f} id={`fear-${i}`} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </ActionCard>
+      <ImpulseEngine
+        character={character}
+        sceneContext={sceneContext === 'all' ? undefined : sceneContext}
+        expanded={expandedCard === 'impulse'}
+        onToggle={() => toggleCard('impulse')}
+        onMomentLogged={handleMomentLogged}
+      />
 
       {/* ══════════════════════════════════════════════════════════════════
-          RECALL CARD
+          RECALL CARD (unchanged)
       ══════════════════════════════════════════════════════════════════ */}
       <ActionCard
         title="Recall"
@@ -422,12 +266,19 @@ export function SessionCockpit({ character, onCharacterUpdate }: SessionCockpitP
         expanded={expandedCard === 'engage'}
         onToggle={() => toggleCard('engage')}
         onCharacterUpdate={onCharacterUpdate}
+        onMomentLogged={handleMomentLogged}
       />
 
       {/* ── AI Assist Panel ── */}
       <AIAssistPanel
         character={character}
         sceneContext={sceneContext === 'all' ? undefined : sceneContext}
+      />
+
+      {/* ── Session Timeline ── */}
+      <SessionTimeline
+        moments={currentSession?.moments ?? []}
+        onEndSession={handleEndSession}
       />
 
       {/* ── Identity Switcher ── */}

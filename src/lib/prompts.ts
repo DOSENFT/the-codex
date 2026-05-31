@@ -1,5 +1,7 @@
-import type { Character, CampaignData, PartyMember, CampaignNPC } from './character'
+import type { Character, CampaignData, PartyMember, CampaignNPC, DialogueLine } from './character'
 import type { ComboBlock } from './toybox'
+import type { MasteryProfile } from './dialogue-mastery'
+import { MASTERY_LEVELS } from './dialogue-mastery'
 import { abilityModifier, skillBonus, attackBonus } from './character'
 import { RACE_CONTENT } from './dnd-data'
 import { ALL_SKILLS, ALL_ABILITIES, ABILITY_NAMES } from './dnd-rules'
@@ -1260,4 +1262,202 @@ Rules:
 - Use their role ("${npc.role}") and notes to make hooks specific
 - Keep each hook under 120 characters
 - Make hooks feel like genuine in-world moments`,
+
+  performRiff: (char: Character, line: string, context?: string) => `${BASE_PROMPT}
+
+You are a dialogue riff engine for this character:
+${characterContext(char)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Voice Notes: ${char.persona.voiceNotes || 'none'}
+${char.persona.catchphrases ? `Catchphrases: ${char.persona.catchphrases.join('; ')}` : ''}` : ''}
+
+${context ? `CURRENT SCENE CONTEXT: ${context}` : ''}
+
+Given the original dialogue line below, create 2-3 variations that stay true to this character's voice and personality but explore different emotional angles, word choices, or dramatic weight.
+
+ORIGINAL LINE: "${line}"
+
+Each variation should sound like something ${char.name} would actually say — not generic fantasy dialogue. Vary the emotional register: one might be softer, one more intense, one more wry or unexpected.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "variations": [
+    { "line": "The riffed dialogue line", "hint": "Brief note on what changed (e.g., 'more vulnerable', 'darker edge')" }
+  ]
+}`,
+
+  performDelivery: (char: Character, line: string, context?: string) => `${BASE_PROMPT}
+
+You are a quick delivery coach for this character:
+${characterContext(char)}
+
+${char.persona ? `Voice Notes: ${char.persona.voiceNotes || 'none'}
+Default State: ${char.persona.defaultState}` : ''}
+
+${context ? `CURRENT SCENE CONTEXT: ${context}` : ''}
+
+Given this dialogue line, provide quick performance hints — lighter and faster than a full coaching session. Think of yourself whispering direction to an actor between takes.
+
+LINE: "${line}"
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "tone": "The emotional quality in 2-5 words (e.g., 'quiet steel', 'warm but guarded')",
+  "pacing": "Brief pacing direction (e.g., 'Slow start, punch the last word')",
+  "bodyLanguage": "One physical action to accompany delivery (e.g., 'Grip sword hilt tighter')"
+}`,
+
+  impulseReaction: (char: Character, situation: string, context?: string) => `${BASE_PROMPT}
+
+You generate instant in-character reactions for this character:
+${characterContext(char)}
+
+${char.persona ? `FULL PERSONA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${(char.persona.physicalTics ?? []).join('; ')}
+Scene Instincts: ${(char.persona.sceneInstincts ?? []).join('; ')}
+Wants: ${(char.persona.wants ?? []).join('; ')}
+Fears: ${(char.persona.fears ?? []).join('; ')}
+Pressure Response: ${char.persona.pressureResponse || 'unknown'}` : ''}
+
+${context ? `CURRENT SCENE CONTEXT: ${context}` : ''}
+
+SITUATION: ${situation}
+
+Generate ${char.name}'s instinctive reaction to this situation. This is not a planned response — it's what they would do in the first 3 seconds before thinking. Use their actual personality traits, tics, fears, and instincts.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "say": "What they blurt out or say instinctively (1-2 sentences, in character voice)",
+  "do": "Their immediate physical reaction (body language, reflexes, combat instinct)",
+  "think": "Their inner monologue in that split second (fears, wants, memories surfacing)"
+}`,
+
+  improvSpark: (char: Character, context?: string) => `${BASE_PROMPT}
+
+You are an improv coach creating roleplay creativity challenges for this character:
+${characterContext(char)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Core Traits: ${(char.persona.coreTraits ?? []).map(t => t.text).join(', ')}
+Color Traits: ${(char.persona.colorTraits ?? []).map(t => t.text).join(', ')}
+Physical Tics: ${(char.persona.physicalTics ?? []).join('; ')}
+Voice Notes: ${char.persona.voiceNotes || 'none'}` : ''}
+
+${context ? `CURRENT SCENE CONTEXT: ${context}` : ''}
+
+Generate a single creativity challenge — a specific, actionable improv prompt that pushes the player to explore an underused facet of their character. The challenge should reference one of their actual traits.
+
+Difficulty levels:
+- "easy": Use a well-known trait in a new way
+- "medium": Combine two traits or explore a trait under pressure
+- "hard": Play against type or find the unexpected edge of a trait
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "spark": "The creativity challenge (1-2 sentences, specific and actionable)",
+  "trait": "Which character trait this exercises",
+  "difficulty": "easy"
+}`,
+
+  rehearsalImprov: (char: Character, lines: DialogueLine[], campaign?: CampaignData | null) => {
+    const linesList = lines.map((l, i) => `  ${i}. "${l.text}" (${l.context})`).join('\n')
+
+    return `${BASE_PROMPT}
+
+You are an improv scene director creating a situation where a player must choose the right dialogue line from their bank.
+
+${characterContext(char, campaign)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+${char.persona.voiceNotes ? `Voice Notes: ${char.persona.voiceNotes}` : ''}` : ''}
+
+AVAILABLE DIALOGUE LINES:
+${linesList}
+
+Create a vivid, specific situation (2-3 sentences) where ONE of these lines would be the clearly best choice. The situation should:
+1. Test whether the player understands when to use which line
+2. Create emotional stakes that make the choice meaningful
+3. Be specific enough that only one line truly fits
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "situation": "A vivid 2-3 sentence scenario description",
+  "idealLineIndex": 0,
+  "hint": "A subtle hint about what emotional register or context would guide the right choice"
+}`
+  },
+
+  warmupScene: (char: Character, context?: string, campaign?: CampaignData | null) => `${BASE_PROMPT}
+
+You generate quick warmup scenes for dialogue rehearsal. These are short, focused, and designed to get a player into character fast.
+
+${characterContext(char, campaign)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Decision Tree: ${char.persona.decisionTree}
+Physical Tics: ${(char.persona.physicalTics ?? []).join('; ')}
+${char.persona.voiceNotes ? `Voice Notes: ${char.persona.voiceNotes}` : ''}` : ''}
+
+${context ? `WARMUP CONTEXT: ${context}` : ''}
+
+Generate a quick scene setup (2-3 sentences) that puts the player in a situation requiring an in-character verbal response. The scene should be simple enough for a warmup exercise but engaging enough to activate the character's voice.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "scene": "A concise 2-3 sentence scene description",
+  "prompt": "A direct question or trigger the character must respond to",
+  "suggestedTone": "The emotional register that fits this scene (e.g., 'guarded warmth', 'cold authority', 'nervous humor')"
+}`,
+
+  journalInsight: (char: Character, profile: MasteryProfile, campaign?: CampaignData | null) => {
+    const totalLines = profile.lines.length
+    const practicedLines = profile.lines.filter(l => l.practiceCount > 0).length
+    const totalPractices = profile.lines.reduce((sum, l) => sum + l.practiceCount, 0)
+    const nailedCount = profile.lines.flatMap(l => l.ratings).filter(r => r === 'nailed').length
+    const closeCount = profile.lines.flatMap(l => l.ratings).filter(r => r === 'close').length
+    const offCount = profile.lines.flatMap(l => l.ratings).filter(r => r === 'off').length
+
+    const levelDistribution = [0, 1, 2, 3].map(lvl => ({
+      level: MASTERY_LEVELS[lvl],
+      count: profile.lines.filter(l => l.level === lvl).length,
+    }))
+
+    return `${BASE_PROMPT}
+
+You are a performance coach analyzing a player's dialogue mastery progress for their D&D character.
+
+${characterContext(char, campaign)}
+
+${char.persona ? `PERSONA:
+Default State: ${char.persona.defaultState}
+Voice Notes: ${char.persona.voiceNotes || 'none'}` : ''}
+
+MASTERY STATISTICS:
+- Total lines tracked: ${totalLines}
+- Lines practiced: ${practicedLines}
+- Total practice sessions: ${totalPractices}
+- Rating breakdown: ${nailedCount} nailed, ${closeCount} close, ${offCount} off
+- Level distribution: ${levelDistribution.map(d => `${d.level}: ${d.count}`).join(', ')}
+- Current warmup streak: ${profile.warmupStreak} days
+- Best warmup streak: ${profile.bestStreak} days
+- Warmups completed: ${profile.warmups.filter(w => w.completed).length}
+- Badges earned: ${profile.badges.length}
+
+Analyze this mastery data and provide actionable coaching. Consider what the data reveals about the player's strengths and blind spots.
+
+Respond with ONLY valid JSON (no markdown, no code fences):
+{
+  "insight": "A 2-3 sentence analysis of their current progress and patterns (be specific about numbers)",
+  "suggestion": "One specific, actionable thing they should focus on next (reference their actual data)",
+  "focusArea": "A single word or short phrase naming their priority area (e.g., 'consistency', 'combat lines', 'improv confidence')"
+}`
+  },
 }

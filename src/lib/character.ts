@@ -72,6 +72,14 @@ export interface AbilityScores {
   STR: number; DEX: number; CON: number; INT: number; WIS: number; CHA: number
 }
 
+export interface WeaponAbility {
+  name: string        // "Life Drain"
+  trigger: string     // "On hit", "1/long rest"
+  effect: string      // "Deal 1d4 necrotic, heal same"
+  damageDice?: string
+  damageType?: string
+}
+
 export interface Weapon {
   name: string
   attackType: 'melee' | 'ranged'
@@ -83,6 +91,10 @@ export interface Weapon {
   magical?: boolean
   bonusToHit?: number
   bonusDamage?: number
+  description?: string              // Homebrew flavor text
+  range?: string                    // "5 ft", "20/60 ft"
+  masteryProperty?: string          // 2024 weapon mastery: Nick, Topple, Graze, etc.
+  specialAbilities?: WeaponAbility[]
 }
 
 export interface Spell {
@@ -185,6 +197,17 @@ export interface CustomRPHook {
   createdAt: string
 }
 
+export interface CharacterFeat {
+  name: string
+  description: string
+  source?: string             // "PHB", "Homebrew"
+  isHomebrew: boolean
+  abilityIncrease?: { ability: AbilityKey; amount: number }
+  effects: string[]           // Brief list of mechanical effects
+  prerequisites?: string
+  tacticalNote?: string       // How to USE this feat
+}
+
 export interface Character {
   id: string // Unique identifier (crypto.randomUUID)
   name: string
@@ -249,6 +272,9 @@ export interface Character {
 
   // Custom RP hooks
   customHooks?: CustomRPHook[]
+
+  // Feats
+  feats: CharacterFeat[]
 
   // Metadata
   createdAt: string
@@ -368,7 +394,13 @@ export function loadCharacter(id: string): Character | null {
       skillProficiencies: parsed.skillProficiencies ?? [],
       skillExpertise: parsed.skillExpertise ?? [],
       savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
-      weapons: parsed.weapons ?? [],
+      weapons: (parsed.weapons ?? []).map((w: Partial<Weapon>) => ({
+        ...w,
+        description: w.description ?? undefined,
+        range: w.range ?? undefined,
+        masteryProperty: w.masteryProperty ?? undefined,
+        specialAbilities: w.specialAbilities ?? undefined,
+      })) as Weapon[],
       gender: parsed.gender ?? '',
       pronouns: parsed.pronouns ?? '',
       equipment: parsed.equipment ?? [],
@@ -377,6 +409,7 @@ export function loadCharacter(id: string): Character | null {
       activeIdentityId: parsed.activeIdentityId ?? undefined,
       campaignId: parsed.campaignId ?? undefined,
       customHooks: parsed.customHooks ?? [],
+      feats: parsed.feats ?? [],
     } as Character
   } catch {
     return null
