@@ -173,7 +173,7 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
           'bg-void-1 border border-white/10 rounded-t-2xl sm:rounded-2xl',
           'shadow-[0_0_48px_-12px_rgba(157,78,221,0.15)]',
           'flex flex-col overflow-hidden',
-          'animate-in slide-in-from-bottom-4 duration-300',
+          'animate-object-enter',
         )}
       >
         {/* Header */}

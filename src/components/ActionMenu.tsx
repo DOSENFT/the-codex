@@ -14,7 +14,9 @@ import {
   BookOpen,
   Info,
 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { cn } from '../lib/cn'
+import { SPRING_SETTLE, SHEET_EXIT } from '../lib/motion-utils'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
@@ -407,19 +409,20 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
       />
 
       {/* Panel */}
-      <div
+      <motion.div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={FILTER_HEADERS[filter]}
         tabIndex={-1}
+        initial={false}
+        animate={isOpen ? { y: 0 } : { y: '100%' }}
+        transition={isOpen ? SPRING_SETTLE : SHEET_EXIT}
         className={cn(
           'fixed inset-x-0 bottom-0 z-50',
           'max-h-[85dvh] overflow-y-auto overscroll-contain',
           'glass-card rounded-t-2xl border-b-0',
           'outline-none',
-          'transition-transform duration-300 ease-forge',
-          isOpen ? 'translate-y-0' : 'translate-y-full',
           !isOpen && 'pointer-events-none',
         )}
       >
@@ -676,7 +679,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
             </MenuSection>
           )}
         </div>
-      </div>
+      </motion.div>
     </>
   )
 }

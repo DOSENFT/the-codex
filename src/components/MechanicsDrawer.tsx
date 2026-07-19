@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { Search, X, ChevronDown, ChevronUp, BookOpen } from 'lucide-react'
+import { motion } from 'motion/react'
 import { cn } from '../lib/cn'
+import { SPRING_SETTLE, SHEET_EXIT } from '../lib/motion-utils'
 import {
   type MechanicsCategory,
   type MechanicsEntry,
@@ -242,19 +244,20 @@ export function MechanicsDrawer({ isOpen, onClose }: MechanicsDrawerProps) {
       />
 
       {/* ── Panel ── */}
-      <div
+      <motion.div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Mechanics Reference"
         tabIndex={-1}
+        initial={false}
+        animate={isOpen ? { y: 0 } : { y: '100%' }}
+        transition={isOpen ? SPRING_SETTLE : SHEET_EXIT}
         className={cn(
           'fixed inset-x-0 bottom-0 z-50',
           'max-h-[90dvh] overflow-y-auto overscroll-contain',
           'glass-card rounded-t-2xl border-b-0',
           'outline-none',
-          'transition-transform duration-300 ease-forge',
-          isOpen ? 'translate-y-0' : 'translate-y-full',
           !isOpen && 'pointer-events-none',
         )}
       >
@@ -344,7 +347,7 @@ export function MechanicsDrawer({ isOpen, onClose }: MechanicsDrawerProps) {
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </>
   )
 }

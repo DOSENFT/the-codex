@@ -1,8 +1,9 @@
 import { type ReactNode, useState, useEffect, useRef } from 'react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Swords, BookOpen, Theater, GraduationCap, Settings as SettingsIcon, Dices, ChevronDown, Users, HelpCircle, Puzzle, User, Flame, Compass } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { SPRING_SNAP } from '../lib/motion-utils'
+import { Sheet } from './ui/Sheet'
 import type { Character, RosterEntry } from '../lib/character'
 import { Badge } from './ui/Badge'
 import { DiceRoller } from './DiceRoller'
@@ -215,6 +216,7 @@ export function Layout({
       </header>
 
       {/* Character Switcher Dropdown */}
+      <AnimatePresence>
       {switcherOpen && roster.length > 1 && (
         <>
           <div
@@ -222,7 +224,12 @@ export function Layout({
             onClick={() => setSwitcherOpen(false)}
             aria-hidden
           />
-          <div className="fixed top-14 right-4 z-50 w-64 p-2 rounded-xl bg-void-1/95 backdrop-blur-lg border border-white/[0.08] shadow-xl animate-fade-in">
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98, transition: { duration: 0.14 } }}
+            transition={SPRING_SNAP}
+            className="fixed top-14 right-4 z-50 w-64 p-2 rounded-xl bg-void-1/95 backdrop-blur-lg border border-white/[0.08] shadow-xl origin-top-right">
             {roster.filter(e => e.id !== character.id).map((entry) => (
               <button
                 key={entry.id}
@@ -244,9 +251,10 @@ export function Layout({
                 <Users size={14} className="text-forge-2 shrink-0" aria-hidden />
               </button>
             ))}
-          </div>
+          </motion.div>
         </>
       )}
+      </AnimatePresence>
 
       {/* ─── Scrollable Content Area ─── */}
       <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
@@ -296,14 +304,14 @@ export function Layout({
       />
 
       {/* ─── Settings Drawer ─── */}
-      {settingsOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-[55] bg-void-0/60 backdrop-blur-sm"
-            onClick={() => setSettingsOpen(false)}
-            aria-hidden
-          />
-          <div className="fixed inset-y-0 right-0 z-[56] w-full max-w-md overflow-y-auto bg-void-1 border-l border-white/[0.08] shadow-2xl animate-in slide-in-from-right duration-300">
+      <Sheet
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        label="Settings"
+        side="right"
+        z={55}
+        backdropClassName="bg-void-0/60 backdrop-blur-sm"
+      >
             <div className="flex items-center justify-between p-4 border-b border-white/[0.06] sticky top-0 bg-void-1/90 backdrop-blur-md z-10">
               <h2 className="font-display text-lg font-semibold text-forge-0">Settings</h2>
               <button
@@ -330,9 +338,7 @@ export function Layout({
                 onCreateNew={onCreateNew}
               />
             </div>
-          </div>
-        </>
-      )}
+      </Sheet>
 
       {/* ─── Fixed Bottom Tab Navigation ─── */}
       <nav

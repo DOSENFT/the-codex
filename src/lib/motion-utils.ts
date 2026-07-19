@@ -12,6 +12,9 @@ const EASE_CEREMONY = [0.65, 0, 0.35, 1] as const
 export const SPRING_SETTLE = { type: 'spring', stiffness: 360, damping: 34, mass: 0.9 } as const
 export const SPRING_SNAP = { type: 'spring', stiffness: 520, damping: 42 } as const
 
+/** Exit for sheets/drawers — leaving is quicker than arriving, like setting a tool down */
+export const SHEET_EXIT = { duration: 0.22, ease: [0.4, 0, 1, 1] } as const
+
 /** Reveal-up: element slides from y:12px to y:0 with fade */
 export const revealUp = {
   initial: { opacity: 0, y: 12 },

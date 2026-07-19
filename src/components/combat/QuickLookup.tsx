@@ -3,6 +3,7 @@ import { Search, X, BookOpen, Dices } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { Character, Spell, ClassFeature } from '../../lib/character'
 import { Badge } from '../ui/Badge'
+import { Sheet } from '../ui/Sheet'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,30 +46,17 @@ export function QuickLookup({ isOpen, onClose, character, onRollDice }: QuickLoo
     ).slice(0, 15)
   }, [allItems, search])
 
-  if (!isOpen) return null
+  const handleClose = () => { onClose(); setSearch(''); setSelectedItem(null) }
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[55] bg-void-0/60 backdrop-blur-sm"
-        onClick={() => { onClose(); setSearch(''); setSelectedItem(null) }}
-        aria-hidden
-      />
-
-      {/* Panel — slides up from bottom */}
-      <div
-        className={cn(
-          'fixed inset-x-0 bottom-0 z-[56]',
-          'max-h-[70vh] bg-void-1 border-t border-white/[0.08]',
-          'rounded-t-2xl shadow-2xl',
-          'flex flex-col overflow-hidden',
-          'animate-in slide-in-from-bottom-4 duration-300',
-        )}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Quick Grimoire lookup"
-      >
+    <Sheet
+      isOpen={isOpen}
+      onClose={handleClose}
+      label="Quick Grimoire lookup"
+      z={55}
+      backdropClassName="bg-void-0/60 backdrop-blur-sm"
+      panelClassName="max-h-[70vh] flex flex-col overflow-hidden"
+    >
         {/* Header */}
         <div className="flex items-center gap-2 p-4 border-b border-white/5 shrink-0">
           <BookOpen size={16} className="text-arcane shrink-0" aria-hidden />
@@ -208,7 +196,6 @@ export function QuickLookup({ isOpen, onClose, character, onRollDice }: QuickLoo
             </div>
           )}
         </div>
-      </div>
-    </>
+    </Sheet>
   )
 }

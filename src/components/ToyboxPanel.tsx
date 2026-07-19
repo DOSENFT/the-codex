@@ -572,8 +572,7 @@ export function ToyboxPanel({
           'fixed right-0 top-0 bottom-0 z-50',
           'w-full max-w-xl bg-void-1 border-l border-white/[0.08] shadow-xl',
           'overflow-y-auto',
-          'transition-transform duration-300 ease-forge',
-          'translate-x-0',
+          'animate-drawer-enter',
         )}
         role="dialog"
         aria-label="The Toybox"

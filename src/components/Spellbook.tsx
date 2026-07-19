@@ -571,7 +571,7 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
           'bg-void-1 border border-bronze/25 rounded-t-2xl sm:rounded-2xl',
           'shadow-[0_0_48px_-12px_rgba(197,165,90,0.15)]',
           'flex flex-col overflow-hidden',
-          'animate-in slide-in-from-bottom-4 duration-300',
+          'animate-object-enter',
         )}
       >
         {/* Header */}

@@ -4,6 +4,7 @@ import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
 import { OrnateHeader } from './ui/OrnateHeader'
+import { Sheet } from './ui/Sheet'
 import { Badge } from './ui/Badge'
 import type { Character, Weapon, AbilityScores, AbilityKey, SkillName } from '../lib/character'
 import { abilityModifier, skillBonus, savingThrowBonus, passivePerception, attackBonus, computeSpellSaveDC, computeSpellAttackBonus } from '../lib/character'
@@ -462,25 +463,8 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
     { id: 'gear' as const, label: 'Gear', icon: Backpack },
   ]
 
-  if (!isOpen) return null
-
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px] animate-fade-in"
-        onClick={onClose}
-      />
-
-      {/* Panel */}
-      <div
-        className={cn(
-          'fixed inset-x-0 bottom-0 z-50',
-          'max-h-[92dvh] overflow-y-auto overscroll-contain',
-          'glass-card rounded-t-2xl border-b-0',
-          'animate-slide-up',
-        )}
-      >
+    <Sheet isOpen={isOpen} onClose={onClose} label="Character sheet">
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1" aria-hidden>
           <div className="w-10 h-1 rounded-full bg-forge-2/40" />
@@ -588,7 +572,6 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
             </div>
           )}
         </div>
-      </div>
-    </>
+    </Sheet>
   )
 }

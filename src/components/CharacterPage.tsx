@@ -132,7 +132,7 @@ function StudyPanel({
   if (!isOpen) return null
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-object-enter">
       <GlassCard className="p-4 border-arcane/20 bg-arcane/[0.03]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
