@@ -1275,7 +1275,7 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
   const concentrationSpell = combatState.concentrating
 
   // AI hook
-  const { response, loading, error, query, clearResponse } = useAI()
+  const { response, loading, error, queryStream, clearResponse } = useAI()
 
   // Persist combat state whenever it changes
   useEffect(() => {
@@ -1447,9 +1447,10 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
   const handleAIQuery = useCallback(
     (message: string) => {
       const systemPrompt = SYSTEM_PROMPTS.combatAdvisor(character)
-      query(systemPrompt, message)
+      // Streamed — counsel arrives as it's thought, not as a wall after a wait
+      queryStream(systemPrompt, message).catch(() => { /* surfaced via useAI error state */ })
     },
-    [character, query],
+    [character, queryStream],
   )
 
   const handleQuickAction = useCallback(

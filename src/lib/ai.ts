@@ -215,6 +215,148 @@ async function queryOllama(url: string, model: string, systemPrompt: string, use
   return data.message?.content || 'No response generated'
 }
 
+/* ─── Streaming ───
+   Words arrive as they're thought. The stream carries the same prompts and
+   the same fallback doctrine as queryAI: if nothing has arrived yet and the
+   primary path dies, we fall back to the full non-streaming pipeline (which
+   already knows how to switch providers, retry rate limits, and speak
+   human-readable errors). If a stream dies mid-sentence, we surface it. */
+
+/** Ollama chat with stream:true — NDJSON lines, each carrying a content delta */
+async function streamOllama(
+  url: string,
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+  onText: (fullText: string) => void,
+): Promise<string> {
+  const response = await fetch(`${url}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      stream: true,
+      options: { temperature: 0.3 },
+    }),
+  })
+  if (!response.ok || !response.body) throw new Error(`Ollama error: ${response.status}`)
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let full = ''
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+    for (const line of lines) {
+      if (!line.trim()) continue
+      try {
+        const chunk = JSON.parse(line)
+        const delta = chunk.message?.content
+        if (delta) {
+          full += delta
+          onText(full)
+        }
+      } catch { /* incomplete line — wait for more */ }
+    }
+  }
+  return full || 'No response generated'
+}
+
+/** Gemini streamGenerateContent over SSE */
+async function streamGemini(
+  apiKey: string,
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+  onText: (fullText: string) => void,
+): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: userMessage }] }],
+      generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+    }),
+  })
+  if (!response.ok || !response.body) {
+    if (response.status === 429) {
+      throw new Error(
+        `Rate limited on ${model}. Your free-tier quota is exhausted. Try switching to a different model in Settings — each model has its own quota.`,
+      )
+    }
+    throw new Error(`Gemini error (${response.status})`)
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let full = ''
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue
+      const payload = line.slice(5).trim()
+      if (!payload || payload === '[DONE]') continue
+      try {
+        const chunk = JSON.parse(payload)
+        const delta = chunk.candidates?.[0]?.content?.parts?.[0]?.text
+        if (delta) {
+          full += delta
+          onText(full)
+        }
+      } catch { /* partial SSE frame */ }
+    }
+  }
+  return full || 'No response generated'
+}
+
+/**
+ * Streaming query. Calls onText with the accumulated text as it grows.
+ * Falls back to the full non-streaming pipeline if the stream fails
+ * before any text has arrived.
+ */
+export async function queryAIStream(
+  systemPrompt: string,
+  userMessage: string,
+  onText: (fullText: string) => void,
+  config?: AIConfig,
+): Promise<string> {
+  const cfg = config || loadAIConfig()
+  let received = false
+  const guardedOnText = (text: string) => {
+    received = true
+    onText(text)
+  }
+
+  try {
+    const result = cfg.provider === 'gemini'
+      ? await streamGemini(cfg.geminiApiKey!, cfg.geminiModel || 'gemini-2.0-flash', systemPrompt, userMessage, guardedOnText)
+      : await streamOllama(cfg.ollamaUrl!, cfg.ollamaModel!, systemPrompt, userMessage, guardedOnText)
+    _lastUsedProvider = cfg.provider
+    return result
+  } catch (err) {
+    if (received) throw err // died mid-sentence — surface it honestly
+    // Nothing arrived: hand over to the proven non-streaming path
+    const result = await queryAI(systemPrompt, userMessage, cfg)
+    onText(result)
+    return result
+  }
+}
+
 // Structured query that parses JSON response
 export async function queryAIStructured<T>(
   systemPrompt: string,

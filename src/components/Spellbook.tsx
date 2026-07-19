@@ -675,7 +675,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
   const [spellEditorOpen, setSpellEditorOpen] = useState(false)
   const [editingSpell, setEditingSpell] = useState<Spell | null>(null)
 
-  const { response, loading, error, query, clearResponse } = useAI()
+  const { response, loading, error, queryStream, clearResponse } = useAI()
 
   const tabScrollRef = useRef<HTMLDivElement>(null)
 
@@ -791,11 +791,11 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
           ? `Explain the spell "${spell.name}" to me.`
           : `When should I use "${spell.name}"? Give me tactical advice.`
 
-      await query(systemPrompt, message).catch(() => {
+      await queryStream(systemPrompt, message).catch(() => {
         // Error is already captured by useAI — no additional handling needed
       })
     },
-    [character, query, clearResponse],
+    [character, queryStream, clearResponse],
   )
 
   const handleCloseModal = useCallback(() => {
