@@ -5,6 +5,17 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   base: '/the-codex/',
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          motion: ['motion'],
+          icons: ['lucide-react'],
+        },
+      },
+    },
+  },
   server: {
     host: true,
     port: 5173,
