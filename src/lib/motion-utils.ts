@@ -8,6 +8,10 @@
 const EASE_SETTLE = [0.22, 1, 0.36, 1] as const
 const EASE_CEREMONY = [0.65, 0, 0.35, 1] as const
 
+/** Physical springs — surfaces settle like objects with mass, never teleport */
+export const SPRING_SETTLE = { type: 'spring', stiffness: 360, damping: 34, mass: 0.9 } as const
+export const SPRING_SNAP = { type: 'spring', stiffness: 520, damping: 42 } as const
+
 /** Reveal-up: element slides from y:12px to y:0 with fade */
 export const revealUp = {
   initial: { opacity: 0, y: 12 },

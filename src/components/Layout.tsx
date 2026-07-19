@@ -1,6 +1,8 @@
-import { type ReactNode, useState, useEffect } from 'react'
+import { type ReactNode, useState, useEffect, useRef } from 'react'
+import { motion } from 'motion/react'
 import { Swords, BookOpen, Theater, GraduationCap, Settings as SettingsIcon, Dices, ChevronDown, Users, HelpCircle, Puzzle, User, Flame, Compass } from 'lucide-react'
 import { cn } from '../lib/cn'
+import { SPRING_SNAP } from '../lib/motion-utils'
 import type { Character, RosterEntry } from '../lib/character'
 import { Badge } from './ui/Badge'
 import { DiceRoller } from './DiceRoller'
@@ -73,6 +75,12 @@ export function Layout({
   const [switcherOpen, setSwitcherOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [mechanicsOpen, setMechanicsOpen] = useState(false)
+
+  // Each surface opens at its own top — never inherit another tab's scroll position
+  const mainRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+  }, [activeTab, appMode])
 
   const hpPercent = character.hitPoints.max > 0
     ? (character.hitPoints.current / character.hitPoints.max) * 100
@@ -241,7 +249,7 @@ export function Layout({
       )}
 
       {/* ─── Scrollable Content Area ─── */}
-      <main className="flex-1 overflow-y-auto pt-14 pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
+      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
         <div className="px-4 py-4">
           {children}
         </div>
@@ -343,7 +351,7 @@ export function Layout({
                 aria-label={label}
                 onClick={() => onTabChange(id)}
                 className={cn(
-                  'flex-1 flex flex-col items-center justify-center gap-0.5',
+                  'relative flex-1 flex flex-col items-center justify-center gap-0.5',
                   'min-h-[48px] select-none',
                   'transition-colors duration-200 ease-forge',
                   'active:scale-95',
@@ -352,6 +360,14 @@ export function Layout({
                     : 'text-forge-2 hover:text-forge-1',
                 )}
               >
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active-indicator"
+                    className="absolute top-0 left-0 right-0 mx-auto h-[2px] w-10 rounded-full bg-arcane shadow-[0_0_12px_rgba(212,167,74,0.55)]"
+                    transition={SPRING_SNAP}
+                    aria-hidden
+                  />
+                )}
                 <Icon size={20} aria-hidden />
                 <span className="text-[10px] font-medium leading-none">
                   {label}
