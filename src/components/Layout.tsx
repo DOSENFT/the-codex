@@ -257,8 +257,8 @@ export function Layout({
       </AnimatePresence>
 
       {/* ─── Scrollable Content Area ─── */}
-      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(4rem+env(safe-area-inset-bottom,0px))]">
-        <div className="px-4 py-4">
+      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] lg:pl-52 lg:pb-8">
+        <div className="px-4 py-4 mx-auto w-full max-w-3xl lg:px-8 lg:py-6">
           {children}
         </div>
       </main>
@@ -267,7 +267,7 @@ export function Layout({
       <button
         onClick={() => setDiceOpen(true)}
         className={cn(
-          'fixed z-50 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]',
+          'fixed z-50 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:right-8 lg:bottom-8',
           'w-14 h-14 rounded-2xl',
           'bg-eldritch/90 text-white shadow-lg shadow-eldritch/25',
           'flex items-center justify-center',
@@ -342,11 +342,15 @@ export function Layout({
 
       {/* ─── Fixed Bottom Tab Navigation ─── */}
       <nav
-        className="fixed bottom-0 inset-x-0 z-40 bg-void-0/90 backdrop-blur-md border-t border-white/[0.06] safe-bottom"
+        className={cn(
+          'fixed bottom-0 inset-x-0 z-40 bg-void-0/90 backdrop-blur-md border-t border-white/[0.06] safe-bottom',
+          // Desktop: the phone tab bar becomes a workshop rail
+          'lg:inset-x-auto lg:left-0 lg:top-14 lg:w-52 lg:border-t-0 lg:border-r lg:border-white/[0.06]',
+        )}
         role="tablist"
         aria-label="Main navigation"
       >
-        <div className="flex items-stretch h-16">
+        <div className="flex items-stretch h-16 lg:flex-col lg:h-auto lg:gap-1 lg:p-3">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id
             return (
@@ -361,21 +365,22 @@ export function Layout({
                   'min-h-[48px] select-none',
                   'transition-colors duration-200 ease-forge',
                   'active:scale-95',
+                  'lg:flex-none lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:min-h-[44px] lg:rounded-xl',
                   isActive
-                    ? 'text-arcane'
-                    : 'text-forge-2 hover:text-forge-1',
+                    ? 'text-arcane lg:bg-gold/[0.08]'
+                    : 'text-forge-2 hover:text-forge-1 lg:hover:bg-white/[0.04]',
                 )}
               >
                 {isActive && (
                   <motion.span
                     layoutId="nav-active-indicator"
-                    className="absolute top-0 left-0 right-0 mx-auto h-[2px] w-10 rounded-full bg-arcane shadow-[0_0_12px_rgba(212,167,74,0.55)]"
+                    className="absolute top-0 left-0 right-0 mx-auto h-[2px] w-10 rounded-full bg-arcane shadow-[0_0_12px_rgba(212,167,74,0.55)] lg:hidden"
                     transition={SPRING_SNAP}
                     aria-hidden
                   />
                 )}
                 <Icon size={20} aria-hidden />
-                <span className="text-[10px] font-medium leading-none">
+                <span className="text-[10px] font-medium leading-none lg:text-sm">
                   {label}
                 </span>
               </button>
