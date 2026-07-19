@@ -1,8 +1,12 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import { ChevronDown, ChevronRight, Minus, Plus, X } from 'lucide-react'
 import { motion } from 'motion/react'
 import { cn } from '../lib/cn'
 import { SPRING_SETTLE, SHEET_EXIT } from '../lib/motion-utils'
+import { useMotionPreference } from '../hooks/useReducedMotion'
+
+/* GPU dice stage — lazy so three.js loads only when the roller is first used */
+const DiceStage = lazy(() => import('./dice/DiceStage'))
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
@@ -42,7 +46,8 @@ const MIN_QUANTITY = 1
 const MAX_MODIFIER = 20
 const MIN_MODIFIER = -20
 const MAX_HISTORY = 5
-const ROLL_ANIMATION_MS = 400
+/* Matches the GPU dice settle time so the number lands as the die comes to rest */
+const ROLL_ANIMATION_MS = 700
 
 interface QuickPreset {
   label: string
@@ -232,15 +237,32 @@ function RollResultDisplay({
   const displayTotal = animatingTotal !== null ? animatingTotal : result.total
   const isNat20 = result.dieType === 20 && result.keptDice.length === 1 && result.keptDice[0] === 20
   const isNat1 = result.dieType === 20 && result.keptDice.length === 1 && result.keptDice[0] === 1
+  const { shouldReduceMotion } = useMotionPreference()
+
+  const fallbackChip = (
+    <DiceAnimation
+      value={displayTotal}
+      dieType={result.dieType}
+      isAnimating={isAnimating}
+    />
+  )
 
   return (
     <div className="flex flex-col items-center gap-3 py-3">
-      {/* Dice Animation */}
-      <DiceAnimation
-        value={displayTotal}
-        dieType={result.dieType}
-        isAnimating={isAnimating}
-      />
+      {/* The die itself — GPU stage, CSS chip when motion is reduced or WebGL is absent */}
+      {shouldReduceMotion ? (
+        fallbackChip
+      ) : (
+        <Suspense fallback={fallbackChip}>
+          <DiceStage
+            dieType={result.dieType}
+            count={result.keptDice.length}
+            rollId={result.id}
+            isRolling={isAnimating}
+            fallback={fallbackChip}
+          />
+        </Suspense>
+      )}
 
       {/* Total */}
       <div
