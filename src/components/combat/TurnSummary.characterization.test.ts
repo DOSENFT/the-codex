@@ -149,7 +149,7 @@ describe('Phase-0: categorizeTurnOptions(Nix)', () => {
   })
 
   // 5 ────────────────────────────────────────────────────────────────────────
-  it('routes passives out of the action lists — including, today, by name', () => {
+  it('routes passives out of the action lists, and now believes a declaration', () => {
     const { passives, bonusActions } = categorizeTurnOptions(NIX)
 
     expect(names(passives)).toEqual(
@@ -157,14 +157,21 @@ describe('Phase-0: categorizeTurnOptions(Nix)', () => {
     )
     expect(names(bonusActions)).not.toContain('Aura of Protection')
 
-    // BUG (pinned, not endorsed): the passive test is
-    //   actionType === 'passive' || actionType === 'none'
-    //     || feature.name.toLowerCase().includes('aura')
-    // so ANY feature with "aura" in its name is filed as a passive even when
-    // it explicitly declares itself a Bonus Action. Oath of the Hearth's
-    // level-20 Hearth Warden imbues the Aura and is a Bonus Action; if Marcus
-    // ever names a usable feature "Aura of ...", it silently vanishes from
-    // his turn. Slice 6c is where this gets fixed.
+    // FIXED IN SLICE 6C — this assertion is INVERTED from what it pinned, and
+    // the inversion is the point of the change.
+    //
+    // What it used to pin, as a bug it recorded rather than endorsed: the
+    // passive test ended in `|| feature.name.toLowerCase().includes('aura')`,
+    // unconditionally, so ANY feature with "aura" in its name was filed as a
+    // passive EVEN WHEN it explicitly declared itself a Bonus Action — and it
+    // then vanished from the turn with no message and nothing to tap. The
+    // pinned note ended "Slice 6c is where this gets fixed."
+    //
+    // It is fixed: a declared actionType now wins over the name. The sniff
+    // survives only as a fallback for features that declare NOTHING, which is
+    // how Nix's own auras used to be saved, so his four lines above are
+    // unchanged. Found by `turn/openworld.test.ts` driving a character with an
+    // "Undertow Aura" its author declared an Action.
     const withAuraNamedAction = {
       ...NIX,
       features: [
@@ -177,8 +184,18 @@ describe('Phase-0: categorizeTurnOptions(Nix)', () => {
       ],
     }
     const trap = categorizeTurnOptions(withAuraNamedAction)
-    expect(names(trap.bonusActions)).not.toContain('Aura of Embers')
-    expect(names(trap.passives)).toContain('Aura of Embers')
+    expect(names(trap.bonusActions)).toContain('Aura of Embers')
+    expect(names(trap.passives)).not.toContain('Aura of Embers')
+
+    // The fallback still holds, and this is the half that protects Marcus's
+    // existing sheet: no actionType at all, so the name is all there is.
+    const undeclared = {
+      ...NIX,
+      features: [{ name: 'Aura of Embers', level: 3, description: 'Ignite your aura.' }],
+    }
+    const guessed = categorizeTurnOptions(undeclared)
+    expect(names(guessed.passives)).toContain('Aura of Embers')
+    expect(names(guessed.actions)).not.toContain('Aura of Embers')
   })
 
   // 6 ────────────────────────────────────────────────────────────────────────

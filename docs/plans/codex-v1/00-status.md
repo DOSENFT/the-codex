@@ -66,7 +66,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 
 **Wave 1b — homebrew is the main case** *(added 2026-08-16)*
 - [x] 6b — generic `ResourcePool` (closes the one real homebrew hole) + `ResourceEditor` + `ConditionEditor`; `paladinResources` kept and adapted, never removed **— DONE 2026-08-16, see below**
-- [ ] 6c — the open-world pass: a fixture of **entirely invented content** must compose, rank, spend and undo correctly
+- [x] 6c — the open-world pass: a fixture of **entirely invented content** must compose, rank, spend and undo correctly **— DONE 2026-08-16, see below**
 
 **Wave 2 — the missing 40% of combat**
 - [ ] 7 — reactions, opportunity attacks, readied actions
@@ -722,6 +722,107 @@ container query in action: every card becomes one row), `slice6b-turn-phone.png`
   before Aura Range has somewhere to live.
 - **A feature bound to a deleted pool currently costs nothing** (the reducer finds no site and
   charges nothing). The editor warns about this in words; it should probably refuse instead.
+  *(→ FIXED IN 6c.)*
+
+## ✅ Slice 6c — THE OPEN-WORLD PASS, done 2026-08-16
+
+**Why this slice existed.** Every suite up to here drove NIX, and Nix is homebrew *around a
+Paladin*: `paladinResources` exists on him, his features are named "Lay on Hands" and "Channel
+Divinity", his sword declares a mastery the 2024 table knows. Every one of those is a **recognised
+name**, and a fixture that keeps landing on the recognised branch cannot tell us anything about the
+other one. "Fully adaptive to homebrew" was a claim, not a measurement.
+
+**The instrument.** `src/lib/turn/fixtures/openworld.ts` — *Vess Corrow*, the Tidewright, Vow of the
+Undertow, a Saltborn. Class, subclass, species, weapon, weapon mastery (`Undertow`), spell,
+features, condition (`Undertowed`) and resource pool (`Saltwater Tally`, counted in **dice**,
+recharging at **dawn** — two enum arms Nix never reaches) are **all invented**. No
+`paladinResources`. `src/lib/turn/openworld.test.ts` opens by asserting the premise itself — that
+nothing in the fixture is recognised by `masteryForWeaponName`, `coerceMastery`, `allConditions()`
+or `poolIdFor` — so "this is unknown content" is a **checked fact**, not a claim in a comment.
+
+### Five defects found. Every one invisible to the 221 tests that already passed.
+
+1. **A declared Action, hidden because of its NAME.** `options.ts` filed any feature whose name
+   contained the word *"aura"* as a passive. `Undertow Aura` declares `actionType: 'action'` and
+   was silently removed from the turn. A **declaration now always beats a guess about the name**;
+   the name-sniff survives only as a fallback for a record that declares nothing, which is exactly
+   why this survived four slices — all of Nix's auras *do* declare `passive`, so he cannot move.
+2. **A feature bound to a deleted pool was offered as live, then charged nothing.** Carried over
+   from 6b's list. The reducer's tolerance is right *for the reducer*; it is the wrong answer for
+   the **row**, because a free ability is not what Marcus built. The row is now greyed with
+   *"Its resource pool no longer exists"* — and the reducer still undoes an orphaned binding
+   without throwing, which is separately pinned.
+3. **"Undertow — Undertow".** For a mastery the 2024 table does not know, `compose.ts` echoes the
+   declared word rather than inventing a rule for it — correct there, but the rider line then
+   printed the word twice. The line is dropped entirely when it would carry nothing the row does
+   not already say. Nix's known riders (*Sap*, *Slow*) are untouched and verified.
+4. **"Self · Self". "10 feet · 10 feet".** `detailOf` joins `mechanicsLine` and `effectsLine`; both
+   are built independently in `options.ts` and **both end with the range**. Every feature that
+   declares one printed it twice — on Nix, *Lay on Hands* read "Touch · Touch · 15/40 uses". Each
+   half was correct, so no assertion could catch it. Deduped at the composer seam, first-wins.
+5. **The cost said it in gold, the detail said it again in cream.** *Riptide Step* was priced
+   "Bonus action · 3/3 uses" and then repeated "3/3 uses" directly beneath. `detailOf` now also
+   suppresses anything the cost label already states — the same rule `mutexPrices` already applies
+   one level up. A **counter reading** (`n/m`) matches on the numbers alone, because the two
+   producers disagree about the noun: *Lay on Hands* is priced "15/40 **points**" and its detail
+   said "15/40 **uses**". Match is anchored, so `1d8+4`, `2d8`, `+7 to hit` and `Versatile (1d10)`
+   are provably untouched, and exact elsewhere, so "1st-level slot" does not swallow "1st-level".
+
+**Where the fixes live, and why.** All four engine/UI fixes are in `compose.ts`, `options.ts`'s two
+guarded arms, and `TurnScreenD.tsx`. The `detailOf` dedupe is at the **composer seam and not in
+`options.ts`**, which is pinned byte-identical to the legacy `TurnSummary` code — the two producers
+stay independently correct and the one place that knows they will share a line owns the join.
+
+**Defects 3, 4 and 5 were found by looking at the screenshot.** Not by a failing test, not by a
+type error. They are the argument for the shoot step being part of a slice rather than a nicety.
+
+### The pinned test that was inverted, deliberately
+`src/components/combat/TurnSummary.characterization.test.ts:152` pinned the aura name-sniff as
+*current behaviour*, and its own comment said **"Slice 6c is where this gets fixed."** The two trap
+assertions are now inverted, with the reason recorded in place, **plus a new block proving the
+fallback still holds** for an undeclared `Aura of Embers`. Nix's four assertions in that test are
+unchanged.
+
+### Proof
+Every fix has a test that **fails against pre-change code**, each verified by a `cmp`-guarded
+mutation — including one mutation thrown away and redone because it made the tests fail by
+*throwing* rather than by restoring the old logic, which proves nothing.
+
+`docs/plans/codex-v1/reference/prove-slice6c.mjs` — Playwright against a real `vite build`, driving
+the **same fixture the unit tests drive** (via a generalised `nix-seed.mjs`, so it cannot drift into
+a second version of itself): the turn composes for a class that does not exist, the aura is on
+screen priced *Action · 2 of 6 dice*, the mastery word appears exactly once, **no row says the same
+thing twice on its one line**, the condition displays in Marcus's verbatim sentence and closes the
+Reaction with a reason, the strip does not repeat a pool a face prices, spend → 4 dice, reload
+(the iPad suspend) → still 4, undo → 6 and an empty log.
+
+**29/29 checks pass, console clean.** `prove-slice6b.mjs` re-run: still ALL PASS.
+
+**Verification totals:** `npx tsc -b --force` clean · `npx vitest run` **252/252** across 10 files
+(221 at the start of 6c) · `npx vite build` clean · 6c proof 29/29 · 6b proof 24/24.
+
+Shots: `_shots-app/slice6c-openworld-{phone,ipad}.png`.
+
+### Non-degradation, checked rather than assumed
+Nix's auras all declare `passive`, so removing the name-sniff cannot move him. His composed rows
+were dumped before and after the `detailOf` work: all 13 survive, each fact stated once, with dice
+and to-hit intact. His known mastery riders still read in full. The pinned characterization test's
+Nix assertions are byte-unchanged.
+
+### Deliberately NOT changed
+- `poolIdFor`'s loose name mapping — correct for 2024 Channel Divinity options, which genuinely
+  share one pool.
+- The `source.includes('homebrew')` sniffs — a cosmetic flag only.
+- `resources.ts:147` unit forcing — the reason *Lay on Hands* says "points" in one place and said
+  "uses" in another. 6c makes the row read correctly; the underlying unit disagreement is cosmetic
+  and belongs to the ledger merge.
+
+### Still open, carried forward
+- **Authoring a pool from the turn screen's resource strip** *(from 6b)*.
+- **Merging the read-only *Class Resources* panel into the ledger without losing Aura Range**
+  *(from 6b)*.
+- **iPad layout**: for a character with few options the third column is nearly empty and the lower
+  two-thirds of the screen is blank. Pre-existing, not caused by this slice — scope for 13/14.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

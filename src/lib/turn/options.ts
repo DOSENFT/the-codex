@@ -324,15 +324,47 @@ export function categorizeTurnOptions(
     if (feature.resourcePoolId) {
       const pool = findPool(character, feature.resourcePoolId)
       const amount = feature.resourceAmount ?? 1
-      if (pool && !spendable(pool, amount)) {
+      if (!pool) {
+        // Slice 6c, and the third thing 6b wrote down for this slice. The
+        // binding points at a pool that is not there — Marcus deleted it, or
+        // renamed it, or this sheet came off another machine mid-campaign.
+        //
+        // The reducer's answer is to charge nothing and carry on, which is
+        // right FOR THE REDUCER: an undo must never throw because a pool went
+        // missing between the spend and the undo. But it is the wrong answer
+        // for the ROW, because a free ability is not what Marcus built. He
+        // would tap it all night and never pay, and the app would look like it
+        // was working. Blocking it says so out loud, and the FeatureEditor
+        // already warns in the same words on the other side of the fence.
+        if (!build.includeUnaffordable) continue
+        unaffordableReason = 'Its resource pool no longer exists'
+      } else if (!spendable(pool, amount)) {
         if (!build.includeUnaffordable) continue
         unaffordableReason = `Not enough ${pool.name} left`
       }
     }
 
     const actionType = featureActionType(feature)
-    const isPassive = feature.actionType === 'passive' || feature.actionType === 'none'
-      || feature.name.toLowerCase().includes('aura')
+    // Slice 6c. A DECLARATION always wins over a guess about the name.
+    //
+    // This used to read `|| feature.name.toLowerCase().includes('aura')`,
+    // unconditionally, and it hid any feature with 'aura' in its name from the
+    // action list no matter what Marcus had written in the actionType field.
+    // Nix cannot show the fault: all three of his auras declare `passive`
+    // anyway, so the sniff never changes his answer — which is exactly why it
+    // survived four slices. Give the app content it has never seen — an
+    // "Undertow Aura" its author declared an Action — and it silently refuses
+    // to offer an ability he built, with no message and nothing to tap.
+    //
+    // The sniff is KEPT as a fallback, and that is deliberate rather than
+    // timid: features saved before `actionType` was written to every record
+    // declare nothing, `featureActionType` defaults those to 'action', and
+    // "Aura of Protection" would start appearing as something you can spend
+    // your action on. Guessing from the name is the right answer when there is
+    // nothing else to go on, and the wrong answer the moment there is.
+    const declared = feature.actionType
+    const isPassive = declared === 'passive' || declared === 'none'
+      || (declared === undefined && feature.name.toLowerCase().includes('aura'))
 
     // Determine roll info
     let rollNotation: string | undefined

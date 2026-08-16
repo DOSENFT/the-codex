@@ -17,12 +17,22 @@ import { createRequire } from 'node:module';
 
 const req = createRequire(import.meta.url);
 const FIXTURE = new URL('../../../../src/lib/turn/fixtures/nix.ts', import.meta.url);
+const OPENWORLD = new URL('../../../../src/lib/turn/fixtures/openworld.ts', import.meta.url);
 
-export async function loadNix() {
+/** Transpile a pure-data fixture module and hand back one of its exports.
+ *  Slice 6c generalised this out of `loadNix` rather than writing a second
+ *  copy of it — the whole reason this file exists is that a second copy drifts. */
+async function loadExport(url, name) {
   const { transform } = req('esbuild');
-  const source = readFileSync(FIXTURE, 'utf8');
+  const source = readFileSync(url, 'utf8');
   const { code } = await transform(source, { loader: 'ts', format: 'esm' });
   const mod = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
-  if (!mod.NIX) throw new Error('nix.ts no longer exports NIX');
-  return mod.NIX;
+  if (!mod[name]) throw new Error(`${url.pathname} no longer exports ${name}`);
+  return mod[name];
 }
+
+export const loadNix = () => loadExport(FIXTURE, 'NIX');
+
+/** The Slice 6c open-world fixture: a character built entirely of content the
+ *  app has never seen. The same object the unit tests drive. */
+export const loadTidewright = () => loadExport(OPENWORLD, 'TIDEWRIGHT');

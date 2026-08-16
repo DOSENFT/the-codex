@@ -185,7 +185,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       id: `${option.type}-${slug(option.name)}`,
       name: option.name,
       kind: KIND[option.type],
-      detail: detailOf(option),
+      detail: detailOf(option, cost.label),
       dice: option.rollNotation,
       cost,
       ...(rider ? { rider } : {}),
@@ -323,12 +323,70 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
  *
  *  Both halves, joined — the mechanics are what you need to roll and the
  *  effects are what you need to say. Dropping either to save a line would be
- *  the "elegance that reduces capability" the standing rule forbids. */
-function detailOf(option: ActionOption): string {
+ *  the "elegance that reduces capability" the standing rule forbids.
+ *
+ *  Slice 6c: joined, but not repeated. Both halves are assembled independently
+ *  in options.ts — `mechanicsLine` ends with the range, and `featureEffects`
+ *  pushes the range again — so every feature that declares one printed it
+ *  twice: "Self · Self", "10 feet · 10 feet", and for Nix "Touch · Touch ·
+ *  15/40 uses". Found by looking at the iPad shot, not by any assertion.
+ *
+ *  The dedupe lives HERE and not in options.ts on purpose: options.ts is
+ *  pinned byte-identical to the legacy TurnSummary code it was lifted from, so
+ *  the two producers stay independently correct and this seam — the only place
+ *  that knows both lines will share a line of screen — owns the join.
+ *
+ *  Order is first-wins, so the mechanics keep their position; only the later
+ *  echo is dropped. Comparison is case- and space-insensitive because the two
+ *  producers capitalise independently. Nothing is ever dropped from a single
+ *  line's own sequence unless it genuinely says the same thing twice, which is
+ *  also not something worth showing.
+ *
+ *  `costLabel` is the third producer sharing the row. Riptide Step priced
+ *  "Bonus action · 3/3 uses" in gold and then said "3/3 uses" again in cream
+ *  directly beneath it — the same reading, twice, on one row. The rule the
+ *  screen already follows elsewhere is that whatever states a cost owns it and
+ *  nothing repeats it: `mutexPrices` in TurnScreenD drops a pool from the
+ *  resource strip on exactly those grounds. This applies it one level down.
+ *  Match is EXACT (after normalising), so "1st-level" is not swallowed by
+ *  "1st-level slot" — a near-miss is a different fact and stays.
+ *
+ *  With one deliberate exception: a COUNTER READING — a leading "n/m" — is
+ *  matched on the numbers alone, because the two producers disagree about the
+ *  noun. Lay on Hands is priced "Bonus action · 15/40 points" and its detail
+ *  said "15/40 uses": the same number, on the same row, in two words for the
+ *  same thing. Exact matching would keep both, and the row would still be
+ *  telling Marcus his hit point pool twice while implying they might be
+ *  different pools. Only the fraction is compared, so 15/40 never suppresses
+ *  1/2, and a segment that merely CONTAINS a number ("1d8+4 Slashing", "+7 to
+ *  hit") is untouched — the pattern must start the segment. */
+function detailOf(option: ActionOption, costLabel = ''): string {
   const parts = [option.mechanicsLine, option.effectsLine].filter(
     (p): p is string => typeof p === 'string' && p.length > 0,
   )
-  return parts.join(' · ') || option.summary
+  /** What two segments must share to be the same statement. */
+  const keyOf = (raw: string): string => {
+    const seg = raw.trim().toLowerCase()
+    const counter = /^(\d+\s*\/\s*\d+)\b/.exec(seg)
+    return counter ? `#${counter[1].replace(/\s+/g, '')}` : seg
+  }
+  const seen = new Set<string>(
+    costLabel
+      .split(' · ')
+      .map(keyOf)
+      .filter(s => s.length > 0),
+  )
+  const segments: string[] = []
+  for (const part of parts) {
+    for (const raw of part.split(' · ')) {
+      const seg = raw.trim()
+      const key = keyOf(seg)
+      if (!key || seen.has(key)) continue
+      seen.add(key)
+      segments.push(seg)
+    }
+  }
+  return segments.join(' · ') || option.summary
 }
 
 function costOf(

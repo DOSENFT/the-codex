@@ -212,8 +212,22 @@ function ActBody({ o }: { o: TurnOption }) {
           something the row does not already show — see rank.ts — so this is
           absent from most options, and that silence is deliberate. */}
       {o.why && <span className="note">{o.why}</span>}
-      {o.rider && (
-        // Gold names the mechanic; cream says the sentence.
+      {/* Gold names the mechanic; cream says the sentence.
+
+          Slice 6c: for a mastery the 2024 table does not know, `text` IS the
+          property — compose.ts deliberately echoes the declared word rather
+          than inventing a rule for it, which is the right call there. Rendered
+          here it came out as "Undertow — Undertow", which does not read as
+          respect for homebrew, it reads as a bug.
+
+          So the line is dropped entirely when it would carry no more than the
+          row already does: the declared mastery is on the mechanics line above
+          ("Mastery: Undertow") in exactly the case this can happen, because
+          `text === property` only ever holds for a mastery Marcus DECLARED and
+          the app could not recognise. A known rider always has a sentence, so
+          Sap, Vex and the other six are untouched. A row that says a word
+          twice teaches nothing and costs a line of phone screen. */}
+      {o.rider && o.rider.text !== o.rider.property && (
         <span className="rider">
           <b>{o.rider.property}</b> — {o.rider.text}
         </span>
