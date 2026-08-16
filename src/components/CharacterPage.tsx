@@ -44,6 +44,8 @@ import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { useCollapsible } from '../hooks/useCollapsible'
+import { poolsOf } from '../lib/rules-2024/resources'
+import { ResourceLedger } from './resources/ResourceLedger'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1582,6 +1584,24 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
           {character.equipment.length === 0 && character.supplies.length === 0 && (
             <p className="text-xs text-forge-2 italic">No equipment or supplies yet. Add items above.</p>
           )}
+        </div>
+      </Section>
+
+      {/* ─── Resources — every countable thing, including the ones Marcus
+             writes himself. Sits ABOVE Class Resources because this is the
+             surface that can be edited; the one below is a read-only paladin
+             panel that survives untouched (it is the only place Aura Range is
+             shown). Folding the two together is Slice 6c's problem. ─── */}
+      <Section
+        id="resources"
+        title="Resources"
+        icon={Sparkles}
+        characterId={character.id}
+        defaultOpen
+        badge={`${poolsOf(character).length}`}
+      >
+        <div className="dres-embed">
+          <ResourceLedger character={character} onChange={onCharacterUpdate} heading="" />
         </div>
       </Section>
 

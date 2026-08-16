@@ -25,7 +25,7 @@
 // revert, and you are byte-for-byte where you started — and reduce.test.ts
 // proves exactly that over every variant.
 
-import type { PaladinResources, SpellSlots } from '../character'
+import type { SpellSlots } from '../character'
 import type { CombatState } from '../combat-state'
 import type { EconomySlot, SlotSpendRecord } from '../rules-2024/economy'
 
@@ -61,8 +61,29 @@ export type CombatEvent =
 export interface Restore {
   combat: CombatState
   spellSlots?: SpellSlots
-  paladinResources?: PaladinResources
-  /** Feature name → prior `usesCurrent`.
+  /** Pool id → prior `current`, for every pool the event charged.
+   *
+   *  ── Why this replaced two fields ─────────────────────────────────────────
+   *  Slice 6 carried `paladinResources` (a whole-object snapshot) and
+   *  `featureUses` (feature name → number) side by side, because those were
+   *  the only two places a countable thing could live. Slice 6b added a third,
+   *  `character.resourcePools`, and a third bespoke restore field would have
+   *  made Undo's correctness a function of how many KINDS of pool exist. It is
+   *  now a function of one loop.
+   *
+   *  The key is a POOL ID from `./ids.ts`, not a feature name. Ids are already
+   *  the currency `compose` prices in and `reduce` pays in, so this deletes the
+   *  last place those two agreed by convention rather than by type.
+   *
+   *  ── Why replacing was safe, given the warning at the top of this file ────
+   *  This is a persisted format, so a rename would normally demand a migration.
+   *  Not here: the turn screen has only ever existed behind `?d=1` on branch
+   *  `v1`, no build carrying it has reached `main`, and so no
+   *  `codex-combat-log-*` value holding the old shape exists in Marcus's
+   *  browser. `loadLog` filters rather than throws, so even a stray entry from
+   *  a dev session degrades to "that one entry cannot be undone" instead of
+   *  taking the log down with it. The window for this change closes the moment
+   *  `v1` merges; after that, the rule at the top of the file resumes.
    *
    *  Always a number, and that is an invariant rather than an accident: the
    *  reducer only ever spends from a pool whose counter is FULLY declared
@@ -71,7 +92,7 @@ export interface Restore {
    *  untracked, so it is never charged, so there is never an absent value to
    *  restore. This field carried `| null` for that case until the tests showed
    *  the case cannot arise — an untestable safety net is not a safety net. */
-  featureUses?: Record<string, number>
+  pools?: Record<string, number>
 }
 
 /** One entry in the log.

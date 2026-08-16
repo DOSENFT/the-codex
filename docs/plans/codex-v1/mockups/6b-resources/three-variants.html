@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Slice 6b — the resources surface, three ways</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../../src/design/tokens.css">
+<style>
+/* ============================================================================
+   AESTHETIC (the 5–8 liner this surface is built to)
+   ----------------------------------------------------------------------------
+   Warm near-black vellum, lit from within, never blue-black.
+   Gold names the mechanic; cream says the sentence; ember is rationed to cost.
+   Elevation is TONE, not shadow — you cannot cast a shadow into black.
+   Cinzel for names only, at 20px or larger; IBM Plex for everything spoken.
+   Numerals are the loudest thing on a resource surface, because a resource IS
+   its number — the label is a caption to the number, not the other way round.
+   Hairlines do the dividing that boxes would do in a lighter palette.
+   Nothing decorative may occupy space a fingertip needs at arm's length.
+   ========================================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #050504; color: var(--d-cream);
+  font-family: var(--d-font-body); font-size: var(--d-fs-body);
+  padding: 20px; display: flex; gap: 20px; align-items: flex-start;
+}
+.col { width: 440px; flex: 0 0 440px; }
+.tag {
+  font-family: var(--d-font-mono); font-size: var(--d-fs-label);
+  color: var(--d-dim); text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: 8px; display: block;
+}
+.tag b { color: var(--d-gold); font-weight: 500; }
+.panel {
+  background: var(--d-bg); border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius-lg); overflow: hidden;
+}
+.phead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: var(--d-s4); border-bottom: 1px solid var(--d-rule);
+}
+.phead h2 { font-family: var(--d-font-display); font-size: var(--d-fs-title); font-weight: 600; color: var(--d-cream); }
+.phead .n { font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-dim); }
+.thesis {
+  font-size: 13px; color: var(--d-dim); line-height: 1.45;
+  padding: 10px 2px 0; }
+.thesis b { color: var(--d-cream); font-weight: 500; }
+
+/* ---------------------------------------------------------------- VARIANT 1 */
+/* THE LEDGER — rule-lined rows, inline steppers, no modal anywhere. */
+.v1 .row {
+  display: grid; grid-template-columns: 1fr auto auto;
+  align-items: center; gap: var(--d-s3);
+  padding: var(--d-s3) var(--d-s4); border-bottom: 1px solid var(--d-rule);
+  min-height: var(--d-touch-min);
+}
+.v1 .row:last-child { border-bottom: 0; }
+.v1 .nm { font-size: var(--d-fs-body); color: var(--d-cream); }
+.v1 .meta { font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-dim); display: block; margin-top: 2px; }
+.v1 .num { font-family: var(--d-font-mono); font-size: 19px; color: var(--d-gold); letter-spacing: -.01em; }
+.v1 .num s { color: var(--d-dim); text-decoration: none; font-size: 14px; }
+.v1 .step { display: flex; gap: 2px; }
+.v1 .step button {
+  width: 34px; height: 34px; border: 1px solid var(--d-rule-lit); background: var(--d-e1);
+  color: var(--d-cream); font-size: 17px; line-height: 1; border-radius: var(--d-radius);
+  font-family: var(--d-font-body); cursor: pointer;
+}
+.v1 .bar { grid-column: 1 / -1; height: 2px; background: var(--d-rule); border-radius: 1px; overflow: hidden; }
+.v1 .bar i { display: block; height: 100%; background: var(--d-gold); }
+.v1 .add {
+  display: block; width: 100%; min-height: var(--d-touch-min);
+  background: transparent; border: 0; border-top: 1px solid var(--d-rule);
+  color: var(--d-gold); font-family: var(--d-font-body); font-size: var(--d-fs-body); cursor: pointer;
+}
+.v1 .open { background: var(--d-e1); }
+.v1 .form { padding: var(--d-s4); border-bottom: 1px solid var(--d-rule); background: var(--d-e1); }
+.v1 .form .fr { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: var(--d-s3); margin-bottom: var(--d-s3); }
+.v1 label { font-size: var(--d-fs-label); text-transform: uppercase; letter-spacing: .08em; color: var(--d-dim); }
+.v1 input, .v1 select {
+  width: 100%; min-height: 42px; background: var(--d-bg); color: var(--d-cream);
+  border: 1px solid var(--d-rule-lit); border-radius: var(--d-radius);
+  padding: 0 10px; font-family: var(--d-font-body); font-size: var(--d-fs-body);
+}
+
+/* ---------------------------------------------------------------- VARIANT 2 */
+/* THE DIAL — pip cards, spend by tapping a pip, matches the app's dot idiom. */
+.v2 .grid { padding: var(--d-s4); display: grid; gap: var(--d-s3); }
+.v2 .card {
+  background: var(--d-e1); border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius); padding: var(--d-s3) var(--d-s4);
+}
+.v2 .ch { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.v2 .ch .nm { font-family: var(--d-font-display); font-size: var(--d-fs-title); font-weight: 500; }
+.v2 .ch .rc { font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-dim); }
+.v2 .pips { display: flex; gap: 7px; flex-wrap: wrap; }
+.v2 .pip {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--d-amber); border: 1px solid var(--d-amber);
+}
+.v2 .pip.out { background: transparent; border-color: var(--d-rule-lit); }
+.v2 .big { display: flex; align-items: baseline; gap: 10px; }
+.v2 .big .v { font-family: var(--d-font-mono); font-size: 34px; color: var(--d-gold); line-height: 1; }
+.v2 .big .of { font-family: var(--d-font-mono); font-size: 15px; color: var(--d-dim); }
+.v2 .big .u { font-size: var(--d-fs-label); color: var(--d-dim); text-transform: uppercase; letter-spacing: .1em; margin-left: auto; }
+.v2 .track { height: 4px; background: var(--d-rule); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.v2 .track i { display: block; height: 100%; background: var(--d-gold); }
+.v2 .add { margin: 0 var(--d-s4) var(--d-s4); width: calc(100% - 32px); min-height: var(--d-touch-min);
+  background: transparent; border: 1px dashed var(--d-rule-lit); border-radius: var(--d-radius);
+  color: var(--d-gold); font-family: var(--d-font-body); font-size: var(--d-fs-body); cursor: pointer; }
+
+/* ---------------------------------------------------------------- VARIANT 3 */
+/* THE SPREAD — list left, live editor right, permanently. Authoring is not a detour. */
+.v3 .split { display: grid; grid-template-columns: 168px 1fr; min-height: 470px; }
+.v3 .side { border-right: 1px solid var(--d-rule); }
+.v3 .side button {
+  display: block; width: 100%; text-align: left; min-height: var(--d-touch-min);
+  padding: var(--d-s2) var(--d-s3); background: transparent; border: 0;
+  border-bottom: 1px solid var(--d-rule); color: var(--d-cream);
+  font-family: var(--d-font-body); font-size: 14px; cursor: pointer;
+}
+.v3 .side button.on { background: var(--d-e2); box-shadow: inset 2px 0 0 var(--d-gold); }
+.v3 .side .q { display: block; font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-gold); margin-top: 2px; }
+.v3 .side .new { color: var(--d-gold); border-bottom: 0; }
+.v3 .edit { padding: var(--d-s4); }
+.v3 .edit h3 { font-family: var(--d-font-display); font-size: var(--d-fs-title); font-weight: 500; margin-bottom: var(--d-s4); }
+.v3 .fr { margin-bottom: var(--d-s3); }
+.v3 label { display: block; font-size: var(--d-fs-label); text-transform: uppercase; letter-spacing: .08em; color: var(--d-dim); margin-bottom: 5px; }
+.v3 input, .v3 select, .v3 textarea {
+  width: 100%; min-height: 44px; background: var(--d-e1); color: var(--d-cream);
+  border: 1px solid var(--d-rule-lit); border-radius: var(--d-radius);
+  padding: 10px; font-family: var(--d-font-body); font-size: var(--d-fs-body);
+}
+.v3 .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--d-s3); }
+.v3 .segs { display: flex; gap: 0; border: 1px solid var(--d-rule-lit); border-radius: var(--d-radius); overflow: hidden; }
+.v3 .segs button {
+  flex: 1; min-height: 44px; background: var(--d-e1); border: 0; border-right: 1px solid var(--d-rule);
+  color: var(--d-dim); font-family: var(--d-font-body); font-size: 13px; cursor: pointer;
+}
+.v3 .segs button:last-child { border-right: 0; }
+.v3 .segs button.on { background: var(--d-e3); color: var(--d-gold); }
+.v3 .foot { display: flex; gap: var(--d-s3); margin-top: var(--d-s4); }
+.v3 .foot button { flex: 1; min-height: var(--d-touch-min); border-radius: var(--d-radius);
+  font-family: var(--d-font-display); font-size: var(--d-fs-title); font-weight: 500; cursor: pointer; }
+.v3 .foot .save { background: transparent; border: 1px solid var(--d-gold); color: var(--d-gold); }
+.v3 .foot .del { background: transparent; border: 1px solid var(--d-rule-lit); color: var(--d-dim); font-size: 15px; font-family: var(--d-font-body); flex: 0 0 96px; }
+.v3 .hint { font-size: 13px; color: var(--d-dim); line-height: 1.4; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="col">
+  <span class="tag">Variant <b>1 — THE LEDGER</b></span>
+  <div class="panel v1">
+    <div class="phead"><h2>Resources</h2><span class="n">4 pools</span></div>
+    <div class="row">
+      <div><span class="nm">Lay on Hands</span><span class="meta">points · long rest</span></div>
+      <div class="num">14<s>/40</s></div>
+      <div class="step"><button>−</button><button>+</button></div>
+      <div class="bar"><i style="width:35%"></i></div>
+    </div>
+    <div class="row">
+      <div><span class="nm">Channel Divinity</span><span class="meta">uses · short rest</span></div>
+      <div class="num">1<s>/2</s></div>
+      <div class="step"><button>−</button><button>+</button></div>
+      <div class="bar"><i style="width:50%"></i></div>
+    </div>
+    <div class="row open">
+      <div><span class="nm">Hearthfire</span><span class="meta">points · dawn · homebrew</span></div>
+      <div class="num">6<s>/8</s></div>
+      <div class="step"><button>−</button><button>+</button></div>
+      <div class="bar"><i style="width:75%"></i></div>
+    </div>
+    <div class="form">
+      <div class="fr"><label>Name</label><input value="Hearthfire"></div>
+      <div class="fr"><label>Max</label><input value="8"></div>
+      <div class="fr"><label>Unit</label><select><option>points</option><option>uses</option><option>dice</option></select></div>
+      <div class="fr"><label>Recharge</label><select><option>dawn</option><option>long rest</option><option>short rest</option><option>never</option></select></div>
+    </div>
+    <div class="row">
+      <div><span class="nm">Divine Sense</span><span class="meta">uses · long rest</span></div>
+      <div class="num">0<s>/4</s></div>
+      <div class="step"><button>−</button><button>+</button></div>
+      <div class="bar"><i style="width:0%"></i></div>
+    </div>
+    <button class="add">+ New pool</button>
+  </div>
+  <p class="thesis"><b>Thesis:</b> the list is the editor. Tap a row, it opens in place; nothing
+  covers anything. Cheapest to build, densest per inch, and the only variant with no modal
+  state to get wrong. Risk: the form pushes rows around, so the thing you were reading moves.</p>
+</div>
+
+<div class="col">
+  <span class="tag">Variant <b>2 — THE DIAL</b></span>
+  <div class="panel v2">
+    <div class="phead"><h2>Resources</h2><span class="n">4 pools</span></div>
+    <div class="grid">
+      <div class="card">
+        <div class="ch"><span class="nm">Lay on Hands</span><span class="rc">long rest</span></div>
+        <div class="big"><span class="v">14</span><span class="of">/ 40</span><span class="u">points</span></div>
+        <div class="track"><i style="width:35%"></i></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="nm">Channel Divinity</span><span class="rc">short rest</span></div>
+        <div class="pips"><span class="pip"></span><span class="pip out"></span></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="nm">Hearthfire</span><span class="rc">dawn</span></div>
+        <div class="pips">
+          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+          <span class="pip out"></span><span class="pip out"></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="nm">Divine Sense</span><span class="rc">long rest</span></div>
+        <div class="pips"><span class="pip out"></span><span class="pip out"></span><span class="pip out"></span><span class="pip out"></span></div>
+      </div>
+    </div>
+    <button class="add">+ New pool</button>
+  </div>
+  <p class="thesis"><b>Thesis:</b> a pool is a countable thing, so count it. Pips are the
+  vocabulary the app already speaks (GrimoireCard, LoadoutPanel) and a pip is a 30px target you
+  can hit without looking. Risk: 40 points cannot be pips, so the card silently changes form —
+  and two forms is two designs.</p>
+</div>
+
+<div class="col">
+  <span class="tag">Variant <b>3 — THE SPREAD</b></span>
+  <div class="panel v3">
+    <div class="phead"><h2>Resources</h2><span class="n">editing</span></div>
+    <div class="split">
+      <div class="side">
+        <button><span>Lay on Hands</span><span class="q">14/40</span></button>
+        <button><span>Channel Divinity</span><span class="q">1/2</span></button>
+        <button class="on"><span>Hearthfire</span><span class="q">6/8</span></button>
+        <button><span>Divine Sense</span><span class="q">0/4</span></button>
+        <button class="new">+ New pool</button>
+      </div>
+      <div class="edit">
+        <h3>Hearthfire</h3>
+        <div class="fr"><label>Name</label><input value="Hearthfire"></div>
+        <div class="two">
+          <div class="fr"><label>Current</label><input value="6"></div>
+          <div class="fr"><label>Max</label><input value="8"></div>
+        </div>
+        <div class="fr"><label>Unit</label>
+          <div class="segs"><button class="on">points</button><button>uses</button><button>dice</button></div>
+        </div>
+        <div class="fr"><label>Recharge</label>
+          <div class="segs"><button>short</button><button>long</button><button class="on">dawn</button><button>never</button></div>
+        </div>
+        <div class="fr"><label>Note</label><textarea rows="2">Spent to fuel Hearthfire Manifest.</textarea>
+          <p class="hint">Shown on the turn screen when the pool is the reason something is blocked.</p>
+        </div>
+        <div class="foot"><button class="del">Delete</button><button class="save">Save</button></div>
+      </div>
+    </div>
+  </div>
+  <p class="thesis"><b>Thesis:</b> authoring is a first-class act, not a detour — on an iPad there
+  is room to hold the list and the form at once, so nothing is ever hidden behind a mode. Segmented
+  controls kill four dropdowns. Risk: 168px of permanent sidebar on a phone is not affordable.</p>
+</div>
+
+</body>
+</html>

@@ -164,11 +164,63 @@ const CONDITIONS: Record<string, ConditionEffect> = {
   }),
 }
 
-/** Look up one condition by name, case- and space-insensitively.  Unknown
- *  names come back as a neutral, `known: false` pass-through rather than null:
- *  homebrew must survive the trip to the screen. */
-export function effectOf(name: string): ConditionEffect {
+// ---------------------------------------------------------------------------
+// Homebrew conditions (Slice 6b)
+// ---------------------------------------------------------------------------
+//
+// Before this, an unrecognised condition survived to the screen as a NAME and
+// nothing more: all-neutral, `known: false`, blocking nothing. That is the
+// right default for a name typed in a hurry, and the wrong one for a condition
+// Marcus sat down and authored. "Hearthbound: you can't take Reactions" was a
+// label the app displayed and then ignored — a half-built feature running as
+// if done, which the 🔴 rules forbid by name.
+//
+// A CustomCondition is a partial ConditionEffect. Every field is optional, so
+// authoring one costs a name and nothing else, and each field Marcus does fill
+// in behaves exactly like the book's.
+
+export interface CustomCondition {
+  name: string
+  blocks?: EconomySlot[]
+  yourAttacksHaveDisadvantage?: boolean
+  attacksAgainstYouHaveAdvantage?: boolean
+  yourAttacksHaveAdvantage?: boolean
+  attacksAgainstYouHaveDisadvantage?: boolean
+  cascades?: string[]
+  /** Rendered verbatim at the table.  The half of a homebrew condition the
+   *  flags above can never carry. */
+  note?: string
+}
+
+/** Look up one condition by name, case- and space-insensitively.
+ *
+ *  `custom` is consulted FIRST and beats the book. That direction is chosen
+ *  deliberately: the opposite would let Marcus author a condition, save it, see
+ *  it in his list, and have the app quietly disregard it — the exact failure
+ *  this parameter exists to end. A homebrew entry named "Stunned" therefore
+ *  redefines Stunned at this table, which is a house rule, not a bug. The
+ *  editor is where a name collision gets pointed out; here it is obeyed.
+ *
+ *  Unknown names still come back as a neutral, `known: false` pass-through
+ *  rather than null: a name typed at the table must survive the trip. */
+export function effectOf(name: string, custom?: readonly CustomCondition[]): ConditionEffect {
   const key = typeof name === 'string' ? name.trim().toLowerCase() : ''
+  if (key && custom) {
+    const mine = custom.find(c => c?.name?.trim().toLowerCase() === key)
+    if (mine) {
+      return {
+        ...NEUTRAL,
+        ...mine,
+        // A partial cannot be allowed to smuggle `undefined` in over a
+        // required field, so the two array fields are re-defaulted after the
+        // spread rather than trusted from it.
+        name: mine.name.trim(),
+        blocks: mine.blocks ?? [],
+        cascades: mine.cascades ?? [],
+        known: true,
+      }
+    }
+  }
   const hit = CONDITIONS[key]
   if (hit) return hit
   return {
@@ -181,7 +233,10 @@ export function effectOf(name: string): ConditionEffect {
 /** Every condition implied by these names, including cascaded ones, in a
  *  stable order: the names you gave first, then what they drag in with them.
  *  Deduplicated case-insensitively; the first spelling wins. */
-export function expandConditions(conditionNames: readonly string[]): string[] {
+export function expandConditions(
+  conditionNames: readonly string[],
+  custom?: readonly CustomCondition[],
+): string[] {
   const out: string[] = []
   const seen = new Set<string>()
   const push = (name: string) => {
@@ -196,7 +251,9 @@ export function expandConditions(conditionNames: readonly string[]): string[] {
   // Breadth-first over the cascade. Unconscious -> Incapacitated + Prone is the
   // deepest real case, but the loop does not assume that.
   for (let i = 0; i < out.length; i++) {
-    for (const cascaded of effectOf(out[i]).cascades) push(cascaded)
+    // Custom conditions cascade too, and a homebrew cascade can name a book
+    // condition (or another homebrew one) — the loop does not care which.
+    for (const cascaded of effectOf(out[i], custom).cascades) push(cascaded)
   }
   return out
 }
@@ -205,20 +262,33 @@ export function expandConditions(conditionNames: readonly string[]): string[] {
  *
  *  Callers get the complete picture from one call — ask for `['Stunned']` and
  *  the Incapacitated entry that actually blocks the turn is in the result. */
-export function effectsOf(conditionNames: readonly string[]): ConditionEffect[] {
-  return expandConditions(conditionNames).map(effectOf)
+export function effectsOf(
+  conditionNames: readonly string[],
+  custom?: readonly CustomCondition[],
+): ConditionEffect[] {
+  // NOT `.map(effectOf)` — Array.prototype.map hands the callback (value,
+  // index, array), so the index would arrive as `custom` and every lookup
+  // after the first would silently skip the homebrew table. Spelled out.
+  return expandConditions(conditionNames, custom).map(name => effectOf(name, custom))
 }
 
 /** Every economy slot forbidden by these conditions, cascades included. */
-export function blockedSlots(conditionNames: readonly string[]): EconomySlot[] {
+export function blockedSlots(
+  conditionNames: readonly string[],
+  custom?: readonly CustomCondition[],
+): EconomySlot[] {
   const out = new Set<EconomySlot>()
-  for (const e of effectsOf(conditionNames)) for (const s of e.blocks) out.add(s)
+  for (const e of effectsOf(conditionNames, custom)) for (const s of e.blocks) out.add(s)
   return [...out]
 }
 
 /** Is this slot forbidden right now?  The question Slice 5 actually asks. */
-export function isSlotBlocked(conditionNames: readonly string[], slot: EconomySlot): boolean {
-  return blockedSlots(conditionNames).includes(slot)
+export function isSlotBlocked(
+  conditionNames: readonly string[],
+  slot: EconomySlot,
+  custom?: readonly CustomCondition[],
+): boolean {
+  return blockedSlots(conditionNames, custom).includes(slot)
 }
 
 /** Every condition this file knows, for the editor's picker. */

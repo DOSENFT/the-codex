@@ -1,0 +1,465 @@
+/* ============================================================================
+   THE RESOURCE LEDGER — direction D, as a real component
+   ----------------------------------------------------------------------------
+   Ported from docs/plans/codex-v1/mockups/6b-resources/merged.html, which is
+   the locked spec: three labelled variants (THE LEDGER, THE DIAL, THE SPREAD)
+   were built, shot and judged, then merged, then iterated once on a real
+   observed fault. What each contributed and what was dropped is recorded in
+   that file's header and is not repeated here.
+
+   AESTHETIC
+   Warm near-black vellum lit from within; elevation is tone, never shadow.
+   A resource IS its number, so the number is stated in every form the card
+   takes — pips carry a numeral too, because eight dots is not a reading.
+   Gold names the mechanic, cream speaks the sentence, ember is spent only on
+   cost and warning. Cinzel names things, at 20px or never. Hairlines divide
+   where a lighter palette would need a box. Every target a fingertip must
+   find is 48px, measured, including the pips.
+
+   THREE RULES THAT ARE LOAD-BEARING, not stylistic — they get "tidied" away
+   by someone who does not know what they cost:
+
+   1. `.dres-pool` is a CONTAINER, and the breakpoint at 560px is a CONTAINER
+      query. Iteration 1 used a media query and at 820px every card became a
+      wide empty band with two pips adrift in it. A container query means the
+      CARD decides its shape, so the identical component works full-bleed on a
+      390px phone and inside the turn screen's third column. Changing this to
+      a media query silently breaks the narrow-column case.
+   2. Every pip is a 48px BUTTON with a 24px dot inside it. The dot is what you
+      see; the button is what you hit. Shrinking the button to the dot is the
+      single easiest way to fail the touch audit while the screenshot still
+      looks right.
+   3. `--d-dim` is for LABELS, never for a sentence. It is 5.40:1 — legal, and
+      too thin to read a rule off at arm's length under a table lamp.
+
+   Class names are prefixed `dres-` so nothing here can collide with the old
+   Tailwind glass surfaces, which are still live and still Marcus's.
+   ========================================================================== */
+
+.dres {
+  background: var(--d-bg);
+  color: var(--d-cream);
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+}
+
+/* Embedded inside the character sheet, where the surrounding page is a
+   different (glass) language. The border is what says "this is one thing";
+   without it the near-black vellum reads as a hole in the page. */
+.dres-embed {
+  border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius);
+  overflow: hidden;
+}
+
+.dres-hd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--d-s3);
+  padding: var(--d-s4);
+  border-bottom: 1px solid var(--d-rule);
+}
+.dres-hd h2 {
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  font-weight: 600;
+  margin: 0;
+}
+.dres-hd .dres-n {
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+}
+
+.dres-sect {
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: var(--d-s4) var(--d-s4) var(--d-s2);
+}
+
+.dres-stack {
+  padding: 0 var(--d-s4) var(--d-s4);
+  display: grid;
+  gap: var(--d-s3);
+}
+
+/* ---- the card. The container query lives HERE, so the card is portable. --- */
+
+.dres-pool {
+  background: var(--d-e1);
+  border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius);
+  container-type: inline-size;
+}
+.dres-top {
+  display: grid;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'id ed'
+    'val val';
+  gap: var(--d-s2) var(--d-s4);
+  padding: var(--d-s3) var(--d-s3) var(--d-s3) var(--d-s4);
+}
+.dres-idc {
+  grid-area: id;
+}
+.dres-val {
+  grid-area: val;
+}
+.dres-ed {
+  grid-area: ed;
+  align-self: start;
+  min-width: 48px;
+  min-height: 48px;
+  background: transparent;
+  border: 0;
+  color: var(--d-dim);
+  font-family: var(--d-font-body);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: var(--d-radius);
+}
+.dres-ed[aria-expanded='true'] {
+  color: var(--d-gold);
+}
+@container (min-width: 560px) {
+  .dres-top {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: 'id val ed';
+  }
+  .dres-ed {
+    align-self: center;
+  }
+}
+
+.dres-nm {
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  font-weight: 500;
+  color: var(--d-cream);
+  line-height: var(--d-lh-tight);
+}
+.dres-sub {
+  display: block;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  margin-top: 3px;
+}
+/* The number, restated inside the label line. A pool IS its number, and eight
+   dots is not a reading. */
+.dres-sub b {
+  color: var(--d-gold);
+  font-weight: 500;
+}
+.dres-hb {
+  color: var(--d-gold);
+}
+/* Marcus's own sentence about the pool. Cream, because it is a sentence. */
+.dres-note {
+  display: block;
+  font-size: 13px;
+  color: var(--d-cream);
+  line-height: 1.35;
+  margin-top: 5px;
+  opacity: 0.86;
+}
+
+/* form A — countable: the pips ARE the stepper, as they already are elsewhere
+   in the app. Rule 2 above: 48px button, 24px dot. */
+.dres-pips {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -6px;
+}
+.dres-pipbtn {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.dres-pipbtn:disabled {
+  cursor: default;
+}
+.dres-pip {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--d-amber);
+  border: 1px solid var(--d-amber);
+}
+.dres-pip.dres-out {
+  background: transparent;
+  border-color: var(--d-rule-lit);
+}
+
+/* form B — too many to count: the numeral, a bar, and two real 48px steppers */
+.dres-gauge {
+  display: flex;
+  align-items: center;
+  gap: var(--d-s3);
+}
+.dres-v {
+  font-family: var(--d-font-mono);
+  font-size: 30px;
+  color: var(--d-gold);
+  line-height: 1;
+}
+.dres-of {
+  font-family: var(--d-font-mono);
+  font-size: 15px;
+  color: var(--d-dim);
+}
+.dres-sp {
+  margin-left: auto;
+  display: flex;
+  gap: var(--d-s2);
+}
+.dres-sp button {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--d-rule-lit);
+  background: var(--d-bg);
+  color: var(--d-cream);
+  font-size: 20px;
+  line-height: 1;
+  border-radius: var(--d-radius);
+  cursor: pointer;
+  font-family: var(--d-font-body);
+}
+.dres-sp button:disabled {
+  color: var(--d-rule-lit);
+  cursor: default;
+}
+.dres-track {
+  height: 3px;
+  background: var(--d-rule);
+  border-radius: 2px;
+  margin: 0 var(--d-s4) var(--d-s3);
+  overflow: hidden;
+}
+.dres-track i {
+  display: block;
+  height: 100%;
+  background: var(--d-gold);
+}
+/* Ember is rationed to cost and warning. A pool under a fifth is a warning,
+   and the bar is 3px so the ≥16px ember floor does not apply to it — it
+   carries no text. */
+.dres-track i.dres-low {
+  background: var(--d-ember);
+}
+
+/* ---- the same card, expanded into the form. No modal, no second layout. --- */
+
+.dres-pool.dres-editing {
+  border-color: var(--d-rule-lit);
+  background: var(--d-e2);
+}
+.dres-form {
+  padding: 0 var(--d-s4) var(--d-s4);
+}
+.dres-fr {
+  margin-bottom: var(--d-s3);
+}
+.dres-form label {
+  display: block;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--d-dim);
+  margin-bottom: 5px;
+}
+.dres-form input,
+.dres-form textarea {
+  width: 100%;
+  min-height: 48px;
+  background: var(--d-bg);
+  color: var(--d-cream);
+  border: 1px solid var(--d-rule-lit);
+  border-radius: var(--d-radius);
+  padding: 12px;
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+}
+.dres-form textarea {
+  min-height: 0;
+  resize: vertical;
+}
+.dres-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--d-s3);
+}
+
+.dres-segs {
+  display: flex;
+  border: 1px solid var(--d-rule-lit);
+  border-radius: var(--d-radius);
+  overflow: hidden;
+}
+.dres-segs button {
+  flex: 1;
+  min-height: 48px;
+  background: var(--d-bg);
+  border: 0;
+  border-right: 1px solid var(--d-rule);
+  color: var(--d-dim);
+  font-family: var(--d-font-body);
+  font-size: 13px;
+  cursor: pointer;
+}
+.dres-segs button:last-child {
+  border-right: 0;
+}
+.dres-segs button[aria-pressed='true'] {
+  background: var(--d-e3);
+  color: var(--d-gold);
+}
+
+.dres-hint {
+  font-size: 13px;
+  color: var(--d-dim);
+  line-height: 1.4;
+  margin: 6px 0 0;
+}
+/* The one place ember earns its keep in this file: a refusal. ≥16px, per the
+   token rules — ember at label size is unreadable and the app would be
+   whispering the only thing it is trying to shout. */
+.dres-warn {
+  font-size: 16px;
+  color: var(--d-ember);
+  line-height: 1.35;
+  margin: 6px 0 0;
+}
+
+.dres-foot {
+  display: flex;
+  gap: var(--d-s3);
+  margin-top: var(--d-s4);
+}
+.dres-foot button {
+  min-height: 48px;
+  border-radius: var(--d-radius);
+  cursor: pointer;
+}
+.dres-save {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--d-gold);
+  color: var(--d-gold);
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  font-weight: 500;
+}
+.dres-save:disabled {
+  border-color: var(--d-rule-lit);
+  color: var(--d-dim);
+  cursor: default;
+}
+.dres-cancel {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--d-rule-lit);
+  color: var(--d-cream);
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+}
+.dres-del {
+  flex: 0 0 92px;
+  background: transparent;
+  border: 1px solid var(--d-rule-lit);
+  color: var(--d-dim);
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+}
+/* Two-step delete: the second press is ember, because by then it means it. */
+.dres-del.dres-arm {
+  border-color: var(--d-ember);
+  color: var(--d-ember);
+  font-size: 16px;
+}
+
+/* ---- conditions: the same card, because it is the same act ---- */
+
+.dres-cond {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--d-s3);
+  background: var(--d-e1);
+  border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius);
+  padding: var(--d-s3) var(--d-s3) var(--d-s3) var(--d-s4);
+}
+.dres-cond.dres-editing {
+  display: block;
+  border-color: var(--d-rule-lit);
+  background: var(--d-e2);
+}
+.dres-cond .dres-nm {
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+  color: var(--d-cream);
+}
+.dres-tx {
+  display: block;
+  font-size: 13px;
+  color: var(--d-dim);
+  line-height: 1.35;
+  margin-top: 3px;
+}
+.dres-active {
+  display: block;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  color: var(--d-verdant);
+  margin-top: 4px;
+}
+
+.dres-new {
+  min-height: 48px;
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--d-rule-lit);
+  border-radius: var(--d-radius);
+  color: var(--d-gold);
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+  cursor: pointer;
+}
+
+.dres-empty {
+  font-size: var(--d-fs-body);
+  color: var(--d-cream);
+  opacity: 0.7;
+  line-height: 1.4;
+  padding: 0 0 var(--d-s3);
+}
+
+/* Focus is never removed, only restated in the palette. A keyboard at the
+   table is rare; a keyboard-only user with no focus ring is stranded. */
+.dres :focus-visible {
+  outline: 2px solid var(--d-gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dres-pip,
+  .dres-track i {
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      width 180ms ease;
+  }
+}

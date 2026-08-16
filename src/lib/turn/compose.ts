@@ -49,10 +49,11 @@ import {
   spellSlotSpentThisTurn,
 } from '../rules-2024/economy'
 import { riderFor } from '../rules-2024/mastery'
+import { findPool, poolIdForFeature, poolsOf } from '../rules-2024/resources'
 import { findContention } from './contention'
 // slug/poolIdFor moved to ./ids in Slice 6 so the reducer PAYS with exactly the
 // id the composer PRICES with. Same functions, one home — see ids.ts.
-import { featurePoolId, poolIdFor, slug } from './ids'
+import { slug } from './ids'
 import { categorizeTurnOptions, levelLabel, type ActionOption } from './options'
 import { sortByRank, withRank, type RankContext } from './rank'
 import type {
@@ -109,8 +110,13 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
 
   // -- what is upon you ------------------------------------------------------
   const conditionNames = Array.isArray(character.conditions) ? character.conditions : []
-  const conditionEffects = effectsOf(conditionNames)
-  const forbidden = blockedSlots(conditionNames)
+  // Slice 6b. Marcus's own conditions are consulted before the book's, so a
+  // homebrew condition that says "you can't take Reactions" actually closes the
+  // reaction row instead of merely appearing above it. Before this, an authored
+  // condition was a label the app displayed and then ignored.
+  const customConditions = Array.isArray(character.customConditions) ? character.customConditions : []
+  const conditionEffects = effectsOf(conditionNames, customConditions)
+  const forbidden = blockedSlots(conditionNames, customConditions)
 
   // Which condition to blame for a closed slot. Stunned closes the action via
   // Incapacitated, and naming Incapacitated would be true but useless at the
@@ -146,7 +152,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   const build = (option: ActionOption, slot: EconomySlot): TurnOption => {
     const weapon = option.type === 'weapon' ? weaponsByName.get(option.name) : undefined
     const feature = option.type === 'feature' ? featuresByName.get(option.name) : undefined
-    const cost = costOf(option, slot, feature)
+    const cost = costOf(option, slot, feature, character)
 
     // PRECEDENCE: say the reason that OUTLIVES THE TURN.
     //
@@ -329,6 +335,7 @@ function costOf(
   option: ActionOption,
   slot: EconomySlot,
   feature: ClassFeature | undefined,
+  character: Character,
 ): OptionCost {
   const base = ECONOMY_LABEL[slot]
 
@@ -341,13 +348,43 @@ function costOf(
   }
 
   if (feature) {
-    const poolId = featurePoolId(feature.name, feature.usesMax)
+    // `poolIdForFeature` prefers an explicit `resourcePoolId` over the
+    // name-derived one. That is the whole of Slice 6b's wiring on this side:
+    // without it a pool Marcus authors has no consumer, and "create a pool,
+    // spend it from the turn screen" cannot happen. With it, several features
+    // can draw on ONE shared pool at different prices — the case a per-feature
+    // `usesMax` counter has never been able to express.
+    const poolId = poolIdForFeature(feature)
     if (poolId) {
+      // Absent means 1, matching the reducer's `option.resourceAmount ?? 1`.
+      // Both sides state the default rather than one of them inferring it.
+      const amount = feature.resourceAmount ?? 1
+      // The reading comes from the POOL, not from the option's own
+      // `usesRemaining` string. Two reasons, and the first was a real bug:
+      //
+      //  1. A mutex face suppresses its pool from the resource strip on the
+      //     grounds that the face already shows it (TurnScreenD:148). For a
+      //     feature bound to an authored pool there is no `usesRemaining` —
+      //     the counter lives on the pool, not on the feature — so the label
+      //     fell back to a bare "Action", the strip stayed silent, and Hearth
+      //     Embers was invisible on the only screen that spends it.
+      //  2. The pool knows its unit. `usesRemaining` said "40/40 uses" for Lay
+      //     on Hands, which is 40 POINTS. Slice 6b fixed that in the model; it
+      //     would be strange to keep saying the wrong word on the screen.
+      //
+      // A price of 1 is not stated — every other option on the screen costs
+      // one of itself and does not say so. A price above 1 always is.
+      const pool = findPool(character, poolId)
+      const reading = pool
+        ? amount > 1
+          ? `${amount} of ${pool.current} ${pool.unit}`
+          : `${pool.current}/${pool.max} ${pool.unit}`
+        : option.usesRemaining
       return {
         slot,
         resourcePoolId: poolId,
-        resourceAmount: 1,
-        label: option.usesRemaining ? `${base} · ${option.usesRemaining} uses` : base,
+        resourceAmount: amount,
+        label: reading ? `${base} · ${reading}` : base,
       }
     }
   }
@@ -420,73 +457,32 @@ function describe(effect: ConditionEffect): string {
 
 /** Every pool the screen can show, deduplicated by id.
  *
- *  The bespoke `paladinResources` field comes first: it predates the feature
- *  list, and where a character has both, a feature named "Lay on Hands" must
- *  point at THAT pool rather than minting a second one showing the same 40
- *  points twice. Nix has only the feature form, which is the common case and
- *  the one the units correction below exists for. */
+ *  Slice 6b hollowed this out. It used to build the list itself — paladin pair,
+ *  then feature counters, deduped, with the units correction — which meant the
+ *  screen's idea of "your pools" and the reducer's idea of "the pool I am about
+ *  to charge" were two separate pieces of code that had to stay in agreement by
+ *  hand. They didn't have to disagree by much: charge one pool, display
+ *  another, and the screen still looks right.
+ *
+ *  `poolsOf()` is now the single answer, and it kept every rule this function
+ *  documented — paladin-before-feature precedence (a feature named "Lay on
+ *  Hands" must point at THAT pool rather than minting a second one showing the
+ *  same 40 points twice), the level gate, both-halves-or-untracked, and the
+ *  points/uses correction. What remains here is the projection down to what the
+ *  screen needs: `origin` and `editable` are the editor's business, not the
+ *  turn screen's, so they are dropped at this boundary rather than travelling
+ *  as dead weight into every render. */
 function resourcesOf(character: Character): TurnResource[] {
-  const out: TurnResource[] = []
-  const seen = new Set<string>()
-  const push = (resource: TurnResource) => {
-    if (seen.has(resource.id)) return
-    seen.add(resource.id)
-    out.push(resource)
-  }
-
-  const paladin = character.paladinResources
-  if (paladin?.layOnHands) {
-    push({
-      id: 'lay-on-hands',
-      name: 'Lay on Hands',
-      current: paladin.layOnHands.current,
-      max: paladin.layOnHands.max,
-      unit: 'points',
-      recharge: 'longRest',
-    })
-  }
-  if (paladin?.channelDivinity) {
-    push({
-      id: 'channel-divinity',
-      name: 'Channel Divinity',
-      current: paladin.channelDivinity.current,
-      max: paladin.channelDivinity.max,
-      unit: 'uses',
-      recharge: 'shortRest',
-    })
-  }
-
-  for (const feature of character.features ?? []) {
-    if (feature.level > character.level) continue
-    // BOTH halves, and that is the app's own definition of a tracked counter —
-    // GrimoireCard:132 and LoadoutPanel:168 say exactly this, and GrimoireCard
-    // then treats a half-declared counter as unlimited. Slice 6's reducer
-    // agrees and will not charge one. Rendering `usesCurrent ?? 0` here said
-    // "0 / 2" for something Marcus can actually press, so the strip was calling
-    // a usable homebrew ability exhausted. It is untracked; it is not shown.
-    if (feature.usesMax === undefined || feature.usesCurrent === undefined) continue
-    const id = poolIdFor(feature.name) ?? slug(feature.name)
-    push({
-      id,
-      name: feature.name,
-      current: feature.usesCurrent,
-      max: feature.usesMax,
-      // Lay on Hands is the one pool measured in POINTS. Nix's is stored as a
-      // feature with `usesMax: 40`, which is why his sheet has always read
-      // "40 uses" — the Slice 2 pinned bug. That string is characterized and
-      // may not move yet, but this array is new and owes it nothing.
-      unit: id === 'lay-on-hands' ? 'points' : 'uses',
-      recharge:
-        feature.usesPerRest === 'short'
-          ? 'shortRest'
-          : feature.usesPerRest === 'long'
-            ? 'longRest'
-            : 'manual',
-      ...(feature.source?.toLowerCase().includes('homebrew') ? { homebrew: true } : {}),
-    })
-  }
-
-  return out
+  return poolsOf(character).map(pool => ({
+    id: pool.id,
+    name: pool.name,
+    current: pool.current,
+    max: pool.max,
+    unit: pool.unit,
+    recharge: pool.recharge,
+    ...(pool.homebrew ? { homebrew: true as const } : {}),
+    ...(pool.note ? { note: pool.note } : {}),
+  }))
 }
 
 /** Slot tiers you actually possess, lowest first.

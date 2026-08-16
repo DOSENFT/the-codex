@@ -5,7 +5,7 @@
 //      reverted, must be STRICTLY equal to where it started. `toStrictEqual`
 //      and not `toEqual`, deliberately: `toEqual` treats `{usesCurrent:
 //      undefined}` as equal to `{}`, which is exactly the distinction the
-//      `featureUses: null` design exists to preserve. Using the looser matcher
+//      snapshot design exists to preserve. Using the looser matcher
 //      would make the most subtle bug in the file invisible.
 //
 //   2. THE AFFORDABILITY LOCKS. Four ways a tap can silently corrupt the
@@ -200,7 +200,7 @@ describe('the round-trip proof — undo restores, it does not recompute', () => 
       [],
     )
     expect(applied.refused).toBeUndefined()
-    expect(applied.entry!.restore.featureUses).toBeUndefined()
+    expect(applied.entry!.restore.pools).toBeUndefined()
     expect('usesCurrent' in applied.state.character.features[0]!).toBe(false)
     expect(revert(applied.state, applied.entry!)).toStrictEqual(state)
   })
@@ -504,8 +504,7 @@ describe('open world — content the engine has never seen', () => {
       [],
     )
     expect(out.refused).toBeUndefined()
-    expect(out.entry!.restore.featureUses).toBeUndefined()
-    expect(out.entry!.restore.paladinResources).toBeUndefined()
+    expect(out.entry!.restore.pools).toBeUndefined()
     expect(out.state.character).toBe(state.character)
     expect(out.state.combat.turnActions.action).toBe(true)
   })
@@ -694,5 +693,151 @@ describe('the seam closes: taking a spell blocks the next one on screen', () => 
     const applied = reduce(session(), { type: 'takeOption', option: SMITE }, [])
     const turn = composeTurn({ character: applied.state.character, combat: applied.state.combat })
     expect(turn.spellSlots.find(s => s.level === 1)).toStrictEqual({ level: 1, current: 2, max: 4 })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 6. Slice 6b — authored pools, and one restore path for all three kinds
+// ---------------------------------------------------------------------------
+//
+// The reducer's private `resolvePool` was deleted in 6b and the two bespoke
+// restore fields (`paladinResources`, `featureUses`) collapsed into one
+// `pools` map keyed by pool id. None of the tests below can pass against Slice
+// 6's code: `character.resourcePools` was not a field, so an option priced
+// against one charged nothing at all.
+
+describe('authored pools — a resource with no code written for it', () => {
+  const EMBERS = {
+    id: 'hearth-embers',
+    name: 'Hearth Embers',
+    current: 3,
+    max: 5,
+    unit: 'points' as const,
+    recharge: 'longRest' as const,
+  }
+  /** Nix, plus a pool he made up, plus a feature bound to spend it. */
+  const HEARTH: Character = {
+    ...NIX,
+    resourcePools: [EMBERS],
+    features: [
+      ...NIX.features,
+      {
+        name: 'Ember Ward',
+        level: 3,
+        description: 'Homebrew. Shelter an ally in banked warmth.',
+        actionType: 'bonusAction',
+        source: 'Homebrew',
+        resourcePoolId: 'hearth-embers',
+        resourceAmount: 2,
+      },
+    ],
+  }
+  const WARD: TakenOption = {
+    id: 'feature-ember-ward',
+    name: 'Ember Ward',
+    slot: 'bonusAction',
+    resourcePoolId: 'hearth-embers',
+    resourceAmount: 2,
+  }
+
+  it('spends it, records it by POOL ID, and puts it back exactly', () => {
+    const state = session({ character: HEARTH })
+    const applied = reduce(state, { type: 'takeOption', option: WARD }, [])
+    expect(applied.refused).toBeUndefined()
+    expect(applied.state.character.resourcePools![0]!.current).toBe(1)
+    expect(applied.entry!.restore.pools).toStrictEqual({ 'hearth-embers': 3 })
+    expect(revert(applied.state, applied.entry!)).toStrictEqual(state)
+  })
+
+  it('refuses when the pool cannot cover the price, and changes nothing', () => {
+    const thin = session({
+      character: { ...HEARTH, resourcePools: [{ ...EMBERS, current: 1 }] },
+    })
+    const out = reduce(thin, { type: 'takeOption', option: WARD }, [])
+    expect(out.refused).toBe('Not enough Hearth Embers left.')
+    expect(out.entry).toBeNull()
+    expect(out.state.character).toBe(thin.character)
+  })
+
+  it('undoes quietly when Marcus deleted the pool in between', () => {
+    // The reason `setPoolCurrent` no-ops on a missing pool. He spent embers,
+    // then deleted the pool from the editor, then hit Undo. A crash here lands
+    // mid-encounter, at the table, on the one control whose whole promise is
+    // that it is safe to press.
+    const state = session({ character: HEARTH })
+    const applied = reduce(state, { type: 'takeOption', option: WARD }, [])
+    const deleted: SessionState = {
+      ...applied.state,
+      character: { ...applied.state.character, resourcePools: [] },
+    }
+    const back = revert(deleted, applied.entry!)
+    expect(back.character.resourcePools).toEqual([])
+    // The rest of the entry still reverted — one dead pool does not abort the
+    // whole restoration.
+    expect(back.combat).toStrictEqual(state.combat)
+  })
+
+  it('clamps the restore to the max the pool has NOW, not the one it had then', () => {
+    const state = session({ character: HEARTH })
+    const applied = reduce(state, { type: 'takeOption', option: WARD }, [])
+    const shrunk: SessionState = {
+      ...applied.state,
+      character: {
+        ...applied.state.character,
+        resourcePools: [{ ...EMBERS, current: 1, max: 2 }],
+      },
+    }
+    expect(revert(shrunk, applied.entry!).character.resourcePools![0]!.current).toBe(2)
+  })
+
+  it('prices the composed option from the binding, not from the feature name', () => {
+    // The end-to-end wiring: compose must offer "Ember Ward" as costing 2 from
+    // hearth-embers, and the reducer must charge exactly that. If these two
+    // ever drift the app deducts from a pool the screen is not showing.
+    const turn = composeTurn({ character: HEARTH, combat: FIGHTING })
+    const all = [...turn.ranked, ...turn.rest, ...turn.mutex.flatMap(g => g.faces)]
+    const ward = all.find(o => o.name === 'Ember Ward')
+    expect(ward!.cost).toMatchObject({ resourcePoolId: 'hearth-embers', resourceAmount: 2 })
+    expect(turn.resources.find(r => r.id === 'hearth-embers')).toMatchObject({
+      current: 3,
+      max: 5,
+      unit: 'points',
+      homebrew: true,
+    })
+
+    const applied = reduce(session({ character: HEARTH }), {
+      type: 'takeOption',
+      option: takenFrom(ward!),
+    }, [])
+    expect(applied.state.character.resourcePools![0]!.current).toBe(1)
+  })
+})
+
+describe('homebrew conditions — a condition Marcus wrote that actually bites', () => {
+  it('closes the slot it says it closes', () => {
+    // Before 6b this was a label the app displayed and then ignored: an
+    // unknown condition was all-neutral, so "you can't take Reactions" blocked
+    // nothing. That is the 🔴 half-built-feature rule in miniature.
+    const bound: Character = {
+      ...NIX,
+      conditions: ['Hearthbound'],
+      customConditions: [
+        { name: 'Hearthbound', blocks: ['reaction'], note: 'The hearth holds you.' },
+      ],
+    }
+    const turn = composeTurn({ character: bound, combat: FIGHTING })
+    const all = [...turn.ranked, ...turn.rest, ...turn.mutex.flatMap(g => g.faces)]
+    const reactions = all.filter(o => o.cost.slot === 'reaction')
+    expect(reactions.length).toBeGreaterThan(0)
+    for (const o of reactions) expect(o.available).toBe(false)
+    expect(turn.upon.find(u => u.name === 'Hearthbound')?.text).toContain('The hearth holds you.')
+  })
+
+  it('leaves an unauthored name exactly as harmless as it was', () => {
+    const typo: Character = { ...NIX, conditions: ['Hearthbownd'] }
+    const turn = composeTurn({ character: typo, combat: FIGHTING })
+    const all = [...turn.ranked, ...turn.rest, ...turn.mutex.flatMap(g => g.faces)]
+    expect(all.filter(o => o.cost.slot === 'reaction').some(o => o.available)).toBe(true)
+    expect(turn.upon.find(u => u.name === 'Hearthbownd')).toBeDefined()
   })
 })

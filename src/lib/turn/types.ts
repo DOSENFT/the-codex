@@ -137,6 +137,11 @@ export interface TurnResource {
   unit: 'points' | 'uses' | 'dice'
   recharge: 'shortRest' | 'longRest' | 'dawn' | 'never' | 'manual'
   homebrew?: boolean
+  /** Marcus's own words about the pool, carried to the table verbatim.
+   *  Slice 6b: the whole point of letting him author a pool is that he can say
+   *  what it is for. Dropping the sentence at this boundary would make the
+   *  editor's note field a place text goes to die. */
+  note?: string
 }
 
 /** What is true of you and the board — the "upon you" zone.

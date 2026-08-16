@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Slice 6b — the merged resources surface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../../src/design/tokens.css">
+<style>
+/* ============================================================================
+   THE MERGE — what each variant contributed, and what was dropped
+   ----------------------------------------------------------------------------
+   FROM 2 (THE DIAL)   the card, and the two honest forms of a pool: pips when
+                       you can count them, a numeral and a bar when you cannot.
+                       This is the surface Marcus looks at 95% of the time, so
+                       it wins the argument about legibility at arm's length.
+   FROM 3 (THE SPREAD) the FORM — segmented controls instead of dropdowns,
+                       current and max side by side, a note with a hint that
+                       says where the note will show up.
+   FROM 1 (THE LEDGER) the thesis that editing happens IN PLACE. No modal, no
+                       sidebar, no second layout for the phone.
+   DROPPED             V1's 34px steppers (below the 48px floor), V3's 168px
+                       permanent sidebar, which a 390px phone cannot pay for.
+
+   ITERATION 2 fixed the one real fault in the merge: at 820px every card was
+   a wide empty band with two pips adrift in it. The card is now a CONTAINER
+   QUERY, not a media query — identity, value and Edit ride one row when the
+   card is wide and stack when it is narrow. One layout, two shapes, and it is
+   the card that decides, so the same component works inside the turn screen's
+   third column as it does full-bleed on a phone.
+
+   AESTHETIC
+   Warm near-black vellum lit from within; elevation is tone, never shadow.
+   A resource IS its number, so the number is stated in every form the card
+   takes — pips carry a numeral too, because eight dots is not a reading.
+   Gold names the mechanic, cream speaks the sentence, ember is spent only on
+   cost and warning. Cinzel names things, at 20px or never. Hairlines divide
+   where a lighter palette would need a box. Every target a fingertip must
+   find is 48px, measured, including the pips.
+   ========================================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #050504; font-family: var(--d-font-body); display: flex; gap: 28px; padding: 20px; align-items: flex-start; }
+.frame { background: var(--d-bg); border: 1px solid var(--d-rule-lit); border-radius: 14px; overflow: hidden; }
+.cap { font-family: var(--d-font-mono); font-size: 12px; color: var(--d-dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; display: block; }
+
+.led { color: var(--d-cream); font-size: var(--d-fs-body); }
+.led .hd {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: var(--d-s4); border-bottom: 1px solid var(--d-rule);
+}
+.led .hd h2 { font-family: var(--d-font-display); font-size: var(--d-fs-title); font-weight: 600; }
+.led .hd .n { font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-dim); }
+.sect { font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-dim);
+  text-transform: uppercase; letter-spacing: .1em; padding: var(--d-s4) var(--d-s4) var(--d-s2); }
+.stack { padding: 0 var(--d-s4) var(--d-s4); display: grid; gap: var(--d-s3); }
+
+/* ---- the card. The container query lives HERE, so the card is portable. ---- */
+.pool { background: var(--d-e1); border: 1px solid var(--d-rule); border-radius: var(--d-radius);
+  container-type: inline-size; }
+.pool .top {
+  display: grid; align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "id ed" "val val";
+  gap: var(--d-s2) var(--d-s4);
+  padding: var(--d-s3) var(--d-s3) var(--d-s3) var(--d-s4);
+}
+.idc { grid-area: id; }
+.val { grid-area: val; }
+.pool .ed { grid-area: ed; align-self: start; }
+@container (min-width: 560px) {
+  .pool .top { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "id val ed"; }
+  .pool .ed { align-self: center; }
+}
+.pool .nm { font-family: var(--d-font-display); font-size: var(--d-fs-title); font-weight: 500; color: var(--d-cream); line-height: var(--d-lh-tight); }
+.pool .sub { display: block; font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-dim); margin-top: 3px; }
+.pool .sub b { color: var(--d-gold); font-weight: 500; }
+.pool .sub .hb { color: var(--d-gold); }
+.pool .ed {
+  min-width: 48px; min-height: 48px; background: transparent; border: 0;
+  color: var(--d-dim); font-family: var(--d-font-body); font-size: 14px; cursor: pointer; border-radius: var(--d-radius);
+}
+
+/* form A — countable: the pips ARE the stepper, as they already are in the app */
+.pips { display: flex; flex-wrap: wrap; margin: 0 -6px; }
+.pipbtn { width: 48px; height: 48px; display: grid; place-items: center; background: transparent; border: 0; cursor: pointer; }
+.pip { width: 24px; height: 24px; border-radius: 50%; background: var(--d-amber); border: 1px solid var(--d-amber); }
+.pip.out { background: transparent; border-color: var(--d-rule-lit); }
+
+/* form B — too many to count: the numeral, a bar, and two real 48px steppers */
+.gauge { display: flex; align-items: center; gap: var(--d-s3); }
+.gauge .v { font-family: var(--d-font-mono); font-size: 30px; color: var(--d-gold); line-height: 1; }
+.gauge .of { font-family: var(--d-font-mono); font-size: 15px; color: var(--d-dim); }
+.gauge .sp { margin-left: auto; display: flex; gap: var(--d-s2); }
+.gauge .sp button {
+  width: 48px; height: 48px; border: 1px solid var(--d-rule-lit); background: var(--d-bg);
+  color: var(--d-cream); font-size: 20px; line-height: 1; border-radius: var(--d-radius); cursor: pointer;
+  font-family: var(--d-font-body);
+}
+.track { height: 3px; background: var(--d-rule); border-radius: 2px; margin: 0 var(--d-s4) var(--d-s3); overflow: hidden; }
+.track i { display: block; height: 100%; background: var(--d-gold); }
+.track i.low { background: var(--d-ember); }
+
+/* ---- the same card, expanded into the form. No modal, no second layout. ---- */
+.pool.editing { border-color: var(--d-rule-lit); background: var(--d-e2); }
+.form { padding: 0 var(--d-s4) var(--d-s4); }
+.form .fr { margin-bottom: var(--d-s3); }
+.form label { display: block; font-family: var(--d-font-mono); font-size: var(--d-fs-label);
+  text-transform: uppercase; letter-spacing: .08em; color: var(--d-dim); margin-bottom: 5px; }
+.form input, .form textarea {
+  width: 100%; min-height: 48px; background: var(--d-bg); color: var(--d-cream);
+  border: 1px solid var(--d-rule-lit); border-radius: var(--d-radius); padding: 12px;
+  font-family: var(--d-font-body); font-size: var(--d-fs-body);
+}
+.form textarea { min-height: 0; }
+.form .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--d-s3); }
+.segs { display: flex; border: 1px solid var(--d-rule-lit); border-radius: var(--d-radius); overflow: hidden; }
+.segs button { flex: 1; min-height: 48px; background: var(--d-bg); border: 0; border-right: 1px solid var(--d-rule);
+  color: var(--d-dim); font-family: var(--d-font-body); font-size: 13px; cursor: pointer; }
+.segs button:last-child { border-right: 0; }
+.segs button.on { background: var(--d-e3); color: var(--d-gold); }
+.hint { font-size: 13px; color: var(--d-dim); line-height: 1.4; margin-top: 6px; }
+.foot { display: flex; gap: var(--d-s3); margin-top: var(--d-s4); }
+.foot button { min-height: 48px; border-radius: var(--d-radius); cursor: pointer; }
+.foot .save { flex: 1; background: transparent; border: 1px solid var(--d-gold); color: var(--d-gold);
+  font-family: var(--d-font-display); font-size: var(--d-fs-title); font-weight: 500; }
+.foot .cancel { flex: 1; background: transparent; border: 1px solid var(--d-rule-lit); color: var(--d-cream);
+  font-family: var(--d-font-body); font-size: var(--d-fs-body); }
+.foot .del { flex: 0 0 92px; background: transparent; border: 1px solid var(--d-rule-lit);
+  color: var(--d-dim); font-family: var(--d-font-body); font-size: var(--d-fs-body); }
+
+/* ---- conditions: the same card, because it is the same act ---- */
+.cond { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center;
+  background: var(--d-e1); border: 1px solid var(--d-rule); border-radius: var(--d-radius);
+  padding: var(--d-s3) var(--d-s3) var(--d-s3) var(--d-s4); }
+.cond .nm { font-size: var(--d-fs-body); color: var(--d-cream); }
+.cond .tx { display: block; font-size: 13px; color: var(--d-dim); line-height: 1.35; margin-top: 3px; }
+.cond .on { display: block; font-family: var(--d-font-mono); font-size: var(--d-fs-label); color: var(--d-verdant); margin-top: 4px; }
+.cond .ed { min-width: 48px; min-height: 48px; background: transparent; border: 0; color: var(--d-dim); font-size: 14px; cursor: pointer; }
+.newbtn { min-height: 48px; width: 100%; background: transparent; border: 1px dashed var(--d-rule-lit);
+  border-radius: var(--d-radius); color: var(--d-gold); font-family: var(--d-font-body); font-size: var(--d-fs-body); cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div>
+  <span class="cap">iPad — 820 · the surface at the table</span>
+  <div class="frame led" style="width:820px">
+    <div class="hd"><h2>Resources</h2><span class="n">4 pools · 2 conditions</span></div>
+
+    <div class="sect">Pools</div>
+    <div class="stack">
+
+      <div class="pool">
+        <div class="top">
+          <div class="idc"><span class="nm">Lay on Hands</span><span class="sub">points · recharges on a long rest</span></div>
+          <div class="val"><div class="gauge">
+            <span class="v">14</span><span class="of">/ 40</span>
+            <span class="sp"><button>−</button><button>+</button></span>
+          </div></div>
+          <button class="ed">Edit</button>
+        </div>
+        <div class="track"><i style="width:35%"></i></div>
+      </div>
+
+      <div class="pool">
+        <div class="top">
+          <div class="idc"><span class="nm">Channel Divinity</span><span class="sub"><b>1/2</b> uses · recharges on a short rest</span></div>
+          <div class="val"><div class="pips">
+            <span class="pipbtn"><span class="pip"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+          </div></div>
+          <button class="ed">Edit</button>
+        </div>
+      </div>
+
+      <div class="pool editing">
+        <div class="top">
+          <div class="idc"><span class="nm">Hearthfire</span><span class="sub"><b>6/8</b> points · dawn · <span class="hb">homebrew</span></span></div>
+          <button class="ed" style="color:var(--d-gold)">Editing</button>
+        </div>
+        <div class="form">
+          <div class="fr"><label>Name</label><input value="Hearthfire"></div>
+          <div class="two">
+            <div class="fr"><label>Current</label><input value="6"></div>
+            <div class="fr"><label>Max</label><input value="8"></div>
+          </div>
+          <div class="fr"><label>Unit</label>
+            <div class="segs"><button class="on">points</button><button>uses</button><button>dice</button></div>
+          </div>
+          <div class="fr"><label>Recharges on</label>
+            <div class="segs"><button>short rest</button><button>long rest</button><button class="on">dawn</button><button>never</button></div>
+          </div>
+          <div class="fr"><label>Note</label>
+            <textarea rows="2">Spent to fuel Hearthfire Manifest.</textarea>
+            <p class="hint">Shown on the turn screen when this pool is the reason something is blocked.</p>
+          </div>
+          <div class="foot">
+            <button class="del">Delete</button>
+            <button class="cancel">Cancel</button>
+            <button class="save">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pool">
+        <div class="top">
+          <div class="idc"><span class="nm">Divine Sense</span><span class="sub"><b>0/4</b> uses · recharges on a long rest</span></div>
+          <div class="val"><div class="pips">
+            <span class="pipbtn"><span class="pip out"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+          </div></div>
+          <button class="ed">Edit</button>
+        </div>
+      </div>
+
+      <button class="newbtn">+ New pool</button>
+    </div>
+
+    <div class="sect">Conditions</div>
+    <div class="stack">
+      <div class="cond">
+        <div><span class="nm">Hearthbound</span>
+          <span class="tx">While within 10 ft of your Hearthfire, you have advantage on saves against being frightened.</span>
+          <span class="on">● active</span>
+        </div>
+        <button class="ed">Edit</button>
+      </div>
+      <div class="cond">
+        <div><span class="nm">Ember-Marked</span>
+          <span class="tx">The next attack against this creature before the end of your next turn deals +1d6 fire.</span>
+        </div>
+        <button class="ed">Edit</button>
+      </div>
+      <button class="newbtn">+ New condition</button>
+    </div>
+  </div>
+</div>
+
+<div>
+  <span class="cap">iPhone — 390 · the same component, one shape narrower</span>
+  <div class="frame led" style="width:390px">
+    <div class="hd"><h2>Resources</h2><span class="n">4 pools</span></div>
+    <div class="sect">Pools</div>
+    <div class="stack">
+      <div class="pool">
+        <div class="top">
+          <div class="idc"><span class="nm">Lay on Hands</span><span class="sub">points · long rest</span></div>
+          <div class="val"><div class="gauge">
+            <span class="v">14</span><span class="of">/ 40</span>
+            <span class="sp"><button>−</button><button>+</button></span>
+          </div></div>
+          <button class="ed">Edit</button>
+        </div>
+        <div class="track"><i style="width:35%"></i></div>
+      </div>
+      <div class="pool">
+        <div class="top">
+          <div class="idc"><span class="nm">Channel Divinity</span><span class="sub"><b>1/2</b> uses · short rest</span></div>
+          <div class="val"><div class="pips">
+            <span class="pipbtn"><span class="pip"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+          </div></div>
+          <button class="ed">Edit</button>
+        </div>
+      </div>
+      <div class="pool editing">
+        <div class="top">
+          <div class="idc"><span class="nm">Hearthfire</span><span class="sub"><b>6/8</b> points · dawn · <span class="hb">homebrew</span></span></div>
+          <button class="ed" style="color:var(--d-gold)">Editing</button>
+        </div>
+        <div class="form">
+          <div class="fr"><label>Name</label><input value="Hearthfire"></div>
+          <div class="two">
+            <div class="fr"><label>Current</label><input value="6"></div>
+            <div class="fr"><label>Max</label><input value="8"></div>
+          </div>
+          <div class="fr"><label>Unit</label>
+            <div class="segs"><button class="on">points</button><button>uses</button><button>dice</button></div>
+          </div>
+          <div class="fr"><label>Recharges on</label>
+            <div class="segs"><button>short</button><button>long</button><button class="on">dawn</button><button>never</button></div>
+          </div>
+          <div class="foot">
+            <button class="del">Delete</button>
+            <button class="save">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="pool">
+        <div class="top">
+          <div class="idc"><span class="nm">Divine Sense</span><span class="sub"><b>0/4</b> uses · long rest</span></div>
+          <div class="val"><div class="pips">
+            <span class="pipbtn"><span class="pip out"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+            <span class="pipbtn"><span class="pip out"></span></span>
+          </div></div>
+          <button class="ed">Edit</button>
+        </div>
+      </div>
+      <button class="newbtn">+ New pool</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

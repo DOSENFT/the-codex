@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { X, Shield } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { type Character, type ClassFeature } from '../lib/character'
+import { poolsOf } from '../lib/rules-2024/resources'
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
@@ -109,6 +110,23 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = '' }
   }, [isOpen])
+
+  /** Every pool this feature could draw on, plus — if it is bound to a pool
+   *  that has since been deleted — that dead id, kept in the list on purpose.
+   *  A <select> whose value matches no option renders blank, and the next save
+   *  would silently drop a binding Marcus never chose to remove. */
+  const poolOptions = useMemo(() => {
+    const pools = poolsOf(character)
+    const options = [
+      { value: '', label: 'Its own uses' },
+      ...pools.map(p => ({ value: p.id, label: `${p.name} (${p.current}/${p.max} ${p.unit})` })),
+    ]
+    const bound = form.resourcePoolId
+    if (bound && !pools.some(p => p.id === bound)) {
+      options.push({ value: bound, label: `${bound} — missing` })
+    }
+    return options
+  }, [character, form.resourcePoolId])
 
   const updateField = useCallback(<K extends keyof ClassFeature>(key: K, value: ClassFeature[K]) => {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -288,6 +306,41 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
                 }}
               />
             </div>
+
+            {/* The binding. Without this a pool Marcus authors has nothing in
+                the app able to spend it — he can create "Hearth Embers" and
+                then watch every feature keep drawing on its own private
+                counter. The empty value is the behaviour every feature has
+                always had, so an untouched feature is unchanged. */}
+            <div className="grid grid-cols-2 gap-3">
+              <Select
+                label="Spends From"
+                options={poolOptions}
+                value={form.resourcePoolId ?? ''}
+                onChange={e =>
+                  updateField('resourcePoolId', (e.target.value || undefined) as string | undefined)
+                }
+              />
+              <Input
+                label="Amount Per Use"
+                placeholder="1"
+                type="number"
+                value={form.resourceAmount !== undefined ? String(form.resourceAmount) : ''}
+                onChange={e => {
+                  const val = Number(e.target.value)
+                  updateField(
+                    'resourceAmount',
+                    e.target.value === '' || !Number.isFinite(val) ? undefined : Math.max(0, Math.round(val)),
+                  )
+                }}
+              />
+            </div>
+            {form.resourcePoolId && !poolsOf(character).some(p => p.id === form.resourcePoolId) && (
+              <p className="text-[10px] text-ember">
+                That pool no longer exists, so this feature currently costs nothing. Pick another,
+                or clear the binding.
+              </p>
+            )}
           </GlassCard>
 
           {/* Combat Stats */}

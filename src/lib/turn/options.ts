@@ -32,6 +32,7 @@ import {
   featureActionType,
 } from '../combat-state'
 import { getFeatTips } from '../skill-guide'
+import { findPool, spendable } from '../rules-2024/resources'
 
 export interface ActionOption {
   name: string
@@ -312,6 +313,21 @@ export function categorizeTurnOptions(
       unaffordableReason = feature.usesPerRest
         ? `No uses left until a ${feature.usesPerRest} rest`
         : 'No uses left'
+    }
+    // Slice 6b. A feature BOUND to a pool has no counter of its own for the
+    // check above to read, so before this it was offered as live right up to
+    // the tap and then refused by the reducer. The row and the reducer must
+    // agree about affordability, or the screen is lying about what will happen
+    // — and at a table the tap that gets refused is the one that costs the
+    // round. Only an explicit binding is checked here: a feature drawing on
+    // its own counter is already covered, in its own words.
+    if (feature.resourcePoolId) {
+      const pool = findPool(character, feature.resourcePoolId)
+      const amount = feature.resourceAmount ?? 1
+      if (pool && !spendable(pool, amount)) {
+        if (!build.includeUnaffordable) continue
+        unaffordableReason = `Not enough ${pool.name} left`
+      }
     }
 
     const actionType = featureActionType(feature)

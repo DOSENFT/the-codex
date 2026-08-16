@@ -65,7 +65,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [ ] 6a — the shrink, split out of 6: `CombatHelper` (1,746 LOC) and `TurnSummary` re-expressed over the reducer *(deferred deliberately — see the Slice 6 section)*
 
 **Wave 1b — homebrew is the main case** *(added 2026-08-16)*
-- [ ] 6b — generic `ResourcePool` (closes the one real homebrew hole) + `ResourceEditor` + `ConditionEditor`; `paladinResources` kept and adapted, never removed
+- [x] 6b — generic `ResourcePool` (closes the one real homebrew hole) + `ResourceEditor` + `ConditionEditor`; `paladinResources` kept and adapted, never removed **— DONE 2026-08-16, see below**
 - [ ] 6c — the open-world pass: a fixture of **entirely invented content** must compose, rank, spend and undo correctly
 
 **Wave 2 — the missing 40% of combat**
@@ -624,6 +624,104 @@ genuinely live D screen**; the shrink is Slice 6a, to be done against the reduce
 and against Slice 2's characterization tests. Nothing was dropped — it was moved and named.
 
 ---
+
+## ✅ Slice 6b — HOMEBREW IS THE MAIN CASE, done 2026-08-16
+
+**The hole this closed.** Before 6b the app could count exactly three things: the paladin pair
+(`paladinResources`), a per-feature `usesMax/usesCurrent` counter, and spell slots. A resource
+Marcus invented had nowhere to live. Worse, "where does this pool live" was implemented **twice** —
+privately in `reduce.ts` (`resolvePool`/`PoolSite`) and again by hand in `compose.ts`
+(`resourcesOf`) — and the two had to agree about precedence, ids and tracked-ness by hand. When
+they disagreed the app charged one pool and displayed another, which still *looks* correct on
+screen. That whole class of bug is gone: there is one model.
+
+### The model — `src/lib/rules-2024/resources.ts`
+A **projection with write-back**, never a migration. `paladinResources` is untouched on disk and
+stays the authority for the paladin pair; feature counters stay on their features; authored pools
+live in the new `character.resourcePools`. `poolsOf(character)` reads all three, in that
+precedence, deduped by id.
+
+- `poolsOf` · `findPool` · `spendable` · `setPoolCurrent` · `upsertPool` · `removePool`
+  · `freePoolId` · `rechargePools` · `poolIdForFeature`
+- `setPoolCurrent` is the **only writer**, so the clamp cannot differ by site — including on a
+  *restore*, which is clamped to the max the pool has NOW (he can shrink a pool between spending it
+  and undoing the spend). It returns the character **by identity** when nothing moved, because
+  `reduce` uses `next !== character` to decide whether an event is worth logging.
+- `rechargePools` deliberately **refuses to touch** the paladin pair and feature counters —
+  `longRest`/`shortRest` in `character.ts` already own those, and 2024's Channel Divinity (+1 use
+  on a short rest, *not* all of them) is exactly the subtlety a second writer would flatten.
+
+### What changed around it
+- `reduce.ts` — `resolvePool`/`PoolSite` **deleted**; affordability and spend now go through
+  `findPool`/`spendable`/`setPoolCurrent`.
+- `compose.ts` — `resourcesOf` collapsed from ~62 lines to a `poolsOf` projection.
+- `events.ts` — `Restore.paladinResources` + `Restore.featureUses` collapsed into one
+  `pools?: Record<string, number>` keyed by pool id. (Safe *only* because the turn screen has never
+  been outside `?d=1` on `v1`; that window closes the moment `v1` merges.)
+- `character.ts` — `resourcePools` and `customConditions` on `Character`, with `loadCharacter`
+  defaults; `resourcePoolId`/`resourceAmount` on `ClassFeature`; both rests wired.
+- `conditions.ts` — `CustomCondition`, and a homebrew condition now **beats the book**. The
+  opposite would let Marcus author a condition, save it, see it in his list, and have the app
+  quietly disregard it. A condition of his that declares `blocks: ['reaction']` genuinely closes
+  the reaction row.
+
+### The UI — `src/components/resources/`
+`ResourceLedger.tsx` + `resources-d.css`, ported from the locked mockup
+`docs/plans/codex-v1/mockups/6b-resources/merged.html` (three labelled variants → shot → judged →
+merged → one iteration on a real observed fault). Wired into `CharacterPage` as a new **Resources**
+section, above the old read-only *Class Resources* panel, which is left **untouched** — it is still
+the only place Aura Range is shown. Folding the two together is 6c's problem, not a reason to
+delete a working panel.
+
+Three rules in that stylesheet are load-bearing and are marked as such in its header: the card is a
+**container query** (a media query made every card a wide empty band inside a narrow column), every
+pip is a **48px button around a 24px dot**, and `--d-dim` is for labels, never a sentence.
+
+`FeatureEditor` gained **Spends From** + **Amount Per Use**. Without them an authored pool has no
+consumer in the app at all, and this slice's proof cannot be met through the UI.
+
+### Two bugs the browser proof found that no unit test would have
+Both were found by *driving the built app*, and both are now pinned by tests in `compose.test.ts`
+that fail against the code of an hour earlier:
+
+1. **The pool was invisible on the only screen that spends it.** A mutex face suppresses its pool
+   from the resource strip on the grounds that the face already shows it
+   (`TurnScreenD.tsx:148`) — but the face's label came from `option.usesRemaining`, which a
+   pool-bound feature does not have. The face said "Action", the strip said nothing. `costOf` now
+   reads the pool itself: **`Action · 2 of 5 points`**. It also fixes the Slice 2 pinned wart in
+   passing — Lay on Hands now reads *40 points*, not *40 "uses"*.
+2. **The row stayed live and the reducer refused the tap.** `options.ts` read affordability off
+   `feature.usesCurrent`, which a bound feature does not have. At a table the tap that gets refused
+   is the one that costs you the round. The row now says **"Not enough Hearth Embers left"** before
+   you reach for it.
+
+### Proof
+`docs/plans/codex-v1/reference/prove-slice6b.mjs` — Playwright against a real `vite build`, and
+every step is a real tap:
+
+> Marcus opens the sheet, taps **+ New pool**, types *Hearth Embers* 5/5 points on a long rest with
+> a note in his own words, saves. Goes to the Grimoire, adds a feature *Ember Ward*, sets **Spends
+> From → Hearth Embers**, **Amount Per Use → 2**. Opens the turn screen: the option is priced
+> *Action · 2 of 5 points*. Taps it → 3 left, on screen and in `localStorage`, with an
+> **Undo Ember Ward**. Reloads the page (the iPad suspend) → still 3, undo still offered. Undoes →
+> 5 again, log empty. Spends it dry → the row greys out and says why.
+
+**24/24 checks pass, console clean.** No code was written for "Hearth Embers".
+
+**Verification totals:** `npx tsc -b` clean · `npx vitest run` **221/221** across 9 files (183 at
+the start of 6b) · `npx vite build` clean · browser proof 24/24.
+
+Shots: `_shots-app/slice6b-ledger-phone.png` (390px), `slice6b-ledger-ipad.png` (1024px — the
+container query in action: every card becomes one row), `slice6b-turn-phone.png`.
+
+### Left for 6c, deliberately, and named so it cannot be forgotten
+- **Authoring from the turn screen.** A pool can be *spent* at the table but must be *created* on
+  the sheet. Fine for tonight; it should be reachable from the resource strip.
+- **The two resource panels overlap.** *Class Resources* is read-only and duplicates Lay on Hands
+  and Channel Divinity, but uniquely shows Aura Range. Merge it into the ledger — do not delete it
+  before Aura Range has somewhere to live.
+- **A feature bound to a deleted pool currently costs nothing** (the reducer finds no site and
+  charges nothing). The editor warns about this in words; it should probably refuse instead.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

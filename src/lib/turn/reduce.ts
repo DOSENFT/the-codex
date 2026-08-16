@@ -30,11 +30,11 @@
 // the four ways a tap can quietly corrupt the sheet, and they are the four
 // things worth a second lock.
 
-import type { Character, ClassFeature, PaladinResources, SpellSlots } from '../character'
+import type { Character, ClassFeature, SpellSlots } from '../character'
 import type { CombatState } from '../combat-state'
 import { spellSlotSpentThisTurn } from '../rules-2024/economy'
+import { findPool, setPoolCurrent, spendable } from '../rules-2024/resources'
 import { LOG_DEPTH, type CombatEvent, type LogEntry, type Restore, type TakenOption } from './events'
-import { featurePoolId } from './ids'
 import type { TurnOption } from './types'
 
 /** The two things a turn can change, together.  Deliberately NOT a class and
@@ -117,59 +117,24 @@ export function reconcile(state: SessionState): SessionState {
 // Resource pools
 // ---------------------------------------------------------------------------
 
-/** Where a pool actually lives on the sheet.  Resolved fresh on every event,
- *  because Marcus can rename or delete a feature between taking an action and
- *  undoing it. */
-type PoolSite =
-  | { kind: 'paladin'; key: 'layOnHands' | 'channelDivinity'; name: string; current: number }
-  | { kind: 'feature'; index: number; name: string; current: number }
-
-/** Find the pool an option is priced against.
- *
- *  Precedence mirrors `resourcesOf()` in compose.ts exactly: the bespoke
- *  `paladinResources` field wins over a same-named feature, because that is
- *  the pool the screen is showing. If those two ever disagree the app charges
- *  one and displays the other, so this order is load-bearing, not stylistic.
- *
- *  Returns null for a pool the sheet does not track — an id from a deleted
- *  feature, or a homebrew option whose author priced it against something they
- *  never gave a `usesMax`. Null means "charge nothing and carry on", never
- *  "refuse": the alternative is an ability Marcus can see and cannot press. */
-function resolvePool(character: Character, poolId: string): PoolSite | null {
-  const paladin = character.paladinResources
-  if (poolId === 'lay-on-hands' && paladin?.layOnHands) {
-    return { kind: 'paladin', key: 'layOnHands', name: 'Lay on Hands', current: paladin.layOnHands.current }
-  }
-  if (poolId === 'channel-divinity' && paladin?.channelDivinity) {
-    return {
-      kind: 'paladin',
-      key: 'channelDivinity',
-      name: 'Channel Divinity',
-      current: paladin.channelDivinity.current,
-    }
-  }
-
-  const features = character.features ?? []
-  // FIRST match only, and `revert` restores the first match only. Two features
-  // sharing a name is a pathological sheet; symmetric handling means it stays
-  // merely odd instead of becoming corrupting.
-  const index = features.findIndex(f => featurePoolId(f.name, f.usesMax) === poolId)
-  if (index < 0) return null
-
-  const feature = features[index]!
-  // UNTRACKED unless BOTH halves of the counter are present, which is the rule
-  // the rest of the app already runs on — GrimoireCard:132 and
-  // LoadoutPanel:168 both define `hasUses` exactly this way, and GrimoireCard
-  // then treats a half-declared counter as unlimited rather than as empty.
-  //
-  // The first draft of this function used AND instead of OR and so read a
-  // missing `usesCurrent` as zero, which refused a homebrew feature that the
-  // Grimoire happily lets Marcus press. Same sheet, two answers, depending on
-  // which screen he was looking at. This is the app's answer.
-  if (feature.usesMax === undefined || feature.usesCurrent === undefined) return null
-
-  return { kind: 'feature', index, name: feature.name, current: feature.usesCurrent }
-}
+// Slice 6b deleted this file's private `resolvePool`/`PoolSite` pair in favour
+// of `rules-2024/resources.ts`. The deletion is the point of the slice, not a
+// tidy-up: that function and `resourcesOf()` in compose.ts were two independent
+// implementations of "where does this pool live", and they had to agree on
+// precedence, on ids, and on what counts as a tracked counter, forever, by
+// hand. Whenever they disagreed the app would charge one pool and display
+// another — the failure that still looks correct on screen.
+//
+// Everything the old function documented is preserved in `poolsOf()`:
+// paladin-before-feature precedence, first-match-only, and BOTH halves of a
+// counter required before it can be charged. It adds the third site,
+// `character.resourcePools`, which is what Marcus authors himself.
+//
+// `findPool` still returns null for a pool the sheet does not track — an id
+// from a deleted feature, or a homebrew option priced against something that
+// was never given a `usesMax`. Null still means "charge nothing and carry on",
+// never "refuse": the alternative is an ability Marcus can see and cannot
+// press.
 
 // ---------------------------------------------------------------------------
 // Snapshots
@@ -262,11 +227,9 @@ function takeOption(
 
   // -- 3. the resource pool --------------------------------------------------
   const amount = option.resourceAmount ?? 1
-  const site = option.resourcePoolId ? resolvePool(character, option.resourcePoolId) : null
-  if (site && amount > 0) {
-    if (site.current < amount) {
-      return refuse(state, `Not enough ${site.name} left.`)
-    }
+  const site = option.resourcePoolId ? findPool(character, option.resourcePoolId) : null
+  if (site && amount > 0 && !spendable(site, amount)) {
+    return refuse(state, `Not enough ${site.name} left.`)
   }
 
   // -- everything is affordable; snapshot, then spend ------------------------
@@ -279,25 +242,15 @@ function takeOption(
   }
 
   if (site && amount > 0) {
-    if (site.kind === 'paladin') {
-      const paladin = nextCharacter.paladinResources!
-      restore.paladinResources = snap(paladin)
-      nextCharacter = {
-        ...nextCharacter,
-        paladinResources: {
-          ...paladin,
-          [site.key]: { ...paladin[site.key], current: site.current - amount },
-        } as PaladinResources,
-      }
-    } else {
-      // `site.current` is the declared value, never a `?? 0` default — see
-      // resolvePool: a half-declared counter never resolves to a site at all.
-      restore.featureUses = { [site.name]: site.current }
-      const features = nextCharacter.features.map((f, i) =>
-        i === site.index ? { ...f, usesCurrent: site.current - amount } : f,
-      )
-      nextCharacter = { ...nextCharacter, features }
-    }
+    // One line for all three kinds of pool. `site.current` is the declared
+    // value, never a `?? 0` default — `poolsOf` skips a half-declared counter
+    // entirely, so it can never resolve to a site in the first place.
+    //
+    // The snapshot is keyed by POOL ID, and it is taken BEFORE the write. That
+    // ordering is the whole of Undo's correctness: `setPoolCurrent` clamps, and
+    // a clamp destroys the number an inverse would need to run backwards.
+    restore.pools = { [site.id]: site.current }
+    nextCharacter = setPoolCurrent(nextCharacter, site.id, site.current - amount)
   }
 
   const closesSlot =
@@ -433,21 +386,22 @@ export function revert(state: SessionState, entry: LogEntry): SessionState {
   if (restore.spellSlots !== undefined) {
     character = { ...character, spellSlots: snap(restore.spellSlots) }
   }
-  if (restore.paladinResources !== undefined) {
-    character = { ...character, paladinResources: snap(restore.paladinResources) }
-  }
-  if (restore.featureUses !== undefined) {
-    const uses = restore.featureUses
-    const done = new Set<string>()
-    character = {
-      ...character,
-      // FIRST match only, mirroring resolvePool. Two features sharing a name
-      // is a pathological sheet; symmetric handling keeps it merely odd.
-      features: (character.features ?? []).map(f => {
-        if (!Object.prototype.hasOwnProperty.call(uses, f.name) || done.has(f.name)) return f
-        done.add(f.name)
-        return { ...f, usesCurrent: uses[f.name]! }
-      }),
+  if (restore.pools !== undefined) {
+    // One loop, whatever kind of pool each id turns out to name. The two
+    // hand-written branches this replaced could only ever put back the two
+    // kinds of pool that existed when they were written.
+    //
+    // `setPoolCurrent` is deliberately forgiving here, and both of its
+    // forgivenesses matter at a real table:
+    //   · A pool that no longer exists is a QUIET NO-OP. Marcus can delete a
+    //     homebrew pool between spending it and undoing the spend, and Undo
+    //     must not crash mid-encounter over a resource he has thrown away.
+    //   · The value is clamped to the pool's CURRENT max, not the max it had
+    //     when the snapshot was taken. If he lowered the max in between,
+    //     handing back the old number would hand back a pool bigger than the
+    //     one he now owns.
+    for (const [poolId, prior] of Object.entries(restore.pools)) {
+      character = setPoolCurrent(character, poolId, prior)
     }
   }
 

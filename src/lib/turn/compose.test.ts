@@ -74,3 +74,68 @@ describe('composeTurn', () => {
     expect(turn().actor.subclass).toBe('Oath of the Hearth')
   })
 })
+
+// ---------------------------------------------------------------------------
+// Slice 6b — an authored pool has to be VISIBLE and HONEST on the turn screen
+//
+// Both of these were found by driving the built app, not by reading it, and
+// neither can pass against the code that shipped an hour before they were
+// written: the label came from `option.usesRemaining` (undefined for a pool-
+// bound feature) and affordability was read off `feature.usesCurrent` (also
+// undefined). The app offered a live row, priced "Action", for a feature it
+// was about to refuse — while the resource strip stayed silent because the
+// mutex face it sat on was assumed to be showing the pool already.
+// ---------------------------------------------------------------------------
+
+const EMBERS = {
+  id: 'hearth-embers',
+  name: 'Hearth Embers',
+  current: 5,
+  max: 5,
+  unit: 'points' as const,
+  recharge: 'longRest' as const,
+}
+
+const WARD = {
+  name: 'Ember Ward',
+  level: 1,
+  description: 'Shelter an ally in banked warmth.',
+  actionType: 'action' as const,
+  resourcePoolId: 'hearth-embers',
+  resourceAmount: 2,
+}
+
+const hearth = (current: number) =>
+  composeTurn({
+    character: {
+      ...NIX,
+      resourcePools: [{ ...EMBERS, current }],
+      features: [...NIX.features, WARD],
+    },
+    combat: null,
+  })
+
+const find = (t: ReturnType<typeof composeTurn>, name: string) =>
+  [...t.ranked, ...t.rest, ...t.mutex.flatMap(g => g.faces)].find(o => o.name === name)
+
+describe('a feature bound to an authored pool', () => {
+  it('states the price and the pool on its own row', () => {
+    // The row must carry the reading whether or not the strip does, because a
+    // mutex face suppresses the strip row on the grounds that the face has it.
+    expect(find(hearth(5), 'Ember Ward')!.cost.label).toBe('Action · 2 of 5 points')
+  })
+
+  it('says POINTS for Lay on Hands, which was never 40 "uses"', () => {
+    expect(find(hearth(5), 'Lay on Hands')!.cost.label).toMatch(/\d+\/40 points$/)
+  })
+
+  it('is blocked, with the reason, BEFORE the tap that would be refused', () => {
+    const o = find(hearth(1), 'Ember Ward')!
+    expect(o.available).toBe(false)
+    expect(o.blockedReason).toBe('Not enough Hearth Embers left')
+  })
+
+  it('is still live at exactly the price, and not one below it', () => {
+    expect(find(hearth(2), 'Ember Ward')!.available).toBe(true)
+  })
+})

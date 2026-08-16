@@ -1,4 +1,10 @@
 import { type AbilityKey, type SkillName, SKILL_ABILITIES, CASTING_ABILITY } from './dnd-rules'
+// Slice 6b. `resources.ts` imports Character back, but only as a TYPE, so the
+// cycle is erased at compile time and there is no runtime edge in that
+// direction. Kept that way on purpose: character.ts is the module every screen
+// loads first and it must not wait on the rules layer to initialise.
+import { rechargePools, type ResourcePool } from './rules-2024/resources'
+import type { CustomCondition } from './rules-2024/conditions'
 
 // Re-export for convenience
 export type { AbilityKey, SkillName }
@@ -183,6 +189,18 @@ export interface ClassFeature {
   source?: string          // "PHB p.84", "Homebrew"
   tacticalNote?: string    // Brief combat tip
   category?: 'class' | 'subclass' | 'racial' | 'feat'
+
+  // -- Slice 6b: a feature may spend a pool other than its own counter -------
+  // Without these two, a pool Marcus authors has no consumer: he can create
+  // "Hearth Embers 5" and nothing in the app is able to spend from it. The
+  // feature's own `usesMax`/`usesCurrent` counter still works exactly as
+  // before and is still the default — this is the opt-in route for the case
+  // the counter cannot express, which is several features drawing on ONE
+  // shared pool at different prices.
+  /** Id of a ResourcePool this feature draws from instead of its own counter. */
+  resourcePoolId?: string
+  /** How much of that pool one use costs.  Absent means 1. */
+  resourceAmount?: number
 }
 
 export interface SpellSlots {
@@ -240,7 +258,15 @@ export interface Character {
   homebrewNotes?: string
 
   // Paladin-specific resources (optional)
+  // KEPT, not replaced. Slice 6b puts a generic pool model over the top of
+  // this field; it does not migrate away from it. See rules-2024/resources.ts.
   paladinResources?: PaladinResources
+
+  // Homebrew resources and conditions Marcus authored in the app (Slice 6b).
+  // Both are optional and both default to [] on load, so every character saved
+  // before 6b existed reads back as "has none" rather than "is broken".
+  resourcePools?: ResourcePool[]
+  customConditions?: CustomCondition[]
 
   // Ability scores & proficiencies
   abilityScores: AbilityScores
@@ -436,6 +462,12 @@ export function loadCharacter(id: string): Character | null {
       campaignId: parsed.campaignId ?? undefined,
       customHooks: parsed.customHooks ?? [],
       feats: parsed.feats ?? [],
+      // Slice 6b. Defaulted to [] rather than left undefined so that every
+      // reader can iterate without a guard, and so a sheet written before 6b
+      // gains the fields the first time it is saved — no migration step, no
+      // version stamp, and nothing existing is touched.
+      resourcePools: parsed.resourcePools ?? [],
+      customConditions: parsed.customConditions ?? [],
     } as Character
   } catch {
     return null
@@ -581,16 +613,25 @@ export function longRest(character: Character): Character {
       }
     : undefined
 
-  return {
-    ...character,
-    spellSlots: slots,
-    features,
-    hitPoints: { ...character.hitPoints, current: character.hitPoints.max },
-    tempHP: 0,
-    conditions: [],
-    deathSaves: { successes: 0, failures: 0 },
-    ...(paladinResources && { paladinResources }),
-  }
+  // Slice 6b: authored pools refill last, over the top of everything above.
+  // `rechargePools` touches ONLY `resourcePools` — the paladin pair and the
+  // feature counters are recharged by the code immediately above this line and
+  // must keep exactly one writer each, or a bug in one gets masked by the
+  // other. Called on the merged object so it sees the fields as they will be
+  // saved, not as they were.
+  return rechargePools(
+    {
+      ...character,
+      spellSlots: slots,
+      features,
+      hitPoints: { ...character.hitPoints, current: character.hitPoints.max },
+      tempHP: 0,
+      conditions: [],
+      deathSaves: { successes: 0, failures: 0 },
+      ...(paladinResources && { paladinResources }),
+    },
+    'long',
+  )
 }
 
 export function shortRest(character: Character): Character {
@@ -615,11 +656,17 @@ export function shortRest(character: Character): Character {
       }
     : undefined
 
-  return {
-    ...character,
-    features,
-    ...(paladinResources && { paladinResources }),
-  }
+  // Only pools whose recharge is 'shortRest' come back here — see the refill
+  // table in rechargePools. A long-rest pool surviving a short rest is the
+  // whole point of the distinction.
+  return rechargePools(
+    {
+      ...character,
+      features,
+      ...(paladinResources && { paladinResources }),
+    },
+    'short',
+  )
 }
 
 // Prepared spell management (for Paladin, Cleric, Druid, Wizard)
