@@ -219,8 +219,18 @@ export function demandOfWeapon(weapon: Weapon): SlotDemand
 /** Is this slot still free this turn? Reads CombatState.turnActions. */
 export function slotAvailable(combat: CombatState, slot: EconomySlot): boolean
 
-/** Has a spell slot already been spent this turn? The 2024 one-slot rule. */
-export function spellSlotSpentThisTurn(log: LoggedEvent[], round: number): boolean
+/** Has a spell slot already been spent this turn? The 2024 one-slot rule.
+ *
+ *  CORRECTED IN SLICE 3. This doc originally read the rule as applying to the
+ *  Action and the Bonus Action. An adversarial pass REFUTED that: the printed
+ *  text is "on a turn, you can expend only one spell slot to cast a spell" —
+ *  the whole turn, every action type. Action Surge does not buy a second
+ *  levelled spell, and a levelled Reaction spell on your own turn after you
+ *  have spent a slot is illegal. The scope is the round, not the slot.
+ *
+ *  `LoggedEvent` does not exist until Slice 6, so the shipped signature takes
+ *  the structural minimum (`SlotSpendRecord`) that `LoggedEvent` will satisfy. */
+export function spellSlotSpentThisTurn(log: readonly SlotSpendRecord[], round: number): boolean
 ```
 
 ### `rules-2024/mastery.ts`
@@ -237,8 +247,19 @@ export interface MasteryRider {
   automatic: boolean
   save?: { ability: 'STR' | 'CON' | 'DEX'; dc: 'weaponAttackDC' }
   /** Sap and Vex expire on DIFFERENT windows — this is the detail that gets
-   *  played wrong at the table, so the type carries it. */
-  expires: 'endOfTargetNextTurn' | 'endOfYourNextTurn' | 'immediate'
+   *  played wrong at the table, so the type carries it.
+   *
+   *  CORRECTED IN SLICE 3. This doc assumed Sap expired at the end of the
+   *  TARGET's next turn. It does not: the printed text is "before the start of
+   *  your next turn". Both Sap and Slow are keyed to YOUR turn, so
+   *  'endOfTargetNextTurn' describes no mastery in the game and
+   *  'startOfYourNextTurn' was missing. Vex's window strictly contains Sap's.
+   *  The purpose of the field is vindicated; one of its values was wrong. */
+  expires: 'startOfYourNextTurn' | 'endOfYourNextTurn' | 'immediate'
+
+  /** ADDED IN SLICE 3. Vex requires the hit to DEAL DAMAGE and Sap does not —
+   *  a second difference between them, independent of expiry. */
+  trigger: 'onHit' | 'onHitDealingDamage' | 'onMiss' | 'onLightExtraAttack'
 }
 
 export function riderFor(weapon: Weapon): MasteryRider | null
@@ -258,6 +279,18 @@ export interface ConditionEffect {
   attacksAgainstYouHaveAdvantage: boolean
   /** Incapacitated is a composite in 2024 and must cascade. */
   cascades: string[]
+
+  /** EXTENDED IN SLICE 3 (additive — nothing above was removed). The two
+   *  booleans above cannot express Invisible, which runs the other way, so it
+   *  would have rendered as "no effect". And several conditions are only
+   *  conditionally true (Prone's axis is distance; Grappled exempts the
+   *  grappler), which a boolean cannot say and `note` can. */
+  yourAttacksHaveAdvantage: boolean
+  attacksAgainstYouHaveDisadvantage: boolean
+  note?: string
+  /** False for a name this file has never heard of. Homebrew conditions pass
+   *  through with their name intact and no effects invented for them. */
+  known: boolean
 }
 
 export function effectsOf(conditionNames: string[]): ConditionEffect[]
@@ -492,7 +525,7 @@ extraction, I stop and justify the difference rather than shipping it.
 **rules-2024/mastery**
 - `Longsword yields the Sap rider`
 - `Sap and Vex are automatic; Topple is the only rider carrying a save`
-- `Sap expires end of target's next turn; Vex expires end of YOUR next turn` *(different windows)*
+- `Sap expires at the START of your next turn; Vex at the END of it` *(different windows — corrected in Slice 3)*
 - `coerceMastery() returns null for an unrecognised free-text value and does not throw`
 
 **rules-2024/conditions**

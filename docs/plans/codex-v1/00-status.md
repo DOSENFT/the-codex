@@ -58,7 +58,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 
 **Wave 1 — the turn brain (the 15-second metric)**
 - [x] 2 — Phase-0 characterization tests against the UNMODIFIED prototype **— DONE 2026-08-16, see below**
-- [ ] 3 — `rules-2024/` economy + mastery + conditions, pure, tested *(team: fan out + adversarial refute pass)*
+- [x] 3 — `rules-2024/` economy + mastery + conditions, pure, tested *(team: fan out + adversarial refute pass)* **— DONE 2026-08-16, see below**
 - [ ] 4 — the extraction: real `composeTurn()`; Slice 2's tests must stay green *(single author, deliberately)*
 - [ ] 5 — `rank.ts` + `contention.ts`: the shortlist is genuinely ranked, the mutex renders
 - [ ] 6 — 🚩 `CombatProvider` + reducer + event log → **Undo**; spell-slot reconciliation; both combat components halved *(team: fan out on verification)*
@@ -254,6 +254,103 @@ missing the thing under test.
 |---|---|---|---|---|---|
 | `v0.9-turnsummary--phone` | NO (2651px) | 87 | 32 | 56 | 33.6% |
 | `v0.9-turnsummary--ipad` | NO (2635px) | 90 | 32 | 53 | 30.9% |
+
+## ✅ Slice 3 — `rules-2024/`, done 2026-08-16
+
+The rules exist in code for the first time. Three pure modules, no React, no UI change,
+no existing file's behaviour altered. `character.conditions` has been a bare `string[]`
+since V0.9 with nothing reading it; `masteryProperty` has been printed on screen since
+V0.9 with nothing acting on it; Bloodied was absent from `src/` entirely. All three now
+have a tested answer.
+
+### What was written
+
+| File | LOC | What it holds |
+|---|---|---|
+| `src/lib/rules-2024/mastery.ts` | 180 | The 8 riders, their expiry windows and damage triggers, the 2024 weapon→mastery table (~40 names), and a `coerceMastery()` that never throws |
+| `src/lib/rules-2024/economy.ts` | 137 | `EconomySlot`, `demandOfSpell/Feature/Weapon`, `slotAvailable()`, `spellSlotSpentThisTurn()` |
+| `src/lib/rules-2024/conditions.ts` | 258 | All 15 conditions with the Incapacitated cascade, homebrew pass-through, and Bloodied as a derived threshold |
+| `…/{mastery,economy,conditions}.test.ts` | — | 45 tests |
+
+### How the rules were established
+
+Rules errors are the kind that survive review by sounding right, so they were not written
+from memory. Three research subagents ran in parallel (mastery / conditions + Bloodied /
+action economy), then **two adversarial refuters** were told to *refute* each claim and to
+default to REFUTED or UNCERTAIN when unsure. **38 of 40 claims came back CONFIRMED with
+sources.** The two that did not are recorded below, because both were errors in our own
+approved Gate 3 doc.
+
+### 🚩 Two corrections to `03-program-design.md` (Marcus should know these)
+
+1. **`MasteryRider.expires` had a value that describes nothing in the game.** Gate 3 wrote
+   `'endOfTargetNextTurn'` for Sap. The printed text is *"before the start of your next
+   turn"* — Sap and Slow are keyed to YOUR turn, not the target's. So `'startOfYourNextTurn'`
+   was missing and one member was fictional. Vex's window (`endOfYourNextTurn`) strictly
+   **contains** Sap's; had they gone in the same way round, the app would have promised
+   Marcus advantage that expired a turn earlier.
+2. **The one-spell-slot rule is scoped to the TURN, not to Action + Bonus Action.** The
+   refuter materially REFUTED our narrower reading. The rule is *"on a turn, you can expend
+   only one spell slot to cast a spell"* — every action type at once. Action Surge does not
+   buy a second levelled spell; a levelled Reaction spell on your own turn after spending a
+   slot is illegal.
+
+Neither is a Gate 3 backtrack: the *purpose* of both fields is vindicated — carrying the
+window in the type is exactly what caught the error. The doc has been corrected in place
+with `CORRECTED IN SLICE 3` notes at both sites.
+
+### One additive extension, flagged
+
+`ConditionEffect` as designed had only `yourAttacksHaveDisadvantage` and
+`attacksAgainstYouHaveAdvantage`. That shape cannot express **Invisible**, which runs the
+other way — it would have rendered as "no effect". Four fields were added and none removed:
+`yourAttacksHaveAdvantage`, `attacksAgainstYouHaveDisadvantage`, an optional `note` (for the
+caveats a boolean cannot carry — Prone's axis is *distance*, Grappled exempts the grappler),
+and `known` (homebrew pass-through, which the doc's own risk table required).
+
+### Facts now encoded that the app previously had wrong or absent
+
+- **Incapacitated blocks the bonus action** — new in 2024; 2014 took only the action and
+  reaction. It does **not** block movement.
+- **2024 Stunned does not set Speed 0.** 2014 did. A model reaching for the familiar
+  wording will add it back; there is a test whose only job is to stop that.
+- **Bloodied is inclusive and has no floor.** 38 of 76 IS bloodied; 38 of 75 is not; a
+  creature at 0 HP is still bloodied. No inherent penalty — it is a trigger and a display.
+- **Sap fires on a hit; Vex requires the hit to deal damage.** Two independent differences
+  between the pair, pinned by two separate tests so fixing one cannot mask the other.
+- **Topple is the only rider carrying a save** (CON, DC 8 + attack mod + PB).
+- **A declared `masteryProperty` always beats the weapon-name table.** Homebrew is the main
+  case; the table exists only for characters saved before this file did.
+
+### Proof
+
+- `npx vitest run` — **61/61 green** (45 new + the 16 from Slices 1–2, all still passing).
+- `npx tsc -b` clean, `npx vite build` clean.
+- **Mutation sweep: 15 deliberate bugs injected, 15 killed on the first pass.** Every sed
+  was guarded with a `cmp` so a mutation that failed to apply reports INVALID rather than
+  passing itself off as a survivor — that guard was added after M7 in Slice 2 "survived"
+  vacuously. Mutants included: cantrips consuming slots, `slotAvailable()` inverted, the
+  one-slot rule ignoring the round, Sap and Vex sharing a window, the weapon table beating
+  the declaration, Incapacitated permitting a bonus action, the Bloodied boundary made
+  exclusive, the cascade never running, homebrew claimed as known, and 2014's Speed-0
+  Stunned restored.
+
+### Two Slice 1 files updated to match
+
+- `src/lib/turn/types.ts` — `OptionRider.expires` gained `'startOfYourNextTurn'`.
+  `'endOfTargetNextTurn'` was **kept**: no printed mastery uses it, but a homebrew rider may
+  declare any window it likes, and this union stays open-world. Only the mastery table is closed.
+- `src/lib/turn/compose.ts` — the Slice 1 Sap seed said `endOfYourNextTurn`. Corrected.
+
+### Not done here, deliberately
+
+Nothing consumes these modules yet. `demandOfWeapon()` is flat (`action`) — Extra Attack,
+two-weapon fighting and Nick's free extra attack are questions about how many attacks one
+Attack action contains, which is **contention** and belongs to Slice 5. Exhaustion levels
+are not tracked; condition *state* is Slice 7. `LoggedEvent` does not exist until Slice 6,
+so `spellSlotSpentThisTurn()` takes the structural minimum that `LoggedEvent` will satisfy.
+
+---
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

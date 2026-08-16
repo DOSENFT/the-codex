@@ -59,9 +59,16 @@ export interface OptionRider {
    *  words.  Silently dropping homebrew is the failure this field prevents. */
   text: string
   automatic: boolean
+  /** For the eight standard masteries, `rules-2024/mastery.ts` is the
+   *  authority and `RiderExpiry` is the narrower union it uses: no printed
+   *  mastery expires on the TARGET's turn, and Sap expires at the START of
+   *  yours.  That member survives here anyway, because a homebrew rider is
+   *  free to declare a window the rulebook never prints — this union stays
+   *  open-world, and only the mastery table is closed. */
   expires:
-    | 'endOfTargetNextTurn'
+    | 'startOfYourNextTurn'
     | 'endOfYourNextTurn'
+    | 'endOfTargetNextTurn'
     | 'immediate'
     | 'unspecified'
 }

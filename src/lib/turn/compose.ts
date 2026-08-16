@@ -112,7 +112,9 @@ const NIX_SEED: ComposedTurn = {
         known: true,
         text: 'the target has disadvantage on its next attack roll',
         automatic: true,
-        expires: 'endOfYourNextTurn',
+        // Sap's window ends before the START of your next turn - verified
+        // in Slice 3 against the printed text. NOT the same window as Vex.
+        expires: 'startOfYourNextTurn',
       },
       available: true,
       score: 90,
