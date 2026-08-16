@@ -229,10 +229,8 @@
   },
   {
     "shot": "v0.9-combat--ipad",
-    "errors": [
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ],
-    "scrollHeight": 2207,
+    "errors": [],
+    "scrollHeight": 2208,
     "overflowsViewport": true,
     "horizontalOverflow": false,
     "rootChildren": 1,
@@ -608,5 +606,385 @@
     "goldPctOfLitPixels": 35.6,
     "emberPctOfLitPixels": 6.2,
     "litPctOfScreen": 5.7
+  },
+  {
+    "shot": "v0.9-turnsummary--phone",
+    "errors": [],
+    "scrollHeight": 2651,
+    "overflowsViewport": true,
+    "horizontalOverflow": false,
+    "rootChildren": 1,
+    "sawTurnScreen": false,
+    "sawErrorBoundary": false,
+    "underMinTouch": [
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-ember/15 text-ember",
+        "text": "Play",
+        "w": 62,
+        "h": 30
+      },
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-white/[0.02] text-forge-2 hover:text-forge-1",
+        "text": "Prep",
+        "w": 63,
+        "h": 30
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-1 hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-ember hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-arcane hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity",
+        "text": "NixPaladin",
+        "w": 92,
+        "h": 20
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-forge-2 hover:text-arcane hover:bg-white/[0.06] transition-all duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-gradient-to-r from-gold to-arcane text-void-0 font-semibold shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)] hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)] hover:brightness-110 disabled:from-forge-2/40 disabled:to-forge-2/40 disabled:text-forge-2 disabled:shadow-none min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5",
+        "text": "Next Turn",
+        "w": 111,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-arcane/10 border-arcane/25 text-arcane",
+        "text": "Action",
+        "w": 73,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-ember/10 border-ember/25 text-ember",
+        "text": "Bonus",
+        "w": 72,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-eldritch/10 border-eldritch/25 text-eldritch",
+        "text": "React",
+        "w": 69,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-white/[0.04] border-white/10 text-forge-1",
+        "text": "Move",
+        "w": 66,
+        "h": 44
+      }
+    ],
+    "underMinTouchCount": 87,
+    "cinzelUnder20": [
+      {
+        "sample": "Hit Points",
+        "size": 14
+      },
+      {
+        "sample": "Active Conditions",
+        "size": 12
+      },
+      {
+        "sample": "Spell Slots",
+        "size": 14
+      },
+      {
+        "sample": "Paladin Resources",
+        "size": 14
+      },
+      {
+        "sample": "Choose Action",
+        "size": 16
+      },
+      {
+        "sample": "Dice Roller",
+        "size": 14
+      },
+      {
+        "sample": "Mechanics Reference",
+        "size": 14
+      },
+      {
+        "sample": "How do I make an attack ",
+        "size": 14
+      },
+      {
+        "sample": "How do critical hits wor",
+        "size": 14
+      },
+      {
+        "sample": "How does multiattack wor",
+        "size": 14
+      },
+      {
+        "sample": "How does opportunity att",
+        "size": 14
+      },
+      {
+        "sample": "How do saving throws wor",
+        "size": 14
+      }
+    ],
+    "cinzelUnder20Count": 32,
+    "under12px": [
+      {
+        "sample": "Play",
+        "size": 10
+      },
+      {
+        "sample": "Prep",
+        "size": 10
+      },
+      {
+        "sample": "Always Active",
+        "size": 10
+      },
+      {
+        "sample": "Aura of Solace",
+        "size": 11
+      },
+      {
+        "sample": "+7 to hit (STR +3 + prof",
+        "size": 10
+      },
+      {
+        "sample": "+6 to hit (STR +3 + prof",
+        "size": 10
+      },
+      {
+        "sample": "Cantrip",
+        "size": 9
+      },
+      {
+        "sample": "Cantrip · DC 16 DEX save",
+        "size": 10
+      },
+      {
+        "sample": "1st",
+        "size": 9
+      },
+      {
+        "sample": "1st-level · +8 to hit · ",
+        "size": 10
+      },
+      {
+        "sample": "2nd",
+        "size": 9
+      },
+      {
+        "sample": "2nd-level",
+        "size": 10
+      }
+    ],
+    "under12pxCount": 56,
+    "goldPctOfLitPixels": 33.6,
+    "emberPctOfLitPixels": 0.1,
+    "litPctOfScreen": 5.7
+  },
+  {
+    "shot": "v0.9-turnsummary--ipad",
+    "errors": [],
+    "scrollHeight": 2635,
+    "overflowsViewport": true,
+    "horizontalOverflow": false,
+    "rootChildren": 1,
+    "sawTurnScreen": false,
+    "sawErrorBoundary": false,
+    "underMinTouch": [
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-ember/15 text-ember",
+        "text": "Play",
+        "w": 62,
+        "h": 30
+      },
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-white/[0.02] text-forge-2 hover:text-forge-1",
+        "text": "Prep",
+        "w": 63,
+        "h": 30
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-1 hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-ember hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-arcane hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity",
+        "text": "NixPaladin",
+        "w": 92,
+        "h": 20
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-forge-2 hover:text-arcane hover:bg-white/[0.06] transition-all duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-gradient-to-r from-gold to-arcane text-void-0 font-semibold shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)] hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)] hover:brightness-110 disabled:from-forge-2/40 disabled:to-forge-2/40 disabled:text-forge-2 disabled:shadow-none min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5",
+        "text": "Next Turn",
+        "w": 111,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-arcane/10 border-arcane/25 text-arcane",
+        "text": "Action",
+        "w": 151,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-ember/10 border-ember/25 text-ember",
+        "text": "Bonus",
+        "w": 151,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-eldritch/10 border-eldritch/25 text-eldritch",
+        "text": "React",
+        "w": 151,
+        "h": 44
+      },
+      {
+        "cls": "flex-1 min-h-[44px] px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all duration-200 ease-forge active:scale-[0.96] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-white/[0.04] border-white/10 text-forge-1",
+        "text": "Move",
+        "w": 151,
+        "h": 44
+      }
+    ],
+    "underMinTouchCount": 90,
+    "cinzelUnder20": [
+      {
+        "sample": "Hit Points",
+        "size": 14
+      },
+      {
+        "sample": "Active Conditions",
+        "size": 12
+      },
+      {
+        "sample": "Spell Slots",
+        "size": 14
+      },
+      {
+        "sample": "Paladin Resources",
+        "size": 14
+      },
+      {
+        "sample": "Choose Action",
+        "size": 16
+      },
+      {
+        "sample": "Dice Roller",
+        "size": 14
+      },
+      {
+        "sample": "Mechanics Reference",
+        "size": 14
+      },
+      {
+        "sample": "How do I make an attack ",
+        "size": 14
+      },
+      {
+        "sample": "How do critical hits wor",
+        "size": 14
+      },
+      {
+        "sample": "How does multiattack wor",
+        "size": 14
+      },
+      {
+        "sample": "How does opportunity att",
+        "size": 14
+      },
+      {
+        "sample": "How do saving throws wor",
+        "size": 14
+      }
+    ],
+    "cinzelUnder20Count": 32,
+    "under12px": [
+      {
+        "sample": "Play",
+        "size": 10
+      },
+      {
+        "sample": "Prep",
+        "size": 10
+      },
+      {
+        "sample": "Always Active",
+        "size": 10
+      },
+      {
+        "sample": "Aura of Solace",
+        "size": 11
+      },
+      {
+        "sample": "+7 to hit (STR +3 + prof",
+        "size": 10
+      },
+      {
+        "sample": "+6 to hit (STR +3 + prof",
+        "size": 10
+      },
+      {
+        "sample": "Cantrip",
+        "size": 9
+      },
+      {
+        "sample": "Cantrip · DC 16 DEX save",
+        "size": 10
+      },
+      {
+        "sample": "1st",
+        "size": 9
+      },
+      {
+        "sample": "1st-level · +8 to hit · ",
+        "size": 10
+      },
+      {
+        "sample": "2nd",
+        "size": 9
+      },
+      {
+        "sample": "2nd-level",
+        "size": 10
+      }
+    ],
+    "under12pxCount": 53,
+    "goldPctOfLitPixels": 30.9,
+    "emberPctOfLitPixels": 0.1,
+    "litPctOfScreen": 1.7
   }
 ]

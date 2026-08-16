@@ -92,12 +92,60 @@ const SEED = {
 // this seed white-screened the app above every error boundary.
 const THIN = { id: SEED_ID, name: 'Thin', class: 'Paladin', level: 1 };
 
+// A Nix with an actual kit, so TurnSummary has something to compose. The four
+// shots above all stop at the pre-combat screen — TurnSummary only mounts once
+// combat is running, which means the audit was cheerfully reporting "no errors"
+// about a component it never rendered. This seed plus `click` fixes that.
+//
+// It deliberately mirrors src/lib/turn/fixtures/nix.ts. It cannot import it —
+// this is plain .mjs and the fixture is TypeScript — so if you change one,
+// change the other. The unit tests own correctness here; this seed only has to
+// be rich enough that the screen is worth looking at.
+const RICH = {
+  ...SEED,
+  weapons: [
+    { name: 'Hearthbrand', attackType: 'melee', abilityMod: 'STR', proficient: true,
+      damageDice: '1d8', damageType: 'Slashing', properties: ['Versatile (1d10)'],
+      magical: true, bonusToHit: 1, bonusDamage: 1, range: '5 ft', masteryProperty: 'Sap' },
+    { name: 'Javelin', attackType: 'ranged', abilityMod: 'STR', proficient: true,
+      damageDice: '1d6', damageType: 'Piercing', properties: [] },
+  ],
+  spells: [
+    { name: 'Sacred Flame', level: 0, school: 'Evocation', castingTime: 'Action',
+      range: '60 feet', components: 'V, S', duration: 'Instantaneous', concentration: false,
+      ritual: false, prepared: true, description: 'Radiance descends on a creature.',
+      saveType: 'DEX', damageDice: '2d8', damageType: 'Radiant' },
+    { name: 'Divine Smite', level: 1, school: 'Evocation', castingTime: 'Bonus Action',
+      range: 'Self', components: 'V', duration: 'Instantaneous', concentration: false,
+      ritual: false, prepared: true, description: 'Your weapon flares with radiance.',
+      damageDice: '2d8', damageType: 'Radiant' },
+    { name: 'Misty Step', level: 2, school: 'Conjuration', castingTime: 'Bonus Action',
+      range: 'Self', components: 'V', duration: 'Instantaneous', concentration: false,
+      ritual: false, prepared: true, description: 'You teleport up to 30 feet.' },
+  ],
+  features: [
+    { name: 'Lay on Hands', level: 1, description: 'A pool of healing power.',
+      actionType: 'bonusAction', range: 'Touch', usesPerRest: 'long', usesMax: 40, usesCurrent: 15 },
+    { name: 'Hearthfire Manifest', level: 3, description: 'A manifestation sheds bright light.',
+      actionType: 'bonusAction', range: '30 feet', source: 'Homebrew' },
+    { name: 'Flaming Cloak', level: 3, description: 'Transform your manifestation into a cloak.',
+      actionType: 'reaction', damageDice: '1d10', damageType: 'Fire',
+      usesPerRest: 'short', usesMax: 2, usesCurrent: 1, source: 'Homebrew' },
+    { name: 'Aura of Solace', level: 7, description: 'Resistance to Fire, Cold and Psychic.',
+      actionType: 'passive', range: '10 feet', source: 'Homebrew' },
+  ],
+};
+
 const TARGETS = [
   { path: '?d=1', label: 'turn-d--phone', vp: PHONE },
   { path: '?d=1', label: 'turn-d--ipad', vp: IPAD },
   { path: '', label: 'v0.9-combat--phone', vp: PHONE },
   { path: '', label: 'v0.9-combat--ipad', vp: IPAD },
   { path: '', label: 'thin-character-boots--phone', vp: PHONE, seed: THIN },
+  // The screen Slices 4-5 rewrite. Shot last so the four baselines above keep
+  // their Slice 1 numbers exactly.
+  { path: '', label: 'v0.9-turnsummary--phone', vp: PHONE, seed: RICH, click: 'Start Combat' },
+  { path: '', label: 'v0.9-turnsummary--ipad', vp: IPAD, seed: RICH, click: 'Start Combat' },
 ];
 
 const browser = await chromium.launch();
@@ -132,6 +180,15 @@ for (const t of TARGETS) {
   await page.goto(BASE + t.path, { waitUntil: 'load' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(900);
+
+  // Some surfaces only exist behind a click. If the button is missing the shot
+  // is worthless, so fail loudly rather than silently auditing the wrong page.
+  if (t.click) {
+    const btn = page.getByRole('button', { name: t.click, exact: false }).first();
+    await btn.click({ timeout: 5000 });
+    await page.waitForTimeout(700);
+  }
+
   await page.screenshot({ path: `${OUT}/${t.label}.png` });
 
   const audit = await page.evaluate((vpH) => {

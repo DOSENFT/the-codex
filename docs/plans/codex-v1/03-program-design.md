@@ -184,7 +184,7 @@ saved states) but is recomputed from the character on load. Called out in Least 
 
 | File | | Change |
 |---|---|---|
-| `src/components/TurnSummary.tsx` | EXTEND | 1,196 → target <400. Composition logic leaves; it becomes a renderer of `ComposedTurn`. |
+| `src/components/combat/TurnSummary.tsx` | EXTEND | 1,196 → target <400. Composition logic leaves; it becomes a renderer of `ComposedTurn`. |
 | `src/components/CombatHelper.tsx` | EXTEND | 1,746 → target <400. State ownership leaves. |
 | `src/lib/combat-state.ts` | EXTEND | `InitiativeEntry` gains an optional group. `spellSlots` marked derived. Nothing removed. |
 | `src/lib/character.ts` | EXTEND | `species` alias for `race`; `masteryProperty` coercion on load. Nothing renamed. |

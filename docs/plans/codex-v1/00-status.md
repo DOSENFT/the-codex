@@ -57,7 +57,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 1 — TRACER: `v1` branch · Vitest · ErrorBoundary · `src/design/tokens.css` · `composeTurn()` returning hardcoded seeded data · D turn view behind `?d=1`, running on the iPad **— DONE 2026-08-16, see below**
 
 **Wave 1 — the turn brain (the 15-second metric)**
-- [ ] 2 — Phase-0 characterization tests against the UNMODIFIED prototype
+- [x] 2 — Phase-0 characterization tests against the UNMODIFIED prototype **— DONE 2026-08-16, see below**
 - [ ] 3 — `rules-2024/` economy + mastery + conditions, pure, tested *(team: fan out + adversarial refute pass)*
 - [ ] 4 — the extraction: real `composeTurn()`; Slice 2's tests must stay green *(single author, deliberately)*
 - [ ] 5 — `rank.ts` + `contention.ts`: the shortlist is genuinely ranked, the mutex renders
@@ -146,6 +146,114 @@ that worked stopped working.
 1. **Spell-slot desync: reconcile, don't hard-switch.** Character is the source of truth, plus a one-time load reconciliation for saved states where `used + current !== max`. Uglier, but it cannot lose Marcus's live data.
 2. **`v1` branch, never `main` directly.** Half-built features must never be publicly live.
 3. **No more throwaway HTML mockups.** The turn screen settled the language; slices 13–14 build real components from `tokens.css`.
+
+## ✅ Slice 2 — PHASE-0 CHARACTERIZATION, done 2026-08-16
+
+**This is the slice that makes the working prototype count.** From here Marcus's V0.9 is not
+"old code to be replaced" — it is an executable specification, and Slice 4 has to pass its exam.
+
+### The path correction (found first, before any code)
+Every planning doc pointed at `src/components/TurnSummary.tsx`. **The file is at
+`src/components/combat/TurnSummary.tsx`** — same file, same 1,196 LOC, same `219–378`
+composition block Gate 2 described. Wrong directory in the citation, nothing more, so no gate
+was invalidated and no backtrack was needed. Paths corrected in `02-architecture.md:37` and
+`03-program-design.md:187`.
+
+### The lift — how the prototype was made testable without being modified
+The composition logic lived inside a `useMemo` in the component, so it could not be called from
+a test. It now lives in an exported `categorizeTurnOptions(character)` in the same file, and the
+memo calls it:
+
+```ts
+const { actions, bonusActions, reactions, passives } = useMemo(
+  () => categorizeTurnOptions(character), [character])
+```
+
+**The move was mechanical, not retyped.** A script sliced lines 221–377 out and reinserted them
+at module scope, dedented by exactly two spaces; it refused to run unless all seven boundary
+lines matched their expected text first. The trimmed before/after bodies were then `diff`ed:
+**156 lines, zero content change.** That mattered — a hand-transcribed "verbatim" lift that
+introduced a bug would have produced tests characterizing the *broken* version, which is the one
+failure mode this slice cannot survive.
+
+The memo body only ever closed over `character`, so the lift was safe by construction.
+
+### Files
+| File | What |
+|---|---|
+| `src/components/combat/TurnSummary.tsx` | Memo body lifted to exported `categorizeTurnOptions()`; `ActionOption` and new `CategorizedOptions` exported. **No behaviour change.** |
+| `src/lib/turn/fixtures/nix.ts` | NEW. Nix as a real `Character` — typed, so `tsc` checks it. Reconstructed from `inject-nix-backstory.js` and `dnd-data.ts:182–206`. |
+| `src/components/combat/TurnSummary.characterization.test.ts` | NEW. The seven tests. |
+| `docs/plans/codex-v1/reference/shoot-app.mjs` | Two new shots of the TurnSummary surface + a `click` step. |
+
+### The fixture reaches every branch
+Paladin 8 = 4×1st, 3×2nd, **no 3rd tier**. So Fireball (an Oath of the Hearth spell at level 9)
+is written on his sheet and uncastable — that is not a contrivance, it is why the "no slot tier"
+branch exists. Also: a decorated weapon and a bare one, a cantrip, an unprepared spell, a feature
+above level, a feature with its uses spent, and two passives.
+
+### The seven tests, and the two bugs they pin
+1. Weapons → Actions, with the exact composed mechanics line.
+2. Unprepared spells and spells with no slot are dropped; cantrips skip the check.
+3. Casting time decides the bucket — Divine Smite *and* Misty Step both land in bonus actions.
+4. Features above level, and features with 0 uses, are dropped.
+5. **BUG PINNED:** the passive test is `actionType === 'passive' || … || name.includes('aura')`,
+   so *any* feature with "aura" in its name is filed as passive **even when it declares itself a
+   Bonus Action**. Name a usable feature "Aura of ..." and it silently vanishes from your turn.
+   → Slice 6c.
+6. **BUG PINNED:** a 40-point healing *pool* is described in the same "uses" vocabulary as a
+   2-use Channel Divinity. `"15/40 uses"` reads at the table as forty separate castings.
+   → Slice 6.
+7. A complete, non-overlapping census: 14 options, exact names, deterministic.
+
+Both bugs are pinned rather than fixed. A characterization suite that only records the parts you
+like is not a safety net, it is an opinion. When Slice 4 fixes one, the fix is a deliberate edit
+to an assertion with a reason attached — which is exactly the conversation that should happen.
+
+### The tests were mutation-tested, because green on the first run proves nothing
+Eight mutants injected into the code under test; **seven killed**:
+
+| Mutant | Result |
+|---|---|
+| `feature.level > level` → `>=` | killed *(after fix — see below)* |
+| `slot.current <= 0` → `< 0` | killed *(after fix — see below)* |
+| aura name-match removed | killed |
+| mastery property dropped | killed |
+| `prepared` filter removed | killed |
+| exhausted-uses filter removed | killed |
+| proficiency dropped from `attackBonus` | killed |
+| `abilityModifier` floor → round | **survived — equivalent mutant.** All six of Nix's ability scores are even, so `floor` and `round` agree. Out of scope for the turn composer; noted, not chased. |
+
+**The first pass killed only five.** The two survivors were not equivalent — they exposed real
+holes: Nix has no feature at *exactly* level 8, and no slot tier at *exactly* zero. Both are
+boundaries that matter (the ability you just levelled up for; the ordinary out-of-slots state
+late in a fight). Boundary cases were added to tests 2 and 4 and both mutants then died.
+**The mutation sweep, not the test run, is what made this suite worth having.**
+
+### Proof
+- `npm test` — **16/16 green** (9 Slice 1 invariants + 7 characterization), against a body of
+  code whose content was not changed.
+- `npm run build` — `tsc -b` clean, Vite build clean.
+- Five Slice 1 shots re-run: **numbers identical to the baseline**, no console errors.
+
+### The audit was auditing a screen that did not contain the component
+`v0.9-combat--*` stops at the pre-combat "Start Combat" screen — **TurnSummary only mounts once
+combat is running.** The suite had been reporting "no errors" about a component it never
+rendered. Two shots (`v0.9-turnsummary--phone` / `--ipad`, a `RICH` seed plus a `click` step)
+now cover the surface Slices 4–5 rewrite. The screenshot shows the pinned strings on glass —
+`+7 to hit (STR +3 + prof +1 magic) · 1d8+4 Slashing`, Divine Smite and Misty Step both under
+BONUS ACTION, Aura of Solace under ALWAYS ACTIVE — so the characterization is confirmed against
+the rendered UI, not just the unit boundary.
+
+This is the Slice 1 lesson landing twice: **the audit only checks the claims you thought to
+make.** First time it passed a visibly broken screen; this time it passed a screen that was
+missing the thing under test.
+
+### Baseline for Slice 13 (TurnSummary surface, V0.9)
+| Shot | Fits | Touch <48px | Cinzel <20px | Text <12px | Gold |
+|---|---|---|---|---|---|
+| `v0.9-turnsummary--phone` | NO (2651px) | 87 | 32 | 56 | 33.6% |
+| `v0.9-turnsummary--ipad` | NO (2635px) | 90 | 32 | 53 | 30.9% |
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

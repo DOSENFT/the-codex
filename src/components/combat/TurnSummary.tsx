@@ -91,7 +91,7 @@ interface TurnSummaryProps {
   onCharacterUpdate: (character: Character) => void
 }
 
-interface ActionOption {
+export interface ActionOption {
   name: string
   type: 'spell' | 'feature' | 'weapon'
   actionEconomy: ActionEconomyType
@@ -195,6 +195,187 @@ function featureEffects(feature: ClassFeature): string {
 }
 
 // ---------------------------------------------------------------------------
+// Turn composition — Phase 0
+// ---------------------------------------------------------------------------
+//
+// This is the body of TurnSummary's useMemo, lifted out of the component so it
+// can be characterized by tests.  The lift was mechanical: every line below is
+// byte-identical to what shipped inside the memo apart from two spaces of
+// indentation, and the memo now calls this function instead.
+//
+// It is a record of what the app does TODAY, bugs included.  Slice 4 replaces
+// it with src/lib/turn/compose.ts; TurnSummary.characterization.test.ts is the
+// net that proves the replacement behaves the same.  Do not improve anything
+// here — its whole value is being an exact record.
+
+export interface CategorizedOptions {
+  actions: ActionOption[]
+  bonusActions: ActionOption[]
+  reactions: ActionOption[]
+  passives: ActionOption[]
+}
+
+export function categorizeTurnOptions(character: Character): CategorizedOptions {
+  const actions: ActionOption[] = []
+  const bonusActions: ActionOption[] = []
+  const reactions: ActionOption[] = []
+  const passives: ActionOption[] = []
+
+  // Weapons → action
+  for (const weapon of character.weapons) {
+    const bonus = attackBonus(character, weapon)
+    const abilityName = weapon.abilityMod
+    const dmgMod = abilityModifier(character.abilityScores[weapon.abilityMod]) + (weapon.bonusDamage ?? 0)
+
+    // Build mechanics line, including range if present
+    const mechanicsParts = [
+      `${formatMod(bonus)} to hit (${abilityName} ${formatMod(abilityModifier(character.abilityScores[weapon.abilityMod]))}${weapon.proficient ? ' + prof' : ''}${weapon.bonusToHit ? ` ${formatMod(weapon.bonusToHit)} magic` : ''})`,
+      `${weapon.damageDice}${formatMod(dmgMod)} ${weapon.damageType}`,
+    ]
+    if (weapon.range) {
+      mechanicsParts.push(weapon.range)
+    }
+
+    // Build effects line, including mastery property
+    const effectsParts = [
+      weapon.magical ? 'Magical' : null,
+      weapon.masteryProperty ? `Mastery: ${weapon.masteryProperty}` : null,
+      ...weapon.properties,
+    ].filter(Boolean)
+
+    // Build strategic tip from special abilities + feat tips
+    const tipParts: string[] = []
+    if (weapon.specialAbilities && weapon.specialAbilities.length > 0) {
+      tipParts.push(
+        weapon.specialAbilities
+          .map(a => `${a.name} (${a.trigger}): ${a.effect}`)
+          .join(' | ')
+      )
+    }
+
+    // Merge feat tips for this weapon
+    const weaponFeatTips = getFeatTips(character, weapon.name, 'weapon')
+    tipParts.push(...weaponFeatTips)
+
+    const strategicTip = tipParts.length > 0 ? tipParts.join(' | ') : undefined
+
+    actions.push({
+      name: weapon.name,
+      type: 'weapon',
+      actionEconomy: 'action',
+      summary: `${weapon.attackType === 'melee' ? 'Melee' : 'Ranged'} weapon attack with ${weapon.properties.join(', ') || 'no special properties'}.`,
+      mechanicsLine: mechanicsParts.join(' · '),
+      effectsLine: effectsParts.join(' · ') || 'Standard attack',
+      strategicTip,
+      rollNotation: `1d20${bonus >= 0 ? `+${bonus}` : bonus}`,
+      rollLabel: `${weapon.name} Attack`,
+    })
+  }
+
+  // Prepared spells
+  const preparedSpells = character.spells.filter(s => s.prepared)
+  for (const spell of preparedSpells) {
+    // Skip if no slots for leveled spells
+    if (spell.level > 0) {
+      const slot = character.spellSlots[spell.level]
+      if (!slot || slot.current <= 0) continue
+    }
+
+    const actionType = spellActionType(spell.castingTime)
+
+    // Determine roll info
+    let rollNotation: string | undefined
+    let rollLabel: string | undefined
+    if (spell.damageDice) {
+      rollNotation = spell.damageDice
+      rollLabel = `${spell.name} Damage`
+    } else if (spell.saveType) {
+      // Save-based spell with no damage (buff/debuff) — no auto-roll
+    } else if (spell.level > 0 || spell.castingTime.toLowerCase().includes('attack')) {
+      // Spell attack
+      rollNotation = `1d20+${character.spellAttackBonus}`
+      rollLabel = `${spell.name} Attack`
+    }
+
+    // Merge feat tips for this spell
+    const spellFeatTips = getFeatTips(character, spell.name, 'spell')
+    const spellTipParts: string[] = []
+    if (spell.tacticalNote) spellTipParts.push(spell.tacticalNote)
+    spellTipParts.push(...spellFeatTips)
+    const spellStrategicTip = spellTipParts.length > 0 ? spellTipParts.join(' | ') : undefined
+
+    const option: ActionOption = {
+      name: spell.name,
+      type: 'spell',
+      actionEconomy: actionType,
+      summary: spellSummary(spell),
+      mechanicsLine: spellMechanics(spell, character),
+      effectsLine: spellEffects(spell),
+      strategicTip: spellStrategicTip,
+      rollNotation,
+      rollLabel,
+      spellLevel: spell.level,
+      isConcentration: spell.concentration,
+      isRitual: spell.ritual,
+    }
+
+    if (actionType === 'bonusAction') bonusActions.push(option)
+    else if (actionType === 'reaction') reactions.push(option)
+    else actions.push(option)
+  }
+
+  // Class features (available at level)
+  for (const feature of character.features) {
+    if (feature.level > character.level) continue
+    // Skip if uses exhausted
+    if (feature.usesMax !== undefined && (feature.usesCurrent ?? 0) <= 0) continue
+
+    const actionType = featureActionType(feature)
+    const isPassive = feature.actionType === 'passive' || feature.actionType === 'none'
+      || feature.name.toLowerCase().includes('aura')
+
+    // Determine roll info
+    let rollNotation: string | undefined
+    let rollLabel: string | undefined
+    if (feature.damageDice) {
+      rollNotation = feature.damageDice
+      rollLabel = `${feature.name}`
+    }
+
+    // Merge feat tips for this feature
+    const featureFeatTips = getFeatTips(character, feature.name, 'feature')
+    const featureTipParts: string[] = []
+    if (feature.tacticalNote) featureTipParts.push(feature.tacticalNote)
+    featureTipParts.push(...featureFeatTips)
+    const featureStrategicTip = featureTipParts.length > 0 ? featureTipParts.join(' | ') : undefined
+
+    const option: ActionOption = {
+      name: feature.name,
+      type: 'feature',
+      actionEconomy: actionType,
+      summary: featureSummary(feature),
+      mechanicsLine: [
+        feature.damageDice ? `${feature.damageDice}${feature.damageType ? ' ' + feature.damageType : ''}` : null,
+        feature.saveType ? `DC ${character.spellSaveDC} ${feature.saveType}` : null,
+        feature.range || null,
+      ].filter(Boolean).join(' · ') || 'See description',
+      effectsLine: featureEffects(feature),
+      strategicTip: featureStrategicTip,
+      rollNotation,
+      rollLabel,
+      usesRemaining: feature.usesMax !== undefined ? `${feature.usesCurrent ?? 0}/${feature.usesMax}` : undefined,
+    }
+
+    if (isPassive) passives.push(option)
+    else if (actionType === 'bonusAction') bonusActions.push(option)
+    else if (actionType === 'reaction') reactions.push(option)
+    else actions.push(option)
+  }
+
+  return { actions, bonusActions, reactions, passives }
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -216,166 +397,13 @@ export function TurnSummary({
     saveActionNotes(character.id, actionNotes)
   }, [character.id, actionNotes])
 
-  // Categorize available options by action type
-  const { actions, bonusActions, reactions, passives } = useMemo(() => {
-    const actions: ActionOption[] = []
-    const bonusActions: ActionOption[] = []
-    const reactions: ActionOption[] = []
-    const passives: ActionOption[] = []
-
-    // Weapons → action
-    for (const weapon of character.weapons) {
-      const bonus = attackBonus(character, weapon)
-      const abilityName = weapon.abilityMod
-      const dmgMod = abilityModifier(character.abilityScores[weapon.abilityMod]) + (weapon.bonusDamage ?? 0)
-
-      // Build mechanics line, including range if present
-      const mechanicsParts = [
-        `${formatMod(bonus)} to hit (${abilityName} ${formatMod(abilityModifier(character.abilityScores[weapon.abilityMod]))}${weapon.proficient ? ' + prof' : ''}${weapon.bonusToHit ? ` ${formatMod(weapon.bonusToHit)} magic` : ''})`,
-        `${weapon.damageDice}${formatMod(dmgMod)} ${weapon.damageType}`,
-      ]
-      if (weapon.range) {
-        mechanicsParts.push(weapon.range)
-      }
-
-      // Build effects line, including mastery property
-      const effectsParts = [
-        weapon.magical ? 'Magical' : null,
-        weapon.masteryProperty ? `Mastery: ${weapon.masteryProperty}` : null,
-        ...weapon.properties,
-      ].filter(Boolean)
-
-      // Build strategic tip from special abilities + feat tips
-      const tipParts: string[] = []
-      if (weapon.specialAbilities && weapon.specialAbilities.length > 0) {
-        tipParts.push(
-          weapon.specialAbilities
-            .map(a => `${a.name} (${a.trigger}): ${a.effect}`)
-            .join(' | ')
-        )
-      }
-
-      // Merge feat tips for this weapon
-      const weaponFeatTips = getFeatTips(character, weapon.name, 'weapon')
-      tipParts.push(...weaponFeatTips)
-
-      const strategicTip = tipParts.length > 0 ? tipParts.join(' | ') : undefined
-
-      actions.push({
-        name: weapon.name,
-        type: 'weapon',
-        actionEconomy: 'action',
-        summary: `${weapon.attackType === 'melee' ? 'Melee' : 'Ranged'} weapon attack with ${weapon.properties.join(', ') || 'no special properties'}.`,
-        mechanicsLine: mechanicsParts.join(' · '),
-        effectsLine: effectsParts.join(' · ') || 'Standard attack',
-        strategicTip,
-        rollNotation: `1d20${bonus >= 0 ? `+${bonus}` : bonus}`,
-        rollLabel: `${weapon.name} Attack`,
-      })
-    }
-
-    // Prepared spells
-    const preparedSpells = character.spells.filter(s => s.prepared)
-    for (const spell of preparedSpells) {
-      // Skip if no slots for leveled spells
-      if (spell.level > 0) {
-        const slot = character.spellSlots[spell.level]
-        if (!slot || slot.current <= 0) continue
-      }
-
-      const actionType = spellActionType(spell.castingTime)
-
-      // Determine roll info
-      let rollNotation: string | undefined
-      let rollLabel: string | undefined
-      if (spell.damageDice) {
-        rollNotation = spell.damageDice
-        rollLabel = `${spell.name} Damage`
-      } else if (spell.saveType) {
-        // Save-based spell with no damage (buff/debuff) — no auto-roll
-      } else if (spell.level > 0 || spell.castingTime.toLowerCase().includes('attack')) {
-        // Spell attack
-        rollNotation = `1d20+${character.spellAttackBonus}`
-        rollLabel = `${spell.name} Attack`
-      }
-
-      // Merge feat tips for this spell
-      const spellFeatTips = getFeatTips(character, spell.name, 'spell')
-      const spellTipParts: string[] = []
-      if (spell.tacticalNote) spellTipParts.push(spell.tacticalNote)
-      spellTipParts.push(...spellFeatTips)
-      const spellStrategicTip = spellTipParts.length > 0 ? spellTipParts.join(' | ') : undefined
-
-      const option: ActionOption = {
-        name: spell.name,
-        type: 'spell',
-        actionEconomy: actionType,
-        summary: spellSummary(spell),
-        mechanicsLine: spellMechanics(spell, character),
-        effectsLine: spellEffects(spell),
-        strategicTip: spellStrategicTip,
-        rollNotation,
-        rollLabel,
-        spellLevel: spell.level,
-        isConcentration: spell.concentration,
-        isRitual: spell.ritual,
-      }
-
-      if (actionType === 'bonusAction') bonusActions.push(option)
-      else if (actionType === 'reaction') reactions.push(option)
-      else actions.push(option)
-    }
-
-    // Class features (available at level)
-    for (const feature of character.features) {
-      if (feature.level > character.level) continue
-      // Skip if uses exhausted
-      if (feature.usesMax !== undefined && (feature.usesCurrent ?? 0) <= 0) continue
-
-      const actionType = featureActionType(feature)
-      const isPassive = feature.actionType === 'passive' || feature.actionType === 'none'
-        || feature.name.toLowerCase().includes('aura')
-
-      // Determine roll info
-      let rollNotation: string | undefined
-      let rollLabel: string | undefined
-      if (feature.damageDice) {
-        rollNotation = feature.damageDice
-        rollLabel = `${feature.name}`
-      }
-
-      // Merge feat tips for this feature
-      const featureFeatTips = getFeatTips(character, feature.name, 'feature')
-      const featureTipParts: string[] = []
-      if (feature.tacticalNote) featureTipParts.push(feature.tacticalNote)
-      featureTipParts.push(...featureFeatTips)
-      const featureStrategicTip = featureTipParts.length > 0 ? featureTipParts.join(' | ') : undefined
-
-      const option: ActionOption = {
-        name: feature.name,
-        type: 'feature',
-        actionEconomy: actionType,
-        summary: featureSummary(feature),
-        mechanicsLine: [
-          feature.damageDice ? `${feature.damageDice}${feature.damageType ? ' ' + feature.damageType : ''}` : null,
-          feature.saveType ? `DC ${character.spellSaveDC} ${feature.saveType}` : null,
-          feature.range || null,
-        ].filter(Boolean).join(' · ') || 'See description',
-        effectsLine: featureEffects(feature),
-        strategicTip: featureStrategicTip,
-        rollNotation,
-        rollLabel,
-        usesRemaining: feature.usesMax !== undefined ? `${feature.usesCurrent ?? 0}/${feature.usesMax}` : undefined,
-      }
-
-      if (isPassive) passives.push(option)
-      else if (actionType === 'bonusAction') bonusActions.push(option)
-      else if (actionType === 'reaction') reactions.push(option)
-      else actions.push(option)
-    }
-
-    return { actions, bonusActions, reactions, passives }
-  }, [character])
+  // Categorize available options by action type.  The body of this memo was
+  // lifted verbatim to categorizeTurnOptions() above so Phase-0 behaviour can
+  // be pinned by tests before Slice 4 extracts it to src/lib/turn/.
+  const { actions, bonusActions, reactions, passives } = useMemo(
+    () => categorizeTurnOptions(character),
+    [character],
+  )
 
   // Handle using an action — this actually does things
   const handleUseAction = useCallback((option: ActionOption) => {

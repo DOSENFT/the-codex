@@ -34,7 +34,7 @@ needs a *reducer*, and the store to write to already exists.
 | `src/lib/character.ts` | Character type (211–282), slot maths, persistence (370–372), legacy migration (485–516). | Additive fields only. `race` gains a `species` alias (2024 naming) — **both retained**, no rename break. |
 | `src/lib/combat-state.ts` (29–48) | `CombatState`, `InitiativeEntry`, `useAction`, `nextTurn`. | Becomes the reducer's state shape. `InitiativeEntry` extended, not replaced. |
 | `src/components/CombatHelper.tsx` (1,746) | Container; owns combat state, slot handlers (427–435). | Loses the state ownership to the provider. Target: under 400 LOC. |
-| `src/components/TurnSummary.tsx` (1,196) | Composes and renders available actions. | Composition logic **extracted to `src/lib/turn/`**; the component becomes a renderer. Target: under 400 LOC. |
+| `src/components/combat/TurnSummary.tsx` (1,196) | Composes and renders available actions. | Composition logic **extracted to `src/lib/turn/`**; the component becomes a renderer. Target: under 400 LOC. |
 | `src/lib/ai.ts` (1–376) | Ollama + Gemini, streaming and non-streaming, auto-fallback. | Genuinely good. Two fixes only (below). Not restructured. |
 
 **Not touched by V1.0:** Academy, Accent Forge, Persona Engine, Dialogue Bank, Toybox, Backstory
