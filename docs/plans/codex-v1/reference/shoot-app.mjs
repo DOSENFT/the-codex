@@ -10,6 +10,7 @@
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import { loadNix } from './nix-seed.mjs';
 
 const req = createRequire(import.meta.url);
 const npxRoot = 'C:/Users/marcu/AppData/Local/npm-cache/_npx';
@@ -92,53 +93,23 @@ const SEED = {
 // this seed white-screened the app above every error boundary.
 const THIN = { id: SEED_ID, name: 'Thin', class: 'Paladin', level: 1 };
 
-// A Nix with an actual kit, so TurnSummary has something to compose. The four
-// shots above all stop at the pre-combat screen — TurnSummary only mounts once
-// combat is running, which means the audit was cheerfully reporting "no errors"
-// about a component it never rendered. This seed plus `click` fixes that.
+// A Nix with an actual kit, so the turn screen has something to compose. The
+// bare SEED above stops at the pre-combat screen, which meant the audit was
+// cheerfully reporting "no errors" about a component it never rendered.
 //
-// It deliberately mirrors src/lib/turn/fixtures/nix.ts. It cannot import it —
-// this is plain .mjs and the fixture is TypeScript — so if you change one,
-// change the other. The unit tests own correctness here; this seed only has to
-// be rich enough that the screen is worth looking at.
-const RICH = {
-  ...SEED,
-  weapons: [
-    { name: 'Hearthbrand', attackType: 'melee', abilityMod: 'STR', proficient: true,
-      damageDice: '1d8', damageType: 'Slashing', properties: ['Versatile (1d10)'],
-      magical: true, bonusToHit: 1, bonusDamage: 1, range: '5 ft', masteryProperty: 'Sap' },
-    { name: 'Javelin', attackType: 'ranged', abilityMod: 'STR', proficient: true,
-      damageDice: '1d6', damageType: 'Piercing', properties: [] },
-  ],
-  spells: [
-    { name: 'Sacred Flame', level: 0, school: 'Evocation', castingTime: 'Action',
-      range: '60 feet', components: 'V, S', duration: 'Instantaneous', concentration: false,
-      ritual: false, prepared: true, description: 'Radiance descends on a creature.',
-      saveType: 'DEX', damageDice: '2d8', damageType: 'Radiant' },
-    { name: 'Divine Smite', level: 1, school: 'Evocation', castingTime: 'Bonus Action',
-      range: 'Self', components: 'V', duration: 'Instantaneous', concentration: false,
-      ritual: false, prepared: true, description: 'Your weapon flares with radiance.',
-      damageDice: '2d8', damageType: 'Radiant' },
-    { name: 'Misty Step', level: 2, school: 'Conjuration', castingTime: 'Bonus Action',
-      range: 'Self', components: 'V', duration: 'Instantaneous', concentration: false,
-      ritual: false, prepared: true, description: 'You teleport up to 30 feet.' },
-  ],
-  features: [
-    { name: 'Lay on Hands', level: 1, description: 'A pool of healing power.',
-      actionType: 'bonusAction', range: 'Touch', usesPerRest: 'long', usesMax: 40, usesCurrent: 15 },
-    { name: 'Hearthfire Manifest', level: 3, description: 'A manifestation sheds bright light.',
-      actionType: 'bonusAction', range: '30 feet', source: 'Homebrew' },
-    { name: 'Flaming Cloak', level: 3, description: 'Transform your manifestation into a cloak.',
-      actionType: 'reaction', damageDice: '1d10', damageType: 'Fire',
-      usesPerRest: 'short', usesMax: 2, usesCurrent: 1, source: 'Homebrew' },
-    { name: 'Aura of Solace', level: 7, description: 'Resistance to Fire, Cold and Psychic.',
-      actionType: 'passive', range: '10 feet', source: 'Homebrew' },
-  ],
-};
+// SLICE 4: this used to be a hand-written half-copy of the unit-test fixture,
+// with a comment asking whoever edited one to remember the other. It had
+// already drifted. It is now DERIVED from src/lib/turn/fixtures/nix.ts, so the
+// character in these screenshots is byte-for-byte the character the tests
+// assert on, and drift is no longer possible.
+const RICH = await loadNix();
 
 const TARGETS = [
-  { path: '?d=1', label: 'turn-d--phone', vp: PHONE },
-  { path: '?d=1', label: 'turn-d--ipad', vp: IPAD },
+  // Slice 4: composeTurn() reads the character now, so these two MUST carry a
+  // real kit. Under the Slice 1 fixture body the seed was ignored and the bare
+  // SEED was fine; pointing them at it today would shoot an empty screen.
+  { path: '?d=1', label: 'turn-d--phone', vp: PHONE, seed: RICH },
+  { path: '?d=1', label: 'turn-d--ipad', vp: IPAD, seed: RICH },
   { path: '', label: 'v0.9-combat--phone', vp: PHONE },
   { path: '', label: 'v0.9-combat--ipad', vp: IPAD },
   { path: '', label: 'thin-character-boots--phone', vp: PHONE, seed: THIN },

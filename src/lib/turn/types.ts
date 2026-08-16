@@ -190,8 +190,7 @@ export interface ComposedTurn {
   rest: TurnOption[]
   resources: TurnResource[]
   spellSlots: SpellSlotLine[]
-  /** Set while composeTurn() returns seed data instead of reading the real
-   *  character.  Slice 4 deletes it.  Nothing may branch on it except the
-   *  banner that tells Marcus he is looking at a fixture. */
-  seeded?: boolean
+  /* `seeded?` lived here through Slices 1-3 and Slice 4 deleted it, exactly as
+     its own doc comment promised. composeTurn() now reads the real character,
+     so there is no fixture left to warn anyone about. */
 }

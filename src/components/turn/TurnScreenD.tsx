@@ -22,10 +22,6 @@ export function TurnScreenD({ turn }: { turn: ComposedTurn }) {
 
   return (
     <div className="dturn">
-      {turn.seeded && (
-        <div className="fixture">Seeded fixture · slice 1</div>
-      )}
-
       <header className="chrome">
         <div className="who">
           <span className="nm">{actor.name}</span>

@@ -59,7 +59,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 **Wave 1 — the turn brain (the 15-second metric)**
 - [x] 2 — Phase-0 characterization tests against the UNMODIFIED prototype **— DONE 2026-08-16, see below**
 - [x] 3 — `rules-2024/` economy + mastery + conditions, pure, tested *(team: fan out + adversarial refute pass)* **— DONE 2026-08-16, see below**
-- [ ] 4 — the extraction: real `composeTurn()`; Slice 2's tests must stay green *(single author, deliberately)*
+- [x] 4 — the extraction: real `composeTurn()`; Slice 2's tests must stay green *(single author, deliberately)* **— DONE 2026-08-16, see below**
 - [ ] 5 — `rank.ts` + `contention.ts`: the shortlist is genuinely ranked, the mutex renders
 - [ ] 6 — 🚩 `CombatProvider` + reducer + event log → **Undo**; spell-slot reconciliation; both combat components halved *(team: fan out on verification)*
 
@@ -349,6 +349,105 @@ two-weapon fighting and Nick's free extra attack are questions about how many at
 Attack action contains, which is **contention** and belongs to Slice 5. Exhaustion levels
 are not tracked; condition *state* is Slice 7. `LoggedEvent` does not exist until Slice 6,
 so `spellSlotSpentThisTurn()` takes the structural minimum that `LoggedEvent` will satisfy.
+
+---
+
+## ✅ Slice 4 — THE EXTRACTION, done 2026-08-16
+
+`composeTurn()` stopped returning a fixture and started reading Nix. **97 tests green · `tsc -b`
+clean · `vite build` clean · 22/22 mutants killed.**
+
+### The move was mechanical, not transcribed
+
+283 lines went from `TurnSummary.tsx:94-376` to `src/lib/turn/options.ts` **by script**
+(`C:/tmp/lift-options.mjs`), and the extracted range was `diff`ed against the destination:
+**IDENTICAL — 283 lines moved, zero content change.** "Verbatim" is the entire proof of this
+slice, and a human retyping 283 lines cannot claim it.
+
+TurnSummary now re-exports `categorizeTurnOptions` / `ActionOption` / `CategorizedOptions` from
+that module, so Slice 2's seven characterization tests import from the path they always imported
+from and did not change by one character. There is now **one** implementation of "what can this
+character do", and both the V0.9 screen and the composer call it. Two copies would have drifted,
+and the drift would have been invisible because both would have looked "working".
+
+### What landed
+
+| File | What it is |
+|---|---|
+| `src/lib/turn/options.ts` | The moved logic + a 44-line header + the `includeUnaffordable` build switch. |
+| `src/lib/turn/compose.ts` | The real composer. Reads character + `CombatState`, returns `ComposedTurn`. 380 LOC, no fixture. |
+| `src/lib/turn/contention.ts` | Pulled forward from Slice 5 — contention is **legality**, which is this slice's remit; ranking is wisdom, which is Slice 5's. |
+| `src/lib/turn/compose.equivalence.test.ts` | 36 tests. The proof: composeTurn's *available* set **equals** what TurnSummary offers, and the only difference is the affordability drops. |
+| `docs/plans/codex-v1/reference/nix-seed.mjs` | Derives the screenshot seed from the unit-test fixture via esbuild. One Nix, not two. |
+| `src/lib/turn/types.ts` · `TurnScreenD.tsx` · `App.tsx` | `seeded?` deleted, exactly as its own doc comment promised. |
+
+### The distinction that resolved Slice 2 vs D
+
+Slice 2 pinned "drop unaffordable options". D says "grey with a reason, never hide". Both are right
+about different things, and the split is:
+
+- **Not yours today** — unprepared spell, feature above your level, a spell tier you do not possess
+  at all (a Paladin 8 has no 3rd). **Still dropped.** Bless and Fireball do not appear.
+- **Yours, but unaffordable right now** — the tier exists and is spent, the pool is at 0.
+  **Shown, greyed, with the reason.** Divine Sense reads *"No uses left until a long rest"*.
+
+That is why `options.ts` gained a build switch rather than having its filter deleted: the default
+path is provably byte-identical (`categorizeTurnOptions(c)` deep-equals
+`categorizeTurnOptions(c, {includeUnaffordable:false})`, asserted), so V0.9 is untouched.
+
+### Blocked-reason precedence: say the reason that OUTLIVES THE TURN
+
+An option can be blocked several times over and one sentence fits on the row. Order:
+**condition → empty pool → spent slot → one-slot rule.** A condition lasts until removed; a pool
+until a rest; a spent slot evaporates in six seconds. Leading with a transient reason implies
+"wait a turn and this works", which for Divine Sense at 0 of 4 is false. The economy strip already
+shows the whole slot closed, so repeating it per row is the redundant half of the message.
+
+### What the screen actually shows now, from Nix's real sheet
+
+Five ranked (Hearthbrand · Javelin · Sacred Flame · Hearthfire Manifest · Flaming Cloak), then
+*Everything else* (Divine Sense, greyed, with its reason), then **two brackets**: the bonus action
+with five faces (Divine Smite · Shield of Faith · Misty Step · Lay on Hands · Channel Divinity)
+reason `both`, and the action with two (Cure Wounds · Warding Bond). Hearthbrand's declared **Sap**
+survives on a homebrew-named weapon; Javelin picks up **Slow** from the 2024 name table.
+
+### 🩹 A regression this slice CAUSED, and fixed inside it
+
+Raising the option count from the fixture's 3+3 to the real 5+7 starved the layout. `.list` was the
+only flexing zone and the brackets were `flex: 0 0 auto`, so on the **phone the ranked list
+collapsed to ZERO HEIGHT — Marcus would have opened the app at the table and seen none of his
+attacks.** On the iPad two options and the whole *Everything else* band were scrolled out of an
+invisible inner scroll region.
+
+Screenshot-verified, not theorised, and fixed in `turn-d.css`: the phone stack and (≥900px) the
+middle column each became **one scroll surface**. Pinning the brackets was always a nicety;
+showing the attacks is the product. Both viewports re-audit **fits viewport: yes · errors: none ·
+touch < 48px: 0 · Cinzel < 20px: 0 · text < 12px: 0**.
+
+### Mutation sweep — 22/22 killed
+
+Every sed `cmp`-guarded, so a sed that fails to apply reports INVALID rather than posing as a
+survivor. **Two genuinely survived on the first pass and both were real coverage holes**, not
+equivalent mutants:
+
+- **M16** `DEFAULT_SHORTLIST = 500` survived: Nix has *exactly* five uncontended affordable
+  options, so the default was saturated but never exercised. Closed with a nine-weapon character.
+- **M17** `findContention([])` survived: every mutex assertion was written "for each group", and a
+  turn with **no** groups passes them all vacuously. Nothing said the brackets must EXIST — for
+  D's defining element. Closed with six tests that name the faces, the reason and the caption.
+
+M19 reported **INVALID** because I pointed it at the wrong file; the guard caught it rather than
+letting it read as a pass. Retargeted, it kills.
+
+### Deliberately NOT done here
+
+No ranking — every `score` is 0 and the shortlist is the first five in build order. Slice 5 owns
+`rank.ts`. `log` is accepted and empty, so the one-slot-per-turn rule is stated correctly and
+inert until Slice 6 builds the event log; wiring it is one argument, not a redesign.
+
+**Noted for Slice 6b:** the fixture gives *Flaming Cloak* its own `usesMax: 2` although its text
+says it spends a **Channel Divinity** use, so it shows as a separate pool. That is character-data
+modelling, not composer logic, and it belongs to the resource-pool slice.
 
 ---
 

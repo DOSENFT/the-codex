@@ -47,8 +47,28 @@
 
 /* On the phone the three columns do not exist — the zones simply stack, so the
    columns dissolve and their children become the stack.  One markup, two real
-   layouts, no duplicated tree. */
-.dturn .body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+   layouts, no duplicated tree.
+
+   ONE SCROLL, NOT TWO (Slice 4).  This stack used to pin the mutex brackets and
+   let only the ranked list scroll inside whatever height was left over.  That held for
+   exactly as long as composeTurn() returned the Slice 1 fixture — three ranked
+   options and one three-face bracket.  The moment it read Nix's real sheet the
+   count went to five ranked, two brackets and seven faces, the brackets ate the
+   whole column at flex:0 0 auto, and the list was starved to ZERO HEIGHT:
+   the phone showed the player none of his attacks.  Screenshot-verified, not
+   theorised.
+
+   So the phone scrolls as one surface.  Everything is reachable with one
+   gesture and nothing can starve anything else.  Pinning the brackets was
+   always a nicety; showing the attacks is the product. */
+.dturn .body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 .dturn .colA, .dturn .colB, .dturn .colC { display: contents; }
 
 /* ---- chrome --------------------------------------------------------------- */
@@ -162,9 +182,9 @@
 
 /* ---- the ranked list — the only zone that flexes -------------------------- */
 .dturn .list {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow-y: auto;
+  overflow-y: visible;
   padding: var(--d-s3) var(--pad);
   display: flex;
   flex-direction: column;
@@ -323,7 +343,18 @@
   }
   .dturn .body > * { background: var(--d-bg); min-height: 0; }
   .dturn .colA, .dturn .colC { display: flex; flex-direction: column; }
-  .dturn .colB { display: flex; flex-direction: column; min-height: 0; }
+  /* On the tablet the SCROLL MOVES ONE LEVEL UP, for the same reason it moved
+     on the phone: with .list no longer its own scroll region, the middle
+     column is what scrolls, in one continuous surface, while vitals and
+     resources stay pinned either side. */
+  .dturn .colB {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .dturn .body { overflow-y: hidden; }
   .dturn .list { padding-top: var(--d-s4); }
   .dturn .upon { flex-direction: column; align-items: flex-start; }
   .dturn .tag { max-width: 100%; }

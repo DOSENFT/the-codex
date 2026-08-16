@@ -1,14 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import { composeTurn } from './compose'
-import type { Character } from '../character'
+import { NIX } from './fixtures/nix'
 
 /* These assert invariants of the composed turn, not the fixture's contents.
-   They are written so they keep meaning after Slice 4 swaps the seed body for
+   They were written so they keep meaning after Slice 4 swaps the seed body for
    real composition — at which point they stop being cheap and start being the
-   safety net. */
+   safety net.
 
-const anyCharacter = { name: 'ignored' } as unknown as Character
-const turn = () => composeTurn({ character: anyCharacter, combat: null })
+   SLICE 4: that swap has happened, and the only edit these tests needed was
+   their input. Slice 1 passed `{ name: 'ignored' }` because the body ignored
+   it; they now run against the real Nix fixture and every assertion below is
+   unchanged. That is the point — the invariants were written to outlive the
+   fixture, and they did. */
+
+const turn = () => composeTurn({ character: NIX, combat: null })
 
 describe('composeTurn', () => {
   it('is deterministic — same input, same output', () => {

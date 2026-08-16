@@ -14,9 +14,9 @@
     "cinzelUnder20Count": 0,
     "under12px": [],
     "under12pxCount": 0,
-    "goldPctOfLitPixels": 27.9,
-    "emberPctOfLitPixels": 4.9,
-    "litPctOfScreen": 4.8
+    "goldPctOfLitPixels": 17.9,
+    "emberPctOfLitPixels": 0.2,
+    "litPctOfScreen": 5.7
   },
   {
     "shot": "turn-d--ipad",
@@ -33,9 +33,9 @@
     "cinzelUnder20Count": 0,
     "under12px": [],
     "under12pxCount": 0,
-    "goldPctOfLitPixels": 38,
-    "emberPctOfLitPixels": 8.8,
-    "litPctOfScreen": 2.1
+    "goldPctOfLitPixels": 39.2,
+    "emberPctOfLitPixels": 6.7,
+    "litPctOfScreen": 2.5
   },
   {
     "shot": "v0.9-combat--phone",
@@ -610,7 +610,7 @@
   {
     "shot": "v0.9-turnsummary--phone",
     "errors": [],
-    "scrollHeight": 2651,
+    "scrollHeight": 2363,
     "overflowsViewport": true,
     "horizontalOverflow": false,
     "rootChildren": 1,
@@ -705,10 +705,6 @@
         "size": 14
       },
       {
-        "sample": "Paladin Resources",
-        "size": 14
-      },
-      {
         "sample": "Choose Action",
         "size": 16
       },
@@ -739,9 +735,13 @@
       {
         "sample": "How do saving throws wor",
         "size": 14
+      },
+      {
+        "sample": "What is an ability check",
+        "size": 14
       }
     ],
-    "cinzelUnder20Count": 32,
+    "cinzelUnder20Count": 31,
     "under12px": [
       {
         "sample": "Play",
@@ -754,6 +754,10 @@
       {
         "sample": "Always Active",
         "size": 10
+      },
+      {
+        "sample": "Aura of Protection",
+        "size": 11
       },
       {
         "sample": "Aura of Solace",
@@ -784,23 +788,19 @@
         "size": 10
       },
       {
-        "sample": "2nd",
-        "size": 9
-      },
-      {
-        "sample": "2nd-level",
-        "size": 10
+        "sample": "+1 more",
+        "size": 11
       }
     ],
-    "under12pxCount": 56,
-    "goldPctOfLitPixels": 33.6,
+    "under12pxCount": 61,
+    "goldPctOfLitPixels": 35,
     "emberPctOfLitPixels": 0.1,
     "litPctOfScreen": 5.7
   },
   {
     "shot": "v0.9-turnsummary--ipad",
     "errors": [],
-    "scrollHeight": 2635,
+    "scrollHeight": 2347,
     "overflowsViewport": true,
     "horizontalOverflow": false,
     "rootChildren": 1,
@@ -895,10 +895,6 @@
         "size": 14
       },
       {
-        "sample": "Paladin Resources",
-        "size": 14
-      },
-      {
         "sample": "Choose Action",
         "size": 16
       },
@@ -929,9 +925,13 @@
       {
         "sample": "How do saving throws wor",
         "size": 14
+      },
+      {
+        "sample": "What is an ability check",
+        "size": 14
       }
     ],
-    "cinzelUnder20Count": 32,
+    "cinzelUnder20Count": 31,
     "under12px": [
       {
         "sample": "Play",
@@ -944,6 +944,10 @@
       {
         "sample": "Always Active",
         "size": 10
+      },
+      {
+        "sample": "Aura of Protection",
+        "size": 11
       },
       {
         "sample": "Aura of Solace",
@@ -974,16 +978,12 @@
         "size": 10
       },
       {
-        "sample": "2nd",
-        "size": 9
-      },
-      {
-        "sample": "2nd-level",
-        "size": 10
+        "sample": "+1 more",
+        "size": 11
       }
     ],
-    "under12pxCount": 53,
-    "goldPctOfLitPixels": 30.9,
+    "under12pxCount": 58,
+    "goldPctOfLitPixels": 29.6,
     "emberPctOfLitPixels": 0.1,
     "litPctOfScreen": 1.7
   }

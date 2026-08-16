@@ -101,9 +101,10 @@ export default function App() {
     )
   }
 
-  /* The tracer bullet: the real character and the real persisted encounter go
-     into composeTurn, and the real component renders what comes out. Only the
-     body of composeTurn is a fixture — the pipe either side of it is live. */
+  /* Slice 1 wired this pipe with a fixture at the far end. Slice 4 removed the
+     fixture: the real character and the real persisted encounter go into
+     composeTurn, real rules come out, and the real component renders them.
+     Nothing on this screen is hardcoded any more. */
   if (D_PREVIEW) {
     return (
       <ErrorBoundary surface="Turn (preview)">
