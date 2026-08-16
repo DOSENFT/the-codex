@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>A · Instrument — Turn spread (iPad)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DIRECTION A — THE INSTRUMENT · iPad 1366×1024
+   Garmin G1000 split, never violated:
+     LEFT  pane = PFD = what is happening NOW
+     RIGHT pane = MFD = reference, always visible
+   The "+6 more" tap does not exist on this device — there is
+   room, so everything you own is on screen, ranked but present.
+   ============================================================ */
+:root{
+  --bg:#0a0a08; --surface:#12110e; --raised:#1c1a15;
+  --cream:#f0e6d3; --cream-2:rgba(240,230,211,.60); --cream-3:rgba(240,230,211,.38);
+  --gold:#c5a55a; --gold-line:rgba(197,165,90,.22); --gold-faint:rgba(197,165,90,.09);
+  --amber:#d4a74a; --ember:#c06030;
+  --r-panel:14px; --r-card:9px; --r-chip:5px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  /* tablet distance: body steps up from 16 → 17. Type scales with the device. */
+  font-size:17px;line-height:1.45;
+  display:flex;height:100dvh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+.zlabel{font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--cream-3)}
+.dots{display:inline-flex;gap:4px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.dot.off{background:transparent;box-shadow:inset 0 0 0 1px rgba(197,165,90,.35)}
+.tag{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--cream-3);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:3px 7px;white-space:nowrap}
+.tag.b{color:var(--gold);border-color:rgba(197,165,90,.4)}
+.tag.free{color:var(--amber);border-color:rgba(212,167,74,.4)}
+
+/* ---- NAV RAIL (Procreate): 56px, controls in the lower 35% for thumb reach ---- */
+.rail{
+  flex:0 0 56px;border-right:1px solid var(--gold-line);
+  display:flex;flex-direction:column;align-items:center;padding:12px 0 16px;background:var(--surface);
+}
+.rail .crest{font-family:'Cinzel',serif;font-weight:700;font-size:17px;color:var(--gold);letter-spacing:.04em}
+.rail .grow{flex:1}
+.rail .nav{display:flex;flex-direction:column;gap:6px;width:100%;align-items:center}
+.rnav{
+  width:44px;height:52px;border-radius:var(--r-card);border:1px solid transparent;background:transparent;
+  color:var(--cream-3);font-family:inherit;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
+.rnav .g{font-family:'Cinzel',serif;font-size:15px;font-weight:700}
+.rnav.on{background:var(--raised);border-color:var(--gold-line);color:var(--gold);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.2)}
+
+/* ================= LEFT PANE — PFD — "NOW" ================= */
+.pfd{flex:0 0 46%;display:flex;flex-direction:column;border-right:1px solid var(--gold-line);min-width:0}
+
+.hdr{display:flex;align-items:center;gap:12px;padding:12px 20px 11px;border-bottom:1px solid var(--gold-line)}
+.hdr .name{font-family:'Cinzel',serif;font-weight:700;font-size:20px;letter-spacing:.05em;color:var(--gold)}
+.hdr .sub{font-size:12px;color:var(--cream-3);letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+.hdr .grow{flex:1}
+.mode-pill{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--bg);
+  background:var(--gold);padding:4px 11px;border-radius:var(--r-chip);font-weight:600}
+
+.vitals{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--gold-line);
+  border-bottom:1px solid var(--gold-line)}
+.vitals>div{background:var(--bg);padding:14px 20px 15px}
+.hp-row{display:flex;align-items:baseline;gap:3px}
+.hp-cur{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:52px;line-height:.9}
+.hp-max{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--cream-3)}
+.hp-temp{font-family:'JetBrains Mono',monospace;font-size:19px;color:var(--amber);margin-left:8px}
+.hp-track{height:4px;background:var(--raised);margin-top:11px;border-radius:2px;overflow:hidden;display:flex}
+.hp-fill{width:54%;background:var(--gold)} .hp-tempfill{width:6.5%;background:var(--amber)}
+.ac-row{display:flex;gap:24px;margin-top:12px}
+.ac-item{display:flex;align-items:baseline;gap:6px}
+.ac-item b{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:21px}
+.ac-item span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3)}
+.threat{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--gold-faint)}
+.threat:last-child{border-bottom:0}
+.threat .bar{width:2px;align-self:stretch;background:var(--amber);border-radius:1px;flex:0 0 2px}
+.threat.active .bar{background:var(--ember)}
+.threat .t{font-size:14px;font-weight:600;line-height:1.25}
+.threat.active .t{color:var(--ember)}
+.threat .d{font-size:12.5px;color:var(--cream-2);line-height:1.35;margin-top:2px}
+
+.turnbar{display:flex;align-items:center;gap:14px;padding:11px 20px;border-bottom:1px solid var(--gold-line)}
+.round{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3)}
+.yourturn{font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:.12em;color:var(--gold)}
+.turnbar .grow{flex:1}
+.nextbtn{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:8px 14px;background:transparent;
+  font-family:inherit;min-height:36px}
+
+.econ-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--gold-line);
+  border-bottom:1px solid var(--gold-line)}
+.econ{background:var(--bg);padding:10px 6px 11px;text-align:center}
+.econ .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-3)}
+.econ .v{font-family:'Cinzel',serif;font-weight:700;font-size:14px;letter-spacing:.05em;margin-top:4px;color:var(--gold)}
+
+.ranked{flex:1;overflow-y:auto;padding:12px 20px 8px}
+.ranked::-webkit-scrollbar{width:0}
+.rhead{display:flex;align-items:baseline;margin-bottom:9px}
+.rhead .hint{margin-left:auto;font-size:11px;color:var(--cream-3)}
+.act{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:start;
+  padding:11px 13px 12px;margin-bottom:7px;min-height:48px;
+  background:var(--surface);border-radius:var(--r-card);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.13);border-left:2px solid transparent}
+.act.lead{background:var(--raised);border-left-color:var(--ember);box-shadow:inset 0 1px 0 rgba(197,165,90,.2)}
+.act.spent{opacity:.42;background:var(--bg);box-shadow:none}
+.act .idx{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cream-3);text-align:center;padding-top:2px}
+.act.lead .idx{color:var(--ember);font-weight:700}
+.act .nm{font-size:17px;font-weight:600;line-height:1.2}
+.act .math{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cream-2);margin-top:4px}
+.act .note{font-size:12.5px;margin-top:5px;color:var(--cream-2);line-height:1.35}
+.act .note.warn{color:var(--ember);font-weight:600}
+.cost{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+
+/* ================= RIGHT PANE — MFD — "REFERENCE" ================= */
+.mfd{flex:1;display:flex;flex-direction:column;min-width:0}
+.mfd-top{padding:12px 20px 11px;border-bottom:1px solid var(--gold-line);display:flex;align-items:center}
+.mfd-top .grow{flex:1}
+.seg{display:flex;gap:1px;background:var(--gold-line);border-radius:var(--r-chip);overflow:hidden}
+.seg button{font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  padding:7px 13px;background:var(--surface);color:var(--cream-3);border:0;min-height:34px}
+.seg button.on{background:var(--raised);color:var(--gold)}
+
+/* initiative — a strip, not a list. Mobs are one entry with pips. */
+.init{display:flex;gap:1px;background:var(--gold-line);border-bottom:1px solid var(--gold-line)}
+.ini{flex:1;background:var(--bg);padding:9px 10px 10px;min-width:0}
+.ini.now{background:var(--raised);box-shadow:inset 0 2px 0 var(--gold)}
+.ini .n{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ini.now .n{color:var(--gold)}
+.ini .m{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cream-3);margin-top:3px}
+.pips{display:flex;gap:2px;margin-top:5px}
+.pip{width:5px;height:5px;border-radius:1px;background:var(--ember)}
+.pip.down{background:rgba(240,230,211,.18)}
+
+.ref{flex:1;overflow-y:auto;padding:12px 20px 10px;column-count:2;column-gap:20px}
+.ref::-webkit-scrollbar{width:0}
+.grp{break-inside:avoid;margin-bottom:14px}
+.grp h4{font-family:'Cinzel',serif;font-weight:600;font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);padding-bottom:5px;margin-bottom:6px;
+  border-bottom:1px solid var(--gold-line)}
+.ent{display:flex;align-items:baseline;gap:8px;padding:5px 0;break-inside:avoid}
+.ent .en{font-size:14.5px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ent .em{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--cream-3);white-space:nowrap}
+.ent.off{opacity:.4}
+.ent.off .en{text-decoration:line-through;text-decoration-thickness:1px}
+.always{background:var(--surface);border-radius:var(--r-card);padding:10px 12px 4px;
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.13)}
+.always h4{border-bottom-color:var(--gold-faint)}
+
+/* ================= EDGE READOUT — full width, Shearwater ================= */
+.readout{
+  position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;gap:14px;
+  padding:11px 20px calc(11px + env(safe-area-inset-bottom));
+  background:var(--surface);border-top:1px solid var(--gold-line);
+}
+.readout .mode{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3)}
+.readout .arrow{color:var(--gold-line)}
+.readout .next{font-size:14px;font-weight:600}
+.readout .grow{flex:1}
+.readout .d20{width:44px;height:40px;border-radius:var(--r-chip);border:1px solid rgba(197,165,90,.4);
+  background:transparent;color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:12px;
+  font-weight:700;display:grid;place-items:center}
+.pad{height:62px;flex:0 0 auto}
+</style>
+</head>
+<body>
+
+<!-- NAV RAIL -->
+<div class="rail">
+  <div class="crest">C</div>
+  <div class="grow"></div>
+  <div class="nav">
+    <button class="rnav on"><span class="g">⚔</span>Fight</button>
+    <button class="rnav"><span class="g">✦</span>Book</button>
+    <button class="rnav"><span class="g">☾</span>Voice</button>
+    <button class="rnav"><span class="g">d</span>Roll</button>
+  </div>
+</div>
+
+<!-- ================= LEFT: PFD — NOW ================= -->
+<div class="pfd">
+  <div class="hdr">
+    <div>
+      <div class="name">VAELIN ASHGROVE</div>
+      <div class="sub">Paladin 8 · Oath of Vengeance · Half-Elf</div>
+    </div>
+    <div class="grow"></div>
+    <div class="mode-pill">Play</div>
+  </div>
+
+  <div class="vitals">
+    <div>
+      <div class="zlabel">Hit Points</div>
+      <div class="hp-row" style="margin-top:6px">
+        <span class="hp-cur">41</span><span class="hp-max">/76</span><span class="hp-temp">+5</span>
+      </div>
+      <div class="hp-track"><div class="hp-fill"></div><div class="hp-tempfill"></div></div>
+      <div class="ac-row">
+        <div class="ac-item"><b>19</b><span>AC</span></div>
+        <div class="ac-item"><b>16</b><span>Save DC</span></div>
+        <div class="ac-item"><b>+3</b><span>Prof</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="zlabel">Pressing</div>
+      <div style="margin-top:6px">
+        <div class="threat active">
+          <div class="bar"></div>
+          <div><div class="t">Frightened</div>
+            <div class="d">Disadvantage on attack rolls while the ogre is in your line of sight.</div></div>
+        </div>
+        <div class="threat">
+          <div class="bar"></div>
+          <div><div class="t">Concentrating — Bless</div>
+            <div class="d">Any damage forces a CON save, DC 10 or half the damage taken.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="turnbar">
+    <span class="round">Round 3</span>
+    <span class="yourturn">YOUR TURN</span>
+    <span class="grow"></span>
+    <button class="nextbtn">End turn</button>
+  </div>
+
+  <div class="econ-row">
+    <div class="econ"><div class="k">Action</div><div class="v">OPEN</div></div>
+    <div class="econ"><div class="k">Bonus</div><div class="v">OPEN</div></div>
+    <div class="econ"><div class="k">Reaction</div><div class="v">OPEN</div></div>
+    <div class="econ"><div class="k">Move</div><div class="v">30 FT</div></div>
+  </div>
+
+  <div class="ranked">
+    <div class="rhead"><div class="zlabel">What you can do now</div><div class="hint">ranked</div></div>
+
+    <div class="act lead">
+      <div class="idx">1</div>
+      <div>
+        <div class="nm">Oathkeeper</div>
+        <div class="math">+8 to hit (STR +4 · prof +3 · magic +1) · 1d8+5 slashing · 5 ft</div>
+        <div class="note warn">Roll twice, take the lower — you are frightened.</div>
+      </div>
+      <div class="cost"><span class="tag b">Action</span><span class="tag">×2 attacks</span></div>
+    </div>
+
+    <div class="act">
+      <div class="idx">2</div>
+      <div>
+        <div class="nm">Divine Smite</div>
+        <div class="math">+2d8 radiant on hit · +1d8 vs undead or fiend</div>
+        <div class="note">Declare after the hit lands, not before.</div>
+      </div>
+      <div class="cost"><span class="tag free">No action</span>
+        <span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot off"></i><i class="dot off"></i></span></div>
+    </div>
+
+    <div class="act">
+      <div class="idx">3</div>
+      <div>
+        <div class="nm">Misty Step</div>
+        <div class="math">30 ft teleport · breaks line of sight</div>
+        <div class="note">Ends the frightened disadvantage if the ogre loses sight of you.</div>
+      </div>
+      <div class="cost"><span class="tag b">Bonus</span>
+        <span class="dots"><i class="dot"></i><i class="dot off"></i><i class="dot off"></i></span></div>
+    </div>
+
+    <div class="act">
+      <div class="idx">4</div>
+      <div>
+        <div class="nm">Lay on Hands</div>
+        <div class="math">Heal up to 15 · touch · pool 15/40</div>
+      </div>
+      <div class="cost"><span class="tag b">Action</span></div>
+    </div>
+
+    <div class="act spent">
+      <div class="idx">5</div>
+      <div>
+        <div class="nm">Vow of Enmity</div>
+        <div class="math">Advantage vs one target for 1 minute</div>
+        <div class="note">Channel Divinity spent — returns on a short rest.</div>
+      </div>
+      <div class="cost"><span class="tag">Spent</span></div>
+    </div>
+    <div class="pad"></div>
+  </div>
+</div>
+
+<!-- ================= RIGHT: MFD — REFERENCE ================= -->
+<div class="mfd">
+  <div class="mfd-top">
+    <div class="zlabel">Everything you own — nothing hidden</div>
+    <div class="grow"></div>
+    <div class="seg">
+      <button class="on">By economy</button>
+      <button>By level</button>
+      <button>A–Z</button>
+    </div>
+  </div>
+
+  <div class="init">
+    <div class="ini"><div class="n">Brannoch</div><div class="m">21</div></div>
+    <div class="ini now"><div class="n">Vaelin</div><div class="m">18 · now</div></div>
+    <div class="ini"><div class="n">Ogre</div><div class="m">14 · 63 hp</div></div>
+    <div class="ini"><div class="n">Goblins ×8</div><div class="m">11</div>
+      <div class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip down"></i><i class="pip down"></i><i class="pip down"></i></div></div>
+    <div class="ini"><div class="n">Sera</div><div class="m">9</div></div>
+  </div>
+
+  <div class="ref">
+    <div class="grp always">
+      <h4>Always active</h4>
+      <div class="ent"><span class="en">Aura of Protection</span><span class="em">+4 saves · 10 ft</span></div>
+      <div class="ent"><span class="en">Extra Attack</span><span class="em">×2</span></div>
+      <div class="ent"><span class="en">Fey Ancestry</span><span class="em">adv. vs charm</span></div>
+      <div class="ent"><span class="en">Divine Sense</span><span class="em">3 / long rest</span></div>
+      <div class="ent"><span class="en">Relentless Avenger</span><span class="em">on opp. attack</span></div>
+      <div class="ent"><span class="en">Great Weapon Master</span><span class="em">−5 / +10</span></div>
+    </div>
+
+    <div class="grp">
+      <h4>Action</h4>
+      <div class="ent"><span class="en">Oathkeeper</span><span class="em">+8 · 1d8+5</span></div>
+      <div class="ent"><span class="en">Javelin</span><span class="em">+7 · 1d6+4 · 30/120</span></div>
+      <div class="ent"><span class="en">Lay on Hands</span><span class="em">pool 15</span></div>
+      <div class="ent"><span class="en">Sacred Flame</span><span class="em">DEX 16 · 2d8</span></div>
+      <div class="ent"><span class="en">Hold Person</span><span class="em">II · WIS 16</span></div>
+      <div class="ent"><span class="en">Compelled Duel</span><span class="em">I · WIS 16</span></div>
+      <div class="ent"><span class="en">Revivify</span><span class="em">III · 300gp</span></div>
+      <div class="ent"><span class="en">Haste</span><span class="em">III · conc.</span></div>
+      <div class="ent"><span class="en">Magic Weapon</span><span class="em">II · conc.</span></div>
+      <div class="ent"><span class="en">Dash · Dodge · Disengage</span><span class="em">—</span></div>
+      <div class="ent"><span class="en">Help · Hide · Shove</span><span class="em">—</span></div>
+    </div>
+
+    <div class="grp">
+      <h4>Bonus action</h4>
+      <div class="ent"><span class="en">Misty Step</span><span class="em">II · 30 ft</span></div>
+      <div class="ent"><span class="en">Shield of Faith</span><span class="em">I · +2 AC · conc.</span></div>
+      <div class="ent off"><span class="en">Vow of Enmity</span><span class="em">spent</span></div>
+      <div class="ent off"><span class="en">Abjure Enemy</span><span class="em">spent</span></div>
+      <div class="ent"><span class="en">Bless</span><span class="em">I · running</span></div>
+    </div>
+
+    <div class="grp">
+      <h4>Reaction</h4>
+      <div class="ent"><span class="en">Opportunity Attack</span><span class="em">+8 · 1d8+5</span></div>
+      <div class="ent"><span class="en">Relentless Avenger</span><span class="em">move 15 ft</span></div>
+    </div>
+
+    <div class="grp">
+      <h4>No action — on hit</h4>
+      <div class="ent"><span class="en">Divine Smite</span><span class="em">I · +2d8 radiant</span></div>
+      <div class="ent"><span class="en">Divine Smite</span><span class="em">II · +3d8 radiant</span></div>
+      <div class="ent"><span class="en">Divine Smite</span><span class="em">III · +4d8 radiant</span></div>
+    </div>
+    <div class="pad"></div>
+  </div>
+</div>
+
+<!-- EDGE READOUT -->
+<div class="readout">
+  <span class="mode">Combat · Round 3 · your turn</span>
+  <span class="arrow">›</span>
+  <span class="next">Attack with Oathkeeper, then smite on a hit</span>
+  <span class="grow"></span>
+  <button class="d20">d20</button>
+</div>
+
+</body>
+</html>

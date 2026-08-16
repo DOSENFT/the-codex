@@ -1,0 +1,333 @@
+/* ============================================================================
+   THE TURN SCREEN — direction D, as a real component
+   ----------------------------------------------------------------------------
+   Ported from docs/plans/codex-v1/mockups/d-merged/01-turn.html (phone) and
+   02-turn-spread.html (iPad), which shipped with zero audit violations: no
+   tappable under 48px, nothing Cinzel under 20px, nothing at all under 12px.
+
+   Every rule in src/design/README.md is enforced here.  Two are load-bearing
+   and are marked in place, because they are the ones that get "tidied" away by
+   someone who does not know what they cost:
+     · the HP bar and its Bloodied annotation are ONE row
+     · riders are cream body copy with a gold keyword, never a gold line
+   ========================================================================== */
+
+.dturn {
+  --pad: var(--d-s4);
+  display: flex;
+  flex-direction: column;
+  /* HEIGHT, not min-height. With min-height the column grows past the viewport
+     when the list is long, the page scrolls as a whole, and the mutex — the one
+     zone that must always be visible — walks off the bottom of the phone.
+     Measured: 1244px of document in an 844px screen. The list is the only zone
+     allowed to scroll, and it can only do that if the frame is pinned. */
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background: var(--d-bg);
+  color: var(--d-cream);
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+  line-height: var(--d-lh-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.dturn button { font: inherit; color: inherit; }
+
+/* ---- fixture banner — deleted in Slice 4 with the seed --------------------- */
+.dturn .fixture {
+  flex: 0 0 auto;
+  padding: 6px var(--pad);
+  background: #2a1a10;
+  border-bottom: 1px solid var(--d-rule-lit);
+  color: var(--d-ember);
+  font-size: 16px; /* ember floor */
+  letter-spacing: 0.02em;
+}
+
+/* On the phone the three columns do not exist — the zones simply stack, so the
+   columns dissolve and their children become the stack.  One markup, two real
+   layouts, no duplicated tree. */
+.dturn .body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.dturn .colA, .dturn .colB, .dturn .colC { display: contents; }
+
+/* ---- chrome --------------------------------------------------------------- */
+.dturn .chrome {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--d-s3);
+  padding: var(--d-s3) var(--pad);
+  border-bottom: 1px solid var(--d-rule);
+}
+/* The subclass is the character, and Nix's is homebrew — "Oath of the He…" is
+   not an acceptable way to render the thing Marcus wrote himself.  It wraps. */
+.dturn .who { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 9px; min-width: 0; }
+.dturn .who .nm {
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-name);
+  color: var(--d-cream);
+  line-height: var(--d-lh-tight);
+}
+.dturn .who .sub { font-size: var(--d-fs-label); color: var(--d-dim); }
+.dturn .who .hb { color: var(--d-gold); }
+.dturn .round {
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  color: var(--d-gold);
+  white-space: nowrap;
+}
+
+/* ---- vitals --------------------------------------------------------------- */
+.dturn .vitals { flex: 0 0 auto; padding: var(--d-s3) var(--pad); }
+.dturn .vrow { display: flex; align-items: baseline; justify-content: space-between; gap: var(--d-s3); }
+.dturn .hp {
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-display);
+  color: var(--d-cream);
+  line-height: 1;
+}
+.dturn .hp .of { font-size: var(--d-fs-title); color: var(--d-dim); }
+.dturn .ac { font-size: var(--d-fs-label); color: var(--d-dim); }
+.dturn .ac b { font-family: var(--d-font-mono); font-size: var(--d-fs-mono); color: var(--d-gold); font-weight: 500; }
+
+/* THE ONE-ROW RULE.  Stacked, the bar and its annotation cost 37px of an
+   844px phone and pushed the second ranked card off the bottom — for what was
+   always a single statement: here is the line, here is where Bloodied sits on
+   it.  Do not restack them. */
+.dturn .hprow { display: flex; align-items: center; gap: var(--d-s3); margin-top: var(--d-s2); height: 16px; }
+.dturn .track { position: relative; flex: 1; min-width: 0; height: 6px; background: #191712; border-radius: 3px; }
+.dturn .fill { position: absolute; inset: 0 auto 0 0; background: var(--d-gold); border-radius: 3px; }
+.dturn .fill.low { background: var(--d-ember); }
+.dturn .mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--d-ember); }
+.dturn .blabel { flex: 0 0 auto; font-size: var(--d-fs-label); color: var(--d-dim); white-space: nowrap; }
+.dturn .blabel.is { color: var(--d-ember); font-size: 16px; }
+
+/* ---- upon you ------------------------------------------------------------- */
+.dturn .upon {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--d-s2);
+  padding: 0 var(--pad) var(--d-s3);
+  /* Conditions wrap to full sentences, so with four of them on the board this
+     zone would eat the ranked list — and the list is the metric.  Capped: the
+     board can never crowd out the decision. */
+  max-height: 22dvh;
+  overflow-y: auto;
+}
+/* The condition text is the whole point of the tag — "the hobgoblin is prone"
+   without "melee attacks against it have advantage" is trivia.  So it wraps
+   rather than ellipsing, and the pill grows to fit its sentence. */
+.dturn .tag {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--d-e1);
+  border: 1px solid var(--d-rule-lit);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  max-width: 100%;
+}
+.dturn .tag .k { flex: 0 0 auto; color: var(--d-gold); font-weight: 500; }
+.dturn .tag.good .k { color: var(--d-verdant); }
+.dturn .tag .t { color: var(--d-cream); min-width: 0; }
+
+/* ---- economy strip -------------------------------------------------------- */
+.dturn .econ {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--d-rule);
+  border-block: 1px solid var(--d-rule);
+}
+.dturn .eslot {
+  min-height: var(--d-touch-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: var(--d-bg);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+}
+.dturn .eslot .dot { width: 7px; height: 7px; border-radius: 50%; background: #2b271f; }
+.dturn .eslot.open .dot { background: var(--d-amber); }
+.dturn .eslot.open { color: var(--d-cream); }
+
+/* ---- the ranked list — the only zone that flexes -------------------------- */
+.dturn .list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--d-s3) var(--pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--d-s2);
+}
+.dturn .cap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--d-s2);
+}
+.dturn .cap .lbl { font-size: var(--d-fs-label); color: var(--d-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+.dturn .cap .n { font-size: var(--d-fs-label); color: var(--d-dim); }
+
+/* NEVER SHRINK A CARD.  `min-height` is not a floor inside a flex column —
+   flex-shrink beats it, and the cards were being compressed into each other
+   until their own text overflowed and overlapped the card below.  The audit
+   passed the whole time, because every box still measured over 48px; only the
+   screenshot showed it.  The list scrolls; the cards keep their size. */
+.dturn .cap, .dturn .act { flex: 0 0 auto; }
+
+.dturn .act {
+  min-height: var(--d-touch-min);
+  padding: 10px 13px;
+  border-radius: var(--d-radius);
+  background: var(--d-e1);
+  border: 1px solid var(--d-rule-lit);
+  border-left: 2px solid var(--d-gold);
+  text-align: left;
+}
+.dturn .act.blocked { border-left-color: var(--d-rule-lit); opacity: 0.62; }
+.dturn .act .hd { display: flex; align-items: baseline; justify-content: space-between; gap: var(--d-s3); }
+.dturn .act .anm { font-family: var(--d-font-display); font-size: var(--d-fs-title); color: var(--d-cream); }
+.dturn .act .cost { flex: 0 0 auto; font-size: var(--d-fs-label); color: var(--d-dim); white-space: nowrap; }
+.dturn .act .det { font-size: var(--d-fs-body); color: var(--d-cream); margin-top: 2px; }
+.dturn .act .why { font-size: 16px; color: var(--d-ember); margin-top: 3px; }
+.dturn .act .hbtag { font-size: var(--d-fs-label); color: var(--d-gold); }
+
+/* GOLD NAMES THE MECHANIC, CREAM SAYS THE SENTENCE.  Two full gold rider lines
+   pushed gold to 38.5% of the lit ink on the phone and inverted figure and
+   ground — the exact fault D was built to drop from direction C. */
+.dturn .act .rider {
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-mono);
+  color: var(--d-cream);
+  margin-top: 3px;
+  line-height: 1.3;
+}
+.dturn .act .rider b { color: var(--d-gold); font-weight: 500; }
+
+/* ---- the mutex — D's defining element ------------------------------------
+   A SIBLING of the list, never a child of it.  It is not one more option; it
+   is one decision that happens to have three faces, and nesting it inside the
+   scrolling list says the opposite. */
+.dturn .mutex {
+  flex: 0 0 auto;
+  padding: var(--d-s2) var(--pad) var(--d-s3);
+  background: var(--d-e1);
+  border-top: 1px solid var(--d-rule-lit);
+}
+.dturn .mutex .cap { padding-bottom: 6px; }
+.dturn .faces { display: flex; flex-direction: column; gap: 6px; }
+/* Two rows, not one.  On 390px a single row ellipsed the faces down to
+   "+2d8 radia…", "Touch · r…", "Teleport 30 ft t…" — and a mutex whose faces
+   you cannot read is not a decision, it is three mystery buttons.  Name and
+   price share the top line because price is what you are weighing. */
+.dturn .face {
+  min-height: var(--d-touch-min);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 1px var(--d-s3);
+  padding: 7px 12px;
+  border-radius: var(--d-radius);
+  background: var(--d-e2);
+  border: 1px solid var(--d-rule-lit);
+  text-align: left;
+}
+.dturn .face .fnm {
+  grid-area: 1 / 1;
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  color: var(--d-cream);
+  line-height: var(--d-lh-tight);
+}
+.dturn .face .fc {
+  grid-area: 1 / 2;
+  justify-self: end;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-mono);
+  color: var(--d-gold);
+  white-space: nowrap;
+}
+.dturn .face .fd {
+  grid-area: 2 / 1 / 2 / -1;
+  min-width: 0;
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  line-height: 1.3;
+}
+
+/* ---- resource strip -------------------------------------------------------
+   Four groups do not fit on 390px at a 12px floor — 451px of content measured
+   into 362px of strip, and "Lay on hands 15/40" folded into itself.  The strip
+   carries only what nothing else on this screen carries.  Anything already
+   stated as a cost on a mutex face is not repeated here. */
+.dturn .res {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--d-s5);
+  padding: 0 var(--pad);
+  min-height: 40px;
+  border-top: 1px solid var(--d-rule);
+  overflow-x: auto;
+}
+.dturn .rgrp { display: flex; align-items: baseline; gap: 7px; white-space: nowrap; }
+.dturn .rgrp .k { font-size: var(--d-fs-label); color: var(--d-dim); }
+.dturn .rgrp .v { font-family: var(--d-font-mono); font-size: var(--d-fs-mono); color: var(--d-gold); }
+.dturn .rgrp .v.spent { color: var(--d-dim); }
+
+/* ---- edge ----------------------------------------------------------------- */
+.dturn .edge {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--d-s2);
+  padding: var(--d-s2) var(--pad) calc(var(--d-s2) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--d-rule);
+}
+.dturn .edge .btn {
+  flex: 1 1 0;
+  min-height: var(--d-touch-min);
+  border-radius: var(--d-radius);
+  border: 1px solid var(--d-rule-lit);
+  background: var(--d-e1);
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  color: var(--d-cream);
+}
+.dturn .edge .btn.primary { border-color: var(--d-gold); color: var(--d-gold); }
+
+/* ============================================================================
+   THE SPREAD — iPad is its own layout, not a stretched phone.
+   Three fixed columns: the board on the left, the decision in the middle, the
+   ledger on the right.  Nothing scrolls that does not have to.
+   ========================================================================== */
+@media (min-width: 900px) {
+  .dturn { --pad: var(--d-s5); }
+  .dturn .body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr) 300px;
+    gap: 1px;
+    background: var(--d-rule);
+  }
+  .dturn .body > * { background: var(--d-bg); min-height: 0; }
+  .dturn .colA, .dturn .colC { display: flex; flex-direction: column; }
+  .dturn .colB { display: flex; flex-direction: column; min-height: 0; }
+  .dturn .list { padding-top: var(--d-s4); }
+  .dturn .upon { flex-direction: column; align-items: flex-start; }
+  .dturn .tag { max-width: 100%; }
+  .dturn .econ { grid-template-columns: 1fr; }
+  .dturn .eslot { flex-direction: row; justify-content: flex-start; gap: 9px; padding: 0 var(--pad); }
+  .dturn .res { flex-direction: column; align-items: flex-start; gap: var(--d-s3); padding: var(--d-s4) var(--pad); overflow: visible; }
+}

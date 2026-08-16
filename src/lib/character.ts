@@ -387,6 +387,32 @@ export function loadCharacter(id: string): Character | null {
     return {
       ...parsed,
       id: parsed.id ?? id,
+      // Everything below this comment is a REQUIRED field of Character that
+      // was not being defaulted. A stored character missing any of them
+      // white-screens the whole app ABOVE every error boundary, before a
+      // single surface has rendered — getPreparedSpells() reaches for
+      // .spells.filter() and StatsBar reaches for .hitPoints.max during boot.
+      // Found by seeding a threadbare character in the Slice 1 shoot script;
+      // `thin-character-boots--phone` is the standing regression guard.
+      // Guardrail: zero blank screens, ever.
+      name: parsed.name ?? 'Unnamed',
+      class: parsed.class ?? '',
+      subclass: parsed.subclass ?? '',
+      race: parsed.race ?? '',
+      level: parsed.level ?? 1,
+      hitPoints: parsed.hitPoints ?? { max: 1, current: 1 },
+      armorClass: parsed.armorClass ?? 10,
+      proficiencyBonus: parsed.proficiencyBonus ?? 2,
+      spellcastingAbility: parsed.spellcastingAbility ?? '',
+      spellSaveDC: parsed.spellSaveDC ?? 10,
+      spellAttackBonus: parsed.spellAttackBonus ?? 0,
+      canPrepareSpells: parsed.canPrepareSpells ?? false,
+      maxPreparedSpells: parsed.maxPreparedSpells ?? 0,
+      spells: parsed.spells ?? [],
+      features: parsed.features ?? [],
+      spellSlots: parsed.spellSlots ?? {},
+      createdAt: parsed.createdAt ?? new Date().toISOString(),
+      updatedAt: parsed.updatedAt ?? new Date().toISOString(),
       conditions: parsed.conditions ?? [],
       deathSaves: parsed.deathSaves ?? { successes: 0, failures: 0 },
       tempHP: parsed.tempHP ?? 0,

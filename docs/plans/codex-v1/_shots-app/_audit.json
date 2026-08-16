@@ -1,0 +1,612 @@
+[
+  {
+    "shot": "turn-d--phone",
+    "errors": [],
+    "scrollHeight": 844,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "rootChildren": 1,
+    "sawTurnScreen": true,
+    "sawErrorBoundary": false,
+    "underMinTouch": [],
+    "underMinTouchCount": 0,
+    "cinzelUnder20": [],
+    "cinzelUnder20Count": 0,
+    "under12px": [],
+    "under12pxCount": 0,
+    "goldPctOfLitPixels": 27.9,
+    "emberPctOfLitPixels": 4.9,
+    "litPctOfScreen": 4.8
+  },
+  {
+    "shot": "turn-d--ipad",
+    "errors": [],
+    "scrollHeight": 1024,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "rootChildren": 1,
+    "sawTurnScreen": true,
+    "sawErrorBoundary": false,
+    "underMinTouch": [],
+    "underMinTouchCount": 0,
+    "cinzelUnder20": [],
+    "cinzelUnder20Count": 0,
+    "under12px": [],
+    "under12pxCount": 0,
+    "goldPctOfLitPixels": 38,
+    "emberPctOfLitPixels": 8.8,
+    "litPctOfScreen": 2.1
+  },
+  {
+    "shot": "v0.9-combat--phone",
+    "errors": [],
+    "scrollHeight": 2276,
+    "overflowsViewport": true,
+    "horizontalOverflow": false,
+    "rootChildren": 1,
+    "sawTurnScreen": false,
+    "sawErrorBoundary": false,
+    "underMinTouch": [
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-ember/15 text-ember",
+        "text": "Play",
+        "w": 62,
+        "h": 30
+      },
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-white/[0.02] text-forge-2 hover:text-forge-1",
+        "text": "Prep",
+        "w": 63,
+        "h": 30
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-1 hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-ember hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-arcane hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity",
+        "text": "NixPaladin",
+        "w": 92,
+        "h": 20
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-gradient-to-r from-gold to-arcane text-void-0 font-semibold shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)] hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)] hover:brightness-110 disabled:from-forge-2/40 disabled:to-forge-2/40 disabled:text-forge-2 disabled:shadow-none min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5",
+        "text": "Start Combat",
+        "w": 134,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-red-400 border-red-400/20 hover:bg-red-400/10 hover:border-red-400/30",
+        "text": "Damage",
+        "w": 100,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-verdant border-verdant/20 hover:bg-verdant/10 hover:border-verdant/30",
+        "text": "Heal",
+        "w": 100,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-arcane border-arcane/20 hover:bg-arcane/10 hover:border-arcane/30",
+        "text": "Temp HP",
+        "w": 100,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] rounded-xl px-3 py-2 text-left border transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold text-forge-2 border-forge-2/30 bg-forge-2/10 opacity-50 hover:opacity-80",
+        "text": "Blinded",
+        "w": 155,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] rounded-xl px-3 py-2 text-left border transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold text-eldritch border-eldritch/30 bg-eldritch/10 opacity-50 hover:opacity-80",
+        "text": "Charmed",
+        "w": 155,
+        "h": 44
+      }
+    ],
+    "underMinTouchCount": 74,
+    "cinzelUnder20": [
+      {
+        "sample": "Hit Points",
+        "size": 14
+      },
+      {
+        "sample": "Active Conditions",
+        "size": 12
+      },
+      {
+        "sample": "Action Economy",
+        "size": 14
+      },
+      {
+        "sample": "Spell Slots",
+        "size": 14
+      },
+      {
+        "sample": "Paladin Resources",
+        "size": 14
+      },
+      {
+        "sample": "Concentration",
+        "size": 14
+      },
+      {
+        "sample": "Choose Action",
+        "size": 16
+      },
+      {
+        "sample": "Dice Roller",
+        "size": 14
+      },
+      {
+        "sample": "Mechanics Reference",
+        "size": 14
+      },
+      {
+        "sample": "How do I make an attack ",
+        "size": 14
+      },
+      {
+        "sample": "How do critical hits wor",
+        "size": 14
+      },
+      {
+        "sample": "How does multiattack wor",
+        "size": 14
+      }
+    ],
+    "cinzelUnder20Count": 34,
+    "under12px": [
+      {
+        "sample": "Play",
+        "size": 10
+      },
+      {
+        "sample": "Prep",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Saving Throw",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Damage",
+        "size": 10
+      },
+      {
+        "sample": "Damage",
+        "size": 10
+      }
+    ],
+    "under12pxCount": 30,
+    "goldPctOfLitPixels": 47.2,
+    "emberPctOfLitPixels": 6.8,
+    "litPctOfScreen": 5.2
+  },
+  {
+    "shot": "v0.9-combat--ipad",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "scrollHeight": 2207,
+    "overflowsViewport": true,
+    "horizontalOverflow": false,
+    "rootChildren": 1,
+    "sawTurnScreen": false,
+    "sawErrorBoundary": false,
+    "underMinTouch": [
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-ember/15 text-ember",
+        "text": "Play",
+        "w": 62,
+        "h": 30
+      },
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-white/[0.02] text-forge-2 hover:text-forge-1",
+        "text": "Prep",
+        "w": 63,
+        "h": 30
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-1 hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-ember hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-arcane hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity",
+        "text": "NixPaladin",
+        "w": 92,
+        "h": 20
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-gradient-to-r from-gold to-arcane text-void-0 font-semibold shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)] hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)] hover:brightness-110 disabled:from-forge-2/40 disabled:to-forge-2/40 disabled:text-forge-2 disabled:shadow-none min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5",
+        "text": "Start Combat",
+        "w": 134,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-red-400 border-red-400/20 hover:bg-red-400/10 hover:border-red-400/30",
+        "text": "Damage",
+        "w": 215,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-verdant border-verdant/20 hover:bg-verdant/10 hover:border-verdant/30",
+        "text": "Heal",
+        "w": 215,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-arcane border-arcane/20 hover:bg-arcane/10 hover:border-arcane/30",
+        "text": "Temp HP",
+        "w": 215,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] rounded-xl px-3 py-2 text-left border transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold text-forge-2 border-forge-2/30 bg-forge-2/10 opacity-50 hover:opacity-80",
+        "text": "Blinded",
+        "w": 328,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] rounded-xl px-3 py-2 text-left border transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold text-eldritch border-eldritch/30 bg-eldritch/10 opacity-50 hover:opacity-80",
+        "text": "Charmed",
+        "w": 328,
+        "h": 44
+      }
+    ],
+    "underMinTouchCount": 77,
+    "cinzelUnder20": [
+      {
+        "sample": "Hit Points",
+        "size": 14
+      },
+      {
+        "sample": "Active Conditions",
+        "size": 12
+      },
+      {
+        "sample": "Action Economy",
+        "size": 14
+      },
+      {
+        "sample": "Spell Slots",
+        "size": 14
+      },
+      {
+        "sample": "Paladin Resources",
+        "size": 14
+      },
+      {
+        "sample": "Concentration",
+        "size": 14
+      },
+      {
+        "sample": "Choose Action",
+        "size": 16
+      },
+      {
+        "sample": "Dice Roller",
+        "size": 14
+      },
+      {
+        "sample": "Mechanics Reference",
+        "size": 14
+      },
+      {
+        "sample": "How do I make an attack ",
+        "size": 14
+      },
+      {
+        "sample": "How do critical hits wor",
+        "size": 14
+      },
+      {
+        "sample": "How does multiattack wor",
+        "size": 14
+      }
+    ],
+    "cinzelUnder20Count": 34,
+    "under12px": [
+      {
+        "sample": "Play",
+        "size": 10
+      },
+      {
+        "sample": "Prep",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Saving Throw",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Damage",
+        "size": 10
+      },
+      {
+        "sample": "Damage",
+        "size": 10
+      }
+    ],
+    "under12pxCount": 27,
+    "goldPctOfLitPixels": 41.4,
+    "emberPctOfLitPixels": 7.4,
+    "litPctOfScreen": 1.7
+  },
+  {
+    "shot": "thin-character-boots--phone",
+    "errors": [],
+    "scrollHeight": 1630,
+    "overflowsViewport": true,
+    "horizontalOverflow": false,
+    "rootChildren": 1,
+    "sawTurnScreen": false,
+    "sawErrorBoundary": false,
+    "underMinTouch": [
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-ember/15 text-ember",
+        "text": "Play",
+        "w": 62,
+        "h": 30
+      },
+      {
+        "cls": "px-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all duration-200 ease-forge focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane bg-white/[0.02] text-forge-2 hover:text-forge-1",
+        "text": "Prep",
+        "w": 63,
+        "h": 30
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-1 hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-ember hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-arcane hover:bg-white/[0.06] transition-all duration-200 ease-forge active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane",
+        "text": "",
+        "w": 44,
+        "h": 44
+      },
+      {
+        "cls": "flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity",
+        "text": "ThinPaladin",
+        "w": 99,
+        "h": 20
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-gradient-to-r from-gold to-arcane text-void-0 font-semibold shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)] hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)] hover:brightness-110 disabled:from-forge-2/40 disabled:to-forge-2/40 disabled:text-forge-2 disabled:shadow-none min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5",
+        "text": "Start Combat",
+        "w": 134,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-red-400 border-red-400/20 hover:bg-red-400/10 hover:border-red-400/30",
+        "text": "Damage",
+        "w": 100,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-verdant border-verdant/20 hover:bg-verdant/10 hover:border-verdant/30",
+        "text": "Heal",
+        "w": 100,
+        "h": 44
+      },
+      {
+        "cls": "inline-flex items-center justify-center select-none whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:pointer-events-none disabled:cursor-not-allowed bg-void-2/60 font-medium border disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5 text-arcane border-arcane/20 hover:bg-arcane/10 hover:border-arcane/30",
+        "text": "Temp HP",
+        "w": 100,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] rounded-xl px-3 py-2 text-left border transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold text-forge-2 border-forge-2/30 bg-forge-2/10 opacity-50 hover:opacity-80",
+        "text": "Blinded",
+        "w": 155,
+        "h": 44
+      },
+      {
+        "cls": "min-h-[44px] rounded-xl px-3 py-2 text-left border transition-all duration-200 ease-forge active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold text-eldritch border-eldritch/30 bg-eldritch/10 opacity-50 hover:opacity-80",
+        "text": "Charmed",
+        "w": 155,
+        "h": 44
+      }
+    ],
+    "underMinTouchCount": 61,
+    "cinzelUnder20": [
+      {
+        "sample": "Hit Points",
+        "size": 14
+      },
+      {
+        "sample": "Active Conditions",
+        "size": 12
+      },
+      {
+        "sample": "Action Economy",
+        "size": 14
+      },
+      {
+        "sample": "Concentration",
+        "size": 14
+      },
+      {
+        "sample": "Choose Action",
+        "size": 16
+      },
+      {
+        "sample": "Dice Roller",
+        "size": 14
+      },
+      {
+        "sample": "Mechanics Reference",
+        "size": 14
+      },
+      {
+        "sample": "How do I make an attack ",
+        "size": 14
+      },
+      {
+        "sample": "How do critical hits wor",
+        "size": 14
+      },
+      {
+        "sample": "How does multiattack wor",
+        "size": 14
+      },
+      {
+        "sample": "How does opportunity att",
+        "size": 14
+      },
+      {
+        "sample": "How do saving throws wor",
+        "size": 14
+      }
+    ],
+    "cinzelUnder20Count": 32,
+    "under12px": [
+      {
+        "sample": "Play",
+        "size": 10
+      },
+      {
+        "sample": "Prep",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Attack",
+        "size": 10
+      },
+      {
+        "sample": "Saving Throw",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Ability Check",
+        "size": 10
+      },
+      {
+        "sample": "Damage",
+        "size": 10
+      },
+      {
+        "sample": "Damage",
+        "size": 10
+      }
+    ],
+    "under12pxCount": 30,
+    "goldPctOfLitPixels": 35.6,
+    "emberPctOfLitPixels": 6.2,
+    "litPctOfScreen": 5.7
+  }
+]

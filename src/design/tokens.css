@@ -1,0 +1,93 @@
+/* ============================================================================
+   DIRECTION D — the merged design language
+   ----------------------------------------------------------------------------
+   Extracted from docs/plans/codex-v1/mockups/d-merged/ after the three-direction
+   exploration.  D took the best of A (instrument), B (spread) and C (hand) and
+   dropped the four faults they shared.  Everything here is measured, not
+   guessed — the audit lives in mockups/00-render-verification.md.
+
+   Contrast ratios below are WCAG 2.1 sRGB relative luminance against --bg.
+
+   These are custom properties only.  Declaring them changes nothing until a
+   surface opts in, so importing this file globally cannot disturb V0.9.
+   ========================================================================== */
+
+:root {
+  /* ---- Ground -------------------------------------------------------------
+     Warm near-black, never blue-black.  Four tonal steps because you cannot
+     shadow into black: elevation on this palette is TONE, not drop shadow. */
+  --d-bg: #0a0a08;
+  --d-e1: #12110e;
+  --d-e2: #1c1a15;
+  --d-e3: #26231b;
+
+  /* ---- Ink ----------------------------------------------------------------
+     --d-dim is 5.40:1 — passes AA for text but is reserved for LABELS ONLY.
+     Body copy is always cream.  This is fault #2 that D exists to drop. */
+  --d-cream: #f0e6d3;   /* 16.01:1  body copy, every sentence the player reads */
+  --d-dim:   #8b8578;   /*  5.40:1  labels, units, annotations — never a sentence */
+
+  /* ---- Lit ink ------------------------------------------------------------
+     Gold names the mechanic.  It is a HIGHLIGHT, and a highlight that covers
+     40% of the ink is not a highlight — it is the new background.  Direction C
+     hit 48.7% gold and inverted figure and ground.  D holds at ~36%. */
+  --d-gold:  #c5a55a;   /*  8.40:1  named mechanics, numerals, rule keywords */
+  --d-amber: #d4a74a;   /*  8.89:1  the live/active state of a gold element */
+
+  /* ember is the loudest thing on the screen and is rationed accordingly:
+     RUBRIC USE ONLY — costs, warnings, the bloodied line — and never under
+     16px, because 4.68:1 needs the size to carry it. */
+  --d-ember: #c06030;   /*  4.68:1  >=16px only */
+
+  --d-verdant: #39d98a; /* affirmative state: available, restored, healed */
+
+  /* ---- Rules and edges ---------------------------------------------------- */
+  --d-rule:      #211e18;
+  --d-rule-lit:  #3a3327;
+
+  /* ---- Type ---------------------------------------------------------------
+     Cinzel is a display face.  Below 20px it stops being legible under bad
+     table lighting and starts being decoration — so 20px is a hard floor and
+     the audit fails the build if anything Cinzel renders smaller.  Nothing on
+     any surface goes below 12px, ever. */
+  --d-font-display: 'Cinzel', Georgia, serif;
+  --d-font-body:    'IBM Plex Sans', system-ui, sans-serif;
+  --d-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  --d-fs-display: 28px;  /* headline numerals — HP, the roll */
+  --d-fs-name:    22px;  /* Cinzel: the character, the encounter */
+  --d-fs-title:   20px;  /* Cinzel FLOOR — nothing display-face is smaller */
+  --d-fs-body:    15px;  /* every sentence */
+  --d-fs-mono:    13px;  /* dice, riders, notation */
+  --d-fs-label:   12px;  /* FLOOR — labels and units only */
+
+  --d-lh-tight: 1.15;
+  --d-lh-body:  1.35;
+
+  /* ---- Space --------------------------------------------------------------
+     48px is not a suggestion.  It is the iPad-at-arm's-length minimum and the
+     audit counts violations. */
+  --d-touch-min: 48px;
+  --d-s1: 4px;
+  --d-s2: 8px;
+  --d-s3: 11px;
+  --d-s4: 16px;
+  --d-s5: 22px;
+  --d-radius:    6px;
+  --d-radius-lg: 10px;
+
+  /* ---- Motion budget ------------------------------------------------------
+     Three durations, and a tap must never cost you a second you needed. */
+  --d-dur-tap:      90ms;   /* it acknowledged you */
+  --d-dur-state:   220ms;   /* the board changed */
+  --d-dur-ceremony: 700ms;  /* a death save, a level, binding a session */
+  --d-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --d-dur-tap: 0ms;
+    --d-dur-state: 0ms;
+    --d-dur-ceremony: 0ms;
+  }
+}

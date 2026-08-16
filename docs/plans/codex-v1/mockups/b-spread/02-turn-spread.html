@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>B · Illuminated Spread — Turn spread (iPad)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DIRECTION B — THE ILLUMINATED SPREAD · iPad 1366×1024
+   A true two-page spread with a real gutter.
+     VERSO (left)  — the state of the world: who you are, what
+                     is on you, who is in the fight.
+     RECTO (right) — what you do: illuminated by rank.
+   The iPad is not a wider phone. It is a different object:
+   an open book. (baseline fault #1)
+   ============================================================ */
+:root{
+  --bg:#0a0a08; --surface:#12110e; --raised:#1c1a15;
+  --cream:#f0e6d3; --cream-2:rgba(240,230,211,.62); --cream-3:rgba(240,230,211,.40);
+  --gold:#c5a55a; --gold-line:rgba(197,165,90,.20); --gold-faint:rgba(197,165,90,.085);
+  --ember:#c06030; --amber:#d4a74a;
+  --e1:rgba(197,165,90,.045); --e2:rgba(197,165,90,.075); --e3:rgba(197,165,90,.115);
+  --r-card:9px; --r-chip:5px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  font-size:17px;line-height:1.5;               /* type scales with the device */
+  height:100dvh;display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+.rubric{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ember)}
+.rubric.inline{font-size:13.5px;letter-spacing:.01em;text-transform:none;line-height:1.4}
+.pips{display:inline-flex;gap:3px;align-items:center;margin-left:3px}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.pip.off{background:transparent;box-shadow:inset 0 0 0 1px rgba(197,165,90,.35)}
+.mtag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream-3);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:3px 8px;white-space:nowrap}
+.mtag.g{color:var(--gold);border-color:rgba(197,165,90,.36)}
+
+/* ---- RUNNING HEAD across both pages ---- */
+.runhead{
+  flex:0 0 auto;display:flex;align-items:center;gap:16px;
+  padding:11px 30px 11px;border-bottom:1px solid var(--gold-line);
+}
+.runhead .crest{font-family:'Cinzel',serif;font-weight:900;font-size:18px;color:var(--gold);letter-spacing:.06em}
+.runhead .folio{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-3)}
+.runhead .grow{flex:1}
+.runhead nav{display:flex;gap:2px}
+.runhead nav button{font-family:'Cinzel',serif;font-size:12px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;padding:8px 15px;min-height:38px;background:transparent;border:0;
+  color:var(--cream-3);border-radius:var(--r-chip)}
+.runhead nav button.on{color:var(--gold);background:var(--raised);box-shadow:inset 0 1px 0 rgba(197,165,90,.2)}
+.endt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:8px 14px;background:transparent;
+  font-family:inherit;min-height:38px}
+
+/* ---- THE SPREAD ---- */
+.spread{flex:1;display:flex;min-height:0}
+.verso{flex:0 0 40%;min-width:0;overflow-y:auto;padding:20px 26px 24px 30px}
+.recto{flex:1;min-width:0;overflow-y:auto;padding:20px 30px 24px 30px}
+.verso::-webkit-scrollbar,.recto::-webkit-scrollbar{width:0}
+/* the gutter is a real object — light falling into the binding, not a black shadow */
+.gutter{
+  flex:0 0 26px;background:
+    linear-gradient(90deg,
+      rgba(0,0,0,0) 0%, rgba(0,0,0,.45) 34%,
+      rgba(197,165,90,.16) 50%,
+      rgba(0,0,0,.45) 66%, rgba(0,0,0,0) 100%);
+}
+
+/* ================= VERSO — the state of the world ================= */
+.name{font-family:'Cinzel',serif;font-weight:700;font-size:27px;letter-spacing:.05em;color:var(--gold);line-height:1.08}
+.sub{font-size:13px;color:var(--cream-3);margin-top:4px;letter-spacing:.03em}
+.hpblock{margin-top:20px;padding-bottom:18px;border-bottom:1px solid var(--gold-line)}
+.hpline{display:flex;align-items:baseline;gap:3px}
+.hpline .cur{font-family:'Cinzel',serif;font-weight:700;font-size:60px;line-height:.9;color:var(--cream)}
+.hpline .max{font-family:'Cinzel',serif;font-weight:600;font-size:24px;color:var(--cream-3)}
+.hpline .tmp{font-family:'Cinzel',serif;font-weight:600;font-size:22px;color:var(--amber);margin-left:9px}
+.hplabel{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-3)}
+.track{height:4px;background:var(--raised);margin-top:13px;border-radius:2px;display:flex;overflow:hidden}
+.track .f{width:54%;background:var(--gold)} .track .t{width:6.5%;background:var(--amber)}
+.stats{display:flex;gap:28px;margin-top:15px}
+.stat b{font-family:'Cinzel',serif;font-weight:700;font-size:22px;color:var(--cream)}
+.stat span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3);margin-left:6px}
+
+.sect{margin-top:20px}
+.sect h4{font-family:'Cinzel',serif;font-weight:600;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);padding-bottom:7px;border-bottom:1px solid var(--gold-line);margin-bottom:10px}
+.bearing{padding:11px 13px;border-radius:var(--r-card);margin-bottom:8px;
+  background:linear-gradient(var(--e1),var(--e1));box-shadow:inset 0 1px 0 rgba(197,165,90,.14)}
+.bearing.press{background:linear-gradient(var(--e2),var(--e2));border-left:2px solid var(--ember)}
+.bearing .bt{font-size:15px;font-weight:600}
+.bearing.press .bt{color:var(--ember)}
+.bearing .bd{font-size:13px;color:var(--cream-2);margin-top:3px;line-height:1.4}
+
+/* the cast: mobs are one entry with pips, never eight rows */
+.cast{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--gold-faint)}
+.cast:last-child{border-bottom:0}
+.cast .ord{font-family:'Cinzel',serif;font-weight:700;font-size:14px;color:var(--cream-3);width:26px}
+.cast.now .ord{color:var(--gold)}
+.cast .cn{flex:1;font-size:15px;min-width:0}
+.cast.now .cn{color:var(--gold);font-weight:600}
+.cast .cm{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream-3)}
+.mobpips{display:flex;gap:3px;margin-top:4px}
+.mp{width:6px;height:6px;border-radius:1px;background:var(--ember)}
+.mp.down{background:rgba(240,230,211,.16)}
+
+/* ================= RECTO — what you do ================= */
+.rectohead{display:flex;align-items:baseline;gap:14px;padding-bottom:11px;
+  border-bottom:1px solid var(--gold-line);margin-bottom:4px}
+.rectohead h3{font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold)}
+.rectohead .grow{flex:1}
+.econ{display:flex;gap:20px}
+.econ div{text-align:center}
+.econ .k{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--cream-3)}
+.econ .v{font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--gold);margin-top:2px}
+
+.ill{padding:15px 16px 16px;border-radius:var(--r-card);margin-top:10px}
+.ill.t1{background:linear-gradient(var(--e3),var(--e3));box-shadow:inset 0 1px 0 rgba(197,165,90,.22)}
+.ill.t2{background:linear-gradient(var(--e1),var(--e1))}
+.ill.t3{padding:11px 16px 12px;border-top:1px solid var(--gold-faint);border-radius:0}
+.ill.done{opacity:.42}
+.ill .nm{display:flex;align-items:baseline;gap:1px}
+.ill.t1 .nm .cap{font-family:'Cinzel',serif;font-weight:900;font-size:38px;line-height:.88;color:var(--gold)}
+.ill.t1 .nm .rest{font-family:'Cinzel',serif;font-weight:700;font-size:26px;letter-spacing:.04em;color:var(--gold)}
+.ill.t2 .nm .cap{font-family:'Cinzel',serif;font-weight:700;font-size:26px;line-height:.95;color:var(--gold)}
+.ill.t2 .nm .rest{font-family:'Cinzel',serif;font-weight:600;font-size:20px;letter-spacing:.04em;color:var(--gold)}
+.ill.t3 .nm .rest{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:17px;color:var(--cream)}
+.ill .mech{font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--cream);margin-top:7px;line-height:1.45}
+.ill.t3 .mech{font-size:12.5px;color:var(--cream-2);margin-top:4px}
+.marg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ill.t3 .marg{margin-top:6px}
+
+.plain{margin-top:22px}
+.plain h4{font-family:'Cinzel',serif;font-weight:600;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);padding-bottom:7px;border-bottom:1px solid var(--gold-line);margin-bottom:2px}
+.plaingrid{column-count:2;column-gap:26px}
+.pent{display:flex;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid var(--gold-faint);
+  break-inside:avoid;min-height:38px}
+.pent .n{font-size:15.5px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pent .m{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream-3);white-space:nowrap}
+.pent.off{opacity:.42}
+.pent.off .n{text-decoration:line-through;text-decoration-thickness:1px}
+
+/* ---- FOOT: the rubric instruction, running across the whole spread ---- */
+.foot{
+  flex:0 0 auto;display:flex;align-items:center;gap:14px;
+  padding:12px 30px calc(12px + env(safe-area-inset-bottom));
+  background:var(--surface);border-top:1px solid var(--gold-line);
+}
+.foot .grow{flex:1}
+.foot .d20{width:46px;height:46px;border-radius:50%;border:1px solid rgba(197,165,90,.42);
+  background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:14px;font-weight:700;
+  display:grid;place-items:center}
+</style>
+</head>
+<body>
+
+<div class="runhead">
+  <span class="crest">THE CODEX</span>
+  <span class="folio">Folio III · The Ogre at Emberfall</span>
+  <span class="grow"></span>
+  <nav>
+    <button class="on">Fight</button><button>Book</button><button>Voice</button>
+  </nav>
+  <button class="endt">End turn</button>
+</div>
+
+<div class="spread">
+
+  <!-- ================= VERSO ================= -->
+  <div class="verso">
+    <div class="name">Vaelin Ashgrove</div>
+    <div class="sub">Paladin the Eighth · Oath of Vengeance · Half-Elf</div>
+
+    <div class="hpblock">
+      <div class="hplabel" style="margin-top:18px">Hit points</div>
+      <div class="hpline" style="margin-top:6px">
+        <span class="cur">41</span><span class="max">/76</span><span class="tmp">+5</span>
+      </div>
+      <div class="track"><div class="f"></div><div class="t"></div></div>
+      <div class="stats">
+        <div class="stat"><b>19</b><span>Armour</span></div>
+        <div class="stat"><b>16</b><span>Save DC</span></div>
+        <div class="stat"><b>+3</b><span>Prof</span></div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <h4>Bearing upon you</h4>
+      <div class="bearing press">
+        <div class="bt">Frightened</div>
+        <div class="bd">Disadvantage on attack rolls while the ogre is in your line of sight.</div>
+      </div>
+      <div class="bearing">
+        <div class="bt">Concentrating — Bless</div>
+        <div class="bd">Any damage forces a CON save: DC 10, or half the damage taken, whichever is higher.</div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <h4>The order of things</h4>
+      <div class="cast"><span class="ord">21</span><span class="cn">Brannoch</span><span class="cm">ally</span></div>
+      <div class="cast now"><span class="ord">18</span><span class="cn">Vaelin — you</span><span class="cm">now</span></div>
+      <div class="cast"><span class="ord">14</span><span class="cn">Ogre</span><span class="cm">63 hp</span></div>
+      <div class="cast"><span class="ord">11</span>
+        <span class="cn">Goblins ×8
+          <span class="mobpips"><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp down"></i><i class="mp down"></i><i class="mp down"></i></span>
+        </span>
+        <span class="cm">5 up</span></div>
+      <div class="cast"><span class="ord">9</span><span class="cn">Sera</span><span class="cm">ally</span></div>
+    </div>
+  </div>
+
+  <div class="gutter"></div>
+
+  <!-- ================= RECTO ================= -->
+  <div class="recto">
+    <div class="rectohead">
+      <h3>What you may do</h3>
+      <span class="grow"></span>
+      <div class="econ">
+        <div><div class="k">Action</div><div class="v">OPEN</div></div>
+        <div><div class="k">Bonus</div><div class="v">OPEN</div></div>
+        <div><div class="k">Reaction</div><div class="v">OPEN</div></div>
+        <div><div class="k">Move</div><div class="v">30 FT</div></div>
+      </div>
+    </div>
+
+    <div class="ill t1">
+      <div class="nm"><span class="cap">O</span><span class="rest">ATHKEEPER</span></div>
+      <div class="mech">+8 to hit (STR +4 · prof +3 · magic +1) · 1d8+5 slashing · 5 ft · two attacks</div>
+      <div class="rubric inline" style="margin-top:9px">Roll twice and take the lower — you are frightened of the ogre.</div>
+      <div class="marg"><span class="mtag g">Action</span><span class="mtag">Melee</span><span class="mtag">Magical +1</span></div>
+    </div>
+
+    <div class="ill t2">
+      <div class="nm"><span class="cap">D</span><span class="rest">IVINE SMITE</span></div>
+      <div class="mech">+2d8 radiant on a hit · +1d8 against undead or fiends</div>
+      <div class="rubric inline" style="margin-top:8px">Declare it after the hit lands, never before.</div>
+      <div class="marg"><span class="mtag g">No action</span>
+        <span class="mtag">1st <span class="pips"><i class="pip"></i><i class="pip"></i><i class="pip off"></i><i class="pip off"></i></span></span></div>
+    </div>
+
+    <div class="ill t2">
+      <div class="nm"><span class="cap">M</span><span class="rest">ISTY STEP</span></div>
+      <div class="mech">30 ft teleport to a space you can see · breaks line of sight</div>
+      <div class="rubric inline" style="margin-top:8px">Take this to shed the fear before you swing.</div>
+      <div class="marg"><span class="mtag g">Bonus</span>
+        <span class="mtag">2nd <span class="pips"><i class="pip"></i><i class="pip off"></i><i class="pip off"></i></span></span></div>
+    </div>
+
+    <div class="ill t3">
+      <div class="nm"><span class="rest">Lay on Hands</span></div>
+      <div class="mech">Heal up to 15 · touch · pool 15 of 40 remaining</div>
+      <div class="marg"><span class="mtag">Action</span></div>
+    </div>
+
+    <div class="ill t3 done">
+      <div class="nm"><span class="rest">Vow of Enmity</span></div>
+      <div class="mech">Advantage against one target for 1 minute</div>
+      <div class="marg"><span class="mtag">Channel Divinity spent — returns on a short rest</span></div>
+    </div>
+
+    <div class="plain">
+      <h4>Also on this page</h4>
+      <div class="plaingrid">
+        <div class="pent"><span class="n">Javelin</span><span class="m">+7 · 1d6+4</span></div>
+        <div class="pent"><span class="n">Sacred Flame</span><span class="m">DEX 16 · 2d8</span></div>
+        <div class="pent"><span class="n">Hold Person</span><span class="m">2nd · WIS 16</span></div>
+        <div class="pent"><span class="n">Shield of Faith</span><span class="m">1st · +2 AC</span></div>
+        <div class="pent"><span class="n">Compelled Duel</span><span class="m">1st · WIS 16</span></div>
+        <div class="pent"><span class="n">Haste</span><span class="m">3rd · conc.</span></div>
+        <div class="pent"><span class="n">Magic Weapon</span><span class="m">2nd · conc.</span></div>
+        <div class="pent"><span class="n">Revivify</span><span class="m">3rd · 300 gp</span></div>
+        <div class="pent"><span class="n">Opportunity Attack</span><span class="m">reaction</span></div>
+        <div class="pent off"><span class="n">Abjure Enemy</span><span class="m">spent</span></div>
+      </div>
+    </div>
+
+    <div class="plain">
+      <h4>Standing upon you always</h4>
+      <div class="plaingrid">
+        <div class="pent"><span class="n">Aura of Protection</span><span class="m">+4 saves · 10 ft</span></div>
+        <div class="pent"><span class="n">Extra Attack</span><span class="m">two per Attack</span></div>
+        <div class="pent"><span class="n">Fey Ancestry</span><span class="m">adv. vs charm</span></div>
+        <div class="pent"><span class="n">Relentless Avenger</span><span class="m">move 15 ft free</span></div>
+        <div class="pent"><span class="n">Great Weapon Master</span><span class="m">−5 hit / +10 dmg</span></div>
+        <div class="pent"><span class="n">Divine Sense</span><span class="m">3 per long rest</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div>
+    <div class="rubric">Round III — it is your turn</div>
+    <div class="rubric inline" style="margin-top:2px">Strike with Oathkeeper, then smite if it lands.</div>
+  </div>
+  <div class="grow"></div>
+  <button class="d20">d20</button>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Codex D — the turn · phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   DIRECTION D — the merge.  Phone, 390x844.
+
+   WHAT IT TAKES FROM EACH
+     A (Instrument) — the zone grammar.  Zones never move and never reflow;
+                      position is what tells you where the answer lives.
+     B (Spread)     — illumination + rubrication.  Rank is carried by tonal tier
+                      and physical size, and every instruction is ember rubric.
+     C (Hand)       — object physics.  Things you press behave like objects, and
+                      spent resources leave residue rather than vanishing.
+
+   WHAT IT DROPS (the faults the audit found in all three)
+     1. Cinzel as a label face at 11-16px.  Here Cinzel is used ONLY for names
+        and numerals, never below 20px.  Every label/tab/chip is IBM Plex Sans,
+        uppercase, tracked.  (guardrail: Cinzel >= 20px, no exceptions)
+     2. Text below 12px.  Nothing here is under 12px.  Read at arm's length.
+     3. Touch targets under 48px.  Everything pressable is >= 48px, and
+        "End turn" — the most consequential control — is the largest.
+     4. C's gold saturation.  Gold is emphasis, not body colour.  Body copy is
+        cream; gold is reserved for names, numerals and the rank-1 tier.
+
+   FORBIDDEN HERE: parchment texture, noise, vignette, glow, drop shadows on
+   near-black.  Depth is tone and position only.  (anti-pattern 4 — you cannot
+   shadow into black)
+
+   RULES: D&D 2024 (SRD 5.2.1).  See reference/03-rules-2024.md.
+   The layout change the 2024 rules forced: Divine Smite is a Bonus Action spell
+   and Lay on Hands is also a Bonus Action, so they are not three list items —
+   they are ONE CHOICE WITH THREE FACES, and the screen has to say so.
+   ========================================================================== */
+
+:root{
+  --bg:#0a0a08;          /* the field */
+  --e1:#12110e;          /* elevation 1 — a zone */
+  --e2:#1c1a15;          /* elevation 2 — a card */
+  --e3:#26231b;          /* elevation 3 — the illuminated, rank-1 card */
+  --cream:#f0e6d3;       /* body.  16.01:1 on --bg */
+  --dim:#8b8578;         /* labels.  5.40:1 on --bg — labels only, never body */
+  --gold:#c5a55a;        /* names, numerals.  8.40:1 — passes AAA */
+  --amber:#d4a74a;       /* the live/now accent.  8.89:1 */
+  --ember:#c06030;       /* RUBRIC. instructions only, >=16px. 4.68:1 */
+  --hair:rgba(197,165,90,.14);
+  --hair2:rgba(240,230,211,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:844px;width:390px;overflow:hidden}
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:16px;line-height:1.35;
+  display:flex;flex-direction:column;
+}
+/* --- the label face.  This is the fix for fault 1. -------------------------- */
+.lbl{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:12px;
+     letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+/* --- Cinzel: names and numerals only, never below 20px. -------------------- */
+.nm{font-family:'Cinzel',serif;font-weight:700;font-size:21px;line-height:1.15;color:var(--cream)}
+.num{font-family:'Cinzel',serif;font-weight:900;font-variant-numeric:tabular-nums}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px}
+/* --- rubric: the one thing you should do, in ember, never below 16px ------- */
+.rub{color:var(--ember);font-size:16px;font-weight:500;line-height:1.3}
+
+/* --- object physics (from C).  Press behaves like pressing a thing. -------- */
+.obj{cursor:pointer;transition:transform 140ms cubic-bezier(.2,.8,.3,1),
+     filter 140ms,background 140ms}
+.obj:active{transform:scale(.975);filter:brightness(.86);transition-duration:80ms}
+
+/* ===== ZONE: CHROME ======================================================== */
+.chrome{flex:0 0 auto;display:flex;align-items:center;gap:10px;
+        padding:6px 14px;border-bottom:1px solid var(--hair)}
+.who{flex:1;min-width:0}
+.who .nm{font-size:21px;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .sub{font-size:12px;color:var(--dim);margin-top:1px}
+/* Outlined, not filled.  A solid amber block this size is ~2% of the screen in
+   pure chroma and it drags the whole figure/ground balance with it — gold has
+   to stay ink, not surface. */
+.play{flex:0 0 auto;min-width:74px;height:48px;display:flex;align-items:center;justify-content:center;
+      background:var(--e2);color:var(--amber);border:1px solid rgba(212,167,74,.45);border-radius:7px;
+      font-weight:700;font-size:13px;letter-spacing:.09em;text-transform:uppercase}
+
+/* ===== ZONE 1: VITALS ====================================================== */
+.vitals{flex:0 0 auto;padding:7px 14px 6px;border-bottom:1px solid var(--hair2)}
+.hp{display:flex;align-items:baseline;gap:9px}
+.hp .big{font-family:'Cinzel',serif;font-weight:900;font-size:38px;line-height:1;color:var(--cream)}
+.hp .of{font-size:17px;color:var(--dim)}
+.hp .tmp{font-size:17px;color:var(--gold);font-weight:600}
+.hp .right{margin-left:auto;display:flex;gap:16px;align-items:baseline}
+.stat{text-align:right}
+.stat .v{font-family:'Cinzel',serif;font-weight:900;font-size:22px;color:var(--cream)}
+.stat .k{font-size:12px;color:var(--dim);letter-spacing:.08em;font-weight:600}
+/* The bar and its annotation are ONE row.  Stacked they cost 37px of the 844
+   and the second ranked card fell off the bottom — and they were always one
+   statement anyway: here is the line, here is where Bloodied sits on it. */
+.hprow{display:flex;align-items:center;gap:11px;margin-top:8px;height:16px}
+/* the HP track carries the 2024 Bloodied threshold as a physical mark */
+.track{position:relative;flex:1;min-width:0;height:6px;background:#191712;border-radius:3px}
+.track .fill{position:absolute;inset:0 auto 0 0;width:53.9%;
+             background:linear-gradient(90deg,#8a6f2e,var(--amber));border-radius:3px}
+.track .blood{position:absolute;top:-4px;bottom:-4px;left:50%;width:2px;background:var(--ember);opacity:.9}
+.blabel{flex:0 0 auto;font-size:12px;color:var(--dim);white-space:nowrap}
+.blabel b{color:var(--ember);font-weight:600}
+
+/* ===== ZONE 2: WHAT IS ON YOU ============================================== */
+.upon{flex:0 0 auto;display:flex;gap:8px;padding:6px 14px;border-bottom:1px solid var(--hair2)}
+.cond{flex:1;min-width:0;background:var(--e1);border-radius:7px;padding:5px 9px;
+      border-left:2px solid transparent}
+.cond.bad{border-left-color:var(--ember)}
+.cond.conc{border-left-color:var(--gold)}
+.cond .t{font-size:14px;font-weight:600;color:var(--cream);
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cond.bad .t{color:var(--ember)}
+/* One line each. The full text is a tap away — on the phone this zone is a
+   reminder that the condition EXISTS, not a place to read its rules. */
+.cond .d{font-size:12px;color:var(--dim);margin-top:1px;line-height:1.25;
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== ZONE 3: THE ECONOMY ================================================= */
+/* Fixed four cells, never reflows — this is A's grammar.  The BONUS cell is
+   marked as contested because in 2024 three different things want it. */
+.econ{flex:0 0 50px;display:flex;border-bottom:1px solid var(--hair)}
+.cell{flex:1;padding:5px 4px;text-align:center;border-right:1px solid var(--hair2)}
+.cell:last-child{border-right:0}
+.cell .k{font-size:12px;color:var(--dim);letter-spacing:.08em;font-weight:600;text-transform:uppercase}
+.cell .v{font-size:15px;font-weight:700;color:var(--cream);letter-spacing:.06em;margin-top:2px;text-transform:uppercase}
+.cell.open .v{color:var(--amber)}
+/* The BONUS cell is marked contested because in 2024 three different things
+   want it. The count rides on the value line — a third line cost 17px. */
+.cell.contested{background:linear-gradient(180deg,rgba(192,96,48,.10),transparent)}
+.cell.contested .v{color:var(--ember)}
+.cell .v small{font-family:'IBM Plex Sans';font-size:12px;font-weight:600;
+                color:var(--dim);text-transform:none;letter-spacing:0}
+
+/* ===== ZONE 4: THE RANKED SHORTLIST ========================================
+   STRUCTURAL NOTE, learned the hard way: the mutex block below is a SIBLING of
+   this list, not a child of it.  In the first build it lived inside .list, the
+   content overran 844px, and `overflow:hidden` silently ate the single most
+   important element on the screen.  The bonus-action decision is structural —
+   it must never be what gets clipped.  Only the ranked cards may be trimmed. */
+.list{flex:1 1 auto;overflow:hidden;padding:6px 14px 0;min-height:0}
+.listhead{display:flex;align-items:baseline;margin-bottom:6px;height:16px}
+.listhead .r{margin-left:auto;font-size:12px;color:var(--dim)}
+
+/* illumination tiers (from B): rank is size and tone, not a badge */
+.act{border-radius:9px;margin-bottom:6px;padding:8px 12px;position:relative;
+     min-height:48px;border:1px solid transparent}
+.act .top{display:flex;align-items:flex-start;gap:9px}
+.act .rank{font-family:'Cinzel',serif;font-weight:700;font-size:20px;color:var(--dim);
+           flex:0 0 20px;line-height:1.15}
+.act .body{flex:1;min-width:0}
+.act .maths{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cream);
+            margin-top:3px;line-height:1.3}
+/* The rider — the 2024 consequence that is not in the to-hit line.  It is body
+   copy, so it is CREAM; only the named mechanic is gold.  Two full gold lines
+   pushed gold to 38.5% of the lit ink and inverted figure and ground, which is
+   the exact fault D was built to drop from C. */
+.act .rider{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cream);
+            margin-top:3px;line-height:1.3}
+.act .rider b{color:var(--gold);font-weight:500}
+.act .cost{flex:0 0 auto;font-size:12px;font-weight:600;letter-spacing:.07em;
+           text-transform:uppercase;color:var(--dim);border:1px solid var(--hair);
+           border-radius:5px;padding:4px 7px;white-space:nowrap}
+
+/* tier 1 — illuminated.  The free thing, and the thing you swing. */
+.act.t1{background:var(--e3);border-color:rgba(197,165,90,.20)}
+.act.t1 .nm{font-size:24px;color:var(--gold)}
+.act.t1 .rank{color:var(--gold)}
+.act.t1 .cost{color:var(--amber);border-color:rgba(212,167,74,.42)}
+/* tier 2 — present, lit, but not illuminated */
+.act.t2{background:var(--e2)}
+.act.t2 .nm{font-size:21px;color:var(--cream)}
+
+/* the bonus-action bracket: ONE choice, three faces.  This is the 2024 rule
+   made visible.  It is a container, not three separate rows. */
+.mutex{flex:0 0 auto;border:1px solid rgba(192,96,48,.30);border-radius:9px;background:var(--e1);
+       padding:6px 9px 7px;margin:0 14px 7px}
+.mutex .cap{display:flex;align-items:baseline;gap:7px;margin-bottom:5px;padding:0 3px}
+.mutex .cap .lbl{color:var(--ember)}
+.mutex .cap .n{margin-left:auto;font-size:12px;color:var(--dim)}
+.face{display:flex;align-items:center;gap:9px;min-height:48px;padding:6px 9px;
+      background:var(--e2);border-radius:7px;margin-bottom:4px}
+.face:last-child{margin-bottom:0}
+.face .fnm{font-family:'Cinzel',serif;font-weight:700;font-size:20px;color:var(--cream);
+           flex:0 0 auto;line-height:1.1}
+.face .fd{font-size:13px;color:var(--dim);line-height:1.25;min-width:0}
+.face .fc{margin-left:auto;flex:0 0 auto;text-align:right;font-size:12px;
+          color:var(--dim);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.face .fc.free{color:var(--amber)}
+
+/* ===== ZONE 5: RESOURCES =================================================== */
+/* Four groups do not fit on 390px at a 12px floor — measured 451px of content
+   into 362px of strip, and "Lay on hands 15/40" folded into itself.  The pool
+   is already stated as a cost on the Lay on Hands face, so the strip carries
+   only what nothing else on this screen carries: 1st-level slots and Channel
+   Divinity.  (On the real build the strip restores the pool whenever the mutex
+   is not on screen — the ledger is never allowed to lose a resource, only to
+   stop repeating one.) */
+.res{flex:0 0 40px;display:flex;align-items:center;border-top:1px solid var(--hair);
+     padding:0 14px;gap:22px}
+.rgrp{display:flex;align-items:center;gap:7px}
+.rgrp .k{font-size:12px;color:var(--dim);letter-spacing:.08em;font-weight:600;
+         text-transform:uppercase;white-space:nowrap}
+.pips{display:flex;gap:4px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--amber);position:relative}
+/* residue (from C): spent things leave a mark, they do not disappear */
+.dot.spent{background:#241f16}
+.dot.spent::after{content:"";position:absolute;inset:1px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,167,74,.40),transparent 70%)}
+.rgrp .v{font-family:'Cinzel',serif;font-weight:900;font-size:20px;color:var(--cream);margin-left:auto}
+.rgrp .v small{font-family:'IBM Plex Sans';font-size:12px;font-weight:600;color:var(--dim)}
+
+/* ===== EDGE: the readout + the one instruction ============================= */
+.edge{flex:0 0 64px;display:flex;align-items:center;gap:11px;padding:0 14px;
+      border-top:1px solid var(--hair);background:var(--e1)}
+.edge .txt{flex:1;min-width:0}
+.edge .txt .lbl{display:block;margin-bottom:2px}
+.d20{flex:0 0 auto;width:52px;height:52px;border-radius:50%;border:1px solid rgba(197,165,90,.36);
+     display:flex;align-items:center;justify-content:center;background:var(--e2);
+     font-family:'Cinzel',serif;font-weight:700;font-size:20px;color:var(--gold)}
+.endt{flex:0 0 auto;min-width:96px;height:52px;padding:0 15px;display:flex;align-items:center;
+      justify-content:center;border-radius:8px;background:var(--e3);
+      border:1px solid rgba(197,165,90,.30);color:var(--cream);
+      font-weight:700;font-size:13px;letter-spacing:.09em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<!-- ============ CHROME ============ -->
+<div class="chrome">
+  <div class="who">
+    <div class="nm">Vaelin Ashgrove</div>
+    <!-- 2024: Human, not Half-Elf. Half-Elf is not a species in the 2024 rules. -->
+    <div class="sub">Human &middot; Paladin 8 &middot; Oath of Vengeance</div>
+  </div>
+  <div class="play obj">Play</div>
+</div>
+
+<!-- ============ ZONE 1 — VITALS ============ -->
+<div class="vitals">
+  <div class="hp">
+    <span class="big">41</span>
+    <span class="of">/76</span>
+    <span class="tmp">+5</span>
+    <span class="right">
+      <span class="stat"><span class="v">19</span> <span class="k">AC</span></span>
+      <span class="stat"><span class="v">16</span> <span class="k">DC</span></span>
+      <span class="stat"><span class="v">+3</span> <span class="k">PB</span></span>
+    </span>
+  </div>
+  <!-- 2024 formalises Bloodied (hp <= half). Show the approach, not just the state. -->
+  <div class="hprow">
+    <div class="track"><div class="fill"></div><div class="blood"></div></div>
+    <div class="blabel"><b>Bloodied</b> at 38 &middot; 4 away</div>
+  </div>
+</div>
+
+<!-- ============ ZONE 2 — WHAT IS ON YOU ============ -->
+<div class="upon">
+  <div class="cond bad">
+    <div class="t">Frightened</div>
+    <div class="d">Disadvantage while it is in sight</div>
+  </div>
+  <div class="cond conc">
+    <div class="t">Concentrating &mdash; Bless</div>
+    <div class="d">Damage &rarr; CON save, DC 10 min</div>
+  </div>
+</div>
+
+<!-- ============ ZONE 3 — THE ECONOMY ============ -->
+<div class="econ">
+  <div class="cell open"><div class="k">Action</div><div class="v">Open</div></div>
+  <div class="cell contested">
+    <div class="k">Bonus</div><div class="v">3 want it</div>
+  </div>
+  <div class="cell open"><div class="k">Reaction</div><div class="v">Open</div></div>
+  <div class="cell"><div class="k">Move</div><div class="v">30 ft</div></div>
+</div>
+
+<!-- ============ ZONE 4 — THE RANKED SHORTLIST ============ -->
+<div class="list">
+  <div class="listhead">
+    <span class="lbl">What you can do now</span>
+    <span class="r">ranked &middot; 5 of 19</span>
+  </div>
+
+  <!-- #1 is free. It is first BECAUSE it is free, and because its advantage
+       cancels the Frightened disadvantage. 2024: Vow is a rider on the Attack
+       action, not a bonus action. That is the reverse of the 2014 rules. -->
+  <div class="act t1 obj">
+    <div class="top">
+      <div class="rank">1</div>
+      <div class="body">
+        <div class="nm">Vow of Enmity</div>
+        <div class="maths">Advantage vs one target &middot; 30 ft &middot; 1 min</div>
+        <!-- The rubric that used to live here said the same sentence as the edge
+             bar. On a 844px screen that duplication cost 62px and clipped the
+             Attack card. One instruction, one place: the edge. -->
+        <div class="rider"><b>Cancels</b> your frightened disadvantage</div>
+      </div>
+      <div class="cost">Free</div>
+    </div>
+  </div>
+
+  <!-- #2 the Action. Weapon Mastery rider shown inline — 2024 attaches a rider
+       to every weapon, and Sap is automatic ("that creature HAS disadvantage"). -->
+  <div class="act t1 obj">
+    <div class="top">
+      <div class="rank">2</div>
+      <div class="body">
+        <div class="nm">Oathkeeper &times;2</div>
+        <div class="maths">+8 to hit &middot; 1d8+5 slashing &middot; 5 ft</div>
+        <div class="rider"><b>Sap</b> &mdash; disadvantage on its next attack</div>
+      </div>
+      <div class="cost">Action</div>
+    </div>
+  </div>
+</div>
+
+<!-- THE 2024 MUTEX. Smite, Lay on Hands and Misty Step are not three list
+     items — they are one decision with three faces. Drawing them as a list
+     would be lying about the rules. Sibling of .list so it cannot be clipped. -->
+<div class="mutex">
+    <div class="cap">
+      <span class="lbl">One of these &mdash; the bonus action</span>
+      <span class="n">pick one</span>
+    </div>
+
+    <div class="face obj">
+      <span class="fnm">Divine Smite</span>
+      <span class="fd">+2d8 radiant &middot; after a hit</span>
+      <span class="fc free">Free cast<br>no slot</span>
+    </div>
+    <div class="face obj">
+      <span class="fnm">Lay on Hands</span>
+      <span class="fd">Heal up to 15 &middot; touch</span>
+      <span class="fc">Pool<br>15/40</span>
+    </div>
+    <div class="face obj">
+      <span class="fnm">Misty Step</span>
+      <span class="fd">30 ft &middot; breaks line of sight</span>
+      <span class="fc">2nd slot<br>1 left</span>
+    </div>
+</div>
+
+<!-- ============ ZONE 5 — RESOURCES ============ -->
+<div class="res">
+  <div class="rgrp">
+    <div class="k">1st</div>
+    <div class="pips"><span class="dot"></span><span class="dot"></span>
+      <span class="dot spent"></span><span class="dot spent"></span></div>
+  </div>
+  <div class="rgrp">
+    <div class="k">2nd</div>
+    <div class="pips"><span class="dot"></span>
+      <span class="dot spent"></span><span class="dot spent"></span></div>
+  </div>
+  <!-- 2024: Channel Divinity is 2 uses, and a short rest returns only ONE. -->
+  <div class="rgrp">
+    <div class="k">Channel</div>
+    <div class="pips"><span class="dot"></span><span class="dot spent"></span></div>
+  </div>
+</div>
+
+<!-- ============ EDGE ============ -->
+<div class="edge">
+  <div class="txt">
+    <span class="lbl">Round 3 &middot; your turn</span>
+    <span class="rub">Vow the ogre, swing twice, smite the first hit.</span>
+  </div>
+  <div class="d20 obj">d20</div>
+  <div class="endt obj">End turn</div>
+</div>
+
+</body>
+</html>

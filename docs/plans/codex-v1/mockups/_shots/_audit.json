@@ -1,0 +1,876 @@
+[
+  {
+    "mockup": "a-instrument--01-turn--phone",
+    "errors": [],
+    "scrollHeight": 844,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [
+      {
+        "cls": "nextbtn",
+        "text": "End turn",
+        "w": 81,
+        "h": 32
+      },
+      {
+        "cls": "d20",
+        "text": "d20",
+        "w": 38,
+        "h": 38
+      }
+    ],
+    "underMinTouchCount": 2,
+    "cinzelUnder20": [
+      {
+        "sample": "VAELIN ASHGROVE",
+        "size": 15
+      },
+      {
+        "sample": "YOUR TURN",
+        "size": 13
+      },
+      {
+        "sample": "OPEN",
+        "size": 12.5
+      },
+      {
+        "sample": "OPEN",
+        "size": 12.5
+      },
+      {
+        "sample": "OPEN",
+        "size": 12.5
+      },
+      {
+        "sample": "30 FT",
+        "size": 12.5
+      }
+    ],
+    "cinzelUnder20Count": 6,
+    "under12px": [
+      {
+        "sample": "Paladin 8 · Oath of Veng",
+        "size": 11
+      },
+      {
+        "sample": "Play",
+        "size": 10
+      },
+      {
+        "sample": "Hit Points",
+        "size": 9.5
+      },
+      {
+        "sample": "AC",
+        "size": 9.5
+      },
+      {
+        "sample": "Save DC",
+        "size": 9.5
+      },
+      {
+        "sample": "Pressing",
+        "size": 9.5
+      },
+      {
+        "sample": "Disadvantage on attacks ",
+        "size": 11
+      },
+      {
+        "sample": "Damage taken → CON save ",
+        "size": 11
+      },
+      {
+        "sample": "Round 3",
+        "size": 10
+      },
+      {
+        "sample": "End turn",
+        "size": 10.5
+      },
+      {
+        "sample": "Action",
+        "size": 9
+      },
+      {
+        "sample": "Bonus",
+        "size": 9
+      }
+    ],
+    "under12pxCount": 33,
+    "texturedElements": 0,
+    "goldPctOfScreen": 1.2,
+    "goldPctOfLitPixels": 22.5,
+    "emberPctOfLitPixels": 8.6
+  },
+  {
+    "mockup": "a-instrument--02-turn-spread--ipad-landscape",
+    "errors": [],
+    "scrollHeight": 1024,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [
+      {
+        "cls": "rnav on",
+        "text": "⚔Fight",
+        "w": 44,
+        "h": 52
+      },
+      {
+        "cls": "rnav",
+        "text": "✦Book",
+        "w": 44,
+        "h": 52
+      },
+      {
+        "cls": "rnav",
+        "text": "☾Voice",
+        "w": 44,
+        "h": 52
+      },
+      {
+        "cls": "rnav",
+        "text": "dRoll",
+        "w": 44,
+        "h": 52
+      },
+      {
+        "cls": "nextbtn",
+        "text": "End turn",
+        "w": 92,
+        "h": 36
+      },
+      {
+        "cls": "on",
+        "text": "By economy",
+        "w": 105,
+        "h": 34
+      },
+      {
+        "cls": "BUTTON",
+        "text": "By level",
+        "w": 81,
+        "h": 34
+      },
+      {
+        "cls": "BUTTON",
+        "text": "A–Z",
+        "w": 49,
+        "h": 34
+      },
+      {
+        "cls": "d20",
+        "text": "d20",
+        "w": 44,
+        "h": 40
+      }
+    ],
+    "underMinTouchCount": 9,
+    "cinzelUnder20": [
+      {
+        "sample": "C",
+        "size": 17
+      },
+      {
+        "sample": "⚔",
+        "size": 15
+      },
+      {
+        "sample": "✦",
+        "size": 15
+      },
+      {
+        "sample": "☾",
+        "size": 15
+      },
+      {
+        "sample": "d",
+        "size": 15
+      },
+      {
+        "sample": "YOUR TURN",
+        "size": 15
+      },
+      {
+        "sample": "OPEN",
+        "size": 14
+      },
+      {
+        "sample": "OPEN",
+        "size": 14
+      },
+      {
+        "sample": "OPEN",
+        "size": 14
+      },
+      {
+        "sample": "30 FT",
+        "size": 14
+      },
+      {
+        "sample": "Always active",
+        "size": 11.5
+      },
+      {
+        "sample": "Action",
+        "size": 11.5
+      }
+    ],
+    "cinzelUnder20Count": 15,
+    "under12px": [
+      {
+        "sample": "⚔Fight",
+        "size": 9.5
+      },
+      {
+        "sample": "✦Book",
+        "size": 9.5
+      },
+      {
+        "sample": "☾Voice",
+        "size": 9.5
+      },
+      {
+        "sample": "dRoll",
+        "size": 9.5
+      },
+      {
+        "sample": "Play",
+        "size": 11
+      },
+      {
+        "sample": "Hit Points",
+        "size": 10
+      },
+      {
+        "sample": "AC",
+        "size": 10
+      },
+      {
+        "sample": "Save DC",
+        "size": 10
+      },
+      {
+        "sample": "Prof",
+        "size": 10
+      },
+      {
+        "sample": "Pressing",
+        "size": 10
+      },
+      {
+        "sample": "Round 3",
+        "size": 11
+      },
+      {
+        "sample": "End turn",
+        "size": 11
+      }
+    ],
+    "under12pxCount": 66,
+    "texturedElements": 0,
+    "goldPctOfScreen": 1,
+    "goldPctOfLitPixels": 29.6,
+    "emberPctOfLitPixels": 7.2
+  },
+  {
+    "mockup": "b-spread--01-turn--phone",
+    "errors": [],
+    "scrollHeight": 844,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [
+      {
+        "cls": "endt",
+        "text": "End",
+        "w": 46,
+        "h": 32
+      },
+      {
+        "cls": "d20",
+        "text": "d20",
+        "w": 40,
+        "h": 40
+      }
+    ],
+    "underMinTouchCount": 2,
+    "cinzelUnder20": [
+      {
+        "sample": "Vaelin Ashgrove",
+        "size": 19
+      },
+      {
+        "sample": "/76",
+        "size": 16
+      },
+      {
+        "sample": "+5",
+        "size": 15
+      },
+      {
+        "sample": "OPEN",
+        "size": 12
+      },
+      {
+        "sample": "OPEN",
+        "size": 12
+      },
+      {
+        "sample": "OPEN",
+        "size": 12
+      },
+      {
+        "sample": "30 FT",
+        "size": 12
+      },
+      {
+        "sample": "IVINE SMITE",
+        "size": 18
+      },
+      {
+        "sample": "ISTY STEP",
+        "size": 18
+      },
+      {
+        "sample": "Also on this page",
+        "size": 10.5
+      },
+      {
+        "sample": "Standing upon you always",
+        "size": 10.5
+      },
+      {
+        "sample": "d20",
+        "size": 13
+      }
+    ],
+    "cinzelUnder20Count": 12,
+    "under12px": [
+      {
+        "sample": "Paladin the Eighth · Oat",
+        "size": 11.5
+      },
+      {
+        "sample": "AC 19 · DC 16",
+        "size": 11
+      },
+      {
+        "sample": "19",
+        "size": 11
+      },
+      {
+        "sample": "16",
+        "size": 11
+      },
+      {
+        "sample": "Round III — it is your t",
+        "size": 10.5
+      },
+      {
+        "sample": "End",
+        "size": 10.5
+      },
+      {
+        "sample": "Action",
+        "size": 8.5
+      },
+      {
+        "sample": "Bonus",
+        "size": 8.5
+      },
+      {
+        "sample": "Reaction",
+        "size": 8.5
+      },
+      {
+        "sample": "Move",
+        "size": 8.5
+      },
+      {
+        "sample": "Action",
+        "size": 10
+      },
+      {
+        "sample": "Melee",
+        "size": 10
+      }
+    ],
+    "under12pxCount": 40,
+    "texturedElements": 0,
+    "goldPctOfScreen": 1.3,
+    "goldPctOfLitPixels": 25.4,
+    "emberPctOfLitPixels": 24.3
+  },
+  {
+    "mockup": "b-spread--02-turn-spread--ipad-landscape",
+    "errors": [],
+    "scrollHeight": 1024,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [
+      {
+        "cls": "on",
+        "text": "Fight",
+        "w": 76,
+        "h": 38
+      },
+      {
+        "cls": "BUTTON",
+        "text": "Book",
+        "w": 73,
+        "h": 38
+      },
+      {
+        "cls": "BUTTON",
+        "text": "Voice",
+        "w": 77,
+        "h": 38
+      },
+      {
+        "cls": "endt",
+        "text": "End turn",
+        "w": 92,
+        "h": 38
+      },
+      {
+        "cls": "d20",
+        "text": "d20",
+        "w": 46,
+        "h": 46
+      }
+    ],
+    "underMinTouchCount": 5,
+    "cinzelUnder20": [
+      {
+        "sample": "THE CODEX",
+        "size": 18
+      },
+      {
+        "sample": "Fight",
+        "size": 12
+      },
+      {
+        "sample": "Book",
+        "size": 12
+      },
+      {
+        "sample": "Voice",
+        "size": 12
+      },
+      {
+        "sample": "Bearing upon you",
+        "size": 11
+      },
+      {
+        "sample": "The order of things",
+        "size": 11
+      },
+      {
+        "sample": "21",
+        "size": 14
+      },
+      {
+        "sample": "18",
+        "size": 14
+      },
+      {
+        "sample": "14",
+        "size": 14
+      },
+      {
+        "sample": "11",
+        "size": 14
+      },
+      {
+        "sample": "9",
+        "size": 14
+      },
+      {
+        "sample": "What you may do",
+        "size": 15
+      }
+    ],
+    "cinzelUnder20Count": 19,
+    "under12px": [
+      {
+        "sample": "Folio III · The Ogre at ",
+        "size": 11
+      },
+      {
+        "sample": "End turn",
+        "size": 11
+      },
+      {
+        "sample": "Hit points",
+        "size": 11
+      },
+      {
+        "sample": "Armour",
+        "size": 11
+      },
+      {
+        "sample": "Save DC",
+        "size": 11
+      },
+      {
+        "sample": "Prof",
+        "size": 11
+      },
+      {
+        "sample": "Bearing upon you",
+        "size": 11
+      },
+      {
+        "sample": "The order of things",
+        "size": 11
+      },
+      {
+        "sample": "Action",
+        "size": 9.5
+      },
+      {
+        "sample": "Bonus",
+        "size": 9.5
+      },
+      {
+        "sample": "Reaction",
+        "size": 9.5
+      },
+      {
+        "sample": "Move",
+        "size": 9.5
+      }
+    ],
+    "under12pxCount": 24,
+    "texturedElements": 0,
+    "goldPctOfScreen": 0.8,
+    "goldPctOfLitPixels": 32.4,
+    "emberPctOfLitPixels": 17.1
+  },
+  {
+    "mockup": "c-hand--01-turn--phone",
+    "errors": [],
+    "scrollHeight": 844,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [
+      {
+        "cls": "take obj",
+        "text": "Take it",
+        "w": 160,
+        "h": 44
+      },
+      {
+        "cls": "obj",
+        "text": "Let it go",
+        "w": 160,
+        "h": 44
+      },
+      {
+        "cls": "deckbtn obj",
+        "text": "The deck · 13 more →",
+        "w": 125,
+        "h": 34
+      }
+    ],
+    "underMinTouchCount": 3,
+    "cinzelUnder20": [
+      {
+        "sample": "VAELIN ASHGROVE",
+        "size": 16
+      },
+      {
+        "sample": "OPEN",
+        "size": 12
+      },
+      {
+        "sample": "OPEN",
+        "size": 12
+      },
+      {
+        "sample": "OPEN",
+        "size": 12
+      },
+      {
+        "sample": "30 FT",
+        "size": 12
+      },
+      {
+        "sample": "Divine Smite",
+        "size": 14
+      },
+      {
+        "sample": "Misty Step",
+        "size": 14
+      },
+      {
+        "sample": "Lay on Hands",
+        "size": 14
+      },
+      {
+        "sample": "Vow of Enmity",
+        "size": 16
+      }
+    ],
+    "cinzelUnder20Count": 9,
+    "under12px": [
+      {
+        "sample": "Paladin 8 · Oath of Veng",
+        "size": 11
+      },
+      {
+        "sample": "Play",
+        "size": 10
+      },
+      {
+        "sample": "AC",
+        "size": 9.5
+      },
+      {
+        "sample": "DC",
+        "size": 9.5
+      },
+      {
+        "sample": "disadv. on attacks",
+        "size": 11
+      },
+      {
+        "sample": "conc. · CON 10 if hit",
+        "size": 11
+      },
+      {
+        "sample": "21",
+        "size": 11
+      },
+      {
+        "sample": "18 · now",
+        "size": 11
+      },
+      {
+        "sample": "14 · 63hp",
+        "size": 11
+      },
+      {
+        "sample": "11 · ×8",
+        "size": 11
+      },
+      {
+        "sample": "9",
+        "size": 11
+      },
+      {
+        "sample": "Action",
+        "size": 8.5
+      }
+    ],
+    "under12pxCount": 32,
+    "texturedElements": 0,
+    "goldPctOfScreen": 3.5,
+    "goldPctOfLitPixels": 48.7,
+    "emberPctOfLitPixels": 11.6
+  },
+  {
+    "mockup": "c-hand--02-turn-spread--ipad-landscape",
+    "errors": [],
+    "scrollHeight": 1024,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [
+      {
+        "cls": "on",
+        "text": "Fight",
+        "w": 78,
+        "h": 40
+      },
+      {
+        "cls": "BUTTON",
+        "text": "Book",
+        "w": 75,
+        "h": 40
+      },
+      {
+        "cls": "BUTTON",
+        "text": "Voice",
+        "w": 79,
+        "h": 40
+      },
+      {
+        "cls": "BUTTON",
+        "text": "Roll",
+        "w": 70,
+        "h": 40
+      },
+      {
+        "cls": "endt obj",
+        "text": "End turn",
+        "w": 94,
+        "h": 40
+      },
+      {
+        "cls": "take obj",
+        "text": "Take it",
+        "w": 122,
+        "h": 46
+      },
+      {
+        "cls": "obj",
+        "text": "Let it go",
+        "w": 122,
+        "h": 46
+      },
+      {
+        "cls": "undo obj",
+        "text": "↶ Undo the last thing",
+        "w": 286,
+        "h": 44
+      },
+      {
+        "cls": "deckbtn obj",
+        "text": "The deck · 13 more →",
+        "w": 133,
+        "h": 36
+      }
+    ],
+    "underMinTouchCount": 9,
+    "cinzelUnder20": [
+      {
+        "sample": "Fight",
+        "size": 12
+      },
+      {
+        "sample": "Book",
+        "size": 12
+      },
+      {
+        "sample": "Voice",
+        "size": 12
+      },
+      {
+        "sample": "Roll",
+        "size": 12
+      },
+      {
+        "sample": "YOUR TURN",
+        "size": 15
+      },
+      {
+        "sample": "OPEN",
+        "size": 13
+      },
+      {
+        "sample": "OPEN",
+        "size": 13
+      },
+      {
+        "sample": "OPEN",
+        "size": 13
+      },
+      {
+        "sample": "30 FT",
+        "size": 13
+      },
+      {
+        "sample": "Divine Smite",
+        "size": 19
+      },
+      {
+        "sample": "Misty Step",
+        "size": 19
+      },
+      {
+        "sample": "Lay on Hands",
+        "size": 19
+      }
+    ],
+    "cinzelUnder20Count": 13,
+    "under12px": [
+      {
+        "sample": "End turn",
+        "size": 11
+      },
+      {
+        "sample": "You",
+        "size": 10
+      },
+      {
+        "sample": "AC",
+        "size": 10
+      },
+      {
+        "sample": "DC",
+        "size": 10
+      },
+      {
+        "sample": "Prof",
+        "size": 10
+      },
+      {
+        "sample": "Upon you",
+        "size": 10
+      },
+      {
+        "sample": "Held in reserve",
+        "size": 10
+      },
+      {
+        "sample": "I",
+        "size": 10
+      },
+      {
+        "sample": "II",
+        "size": 10
+      },
+      {
+        "sample": "III",
+        "size": 10
+      },
+      {
+        "sample": "Lay on Hands",
+        "size": 10
+      },
+      {
+        "sample": "Channel",
+        "size": 10
+      }
+    ],
+    "under12pxCount": 38,
+    "texturedElements": 0,
+    "goldPctOfScreen": 0.9,
+    "goldPctOfLitPixels": 30.1,
+    "emberPctOfLitPixels": 11
+  },
+  {
+    "mockup": "d-merged--01-turn--phone",
+    "errors": [],
+    "scrollHeight": 844,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [],
+    "underMinTouchCount": 0,
+    "cinzelUnder20": [],
+    "cinzelUnder20Count": 0,
+    "under12px": [],
+    "under12pxCount": 0,
+    "texturedElements": 0,
+    "goldPctOfScreen": 2.6,
+    "goldPctOfLitPixels": 36,
+    "emberPctOfLitPixels": 14
+  },
+  {
+    "mockup": "d-merged--02-turn-spread--ipad-landscape",
+    "errors": [],
+    "scrollHeight": 1024,
+    "overflowsViewport": false,
+    "horizontalOverflow": false,
+    "underMinTouch": [],
+    "underMinTouchCount": 0,
+    "cinzelUnder20": [],
+    "cinzelUnder20Count": 0,
+    "under12px": [],
+    "under12pxCount": 0,
+    "texturedElements": 0,
+    "goldPctOfScreen": 2,
+    "goldPctOfLitPixels": 37.7,
+    "emberPctOfLitPixels": 14.1
+  }
+]

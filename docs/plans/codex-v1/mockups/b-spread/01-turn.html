@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>B · Illuminated Spread — Turn (phone)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DIRECTION B — THE ILLUMINATED SPREAD
+   Rank is encoded by ILLUMINATION. What matters is gilded;
+   what doesn't is body text on the same page — never hidden.
+   Rubrication is absolute: ember = instruction to the reader,
+   never content. Gold = primary. Cream = the words.
+   Borrowed: Très Riches Heures (3 layers) · Lindisfarne (scale
+   ramp) · medieval rubrication · Hochuli/Tschichold (measure,
+   leading) · M3 tonal elevation · visionOS specular rim.
+   FORBIDDEN HERE: parchment texture, noise, vignette, glow.
+   Depth comes from tone and position only. (anti-pattern 4)
+   ============================================================ */
+:root{
+  --bg:#0a0a08; --surface:#12110e; --raised:#1c1a15;
+  --cream:#f0e6d3; --cream-2:rgba(240,230,211,.62); --cream-3:rgba(240,230,211,.40);
+  --gold:#c5a55a; --gold-line:rgba(197,165,90,.20); --gold-faint:rgba(197,165,90,.085);
+  --ember:#c06030;   /* RUBRIC. Instructions to the reader. Nothing else, ever. */
+  --amber:#d4a74a;
+  /* tonal elevation — you cannot shadow into black (F2/F4) */
+  --e1:rgba(197,165,90,.045); --e2:rgba(197,165,90,.075); --e3:rgba(197,165,90,.115);
+  --r-panel:14px; --r-card:9px; --r-chip:5px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:16px;line-height:1.5;
+  display:flex;justify-content:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+.page{width:100%;max-width:390px;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+/* RUBRIC — the only use of ember in the entire document. */
+.rubric{
+  font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ember);
+}
+.rubric.inline{font-size:12.5px;letter-spacing:.02em;text-transform:none;font-weight:600;line-height:1.35}
+
+/* ---------- COLOPHON: who this page is about ---------- */
+.colophon{
+  padding:11px 20px 12px;border-bottom:1px solid var(--gold-line);flex:0 0 auto;
+  display:flex;align-items:flex-end;gap:12px;
+}
+.colophon .who{flex:1;min-width:0}
+.colophon .nm{font-family:'Cinzel',serif;font-weight:700;font-size:19px;letter-spacing:.05em;color:var(--gold);line-height:1.1}
+.colophon .sub{font-size:11.5px;color:var(--cream-3);letter-spacing:.03em;margin-top:3px}
+.vit{text-align:right;flex:0 0 auto}
+.vit .hp{display:flex;align-items:baseline;gap:2px;justify-content:flex-end}
+/* Cinzel numerals at 38px — well above the 20px hairline floor. Manuscript, not telemetry. */
+.vit .cur{font-family:'Cinzel',serif;font-weight:700;font-size:38px;line-height:.95;color:var(--cream)}
+.vit .max{font-family:'Cinzel',serif;font-weight:600;font-size:16px;color:var(--cream-3)}
+.vit .tmp{font-family:'Cinzel',serif;font-weight:600;font-size:15px;color:var(--amber);margin-left:5px}
+.vit .ac{font-size:11px;color:var(--cream-3);letter-spacing:.09em;text-transform:uppercase;margin-top:3px}
+.vit .ac b{color:var(--cream);font-weight:600}
+
+/* ---------- THE RUBRIC HEADLINE: what the page is telling you to do ---------- */
+.instruct{
+  padding:9px 20px 10px;background:var(--surface);
+  border-bottom:1px solid var(--gold-line);flex:0 0 auto;
+  display:flex;align-items:center;gap:10px;
+}
+.instruct .grow{flex:1}
+.endt{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:6px 10px;background:transparent;
+  font-family:inherit;min-height:32px}
+
+/* ---------- ECONOMY: kept from V0.9, set as a running head ---------- */
+.econ{display:flex;border-bottom:1px solid var(--gold-line);flex:0 0 auto}
+.econ div{flex:1;text-align:center;padding:7px 2px 8px;border-right:1px solid var(--gold-faint)}
+.econ div:last-child{border-right:0}
+.econ .k{font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--cream-3)}
+.econ .v{font-family:'Cinzel',serif;font-weight:700;font-size:12px;letter-spacing:.05em;color:var(--gold);margin-top:2px}
+.econ .v.out{color:var(--cream-3)}
+
+/* ================= THE PAGE BODY ================= */
+.body{flex:1 1 auto;overflow-y:auto;padding:0 0 4px}
+.body::-webkit-scrollbar{width:0}
+
+/* --- ILLUMINATED ENTRIES. Weight descends: this IS the ranking. --- */
+.ill{
+  position:relative;padding:13px 20px 14px;border-bottom:1px solid var(--gold-faint);
+}
+.ill.t1{background:linear-gradient(var(--e3),var(--e3));box-shadow:inset 0 1px 0 rgba(197,165,90,.22)}
+.ill.t2{background:linear-gradient(var(--e1),var(--e1))}
+.ill.t3{padding-top:11px;padding-bottom:11px}
+
+/* Lindisfarne scale ramp — the initial is functional, not decorative */
+.ill .nm{display:flex;align-items:baseline;gap:1px;flex-wrap:wrap}
+.ill.t1 .nm .cap{font-family:'Cinzel',serif;font-weight:900;font-size:30px;line-height:.9;color:var(--gold)}
+.ill.t1 .nm .rest{font-family:'Cinzel',serif;font-weight:700;font-size:21px;letter-spacing:.03em;color:var(--gold)}
+.ill.t2 .nm .cap{font-family:'Cinzel',serif;font-weight:700;font-size:22px;line-height:.95;color:var(--gold)}
+.ill.t2 .nm .rest{font-family:'Cinzel',serif;font-weight:600;font-size:18px;letter-spacing:.03em;color:var(--gold)}
+.ill.t3 .nm .cap,.ill.t3 .nm .rest{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:16px;
+  letter-spacing:0;color:var(--cream)}
+
+/* layer 1 — core text */
+.ill .core{font-size:14px;color:var(--cream-2);line-height:1.45;margin-top:5px;max-width:62ch}
+/* layer 2 — the mechanical rubric line. Mono, always visible, never truncated. */
+.ill .mech{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--cream);
+  margin-top:6px;line-height:1.45;letter-spacing:-.01em}
+.ill.t3 .mech{font-size:11.5px;color:var(--cream-2);margin-top:3px}
+/* layer 3 — marginalia. Own zone, never co-located with the other two. */
+.marg{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.mtag{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--cream-3);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:3px 7px}
+.mtag.g{color:var(--gold);border-color:rgba(197,165,90,.36)}
+.mtag.spent{color:var(--cream-3);opacity:.6}
+.pips{display:inline-flex;gap:3px;align-items:center;margin-left:2px}
+.pip{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.pip.off{background:transparent;box-shadow:inset 0 0 0 1px rgba(197,165,90,.35)}
+.ill.done{opacity:.4}
+
+/* --- THE REST OF THE PAGE. Plain body text. Present, not hidden. --- */
+.plain{padding:12px 20px 4px}
+.plain h4{font-family:'Cinzel',serif;font-weight:600;font-size:10.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);padding-bottom:6px;border-bottom:1px solid var(--gold-line);margin-bottom:3px}
+.pent{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--gold-faint);min-height:40px}
+.pent:last-child{border-bottom:0}
+.pent .n{font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pent .m{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--cream-3);white-space:nowrap}
+.pent.off{opacity:.42}
+.pent.off .n{text-decoration:line-through;text-decoration-thickness:1px}
+
+/* ---------- MARGINALIA SHEET (phone: the margin becomes a drawer) ---------- */
+.sheet{
+  flex:0 0 auto;background:var(--surface);border-top:1px solid var(--gold-line);
+  padding:8px 20px calc(9px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.sheet .grip{position:absolute}
+.sheet .lbl{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--cream-3)}
+.sheet .val{font-size:13px;font-weight:600;color:var(--cream);margin-top:2px}
+.sheet .grow{flex:1}
+.sheet .d20{width:40px;height:40px;border-radius:50%;border:1px solid rgba(197,165,90,.42);
+  background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:13px;font-weight:700;
+  display:grid;place-items:center}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- COLOPHON -->
+  <div class="colophon">
+    <div class="who">
+      <div class="nm">Vaelin Ashgrove</div>
+      <div class="sub">Paladin the Eighth · Oath of Vengeance</div>
+    </div>
+    <div class="vit">
+      <div class="hp"><span class="cur">41</span><span class="max">/76</span><span class="tmp">+5</span></div>
+      <div class="ac">AC <b>19</b> · DC <b>16</b></div>
+    </div>
+  </div>
+
+  <!-- THE RUBRIC HEADLINE -->
+  <div class="instruct">
+    <div>
+      <div class="rubric">Round III — it is your turn</div>
+      <div class="rubric inline" style="margin-top:3px">Strike, then smite if it lands.</div>
+    </div>
+    <div class="grow"></div>
+    <button class="endt">End</button>
+  </div>
+
+  <!-- ECONOMY -->
+  <div class="econ">
+    <div><div class="k">Action</div><div class="v">OPEN</div></div>
+    <div><div class="k">Bonus</div><div class="v">OPEN</div></div>
+    <div><div class="k">Reaction</div><div class="v">OPEN</div></div>
+    <div><div class="k">Move</div><div class="v">30 FT</div></div>
+  </div>
+
+  <div class="body">
+
+    <!-- TIER 1 — fully illuminated. There is only ever one. -->
+    <div class="ill t1">
+      <div class="nm"><span class="cap">O</span><span class="rest">ATHKEEPER</span></div>
+      <div class="mech">+8 to hit (STR +4 · prof +3 · magic +1) · 1d8+5 slashing · 5 ft · two attacks</div>
+      <div class="rubric inline" style="margin-top:7px">Roll twice and take the lower — you are frightened of the ogre.</div>
+      <div class="marg">
+        <span class="mtag g">Action</span><span class="mtag">Melee</span><span class="mtag">Magical +1</span>
+      </div>
+    </div>
+
+    <!-- TIER 2 — illuminated, lesser -->
+    <div class="ill t2">
+      <div class="nm"><span class="cap">D</span><span class="rest">IVINE SMITE</span></div>
+      <div class="mech">+2d8 radiant on a hit · +1d8 against undead or fiends</div>
+      <div class="rubric inline" style="margin-top:6px">Declare it after the hit lands, never before.</div>
+      <div class="marg">
+        <span class="mtag g">No action</span>
+        <span class="mtag">1st <span class="pips"><i class="pip"></i><i class="pip"></i><i class="pip off"></i><i class="pip off"></i></span></span>
+      </div>
+    </div>
+
+    <div class="ill t2">
+      <div class="nm"><span class="cap">M</span><span class="rest">ISTY STEP</span></div>
+      <div class="mech">30 ft teleport to a space you can see · breaks line of sight</div>
+      <div class="rubric inline" style="margin-top:6px">Take this to shed the fear before you swing.</div>
+      <div class="marg">
+        <span class="mtag g">Bonus</span>
+        <span class="mtag">2nd <span class="pips"><i class="pip"></i><i class="pip off"></i><i class="pip off"></i></span></span>
+      </div>
+    </div>
+
+    <!-- TIER 3 — plain weight, still on the page -->
+    <div class="ill t3">
+      <div class="nm"><span class="rest">Lay on Hands</span></div>
+      <div class="mech">Heal up to 15 · touch · pool 15 of 40 remaining</div>
+      <div class="marg"><span class="mtag">Action</span></div>
+    </div>
+
+    <div class="ill t3 done">
+      <div class="nm"><span class="rest">Vow of Enmity</span></div>
+      <div class="mech">Advantage against one target for 1 minute</div>
+      <div class="marg"><span class="mtag spent">Channel Divinity spent — short rest</span></div>
+    </div>
+
+    <!-- THE REST — plain body text. Nothing is behind a tap. -->
+    <div class="plain">
+      <h4>Also on this page</h4>
+      <div class="pent"><span class="n">Javelin</span><span class="m">+7 · 1d6+4 · 30/120</span></div>
+      <div class="pent"><span class="n">Sacred Flame</span><span class="m">DEX save 16 · 2d8</span></div>
+      <div class="pent"><span class="n">Hold Person</span><span class="m">2nd · WIS 16 · conc.</span></div>
+      <div class="pent"><span class="n">Shield of Faith</span><span class="m">1st · +2 AC · conc.</span></div>
+      <div class="pent"><span class="n">Compelled Duel</span><span class="m">1st · WIS 16 · conc.</span></div>
+      <div class="pent"><span class="n">Haste</span><span class="m">3rd · conc.</span></div>
+      <div class="pent"><span class="n">Magic Weapon</span><span class="m">2nd · conc.</span></div>
+      <div class="pent"><span class="n">Revivify</span><span class="m">3rd · 300 gp</span></div>
+      <div class="pent"><span class="n">Opportunity Attack</span><span class="m">reaction · +8</span></div>
+      <div class="pent off"><span class="n">Abjure Enemy</span><span class="m">spent</span></div>
+    </div>
+
+    <div class="plain">
+      <h4>Standing upon you always</h4>
+      <div class="pent"><span class="n">Aura of Protection</span><span class="m">+4 saves · 10 ft</span></div>
+      <div class="pent"><span class="n">Extra Attack</span><span class="m">two per Attack</span></div>
+      <div class="pent"><span class="n">Fey Ancestry</span><span class="m">adv. vs charm</span></div>
+      <div class="pent"><span class="n">Relentless Avenger</span><span class="m">move 15 ft free</span></div>
+      <div class="pent"><span class="n">Great Weapon Master</span><span class="m">−5 hit / +10 dmg</span></div>
+      <div class="pent"><span class="n">Divine Sense</span><span class="m">3 per long rest</span></div>
+    </div>
+
+  </div>
+
+  <!-- MARGINALIA, collapsed to the foot of the page -->
+  <div class="sheet">
+    <div>
+      <div class="lbl">Bearing upon you</div>
+      <div class="val">Bless (yours) · Frightened</div>
+    </div>
+    <div class="grow"></div>
+    <button class="d20">d20</button>
+  </div>
+
+</div>
+</body>
+</html>

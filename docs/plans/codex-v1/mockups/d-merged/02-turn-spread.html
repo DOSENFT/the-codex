@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Codex D — the turn · iPad landscape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   DIRECTION D — the merge.  iPad landscape, 1366x1024.
+
+   This is NOT the phone stretched.  It is a different layout for a different
+   device, which was baseline fault #1 (a third of 1366x1024 sat empty).
+   Three fixed columns, each answering one question:
+       LEFT   — what is true of you            (state)
+       CENTRE — what you do about it            (the turn)
+       RIGHT  — what is owed to you, and what just happened  (reaction + log)
+
+   FIXES CARRIED FROM THE AUDIT
+     - A's iPad ran its reference columns at 9.5-11px.  Nothing here is under
+       12px, and that costs a column — so the full spell list is a scrolling
+       pane in the centre rather than three columns of microtype.  That is the
+       honest trade: legibility beats density, and the RANKED list means the
+       thing you need is at the top anyway.
+     - C's iPad had ~250px of dead band.  Every column here fills its height.
+     - Cinzel >= 20px, names and numerals only.  Labels are IBM Plex Sans.
+     - Every pressable thing >= 48px.  "End turn" is 56px.
+
+   FORBIDDEN: parchment, noise, vignette, glow, shadow on near-black.
+   RULES: D&D 2024 (SRD 5.2.1).  See reference/03-rules-2024.md.
+   ========================================================================== */
+
+:root{
+  --bg:#0a0a08; --e1:#12110e; --e2:#1c1a15; --e3:#26231b;
+  --cream:#f0e6d3; --dim:#8b8578; --gold:#c5a55a; --amber:#d4a74a; --ember:#c06030;
+  --hair:rgba(197,165,90,.14); --hair2:rgba(240,230,211,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:1024px;width:1366px;overflow:hidden}
+body{background:var(--bg);color:var(--cream);
+     font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:16px;line-height:1.35;
+     display:flex;flex-direction:column}
+.lbl{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:12px;
+     letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.nm{font-family:'Cinzel',serif;font-weight:700;font-size:22px;line-height:1.15;color:var(--cream)}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px}
+.rub{color:var(--ember);font-size:16px;font-weight:500;line-height:1.3}
+.obj{cursor:pointer;transition:transform 140ms cubic-bezier(.2,.8,.3,1),filter 140ms,background 140ms}
+.obj:active{transform:scale(.985);filter:brightness(.86);transition-duration:80ms}
+
+/* ===== CHROME ============================================================== */
+.chrome{flex:0 0 64px;display:flex;align-items:center;gap:16px;padding:0 20px;
+        border-bottom:1px solid var(--hair)}
+.who{flex:0 0 auto}
+.who .n{font-family:'Cinzel',serif;font-weight:700;font-size:24px;color:var(--gold);line-height:1.1}
+.who .s{font-size:12px;color:var(--dim);letter-spacing:.05em;margin-top:1px}
+.nav{margin-left:auto;display:flex;gap:6px}
+.nav .t{min-width:82px;height:48px;display:flex;align-items:center;justify-content:center;
+        border-radius:7px;font-weight:600;font-size:13px;letter-spacing:.09em;
+        text-transform:uppercase;color:var(--dim)}
+.nav .t.on{background:var(--e3);color:var(--gold)}
+.endt{flex:0 0 auto;min-width:132px;height:56px;display:flex;align-items:center;justify-content:center;
+      border-radius:8px;background:var(--e3);border:1px solid rgba(197,165,90,.30);
+      color:var(--cream);font-weight:700;font-size:14px;letter-spacing:.09em;text-transform:uppercase}
+
+/* ===== BODY: three columns ================================================ */
+.body{flex:1 1 auto;display:flex;min-height:0}
+.col{display:flex;flex-direction:column;min-height:0}
+.colL{flex:0 0 336px;border-right:1px solid var(--hair);padding:16px 18px}
+.colC{flex:1 1 auto;padding:16px 20px;min-width:0}
+.colR{flex:0 0 372px;border-left:1px solid var(--hair);padding:16px 18px;background:var(--e1)}
+.sec{margin-bottom:15px}
+.sec > .lbl{display:block;margin-bottom:8px}
+
+/* ---- LEFT: state --------------------------------------------------------- */
+.hp{display:flex;align-items:baseline;gap:10px}
+.hp .big{font-family:'Cinzel',serif;font-weight:900;font-size:62px;line-height:.95;color:var(--cream)}
+.hp .of{font-size:20px;color:var(--dim)}
+.hp .tmp{font-size:20px;color:var(--gold);font-weight:600}
+.track{position:relative;height:7px;background:#191712;border-radius:4px;margin-top:12px}
+.track .fill{position:absolute;inset:0 auto 0 0;width:53.9%;
+             background:linear-gradient(90deg,#8a6f2e,var(--amber));border-radius:4px}
+.track .blood{position:absolute;top:-5px;bottom:-5px;left:50%;width:2px;background:var(--ember)}
+.blabel{margin-top:7px;font-size:13px;color:var(--dim)}
+.blabel b{color:var(--ember);font-weight:600}
+.stats{display:flex;gap:26px;margin-top:14px;padding-top:13px;border-top:1px solid var(--hair2)}
+.stat .v{font-family:'Cinzel',serif;font-weight:900;font-size:26px;color:var(--cream);line-height:1}
+.stat .k{font-size:12px;color:var(--dim);letter-spacing:.08em;font-weight:600;
+         text-transform:uppercase;margin-top:3px}
+.cond{background:var(--e2);border-radius:7px;padding:9px 11px;border-left:2px solid transparent;
+      margin-bottom:7px}
+.cond.bad{border-left-color:var(--ember)}
+.cond.conc{border-left-color:var(--gold)}
+.cond.aura{border-left-color:rgba(197,165,90,.4)}
+.cond .t{font-size:15px;font-weight:600;color:var(--cream)}
+.cond.bad .t{color:var(--ember)}
+.cond .d{font-size:13px;color:var(--dim);margin-top:2px;line-height:1.3}
+.rrow{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--hair2)}
+.rrow:last-child{border-bottom:0}
+.rrow .k{flex:0 0 108px;font-size:12px;color:var(--dim);letter-spacing:.08em;
+         font-weight:600;text-transform:uppercase}
+.pips{display:flex;gap:5px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--amber);position:relative}
+.dot.spent{background:#241f16}
+.dot.spent::after{content:"";position:absolute;inset:1px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,167,74,.40),transparent 70%)}
+.rrow .v{margin-left:auto;font-family:'Cinzel',serif;font-weight:900;font-size:20px;color:var(--cream)}
+.rrow .v small{font-family:'IBM Plex Sans';font-size:12px;font-weight:600;color:var(--dim)}
+
+/* ---- CENTRE: the turn ---------------------------------------------------- */
+.init{display:flex;gap:7px;margin-bottom:14px}
+.ini{flex:1;background:var(--e1);border-radius:7px;padding:8px 10px;min-width:0;
+     border-top:2px solid transparent}
+.ini.now{background:var(--e3);border-top-color:var(--amber)}
+.ini .o{font-family:'Cinzel',serif;font-weight:700;font-size:20px;color:var(--dim);line-height:1}
+.ini.now .o{color:var(--amber)}
+.ini .n{font-size:15px;font-weight:600;color:var(--cream);margin-top:3px;
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ini .h{font-size:12px;color:var(--dim);margin-top:2px}
+.ini .h b{color:var(--ember);font-weight:600}
+.mob{display:flex;gap:3px;margin-top:4px}
+.mob i{width:7px;height:7px;border-radius:50%;background:var(--ember);display:block}
+.mob i.down{background:#2a251b}
+
+.econ{display:flex;border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.cell{flex:1;padding:9px 6px 10px;text-align:center;border-right:1px solid var(--hair2)}
+.cell:last-child{border-right:0}
+.cell .k{font-size:12px;color:var(--dim);letter-spacing:.08em;font-weight:600;text-transform:uppercase}
+.cell .v{font-size:16px;font-weight:700;color:var(--cream);letter-spacing:.06em;
+         margin-top:3px;text-transform:uppercase}
+.cell.open .v{color:var(--amber)}
+.cell.contested{background:linear-gradient(180deg,rgba(192,96,48,.12),transparent)}
+.cell.contested .v{color:var(--ember)}
+.cell .x{font-size:12px;color:var(--dim);margin-top:2px}
+
+.listhead{display:flex;align-items:baseline;margin-bottom:9px}
+.listhead .r{margin-left:auto;font-size:12px;color:var(--dim)}
+.act{border-radius:9px;margin-bottom:9px;padding:12px 14px;min-height:48px;
+     border:1px solid transparent}
+.act .top{display:flex;align-items:flex-start;gap:12px}
+.act .rank{font-family:'Cinzel',serif;font-weight:700;font-size:22px;color:var(--dim);
+           flex:0 0 22px;line-height:1.05}
+.act .body2{flex:1;min-width:0}
+.act .maths{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cream);
+            margin-top:4px;line-height:1.45}
+.act .cost{flex:0 0 auto;font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+           color:var(--dim);border:1px solid var(--hair);border-radius:5px;padding:5px 9px;white-space:nowrap}
+.act.t1{background:var(--e3);border-color:rgba(197,165,90,.20)}
+.act.t1 .nm{font-size:27px;color:var(--gold)}
+.act.t1 .rank{color:var(--gold)}
+.act.t1 .cost{color:var(--amber);border-color:rgba(212,167,74,.42)}
+.act.t2{background:var(--e2)}
+.act.t2 .nm{font-size:23px;color:var(--cream)}
+
+/* the 2024 bonus-action mutex, side by side because there is room here */
+.mutex{border:1px solid rgba(192,96,48,.30);border-radius:9px;background:var(--e1);
+       padding:10px 11px 11px;margin-bottom:14px}
+.mutex .cap{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;padding:0 3px}
+.mutex .cap .lbl{color:var(--ember)}
+.mutex .cap .n{margin-left:auto;font-size:12px;color:var(--dim)}
+.faces{display:flex;gap:8px}
+.face{flex:1;min-height:88px;padding:10px 11px;background:var(--e2);border-radius:7px;
+      display:flex;flex-direction:column}
+.face .fnm{font-family:'Cinzel',serif;font-weight:700;font-size:21px;color:var(--cream);line-height:1.1}
+.face .fd{font-size:13px;color:var(--dim);margin-top:5px;line-height:1.3}
+.face .fc{margin-top:auto;padding-top:7px;font-size:12px;color:var(--dim);
+          font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.face .fc.free{color:var(--amber)}
+
+/* the rest of what you own — one scrolling pane, not three columns of microtype */
+.also{border-top:1px solid var(--hair);padding-top:11px}
+.arow{display:flex;align-items:center;gap:12px;min-height:48px;padding:4px 3px;
+      border-bottom:1px solid var(--hair2)}
+.arow:last-child{border-bottom:0}
+.arow .an{font-size:16px;color:var(--cream);flex:0 0 178px}
+.arow .am{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--dim);flex:1;min-width:0}
+.arow .ac{font-size:12px;color:var(--dim);letter-spacing:.07em;font-weight:600;text-transform:uppercase}
+.arow.off .an,.arow.off .am{color:#5f5a50}
+
+/* ---- RIGHT: owed to you, and what happened ------------------------------- */
+.owed{border:1px solid rgba(192,96,48,.42);border-radius:9px;background:var(--e2);
+      padding:13px 14px;margin-bottom:16px}
+.owed .h{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+         color:var(--ember);margin-bottom:6px}
+.owed .nm{font-size:23px;color:var(--cream)}
+.owed .d{font-size:14px;color:var(--dim);margin-top:6px;line-height:1.35}
+.owed .btns{display:flex;gap:9px;margin-top:12px}
+.owed .b{flex:1;height:52px;display:flex;align-items:center;justify-content:center;border-radius:7px;
+         font-weight:700;font-size:14px;letter-spacing:.05em;background:var(--e3);color:var(--cream)}
+.owed .b.take{background:var(--amber);color:#17140c}
+.log{flex:1 1 auto;min-height:0;overflow:hidden}
+.lrow{display:flex;gap:11px;padding:9px 2px;border-bottom:1px solid var(--hair2);font-size:14px}
+.lrow .r{flex:0 0 26px;font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.06em}
+.lrow .t{flex:1;color:var(--cream);line-height:1.35}
+.lrow .t b{color:var(--gold);font-weight:600}
+.undo{margin-top:13px;height:52px;display:flex;align-items:center;justify-content:center;
+      border-radius:7px;border:1px solid var(--hair);color:var(--dim);
+      font-size:14px;font-weight:600}
+
+/* ===== EDGE =============================================================== */
+.edge{flex:0 0 64px;display:flex;align-items:center;gap:16px;padding:0 20px;
+      border-top:1px solid var(--hair);background:var(--e1)}
+.edge .txt{flex:1;display:flex;align-items:baseline;gap:14px;min-width:0}
+.d20{flex:0 0 auto;width:52px;height:52px;border-radius:50%;border:1px solid rgba(197,165,90,.36);
+     display:flex;align-items:center;justify-content:center;background:var(--e2);
+     font-family:'Cinzel',serif;font-weight:700;font-size:20px;color:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- ============ CHROME ============ -->
+<div class="chrome">
+  <div class="who">
+    <div class="n">Vaelin Ashgrove</div>
+    <div class="s">Human &middot; Paladin 8 &middot; Oath of Vengeance</div>
+  </div>
+  <div class="nav">
+    <div class="t on obj">Fight</div>
+    <div class="t obj">Book</div>
+    <div class="t obj">Voice</div>
+    <div class="t obj">Roll</div>
+  </div>
+  <div class="endt obj">End turn</div>
+</div>
+
+<div class="body">
+
+  <!-- ============ LEFT — what is true of you ============ -->
+  <div class="col colL">
+    <div class="sec">
+      <span class="lbl">Hit points</span>
+      <div class="hp">
+        <span class="big">41</span><span class="of">/76</span><span class="tmp">+5</span>
+      </div>
+      <div class="track"><div class="fill"></div><div class="blood"></div></div>
+      <div class="blabel">4 more damage and you are <b>Bloodied</b> &middot; threshold 38</div>
+      <div class="stats">
+        <div class="stat"><div class="v">19</div><div class="k">Armour</div></div>
+        <div class="stat"><div class="v">16</div><div class="k">Save DC</div></div>
+        <div class="stat"><div class="v">+3</div><div class="k">Prof</div></div>
+        <div class="stat"><div class="v">+4</div><div class="k">Aura</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <span class="lbl">Bearing upon you</span>
+      <div class="cond bad">
+        <div class="t">Frightened</div>
+        <div class="d">Disadvantage on attacks while the ogre is in your line of sight.
+          You cannot willingly move closer to it.</div>
+      </div>
+      <div class="cond conc">
+        <div class="t">Concentrating &mdash; Bless</div>
+        <div class="d">Damage forces a CON save: DC 10, or half the damage taken, whichever is higher.</div>
+      </div>
+      <!-- 2024: Aura of Protection is a 10-ft Emanation and is inactive while
+           Incapacitated (2014 said "must be conscious" — narrower). -->
+      <div class="cond aura">
+        <div class="t">Aura of Protection</div>
+        <div class="d">+4 to saves for you and allies in a 10 ft emanation. Off while incapacitated.</div>
+      </div>
+    </div>
+
+    <div class="sec" style="margin-top:auto">
+      <span class="lbl">Held in reserve</span>
+      <div class="rrow">
+        <span class="k">1st level</span>
+        <span class="pips"><i class="dot"></i><i class="dot"></i>
+          <i class="dot spent"></i><i class="dot spent"></i></span>
+        <span class="v">2<small> / 4</small></span>
+      </div>
+      <div class="rrow">
+        <span class="k">2nd level</span>
+        <span class="pips"><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span>
+        <span class="v">1<small> / 3</small></span>
+      </div>
+      <!-- 2024: 2 uses at level 3, 3 at level 11. A short rest returns only one. -->
+      <div class="rrow">
+        <span class="k">Channel</span>
+        <span class="pips"><i class="dot"></i><i class="dot spent"></i></span>
+        <span class="v">1<small> / 2</small></span>
+      </div>
+      <div class="rrow">
+        <span class="k">Lay on hands</span>
+        <span class="v">15<small> / 40</small></span>
+      </div>
+      <!-- Paladin's Smite (L2): one free cast of Divine Smite per long rest,
+           costing no slot. A real resource, and the 2014 model had no place for it. -->
+      <div class="rrow">
+        <span class="k">Free smite</span>
+        <span class="pips"><i class="dot"></i></span>
+        <span class="v">1<small> / long rest</small></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CENTRE — what you do about it ============ -->
+  <div class="col colC">
+    <div class="init">
+      <div class="ini"><div class="o">21</div><div class="n">Brannoch</div><div class="h">ally &middot; 52/61</div></div>
+      <div class="ini now"><div class="o">18</div><div class="n">Vaelin &mdash; you</div><div class="h">41/76 &middot; now</div></div>
+      <div class="ini"><div class="o">14</div><div class="n">Ogre</div><div class="h">63 hp &middot; <b>bloodied</b></div></div>
+      <div class="ini"><div class="o">11</div><div class="n">Goblins &times;8</div>
+        <div class="mob"><i></i><i></i><i></i><i></i><i></i><i class="down"></i><i class="down"></i><i class="down"></i></div>
+      </div>
+      <div class="ini"><div class="o">9</div><div class="n">Sera</div><div class="h">ally &middot; 38/44</div></div>
+    </div>
+
+    <div class="econ">
+      <div class="cell open"><div class="k">Action</div><div class="v">Open</div><div class="x">&nbsp;</div></div>
+      <div class="cell contested"><div class="k">Bonus</div><div class="v">Open</div><div class="x">3 want it</div></div>
+      <div class="cell open"><div class="k">Reaction</div><div class="v">Open</div><div class="x">&nbsp;</div></div>
+      <div class="cell"><div class="k">Move</div><div class="v">30 ft</div><div class="x">&nbsp;</div></div>
+    </div>
+
+    <div class="listhead">
+      <span class="lbl">What you can do now</span>
+      <span class="r">ranked</span>
+    </div>
+
+    <div class="act t1 obj">
+      <div class="top">
+        <div class="rank">1</div>
+        <div class="body2">
+          <div class="nm">Vow of Enmity</div>
+          <div class="maths">Advantage vs one target &middot; 30 ft &middot; 1 minute &middot; transfers free if it drops</div>
+          <div class="rub" style="margin-top:6px">Costs nothing. Take it first &mdash; the advantage
+            cancels your frightened disadvantage.</div>
+        </div>
+        <div class="cost">Free &middot; on attack</div>
+      </div>
+    </div>
+
+    <div class="act t1 obj">
+      <div class="top">
+        <div class="rank">2</div>
+        <div class="body2">
+          <div class="nm">Oathkeeper &times;2</div>
+          <div class="maths">+8 to hit (STR +4 &middot; PB +3 &middot; magic +1) &middot; 1d8+5 slashing &middot; 5 ft</div>
+          <!-- Rider is body copy: cream, with only the named mechanic in gold.
+               A whole gold line here reads as a second heading and pushes gold
+               past the point where it stops being emphasis. -->
+          <div class="maths"><b style="color:var(--gold);font-weight:500">Sap</b>
+            &mdash; each hit gives it disadvantage on its next attack roll</div>
+        </div>
+        <div class="cost">Action</div>
+      </div>
+    </div>
+
+    <div class="mutex">
+      <div class="cap">
+        <span class="lbl">One of these &mdash; they all want the bonus action</span>
+        <span class="n">pick one</span>
+      </div>
+      <div class="faces">
+        <div class="face obj">
+          <div class="fnm">Divine Smite</div>
+          <div class="fd">+2d8 radiant, cast right after a hit lands. +1d8 vs fiend or undead.</div>
+          <div class="fc free">Free cast &middot; no slot</div>
+        </div>
+        <div class="face obj">
+          <div class="fnm">Lay on Hands</div>
+          <div class="fd">Heal up to 15 by touch, or 5 to clear the poisoned condition.</div>
+          <div class="fc">Pool 15 / 40</div>
+        </div>
+        <div class="face obj">
+          <div class="fnm">Misty Step</div>
+          <div class="fd">30 ft teleport to a space you can see. Breaks line of sight, sheds the fear.</div>
+          <div class="fc">2nd slot &middot; 1 left</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="also">
+      <span class="lbl" style="display:block;margin-bottom:7px">Also yours</span>
+      <div class="arow obj"><span class="an">Javelin</span>
+        <span class="am">+7 to hit &middot; 1d6+4 &middot; 30/120 &middot; Slow</span><span class="ac">Action</span></div>
+      <div class="arow obj"><span class="an">Divine Sense</span>
+        <span class="am">celestials, fiends, undead within 60 ft &middot; 10 min</span><span class="ac">Channel</span></div>
+      <div class="arow obj"><span class="an">Shield of Faith</span>
+        <span class="am">+2 AC &middot; concentration &mdash; would drop Bless</span><span class="ac">1st &middot; bonus</span></div>
+      <div class="arow off"><span class="an">Hold Person</span>
+        <span class="am">no &mdash; you may spend only one slot this turn</span><span class="ac">2nd</span></div>
+    </div>
+  </div>
+
+  <!-- ============ RIGHT — owed to you, and what happened ============ -->
+  <div class="col colR">
+    <div class="owed">
+      <div class="h">The ogre is leaving your reach</div>
+      <div class="nm">Opportunity Attack</div>
+      <div class="d">One melee swing as it goes. +8 to hit, 1d8+5 slashing.
+        <b style="color:var(--gold);font-weight:600">Relentless Avenger</b> &mdash; on a hit its speed
+        drops to 0 and you may move half your speed, free.</div>
+      <div class="btns">
+        <div class="b take obj">Take it</div>
+        <div class="b obj">Let it go</div>
+      </div>
+    </div>
+
+    <span class="lbl" style="display:block;margin-bottom:6px">This round</span>
+    <div class="log">
+      <div class="lrow"><span class="r">R3</span>
+        <span class="t"><b>Brannoch</b> shoved the ogre prone &mdash; it stood.</span></div>
+      <div class="lrow"><span class="r">R3</span>
+        <span class="t">The ogre hit you for <b>17</b>. Concentration held, rolled 14 vs DC 10.</span></div>
+      <div class="lrow"><span class="r">R2</span>
+        <span class="t">You spent a <b>2nd</b> slot on Misty Step.</span></div>
+      <div class="lrow"><span class="r">R2</span>
+        <span class="t">Goblins &times;3 down. Five standing.</span></div>
+      <div class="lrow"><span class="r">R1</span>
+        <span class="t">You cast <b>Bless</b> on Brannoch, Sera, yourself.</span></div>
+    </div>
+    <div class="undo obj">&#8624;&nbsp; Undo the last thing</div>
+  </div>
+</div>
+
+<!-- ============ EDGE ============ -->
+<div class="edge">
+  <div class="txt">
+    <span class="lbl">Round 3 &middot; your turn</span>
+    <span class="rub">Vow the ogre, swing twice, smite the first hit that lands.</span>
+  </div>
+  <div class="d20 obj">d20</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,190 @@
+/* ============================================================================
+   THE COMPOSED TURN
+   ----------------------------------------------------------------------------
+   The 15-second metric lives in this shape.  It is the answer to one question:
+   "it is your turn — what can you actually do right now?"
+
+   Two properties matter more than anything else here:
+
+   1.  It is DATA.  No React, no DOM, no side effects.  composeTurn() is a pure
+       function of (character, combat, board), which is what lets the whole
+       metric be unit-tested without rendering a pixel.
+
+   2.  It is OPEN-WORLD.  Nothing in these types is a closed union of content
+       the engine has heard of.  A homebrew feature, a homebrew mastery and a
+       homebrew resource travel through here carrying their own declared
+       structure and their own text.  Marcus's character IS homebrew; content
+       the engine does not recognise is the main case, not the edge case.
+   ========================================================================== */
+
+/** The 2024 action economy.  `free` covers riders that cost nothing — Vow of
+ *  Enmity is now a free rider on the Attack, not an action of its own. */
+export type EconomySlot = 'action' | 'bonusAction' | 'reaction' | 'movement' | 'free'
+
+/** Where an option came from.  Used for grouping and iconography only —
+ *  never for rules decisions.  The engine must not branch on provenance. */
+export type OptionKind =
+  | 'attack'
+  | 'spell'
+  | 'feature'
+  | 'resource'
+  | 'condition'
+  | 'movement'
+  | 'other'
+
+/** What an option costs.  Every field is optional except the economy slot,
+ *  because "costs nothing but your bonus action" is a real and common shape. */
+export interface OptionCost {
+  slot: EconomySlot
+  /** Spell slot level consumed, if any.  2024: at most ONE per turn, which is
+   *  half of why Smite / Misty Step contend. */
+  spellSlotLevel?: number
+  /** Id of a ResourcePool this spends from.  A plain string, deliberately —
+   *  homebrew pools have ids the engine has never seen. */
+  resourcePoolId?: string
+  resourceAmount?: number
+  /** Rendered cost, authored by whoever declared the option.  ALWAYS
+   *  populated, because the engine may not understand the cost well enough to
+   *  describe it and must still be able to show it. */
+  label: string
+}
+
+/** A weapon-mastery rider, or any other consequence that is not in the to-hit
+ *  line.  `known: false` means the engine does not recognise the property —
+ *  and it still renders `text`, which is the whole point. */
+export interface OptionRider {
+  property: string
+  known: boolean
+  /** ALWAYS populated.  An unrecognised rider loses its automation, never its
+   *  words.  Silently dropping homebrew is the failure this field prevents. */
+  text: string
+  automatic: boolean
+  expires:
+    | 'endOfTargetNextTurn'
+    | 'endOfYourNextTurn'
+    | 'immediate'
+    | 'unspecified'
+}
+
+/** One thing you could do. */
+export interface TurnOption {
+  id: string
+  name: string
+  kind: OptionKind
+  /** One line, cream body copy.  What it does, in play terms. */
+  detail: string
+  /** Dice notation if the option rolls something. */
+  dice?: string
+  cost: OptionCost
+  rider?: OptionRider
+  /** Legal and affordable right now. */
+  available: boolean
+  /** Populated iff `available` is false.  D greys blocked options WITH A
+   *  REASON rather than hiding them — an option that vanishes teaches you
+   *  nothing, and "why can't I smite?" is a question the app should answer. */
+  blockedReason?: string
+  /** Ranking score.  Higher sorts first.  See rank.ts (Slice 5). */
+  score: number
+  /** True if this option is a face of a MutexGroup and so is rendered there
+   *  rather than in the ranked list. */
+  contended?: boolean
+  /** Free-form provenance for the UI: "Oath of the Hearth", "Longsword", … */
+  source?: string
+  /** Set when the content is not book content.  Presentation only. */
+  homebrew?: boolean
+}
+
+/** Several options, one economy slot, pick one.
+ *  D's defining element.  Under 2024 Divine Smite, Lay on Hands and Misty Step
+ *  all want the bonus action — and one-spell-slot-per-turn excludes casting
+ *  Misty Step alongside a Smite twice over.  That is ONE DECISION WITH THREE
+ *  FACES, and listing it as three rows is a lie about the rules. */
+export interface MutexGroup {
+  id: string
+  /** "One of these — the bonus action" */
+  label: string
+  /** Why they contend.  'both' = same economy slot AND the one-slot rule. */
+  reason: 'economy' | 'spellSlot' | 'both' | 'resource'
+  faces: TurnOption[]
+}
+
+/** A spendable pool.  Generic by construction: Lay on Hands, Channel Divinity
+ *  and a homebrew Hearth pool are the same shape, and none of them is special
+ *  to the engine. */
+export interface TurnResource {
+  id: string
+  name: string
+  current: number
+  max: number
+  unit: 'points' | 'uses' | 'dice'
+  recharge: 'shortRest' | 'longRest' | 'dawn' | 'never' | 'manual'
+  homebrew?: boolean
+}
+
+/** What is true of you and the board — the "upon you" zone.
+ *  A condition the engine does not recognise still displays and still carries
+ *  its text.  It just cannot enforce itself. */
+export interface UponYou {
+  name: string
+  known: boolean
+  text: string
+  /** 'on-you' vs 'on-them' — the board reads differently for each. */
+  side: 'you' | 'target'
+  /** Rules-relevant enough to tint gold, or merely informational. */
+  tone: 'good' | 'bad' | 'neutral'
+}
+
+export interface TurnVitals {
+  hp: number
+  maxHp: number
+  tempHp: number
+  ac: number
+  /** 2024: hp <= floor(max/2).  NOT a condition — a threshold, which is why it
+   *  needs edge detection rather than a flag. */
+  bloodied: boolean
+  bloodiedAt: number
+}
+
+export interface EconomyState {
+  action: boolean
+  bonusAction: boolean
+  reaction: boolean
+  movement: boolean
+  /** 2024 hard rule: one levelled spell slot per turn, full stop. */
+  spellSlotUsedThisTurn: boolean
+}
+
+export interface SpellSlotLine {
+  level: number
+  current: number
+  max: number
+}
+
+/** The whole turn, ready to render.  The D turn screen consumes exactly this
+ *  and contains no rules logic of its own. */
+export interface ComposedTurn {
+  actor: {
+    name: string
+    /** 2024 naming.  `species`, not race. */
+    species: string
+    className: string
+    subclass: string
+    level: number
+    homebrewSubclass?: boolean
+  }
+  round: number
+  vitals: TurnVitals
+  upon: UponYou[]
+  economy: EconomyState
+  /** Sorted, highest score first.  Excludes anything in `mutex`. */
+  ranked: TurnOption[]
+  mutex: MutexGroup[]
+  /** Legal but low-value, or blocked-with-a-reason.  Behind "everything else". */
+  rest: TurnOption[]
+  resources: TurnResource[]
+  spellSlots: SpellSlotLine[]
+  /** Set while composeTurn() returns seed data instead of reading the real
+   *  character.  Slice 4 deletes it.  Nothing may branch on it except the
+   *  banner that tells Marcus he is looking at a fixture. */
+  seeded?: boolean
+}

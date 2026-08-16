@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>A · Instrument — Turn (phone)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DIRECTION A — THE INSTRUMENT
+   Rank is encoded by POSITION. Zones are law. One loud thing.
+   Borrowed: A320 PFD zone grammar · IntelliVue size hierarchy
+   · F1 chromatic isolation · Shearwater persistent readout
+   · Divinity OS2 discrete dots · Destiny 2 two-tier urgency
+   ============================================================ */
+:root{
+  --bg:#0a0a08; --surface:#12110e; --raised:#1c1a15;
+  --cream:#f0e6d3; --cream-2:rgba(240,230,211,.60); --cream-3:rgba(240,230,211,.38);
+  --gold:#c5a55a; --gold-line:rgba(197,165,90,.22); --gold-faint:rgba(197,165,90,.10);
+  --amber:#d4a74a;            /* impending threat  — A320 grammar */
+  --ember:#c06030;            /* ACTIVE / act-now  — the one loud thing */
+  --r-panel:14px; --r-card:9px; --r-chip:5px;   /* concentric: outer = inner + padding */
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--cream);
+  font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:16px; line-height:1.45;
+  display:flex; justify-content:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.device{width:100%; max-width:390px; height:100dvh; display:flex; flex-direction:column; overflow:hidden}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums}
+.disp{font-family:'Cinzel',serif; font-weight:700; letter-spacing:.02em}
+
+/* ---- CHROME: identity strip. Deliberately the smallest thing on screen. ---- */
+.chrome{
+  display:flex; align-items:center; gap:8px; padding:8px 14px 7px;
+  border-bottom:1px solid var(--gold-line); flex:0 0 auto;
+}
+.chrome .name{font-family:'Cinzel',serif;font-weight:600;font-size:15px;letter-spacing:.04em;color:var(--gold)}
+.chrome .sub{font-size:11px;color:var(--cream-3);letter-spacing:.06em;text-transform:uppercase}
+.chrome .spacer{flex:1}
+.mode-pill{
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bg);
+  background:var(--gold); padding:3px 9px; border-radius:var(--r-chip); font-weight:600;
+}
+
+/* ============ ZONE 1 — VITALS. Top-left largest. Threats top-right. ============
+   IntelliVue: priority is size + position at once. Ratio held to ~2.5:1. */
+.z-vitals{
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:var(--gold-line); border-bottom:1px solid var(--gold-line); flex:0 0 auto;
+}
+.z-vitals > div{background:var(--bg); padding:10px 14px 11px}
+.zlabel{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-3);margin-bottom:5px}
+.hp-row{display:flex; align-items:baseline; gap:2px}
+.hp-cur{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:40px;line-height:.92;color:var(--cream)}
+.hp-max{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--cream-3)}
+.hp-temp{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--amber);margin-left:6px}
+.hp-track{height:3px;background:var(--raised);margin-top:8px;border-radius:2px;overflow:hidden;display:flex}
+.hp-fill{width:54%;background:var(--gold)}
+.hp-tempfill{width:6.5%;background:var(--amber)}
+.ac-row{display:flex;gap:16px;margin-top:9px}
+.ac-item{display:flex;align-items:baseline;gap:5px}
+.ac-item b{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;color:var(--cream)}
+.ac-item span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3)}
+
+/* threats: amber = impending, ember = active. No other colour carries severity. */
+.threat{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--gold-faint)}
+.threat:last-child{border-bottom:0}
+.threat .bar{width:2px;align-self:stretch;background:var(--amber);border-radius:1px;flex:0 0 2px}
+.threat.active .bar{background:var(--ember)}
+.threat .t{font-size:12.5px;font-weight:600;line-height:1.25;color:var(--cream)}
+.threat .d{font-size:11px;color:var(--cream-2);line-height:1.3;margin-top:1px}
+.threat.active .t{color:var(--ember)}
+
+/* ============ ZONE 2 — TURN STATE + ECONOMY (protected V0.9 feature) ============ */
+.z-turn{
+  display:flex;align-items:center;gap:10px;padding:8px 14px;
+  border-bottom:1px solid var(--gold-line);flex:0 0 auto;
+}
+.round{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3)}
+.yourturn{font-family:'Cinzel',serif;font-weight:700;font-size:13px;letter-spacing:.11em;color:var(--gold)}
+.z-turn .spacer{flex:1}
+.nextbtn{
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:6px 10px;background:transparent;
+  font-family:inherit;min-height:32px;
+}
+.z-econ{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--gold-line);
+  border-bottom:1px solid var(--gold-line);flex:0 0 auto}
+.econ{background:var(--bg);padding:7px 4px 8px;text-align:center}
+.econ .k{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-3)}
+.econ .v{font-family:'Cinzel',serif;font-weight:700;font-size:12.5px;letter-spacing:.05em;margin-top:3px;color:var(--gold)}
+.econ.spent{background:var(--surface)}
+.econ.spent .v{color:var(--cream-3);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* ============ ZONE 3 — THE RANKED FIELD. Lower-centre, where the eye rests. ============
+   Rank = position. Slot 1 is always the same pixel. */
+.z-rank{flex:1 1 auto;overflow-y:auto;padding:9px 14px 4px}
+.z-rank::-webkit-scrollbar{width:0}
+.rank-head{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
+.rank-head .zlabel{margin:0}
+.rank-head .hint{font-size:10px;color:var(--cream-3);margin-left:auto}
+
+.act{
+  display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:start;
+  padding:9px 10px 10px;margin-bottom:6px;min-height:48px;
+  background:var(--surface); border-radius:var(--r-card);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.13);   /* specular rim — cannot shadow into black */
+  border-left:2px solid transparent;
+}
+.act.lead{background:var(--raised);border-left-color:var(--ember);box-shadow:inset 0 1px 0 rgba(197,165,90,.20)}
+.act.spent{opacity:.42;background:var(--bg);box-shadow:none}
+.act .idx{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream-3);padding-top:2px;text-align:center}
+.act.lead .idx{color:var(--ember);font-weight:700}
+.act .nm{font-size:15.5px;font-weight:600;line-height:1.2;letter-spacing:.005em}
+.act .math{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream-2);margin-top:3px;line-height:1.4}
+.act .note{font-size:11.5px;margin-top:4px;line-height:1.35;color:var(--cream-2)}
+.act .note.warn{color:var(--ember);font-weight:600}
+.cost{display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-top:1px}
+.tag{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--cream-3);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:2px 6px;white-space:nowrap}
+.tag.b{color:var(--gold);border-color:rgba(197,165,90,.4)}
+.tag.free{color:var(--amber);border-color:rgba(212,167,74,.4)}
+.dots{display:flex;gap:3px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.dot.off{background:transparent;box-shadow:inset 0 0 0 1px rgba(197,165,90,.35)}
+
+.morebar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 12px;margin:2px 0 8px;min-height:48px;
+  border:1px dashed var(--gold-line);border-radius:var(--r-card);background:transparent;
+  color:var(--cream-2);font-family:inherit;font-size:13px;width:100%;
+}
+.morebar b{font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:500}
+
+/* ============ ZONE 4 — RESOURCES. Discrete dots, never a bar. ============ */
+.z-res{
+  display:flex;gap:0;border-top:1px solid var(--gold-line);flex:0 0 auto;background:var(--bg);
+}
+.res{flex:1;padding:8px 10px 9px;border-right:1px solid var(--gold-faint)}
+.res:last-child{border-right:0}
+.res .k{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--cream-3);white-space:nowrap}
+.res .row{display:flex;align-items:center;gap:5px;margin-top:5px}
+.res .n{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--cream)}
+.res .n.zero{color:var(--cream-3)}
+
+/* ============ EDGE — Shearwater persistent readout. Chrome, not content. ============ */
+.readout{
+  flex:0 0 auto;display:flex;align-items:center;gap:10px;
+  padding:9px 14px calc(9px + env(safe-area-inset-bottom));
+  background:var(--surface);border-top:1px solid var(--gold-line);
+}
+.readout .mode{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3)}
+.readout .arrow{color:var(--gold-line)}
+.readout .next{font-size:12.5px;font-weight:600;color:var(--cream)}
+.readout .d20{
+  margin-left:auto;width:38px;height:38px;border-radius:var(--r-chip);
+  border:1px solid rgba(197,165,90,.4);background:transparent;color:var(--gold);
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  display:grid;place-items:center;
+}
+</style>
+</head>
+<body>
+<div class="device">
+
+  <!-- CHROME -->
+  <div class="chrome">
+    <div>
+      <div class="name">VAELIN ASHGROVE</div>
+      <div class="sub">Paladin 8 · Oath of Vengeance</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="mode-pill">Play</div>
+  </div>
+
+  <!-- ZONE 1 — VITALS (left, largest) / THREATS (right) -->
+  <div class="z-vitals">
+    <div>
+      <div class="zlabel">Hit Points</div>
+      <div class="hp-row">
+        <span class="hp-cur">41</span><span class="hp-max">/76</span><span class="hp-temp">+5</span>
+      </div>
+      <div class="hp-track"><div class="hp-fill"></div><div class="hp-tempfill"></div></div>
+      <div class="ac-row">
+        <div class="ac-item"><b>19</b><span>AC</span></div>
+        <div class="ac-item"><b>16</b><span>Save DC</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="zlabel">Pressing</div>
+      <div class="threat active">
+        <div class="bar"></div>
+        <div>
+          <div class="t">Frightened</div>
+          <div class="d">Disadvantage on attacks while the ogre is in sight.</div>
+        </div>
+      </div>
+      <div class="threat">
+        <div class="bar"></div>
+        <div>
+          <div class="t">Concentrating — Bless</div>
+          <div class="d">Damage taken → CON save DC 10.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 2 — TURN + ECONOMY -->
+  <div class="z-turn">
+    <span class="round">Round 3</span>
+    <span class="yourturn">YOUR TURN</span>
+    <span class="spacer"></span>
+    <button class="nextbtn">End turn</button>
+  </div>
+  <div class="z-econ">
+    <div class="econ"><div class="k">Action</div><div class="v">OPEN</div></div>
+    <div class="econ"><div class="k">Bonus</div><div class="v">OPEN</div></div>
+    <div class="econ"><div class="k">Reaction</div><div class="v">OPEN</div></div>
+    <div class="econ"><div class="k">Move</div><div class="v">30 FT</div></div>
+  </div>
+
+  <!-- ZONE 3 — THE RANKED FIELD -->
+  <div class="z-rank">
+    <div class="rank-head">
+      <div class="zlabel">What you can do now</div>
+      <div class="hint">ranked · 5 of 18</div>
+    </div>
+
+    <div class="act lead">
+      <div class="idx">1</div>
+      <div>
+        <div class="nm">Oathkeeper</div>
+        <div class="math">+8 to hit (STR +4 · prof +3 · magic +1) · 1d8+5 slashing · 5 ft</div>
+        <div class="note warn">Roll twice, take the lower — you are frightened.</div>
+      </div>
+      <div class="cost"><span class="tag b">Action</span><span class="tag">×2 attacks</span></div>
+    </div>
+
+    <div class="act">
+      <div class="idx">2</div>
+      <div>
+        <div class="nm">Divine Smite</div>
+        <div class="math">+2d8 radiant on hit · +1d8 vs undead/fiend</div>
+        <div class="note">Declare after the hit lands, not before.</div>
+      </div>
+      <div class="cost">
+        <span class="tag free">No action</span>
+        <span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot off"></i><i class="dot off"></i></span>
+      </div>
+    </div>
+
+    <div class="act">
+      <div class="idx">3</div>
+      <div>
+        <div class="nm">Misty Step</div>
+        <div class="math">30 ft teleport · breaks line of sight</div>
+        <div class="note">Ends the frightened disadvantage if the ogre loses sight of you.</div>
+      </div>
+      <div class="cost">
+        <span class="tag b">Bonus</span>
+        <span class="dots"><i class="dot"></i><i class="dot off"></i><i class="dot off"></i></span>
+      </div>
+    </div>
+
+    <div class="act">
+      <div class="idx">4</div>
+      <div>
+        <div class="nm">Lay on Hands</div>
+        <div class="math">Heal up to 15 · touch · pool 15/40</div>
+      </div>
+      <div class="cost"><span class="tag b">Action</span></div>
+    </div>
+
+    <div class="act spent">
+      <div class="idx">5</div>
+      <div>
+        <div class="nm">Vow of Enmity</div>
+        <div class="math">Advantage vs one target for 1 minute</div>
+        <div class="note">Channel Divinity spent — returns on a short rest.</div>
+      </div>
+      <div class="cost"><span class="tag">Spent</span></div>
+    </div>
+
+    <button class="morebar"><span>Everything else</span><b>13 more →</b></button>
+  </div>
+
+  <!-- ZONE 4 — RESOURCES -->
+  <div class="z-res">
+    <div class="res">
+      <div class="k">Slot I</div>
+      <div class="row"><span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot off"></i><i class="dot off"></i></span></div>
+    </div>
+    <div class="res">
+      <div class="k">Slot II</div>
+      <div class="row"><span class="dots"><i class="dot"></i><i class="dot off"></i><i class="dot off"></i></span></div>
+    </div>
+    <div class="res">
+      <div class="k">Slot III</div>
+      <div class="row"><span class="dots"><i class="dot"></i><i class="dot"></i></span></div>
+    </div>
+    <div class="res">
+      <div class="k">Lay on Hands</div>
+      <div class="row"><span class="n">15</span></div>
+    </div>
+    <div class="res">
+      <div class="k">Channel</div>
+      <div class="row"><span class="n zero">0</span></div>
+    </div>
+  </div>
+
+  <!-- EDGE — persistent readout -->
+  <div class="readout">
+    <span class="mode">Combat</span>
+    <span class="arrow">›</span>
+    <span class="next">Attack, then smite on a hit</span>
+    <button class="d20">d20</button>
+  </div>
+
+</div>
+</body>
+</html>

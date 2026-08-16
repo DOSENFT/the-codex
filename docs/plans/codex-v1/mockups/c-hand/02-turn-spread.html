@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>C · The Hand — Turn spread (iPad)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DIRECTION C — THE HAND · iPad 1366×1024
+   On the tablet the phone's compromise disappears: five cards
+   across 1366px is ~250px each, and every card carries its own
+   pre-computed maths on its face. This is C at full strength.
+   The table above; the hand along the whole lower edge.
+   ============================================================ */
+:root{
+  --bg:#0a0a08; --surface:#12110e; --raised:#1c1a15; --card:#191712;
+  --cream:#f0e6d3; --cream-2:rgba(240,230,211,.62); --cream-3:rgba(240,230,211,.40);
+  --gold:#c5a55a; --gold-line:rgba(197,165,90,.22); --gold-faint:rgba(197,165,90,.09);
+  --amber:#d4a74a; --ember:#c06030;
+  --r-card:11px; --r-chip:5px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:17px;line-height:1.45;
+  height:100dvh;display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.obj{will-change:transform;transition:transform 120ms ease-out,filter 120ms ease-out}
+.obj:active{transform:scale(.97);filter:brightness(.88);transition-duration:80ms}
+@media (prefers-reduced-motion:reduce){.obj{transition:opacity 80ms}.obj:active{transform:none;filter:none;opacity:.75}}
+.tag{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--cream-3);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:3px 7px;white-space:nowrap}
+.tag.b{color:var(--gold);border-color:rgba(197,165,90,.42)}
+.tag.free{color:var(--amber);border-color:rgba(212,167,74,.42)}
+.dots{display:inline-flex;gap:4px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.dot.spent{background:transparent;box-shadow:inset 0 0 0 1px rgba(197,165,90,.28);position:relative}
+.dot.spent::after{content:"";position:absolute;inset:1.5px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,167,74,.45),transparent 70%)}
+
+/* ---- TOP BAR ---- */
+.top{flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:11px 26px 12px;
+  border-bottom:1px solid var(--gold-line)}
+.top .nm{font-family:'Cinzel',serif;font-weight:700;font-size:20px;letter-spacing:.05em;color:var(--gold)}
+.top .sb{font-size:12px;color:var(--cream-3);margin-top:2px}
+.top .grow{flex:1}
+.top nav{display:flex;gap:2px}
+.top nav button{font-family:'Cinzel',serif;font-size:12px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;padding:9px 16px;min-height:40px;background:transparent;border:0;
+  color:var(--cream-3);border-radius:var(--r-chip)}
+.top nav button.on{color:var(--gold);background:var(--raised);box-shadow:inset 0 1px 0 rgba(197,165,90,.22)}
+.endt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:9px 15px;background:transparent;
+  font-family:inherit;min-height:40px}
+
+/* ================= THE TABLE ================= */
+.table{flex:1;display:grid;grid-template-columns:300px 1fr 330px;gap:1px;
+  background:var(--gold-faint);min-height:0}
+.col{background:var(--bg);overflow-y:auto;padding:18px 22px}
+.col::-webkit-scrollbar{width:0}
+.k{font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--cream-3)}
+
+/* --- LEFT: you --- */
+.you{padding:16px 18px 17px;border-radius:var(--r-card);background:var(--card);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.18),0 1px 0 rgba(0,0,0,.6);margin-top:8px}
+.hpline{display:flex;align-items:baseline;gap:3px}
+.hpline .cur{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:54px;line-height:.9}
+.hpline .max{font-family:'JetBrains Mono',monospace;font-size:21px;color:var(--cream-3)}
+.hpline .tmp{font-family:'JetBrains Mono',monospace;font-size:19px;color:var(--amber);margin-left:8px}
+.track{height:4px;background:#0e0d0a;border-radius:2px;margin-top:13px;display:flex;overflow:hidden}
+.track .f{width:54%;background:var(--gold)} .track .t{width:6.5%;background:var(--amber)}
+.side{display:flex;gap:26px;margin-top:15px}
+.side b{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:21px}
+.side span{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--cream-3);margin-left:6px}
+.cond{padding:11px 13px;border-radius:var(--r-card);background:var(--surface);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.12);margin-top:9px}
+.cond.press{background:var(--raised);box-shadow:inset 0 1px 0 rgba(192,96,48,.38);border-left:2px solid var(--ember)}
+.cond .t{font-size:15px;font-weight:600}
+.cond.press .t{color:var(--ember)}
+.cond .d{font-size:12.5px;color:var(--cream-2);margin-top:3px;line-height:1.35}
+.resrow{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
+.rgrp{display:flex;align-items:center;gap:8px}
+.rgrp .kk{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--cream-3)}
+.rgrp .n{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500}
+.rgrp .n.zero{color:var(--cream-3)}
+
+/* --- CENTRE: the fight, as objects on a table --- */
+.fightbar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.round{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-3)}
+.yourturn{font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:.12em;color:var(--gold)}
+.combatants{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px}
+.cmb{padding:13px 14px 14px;border-radius:var(--r-card);background:var(--surface);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.11)}
+.cmb.now{background:var(--raised);box-shadow:inset 0 1px 0 rgba(197,165,90,.3),0 0 0 1px rgba(197,165,90,.32)}
+.cmb.foe{box-shadow:inset 0 1px 0 rgba(192,96,48,.22)}
+.cmb .ord{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cream-3)}
+.cmb .n{font-size:16px;font-weight:600;margin-top:3px}
+.cmb.now .n{color:var(--gold)}
+.cmb .m{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream-2);margin-top:4px}
+.mobpips{display:flex;gap:3px;margin-top:8px;flex-wrap:wrap}
+.mp{width:8px;height:8px;border-radius:2px;background:var(--ember)}
+.mp.down{background:rgba(240,230,211,.14)}
+.econ{display:flex;gap:1px;margin-top:18px;background:var(--gold-line);border-radius:var(--r-chip);overflow:hidden}
+.econ .c{flex:1;background:var(--surface);padding:10px 6px 11px;text-align:center}
+.econ .ck{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-3)}
+.econ .cv{font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--gold);margin-top:3px}
+
+/* --- RIGHT: what is owed to you, and what just happened --- */
+.react{padding:14px 16px 15px;border-radius:var(--r-card);background:var(--raised);
+  box-shadow:inset 0 1px 0 rgba(192,96,48,.4);border-left:2px solid var(--ember);margin-top:8px}
+.react .h{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ember);font-weight:600}
+.react .n{font-size:18px;font-weight:600;margin-top:5px}
+.react .e{font-size:13px;color:var(--cream-2);margin-top:4px;line-height:1.4}
+.react .btns{display:flex;gap:9px;margin-top:12px}
+.react button{flex:1;min-height:46px;border-radius:var(--r-chip);font-family:inherit;font-size:14px;
+  font-weight:600;border:1px solid var(--gold-line);background:transparent;color:var(--cream-2)}
+.react button.take{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.log{margin-top:20px}
+.lg{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--gold-faint)}
+.lg .w{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cream-3);flex:0 0 44px}
+.lg .x{font-size:13.5px;color:var(--cream-2);line-height:1.35}
+.lg .x b{color:var(--cream);font-weight:600}
+.undo{margin-top:12px;width:100%;min-height:44px;border-radius:var(--r-chip);border:1px dashed var(--gold-line);
+  background:transparent;color:var(--cream-2);font-family:inherit;font-size:13px}
+
+/* ================= THE HAND — full lower edge ================= */
+.handwrap{flex:0 0 auto;border-top:1px solid var(--gold-line);
+  background:linear-gradient(180deg,rgba(197,165,90,.055),transparent 70%)}
+.handhead{display:flex;align-items:center;gap:12px;padding:9px 26px 0}
+.handhead .grow{flex:1}
+.deckbtn{font-size:12px;letter-spacing:.05em;color:var(--gold);background:transparent;border:0;
+  font-family:inherit;min-height:36px;padding:6px 2px}
+.hand{display:flex;gap:12px;padding:9px 26px calc(14px + env(safe-area-inset-bottom))}
+.pc{flex:1 1 0;min-width:0;border-radius:var(--r-card);background:var(--card);padding:13px 15px 14px;
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.18),0 2px 0 rgba(0,0,0,.65);display:flex;flex-direction:column}
+.pc.lead{background:var(--raised);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.3),0 3px 0 rgba(0,0,0,.7),0 0 0 1px rgba(192,96,48,.45)}
+.pc.gone{opacity:.4;box-shadow:inset 0 1px 0 rgba(197,165,90,.08)}
+.pc .cost{display:flex;align-items:center;gap:7px}
+.pc .nm{font-family:'Cinzel',serif;font-weight:700;font-size:19px;letter-spacing:.03em;
+  color:var(--cream);margin-top:8px;line-height:1.12}
+.pc.lead .nm{color:var(--gold);font-size:21px}
+.pc .math{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--cream);margin-top:7px;line-height:1.45}
+.pc .cue{font-size:12.5px;color:var(--ember);font-weight:600;margin-top:8px;line-height:1.3}
+.pc .grow{flex:1;min-height:8px}
+.pc .foot{display:flex;align-items:center;gap:8px;margin-top:9px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <div class="nm">VAELIN ASHGROVE</div>
+    <div class="sb">Paladin 8 · Oath of Vengeance · Half-Elf</div>
+  </div>
+  <div class="grow"></div>
+  <nav><button class="on">Fight</button><button>Book</button><button>Voice</button><button>Roll</button></nav>
+  <button class="endt obj">End turn</button>
+</div>
+
+<div class="table">
+
+  <!-- LEFT — you -->
+  <div class="col">
+    <div class="k">You</div>
+    <div class="you obj">
+      <div class="hpline"><span class="cur">41</span><span class="max">/76</span><span class="tmp">+5</span></div>
+      <div class="track"><div class="f"></div><div class="t"></div></div>
+      <div class="side">
+        <div><b>19</b><span>AC</span></div><div><b>16</b><span>DC</span></div><div><b>+3</b><span>Prof</span></div>
+      </div>
+    </div>
+
+    <div class="k" style="margin-top:20px">Upon you</div>
+    <div class="cond press obj">
+      <div class="t">Frightened</div>
+      <div class="d">Disadvantage on attack rolls while the ogre is in your line of sight.</div>
+    </div>
+    <div class="cond obj">
+      <div class="t">Concentrating — Bless</div>
+      <div class="d">Any damage forces a CON save, DC 10 or half the damage.</div>
+    </div>
+
+    <div class="k" style="margin-top:20px">Held in reserve</div>
+    <div class="resrow">
+      <div class="rgrp"><span class="kk">I</span><span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span></div>
+      <div class="rgrp"><span class="kk">II</span><span class="dots"><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span></div>
+      <div class="rgrp"><span class="kk">III</span><span class="dots"><i class="dot"></i><i class="dot"></i></span></div>
+      <div class="rgrp"><span class="kk">Lay on Hands</span><span class="n">15</span></div>
+      <div class="rgrp"><span class="kk">Channel</span><span class="n zero">0</span></div>
+    </div>
+  </div>
+
+  <!-- CENTRE — the fight -->
+  <div class="col">
+    <div class="fightbar">
+      <span class="round">Round 3</span><span class="yourturn">YOUR TURN</span>
+    </div>
+    <div class="combatants">
+      <div class="cmb obj"><div class="ord">21</div><div class="n">Brannoch</div><div class="m">ally · 52/61</div></div>
+      <div class="cmb now obj"><div class="ord">18 · now</div><div class="n">Vaelin</div><div class="m">you · 41/76</div></div>
+      <div class="cmb foe obj"><div class="ord">14</div><div class="n">Ogre</div><div class="m">63 hp · bloodied</div></div>
+      <div class="cmb foe obj"><div class="ord">11</div><div class="n">Goblins ×8</div><div class="m">5 standing</div>
+        <div class="mobpips"><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp down"></i><i class="mp down"></i><i class="mp down"></i></div>
+      </div>
+      <div class="cmb obj"><div class="ord">9</div><div class="n">Sera</div><div class="m">ally · 38/44</div></div>
+    </div>
+
+    <div class="econ">
+      <div class="c"><div class="ck">Action</div><div class="cv">OPEN</div></div>
+      <div class="c"><div class="ck">Bonus</div><div class="cv">OPEN</div></div>
+      <div class="c"><div class="ck">Reaction</div><div class="cv">OPEN</div></div>
+      <div class="c"><div class="ck">Move</div><div class="cv">30 FT</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT — owed, and what happened -->
+  <div class="col">
+    <div class="k">Owed to you</div>
+    <div class="react">
+      <div class="h">The ogre is leaving your reach</div>
+      <div class="n">Opportunity Attack</div>
+      <div class="e">One melee swing as it goes. +8 to hit, 1d8+5 slashing. You may smite on the hit.</div>
+      <div class="btns"><button class="take obj">Take it</button><button class="obj">Let it go</button></div>
+    </div>
+
+    <div class="k" style="margin-top:22px">This round</div>
+    <div class="log">
+      <div class="lg"><span class="w">R3</span><span class="x"><b>Brannoch</b> shoved the ogre prone — it stood.</span></div>
+      <div class="lg"><span class="w">R2</span><span class="x">You spent a <b>2nd</b> slot on Misty Step.</span></div>
+      <div class="lg"><span class="w">R2</span><span class="x">Ogre hit you for <b>17</b>. Concentration held (rolled 14).</span></div>
+      <div class="lg"><span class="w">R1</span><span class="x">You cast <b>Bless</b> on Brannoch, Sera, yourself.</span></div>
+    </div>
+    <button class="undo obj">↶ Undo the last thing</button>
+  </div>
+</div>
+
+<!-- ================= THE HAND ================= -->
+<div class="handwrap">
+  <div class="handhead">
+    <span class="k">In your hand</span>
+    <span class="grow"></span>
+    <button class="deckbtn obj">The deck · 13 more →</button>
+  </div>
+  <div class="hand">
+
+    <div class="pc lead obj">
+      <div class="cost"><span class="tag b">Action</span><span class="tag">×2 attacks</span></div>
+      <div class="nm">Oathkeeper</div>
+      <div class="math">+8 to hit (STR +4 · prof +3 · magic +1)<br>1d8+5 slashing · 5 ft</div>
+      <div class="cue">Roll twice, take the lower — you are frightened.</div>
+      <div class="grow"></div>
+    </div>
+
+    <div class="pc obj">
+      <div class="cost"><span class="tag free">No action</span></div>
+      <div class="nm">Divine Smite</div>
+      <div class="math">+2d8 radiant on a hit<br>+1d8 vs undead or fiend</div>
+      <div class="grow"></div>
+      <div class="foot"><span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span>
+        <span class="tag">1st</span></div>
+    </div>
+
+    <div class="pc obj">
+      <div class="cost"><span class="tag b">Bonus</span></div>
+      <div class="nm">Misty Step</div>
+      <div class="math">30 ft teleport<br>breaks line of sight</div>
+      <div class="cue">Sheds the fear before you swing.</div>
+      <div class="grow"></div>
+      <div class="foot"><span class="dots"><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span>
+        <span class="tag">2nd</span></div>
+    </div>
+
+    <div class="pc obj">
+      <div class="cost"><span class="tag b">Action</span></div>
+      <div class="nm">Lay on Hands</div>
+      <div class="math">Heal up to 15 · touch<br>pool 15 of 40</div>
+      <div class="grow"></div>
+    </div>
+
+    <div class="pc gone obj">
+      <div class="cost"><span class="tag">Spent</span></div>
+      <div class="nm">Vow of Enmity</div>
+      <div class="math">Advantage vs one target<br>returns on a short rest</div>
+      <div class="grow"></div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

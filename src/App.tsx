@@ -12,9 +12,20 @@ import { AcademyPage } from './components/AcademyPage'
 import { Settings } from './components/Settings'
 import { SessionCockpit } from './components/session'
 import { CharacterPage } from './components/CharacterPage'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { TurnScreenD } from './components/turn/TurnScreenD'
+import { composeTurn } from './lib/turn/compose'
+import { loadCombatState } from './lib/combat-state'
 import type { Character } from './lib/character'
 
 const MODE_STORAGE_KEY = 'codex-app-mode'
+
+/* V1.0's new turn screen (direction D) rides behind ?d=1 until it is finished.
+   The flag is read once at module load, not from state — it is a build-time
+   switch in spirit, and nothing in the existing app should be able to observe
+   that it exists. */
+const D_PREVIEW =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('d') === '1'
 
 function loadMode(): AppMode {
   const saved = localStorage.getItem(MODE_STORAGE_KEY)
@@ -80,11 +91,24 @@ export default function App() {
   // No active character → show setup/selector
   if (!character) {
     return (
-      <CharacterSetup
-        onComplete={createCharacter}
-        roster={roster}
-        onSelectCharacter={switchCharacter}
-      />
+      <ErrorBoundary surface="Character setup">
+        <CharacterSetup
+          onComplete={createCharacter}
+          roster={roster}
+          onSelectCharacter={switchCharacter}
+        />
+      </ErrorBoundary>
+    )
+  }
+
+  /* The tracer bullet: the real character and the real persisted encounter go
+     into composeTurn, and the real component renders what comes out. Only the
+     body of composeTurn is a fixture — the pipe either side of it is live. */
+  if (D_PREVIEW) {
+    return (
+      <ErrorBoundary surface="Turn (preview)">
+        <TurnScreenD turn={composeTurn({ character, combat: loadCombatState(character.id) })} />
+      </ErrorBoundary>
     )
   }
 
@@ -115,48 +139,64 @@ export default function App() {
         transition={SPRING_SETTLE}
       >
       {/* ─── Session Mode Tabs ─── */}
+      {/* One boundary per surface, so a crash in one cannot white-screen the
+          others. Combat in particular must survive anything else failing. */}
       {appMode === 'session' && activeTab === 'combat' && (
-        <CombatHelper
-          character={character}
-          onCharacterUpdate={handleCharacterUpdate}
-          onOpenDiceRoller={setDicePrefill}
-        />
+        <ErrorBoundary surface="Combat">
+          <CombatHelper
+            character={character}
+            onCharacterUpdate={handleCharacterUpdate}
+            onOpenDiceRoller={setDicePrefill}
+          />
+        </ErrorBoundary>
       )}
       {appMode === 'session' && activeTab === 'grimoire' && (
-        <GrimoirePage
-          character={character}
-          onCharacterUpdate={handleCharacterUpdate}
-          mode="session"
-          onOpenDiceRoller={setDicePrefill}
-        />
+        <ErrorBoundary surface="Grimoire">
+          <GrimoirePage
+            character={character}
+            onCharacterUpdate={handleCharacterUpdate}
+            mode="session"
+            onOpenDiceRoller={setDicePrefill}
+          />
+        </ErrorBoundary>
       )}
       {appMode === 'session' && activeTab === 'roleplay' && (
-        <SessionCockpit
-          character={character}
-          onCharacterUpdate={handleCharacterUpdate}
-        />
+        <ErrorBoundary surface="Roleplay">
+          <SessionCockpit
+            character={character}
+            onCharacterUpdate={handleCharacterUpdate}
+          />
+        </ErrorBoundary>
       )}
 
       {/* ─── Prep Mode Tabs ─── */}
       {appMode === 'prep' && activeTab === 'character' && (
-        <CharacterPage
-          character={character}
-          onCharacterUpdate={handleCharacterUpdate}
-        />
+        <ErrorBoundary surface="Character">
+          <CharacterPage
+            character={character}
+            onCharacterUpdate={handleCharacterUpdate}
+          />
+        </ErrorBoundary>
       )}
       {appMode === 'prep' && activeTab === 'grimoire' && (
-        <GrimoirePage
-          character={character}
-          onCharacterUpdate={handleCharacterUpdate}
-          mode="prep"
-          onOpenDiceRoller={setDicePrefill}
-        />
+        <ErrorBoundary surface="Grimoire">
+          <GrimoirePage
+            character={character}
+            onCharacterUpdate={handleCharacterUpdate}
+            mode="prep"
+            onOpenDiceRoller={setDicePrefill}
+          />
+        </ErrorBoundary>
       )}
       {appMode === 'prep' && activeTab === 'persona' && (
-        <IdentityPage character={character} onCharacterUpdate={handleCharacterUpdate} />
+        <ErrorBoundary surface="Identity">
+          <IdentityPage character={character} onCharacterUpdate={handleCharacterUpdate} />
+        </ErrorBoundary>
       )}
       {appMode === 'prep' && activeTab === 'academy' && (
-        <AcademyPage character={character} onCharacterUpdate={handleCharacterUpdate} />
+        <ErrorBoundary surface="Academy">
+          <AcademyPage character={character} onCharacterUpdate={handleCharacterUpdate} />
+        </ErrorBoundary>
       )}
       </motion.div>
     </Layout>

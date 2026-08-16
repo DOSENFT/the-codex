@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>C · The Hand — Turn (phone)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DIRECTION C — THE HAND
+   Rank is encoded by CAPACITY. A hand holds five. The sixth is
+   in the deck, one tap away — never unreachable. (V0.9 prime law)
+   Cards are objects: specular rim, press physics, residue on spend.
+   Borrowed: Alan Wake 2 hand (without the case board) · visionOS
+   objects-not-rectangles · Elden Ring residue trail · BG3 reaction
+   prompt reduced to name/cost/skip PLUS the effect line BG3 omits.
+
+   THE PHONE TENSION, MADE VISIBLE:
+   five cards across 390px = 78px each — not enough for the
+   pre-computed to-hit line, and that line is non-negotiable.
+   Resolution: the card you are about to play is fanned FORWARD
+   and is wide enough to carry its maths; the rest are held
+   narrow. Swipe the hand to bring another card forward.
+   Judge this compromise hardest — it is where C is weakest.
+   ============================================================ */
+:root{
+  --bg:#0a0a08; --surface:#12110e; --raised:#1c1a15; --card:#191712;
+  --cream:#f0e6d3; --cream-2:rgba(240,230,211,.62); --cream-3:rgba(240,230,211,.40);
+  --gold:#c5a55a; --gold-line:rgba(197,165,90,.22); --gold-faint:rgba(197,165,90,.09);
+  --amber:#d4a74a; --ember:#c06030;
+  --r-card:11px; --r-chip:5px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:16px;line-height:1.45;
+  display:flex;justify-content:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+.device{width:100%;max-width:390px;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+/* ---- press physics: shape change, not colour change (F5) ---- */
+.obj{will-change:transform;transition:transform 120ms ease-out,filter 120ms ease-out}
+.obj:active{transform:scale(.97);filter:brightness(.88);transition-duration:80ms}
+@media (prefers-reduced-motion:reduce){
+  .obj{transition:opacity 80ms} .obj:active{transform:none;filter:none;opacity:.75}
+}
+
+/* ================= THE TABLE (above the hand) ================= */
+.table{flex:1 1 auto;overflow-y:auto;padding:0 0 8px;min-height:0}
+.table::-webkit-scrollbar{width:0}
+
+.top{display:flex;align-items:center;gap:10px;padding:9px 16px 10px;border-bottom:1px solid var(--gold-line)}
+.top .nm{font-family:'Cinzel',serif;font-weight:700;font-size:16px;letter-spacing:.045em;color:var(--gold)}
+.top .sb{font-size:11px;color:var(--cream-3);margin-top:2px}
+.top .grow{flex:1}
+.top .mode{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bg);
+  background:var(--gold);padding:3px 9px;border-radius:var(--r-chip);font-weight:600}
+
+/* --- the character block, as an object on the table --- */
+.you{
+  margin:12px 16px 0;padding:13px 15px 14px;border-radius:var(--r-card);background:var(--card);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.18), 0 1px 0 rgba(0,0,0,.6);
+}
+.you .row1{display:flex;align-items:baseline;gap:3px}
+.you .cur{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:38px;line-height:.92}
+.you .max{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--cream-3)}
+.you .tmp{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--amber);margin-left:6px}
+.you .grow{flex:1}
+.you .side{display:flex;gap:16px;align-self:flex-end}
+.you .side div{text-align:right}
+.you .side b{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px}
+.you .side span{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--cream-3)}
+.track{height:4px;background:#0e0d0a;border-radius:2px;margin-top:11px;display:flex;overflow:hidden}
+.track .f{width:54%;background:var(--gold)} .track .t{width:6.5%;background:var(--amber)}
+
+/* --- conditions as chips you can pick up --- */
+.conds{display:flex;gap:7px;flex-wrap:wrap;margin:11px 16px 0}
+.cond{
+  display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:var(--r-card);
+  background:var(--surface);box-shadow:inset 0 1px 0 rgba(197,165,90,.12);min-height:44px;
+}
+.cond.press{background:var(--raised);box-shadow:inset 0 1px 0 rgba(192,96,48,.35)}
+.cond .t{font-size:13px;font-weight:600}
+.cond.press .t{color:var(--ember)}
+.cond .d{font-size:11px;color:var(--cream-2)}
+
+/* --- initiative: objects in a row; the mob is ONE object with pips --- */
+.initrow{display:flex;gap:7px;overflow-x:auto;padding:12px 16px 2px;scrollbar-width:none}
+.initrow::-webkit-scrollbar{height:0}
+.ini{
+  flex:0 0 auto;min-width:78px;padding:8px 11px 9px;border-radius:var(--r-card);
+  background:var(--surface);box-shadow:inset 0 1px 0 rgba(197,165,90,.1);
+}
+.ini.now{background:var(--raised);box-shadow:inset 0 1px 0 rgba(197,165,90,.28),0 0 0 1px rgba(197,165,90,.3)}
+.ini .n{font-size:13px;font-weight:600;white-space:nowrap}
+.ini.now .n{color:var(--gold)}
+.ini .m{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cream-3);margin-top:2px}
+.mobpips{display:flex;gap:2px;margin-top:5px}
+.mp{width:5px;height:5px;border-radius:1px;background:var(--ember)}
+.mp.down{background:rgba(240,230,211,.16)}
+
+/* --- economy + resources: dots with a residue trail on what was spent --- */
+.strip{display:flex;gap:1px;margin:14px 0 0;background:var(--gold-line);
+  border-top:1px solid var(--gold-line);border-bottom:1px solid var(--gold-line)}
+.strip .c{flex:1;background:var(--bg);padding:8px 4px 9px;text-align:center}
+.strip .k{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-3)}
+.strip .v{font-family:'Cinzel',serif;font-weight:700;font-size:12px;color:var(--gold);margin-top:3px}
+.res{display:flex;gap:14px;padding:11px 16px 2px;flex-wrap:wrap}
+.rgrp{display:flex;align-items:center;gap:7px}
+.rgrp .k{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--cream-3)}
+.dots{display:flex;gap:4px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+/* Elden Ring residue: the spent slot leaves a warm trail rather than vanishing */
+.dot.spent{background:transparent;box-shadow:inset 0 0 0 1px rgba(197,165,90,.28);position:relative}
+.dot.spent::after{content:"";position:absolute;inset:1.5px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,167,74,.45),transparent 70%)}
+.rgrp .n{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500}
+.rgrp .n.zero{color:var(--cream-3)}
+
+/* --- the reaction prompt: BG3's three fields + the effect line BG3 omits --- */
+.react{
+  margin:14px 16px 0;padding:12px 14px 13px;border-radius:var(--r-card);
+  background:var(--raised);box-shadow:inset 0 1px 0 rgba(192,96,48,.4);border-left:2px solid var(--ember);
+}
+.react .h{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ember);font-weight:600}
+.react .n{font-size:16px;font-weight:600;margin-top:4px}
+.react .e{font-size:12.5px;color:var(--cream-2);margin-top:3px;line-height:1.35}
+.react .btns{display:flex;gap:8px;margin-top:10px}
+.react button{flex:1;min-height:44px;border-radius:var(--r-chip);font-family:inherit;font-size:13px;
+  font-weight:600;border:1px solid var(--gold-line);background:transparent;color:var(--cream-2)}
+.react button.take{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+
+/* ================= THE HAND ================= */
+.handwrap{flex:0 0 auto;background:linear-gradient(180deg,rgba(197,165,90,.05),transparent 60%);
+  border-top:1px solid var(--gold-line)}
+.handhead{display:flex;align-items:center;gap:10px;padding:8px 16px 2px}
+.handhead .k{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-3)}
+.handhead .grow{flex:1}
+.deckbtn{font-size:11px;letter-spacing:.06em;color:var(--gold);background:transparent;border:0;
+  font-family:inherit;padding:6px 2px;min-height:34px}
+
+.hand{
+  display:flex;gap:9px;overflow-x:auto;padding:8px 16px calc(11px + env(safe-area-inset-bottom));
+  scroll-snap-type:x mandatory;scrollbar-width:none;align-items:stretch;
+}
+.hand::-webkit-scrollbar{height:0}
+.pc{
+  flex:0 0 auto;scroll-snap-align:start;border-radius:var(--r-card);
+  background:var(--card);box-shadow:inset 0 1px 0 rgba(197,165,90,.18),0 2px 0 rgba(0,0,0,.65);
+  padding:11px 12px 12px;display:flex;flex-direction:column;
+}
+/* the card fanned FORWARD carries its maths in full */
+.pc.lead{flex:0 0 268px;background:var(--raised);
+  box-shadow:inset 0 1px 0 rgba(197,165,90,.3),0 3px 0 rgba(0,0,0,.7),0 0 0 1px rgba(192,96,48,.45)}
+.pc.held{flex:0 0 112px}
+.pc.gone{flex:0 0 112px;opacity:.4;box-shadow:inset 0 1px 0 rgba(197,165,90,.08)}
+.pc .cost{display:flex;align-items:center;gap:6px}
+.tag{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--cream-3);
+  border:1px solid var(--gold-line);border-radius:var(--r-chip);padding:2px 6px;white-space:nowrap}
+.tag.b{color:var(--gold);border-color:rgba(197,165,90,.42)}
+.tag.free{color:var(--amber);border-color:rgba(212,167,74,.42)}
+.pc .nm{font-family:'Cinzel',serif;font-weight:700;letter-spacing:.03em;color:var(--cream);margin-top:7px;line-height:1.15}
+.pc.lead .nm{font-size:20px;color:var(--gold)}
+.pc.held .nm{font-size:14px}
+.pc .math{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream);margin-top:6px;line-height:1.4}
+.pc.held .math{font-size:10.5px;color:var(--cream-2);margin-top:5px}
+.pc .cue{font-size:12px;color:var(--ember);font-weight:600;margin-top:7px;line-height:1.3}
+.pc .grow{flex:1;min-height:6px}
+.pc .foot{display:flex;align-items:center;gap:6px;margin-top:8px}
+.pc .foot .dots{gap:3px}
+.pc .foot .dot{width:6px;height:6px}
+</style>
+</head>
+<body>
+<div class="device">
+
+  <!-- ================= THE TABLE ================= -->
+  <div class="table">
+
+    <div class="top">
+      <div>
+        <div class="nm">VAELIN ASHGROVE</div>
+        <div class="sb">Paladin 8 · Oath of Vengeance</div>
+      </div>
+      <div class="grow"></div>
+      <div class="mode">Play</div>
+    </div>
+
+    <div class="you obj">
+      <div style="display:flex;align-items:baseline">
+        <div class="row1"><span class="cur">41</span><span class="max">/76</span><span class="tmp">+5</span></div>
+        <div class="grow"></div>
+        <div class="side">
+          <div><b>19</b><span>AC</span></div>
+          <div><b>16</b><span>DC</span></div>
+        </div>
+      </div>
+      <div class="track"><div class="f"></div><div class="t"></div></div>
+    </div>
+
+    <div class="conds">
+      <div class="cond press obj"><div><div class="t">Frightened</div><div class="d">disadv. on attacks</div></div></div>
+      <div class="cond obj"><div><div class="t">Bless — yours</div><div class="d">conc. · CON 10 if hit</div></div></div>
+    </div>
+
+    <div class="initrow">
+      <div class="ini obj"><div class="n">Brannoch</div><div class="m">21</div></div>
+      <div class="ini now obj"><div class="n">Vaelin</div><div class="m">18 · now</div></div>
+      <div class="ini obj"><div class="n">Ogre</div><div class="m">14 · 63hp</div></div>
+      <div class="ini obj"><div class="n">Goblins</div><div class="m">11 · ×8</div>
+        <div class="mobpips"><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp"></i><i class="mp down"></i><i class="mp down"></i><i class="mp down"></i></div></div>
+      <div class="ini obj"><div class="n">Sera</div><div class="m">9</div></div>
+    </div>
+
+    <div class="strip">
+      <div class="c"><div class="k">Action</div><div class="v">OPEN</div></div>
+      <div class="c"><div class="k">Bonus</div><div class="v">OPEN</div></div>
+      <div class="c"><div class="k">React</div><div class="v">OPEN</div></div>
+      <div class="c"><div class="k">Move</div><div class="v">30 FT</div></div>
+    </div>
+
+    <div class="res">
+      <div class="rgrp"><span class="k">I</span>
+        <span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span></div>
+      <div class="rgrp"><span class="k">II</span>
+        <span class="dots"><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span></div>
+      <div class="rgrp"><span class="k">III</span>
+        <span class="dots"><i class="dot"></i><i class="dot"></i></span></div>
+      <div class="rgrp"><span class="k">Hands</span><span class="n">15</span></div>
+      <div class="rgrp"><span class="k">Channel</span><span class="n zero">0</span></div>
+    </div>
+
+    <!-- reaction prompt — three fields, plus the effect summary BG3 leaves out -->
+    <div class="react">
+      <div class="h">Owed to you — the ogre is moving away</div>
+      <div class="n">Opportunity Attack</div>
+      <div class="e">One melee swing as it leaves your reach. +8 to hit, 1d8+5 slashing. You may smite on the hit.</div>
+      <div class="btns">
+        <button class="take obj">Take it</button>
+        <button class="obj">Let it go</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= THE HAND ================= -->
+  <div class="handwrap">
+    <div class="handhead">
+      <span class="k">In your hand</span>
+      <span class="grow"></span>
+      <button class="deckbtn obj">The deck · 13 more →</button>
+    </div>
+
+    <div class="hand">
+
+      <div class="pc lead obj">
+        <div class="cost"><span class="tag b">Action</span><span class="tag">×2</span></div>
+        <div class="nm">Oathkeeper</div>
+        <div class="math">+8 to hit (STR +4 · prof +3 · magic +1)<br>1d8+5 slashing · 5 ft</div>
+        <div class="cue">Roll twice, take the lower — frightened.</div>
+      </div>
+
+      <div class="pc held obj">
+        <div class="cost"><span class="tag free">Free</span></div>
+        <div class="nm">Divine Smite</div>
+        <div class="math">+2d8 radiant<br>on a hit</div>
+        <div class="grow"></div>
+        <div class="foot"><span class="dots"><i class="dot"></i><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span></div>
+      </div>
+
+      <div class="pc held obj">
+        <div class="cost"><span class="tag b">Bonus</span></div>
+        <div class="nm">Misty Step</div>
+        <div class="math">30 ft · breaks<br>line of sight</div>
+        <div class="grow"></div>
+        <div class="foot"><span class="dots"><i class="dot"></i><i class="dot spent"></i><i class="dot spent"></i></span></div>
+      </div>
+
+      <div class="pc held obj">
+        <div class="cost"><span class="tag b">Action</span></div>
+        <div class="nm">Lay on Hands</div>
+        <div class="math">heal ≤15<br>pool 15/40</div>
+        <div class="grow"></div>
+      </div>
+
+      <div class="pc gone obj">
+        <div class="cost"><span class="tag">Spent</span></div>
+        <div class="nm">Vow of Enmity</div>
+        <div class="math">short rest<br>to recover</div>
+        <div class="grow"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
