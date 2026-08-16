@@ -90,8 +90,14 @@ export interface TurnOption {
    *  REASON rather than hiding them — an option that vanishes teaches you
    *  nothing, and "why can't I smite?" is a question the app should answer. */
   blockedReason?: string
-  /** Ranking score.  Higher sorts first.  See rank.ts (Slice 5). */
+  /** Ranking score.  Higher sorts first.  See rank.ts. */
   score: number
+  /** The one line explaining this option's POSITION, set only when ranking
+   *  had something non-obvious to say ("You are bloodied", "Would drop Shield
+   *  of Faith").  Distinct from `blockedReason`, which explains why an option
+   *  cannot be taken at all; `why` explains why a legal option sits high or
+   *  low.  Most rows have neither, and silence is the correct default. */
+  why?: string
   /** True if this option is a face of a MutexGroup and so is rendered there
    *  rather than in the ranked list. */
   contended?: boolean

@@ -362,3 +362,24 @@
   .dturn .eslot { flex-direction: row; justify-content: flex-start; gap: 9px; padding: 0 var(--pad); }
   .dturn .res { flex-direction: column; align-items: flex-start; gap: var(--d-s3); padding: var(--d-s4) var(--pad); overflow: visible; }
 }
+
+/* THE RANK NOTE.  Deliberately not gold and not ember: gold is already at the
+   ceiling this direction was built to respect, and ember is spoken for by
+   blockedReason, which means something categorically different — ember says
+   "you cannot", this says "consider". Dim cream is the right register for a
+   remark the eye can skip. */
+.dturn .act .note {
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+/* Same register as .note, inside the bracket's detail cell. */
+.dturn .face .fnote {
+  display: block;
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}

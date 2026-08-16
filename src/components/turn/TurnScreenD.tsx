@@ -157,6 +157,10 @@ function Act({ o }: { o: TurnOption }) {
         <span className="cost">{o.cost.label}</span>
       </div>
       <div className="det">{o.detail}</div>
+      {/* Why this row sits where it sits. Ranking only speaks when it has
+          something the row does not already show — see rank.ts — so this is
+          absent from most options, and that silence is deliberate. */}
+      {o.why && <div className="note">{o.why}</div>}
       {o.rider && (
         // Gold names the mechanic; cream says the sentence.
         <div className="rider">
@@ -180,7 +184,16 @@ function Mutex({ g }: { g: MutexGroup }) {
         {g.faces.map(f => (
           <div key={f.id} className="face">
             <span className="fnm">{f.name}</span>
-            <span className="fd">{f.detail}</span>
+            {/* The bracket is now ORDERED by rank, so it owes the same
+                explanation the flat rows give. A face that climbed to the top
+                because Nix is bleeding has to say so, or the reorder looks
+                like the app moved his options around for no reason. Nested in
+                the detail cell rather than added as a fourth column, so the
+                three-column grid is untouched. */}
+            <span className="fd">
+              {f.detail}
+              {f.why && <span className="fnote">{f.why}</span>}
+            </span>
             <span className="fc">{f.cost.label}</span>
           </div>
         ))}

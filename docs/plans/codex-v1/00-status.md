@@ -60,7 +60,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 2 — Phase-0 characterization tests against the UNMODIFIED prototype **— DONE 2026-08-16, see below**
 - [x] 3 — `rules-2024/` economy + mastery + conditions, pure, tested *(team: fan out + adversarial refute pass)* **— DONE 2026-08-16, see below**
 - [x] 4 — the extraction: real `composeTurn()`; Slice 2's tests must stay green *(single author, deliberately)* **— DONE 2026-08-16, see below**
-- [ ] 5 — `rank.ts` + `contention.ts`: the shortlist is genuinely ranked, the mutex renders
+- [x] 5 — `rank.ts`: the shortlist is genuinely ranked *(`contention.ts` landed early, in Slice 4)* **— DONE 2026-08-16, see below**
 - [ ] 6 — 🚩 `CombatProvider` + reducer + event log → **Undo**; spell-slot reconciliation; both combat components halved *(team: fan out on verification)*
 
 **Wave 1b — homebrew is the main case** *(added 2026-08-16)*
@@ -450,6 +450,110 @@ says it spends a **Channel Divinity** use, so it shows as a separate pool. That 
 modelling, not composer logic, and it belongs to the resource-pool slice.
 
 ---
+
+## ✅ Slice 5 — RANKING, done 2026-08-16
+
+Slice 4 left every `score` at 0 and the shortlist was the first five options off the sheet.
+It is now ordered, and the order is defensible out loud — which was the bar, because a list
+that claims to know best and does not is worse than a list that claims nothing.
+
+### What ranking is, and what it refuses to be
+
+`src/lib/turn/rank.ts` is **not a tactical adviser**. There is no board until Slice 9, so
+nothing here knows where the goblin stands or who acts next. What it is: a **reading order**,
+built from the only two things the app honestly knows — what each option **costs**, and what
+is **true of Nix right now**.
+
+| Factor | Weight | The claim it makes |
+| --- | --- | --- |
+| action / bonus action | +20 / +10 | the action is the main event of a turn |
+| reaction | −40 | a reaction happens on someone **else's** turn |
+| spell slot, by tier | −6 −6/level | the app does not spend his resources for him |
+| resource pool / bare uses | −8 | same, for Lay on Hands, Channel Divinity, homebrew |
+| rider (mastery or homebrew) | +4 | free value is still value |
+| healing, and he is hurt | up to +50, scaled | a paladin at half health should see Lay on Hands |
+| healing, and he is not | −20 | healing at full is noise |
+| would break concentration | −45 | almost always a mistake, always worth saying |
+
+### The screen speaks only when it has something to say
+
+`TurnOption.why` is set **only** by a factor worth stating — "You are hurt", "Not on your
+turn", "Would drop Bless". The cost and the dice are printed an inch away on the same row, so
+repeating them as a reason would be chatter. Most rows carry no note at all, and that silence
+is the design. `why` is distinct from `blockedReason`: ember says *you cannot*, dim cream
+says *consider*. Both the flat rows and the mutex faces render it, because the bracket is now
+ordered too and owes the same explanation.
+
+### 🔴 The finding that changed the design: there is no damage factor
+
+The obvious factor — rank the big hit above the small one — was written, and then **deleted
+after reading the real numbers back off Nix's sheet**:
+
+```
+Hearthbrand     41.5   dice=1d20+7     <- the TO-HIT roll, averaged as if it were damage
+Javelin         40.5   dice=1d20+6
+Sacred Flame    29     dice=2d8        <- actual damage, so it scored LOWER
+Shield of Faith 16.5   dice=1d20+8     <- a buff dealing nothing, beating…
+Divine Smite     7     dice=2d8        <- …the paladin's signature move
+```
+
+`rollNotation` is whatever die the row invites you to roll — for a weapon that is the
+**attack**, not the damage. Weapon damage exists only inside authored prose ("1d8+4
+Slashing"). So the term rewarded options for having an attack bonus and punished them for
+being honest about damage. Including it for the spells that expose damage and not for weapons
+would bias the whole list toward spells: **half a signal is worse than none.** The damage is
+printed on every row anyway, and Marcus reads 1d8+4 against 2d8 faster than the app can guess.
+Three tests now exist purely to stop that factor coming back by accident.
+*When the content model carries damage as data rather than prose, this is the first factor to
+add back.*
+
+### Two behaviour changes beyond ordering
+
+1. **Reactions leave the shortlist.** The section is headed "Your turn"; Flaming Cloak was
+   riding into the top five on a technicality and telling Nix to do something he cannot do
+   yet. It is **not hidden** — D never hides — it drops to the fold with "Not on your turn".
+   Slice 7 gives reactions a home of their own. The header now reads *4 ready*, not 5.
+2. **Ranking reads the full authored prose, not the rendered row.** Lay on Hands proved why:
+   its one-line detail reads "Touch · 15/40 uses · recharges on long rest" and never says
+   *heal*, while its description says "restore hit points" plainly. Ranking off the
+   truncation silently failed to raise the heal on a dying paladin — the exact moment the
+   feature exists for. `RankHints` carries the prose and any structural flag (`isConcentration`)
+   the model actually has.
+
+### Open-world by construction
+
+Nothing in `rank.ts` matches a name against a list of book features. The situational factors
+read **the author's own words about their own option**, so a homebrew ability whose text says
+it restores hit points participates in the hurt factor with no code written. An option the
+module cannot characterise simply gets no situational adjustment — never dropped, never
+broken. Three tests assert exactly that against invented content, ahead of Slice 6c.
+
+### Proof
+
+- **132/132 tests green** (17 conditions · 17 economy · 11 mastery · 9 compose · 36 compose
+  equivalence · 7 TurnSummary characterization · 35 rank), `tsc -b` exit 0, `vite build` clean.
+- **30/30 mutants killed** (`C:	mpmutate-slice5.sh`, every sed `cmp`-guarded). Four
+  survived the first sweep and all four were real holes:
+  - **N25 — the shortlist sort could be deleted with nothing failing.** Nix's sheet happens to
+    list his best weapon first, so "sorted" passed for free. Closed by hanging a masteryless
+    *Bent Spoon* off the front of the pack so sheet order fights score.
+  - **N24 — nothing asserted the greyed list was sorted at all.**
+  - **N29 — the hp fraction was unclamped**, so a sheet holding a negative current hp paid a
+    bigger and bigger healing bonus the deeper the number went.
+  - **N30 — a 0-max sheet divided by zero**, producing a NaN score that sorts into an
+    arbitrary position and silently scrambles the list.
+- **Shoot audit clean on both viewports**: fits viewport · no errors · 0 touch targets under
+  48px · 0 Cinzel under 20px · 0 text under 12px.
+
+### Noted, not fixed
+
+- **iPad gold density is 38.3% of lit ink** (phone 17.9%). The CSS comment in `turn-d.css`
+  names 38.5% as the fault D was built to drop from direction C, so the iPad is sitting right
+  on that line. It was 39.2% *before* this slice and no change here caused it. Worth a pass in
+  Slice 14, or sooner if Marcus wants it.
+- **Divine Smite ranks below Channel Divinity** in the bonus-action bracket, because a slot
+  costs more than a use. Defensible, and low-stakes since the bracket shows every face — but
+  it is an editorial call worth Marcus's eye.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

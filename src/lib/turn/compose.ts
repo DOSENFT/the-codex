@@ -51,6 +51,7 @@ import {
 import { riderFor } from '../rules-2024/mastery'
 import { findContention } from './contention'
 import { categorizeTurnOptions, levelLabel, type ActionOption } from './options'
+import { sortByRank, withRank, type RankContext } from './rank'
 import type {
   ComposedTurn,
   OptionCost,
@@ -101,6 +102,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   const shortlistSize = input.shortlistSize ?? DEFAULT_SHORTLIST
   const log = input.log ?? []
   const round = combat?.round ?? 1
+  const hitPoints = character.hitPoints ?? { max: 0, current: 0 }
 
   // -- what is upon you ------------------------------------------------------
   const conditionNames = Array.isArray(character.conditions) ? character.conditions : []
@@ -180,29 +182,61 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       ...(rider ? { rider } : {}),
       available: blockedReason === undefined,
       ...(blockedReason ? { blockedReason } : {}),
-      // Slice 5 replaces this. A fake ordering would be worse than none: it
-      // would look considered and be arbitrary.
+      // Left at 0 here and set by rank.ts a few lines below. build() knows
+      // what an option IS; only the ranker knows what it is worth today, and
+      // keeping those apart is what lets ranking be tested on a flat object
+      // instead of a whole character sheet.
       score: 0,
       ...(feature?.source ? { source: feature.source } : {}),
       ...(feature?.source?.toLowerCase().includes('homebrew') ? { homebrew: true } : {}),
     }
   }
 
+  // Scoring happens HERE — before contention, before the split — so that one
+  // number is computed once and every downstream list, including the faces of
+  // a mutex bracket, is ordered by the same rule. Ranking a list after it has
+  // been carved up is how two parts of one screen end up disagreeing.
+  const rankCtx: RankContext = {
+    hpFraction: hitPoints.max > 0 ? Math.max(0, Math.min(1, hitPoints.current / hitPoints.max)) : 1,
+    bloodied: isBloodied(hitPoints),
+    concentratingOn: combat?.concentrating ?? null,
+  }
+  const rank = (o: ActionOption, slot: EconomySlot): TurnOption => {
+    const built = build(o, slot)
+    return withRank(built, rankCtx, {
+      prose: o.summary,
+      ...(o.isConcentration !== undefined ? { concentration: o.isConcentration } : {}),
+    })
+  }
   const everything: TurnOption[] = [
-    ...raw.actions.map(o => build(o, 'action')),
-    ...raw.bonusActions.map(o => build(o, 'bonusAction')),
-    ...raw.reactions.map(o => build(o, 'reaction')),
+    ...raw.actions.map(o => rank(o, 'action')),
+    ...raw.bonusActions.map(o => rank(o, 'bonusAction')),
+    ...raw.reactions.map(o => rank(o, 'reaction')),
   ]
 
   // Contention runs over EVERYTHING, before the split, because a bracket that
   // only saw the shortlist would show two faces of a three-face decision.
-  const mutex = findContention(everything)
+  // findContention marks faces in place, so it must see the scored objects.
+  const mutex = findContention(everything).map(g => ({ ...g, faces: sortByRank(g.faces) }))
   const loose = everything.filter(o => !o.contended)
 
-  const affordable = loose.filter(o => o.available)
-  const blocked = loose.filter(o => !o.available)
-  const ranked = affordable.slice(0, shortlistSize)
-  const rest = [...affordable.slice(shortlistSize), ...blocked]
+  const affordable = sortByRank(loose.filter(o => o.available))
+  // Blocked options are sorted too. They are greyed, not gone, and a greyed
+  // list in arbitrary order is a wall of text: the thing he most wishes he
+  // could do should be the first thing he cannot do.
+  const blocked = sortByRank(loose.filter(o => !o.available))
+
+  // The shortlist is headed "Your turn", so it holds only things you can do ON
+  // your turn. A reaction is by definition something that happens on someone
+  // ELSE's turn, and Nix has few enough uncontended options that Flaming Cloak
+  // would otherwise have ridden into the top five on a technicality — the list
+  // would have been telling him to do something he cannot do yet. It is not
+  // hidden: D never hides. It drops to the fold, and Slice 7 gives reactions a
+  // home of their own.
+  const now = affordable.filter(o => o.cost.slot !== 'reaction')
+  const later = affordable.filter(o => o.cost.slot === 'reaction')
+  const shortlist = now.slice(0, shortlistSize)
+  const rest = [...now.slice(shortlistSize), ...later, ...blocked]
 
   // -- the rest of the screen ------------------------------------------------
   const upon: UponYou[] = [
@@ -220,8 +254,6 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       }),
     ),
   ]
-
-  const hitPoints = character.hitPoints ?? { max: 0, current: 0 }
 
   return {
     actor: {
@@ -260,7 +292,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       spellSlotUsedThisTurn: slotSpentThisTurn,
     },
 
-    ranked,
+    ranked: shortlist,
     mutex,
     rest,
     resources: resourcesOf(character),
