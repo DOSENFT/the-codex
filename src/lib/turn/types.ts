@@ -98,6 +98,11 @@ export interface TurnOption {
    *  cannot be taken at all; `why` explains why a legal option sits high or
    *  low.  Most rows have neither, and silence is the correct default. */
   why?: string
+  /** The spell this would put you on concentration for, if any — set to the
+   *  option's own name, because the thing you concentrate on IS the spell.
+   *  Read by the reducer so that Undo can restore the PREVIOUS spell rather
+   *  than merely clearing this one. */
+  concentration?: string
   /** True if this option is a face of a MutexGroup and so is rendered there
    *  rather than in the ranked list. */
   contended?: boolean

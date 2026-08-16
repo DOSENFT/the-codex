@@ -13,9 +13,35 @@ import type { ComposedTurn, MutexGroup, TurnOption } from '../../lib/turn/types'
    If you find yourself wanting an `if` here about what the player can do, it
    belongs in compose.ts.  That separation is the reason the 15-second metric
    can be measured at all.
+
+   Slice 6 made it interactive WITHOUT making it stateful.  Every handler is an
+   optional prop: given none, this is exactly the read-only screen Slices 1-5
+   built and the design shoot still measures.  Given them, the same markup
+   becomes live.  The component never learns what a spell slot is.
    ========================================================================== */
 
-export function TurnScreenD({ turn }: { turn: ComposedTurn }) {
+export interface TurnScreenDProps {
+  turn: ComposedTurn
+  /** Take an option.  Rows are inert text until this is supplied. */
+  onTake?: (option: TurnOption) => void
+  onEndTurn?: () => void
+  onUndo?: () => void
+  /** What the last entry was called — "Divine Smite".  Null disables Undo. */
+  undoLabel?: string | null
+  /** The reason the last tap was refused, if it was. */
+  refusal?: string | null
+  onDismissRefusal?: () => void
+}
+
+export function TurnScreenD({
+  turn,
+  onTake,
+  onEndTurn,
+  onUndo,
+  undoLabel = null,
+  refusal = null,
+  onDismissRefusal,
+}: TurnScreenDProps) {
   const { actor, vitals, economy } = turn
   const hpPct = Math.max(0, Math.min(100, (vitals.hp / vitals.maxHp) * 100))
   const markPct = (vitals.bloodiedAt / vitals.maxHp) * 100
@@ -87,7 +113,7 @@ export function TurnScreenD({ turn }: { turn: ComposedTurn }) {
               <span className="n">{turn.ranked.length} ready</span>
             </div>
             {turn.ranked.map(o => (
-              <Act key={o.id} o={o} />
+              <Act key={o.id} o={o} onTake={onTake} />
             ))}
             {turn.rest.length > 0 && (
               <>
@@ -95,14 +121,14 @@ export function TurnScreenD({ turn }: { turn: ComposedTurn }) {
                   <span className="lbl">Everything else</span>
                 </div>
                 {turn.rest.map(o => (
-                  <Act key={o.id} o={o} />
+                  <Act key={o.id} o={o} onTake={onTake} />
                 ))}
               </>
             )}
           </section>
 
           {turn.mutex.map(g => (
-            <Mutex key={g.id} g={g} />
+            <Mutex key={g.id} g={g} onTake={onTake} />
           ))}
         </div>
 
@@ -132,9 +158,31 @@ export function TurnScreenD({ turn }: { turn: ComposedTurn }) {
         </div>
       </div>
 
+      {/* A refusal is the app disagreeing with a tap, so it appears exactly
+          where the tap was heading — above the buttons, not as a corner toast
+          that has floated away by the time he looks up from the dice. */}
+      {refusal && (
+        <button type="button" className="refusal" onClick={onDismissRefusal} aria-live="polite">
+          {refusal}
+        </button>
+      )}
+
       <footer className="edge">
-        <button className="btn">Log damage</button>
-        <button className="btn primary">End turn</button>
+        {/* Slices 1-5 shipped a dead "Log damage" button here. A control that
+            does nothing is the 🔴 half-built-feature rule made visible, so it
+            is replaced by the one thing this screen now genuinely owes the
+            table: an Undo that names what it will undo. */}
+        <button
+          type="button"
+          className="btn"
+          onClick={onUndo}
+          disabled={!onUndo || !undoLabel}
+        >
+          {undoLabel ? `Undo ${undoLabel}` : 'Undo'}
+        </button>
+        <button type="button" className="btn primary" onClick={onEndTurn} disabled={!onEndTurn}>
+          End turn
+        </button>
       </footer>
     </div>
   )
@@ -149,31 +197,71 @@ function EconSlot({ label, open }: { label: string; open: boolean }) {
   )
 }
 
-function Act({ o }: { o: TurnOption }) {
+/** The body of a row.  Extracted so the interactive and inert forms are
+ *  provably the same markup — two copies would drift, and the drift would show
+ *  up as a design regression nobody attributed to this slice. */
+function ActBody({ o }: { o: TurnOption }) {
   return (
-    <div className={`act${o.available ? '' : ' blocked'}`}>
-      <div className="hd">
+    <>
+      <span className="hd">
         <span className="anm">{o.name}</span>
         <span className="cost">{o.cost.label}</span>
-      </div>
-      <div className="det">{o.detail}</div>
+      </span>
+      <span className="det">{o.detail}</span>
       {/* Why this row sits where it sits. Ranking only speaks when it has
           something the row does not already show — see rank.ts — so this is
           absent from most options, and that silence is deliberate. */}
-      {o.why && <div className="note">{o.why}</div>}
+      {o.why && <span className="note">{o.why}</span>}
       {o.rider && (
         // Gold names the mechanic; cream says the sentence.
-        <div className="rider">
+        <span className="rider">
           <b>{o.rider.property}</b> — {o.rider.text}
-        </div>
+        </span>
       )}
-      {!o.available && o.blockedReason && <div className="why">{o.blockedReason}</div>}
-      {o.homebrew && <div className="hbtag">{o.source}</div>}
-    </div>
+      {!o.available && o.blockedReason && <span className="why">{o.blockedReason}</span>}
+      {o.homebrew && <span className="hbtag">{o.source}</span>}
+    </>
   )
 }
 
-function Mutex({ g }: { g: MutexGroup }) {
+function Act({ o, onTake }: { o: TurnOption; onTake?: (o: TurnOption) => void }) {
+  const className = `act${o.available ? '' : ' blocked'}`
+  // A blocked row stays on screen and stays readable — D greys with a reason
+  // rather than hiding — but it is not pressable, and `disabled` is what says
+  // so to VoiceOver as well as to the thumb.
+  if (!onTake) return <div className={className}>{<ActBody o={o} />}</div>
+  return (
+    <button type="button" className={className} disabled={!o.available} onClick={() => onTake(o)}>
+      <ActBody o={o} />
+    </button>
+  )
+}
+
+function MutexFace({ f, onTake }: { f: TurnOption; onTake?: (o: TurnOption) => void }) {
+  const body = (
+    <>
+      <span className="fnm">{f.name}</span>
+      {/* The bracket is ORDERED by rank, so it owes the same explanation the
+          flat rows give. A face that climbed to the top because Nix is
+          bleeding has to say so, or the reorder looks like the app moved his
+          options around for no reason. Nested in the detail cell rather than
+          added as a fourth column, so the three-column grid is untouched. */}
+      <span className="fd">
+        {f.detail}
+        {f.why && <span className="fnote">{f.why}</span>}
+      </span>
+      <span className="fc">{f.cost.label}</span>
+    </>
+  )
+  if (!onTake) return <div className="face">{body}</div>
+  return (
+    <button type="button" className="face" disabled={!f.available} onClick={() => onTake(f)}>
+      {body}
+    </button>
+  )
+}
+
+function Mutex({ g, onTake }: { g: MutexGroup; onTake?: (o: TurnOption) => void }) {
   return (
     <section className="mutex">
       <div className="cap">
@@ -182,20 +270,7 @@ function Mutex({ g }: { g: MutexGroup }) {
       </div>
       <div className="faces">
         {g.faces.map(f => (
-          <div key={f.id} className="face">
-            <span className="fnm">{f.name}</span>
-            {/* The bracket is now ORDERED by rank, so it owes the same
-                explanation the flat rows give. A face that climbed to the top
-                because Nix is bleeding has to say so, or the reorder looks
-                like the app moved his options around for no reason. Nested in
-                the detail cell rather than added as a fourth column, so the
-                three-column grid is untouched. */}
-            <span className="fd">
-              {f.detail}
-              {f.why && <span className="fnote">{f.why}</span>}
-            </span>
-            <span className="fc">{f.cost.label}</span>
-          </div>
+          <MutexFace key={f.id} f={f} onTake={onTake} />
         ))}
       </div>
     </section>

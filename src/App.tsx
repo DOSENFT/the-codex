@@ -13,9 +13,7 @@ import { Settings } from './components/Settings'
 import { SessionCockpit } from './components/session'
 import { CharacterPage } from './components/CharacterPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { TurnScreenD } from './components/turn/TurnScreenD'
-import { composeTurn } from './lib/turn/compose'
-import { loadCombatState } from './lib/combat-state'
+import { TurnLive } from './components/turn/TurnLive'
 import type { Character } from './lib/character'
 
 const MODE_STORAGE_KEY = 'codex-app-mode'
@@ -102,13 +100,19 @@ export default function App() {
   }
 
   /* Slice 1 wired this pipe with a fixture at the far end. Slice 4 removed the
-     fixture: the real character and the real persisted encounter go into
-     composeTurn, real rules come out, and the real component renders them.
-     Nothing on this screen is hardcoded any more. */
+     fixture: the real character and the real persisted encounter went into
+     composeTurn, real rules came out, and the real component rendered them.
+     Slice 6 closed the loop — the screen now WRITES. Taps spend real slots and
+     real pool points through the one reducer, persist through the character's
+     one existing owner, and undo by restoration.
+
+     `setCharacter` is passed straight through: this provider deliberately has
+     no save path of its own, because two writers to one localStorage key is
+     the bug class V0.9 spent a year on. */
   if (D_PREVIEW) {
     return (
       <ErrorBoundary surface="Turn (preview)">
-        <TurnScreenD turn={composeTurn({ character, combat: loadCombatState(character.id) })} />
+        <TurnLive character={character} onCharacterUpdate={setCharacter} />
       </ErrorBoundary>
     )
   }

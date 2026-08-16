@@ -50,6 +50,9 @@ import {
 } from '../rules-2024/economy'
 import { riderFor } from '../rules-2024/mastery'
 import { findContention } from './contention'
+// slug/poolIdFor moved to ./ids in Slice 6 so the reducer PAYS with exactly the
+// id the composer PRICES with. Same functions, one home — see ids.ts.
+import { featurePoolId, poolIdFor, slug } from './ids'
 import { categorizeTurnOptions, levelLabel, type ActionOption } from './options'
 import { sortByRank, withRank, type RankContext } from './rank'
 import type {
@@ -187,6 +190,12 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       // keeping those apart is what lets ranking be tested on a flat object
       // instead of a whole character sheet.
       score: 0,
+      // What taking this would put you on concentration for. Carried on the
+      // option rather than looked up later, because by the time the reducer
+      // runs the option is a flat record and the spell it came from may have
+      // been re-prepared. Slice 8 builds the concentration UI on top of this;
+      // Slice 6 needs it so Undo can put the PREVIOUS spell back.
+      ...(option.isConcentration ? { concentration: option.name } : {}),
       ...(feature?.source ? { source: feature.source } : {}),
       ...(feature?.source?.toLowerCase().includes('homebrew') ? { homebrew: true } : {}),
     }
@@ -304,13 +313,6 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function slug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
 /** The one line D shows under the option name.
  *
  *  Both halves, joined — the mechanics are what you need to roll and the
@@ -321,20 +323,6 @@ function detailOf(option: ActionOption): string {
     (p): p is string => typeof p === 'string' && p.length > 0,
   )
   return parts.join(' · ') || option.summary
-}
-
-/** Pool ids for the two Paladin resources that predate the pool system.
- *
- *  `paladinResources` has been a bespoke field on Character since V0.9 and a
- *  feature named "Lay on Hands" must point at THAT pool rather than minting a
- *  second one, or the screen would show the same 40 points twice. Slice 6b
- *  generalises pools; until then this map is the whole of the special-casing
- *  and it is confined to one function. */
-function poolIdFor(name: string): string | undefined {
-  const lower = name.toLowerCase()
-  if (lower.includes('lay on hands')) return 'lay-on-hands'
-  if (lower.includes('channel divinity')) return 'channel-divinity'
-  return undefined
 }
 
 function costOf(
@@ -353,7 +341,7 @@ function costOf(
   }
 
   if (feature) {
-    const poolId = poolIdFor(feature.name) ?? (feature.usesMax !== undefined ? slug(feature.name) : undefined)
+    const poolId = featurePoolId(feature.name, feature.usesMax)
     if (poolId) {
       return {
         slot,
@@ -470,12 +458,18 @@ function resourcesOf(character: Character): TurnResource[] {
 
   for (const feature of character.features ?? []) {
     if (feature.level > character.level) continue
-    if (feature.usesMax === undefined) continue
+    // BOTH halves, and that is the app's own definition of a tracked counter —
+    // GrimoireCard:132 and LoadoutPanel:168 say exactly this, and GrimoireCard
+    // then treats a half-declared counter as unlimited. Slice 6's reducer
+    // agrees and will not charge one. Rendering `usesCurrent ?? 0` here said
+    // "0 / 2" for something Marcus can actually press, so the strip was calling
+    // a usable homebrew ability exhausted. It is untracked; it is not shown.
+    if (feature.usesMax === undefined || feature.usesCurrent === undefined) continue
     const id = poolIdFor(feature.name) ?? slug(feature.name)
     push({
       id,
       name: feature.name,
-      current: feature.usesCurrent ?? 0,
+      current: feature.usesCurrent,
       max: feature.usesMax,
       // Lay on Hands is the one pool measured in POINTS. Nix's is stored as a
       // feature with `usesMax: 40`, which is why his sheet has always read

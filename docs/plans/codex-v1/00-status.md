@@ -61,7 +61,8 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 3 — `rules-2024/` economy + mastery + conditions, pure, tested *(team: fan out + adversarial refute pass)* **— DONE 2026-08-16, see below**
 - [x] 4 — the extraction: real `composeTurn()`; Slice 2's tests must stay green *(single author, deliberately)* **— DONE 2026-08-16, see below**
 - [x] 5 — `rank.ts`: the shortlist is genuinely ranked *(`contention.ts` landed early, in Slice 4)* **— DONE 2026-08-16, see below**
-- [ ] 6 — 🚩 `CombatProvider` + reducer + event log → **Undo**; spell-slot reconciliation; both combat components halved *(team: fan out on verification)*
+- [x] 6 — 🚩 `CombatProvider` + reducer + event log → **Undo**; spell-slot reconciliation **— DONE 2026-08-16, see below**
+- [ ] 6a — the shrink, split out of 6: `CombatHelper` (1,746 LOC) and `TurnSummary` re-expressed over the reducer *(deferred deliberately — see the Slice 6 section)*
 
 **Wave 1b — homebrew is the main case** *(added 2026-08-16)*
 - [ ] 6b — generic `ResourcePool` (closes the one real homebrew hole) + `ResourceEditor` + `ConditionEditor`; `paladinResources` kept and adapted, never removed
@@ -554,6 +555,75 @@ broken. Three tests assert exactly that against invented content, ahead of Slice
 - **Divine Smite ranks below Channel Divinity** in the bonus-action bracket, because a slot
   costs more than a use. Defensible, and low-stakes since the bracket shows every face — but
   it is an editorial call worth Marcus's eye.
+
+## ✅ Slice 6 — STATE, REDUCER AND UNDO, done 2026-08-16
+
+Slices 1–5 built a screen that could *read* a turn perfectly and could not change one. Slice 6
+made it write. Every tap now goes through one pure function, lands in localStorage before the
+pixel moves, and can be taken back.
+
+### The shape
+| File | What it is |
+| --- | --- |
+| `src/lib/turn/events.ts` | the persisted wire format — `CombatEvent`, `LogEntry`, `Restore`, `LOG_DEPTH = 25` |
+| `src/lib/turn/ids.ts` | the ONE place a feature name becomes a pool id, so `compose` prices what `reduce` pays |
+| `src/lib/turn/reduce.ts` | pure · never throws · reversible. The whole of the slice's thinking |
+| `src/lib/turn/reduce.test.ts` | 51 tests, led by a round-trip proof |
+| `src/components/turn/CombatProvider.tsx` | the only place in the app that writes during a turn |
+| `src/components/turn/TurnLive.tsx` | the join — provider + screen, mounted `key={character.id}` |
+| `TurnScreenD.tsx` / `turn-d.css` | rows became `<button>`s **without becoming stateful** |
+
+### Three decisions worth challenging later
+1. **Undo is a RESTORATION, not an inverse.** Every clamp (a slot at 0, a pool at max) destroys
+   the information an inverse event would need to run backwards. So each log entry carries a
+   snapshot of exactly what it is about to touch, and Undo puts those bytes back. It costs
+   ~200 bytes an entry and it is the only version that is correct at the edges.
+2. **The combat spell-slot mirror was demoted to derived state.** `character.spellSlots` is
+   `{max,current}`; `combat.spellSlots` is `{used,max}` — two writers, opposite polarity, both
+   already living in Marcus's browser. Deleting one risks his slots mid-campaign, so instead
+   `reconcile()` recomputes the combat copy from the sheet on every reduce and on load. **The
+   storage shape did not change; the drift became unrepresentable.**
+3. **The screen stayed presentational.** Every handler on `TurnScreenD` is an optional prop.
+   Given none, it is byte-for-byte the read-only screen the design shoot measures.
+
+### Three real bugs the tests found — none of them by design review
+- **A half-declared counter was being treated as empty.** The app's own rule (`GrimoireCard:132`,
+  `LoadoutPanel:168`) is that a counter is tracked only when `usesMax` **and** `usesCurrent` are
+  present. `reduce` and `compose` both read `?? 0`, so a homebrew ability with a max and no
+  current showed as *0/2* and refused to fire. Fixed in both, with the trunk cited in comments.
+- **A no-op was logging an undoable entry.** A free option that costs nothing changed nothing and
+  still offered "Undo" — the 🔴 half-built-feature rule in miniature. `reduce` now returns
+  `entry: null` unless something was genuinely touched, which is what its own doc always claimed.
+- **`startCombat` silently dropped concentration.** Inherited from `combat-state.ts`; the reducer
+  preserves it and only `endCombat` clears it.
+
+Consequence of the first fix: `Restore.featureUses` could no longer be absent, so the
+`| null` branch was **deleted** rather than kept — an untestable safety net is not a safety net.
+
+### Verification
+- `npx tsc -b` clean · `npx vite build` clean · **183/183 vitest across 8 files**
+- **Mutation sweep: 40 mutants across `reduce.ts`/`compose.ts`/`ids.ts` — 40 killed, 0 survivors,
+  0 invalid.** Every sed `cmp`-guarded, so a mutation that failed to apply reports INVALID
+  instead of posing as a survivor.
+- **Browser proof `live6.mjs` — 33/33 checks, console clean.** Real Chromium, real build, real
+  localStorage: tap Divine Smite → the slot goes on the *sheet* and the mirror agrees → **reload
+  (the iPad-suspend case) and it is still spent** → a blocked row changes nothing → Undo restores
+  screen *and* sheet and empties the log → Lay on Hands, then End turn, and the heal is **not**
+  handed back → the one-slot-per-turn rule lifts with the turn.
+  Shots: `_shots-app/slice6-phone.png`, `_shots-app/slice6-ipad.png`.
+
+Two harness bugs were found and fixed along the way, both of which had accused the app falsely:
+the fixture was seeded under an id the sheet does not carry, and `addInitScript` re-seeded the
+pristine character on the very reload that was supposed to prove persistence.
+
+### 🚩 Re-scope, declared: "both combat components halved" is now Slice 6a
+The plan line asked for `CombatHelper` 1,746 → <400 LOC in the same slice. That is a rewrite of
+the surface Marcus actually played on, and doing it in the same breath as the state core is how
+capability gets lost quietly (V0.9 prime law). Slice 6 therefore delivers **the state core and a
+genuinely live D screen**; the shrink is Slice 6a, to be done against the reducer that now exists
+and against Slice 2's characterization tests. Nothing was dropped — it was moved and named.
+
+---
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

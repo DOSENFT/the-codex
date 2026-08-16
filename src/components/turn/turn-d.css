@@ -383,3 +383,80 @@
   margin-top: 2px;
   letter-spacing: 0.02em;
 }
+
+/* ============================================================================
+   SLICE 6 — the rows became pressable
+   ----------------------------------------------------------------------------
+   `.act` and `.face` are now <button> when the screen is live and <div> when
+   it is not, and the two must be pixel-identical: the design shoot measures the
+   inert form and Marcus uses the live one. So nothing below adds padding,
+   colour or size — it only undoes what a user agent does to a button.
+
+   The children moved from <div> to <span> in the same change (a <div> inside a
+   <button> is legal but a <span> is what the element actually is), so they need
+   their block behaviour restated. `.hd` keeps its flex: three class selectors
+   beat two-classes-plus-an-element, so its rule wins on specificity regardless
+   of order.
+   ========================================================================== */
+.dturn .act > span,
+.dturn .face > span { display: block; }
+
+.dturn button.act,
+.dturn button.face {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* The grid the two-row face is built on. `display` is set on `.face` already,
+   but a UA stylesheet may override it for buttons in older Safari. */
+.dturn button.face { display: grid; }
+
+/* Pressed, not hovered. This screen is a thumb on glass; hover states are for
+   a mouse that is not there, and a hover that sticks after a tap on iOS reads
+   as a stuck selection. */
+.dturn button.act:not(:disabled):active { background: var(--d-e2); }
+.dturn button.face:not(:disabled):active { background: var(--d-e1); }
+.dturn button.act:disabled,
+.dturn button.face:disabled { cursor: default; }
+.dturn button.face:disabled { opacity: 0.62; }
+
+/* Focus: visible, and only for the keyboard. An always-on ring would put a
+   second gold line on every row and blow the density budget D was built for. */
+.dturn button.act:focus-visible,
+.dturn button.face:focus-visible {
+  outline: 2px solid var(--d-gold);
+  outline-offset: 2px;
+}
+
+/* ---- the refusal ----------------------------------------------------------
+   The app disagreeing with a tap. Ember, because that is already this screen's
+   colour for "you cannot do this" — the same ink as `.act .why`, so a refusal
+   and a blocked reason are recognisably the same kind of statement. Full width
+   and directly above the buttons: it belongs where the thumb already is. */
+.dturn .refusal {
+  flex: 0 0 auto;
+  display: block;
+  width: 100%;
+  min-height: var(--d-touch-min);
+  padding: 9px var(--pad);
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--d-ember);
+  background: var(--d-e1);
+  font-family: var(--d-font-body);
+  /* 16px, not --d-fs-body (15px): ember is a 4.68:1 ink and the token file
+     restricts it to 16px and up. `.act .why` is set the same way for the same
+     reason. */
+  font-size: 16px;
+  color: var(--d-ember);
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
