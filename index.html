@@ -7,9 +7,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="description" content="The Codex — D&D 2024 Mastery Companion" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- SLICE 10 — three <link>s used to live here, fetching Cinzel, IBM Plex
+         Sans and JetBrains Mono from the Google Fonts API, render-blocking, at
+         a table that may have no internet. They are gone; the faces are bundled
+         and imported by src/main.tsx. Do not put them back: a <link> to a CDN
+         is invisible to the service worker's precache, so it would silently
+         reopen the exact hole this slice closed. -->
+    <link rel="manifest" href="/the-codex/manifest.webmanifest" />
+    <!-- iOS does not read the manifest for the home screen. It reads this. -->
+    <link rel="apple-touch-icon" href="/the-codex/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/the-codex/icons/icon-192.png" />
+    <meta name="apple-mobile-web-app-title" content="Codex" />
     <title>The Codex</title>
   </head>
   <body>

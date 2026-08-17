@@ -1,61 +1,48 @@
-/* Self-hosted font declarations — currently using Google Fonts API */
-/* TODO: Replace with local woff2 files for production */
+/* ============================================================================
+   THE THREE TYPEFACES, ON THIS MACHINE — Slice 10
+   ----------------------------------------------------------------------------
+   This file used to be nine `@font-face` blocks pointing at fonts.gstatic.com,
+   under a header that said "Self-hosted font declarations" and a TODO admitting
+   it wasn't. It was also imported BY NOTHING — the live font path was a
+   `<link>` to the Google Fonts CSS API in index.html, so the file was a decoy
+   sitting next to the real problem.
 
-/* Cinzel — Display (Authority) */
-@font-face {
-  font-family: 'Cinzel';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnfY3lCQ.woff2') format('woff2');
-}
+   Both are gone. The faces below resolve to `.woff2` files inside
+   `node_modules/@fontsource/*`, which Vite fingerprints and emits into
+   `dist/assets/` like any other asset, which means the service worker precaches
+   them like any other asset, which means THEY ARE ON THE IPAD.
 
-@font-face {
-  font-family: 'Cinzel';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnTI3lCQ.woff2') format('woff2');
-}
+   Why that matters more than it sounds: Cinzel, IBM Plex Sans and JetBrains
+   Mono are not decoration here — `tokens.css` sets a 20px hard floor on the
+   display face and a 12px floor on labels, and the whole 15-second reading
+   metric was measured in them. On a fallback the turn screen reflows into
+   Georgia and system-ui at different metrics, and a table with no Wi-Fi gets a
+   different app. That is the failure this closes.
 
-/* IBM Plex Sans — Body (Clarity) */
-@font-face {
-  font-family: 'IBM Plex Sans';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/ibmplexsans/v19/zYXgKVElMYYaJe8bpLHnCwDKhdHeFaxOedc.woff2') format('woff2');
-}
+   LATIN SUBSETS ONLY. Fontsource ships latin, latin-ext, and for Plex a dozen
+   more. The sheet is English; latin-ext alone roughly doubles the font payload
+   the service worker must hold to make the app start offline, and every byte in
+   the precache sits between Marcus and a working screen on a cold install. If a
+   campaign ever needs the extended set, add the lines — the imports are
+   deliberately one-per-weight so that is a visible edit and not a silent
+   widening.
 
-@font-face {
-  font-family: 'IBM Plex Sans';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/ibmplexsans/v19/zYX9KVElMYYaJe8bpLHnCwDKjSL9AIFsdP3pBms.woff2') format('woff2');
-}
+   The weight list is EXACTLY the one index.html asked Google for. Not fewer:
+   dropping a weight the CSS still names is a silent substitution, which shows
+   up as a slightly wrong screen nobody can attribute. Not more.
+   ========================================================================== */
 
-@font-face {
-  font-family: 'IBM Plex Sans';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/ibmplexsans/v19/zYX9KVElMYYaJe8bpLHnCwDKjQ76AIFsdP3pBms.woff2') format('woff2');
-}
+/* Cinzel — Display (Authority).  --d-font-display */
+@import '@fontsource/cinzel/latin-400.css';
+@import '@fontsource/cinzel/latin-600.css';
+@import '@fontsource/cinzel/latin-700.css';
 
-/* JetBrains Mono — Numeric/Code (Truth) */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOV.woff2') format('woff2');
-}
+/* IBM Plex Sans — Body (Clarity).  --d-font-body */
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
 
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yK1jO1OV.woff2') format('woff2');
-}
+/* JetBrains Mono — Numbers (Precision).  --d-font-mono */
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-500.css';
+@import '@fontsource/jetbrains-mono/latin-600.css';

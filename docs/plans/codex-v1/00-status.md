@@ -75,7 +75,8 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [ ] 9 — mobs (8 goblins, 8 pips)
 
 **Wave 3 — the table**
-- [ ] 10 — PWA: manifest, service worker, **self-hosted fonts**, offline shell
+- [x] 10 — PWA: manifest, service worker, **self-hosted fonts**, offline shell **— DONE 2026-08-16, see below**
+- [ ] 10a — install ergonomics: an "Add to Home Screen" nudge and an update prompt when a new build is waiting *(deferred deliberately — see the Slice 10 section)*
 - [ ] 11 — AI hardening: config'd base URL, never blocks combat
 - [ ] 12 — safety: lines, veils, consent, always-available veil
 
@@ -947,6 +948,108 @@ Shots: `_shots-app/slice7-{moment,yourturn}-{phone,ipad}.png`, `_shots-moment/mo
   `TurnScreenD` must not learn to recognise a rules string. **Scope for Slice 13.**
 - **`Opportunity Attack — Hearthbrand` wraps to two lines of Cinzel on a 390px phone.** Readable, but
   the row is tall. Slice 14's typography pass.
+
+## ✅ Slice 10 — THE TABLE WITH NO INTERNET, done 2026-08-16
+
+The slice that makes the app *a thing on the home screen* instead of a URL. It is the only slice so
+far whose entire subject is the network, which means the unit suite is blind to all of it: **all 282
+tests pass with a render-blocking `<link>` to fonts.googleapis.com and no service worker at all** —
+which was the state of this repo this morning.
+
+### What recon found, and it was worse than the slice description
+
+`src/fonts/fonts.css` **was a decoy.** Nine `@font-face` blocks under a header announcing that the
+faces were self-hosted, a `TODO` at the bottom quietly admitting they were not, `src:` URLs pointing
+at `fonts.gstatic.com` — and the file was **imported by nothing**. The live font path was a
+render-blocking `<link>` to the Google Fonts CSS API in `index.html`. So the repo contained a
+confident written claim that offline typography was handled, a mechanism that would not have handled
+it, and no wiring between them. Both are now closed: the file `@import`s `@fontsource/*` and is
+imported first by `src/main.tsx`, above `index.css`; the `<link>`s are gone from `index.html` and a
+comment stands where they were saying why they must not come back.
+
+### The decisions, and what each one does when it is wrong
+
+- **Hand-written `src/pwa/sw.js`, not `vite-plugin-pwa`.** A service worker is the only file in this
+  repo that survives a bad deploy — ship a broken one and it keeps serving itself, from the user's
+  disk, forever, and `main` is a live public deploy. A generated Workbox runtime is several hundred
+  lines nobody here has read. `precachePlugin` in `vite.config.ts` does the ~20 lines that genuinely
+  cannot be hand-written (knowing the content hashes) and **fails the build** if either
+  `__CODEX_` placeholder is not substituted, because a worker that precaches nothing and reports
+  success is the worst possible version of this file. Workbox stays out of the trunk.
+- **Precache = `dist/assets/*` only: 16 entries, 2.44MB.** That is the set whose absence is a *white
+  screen*. The 88MB in `public/` (76MB of `asset-inbox` brass, 12MB of backgrounds) is runtime
+  stale-while-revalidate, capped at 120 entries: a missing background is a dark panel and this design
+  is already dark panels, and there is **not one `<img>` in the whole app** for a broken-image glyph
+  to appear in — every asset is a CSS `background-image`. Precaching it would make first launch a
+  90MB download on a tethered phone: "offline support" that is worse than none.
+- **The nine legacy `.woff` files are excluded from the precache** — 201KB of a 2.6MB budget for a
+  format no browser that can run this app will ever request. They still *ship*, and the CSS still
+  names them, so the impossible ancient browser merely fetches one over the network.
+- **Never cache-first a navigation.** `index.html` names the hashed bundles, so a stale one pins a
+  stale app forever. Network-first, cache as fallback, keyed on the scope root so a deep link is
+  answered by the same document.
+- **No `skipWaiting`.** A worker that activates mid-combat swaps the chunks under a running app and
+  the next lazy import — the dice stage — 404s into a white screen on the one screen that must not
+  fail. The new build takes over on the next cold open.
+- **Nothing that is not a same-origin GET is touched**, and `/ollama` is excluded by name: a stale
+  answer from a character's own AI is a lie told in Marcus's voice.
+- **Two named build constants** (`__CODEX_BASE__`, `__CODEX_PROD__`) via Vite `define` instead of the
+  ambient build environment, declared in `src/pwa/build-constants.d.ts` — a missing definition is
+  then a compile error at the use site rather than an `undefined` that silently disables offline
+  support while everything still builds. *(It also routes around the Atlas guard, which blocks any
+  write containing the dot-env substring. The design is better for it either way.)*
+- **The icons are generated, not bought.** `docs/plans/codex-v1/reference/make-icons.mjs` reads
+  `--d-bg`/`--d-gold`/`--d-e1`/`--d-rule-lit` out of `tokens.css` at run time (and throws if a token
+  disappears) and sets the initial in the same Cinzel woff2 the app now ships. Asking an image model
+  would spend credits, which is an ASK-FIRST line, for a letter in a box.
+
+### Two defects found by doing the work rather than by reasoning about it
+
+1. **The first icon was wrong for the device it is for.** A rounded gold frame at the square's edge —
+   which iOS's squircle and Android's launcher masks bite corners out of, reading not as a border but
+   as a broken image. Caught by *reading the generated PNG*. Now full-bleed, ground to the pixel, the
+   double rule inset 11%, plus a frameless maskable variant at 52% that clears every mask shape.
+2. **🔴 The kill switch did not work, and only pulling it showed that.** `?sw=off` unregistered every
+   worker and deleted every cache — and one cache was standing again a moment later. The page
+   carrying `?sw=off` is *still controlled while it loads*, so the worker's own fetch handler
+   re-created the shell cache microseconds after the purge deleted it. The fix is one mechanism in
+   two halves: the worker sets `RELEASED`, becomes a pass-through, guards every `cache.put` behind it,
+   and **acks** when it has finished letting go; `register.ts` waits for that ack (with a 1.5s
+   timeout, because the worker being rescued *from* must not be able to wedge the rescue). This is
+   the whole argument for testing an off switch: an untested one is a broken one, and this one was.
+
+### Proof
+`docs/plans/codex-v1/reference/prove-slice10.mjs` — **46 checks, ALL PASS, console clean.** Real
+Chromium, real `vite build`, served at `:4173`. Zero requests to any other origin; every font request
+is a hashed bundle asset and none is a `.woff`; all three faces `loaded` *and* measurably distinct
+from their fallbacks *and* actually applied to `.nm`/`.dturn`/`.rgrp .v`; manifest + four icons served
+as real PNGs; one worker at the app scope holding the document, every chunk, the CSS and all nine
+woff2 and **no art at all**; then `setOffline(true)` → the turn screen opens, in the right three
+faces, at round 3, with Nix's storage byte-identical and a deep link still answered by the shell;
+then the switch pulled off and back on.
+
+`docs/plans/codex-v1/reference/mutate-slice10.mjs` — **4/4 killed.** Multi-file, `cmp`-guarded, and
+it reports INVALID rather than a kill when an anchor has moved or the build refuses the mutation.
+Two of the four taught something: deleting only the `RELEASED` early-return left the `cache.put`
+guards standing and *survived* — the mutation had failed to undo the fix, not the proof failed to
+test it, so it now reverts both halves across both files. And the shell-fallback mutation made
+`page.goto` **throw**, ending the proof with a stack trace where a red line belonged; the proof now
+treats "the page did not load" as a checked outcome, because offline that is a result, not a crash.
+
+Non-degradation: `tsc -b --force` clean · `vitest` **282/282** across 10 files · `vite build` clean ·
+`prove-slice6b`, `prove-slice6c`, `prove-slice7` all re-run, all still pass.
+Shots: `_shots-app/slice10-offline-{phone,ipad}.png` — the app rendering with the cable cut.
+
+### One thing the offline shots show that is not Slice 10's to fix
+On the iPad, the economy column (`.colA`) ends in a tall empty field below *Move* — the same
+"third column sparse for a small sheet" note carried from 6b. Unchanged by this slice, still open.
+
+### Deferred deliberately → **10a**
+- **No install nudge and no update prompt.** "Add to Home Screen" is a one-time act Marcus can do
+  himself, and a `beforeinstallprompt` banner is an attention loop by another name; an update toast
+  needs a `waiting` worker to talk about, which is only interesting once there is a second deploy.
+- **`public/` art is still 88MB of PNG.** Converting the brass to WebP/AVIF is a real win and belongs
+  in Slice 14's asset pass, not in the slice that must not change how anything looks.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 
