@@ -113,7 +113,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 13 — legibility and reach: D's discipline enforced app-wide **— DONE 2026-08-16, see below**
 - [x] 13b — the deferral list from 13, worked: the Cinzel root cause, the two-tier touch floor, skill-dot reach **— DONE 2026-08-17, see below**
 - [x] 14 — motion budget + printable character record *(the print-chronicle half was cancelled 2026-08-17 — campaign memory is the Vault's; see the scope boundary above)* **— DONE 2026-08-17, see below**
-- [ ] 15 — release: regression sweep vs. V0.9 baseline, licensing resolved, `v1` → `main`, one real session *(team: adversarial sweep)*
+- [x] 15 — release: regression sweep vs. V0.9 baseline, licensing resolved, the turn-brain mutation debt paid **— DONE 2026-08-17, see below.** *(the `v1` → `main` merge and the one real session are deliberately NOT included: every push to `main` is a live public deploy, which is ASK-FIRST, and Marcus has not been asked yet)*
 
 ### 🔍 Known process debt — named here so it cannot pass as done (audit 2026-08-16)
 
@@ -123,6 +123,8 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
    for the turn brain — 6, 6b, 6c, 7 — have never been shown able to go red. Those are the checks we
    lean on hardest during every non-degradation sweep, so an untested proof there is the most
    expensive kind. → **a mutation pass over 6/6b/6c/7 is a required part of Slice 15**, not optional.
+   **PAID 2026-08-17** — `reference/mutate-turn-brain.mjs`, 8/8 killed. It found two things while
+   being written; both are in the Slice 15 section below. Debt item 1 is closed.
 2. ~~**Marcus has not read a diff in nine slices.**~~ **RESOLVED as a process change, 2026-08-17.**
    Nudged again at the Slice 13b boundary; Marcus: *"Reading a diff is so long and hard to
    understand that I cant really make anything of it."* **Stop nudging him to read diffs — it
@@ -1714,6 +1716,129 @@ prove-slice14 **31 passed**.
   imported nowhere. Deleting files is ASK-FIRST, so they stay reported.
 - **The `TurnScreenD` parity gap** (§ above) is still unowned and still blocks the honesty of Slice
   15's "regression sweep vs. V0.9 baseline".
+
+## ✅ Slice 15 — RELEASE, done 2026-08-17
+
+The gate slice. Three jobs: prove nothing regressed against the V0.9 prototype, close the licensing
+question, and pay the mutation debt above. All three are done. The fourth job on the original line —
+merge `v1` → `main` and play a real session — is **held**, because `.github/workflows/deploy.yml`
+makes every push to `main` a live GitHub Pages deploy and deploying is ASK-FIRST. Marcus decides.
+
+### 1. The regression sweep found no capability loss — and four ghosts
+
+An adversarial sweep against `V0.9-CAPABILITY-BASELINE.md` reported four regressions. **Every one of
+them was checked against the prototype commit `798a922` before being called a regression, and all
+four failed that check** — they were things the baseline document claimed the prototype had and the
+prototype never did:
+
+| Reported "regression" | What `798a922` actually shows |
+| --- | --- |
+| The initiative tracker stopped working | `InitiativeTracker.tsx` was written but never wired to a render site. It has never run. |
+| Grimoire lost its advanced filters and AI | Those live in `Spellbook.tsx`, which is not rendered by any route in the prototype either. |
+| Campaign context stopped reaching the AI | It was wired at 3 of ~44 AI callsites in the prototype. It is wired at 3 now. |
+| Alegreya, drop caps, `codex-ritual`, gold selection all vanished | None of the four exist anywhere in `798a922`. |
+
+Written up as **§7 of `V0.9-CAPABILITY-BASELINE.md`**, with the method note that matters more than
+the table: *every "regression" must be checked against `798a922` before it is called one. Four out of
+four failed that check this time.* The baseline is a claim about the prototype, not the prototype.
+
+### 2. Licensing is closed
+
+Settings → About now carries the SRD 5.2.1 credit naming Wizards of the Coast, the CC BY 4.0 licence
+named and linked, an explicit line that Marcus's homebrew is excluded from the licence, and the
+version label corrected from the fictional `v2.0` to **The Codex V1.0**. The whole obligation for
+CC BY 4.0 is one honest credit line; it is there and `prove-slice15` holds it there.
+
+### 3. Two real defects, both invisible, both found by writing the proof
+
+Neither was on any list. Both are the kind you cannot see in a screenshot.
+
+- **`ui/Sheet` promised `role="dialog" aria-modal="true"` and honoured neither half.** No Escape
+  handler, no focus trap. Every surface migrated onto the shared primitive — Settings, the character
+  sheet, combat quick lookup — had *silently lost Escape* at migration time, and nobody noticed
+  because nothing failed; the × still worked. Fixed centrally in `Sheet.tsx`: Escape closes, focus
+  moves into the panel on open and back to where it came from on close, Tab cycles inside.
+- **68 focusable controls sat in the tab order behind closed drawers.** The dice roller (22), the
+  mechanics reference (35) and the combat action menu (11) stay mounted and slide off-screen, so
+  `pointer-events: none` fixed the mouse and nothing else — a keyboard or screen-reader user tabbed
+  through 68 invisible controls and was told three modals were open on a screen showing none. Fixed
+  with `src/hooks/useInertWhenClosed.ts`, applied imperatively because `motion`'s prop types predate
+  React 19's `inert`.
+
+### 4. The mutation debt, paid — and what paying it found
+
+`reference/mutate-turn-brain.mjs`, one harness for slices 6/6b/6c/7: **8/8 killed.** Getting there
+produced two findings worth more than the number.
+
+**(a) `prove-slice6` had been red since Slice 7 landed, and nobody knew — because nobody re-ran it.**
+Its check `bonus action reopened` asserted that End turn hands the economy straight back. That was
+correct at Slice 6 and Slice 7 deliberately changed it: ending your turn ends it, and what follows
+is someone else's moment in which Marcus holds only his Reaction. So the proof had been defending a
+bug that a later slice fixed, going red on every run from Slice 7 onward — of which there were none.
+**This is precisely the failure mode the debt note predicted: an unrun proof and a passing proof look
+identical from the outside.** Corrected to the stronger post-Slice-7 claim (the economy must stay
+shut until the turn actually turns) plus a `beginTurn` press proving it comes back with the turn.
+
+**(b) The engine enforces its rules in two independent layers, and four of my eight mutations could
+not reach the screen because of it.** `compose.ts` sets a row's `blockedReason`, so the UI disables
+it and says why; `reduce.ts` calls `refuse(...)` if the event arrives anyway. Break one layer and the
+app still behaves correctly, so a browser proof stays green — **correctly**. That is defence in
+depth, not a proof hole, and reporting it as one would have been a phantom finding. Mutations 3, 6
+and 8 were rewritten as two-layer edits that remove the rule from both places at once; all three then
+died at the right check. The finding is recorded in the harness header so the next person does not
+re-discover it.
+
+**One genuine gap, named rather than papered over:** mutation 4 (half-declared feature counters) had
+no browser fixture to bite on — no character in `_fixtures-app/` has a feature with a `usesMax` and
+no `usesCurrent`, so nothing prove-slice6b can reach exercises the rule. That is a **fixture gap in
+6b**, not a hole in the engine: the rule is covered by `resources.test.ts:'does not count a
+half-declared counter as a pool at all'`, and mutation 4 is now aimed at the layer that actually
+holds the line. → **Wave 5 should add a half-declared feature to the 6b fixture and move it back up
+to the browser.**
+
+Three of the eight also had mis-guessed `expect` anchors — they were killing the mutation at a
+*different and better* check than the one I had named. Printing the actual FAIL lines in the
+MISDIRECT branch is what distinguished "the proof is not testing this" from "my anchor was wrong";
+without that, four sound proofs would have been reported as holes.
+
+### Verification — the whole thing, measured
+
+| Instrument | Result |
+| --- | --- |
+| `npx tsc --noEmit` | exit 0 |
+| `npx vitest run` | **323 / 323** passed, 12 files |
+| `prove-slice15` | **45 / 45** — every surface opens, licence on the page, PWA installable, character survives a reload |
+| `mutate-slice15` | **8 / 8 killed** |
+| `mutate-turn-brain` | **8 / 8 killed** |
+| `prove-slice` 6 · 6b · 6c · 7 · 12 · 13 · 13b · 14 · 15 | **302 checks, all green** (35·24·25·48·44·35·15·31·45) |
+
+Two mutations in the Slice 15 run are worth keeping in mind because they both looked fine locally:
+the manifest `scope` set to `/` installs perfectly on localhost and silently kills the install prompt
+on Pages; and a declared-but-missing icon passed a status-only check because `vite preview` answers
+any unknown path with `index.html` and a 200. The icon check now requires a `content-type` of
+`image/*` — GitHub Pages 404s properly, so the old check would have shipped a blank home-screen tile
+and never complained.
+
+### 🌊 Wave 5 — what is actually left (recorded here so it survives this session)
+
+Ordered by how much it changes what happens at the table.
+
+1. **Engine → table integration.** `TurnScreenD` (engine-backed, reachable only via `?d=1`) and
+   `CombatHelper.tsx` (1,775 lines, the thing Marcus actually uses) are **complementary, not
+   old-vs-new** — flipping the default today would be a capability loss, which is why it was not
+   flipped. The work is to make the engine the single owner of combat state, which means teaching its
+   5-event reducer four more verbs: manual economy toggle, concentration set/drop, slot
+   expend/restore, and arbitrary set. This is the biggest item and the one that ends the parity gap.
+2. **Wire `InitiativeTracker.tsx`.** 332 finished lines that have never rendered. Needs an
+   `initiative` field on `CombatState`, three handlers, and a render site. Cheapest large win in the
+   app — and it retires the first ghost in the table above.
+3. **Port `Spellbook.tsx`'s advanced filters + AI Explain/Tactics** into `GrimoirePage` /
+   `GrimoireCard`, retiring the second ghost.
+4. **Thread `campaign` to the remaining ~41 AI callsites.** Wired at 3. Retires the third ghost.
+5. **The 6b fixture gap** from §4 above.
+6. Carried deferrals, unchanged: 6a (`CombatHelper` shrink), 7b (readied actions), 8
+   (concentration/bloodied), 9 (mobs), 10a (install nudge), and the three dead components in
+   `combat/` still reported-not-deleted because deleting files is ASK-FIRST.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

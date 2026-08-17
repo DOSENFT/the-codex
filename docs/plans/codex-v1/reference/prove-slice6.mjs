@@ -160,11 +160,34 @@ await p.waitForTimeout(150);
 s = await p.evaluate(READ);
 store = await p.evaluate(STORE, ID);
 check('round advanced', s.round, 'Round 2');
-check('bonus action reopened', s.econ['Bonus'], true);
+/* AMENDED 2026-08-17 — a corrected expectation, not a loosened one.
+
+   This line used to read `check('bonus action reopened', s.econ['Bonus'], true)`
+   and it was right when it was written: at Slice 6, End turn meant "my next
+   turn starts now". Slice 7 changed that on purpose. Ending your turn ends it,
+   and what follows is somebody else's moment, in which Marcus holds his
+   Reaction and nothing else; the action, bonus action and movement come back
+   from `beginTurn`, one more press away.
+
+   So the old assertion was defending a bug that Slice 7 fixed, and it went red
+   the moment Slice 7 landed — which nobody saw, because nobody re-ran this file
+   until the Slice 15 mutation pass. That is exactly the process debt
+   00-status.md recorded: an unrun proof and a passing proof look identical from
+   the outside. The replacement is a STRONGER claim — the economy must stay shut
+   until the turn actually turns. */
+check('the bonus action does NOT come back with End turn', s.econ['Bonus'], false);
+check('...nor does the action', s.econ['Action'], false);
 check('the heal was NOT handed back', store.lay, 14);
 check('undo now offers the turn itself', s.undo.text, 'Undo End of round 1');
 
 console.log('\n-- 7. the slot rule lifts with the turn ------------------------');
+// One more press. The off-turn footer's primary control is what begins the next
+// turn — the boundary Slice 7 opened, which Slice 6's one-slot rule has to
+// survive intact.
+await p.locator('.edge .btn.primary').click();
+await p.waitForTimeout(220);
+s = await p.evaluate(READ);
+check('the economy comes back WITH the turn', [s.econ['Action'], s.econ['Bonus']], [true, true]);
 await clickNamed(p, 'Divine Smite');
 s = await p.evaluate(READ);
 check('a new turn allows a new slot', s.slots['Level 1'], '2/4');
