@@ -484,7 +484,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
                         key={i}
                         onClick={() => i < slot.current ? handleExpendSlot(Number(level)) : handleRestoreSlot(Number(level))}
                         className={cn(
-                          'w-3.5 h-3.5 rounded-full transition-all duration-200',
+                          'pip-tap w-3.5 h-3.5 rounded-full transition-all duration-200',
                           'active:scale-90',
                           i < slot.current
                             ? 'bg-arcane shadow-[0_0_4px_rgba(61,210,255,0.4)]'
@@ -494,7 +494,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
                       />
                     ))}
                   </div>
-                  <span className="text-[10px] text-forge-2">{slot.current}/{slot.max}</span>
+                  <span className="text-xs text-forge-2">{slot.current}/{slot.max}</span>
                 </div>
               ))}
           </div>

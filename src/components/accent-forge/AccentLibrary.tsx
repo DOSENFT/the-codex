@@ -257,7 +257,7 @@ export function AccentLibrary({ onSelectAccent }: AccentLibraryProps) {
                         className={cn(
                           'inline-flex items-center px-2 py-0.5',
                           'rounded-md bg-white/[0.04] border border-white/[0.06]',
-                          'text-[10px] text-forge-2 font-medium',
+                          'text-xs text-forge-2 font-medium',
                         )}
                       >
                         {tag}
@@ -268,14 +268,14 @@ export function AccentLibrary({ onSelectAccent }: AccentLibraryProps) {
 
                 {/* Anchor Vowel */}
                 <div className="flex items-center gap-2 mt-auto pt-1.5 border-t border-white/5">
-                  <span className="text-[10px] text-forge-2 uppercase tracking-wider font-medium">
+                  <span className="text-xs text-forge-2 uppercase tracking-wider font-medium">
                     Anchor
                   </span>
                   <code
                     className={cn(
                       'inline-flex items-center px-2 py-0.5',
                       'rounded-md bg-arcane/8 border border-arcane/15',
-                      'font-mono text-[11px] text-arcane/80',
+                      'font-mono text-xs text-arcane/80',
                     )}
                   >
                     {accent.anchorVowel}

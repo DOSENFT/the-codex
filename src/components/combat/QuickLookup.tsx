@@ -186,7 +186,7 @@ export function QuickLookup({ isOpen, onClose, character, onRollDice }: QuickLoo
                           {item.type === 'spell' ? 'Spell' : 'Feature'}
                         </Badge>
                       </div>
-                      <p className="text-[10px] text-forge-2 truncate mt-0.5">
+                      <p className="text-xs text-forge-2 truncate mt-0.5">
                         {item.data.description.slice(0, 60)}{item.data.description.length > 60 ? '...' : ''}
                       </p>
                     </div>

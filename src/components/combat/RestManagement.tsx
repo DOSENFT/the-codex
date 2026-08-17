@@ -137,7 +137,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
               <span className="font-display text-xs font-bold text-arcane uppercase tracking-wider">
                 Confirm?
               </span>
-              <span className="text-[10px] text-arcane/80">
+              <span className="text-xs text-arcane/80">
                 Tap again to rest
               </span>
             </>
@@ -148,7 +148,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
               <span className="font-display text-xs font-bold text-ink-primary uppercase tracking-wider">
                 Short Rest
               </span>
-              <span className="text-[10px] text-ink-muted leading-tight">
+              <span className="text-xs text-ink-muted leading-tight">
                 Reset Arcane Recovery
                 <br />
                 &amp; some resources
@@ -175,7 +175,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
               <span className="font-display text-xs font-bold text-arcane uppercase tracking-wider">
                 Confirm?
               </span>
-              <span className="text-[10px] text-arcane/80">
+              <span className="text-xs text-arcane/80">
                 Tap again to rest
               </span>
             </>
@@ -186,7 +186,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
               <span className="font-display text-xs font-bold text-ink-primary uppercase tracking-wider">
                 Long Rest
               </span>
-              <span className="text-[10px] text-ink-muted leading-tight">
+              <span className="text-xs text-ink-muted leading-tight">
                 Reset all resources
                 <br />
                 &amp; spell slots &middot; Stabilize

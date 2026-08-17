@@ -516,7 +516,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                     <span className="break-words">
                       {hook.text}
                       {hook.isCustom && (
-                        <span className="ml-1.5 text-[10px] text-verdant/50 uppercase font-medium">custom</span>
+                        <span className="ml-1.5 text-xs text-verdant/50 uppercase font-medium">custom</span>
                       )}
                     </span>
                   </button>

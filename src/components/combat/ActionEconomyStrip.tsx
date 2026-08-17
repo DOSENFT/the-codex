@@ -143,7 +143,7 @@ export function ActionEconomyStrip({
               {/* Label — 9px Cinzel tracked uppercase */}
               <span
                 className={cn(
-                  'font-display text-[9px] font-bold uppercase tracking-[0.1em] leading-none',
+                  'font-display text-xs font-bold uppercase tracking-[0.1em] leading-none',
                   'transition-colors duration-[var(--duration-micro)]',
                   'ease-[var(--ease-snap)]',
                   used ? 'text-ink-ghost' : 'gold-gradient-text',

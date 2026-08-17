@@ -81,7 +81,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 12 — safety: lines, veils, consent, always-available veil **— DONE 2026-08-16, see below**
 
 **Wave 4 — finish**
-- [ ] 13 — grimoire / identity / dice as real components in D's language
+- [x] 13 — legibility and reach: D's discipline enforced app-wide **— DONE 2026-08-16, see below**
 - [ ] 14 — motion budget + print chronicle
 - [ ] 15 — release: regression sweep vs. V0.9 baseline, licensing resolved, `v1` → `main`, one real session *(team: adversarial sweep)*
 
@@ -1252,6 +1252,150 @@ path was touched.
   smuggled into a safety slice.
 - **No AI anywhere near the covenant, and no sharing or export.** Both are absences on purpose, not
   gaps: a model must never see the list, and a boundary is not content to publish.
+
+## ✅ Slice 13 — legibility and reach: what direction D actually asked for (2026-08-16)
+
+### The slice changed shape before a line was written
+
+Slice 13 was planned as "grimoire / identity / dice as real components in D's language" — a repaint.
+Before starting it I diffed direction D's token file against v0.9's `@theme` block, and they are the
+**same colours**:
+
+| direction D | v0.9 `@theme` | value |
+|---|---|---|
+| `--d-bg` | `--color-void-0` | `#0a0a08` |
+| `--d-e1` | `--color-void-1` | `#12110e` |
+| `--d-e2` | `--color-void-2` | `#1c1a15` |
+| `--d-amber` | `--color-arcane` | `#d4a74a` |
+| `--d-gold` | `--color-gold` | `#c5a55a` |
+| `--d-verdant` | `--color-verdant` | `#39d98a` |
+| `--d-cream` | `--color-forge-0` | `#f0e6d3` |
+| `--d-ease` | `--ease-forge` | same curve |
+
+Same three fonts too (Cinzel / IBM Plex Sans / JetBrains Mono). **Direction D was derived from v0.9.**
+So the planned diff would have touched hundreds of files and changed nothing a person could see —
+the worst kind of work: expensive, risky, invisible.
+
+What D actually adds over v0.9 is not a palette, it is a set of **floors**: a 12px type minimum, a
+20px Cinzel minimum, a 48px touch minimum, and 4.5:1 contrast. v0.9 honoured none of them. So the
+slice became the enforcement of those floors, which is where the real gap between "works on my
+machine" and "usable at a table in a dim room" lives.
+
+### Measure first — and then check the instrument three times
+
+`reference/audit-d13.mjs` walks 24 surface/viewport combinations (phone 390×844 and iPad 1024×1366
+across 12 surfaces) and measures every rendered text node and every interactive element.
+
+The contrast measurement was **wrong twice**, and both wrong versions are preserved in comments in
+that file so nobody re-derives them:
+
+1. **v1 reported nine primary buttons at 1.0–1.05:1** — catastrophic-looking failures. They were
+   fine. `Button` paints with `background-image: linear-gradient(...)`, and my code read only
+   `backgroundColor`, saw transparent, and compared dark text against the dark page floor. Real
+   ratio ≈8:1. **Had I trusted it, I would have repainted nine perfectly good buttons and the
+   repaint would have been the regression.**
+2. **v2 was worse** — failures went 1023 → 3409 and cream `text-forge-0` was reported at 1:1. I had
+   started compositing gradient stops, but at full opacity, so `.glass-card`'s 3.5% cream sheen
+   (`linear-gradient(rgba(240,230,211,0.035), rgba(240,230,211,0) 42%)`) scored as solid cream.
+3. **v3 composites every layer with its own alpha**, innermost last, over the page floor, and where
+   a gradient gives a range it scores the **worst** stop. It reproduces a hand-computed 3.74:1 for
+   `forge-2`, reports zero failures for cream, and no longer flags the gradient buttons.
+
+*An audit that invents failures is worse than no audit.* Verify the instrument before acting on it.
+
+### Three fixes, all of them small
+
+**1. One token, 111 of 211 distinct contrast failures.** `--color-forge-2` was `#7a7265` — 3.7:1 on
+the glass-card surface, where 4.5 is the floor. It is the app's standard label and secondary-text
+colour, so that single value accounted for over half of every failure in the app. It is now
+`#8b8578`, which is direction D's own `--d-dim`, measures 4.85:1 on the same surface, and reads as
+the same colour in the same role. The hierarchy is unchanged; it is simply legible.
+
+**2. The 12px type floor, 270 sites.** Every `text-[8px]` / `text-[9px]` / `text-[10px]` /
+`text-[11px]` across 46 components became `text-xs`. That is a 20% growth on text that was chosen
+small *because it had to fit*, so it was the single most likely thing in this slice to break a
+layout.
+
+**3. Spell-slot pips reachable without stealing each other's presses.** The pips are 12–14px dots;
+the obvious fix — a 48px centred hit area — is **wrong**, and I refused it. Pips sit 2px apart, so a
+48px circle swallows its neighbours and you would spend the wrong slot. That is a capability
+*regression* wearing an accessibility badge.
+
+The honest fix was only available after reading the handlers: every filled pip at a level calls the
+same `handleExpendSlot(level)`, so vertical overlap between pips at one level is harmless. So
+`.pip-tap::after` extends the target to 48px **tall** and only 2px wider each side — thumb-reachable
+on the axis that matters, with no horizontal theft.
+
+**The residual limitation is stated, not hidden:** the target is still only ~14px wide. Making it
+genuinely wide needs the pips themselves redrawn with spacing, which is a visual redesign and
+belongs to a later pip pass. The comment in `index.css` says so.
+
+### Movement
+
+| | before | after |
+|---|---|---|
+| text rendering below 12px | **494** | **0** |
+| contrast failures below WCAG AA | **1023** | **178** |
+| clipped text / sideways scroll (12 combos) | 0 | **0** |
+
+### Proof
+
+`reference/prove-slice13.mjs` — **35 checks, all pass**, in six sections:
+
+1. the 12px floor holds on all 12 surfaces
+2. the label colour is legible **measured, not asserted** — it recomputes the real `.glass-card`
+   composite and requires ≥4.5, so changing the token to another failing value does not pass
+3. the pips are catchable **and still correct** — the target reaches 48px, and pressing a pip spends
+   *exactly one* slot at *that* level
+4. the enlarged hit area did not steal the card's own tap, and paints nothing
+5. bigger type broke no layout — clipping and sideways scroll across 6 surfaces × 2 viewports
+6. clean console
+
+`reference/mutate-slice13.mjs` — **7/7 killed.** Two of the seven are worth recording:
+
+- **Two mutations first pointed at `combat/StatsBar.tsx` and SURVIVED.** Not a hole — `StatsBar.tsx`
+  is **dead code**, imported by nothing, so no edit to it can fail any proof. That was an INVALID
+  mutation reported as a hole, which is the harness lying in the *safe-looking* direction. Both were
+  re-anchored to a label that actually renders.
+- **The pip mutation survived its first form** (`for (k = 0; k <= i; k++) handleExpendSlot(level)`)
+  because it is a **no-op**: `expendSpellSlot` is pure and the handler closes over one `character`,
+  so four calls in one React tick compute the same next state four times and spend one slot. The
+  proof was right and the mutation was empty. Rewritten wholesale by composing the call
+  (`expendSpellSlot(expendSpellSlot(character, level), level)`), it dies immediately. *A mutation
+  that only half-undoes a fix and survives is the mutation's fault.*
+
+### Non-degradation — this one mattered more than usual
+
+46 component files were edited by `sed`, so every earlier proof was a live regression check:
+
+- `npx tsc -b --force` clean · `npx vite build` clean
+- `npx vitest run` — **323/323 across 12 files**
+- prove-slice **6b · 6c · 7 · 10 · 11 · 12** — all re-run, all green
+- before/after screenshots on 7 surfaces × 2 viewports in `reference/_shots-d13/`, **looked at**:
+  phone and iPad combat, grimoire, prep character, character sheet. Layouts are identical in
+  structure with slightly larger type. Nothing clipped, nothing reflowed badly.
+
+### Found and deliberately not acted on
+
+- **`src/components/combat/StatsBar.tsx` is dead code** — never imported, and it references
+  `text-ink-muted` / `text-ink-secondary`, tokens that do not exist in the theme. Deleting files is
+  ASK-FIRST, so it is reported here rather than removed.
+
+### Honest deferral list → proposed Slice 13b
+
+The floors are not all the way in. What remains, named rather than quietly dropped:
+
+- **~60 distinct Cinzel-under-20px sites.** Mostly `font-display text-xs uppercase` section headers.
+  The right fix is not to grow Cinzel to 20px — it is to stop using Cinzel for labels and let them
+  be IBM Plex at `--d-fs-label`. That is a typographic decision across the whole app, and it belongs
+  in its own slice where it can be looked at, not smuggled into a contrast pass.
+- **~396 distinct interactive targets still under 48px.** The pips were the sharp case. The rest are
+  chips, icon buttons and tabs that mostly need padding, but padding moves layout, so each cluster
+  needs eyes.
+- **178 remaining contrast failures**, now a long tail rather than one token.
+- Carried from earlier slices: nested `<button>` at `GrimoireCard.tsx:68` and `162–235`; duplicated
+  section titles; `blockedReason` tone; `TableCovenant` still in v0.9 card language; the phone veil
+  pill overlapping a condition chip (**confirmed still present** in this slice's phone combat shot).
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

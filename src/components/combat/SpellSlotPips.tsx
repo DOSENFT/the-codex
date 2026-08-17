@@ -31,7 +31,7 @@ export function SpellSlotPips({ spellSlots, onExpend, onRestore }: SpellSlotPips
   return (
     <div className="bg-ash-warm/80 border border-gold/15 rounded-xl p-3">
       {/* Header */}
-      <h3 className="text-[10px] font-mono font-bold uppercase tracking-[0.15em] text-ink-muted mb-2">
+      <h3 className="text-xs font-mono font-bold uppercase tracking-[0.15em] text-ink-muted mb-2">
         Spell Slots
       </h3>
 
@@ -40,7 +40,7 @@ export function SpellSlotPips({ spellSlots, onExpend, onRestore }: SpellSlotPips
         {activeLevels.map(({ level, max, current }) => (
           <div key={level} className="flex items-center gap-2">
             {/* Level Label */}
-            <span className="text-[10px] font-mono text-ink-muted w-6 shrink-0">
+            <span className="text-xs font-mono text-ink-muted w-6 shrink-0">
               {LEVEL_LABELS[level] ?? `${level}th`}
             </span>
 
@@ -86,7 +86,7 @@ export function SpellSlotPips({ spellSlots, onExpend, onRestore }: SpellSlotPips
             </div>
 
             {/* Count */}
-            <span className="text-[10px] font-mono text-ink-muted shrink-0">
+            <span className="text-xs font-mono text-ink-muted shrink-0">
               {current}/{max}
             </span>
           </div>

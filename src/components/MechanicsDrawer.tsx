@@ -91,7 +91,7 @@ function MechanicsEntryCard({ entry }: { entry: MechanicsEntry }) {
           <span
             className={cn(
               'inline-flex items-center rounded-full px-2 py-0.5',
-              'text-[10px] font-medium border',
+              'text-xs font-medium border',
               entry.category === 'attack' && 'bg-ember/10 text-ember border-ember/20',
               entry.category === 'saving_throw' && 'bg-arcane/10 text-arcane border-arcane/20',
               entry.category === 'ability_check' && 'bg-eldritch/10 text-eldritch border-eldritch/20',

@@ -320,7 +320,7 @@ function PhraseCard({
             <div className="flex flex-col gap-4 animate-fade-in">
               {/* Accented version */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+                <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                   Accented Version
                 </span>
                 <p className="text-base text-arcane font-display font-semibold leading-relaxed">
@@ -330,7 +330,7 @@ function PhraseCard({
 
               {/* Word-by-word breakdown */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+                <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                   Word Breakdown
                 </span>
                 <div className="grid gap-2">
@@ -343,7 +343,7 @@ function PhraseCard({
                         <span className="text-sm text-forge-1 font-mono">{w.original}</span>
                         <span className="text-forge-2 text-xs select-none" aria-hidden>&rarr;</span>
                         <span className="text-sm text-arcane font-mono font-semibold">{w.accented}</span>
-                        <Badge variant="neutral" className="text-[10px]">{w.rule}</Badge>
+                        <Badge variant="neutral" className="text-xs">{w.rule}</Badge>
                       </div>
                       <div className="flex items-start gap-1.5 ml-1">
                         <Theater size={12} className="text-ember shrink-0 mt-0.5" aria-hidden />
@@ -356,7 +356,7 @@ function PhraseCard({
 
               {/* Rhythm */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+                <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                   Rhythm Pattern
                 </span>
                 <p className="text-sm text-forge-1 font-mono leading-relaxed">{breakdown.rhythm}</p>
@@ -366,7 +366,7 @@ function PhraseCard({
               <div className="flex items-start gap-2 p-2.5 rounded-lg bg-ember/5 border border-ember/15">
                 <AlertTriangle size={14} className="text-ember shrink-0 mt-0.5" aria-hidden />
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] text-ember uppercase tracking-wider font-semibold">
+                  <span className="text-xs text-ember uppercase tracking-wider font-semibold">
                     Common Mistake
                   </span>
                   <span className="text-xs text-forge-1">{breakdown.commonMistake}</span>
@@ -619,7 +619,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
                       {ed.accented}
                     </span>
                     {ed.note && (
-                      <span className="text-[11px] text-forge-2 italic">{ed.note}</span>
+                      <span className="text-xs text-forge-2 italic">{ed.note}</span>
                     )}
                   </div>
                 </div>
@@ -728,7 +728,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
                         {/* Key sound shifts */}
                         <div className="flex flex-wrap gap-1.5">
                           {translatorResult.keyShifts.map((shift, si) => (
-                            <Badge key={si} variant="arcane" className="text-[10px]">
+                            <Badge key={si} variant="arcane" className="text-xs">
                               {shift.from} &rarr; {shift.to}
                             </Badge>
                           ))}
@@ -753,7 +753,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
             {/* Anchor vowel hero */}
             <GlassCard>
               <div className="flex flex-col items-center gap-3 py-2">
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+                <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                   Anchor Vowel — Your Foundation Sound
                 </span>
                 <span className="text-4xl font-display font-bold text-arcane">
@@ -831,7 +831,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
                   <span className="text-xs text-forge-2 font-mono">{value}/10</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-forge-2 w-10 text-right shrink-0">
+                  <span className="text-xs text-forge-2 w-10 text-right shrink-0">
                     {low}
                   </span>
                   <div className="flex-1 h-2 rounded-full bg-void-2 overflow-hidden">
@@ -840,7 +840,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-forge-2 w-10 shrink-0">{high}</span>
+                  <span className="text-xs text-forge-2 w-10 shrink-0">{high}</span>
                 </div>
               </div>
             )
@@ -866,7 +866,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
 
           <div className="flex flex-wrap items-start gap-4 pt-2 border-t border-white/5">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+              <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                 Anchor Vowel
               </span>
               <span className="inline-flex bg-arcane/10 text-arcane text-xs font-mono px-2.5 py-1 rounded-md">
@@ -874,7 +874,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
               </span>
             </div>
             <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
-              <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+              <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                 Cadence Cheat
               </span>
               <span className="text-xs text-forge-1 italic">{accent.cadenceCheat}</span>
@@ -1115,7 +1115,7 @@ function SpeakItPhraseCard({
             <div className="flex flex-col gap-4 animate-fade-in">
               {/* Accented version */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+                <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                   Say It Like This
                 </span>
                 <p className="text-base text-arcane font-display font-semibold leading-relaxed">
@@ -1125,7 +1125,7 @@ function SpeakItPhraseCard({
 
               {/* Word breakdown */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+                <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                   Word-by-Word
                 </span>
                 <div className="grid gap-2">
@@ -1138,7 +1138,7 @@ function SpeakItPhraseCard({
                         <span className="text-sm text-forge-1 font-mono">{w.original}</span>
                         <span className="text-forge-2 text-xs select-none" aria-hidden>&rarr;</span>
                         <span className="text-sm text-arcane font-mono font-semibold">{w.accented}</span>
-                        <Badge variant="neutral" className="text-[10px]">{w.rule}</Badge>
+                        <Badge variant="neutral" className="text-xs">{w.rule}</Badge>
                       </div>
                       <div className="flex items-start gap-1.5 ml-1">
                         <Theater size={12} className="text-ember shrink-0 mt-0.5" aria-hidden />
@@ -1151,7 +1151,7 @@ function SpeakItPhraseCard({
 
               {/* Rhythm */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider font-semibold">
+                <span className="text-xs text-forge-2 uppercase tracking-wider font-semibold">
                   Rhythm Coaching
                 </span>
                 <p className="text-sm text-forge-1 font-mono leading-relaxed">{breakdown.rhythm}</p>
@@ -1161,7 +1161,7 @@ function SpeakItPhraseCard({
               <div className="flex items-start gap-2 p-2.5 rounded-lg bg-ember/5 border border-ember/15">
                 <AlertTriangle size={14} className="text-ember shrink-0 mt-0.5" aria-hidden />
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] text-ember uppercase tracking-wider font-semibold">
+                  <span className="text-xs text-ember uppercase tracking-wider font-semibold">
                     Watch Out
                   </span>
                   <span className="text-xs text-forge-1">{breakdown.commonMistake}</span>

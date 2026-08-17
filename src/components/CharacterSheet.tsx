@@ -57,7 +57,7 @@ function AbilityScoreGrid({ character, onUpdate }: { character: Character; onUpd
               'hover:bg-gold/[0.06]',
             )}
           >
-            <span className="text-[10px] font-mono font-bold text-forge-2 uppercase tracking-wider">
+            <span className="text-xs font-mono font-bold text-forge-2 uppercase tracking-wider">
               {ability}
             </span>
             {isEditing ? (
@@ -184,7 +184,7 @@ function SkillsList({ character, onUpdate }: { character: Character; onUpdate: (
                 expertise ? 'bg-gold border-gold' : proficient ? 'bg-bronze border-bronze' : 'border-forge-2/50',
               )} />
               <span className="text-sm text-forge-1">{skill}</span>
-              <span className="text-[10px] text-forge-2/60 font-mono">{ability}</span>
+              <span className="text-xs text-forge-2/60 font-mono">{ability}</span>
             </div>
             <span className={cn(
               'font-mono text-xs font-semibold',
@@ -241,7 +241,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-forge-0">{weapon.name}</span>
-                {weapon.magical && <Badge variant="arcane" className="text-[9px]">Magic</Badge>}
+                {weapon.magical && <Badge variant="arcane" className="text-xs">Magic</Badge>}
               </div>
               <span className="text-xs text-forge-2">
                 {weapon.damageDice}{dmgMod >= 0 ? `+${dmgMod}` : dmgMod} {weapon.damageType}
@@ -492,19 +492,19 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
         <div className="px-4 pb-4">
           <div className="grid grid-cols-4 gap-2">
             <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
-              <span className="text-[9px] font-mono text-forge-2 uppercase">AC</span>
+              <span className="text-xs font-mono text-forge-2 uppercase">AC</span>
               <span className="text-lg font-bold text-forge-0">{character.armorClass}</span>
             </div>
             <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
-              <span className="text-[9px] font-mono text-forge-2 uppercase">Prof</span>
+              <span className="text-xs font-mono text-forge-2 uppercase">Prof</span>
               <span className="text-lg font-bold text-arcane">{formatMod(character.proficiencyBonus)}</span>
             </div>
             <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
-              <span className="text-[9px] font-mono text-forge-2 uppercase">DC</span>
+              <span className="text-xs font-mono text-forge-2 uppercase">DC</span>
               <span className="text-lg font-bold text-ember">{spellDC}</span>
             </div>
             <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
-              <span className="text-[9px] font-mono text-forge-2 uppercase">Spell</span>
+              <span className="text-xs font-mono text-forge-2 uppercase">Spell</span>
               <span className="text-lg font-bold text-eldritch">{formatMod(spellAtk)}</span>
             </div>
           </div>

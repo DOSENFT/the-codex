@@ -171,12 +171,12 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
                 <Sparkles size={10} className="text-arcane" aria-hidden />
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider">Spells</span>
+                <span className="text-xs text-forge-2 uppercase tracking-wider">Spells</span>
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-lg font-semibold text-arcane tabular-nums">{preparedCount}</span>
                 {character.canPrepareSpells && (
-                  <span className="text-[10px] text-forge-2">/ {character.maxPreparedSpells + character.spells.filter(s => s.level === 0).length}</span>
+                  <span className="text-xs text-forge-2">/ {character.maxPreparedSpells + character.spells.filter(s => s.level === 0).length}</span>
                 )}
               </div>
               {character.canPrepareSpells && (
@@ -190,14 +190,14 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
                 <Sparkles size={10} className="text-gold" aria-hidden />
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider">Slots</span>
+                <span className="text-xs text-forge-2 uppercase tracking-wider">Slots</span>
               </div>
               <div className="flex flex-wrap gap-1">
                 {slotEntries.map(([level, slot]) => (
                   <span
                     key={level}
                     className={cn(
-                      'text-[10px] font-medium px-1.5 py-0.5 rounded',
+                      'text-xs font-medium px-1.5 py-0.5 rounded',
                       slot.current === slot.max
                         ? 'bg-verdant/10 text-verdant'
                         : slot.current === 0
@@ -217,11 +217,11 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
                 <Zap size={10} className="text-eldritch" aria-hidden />
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider">Features</span>
+                <span className="text-xs text-forge-2 uppercase tracking-wider">Features</span>
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-lg font-semibold text-eldritch tabular-nums">{chargedCount}</span>
-                <span className="text-[10px] text-forge-2">/ {featuresWithUses.length} charged</span>
+                <span className="text-xs text-forge-2">/ {featuresWithUses.length} charged</span>
               </div>
               <ProgressBar current={chargedCount} max={featuresWithUses.length} color="eldritch" />
             </div>
@@ -232,11 +232,11 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
                 <Swords size={10} className="text-ember" aria-hidden />
-                <span className="text-[10px] text-forge-2 uppercase tracking-wider">Weapons</span>
+                <span className="text-xs text-forge-2 uppercase tracking-wider">Weapons</span>
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-lg font-semibold text-ember tabular-nums">{combatWeaponsCount}</span>
-                <span className="text-[10px] text-forge-2">combat-ready</span>
+                <span className="text-xs text-forge-2">combat-ready</span>
               </div>
             </div>
           )}
@@ -246,9 +246,9 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
         {totalChecks > 0 && (
           <div className="pt-2 border-t border-white/5">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] text-forge-2">Readiness</span>
+              <span className="text-xs text-forge-2">Readiness</span>
               <span className={cn(
-                'text-[10px] font-medium',
+                'text-xs font-medium',
                 isReady ? 'text-verdant' : 'text-ember',
               )}>
                 {passedChecks}/{totalChecks} checks passed

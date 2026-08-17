@@ -90,7 +90,7 @@ export function ConditionReminder({ character, onOpenDiceRoller }: ConditionRemi
             <Badge
               key={condition}
               variant={getConditionVariant(condition)}
-              className="text-[11px] px-2 py-0.5"
+              className="text-xs px-2 py-0.5"
             >
               {condition}
             </Badge>
@@ -111,7 +111,7 @@ export function ConditionReminder({ character, onOpenDiceRoller }: ConditionRemi
             if (!data) {
               return (
                 <div key={condition} className="flex items-start gap-2">
-                  <Badge variant="neutral" className="text-[11px] shrink-0 mt-0.5">
+                  <Badge variant="neutral" className="text-xs shrink-0 mt-0.5">
                     {condition}
                   </Badge>
                   <span className="text-xs text-forge-2 italic">No data available</span>
@@ -124,12 +124,12 @@ export function ConditionReminder({ character, onOpenDiceRoller }: ConditionRemi
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={getConditionVariant(condition)}
-                    className="text-[11px] shrink-0"
+                    className="text-xs shrink-0"
                   >
                     {condition}
                   </Badge>
                   {data.reminder && (
-                    <span className="text-[11px] font-medium text-ember/90">
+                    <span className="text-xs font-medium text-ember/90">
                       {data.reminder}
                     </span>
                   )}

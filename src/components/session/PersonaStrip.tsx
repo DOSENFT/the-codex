@@ -101,20 +101,20 @@ export function PersonaStrip({ character }: PersonaStripProps) {
           {/* Row 3: Core trait pills + accent hint */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {visibleTraits.map((trait) => (
-              <Badge key={trait.text} variant="neutral" className="text-[10px]">
+              <Badge key={trait.text} variant="neutral" className="text-xs">
                 {trait.text}
               </Badge>
             ))}
 
             {overflowCount > 0 && (
-              <Badge variant="neutral" className="text-[10px]">
+              <Badge variant="neutral" className="text-xs">
                 +{overflowCount}
               </Badge>
             )}
 
             {/* Accent / voice hint (separated by a dot) */}
             {accentHint && visibleTraits.length > 0 && (
-              <span className="text-forge-2 text-[10px] select-none" aria-hidden>
+              <span className="text-forge-2 text-xs select-none" aria-hidden>
                 &middot;
               </span>
             )}

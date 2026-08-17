@@ -35,7 +35,7 @@ export function VitalsRow({ currentHP, maxHP, tempHP, armorClass, speed }: Vital
       {/* HP */}
       <motion.div variants={panelVariants}>
         <BrassPanel className="p-4">
-          <span className="font-[family-name:var(--font-body)] text-[11px] font-semibold tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
+          <span className="font-[family-name:var(--font-body)] text-xs font-semibold tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
             HP
           </span>
           <div className="flex items-baseline gap-1 mt-2">
@@ -96,7 +96,7 @@ export function VitalsRow({ currentHP, maxHP, tempHP, armorClass, speed }: Vital
       {/* TEMP HP */}
       <motion.div variants={panelVariants}>
         <BrassPanel className="p-4">
-          <span className="font-[family-name:var(--font-body)] text-[10px] font-medium tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
+          <span className="font-[family-name:var(--font-body)] text-xs font-medium tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
             TEMP HP
           </span>
           <div className="mt-2">
@@ -114,7 +114,7 @@ export function VitalsRow({ currentHP, maxHP, tempHP, armorClass, speed }: Vital
       {/* ARMOR CLASS — background-image icon, no img tag */}
       <motion.div variants={panelVariants}>
         <BrassPanel className="p-4">
-          <span className="font-[family-name:var(--font-body)] text-[10px] font-medium tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
+          <span className="font-[family-name:var(--font-body)] text-xs font-medium tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
             ARMOR CLASS
           </span>
           <div className="flex items-center gap-2 mt-2">
@@ -139,7 +139,7 @@ export function VitalsRow({ currentHP, maxHP, tempHP, armorClass, speed }: Vital
       {/* SPEED — background-image icon, no img tag */}
       <motion.div variants={panelVariants}>
         <BrassPanel className="p-4">
-          <span className="font-[family-name:var(--font-body)] text-[10px] font-medium tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
+          <span className="font-[family-name:var(--font-body)] text-xs font-medium tracking-[0.12em] uppercase text-[oklch(0.50_0.015_60)]">
             SPEED
           </span>
           <div className="flex items-baseline gap-1.5 mt-2">

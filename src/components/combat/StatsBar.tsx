@@ -242,7 +242,7 @@ export function StatsBar({
 
         {/* Temp HP tag — only when > 0 */}
         {tempHP > 0 && (
-          <span className="mt-1.5 font-mono text-[11px] font-semibold text-arcane tracking-[0.06em] uppercase tabular-nums">
+          <span className="mt-1.5 font-mono text-xs font-semibold text-arcane tracking-[0.06em] uppercase tabular-nums">
             temp +{tempHP}
           </span>
         )}
@@ -267,7 +267,7 @@ export function StatsBar({
           <div className="flex items-baseline gap-0.5">
             <Wind size={12} className="text-ink-secondary shrink-0" aria-hidden />
             <span className="stat-box-value">{speed}</span>
-            <span className="text-ink-muted text-[10px] font-medium font-mono">ft</span>
+            <span className="text-ink-muted text-xs font-medium font-mono">ft</span>
           </div>
         </div>
 
@@ -289,7 +289,7 @@ export function StatsBar({
             className={cn(
               'group relative flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5',
               'rounded-lg border border-gold-dim/20 bg-ash-mid/60',
-              'font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-ink-secondary',
+              'font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
               'transition-all duration-200 ease-snap',
               'hover:bg-red-400/10 hover:border-red-400/30 hover:text-red-400',
               'active:scale-[0.97]',
@@ -308,7 +308,7 @@ export function StatsBar({
             className={cn(
               'group relative flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5',
               'rounded-lg border border-gold-dim/20 bg-ash-mid/60',
-              'font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-ink-secondary',
+              'font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
               'transition-all duration-200 ease-snap',
               'hover:bg-verdant/10 hover:border-verdant/30 hover:text-verdant',
               'active:scale-[0.97]',
@@ -327,7 +327,7 @@ export function StatsBar({
             className={cn(
               'group relative flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5',
               'rounded-lg border border-gold-dim/20 bg-ash-mid/60',
-              'font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-ink-secondary',
+              'font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
               'transition-all duration-200 ease-snap',
               'hover:bg-arcane/10 hover:border-arcane/30 hover:text-arcane',
               'active:scale-[0.97]',
@@ -345,7 +345,7 @@ export function StatsBar({
         <div className="animate-fade-in space-y-2">
           <span
             className={cn(
-              'font-display text-[8px] font-semibold uppercase tracking-[0.12em]',
+              'font-display text-xs font-semibold uppercase tracking-[0.12em]',
               INPUT_MODE_COLORS[inputMode].text,
             )}
           >
@@ -491,7 +491,7 @@ export function StatsBar({
                 ))}
               </div>
 
-              <span className="text-ink-muted/30 text-[10px] select-none">/</span>
+              <span className="text-ink-muted/30 text-xs select-none">/</span>
 
               {/* Failures */}
               <div className="flex gap-1" aria-label="Death save failures">

@@ -336,8 +336,8 @@ export function VoiceForge({ character, onGenerate, onSelectAccent }: VoiceForge
 
                 {/* Low / High labels */}
                 <div className="flex justify-between">
-                  <span className="text-[11px] text-forge-2">{slider.lowLabel}</span>
-                  <span className="text-[11px] text-forge-2">{slider.highLabel}</span>
+                  <span className="text-xs text-forge-2">{slider.lowLabel}</span>
+                  <span className="text-xs text-forge-2">{slider.highLabel}</span>
                 </div>
               </div>
             )
@@ -493,7 +493,7 @@ export function VoiceForge({ character, onGenerate, onSelectAccent }: VoiceForge
                   <p className="text-sm font-medium text-forge-0 truncate">
                     {profile.name}
                   </p>
-                  <p className="text-[11px] text-forge-2 truncate">
+                  <p className="text-xs text-forge-2 truncate">
                     {new Date(profile.updatedAt).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',

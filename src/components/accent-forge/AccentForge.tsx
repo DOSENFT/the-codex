@@ -166,7 +166,7 @@ export function AccentForge({ character }: AccentForgeProps) {
                     'absolute -top-2 -right-1',
                     'px-1.5 py-0.5 rounded-full',
                     'bg-eldritch/20 border border-eldritch/30',
-                    'text-[9px] font-semibold text-eldritch uppercase tracking-wider',
+                    'text-xs font-semibold text-eldritch uppercase tracking-wider',
                     'whitespace-nowrap pointer-events-none',
                   )}
                 >

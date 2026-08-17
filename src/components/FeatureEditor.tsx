@@ -247,7 +247,7 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
               />
             </div>
 
-            <p className="text-[10px] text-forge-2">
+            <p className="text-xs text-forge-2">
               What action does this use? Action, Bonus Action, Reaction, or Passive (always on)?
             </p>
           </GlassCard>
@@ -278,7 +278,7 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
           {/* Usage */}
           <GlassCard className="p-4 space-y-3">
             <h3 className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Usage Limits</h3>
-            <p className="text-[10px] text-forge-2">How many times can you use it before resting?</p>
+            <p className="text-xs text-forge-2">How many times can you use it before resting?</p>
 
             <div className="grid grid-cols-2 gap-3">
               <Select
@@ -336,7 +336,7 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
               />
             </div>
             {form.resourcePoolId && !poolsOf(character).some(p => p.id === form.resourcePoolId) && (
-              <p className="text-[10px] text-ember">
+              <p className="text-xs text-ember">
                 That pool no longer exists, so this feature currently costs nothing. Pick another,
                 or clear the binding.
               </p>
@@ -346,7 +346,7 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
           {/* Combat Stats */}
           <GlassCard className="p-4 space-y-3">
             <h3 className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Combat Stats</h3>
-            <p className="text-[10px] text-forge-2">What dice do you roll? Does it have a range?</p>
+            <p className="text-xs text-forge-2">What dice do you roll? Does it have a range?</p>
 
             <div className="grid grid-cols-2 gap-3">
               <Input

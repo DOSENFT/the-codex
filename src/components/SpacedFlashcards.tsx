@@ -228,7 +228,7 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
           aria-label={isFlipped ? 'Showing answer, tap to flip back' : 'Tap to reveal answer'}
         >
           {/* Flip indicator */}
-          <div className="absolute top-3 right-3 flex items-center gap-1 text-[10px] text-forge-2">
+          <div className="absolute top-3 right-3 flex items-center gap-1 text-xs text-forge-2">
             <RotateCcw size={10} aria-hidden />
             <span>{isFlipped ? 'Answer' : 'Tap to flip'}</span>
           </div>
@@ -252,7 +252,7 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
           {/* Overdue indicator */}
           {getOverdueDays(currentCard) > 0 && (
             <div className="absolute bottom-3 left-3">
-              <Badge variant="ember" className="text-[10px]">
+              <Badge variant="ember" className="text-xs">
                 {getOverdueDays(currentCard)}d overdue
               </Badge>
             </div>
@@ -276,7 +276,7 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
             )}
           >
             <span className="font-semibold">Again</span>
-            <span className="text-[10px] opacity-70">1d</span>
+            <span className="text-xs opacity-70">1d</span>
           </button>
 
           <button
@@ -292,7 +292,7 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
             )}
           >
             <span className="font-semibold">Hard</span>
-            <span className="text-[10px] opacity-70">
+            <span className="text-xs opacity-70">
               {currentCard ? Math.max(1, Math.round(currentCard.interval * 1.2)) : 1}d
             </span>
           </button>
@@ -310,7 +310,7 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
             )}
           >
             <span className="font-semibold">Good</span>
-            <span className="text-[10px] opacity-70">
+            <span className="text-xs opacity-70">
               {currentCard ? Math.max(1, Math.round(currentCard.interval * currentCard.easeFactor)) : 1}d
             </span>
           </button>
@@ -328,7 +328,7 @@ export function SpacedFlashcards({ character, profile, onReviewCard }: SpacedFla
             )}
           >
             <span className="font-semibold">Easy</span>
-            <span className="text-[10px] opacity-70">
+            <span className="text-xs opacity-70">
               {currentCard ? Math.max(1, Math.round(currentCard.interval * currentCard.easeFactor * 1.3)) : 1}d
             </span>
           </button>

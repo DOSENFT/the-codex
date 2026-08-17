@@ -126,7 +126,7 @@ export function SessionTimeline({ moments, onEndSession }: SessionTimelineProps)
             </div>
             <div className="flex gap-3 flex-wrap">
               {patternData.map(({ type, pct }) => (
-                <span key={type} className="flex items-center gap-1 text-[10px] text-forge-2">
+                <span key={type} className="flex items-center gap-1 text-xs text-forge-2">
                   <span className={cn('w-2 h-2 rounded-full', PATTERN_COLORS[type])} />
                   {type} {pct}%
                 </span>
@@ -156,7 +156,7 @@ export function SessionTimeline({ moments, onEndSession }: SessionTimelineProps)
                   <span className="text-xs text-forge-0 whitespace-nowrap">
                     {truncateText(moment.text, 30)}
                   </span>
-                  <span className="text-[10px] text-forge-3 whitespace-nowrap">
+                  <span className="text-xs text-forge-3 whitespace-nowrap">
                     {relativeTime(moment.timestamp)}
                   </span>
                 </div>

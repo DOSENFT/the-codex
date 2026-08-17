@@ -151,13 +151,13 @@ function ActionItem({
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
           {cost && (
-            <span className="text-[10px] font-mono text-forge-2">{cost}</span>
+            <span className="text-xs font-mono text-forge-2">{cost}</span>
           )}
           {badge}
         </div>
       </div>
       {effect && (
-        <div className="text-[10px] text-forge-2 mt-0.5 leading-snug line-clamp-2">
+        <div className="text-xs text-forge-2 mt-0.5 leading-snug line-clamp-2">
           {effect}
         </div>
       )}

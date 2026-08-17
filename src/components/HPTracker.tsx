@@ -508,7 +508,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                   {condition.name}
                 </span>
                 {isActive && (
-                  <span className="block text-[10px] leading-tight mt-0.5 opacity-75">
+                  <span className="block text-xs leading-tight mt-0.5 opacity-75">
                     {condition.effect}
                   </span>
                 )}

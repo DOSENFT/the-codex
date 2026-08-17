@@ -999,7 +999,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                       </span>
                     )}
                     {line.scenario && (
-                      <Badge variant="neutral" className="text-[10px]">{line.scenario}</Badge>
+                      <Badge variant="neutral" className="text-xs">{line.scenario}</Badge>
                     )}
                   </div>
                 </button>
@@ -1325,15 +1325,15 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                   <div className="flex flex-col items-center gap-2">
                     <div className="flex gap-3">
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] text-forge-2 uppercase">Voice</span>
+                        <span className="text-xs text-forge-2 uppercase">Voice</span>
                         {renderStars(qdEval.voiceMatch)}
                       </div>
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] text-forge-2 uppercase">Context</span>
+                        <span className="text-xs text-forge-2 uppercase">Context</span>
                         {renderStars(qdEval.contextFit)}
                       </div>
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] text-forge-2 uppercase">Creative</span>
+                        <span className="text-xs text-forge-2 uppercase">Creative</span>
                         {renderStars(qdEval.creativity)}
                       </div>
                     </div>
@@ -1638,7 +1638,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                             &ldquo;{line.text}&rdquo;
                           </p>
                           {rehearsalDelivered && isIdeal && (
-                            <Badge variant="verdant" className="ml-auto shrink-0 text-[10px]">Ideal</Badge>
+                            <Badge variant="verdant" className="ml-auto shrink-0 text-xs">Ideal</Badge>
                           )}
                         </div>
                       </GlassCard>
@@ -1983,8 +1983,8 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                     {warmupSpark.spark}
                   </p>
                   <div className="flex items-center gap-3 mt-3 pt-2 border-t border-bronze/20">
-                    <Badge variant="arcane" className="text-[10px]">{warmupSpark.trait}</Badge>
-                    <Badge variant="ember" className="text-[10px]">{warmupSpark.difficulty}</Badge>
+                    <Badge variant="arcane" className="text-xs">{warmupSpark.trait}</Badge>
+                    <Badge variant="ember" className="text-xs">{warmupSpark.difficulty}</Badge>
                   </div>
                 </ParchmentCard>
 
@@ -2098,7 +2098,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                     )}
                   >
                     <span className="text-xs font-medium capitalize">{ctx}</span>
-                    <span className="text-[10px]">{pct}%</span>
+                    <span className="text-xs">{pct}%</span>
                   </div>
                 )
               })}
@@ -2163,7 +2163,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
           {journalInsight && (
             <ParchmentCard className="p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Badge variant="arcane" className="text-[10px]">{journalInsight.focusArea}</Badge>
+                <Badge variant="arcane" className="text-xs">{journalInsight.focusArea}</Badge>
               </div>
               <p className="text-sm text-forge-0 leading-relaxed mb-2">
                 {journalInsight.insight}
@@ -2221,7 +2221,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                       )}>
                         {badge.name}
                       </span>
-                      <span className="text-[10px] text-forge-2 leading-tight">
+                      <span className="text-xs text-forge-2 leading-tight">
                         {badge.description}
                       </span>
                     </div>

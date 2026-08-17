@@ -110,7 +110,7 @@ export function SmartActionsGrid({
             <span className="text-xs font-semibold text-ink-primary truncate">
               {action.name}
             </span>
-            <span className="text-[10px] text-ink-muted truncate">
+            <span className="text-xs text-ink-muted truncate">
               {action.subtitle}
             </span>
           </button>
@@ -118,7 +118,7 @@ export function SmartActionsGrid({
 
         {/* Empty state when no actions available */}
         {actions.length === 0 && (
-          <p className="col-span-2 text-[10px] text-ink-muted text-center py-4 select-none">
+          <p className="col-span-2 text-xs text-ink-muted text-center py-4 select-none">
             No weapons, cantrips, or actions configured.
           </p>
         )}
@@ -131,7 +131,7 @@ export function SmartActionsGrid({
           onClick={onOpenActionMenu}
           className={cn(
             'flex items-center gap-1',
-            'text-[10px] text-ink-muted uppercase tracking-wider',
+            'text-xs text-ink-muted uppercase tracking-wider',
             'hover:text-arcane transition-colors duration-200',
             'active:scale-[0.97]',
             'focus-visible:outline-2 focus-visible:outline-gold',

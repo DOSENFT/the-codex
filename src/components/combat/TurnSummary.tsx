@@ -333,7 +333,7 @@ export function TurnSummary({
         <div className="px-4 py-2 border-b border-white/5">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Radio size={10} className="text-verdant/60" aria-hidden />
-            <span className="text-[10px] font-semibold text-forge-2/60 uppercase tracking-wider">Always Active</span>
+            <span className="text-xs font-semibold text-forge-2/60 uppercase tracking-wider">Always Active</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {passives.map(p => (
@@ -342,7 +342,7 @@ export function TurnSummary({
                 onClick={() => setExpandedAction(expandedAction === p.name ? null : p.name)}
                 className={cn(
                   'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg',
-                  'text-[11px] font-medium border min-h-[32px]',
+                  'text-xs font-medium border min-h-[32px]',
                   'transition-all duration-200 active:scale-[0.96]',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verdant',
                   expandedAction === p.name
@@ -353,7 +353,7 @@ export function TurnSummary({
                 <Radio size={9} aria-hidden />
                 {p.name}
                 {p.usesRemaining && (
-                  <span className="text-[9px] font-mono opacity-60">{p.usesRemaining}</span>
+                  <span className="text-xs font-mono opacity-60">{p.usesRemaining}</span>
                 )}
               </button>
             ))}
@@ -371,10 +371,10 @@ export function TurnSummary({
               <p className="text-xs text-forge-1 leading-relaxed mb-1.5">{p.summary}</p>
               <div className="flex items-start gap-2 mb-1">
                 <Info size={10} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
-                <span className="text-[11px] text-forge-2">{p.effectsLine}</span>
+                <span className="text-xs text-forge-2">{p.effectsLine}</span>
               </div>
               {p.strategicTip && (
-                <p className="text-[10px] text-forge-2/70 italic mt-1">{p.strategicTip}</p>
+                <p className="text-xs text-forge-2/70 italic mt-1">{p.strategicTip}</p>
               )}
             </div>
           ))}
@@ -443,7 +443,7 @@ export function TurnSummary({
               const lvl = Number(level)
               return (
                 <div key={level} className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-forge-2 font-medium">{levelLabel(lvl)}:</span>
+                  <span className="text-xs text-forge-2 font-medium">{levelLabel(lvl)}:</span>
                   <div className="flex gap-1">
                     {Array.from({ length: slot.max }).map((_, i) => {
                       const isFilled = i < slot.current
@@ -465,7 +465,7 @@ export function TurnSummary({
                       )
                     })}
                   </div>
-                  <span className="text-[9px] font-mono text-forge-2/60">{slot.current}/{slot.max}</span>
+                  <span className="text-xs font-mono text-forge-2/60">{slot.current}/{slot.max}</span>
                 </div>
               )
             })}
@@ -559,7 +559,7 @@ function ActionSection({
           {label}
         </span>
         {used && (
-          <span className="text-[10px] text-forge-2 italic">used this turn</span>
+          <span className="text-xs text-forge-2 italic">used this turn</span>
         )}
       </div>
 
@@ -589,12 +589,12 @@ function ActionSection({
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-forge-0 truncate">{opt.name}</span>
                       {opt.type === 'spell' && (
-                        <Badge variant={opt.spellLevel === 0 ? 'neutral' : 'arcane'} className="text-[9px] px-1.5 py-0">
+                        <Badge variant={opt.spellLevel === 0 ? 'neutral' : 'arcane'} className="text-xs px-1.5 py-0">
                           {opt.spellLevel === 0 ? 'Cantrip' : levelLabel(opt.spellLevel!)}
                         </Badge>
                       )}
                       {opt.type === 'feature' && (
-                        <Badge variant="eldritch" className="text-[9px] px-1.5 py-0">
+                        <Badge variant="eldritch" className="text-xs px-1.5 py-0">
                           Feature
                         </Badge>
                       )}
@@ -607,7 +607,7 @@ function ActionSection({
                     </div>
                     {/* Quick mechanics preview when collapsed */}
                     {!isExpanded && (
-                      <p className="text-[10px] text-forge-2 mt-0.5 truncate">
+                      <p className="text-xs text-forge-2 mt-0.5 truncate">
                         {opt.mechanicsLine}
                       </p>
                     )}
@@ -644,7 +644,7 @@ function ActionSection({
             <button
               onClick={() => setShowAll(!showAll)}
               className={cn(
-                'text-[11px] font-medium pl-3 py-1.5 min-h-[44px]',
+                'text-xs font-medium pl-3 py-1.5 min-h-[44px]',
                 'flex items-center gap-1',
                 cs.text, 'hover:underline',
               )}
@@ -743,16 +743,16 @@ function ExpandedActionPanel({
       <div className="flex flex-col gap-1 mb-2">
         <div className="flex items-start gap-2">
           <Dices size={11} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
-          <span className="text-[11px] font-mono text-forge-0">{opt.mechanicsLine}</span>
+          <span className="text-xs font-mono text-forge-0">{opt.mechanicsLine}</span>
         </div>
         <div className="flex items-start gap-2">
           <Info size={11} className="text-forge-2 mt-0.5 shrink-0" aria-hidden />
-          <span className="text-[11px] text-forge-2">{opt.effectsLine}</span>
+          <span className="text-xs text-forge-2">{opt.effectsLine}</span>
         </div>
         {opt.usesRemaining && (
           <div className="flex items-center gap-2">
             <Sparkles size={11} className="text-forge-2 shrink-0" aria-hidden />
-            <span className="text-[11px] text-forge-2">Uses: {opt.usesRemaining}</span>
+            <span className="text-xs text-forge-2">Uses: {opt.usesRemaining}</span>
           </div>
         )}
       </div>
@@ -771,21 +771,21 @@ function ExpandedActionPanel({
               placeholder="Write a custom strategic tip..."
               rows={2}
               className={cn(
-                'w-full bg-transparent text-[11px] text-forge-1 leading-relaxed',
+                'w-full bg-transparent text-xs text-forge-1 leading-relaxed',
                 'border-none outline-none resize-none placeholder:text-forge-2/30',
               )}
             />
             <div className="flex items-center gap-1.5 justify-end">
               <button
                 onClick={() => setEditingTip(false)}
-                className="min-h-[32px] px-2.5 rounded text-[10px] text-forge-2 hover:text-forge-0 transition-colors"
+                className="min-h-[32px] px-2.5 rounded text-xs text-forge-2 hover:text-forge-0 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveTip}
                 className={cn(
-                  'min-h-[32px] px-2.5 rounded text-[10px] font-medium',
+                  'min-h-[32px] px-2.5 rounded text-xs font-medium',
                   'bg-arcane/20 text-arcane hover:bg-arcane/30 transition-colors',
                   'flex items-center gap-1',
                 )}
@@ -797,7 +797,7 @@ function ExpandedActionPanel({
           </div>
         ) : (
           <div className="flex items-start justify-between gap-2">
-            <p className="text-[10px] text-forge-2 italic leading-relaxed flex-1">
+            <p className="text-xs text-forge-2 italic leading-relaxed flex-1">
               {displayTip || 'No strategic tip — tap edit to add one'}
             </p>
             <button
@@ -830,7 +830,7 @@ function ExpandedActionPanel({
               )}
             >
               <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] font-semibold text-forge-1 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-forge-1 uppercase tracking-wider">
                   {note.label}
                 </span>
                 <button
@@ -845,7 +845,7 @@ function ExpandedActionPanel({
                   <Trash2 size={9} />
                 </button>
               </div>
-              <p className="text-[10px] text-forge-2 leading-relaxed">{note.text}</p>
+              <p className="text-xs text-forge-2 leading-relaxed">{note.text}</p>
             </div>
           ))}
         </div>
@@ -863,7 +863,7 @@ function ExpandedActionPanel({
             onChange={(e) => setNewNoteLabel(e.target.value)}
             placeholder="Category (e.g., Combo, Synergy, Reminder)"
             className={cn(
-              'w-full bg-transparent text-[11px] font-semibold text-forge-0 mb-1.5',
+              'w-full bg-transparent text-xs font-semibold text-forge-0 mb-1.5',
               'border-none outline-none placeholder:text-forge-2/30',
             )}
           />
@@ -873,14 +873,14 @@ function ExpandedActionPanel({
             placeholder="Your note..."
             rows={2}
             className={cn(
-              'w-full bg-transparent text-[10px] text-forge-1 leading-relaxed',
+              'w-full bg-transparent text-xs text-forge-1 leading-relaxed',
               'border-none outline-none resize-none placeholder:text-forge-2/30',
             )}
           />
           <div className="flex items-center gap-1.5 justify-end mt-1">
             <button
               onClick={() => { setAddingNote(false); setNewNoteLabel(''); setNewNoteText('') }}
-              className="min-h-[32px] px-2.5 rounded text-[10px] text-forge-2 hover:text-forge-0 transition-colors"
+              className="min-h-[32px] px-2.5 rounded text-xs text-forge-2 hover:text-forge-0 transition-colors"
             >
               Cancel
             </button>
@@ -888,7 +888,7 @@ function ExpandedActionPanel({
               onClick={handleAddNote}
               disabled={!newNoteLabel.trim() || !newNoteText.trim()}
               className={cn(
-                'min-h-[32px] px-2.5 rounded text-[10px] font-medium',
+                'min-h-[32px] px-2.5 rounded text-xs font-medium',
                 'bg-arcane/20 text-arcane hover:bg-arcane/30 transition-colors',
                 'flex items-center gap-1',
                 'disabled:opacity-30 disabled:pointer-events-none',
@@ -905,7 +905,7 @@ function ExpandedActionPanel({
           className={cn(
             'w-full min-h-[32px] px-2.5 rounded-md mb-2',
             'flex items-center justify-center gap-1.5',
-            'text-[10px] text-forge-2/50 hover:text-arcane',
+            'text-xs text-forge-2/50 hover:text-arcane',
             'border border-dashed border-white/5 hover:border-arcane/20',
             'bg-transparent hover:bg-arcane/[0.04]',
             'transition-all duration-200',

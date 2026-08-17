@@ -17,7 +17,15 @@
   /* Text Scale — warm cream/parchment */
   --color-forge-0: #f0e6d3;
   --color-forge-1: #bfb5a0;
-  --color-forge-2: #7a7265;
+  /* Was #7a7265, and it failed WCAG AA everywhere it was used — 3.7:1 against
+     the glass-card surface, where 4.5 is the floor for text this size. It is
+     the app's standard label and secondary-text colour, so that one value
+     accounted for 111 of the 211 distinct contrast failures the Slice 13 audit
+     found. #8b8578 is direction D's `--d-dim`, measures 4.85:1 on the same
+     surface, and reads as the same colour in the same role — the hierarchy is
+     unchanged, it is simply legible now. Dim is for LABELS; if something needs
+     to be read as prose, it should be forge-1 or brighter. */
+  --color-forge-2: #8b8578;
 
   /* Fonts */
   --font-display: "Cinzel", serif;
@@ -73,6 +81,38 @@
 @keyframes drawerEnter {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
+}
+
+/* A resource pip is 12px of paint and was 12px of target. At a table, one
+   handed, in the dark, that is a miss waiting to happen — and the miss expends
+   a spell slot you did not mean to spend.
+
+   The obvious fix is a 48px hit area centred on each pip, and it is WRONG here:
+   the pips sit 2px apart, so a 48px circle on pip 1 swallows pips 2, 3 and 4
+   and you can no longer press the one you aimed at. A touch floor applied
+   blindly to adjacent controls makes them less usable, not more.
+
+   What makes an honest fix possible is what the pips actually do. Every filled
+   pip in a row calls the same expend handler and every empty pip calls the same
+   restore handler — the row is a two-way stepper drawn as a gauge, not N
+   distinct buttons. So horizontal bleed between same-state neighbours costs
+   nothing; the only boundary that must stay crisp is the one between the last
+   filled pip and the first empty one. This grows the target vertically to the
+   48px floor and horizontally only into the gap, which never crosses that
+   boundary. The pip looks identical; it is simply catchable now.
+
+   Residual, stated rather than hidden: the target is still only ~14px WIDE.
+   Making the pips themselves bigger is the real answer and it is a visual
+   redesign, so it belongs to the pip pass, not to this one. */
+.pip-tap { position: relative; }
+.pip-tap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  right: -2px;
+  height: var(--d-touch-min, 48px);
+  transform: translateY(-50%);
 }
 
 @layer base {

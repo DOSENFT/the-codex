@@ -236,7 +236,7 @@ export function LoadoutPanel({ character, onTogglePrepared }: LoadoutPanelProps)
                 <span className="text-xs text-forge-2">
                   Prepared: {nonCantripPrepared} / {character.maxPreparedSpells}
                 </span>
-                <span className="text-[10px] text-forge-2">
+                <span className="text-xs text-forge-2">
                   {nonCantripPrepared >= character.maxPreparedSpells ? 'Full' : `${character.maxPreparedSpells - nonCantripPrepared} remaining`}
                 </span>
               </div>
@@ -249,11 +249,11 @@ export function LoadoutPanel({ character, onTogglePrepared }: LoadoutPanelProps)
             {spellsByLevel.map(([level, spells]) => (
               <div key={level}>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">
+                  <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
                     {levelLabel(level)}{level > 0 ? ' Level' : 's'}
                   </span>
                   {level > 0 && character.spellSlots[level] && (
-                    <span className="text-[10px] text-forge-2">
+                    <span className="text-xs text-forge-2">
                       ({character.spellSlots[level].current}/{character.spellSlots[level].max} slots)
                     </span>
                   )}
@@ -324,7 +324,7 @@ export function LoadoutPanel({ character, onTogglePrepared }: LoadoutPanelProps)
                         />
                       ))}
                     </div>
-                    <span className="text-[10px] text-forge-2 tabular-nums">
+                    <span className="text-xs text-forge-2 tabular-nums">
                       {f.usesCurrent}/{f.usesMax}
                     </span>
                   </div>
@@ -353,12 +353,12 @@ export function LoadoutPanel({ character, onTogglePrepared }: LoadoutPanelProps)
                 <div className="flex items-center gap-2 min-w-0">
                   <Swords size={12} className="text-ember shrink-0" aria-hidden />
                   <span className="text-xs font-medium text-forge-0 truncate">{w.name}</span>
-                  {w.magical && <Badge variant="gold" className="text-[9px] px-1.5">Magical</Badge>}
+                  {w.magical && <Badge variant="gold" className="text-xs px-1.5">Magical</Badge>}
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className="text-[10px] font-mono text-ember">{w.damageDice}</span>
+                  <span className="text-xs font-mono text-ember">{w.damageDice}</span>
                   {w.specialAbilities && w.specialAbilities.length > 0 && (
-                    <span className="text-[10px] text-forge-2">
+                    <span className="text-xs text-forge-2">
                       +{w.specialAbilities.length} {w.specialAbilities.length === 1 ? 'ability' : 'abilities'}
                     </span>
                   )}
@@ -392,7 +392,7 @@ export function LoadoutPanel({ character, onTogglePrepared }: LoadoutPanelProps)
                 <span
                   key={level}
                   className={cn(
-                    'text-[10px] font-medium',
+                    'text-xs font-medium',
                     slot.current === slot.max ? 'text-verdant' : 'text-ember',
                   )}
                 >

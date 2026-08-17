@@ -81,7 +81,7 @@ export function ConditionsGrid({ conditions, onToggle }: ConditionsGridProps) {
             className={cn(
               'inline-flex items-center gap-1',
               'rounded-full px-2 py-0.5',
-              'text-[10px] font-semibold leading-none',
+              'text-xs font-semibold leading-none',
               'bg-red-400/10 text-red-400 border border-red-400/20',
             )}
           >
@@ -113,7 +113,7 @@ export function ConditionsGrid({ conditions, onToggle }: ConditionsGridProps) {
               aria-pressed={isActive}
               aria-label={`${condition.name} condition${isActive ? ' (active)' : ''}`}
             >
-              <span className="block text-[10px] font-semibold leading-tight truncate">
+              <span className="block text-xs font-semibold leading-tight truncate">
                 {condition.name}
               </span>
             </button>

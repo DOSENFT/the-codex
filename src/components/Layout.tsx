@@ -100,7 +100,7 @@ export function Layout({
               type="button"
               onClick={() => onModeChange('session')}
               className={cn(
-                'px-2.5 text-[10px] font-bold uppercase tracking-wider',
+                'px-2.5 text-xs font-bold uppercase tracking-wider',
                 'flex items-center gap-1',
                 'transition-all duration-200 ease-forge',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -117,7 +117,7 @@ export function Layout({
               type="button"
               onClick={() => onModeChange('prep')}
               className={cn(
-                'px-2.5 text-[10px] font-bold uppercase tracking-wider',
+                'px-2.5 text-xs font-bold uppercase tracking-wider',
                 'flex items-center gap-1',
                 'transition-all duration-200 ease-forge',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -380,7 +380,7 @@ export function Layout({
                   />
                 )}
                 <Icon size={20} aria-hidden />
-                <span className="text-[10px] font-medium leading-none lg:text-sm">
+                <span className="text-xs font-medium leading-none lg:text-sm">
                   {label}
                 </span>
               </button>

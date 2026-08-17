@@ -322,7 +322,7 @@ function LiveView({ log }: { log: CombatLog }) {
                     </Badge>
                   )}
                   {entry.target && (
-                    <span className="text-[10px] text-forge-2 truncate">
+                    <span className="text-xs text-forge-2 truncate">
                       vs {entry.target}
                     </span>
                   )}
@@ -381,7 +381,7 @@ function PostCombatSummary({
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3">
         <div className="stat-frame p-3">
-          <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider mb-1">
+          <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-1">
             Total Damage
           </span>
           <span className="text-xl font-display font-bold text-forge-0">
@@ -389,7 +389,7 @@ function PostCombatSummary({
           </span>
         </div>
         <div className="stat-frame p-3">
-          <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider mb-1">
+          <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-1">
             DPR
           </span>
           <span className="text-xl font-display font-bold text-arcane">
@@ -403,7 +403,7 @@ function PostCombatSummary({
         <div className="flex items-center gap-3 p-3 rounded-xl bg-ember/5 border border-ember/15">
           <TrendingUp size={16} className="text-ember shrink-0" aria-hidden />
           <div className="min-w-0">
-            <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block">
               Top Performer
             </span>
             <span className="text-sm font-semibold text-forge-0">
@@ -453,7 +453,7 @@ function PostCombatSummary({
       {/* Source bar chart */}
       {topSources.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">
+          <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
             By Source
           </span>
           {topSources.map((src) => {
@@ -621,7 +621,7 @@ function WhatWorksInsight({ characterId }: { characterId: string }) {
     <div className="flex items-start gap-3 p-3 rounded-xl bg-verdant/5 border border-verdant/15">
       <TrendingUp size={16} className="text-verdant shrink-0 mt-0.5" aria-hidden />
       <div className="min-w-0">
-        <span className="text-[10px] font-semibold text-verdant uppercase tracking-wider block">
+        <span className="text-xs font-semibold text-verdant uppercase tracking-wider block">
           What Works
         </span>
         <span className="text-sm font-semibold text-forge-0">

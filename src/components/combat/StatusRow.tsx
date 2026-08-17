@@ -34,7 +34,7 @@ export function StatusRow({
       {/* SPELL SAVE DC */}
       <motion.div variants={panelVariants}>
         <BrassPanel glow="arcane" className="p-4 relative">
-          <span className="font-[family-name:var(--font-body)] text-[9px] font-medium tracking-[0.16em] uppercase text-[oklch(0.50_0.015_60)] leading-tight">
+          <span className="font-[family-name:var(--font-body)] text-xs font-medium tracking-[0.16em] uppercase text-[oklch(0.50_0.015_60)] leading-tight">
             SPELL SAVE DC
           </span>
           <div className="relative mt-2">
@@ -59,7 +59,7 @@ export function StatusRow({
       {/* CONCENTRATION */}
       <motion.div variants={panelVariants}>
         <BrassPanel className="p-4">
-          <span className="font-[family-name:var(--font-body)] text-[9px] font-medium tracking-[0.16em] uppercase text-[oklch(0.50_0.015_60)] leading-tight">
+          <span className="font-[family-name:var(--font-body)] text-xs font-medium tracking-[0.16em] uppercase text-[oklch(0.50_0.015_60)] leading-tight">
             CONCENTRATION
           </span>
           <div className="mt-2">
@@ -101,7 +101,7 @@ export function StatusRow({
       {/* DEATH SAVES */}
       <motion.div variants={panelVariants}>
         <BrassPanel className="p-4">
-          <span className="font-[family-name:var(--font-body)] text-[9px] font-medium tracking-[0.16em] uppercase text-[oklch(0.50_0.015_60)] leading-tight">
+          <span className="font-[family-name:var(--font-body)] text-xs font-medium tracking-[0.16em] uppercase text-[oklch(0.50_0.015_60)] leading-tight">
             DEATH SAVES
           </span>
           <div className="flex items-center gap-0 mt-2">

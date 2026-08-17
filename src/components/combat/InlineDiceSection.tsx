@@ -111,7 +111,7 @@ export function InlineDiceSection({ character, onOpenFullRoller }: InlineDiceSec
               onClick={() => handleAdvantageChange(mode)}
               className={cn(
                 'min-h-[44px] min-w-[44px] px-3 py-1 rounded-full',
-                'text-[10px] font-mono font-bold uppercase',
+                'text-xs font-mono font-bold uppercase',
                 'transition-all duration-150',
                 'active:scale-[0.97]',
                 'focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-1',
@@ -174,22 +174,22 @@ export function InlineDiceSection({ character, onOpenFullRoller }: InlineDiceSec
 
         {/* Nat 20 / Nat 1 labels */}
         {!rolling && isNat20 && (
-          <span className="text-[10px] font-mono font-bold text-arcane uppercase tracking-widest mt-1">
+          <span className="text-xs font-mono font-bold text-arcane uppercase tracking-widest mt-1">
             Nat 20
           </span>
         )}
         {!rolling && isNat1 && (
-          <span className="text-[10px] font-mono font-bold text-red-400 uppercase tracking-widest mt-1">
+          <span className="text-xs font-mono font-bold text-red-400 uppercase tracking-widest mt-1">
             Nat 1
           </span>
         )}
 
         {/* Notation below diamond */}
-        <span className="text-[10px] font-mono text-ink-muted mt-1">{notation}</span>
+        <span className="text-xs font-mono text-ink-muted mt-1">{notation}</span>
 
         {/* Individual dice shown for advantage/disadvantage */}
         {lastRoll && selectedDie === 20 && advantage !== 'normal' && !rolling && (
-          <span className="text-[10px] font-mono text-ink-muted/60">
+          <span className="text-xs font-mono text-ink-muted/60">
             ({lastRoll.dice.join(', ')})
           </span>
         )}
@@ -204,7 +204,7 @@ export function InlineDiceSection({ character, onOpenFullRoller }: InlineDiceSec
             onClick={() => handleDieSelect(sides)}
             className={cn(
               'min-h-[36px] min-w-[36px] rounded-lg',
-              'text-[10px] font-mono font-bold',
+              'text-xs font-mono font-bold',
               'transition-all duration-150',
               'active:scale-[0.97]',
               'focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-1',
@@ -226,7 +226,7 @@ export function InlineDiceSection({ character, onOpenFullRoller }: InlineDiceSec
         onClick={onOpenFullRoller}
         className={cn(
           'flex items-center gap-0.5',
-          'text-[10px] text-ink-muted hover:text-arcane',
+          'text-xs text-ink-muted hover:text-arcane',
           'transition-colors duration-150',
           'min-h-[44px]',
           'focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-1',

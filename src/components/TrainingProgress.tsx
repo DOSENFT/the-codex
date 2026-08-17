@@ -158,7 +158,7 @@ export function TrainingProgress({ profile }: TrainingProgressProps) {
             <div className="flex flex-wrap gap-1.5 items-center">
               <span className="text-xs text-red-400 font-medium">Needs work:</span>
               {profile.weakCategories.map((cat) => (
-                <Badge key={cat} variant="ember" className="text-[10px] px-2 py-0">
+                <Badge key={cat} variant="ember" className="text-xs px-2 py-0">
                   {CATEGORY_LABELS[cat] ?? cat}
                 </Badge>
               ))}

@@ -179,7 +179,7 @@ export function GrimoireCard({
             </Badge>
             <Badge variant={action.variant}>{action.text}</Badge>
             {range && range !== 'Self' && (
-              <span className="text-[10px] text-forge-2">{range}</span>
+              <span className="text-xs text-forge-2">{range}</span>
             )}
             {spell?.concentration && (
               <Badge variant="ember">Conc</Badge>
@@ -213,7 +213,7 @@ export function GrimoireCard({
           {/* Resource pips */}
           {hasUses && (
             <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="text-[10px] text-forge-2">Uses:</span>
+              <span className="text-xs text-forge-2">Uses:</span>
               <div className="flex gap-0.5">
                 {Array.from({ length: feature!.usesMax! }).map((_, i) => (
                   <button
@@ -224,7 +224,7 @@ export function GrimoireCard({
                       else onRestoreUse?.()
                     }}
                     className={cn(
-                      'w-3 h-3 rounded-full transition-all duration-200',
+                      'pip-tap w-3 h-3 rounded-full transition-all duration-200',
                       'active:scale-90',
                       i < feature!.usesCurrent!
                         ? 'bg-eldritch shadow-[0_0_4px_rgba(157,78,221,0.4)]'
@@ -234,7 +234,7 @@ export function GrimoireCard({
                   />
                 ))}
               </div>
-              <span className="text-[10px] text-forge-2">
+              <span className="text-xs text-forge-2">
                 {feature!.usesCurrent}/{feature!.usesMax}
               </span>
             </div>
@@ -242,13 +242,13 @@ export function GrimoireCard({
 
           {spellSlot && (
             <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="text-[10px] text-forge-2">Slots:</span>
+              <span className="text-xs text-forge-2">Slots:</span>
               <div className="flex gap-0.5">
                 {Array.from({ length: spellSlot.max }).map((_, i) => (
                   <span
                     key={i}
                     className={cn(
-                      'w-3 h-3 rounded-full transition-all duration-200',
+                      'pip-tap w-3 h-3 rounded-full transition-all duration-200',
                       i < spellSlot.current
                         ? 'bg-arcane shadow-[0_0_4px_rgba(61,210,255,0.4)]'
                         : 'bg-white/10 border border-white/20',
@@ -256,7 +256,7 @@ export function GrimoireCard({
                   />
                 ))}
               </div>
-              <span className="text-[10px] text-forge-2">
+              <span className="text-xs text-forge-2">
                 {spellSlot.current}/{spellSlot.max}
               </span>
             </div>
@@ -409,7 +409,7 @@ export function GrimoireCard({
 
           {/* Source */}
           {(spell?.source || feature?.source) && (
-            <p className="text-[10px] text-forge-2 mt-2">
+            <p className="text-xs text-forge-2 mt-2">
               Source: {spell?.source || feature?.source}
             </p>
           )}

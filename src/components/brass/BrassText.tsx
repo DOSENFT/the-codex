@@ -17,7 +17,7 @@ const WEIGHT_CLASS: Record<NonNullable<BrassTextProps['weight']>, string> = {
 }
 
 const SIZE_CLASS: Record<NonNullable<BrassTextProps['size']>, string> = {
-  footnote: 'text-[11px] leading-[1.45]',
+  footnote: 'text-xs leading-[1.45]',
   caption: 'text-[13px] leading-[1.45]',
   body: 'text-[15px] leading-[1.55]',
   section: 'text-[20px] leading-[1.35]',

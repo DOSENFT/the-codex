@@ -163,7 +163,7 @@ export function InlineExplainer({ term, explanation }: InlineExplainerProps) {
           />
 
           {/* Content */}
-          <p className="text-[11px] font-semibold text-arcane uppercase tracking-wider mb-1">
+          <p className="text-xs font-semibold text-arcane uppercase tracking-wider mb-1">
             {term}
           </p>
           <p className="text-xs text-forge-1 leading-relaxed">

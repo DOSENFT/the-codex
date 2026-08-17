@@ -209,7 +209,7 @@ function ComponentPills({ components }: { components: string }) {
           key={l}
           className={cn(
             'inline-flex items-center justify-center',
-            'h-5 w-5 rounded text-[10px] font-mono font-bold',
+            'h-5 w-5 rounded text-xs font-mono font-bold',
             'bg-void-2/60 text-forge-1 border border-bronze/25',
           )}
         >
@@ -217,7 +217,7 @@ function ComponentPills({ components }: { components: string }) {
         </span>
       ))}
       {materialParts.length > 0 && (
-        <span className="text-[11px] text-forge-2 truncate max-w-[120px]" title={materialParts[0]}>
+        <span className="text-xs text-forge-2 truncate max-w-[120px]" title={materialParts[0]}>
           ({materialParts[0]})
         </span>
       )}
@@ -487,7 +487,7 @@ function SpellCard({
 
           {/* Source */}
           {spell.source && (
-            <p className="text-[11px] text-forge-2">
+            <p className="text-xs text-forge-2">
               Source: {spell.source}
             </p>
           )}
@@ -917,7 +917,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
           <SlidersHorizontal size={14} aria-hidden />
           Advanced Filters
           {advancedFilterCount > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-eldritch/30 text-eldritch text-[10px] font-bold">
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-eldritch/30 text-eldritch text-xs font-bold">
               {advancedFilterCount}
             </span>
           )}
@@ -1163,7 +1163,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
               <div key={spell.name}>
                 {showLevelDivider && (
                   <div className="ornate-divider my-2" aria-hidden>
-                    <span className="text-[10px] font-display uppercase tracking-widest text-gold/60">
+                    <span className="text-xs font-display uppercase tracking-widest text-gold/60">
                       {spell.level === 0 ? 'Cantrips' : `Level ${spell.level}`}
                     </span>
                   </div>

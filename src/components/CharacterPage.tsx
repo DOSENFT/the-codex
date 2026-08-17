@@ -383,15 +383,15 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
         {/* Quick stats */}
         <div className="grid grid-cols-3 gap-2">
           <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03] border border-white/5">
-            <span className="text-[10px] text-forge-2 uppercase tracking-wider">AC</span>
+            <span className="text-xs text-forge-2 uppercase tracking-wider">AC</span>
             <span className="text-lg font-mono font-bold text-forge-0">{character.armorClass}</span>
           </div>
           <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03] border border-white/5">
-            <span className="text-[10px] text-forge-2 uppercase tracking-wider">HP</span>
+            <span className="text-xs text-forge-2 uppercase tracking-wider">HP</span>
             <span className="text-lg font-mono font-bold text-forge-0">{character.hitPoints.current}/{character.hitPoints.max}</span>
           </div>
           <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03] border border-white/5">
-            <span className="text-[10px] text-forge-2 uppercase tracking-wider">Prof</span>
+            <span className="text-xs text-forge-2 uppercase tracking-wider">Prof</span>
             <span className="text-lg font-mono font-bold text-forge-0">+{character.proficiencyBonus}</span>
           </div>
         </div>
@@ -420,7 +420,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     studyingAbility === key && 'border-arcane/40 bg-arcane/[0.06]',
                   )}
                 >
-                  <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider mb-1">{key}</span>
+                  <span className="text-xs font-bold text-forge-2 uppercase tracking-wider mb-1">{key}</span>
                   {isEditing ? (
                     <input
                       type="number"
@@ -450,7 +450,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   <button
                     onClick={() => toggleSaveProf(key)}
                     className={cn(
-                      'flex-1 min-h-[32px] rounded-lg text-[9px] font-semibold',
+                      'flex-1 min-h-[32px] rounded-lg text-xs font-semibold',
                       'flex items-center justify-center gap-1',
                       'transition-all duration-200 active:scale-95',
                       isSavingProf
@@ -500,7 +500,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                     {/* Current benchmark */}
                     <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 mb-3">
-                      <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-1">
+                      <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-1">
                         Your {studyingAbility} {score} is:
                       </span>
                       <p className="text-xs text-forge-0">{guide.benchmarks[benchmark]}</p>
@@ -508,7 +508,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                     {/* Affects */}
                     <div className="mb-3">
-                      <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-1.5">
+                      <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-1.5">
                         Governs
                       </span>
                       <div className="flex flex-wrap gap-1">
@@ -520,7 +520,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                     {/* How to increase */}
                     <div>
-                      <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-1.5">
+                      <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-1.5">
                         How to Increase
                       </span>
                       <ul className="flex flex-col gap-1">
@@ -549,7 +549,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
       {/* ─── Skills ─── */}
       <Section id="skills" title="Skills" icon={TrendingUp} characterId={character.id} badge={`${character.skillProficiencies.length} prof`}>
-        <p className="text-[10px] text-forge-2 mb-2 px-1">
+        <p className="text-xs text-forge-2 mb-2 px-1">
           Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
         </p>
         <div className="flex flex-col gap-1">
@@ -600,7 +600,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     )}
                   >
                     <span className="truncate">{skill}</span>
-                    <span className="text-[9px] text-forge-2 ml-1.5 opacity-60">({abilityKey})</span>
+                    <span className="text-xs text-forge-2 ml-1.5 opacity-60">({abilityKey})</span>
                   </button>
 
                   {/* Bonus */}
@@ -622,7 +622,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <BookOpen size={12} className="text-arcane" aria-hidden />
-                            <span className="text-[10px] font-bold text-arcane uppercase">{skill}</span>
+                            <span className="text-xs font-bold text-arcane uppercase">{skill}</span>
                             {ratingStyle && (
                               <Badge variant={ratingStyle.variant}>
                                 {ratingStyle.label}
@@ -632,7 +632,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                         </div>
 
                         {/* Character-specific rating reason */}
-                        <p className="text-[10px] text-forge-2 italic leading-relaxed mb-2 px-1">
+                        <p className="text-xs text-forge-2 italic leading-relaxed mb-2 px-1">
                           {charRating.reason}
                         </p>
 
@@ -641,12 +641,12 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                         </p>
 
                         <div className="mb-2">
-                          <span className="text-[9px] font-bold text-forge-2 uppercase tracking-wider block mb-1">
+                          <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-1">
                             Examples
                           </span>
                           <ul className="flex flex-col gap-0.5">
                             {SKILL_GUIDE[skill].examples.map((ex, i) => (
-                              <li key={i} className="text-[11px] text-forge-2 flex items-start gap-1.5">
+                              <li key={i} className="text-xs text-forge-2 flex items-start gap-1.5">
                                 <Target size={8} className="text-arcane shrink-0 mt-1" aria-hidden />
                                 {ex}
                               </li>
@@ -655,12 +655,12 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                         </div>
 
                         <div>
-                          <span className="text-[9px] font-bold text-forge-2 uppercase tracking-wider block mb-1">
+                          <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-1">
                             Best With
                           </span>
                           <div className="flex flex-wrap gap-1">
                             {SKILL_GUIDE[skill].pairings.map((p, i) => (
-                              <span key={i} className="text-[10px] text-forge-2 bg-white/[0.03] px-2 py-0.5 rounded">
+                              <span key={i} className="text-xs text-forge-2 bg-white/[0.03] px-2 py-0.5 rounded">
                                 {p}
                               </span>
                             ))}
@@ -681,7 +681,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
         <div className="flex flex-col gap-4">
           {/* Ability Score Bars */}
           <div>
-            <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-2">
+            <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-2">
               Ability Scores
             </span>
             <div className="flex flex-col gap-1.5">
@@ -696,7 +696,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   'bg-ember'
                 return (
                   <div key={key} className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-forge-2 w-8 text-right">{key}</span>
+                    <span className="text-xs font-bold text-forge-2 w-8 text-right">{key}</span>
                     <div className="flex-1 h-3 rounded-full bg-white/[0.06] overflow-hidden">
                       <div
                         className={cn('h-full rounded-full transition-all duration-500', barColor)}
@@ -705,7 +705,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     </div>
                     <span className="text-xs font-mono text-forge-0 w-6 text-right">{score}</span>
                     <span className={cn(
-                      'text-[10px] font-mono w-7 text-right',
+                      'text-xs font-mono w-7 text-right',
                       mod >= 0 ? 'text-verdant' : 'text-ember',
                     )}>
                       {formatMod(mod)}
@@ -718,7 +718,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
           {/* Combat Profile Card */}
           <GlassCard className="p-3">
-            <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-2">
+            <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-2">
               Combat Profile
             </span>
             {(() => {
@@ -756,19 +756,19 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
               return (
                 <div className="grid grid-cols-2 gap-2">
                   <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
-                    <span className="text-[9px] text-forge-2 uppercase block">Attack Type</span>
+                    <span className="text-xs text-forge-2 uppercase block">Attack Type</span>
                     <span className="text-xs font-semibold text-forge-0">{attackProfile}</span>
                   </div>
                   <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
-                    <span className="text-[9px] text-forge-2 uppercase block">Best Attack</span>
+                    <span className="text-xs text-forge-2 uppercase block">Best Attack</span>
                     <span className="text-xs font-mono font-semibold text-forge-0">{bestAttack}</span>
                   </div>
                   <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
-                    <span className="text-[9px] text-forge-2 uppercase block">Top Damage</span>
+                    <span className="text-xs text-forge-2 uppercase block">Top Damage</span>
                     <span className="text-xs font-mono font-semibold text-ember">{bestDamage}</span>
                   </div>
                   <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
-                    <span className="text-[9px] text-forge-2 uppercase block">AC {character.armorClass} / HP {character.hitPoints.max}</span>
+                    <span className="text-xs text-forge-2 uppercase block">AC {character.armorClass} / HP {character.hitPoints.max}</span>
                     <span className="text-xs font-semibold text-forge-0">{acAssessment}</span>
                   </div>
                 </div>
@@ -778,7 +778,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
           {/* Skill Proficiency Matrix */}
           <div>
-            <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-2">
+            <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-2">
               Skill Clusters
             </span>
             {(() => {
@@ -811,7 +811,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       <div key={cat.name} className="flex items-center gap-2">
                         <div className="w-20 flex items-center gap-1.5">
                           <span className={cn(
-                            'text-[10px] font-semibold',
+                            'text-xs font-semibold',
                             isBest ? 'text-verdant' : isWorst ? 'text-ember' : 'text-forge-1',
                           )}>
                             {cat.name}
@@ -826,11 +826,11 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <span className="text-[10px] font-mono text-forge-2 w-10 text-right">
+                        <span className="text-xs font-mono text-forge-2 w-10 text-right">
                           {profCount}/{cat.skills.length}
                         </span>
-                        {isBest && <Badge variant="verdant" className="text-[8px] px-1.5 py-0">Best</Badge>}
-                        {isWorst && profCount === 0 && <Badge variant="ember" className="text-[8px] px-1.5 py-0">Gap</Badge>}
+                        {isBest && <Badge variant="verdant" className="text-xs px-1.5 py-0">Best</Badge>}
+                        {isWorst && profCount === 0 && <Badge variant="ember" className="text-xs px-1.5 py-0">Gap</Badge>}
                       </div>
                     )
                   })}
@@ -841,7 +841,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
           {/* Saving Throw Assessment */}
           <div>
-            <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-2">
+            <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-2">
               Saving Throws
             </span>
             <div className="grid grid-cols-3 gap-1.5">
@@ -863,7 +863,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     )}
                   >
                     <span className={cn(
-                      'text-[10px] font-bold',
+                      'text-xs font-bold',
                       isVulnerable ? 'text-ember' :
                       isStrong ? 'text-verdant' : 'text-forge-2',
                     )}>
@@ -894,7 +894,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
               return (
                 <div className="mt-2 p-2 rounded-lg bg-ember/[0.04] border border-ember/15 flex items-start gap-2">
                   <AlertTriangle size={12} className="text-ember shrink-0 mt-0.5" aria-hidden />
-                  <p className="text-[10px] text-ember leading-relaxed">
+                  <p className="text-xs text-ember leading-relaxed">
                     Vulnerable saves: {vulnerabilities.map(v => ABILITY_NAMES[v]).join(', ')}. Consider Resilient or ability increases.
                   </p>
                 </div>
@@ -988,7 +988,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   <div className="mt-2 p-2.5 rounded-lg bg-arcane/[0.04] border border-arcane/15 animate-fade-in">
                     <div className="flex items-center gap-1.5 mb-1">
                       <BookOpen size={10} className="text-arcane" aria-hidden />
-                      <span className="text-[10px] font-bold text-arcane uppercase">{studyingProperty}</span>
+                      <span className="text-xs font-bold text-arcane uppercase">{studyingProperty}</span>
                     </div>
                     <p className="text-xs text-forge-1 leading-relaxed">{WEAPON_PROPERTY_GUIDE[studyingProperty]}</p>
                   </div>
@@ -997,7 +997,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                 {/* Special Abilities */}
                 {weapon.specialAbilities && weapon.specialAbilities.length > 0 && (
                   <div className="mt-2 flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider">Special Abilities</span>
+                    <span className="text-xs font-bold text-forge-2 uppercase tracking-wider">Special Abilities</span>
                     {weapon.specialAbilities.map((ability, ai) => (
                       <button
                         key={ai}
@@ -1012,13 +1012,13 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-semibold text-forge-0">{ability.name}</span>
-                          <Badge variant="eldritch" className="text-[9px]">{ability.trigger}</Badge>
+                          <Badge variant="eldritch" className="text-xs">{ability.trigger}</Badge>
                         </div>
                         {expandedWeaponAbility === ai && (
                           <div className="mt-1.5 animate-fade-in">
-                            <p className="text-[11px] text-forge-1 leading-relaxed">{ability.effect}</p>
+                            <p className="text-xs text-forge-1 leading-relaxed">{ability.effect}</p>
                             {(ability.damageDice || ability.damageType) && (
-                              <p className="text-[10px] font-mono text-ember mt-1">
+                              <p className="text-xs font-mono text-ember mt-1">
                                 {ability.damageDice}{ability.damageType ? ` ${ability.damageType}` : ''}
                               </p>
                             )}
@@ -1039,7 +1039,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
               <div className="flex flex-col gap-3">
                 {/* ── Basic Section ── */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Basic</span>
+                  <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Basic</span>
                   <input
                     type="text"
                     placeholder="Weapon name"
@@ -1081,7 +1081,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* ── Damage Section ── */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Damage</span>
+                  <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Damage</span>
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
@@ -1121,7 +1121,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* ── Properties Section ── */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Properties</span>
+                  <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Properties</span>
                   <div className="flex flex-wrap gap-1.5">
                     {Object.keys(WEAPON_PROPERTY_GUIDE).map(prop => {
                       const isSelected = (weaponForm.properties || []).includes(prop)
@@ -1274,7 +1274,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       {/* Bonus to Hit / Bonus Damage */}
                       <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Bonus to Hit</label>
+                          <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Bonus to Hit</label>
                           <input
                             type="number"
                             placeholder="0"
@@ -1288,7 +1288,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                           />
                         </div>
                         <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Bonus Damage</label>
+                          <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Bonus Damage</label>
                           <input
                             type="number"
                             placeholder="0"
@@ -1305,7 +1305,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                       {/* Mastery Property */}
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Mastery Property</label>
+                        <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Mastery Property</label>
                         <select
                           value={weaponForm.masteryProperty || ''}
                           onChange={e => setWeaponForm({ ...weaponForm, masteryProperty: e.target.value || undefined })}
@@ -1322,7 +1322,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                       {/* Description textarea */}
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Description</label>
+                        <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Description</label>
                         <textarea
                           placeholder="Homebrew flavor text, appearance, lore..."
                           value={weaponForm.description || ''}
@@ -1338,11 +1338,11 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                       {/* Special Abilities */}
                       <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Special Abilities</span>
+                        <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Special Abilities</span>
                         {weaponFormAbilities.map((ability, ai) => (
                           <div key={ai} className="p-2.5 rounded-lg bg-white/[0.02] border border-white/8 flex flex-col gap-1.5">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-eldritch uppercase">Ability {ai + 1}</span>
+                              <span className="text-xs font-bold text-eldritch uppercase">Ability {ai + 1}</span>
                               <button
                                 type="button"
                                 onClick={() => setWeaponFormAbilities(weaponFormAbilities.filter((_, j) => j !== ai))}
@@ -1710,7 +1710,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                 {feat.effects.length > 0 && (
                   <ul className="flex flex-col gap-0.5 mb-1.5">
                     {feat.effects.map((effect, ei) => (
-                      <li key={ei} className="text-[11px] text-forge-2 flex items-start gap-1.5">
+                      <li key={ei} className="text-xs text-forge-2 flex items-start gap-1.5">
                         <span className="w-1 h-1 rounded-full bg-arcane shrink-0 mt-1.5" />
                         {effect}
                       </li>
@@ -1723,9 +1723,9 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   <div className="p-2 rounded-lg bg-ember/[0.04] border border-ember/15 mb-1.5">
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <Swords size={9} className="text-ember" aria-hidden />
-                      <span className="text-[9px] font-bold text-ember uppercase">Tactical Note</span>
+                      <span className="text-xs font-bold text-ember uppercase">Tactical Note</span>
                     </div>
-                    <p className="text-[11px] text-forge-1 leading-relaxed">{feat.tacticalNote}</p>
+                    <p className="text-xs text-forge-1 leading-relaxed">{feat.tacticalNote}</p>
                   </div>
                 )}
 
@@ -1735,12 +1735,12 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     <div className="p-2.5 rounded-lg bg-arcane/[0.04] border border-arcane/15">
                       <div className="flex items-center gap-1.5 mb-2">
                         <BookOpen size={10} className="text-arcane" aria-hidden />
-                        <span className="text-[10px] font-bold text-arcane uppercase">Strategy Guide</span>
+                        <span className="text-xs font-bold text-arcane uppercase">Strategy Guide</span>
                       </div>
 
                       {/* Pairs well with */}
                       <div className="mb-2">
-                        <span className="text-[9px] font-bold text-forge-2 uppercase tracking-wider block mb-1">
+                        <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-1">
                           Pairs Well With
                         </span>
                         <div className="flex flex-wrap gap-1">
@@ -1754,7 +1754,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       <div className="p-2.5 rounded-lg bg-ember/[0.06] border border-ember/20">
                         <div className="flex items-center gap-1.5 mb-1">
                           <Swords size={10} className="text-ember" aria-hidden />
-                          <span className="text-[10px] font-bold text-ember uppercase">Combat Strategy</span>
+                          <span className="text-xs font-bold text-ember uppercase">Combat Strategy</span>
                         </div>
                         <p className="text-xs text-forge-1 leading-relaxed">{synergy.combatTip}</p>
 
@@ -1785,7 +1785,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
               <div className="flex flex-col gap-3">
                 {/* Name — with auto-complete from FEAT_SYNERGIES */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Name</label>
+                  <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Name</label>
                   <input
                     type="text"
                     placeholder="Feat name (e.g. Sentinel)"
@@ -1808,7 +1808,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* Description */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Description</label>
+                  <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Description</label>
                   <textarea
                     placeholder="What does this feat do?"
                     value={featForm.description || ''}
@@ -1825,7 +1825,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                 {/* Source + Homebrew toggle */}
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Source</label>
+                    <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Source</label>
                     <select
                       value={featForm.source || 'PHB'}
                       onChange={e => setFeatForm({ ...featForm, source: e.target.value })}
@@ -1856,10 +1856,10 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* Effects — add/remove */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Effects</label>
+                  <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Effects</label>
                   {featEffects.map((effect, ei) => (
                     <div key={ei} className="flex items-center gap-1.5">
-                      <span className="text-[11px] text-forge-1 flex-1 flex items-start gap-1.5">
+                      <span className="text-xs text-forge-1 flex-1 flex items-start gap-1.5">
                         <span className="w-1 h-1 rounded-full bg-arcane shrink-0 mt-1.5" />
                         {effect}
                       </span>
@@ -1919,7 +1919,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* Ability Increase (optional) */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Ability Increase (optional)</label>
+                  <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Ability Increase (optional)</label>
                   <div className="grid grid-cols-2 gap-2">
                     <select
                       value={featForm.abilityIncrease?.ability || ''}
@@ -1971,7 +1971,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* Prerequisites (optional) */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Prerequisites (optional)</label>
+                  <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Prerequisites (optional)</label>
                   <input
                     type="text"
                     placeholder="e.g. STR 13, Proficiency with heavy armor"
@@ -1987,7 +1987,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* Tactical Note (optional) */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider">Tactical Note (optional)</label>
+                  <label className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Tactical Note (optional)</label>
                   <textarea
                     placeholder="How to use this feat in combat..."
                     value={featForm.tacticalNote || ''}
@@ -2021,7 +2021,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
           {/* Feat Reference — browse known feats from FEAT_SYNERGIES */}
           {(character.feats || []).length === 0 && editingFeat !== -1 && (
             <div className="mt-1">
-              <p className="text-[10px] text-forge-2 mb-2 px-1">
+              <p className="text-xs text-forge-2 mb-2 px-1">
                 Browse the feat reference library below, or add a custom feat above.
               </p>
               <div className="grid grid-cols-2 gap-1.5">
@@ -2054,7 +2054,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       <p className="text-sm text-forge-1 leading-relaxed mb-3">{entry.description}</p>
 
                       <div className="mb-3">
-                        <span className="text-[10px] font-bold text-forge-2 uppercase tracking-wider block mb-1.5">
+                        <span className="text-xs font-bold text-forge-2 uppercase tracking-wider block mb-1.5">
                           Pairs Well With
                         </span>
                         <div className="flex flex-wrap gap-1">
@@ -2067,7 +2067,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       <div className="p-2.5 rounded-lg bg-ember/[0.04] border border-ember/15">
                         <div className="flex items-center gap-1.5 mb-1">
                           <Swords size={10} className="text-ember" aria-hidden />
-                          <span className="text-[10px] font-bold text-ember uppercase">Combat Tip</span>
+                          <span className="text-xs font-bold text-ember uppercase">Combat Tip</span>
                         </div>
                         <p className="text-xs text-forge-1 leading-relaxed">{entry.combatTip}</p>
                       </div>

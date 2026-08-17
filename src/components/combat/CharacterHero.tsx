@@ -56,7 +56,7 @@ export function CharacterHero({ character }: CharacterHeroProps) {
 
       {/* ── Subline — Level · Race · Class — delayed fade-in ── */}
       <motion.p
-        className="mt-1 font-body text-[11px] text-ink-secondary tracking-[0.04em]"
+        className="mt-1 font-body text-xs text-ink-secondary tracking-[0.04em]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.28, delay: 0.1 }}

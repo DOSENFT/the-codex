@@ -91,7 +91,7 @@ export function InitiativeTracker({
       {/* Combatant List */}
       <div className="max-h-[240px] overflow-y-auto -mx-1 px-1 space-y-0.5">
         {sorted.length === 0 && (
-          <p className="text-[10px] text-ink-muted text-center py-3 select-none">
+          <p className="text-xs text-ink-muted text-center py-3 select-none">
             No combatants yet. Add one below.
           </p>
         )}
@@ -143,7 +143,7 @@ export function InitiativeTracker({
               {/* Initiative value */}
               <span
                 className={cn(
-                  'text-[10px] font-mono shrink-0',
+                  'text-xs font-mono shrink-0',
                   isActive ? 'text-arcane' : 'text-ink-muted',
                 )}
               >
@@ -152,7 +152,7 @@ export function InitiativeTracker({
 
               {/* HP display */}
               {entry.hp && (
-                <span className="text-[10px] font-mono text-ink-muted shrink-0">
+                <span className="text-xs font-mono text-ink-muted shrink-0">
                   {entry.hp}
                 </span>
               )}
@@ -185,7 +185,7 @@ export function InitiativeTracker({
           className={cn(
             'mt-2 w-full flex items-center justify-center gap-1',
             'min-h-[36px] rounded-lg',
-            'text-[10px] font-display uppercase tracking-wider text-ink-muted',
+            'text-xs font-display uppercase tracking-wider text-ink-muted',
             'border border-dashed border-gold/15',
             'hover:border-gold/30 hover:text-ink-secondary hover:bg-gold/[0.04]',
             'transition-all duration-200',
@@ -255,7 +255,7 @@ export function InitiativeTracker({
 
             <label
               className={cn(
-                'flex items-center gap-1 text-[10px] text-ink-muted select-none cursor-pointer shrink-0',
+                'flex items-center gap-1 text-xs text-ink-muted select-none cursor-pointer shrink-0',
                 'min-h-[36px] px-2 rounded-lg',
                 'hover:bg-gold/[0.04] transition-colors',
               )}
@@ -276,7 +276,7 @@ export function InitiativeTracker({
               disabled={!name.trim() || !initiative}
               className={cn(
                 'flex-1 min-h-[36px] rounded-lg',
-                'bg-arcane/20 text-arcane font-display text-[10px] uppercase tracking-wider',
+                'bg-arcane/20 text-arcane font-display text-xs uppercase tracking-wider',
                 'border border-arcane/25',
                 'hover:bg-arcane/30 transition-all duration-200',
                 'disabled:opacity-40 disabled:cursor-not-allowed',
@@ -297,7 +297,7 @@ export function InitiativeTracker({
               }}
               className={cn(
                 'min-h-[36px] px-3 rounded-lg',
-                'text-ink-muted text-[10px]',
+                'text-ink-muted text-xs',
                 'hover:text-ink-secondary hover:bg-ash-mid/60 transition-all duration-200',
                 'active:scale-[0.97]',
                 'focus-visible:outline-2 focus-visible:outline-gold',

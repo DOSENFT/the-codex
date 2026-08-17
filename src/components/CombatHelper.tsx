@@ -840,14 +840,14 @@ function SmartActionsPanel({
                       </span>
                       <div className="flex items-center gap-2">
                         {info && (
-                          <span className="text-[10px] font-mono text-forge-2">
+                          <span className="text-xs font-mono text-forge-2">
                             {info}
                           </span>
                         )}
                         <Badge variant="ember">{action.resourceCost}</Badge>
                       </div>
                     </div>
-                    <div className="text-[10px] text-forge-2 mt-0.5 leading-snug line-clamp-2">
+                    <div className="text-xs text-forge-2 mt-0.5 leading-snug line-clamp-2">
                       {action.description}
                     </div>
                     {action.dice && (
@@ -893,7 +893,7 @@ function SmartActionsPanel({
                 if (spells.length === 0) return null
                 return (
                   <div key={groupLabel}>
-                    <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider mb-1.5 block px-1">
+                    <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-1.5 block px-1">
                       {groupLabel}
                     </span>
                     <div className="flex flex-col gap-1.5">
@@ -943,31 +943,31 @@ function SmartActionsPanel({
                                   />
                                 )}
                               </div>
-                              <span className="text-[10px] font-mono text-forge-2 shrink-0 whitespace-nowrap">
+                              <span className="text-xs font-mono text-forge-2 shrink-0 whitespace-nowrap">
                                 {spell.range}
                               </span>
                             </div>
                             {/* Mechanics row */}
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               {spell.saveType ? (
-                                <span className="text-[10px] font-mono text-arcane">
+                                <span className="text-xs font-mono text-arcane">
                                   DC {character.spellSaveDC} {spell.saveType}
                                 </span>
                               ) : spell.level > 0 ? (
-                                <span className="text-[10px] font-mono text-arcane">
+                                <span className="text-xs font-mono text-arcane">
                                   +{character.spellAttackBonus} hit
                                 </span>
                               ) : null}
                               {spell.damageDice && (
-                                <span className="text-[10px] font-mono text-ember font-medium">
+                                <span className="text-xs font-mono text-ember font-medium">
                                   {spell.damageDice}{spell.damageType ? ` ${spell.damageType}` : ''}
                                 </span>
                               )}
                               {spell.castingTime.toLowerCase().includes('bonus') && (
-                                <Badge variant="ember" className="text-[9px] px-1.5 py-0">BA</Badge>
+                                <Badge variant="ember" className="text-xs px-1.5 py-0">BA</Badge>
                               )}
                               {spell.castingTime.toLowerCase().includes('reaction') && (
-                                <Badge variant="ember" className="text-[9px] px-1.5 py-0">Rx</Badge>
+                                <Badge variant="ember" className="text-xs px-1.5 py-0">Rx</Badge>
                               )}
                             </div>
                           </button>
@@ -1023,7 +1023,7 @@ function SmartActionsPanel({
                 <div className="text-xs font-semibold text-forge-0 group-hover:text-arcane transition-colors">
                   {action.name}
                 </div>
-                <div className="text-[10px] text-forge-2 mt-0.5 leading-snug line-clamp-2">
+                <div className="text-xs text-forge-2 mt-0.5 leading-snug line-clamp-2">
                   {action.description}
                 </div>
                 <Badge
@@ -1132,7 +1132,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
         <div className="mt-3 flex flex-col gap-4">
           {/* Default State */}
           <div>
-            <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider block mb-1">
+            <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-1">
               Default State
             </span>
             <p className="text-sm text-forge-1 italic">{persona.defaultState}</p>
@@ -1141,7 +1141,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
           {/* Physical Tics */}
           {persona.physicalTics.length > 0 && (
             <div>
-              <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider block mb-1.5">
+              <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-1.5">
                 Physical Tics
               </span>
               <div className="flex gap-2 flex-wrap">
@@ -1164,7 +1164,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
           {/* Scene Instincts */}
           {persona.sceneInstincts.length > 0 && (
             <div>
-              <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider block mb-1.5">
+              <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-1.5">
                 Scene Instincts
               </span>
               <ul className="flex flex-col gap-1">
@@ -1180,7 +1180,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
 
           {/* Patron */}
           <div>
-            <span className="text-[10px] font-semibold text-forge-2 uppercase tracking-wider block mb-1">
+            <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-1">
               Patron
             </span>
             <p className="text-sm text-ember">

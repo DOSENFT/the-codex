@@ -495,7 +495,7 @@ function CharacterPresets({
                 aria-label={`Attack with ${weapon.name}: d20 + ${bonus}`}
               >
                 <span className="block">{weapon.name}</span>
-                <span className="block text-[10px] text-arcane/70 font-mono">
+                <span className="block text-xs text-arcane/70 font-mono">
                   d20{bonus >= 0 ? `+${bonus}` : bonus}
                 </span>
               </button>
@@ -515,7 +515,7 @@ function CharacterPresets({
             aria-label={`Spell Attack: d20 + ${character.spellAttackBonus}`}
           >
             <span className="block">Spell Attack</span>
-            <span className="block text-[10px] text-eldritch/70 font-mono">
+            <span className="block text-xs text-eldritch/70 font-mono">
               d20{character.spellAttackBonus >= 0 ? `+${character.spellAttackBonus}` : character.spellAttackBonus}
             </span>
           </button>
@@ -545,7 +545,7 @@ function CharacterPresets({
               >
                 <span className="block">{ability}</span>
                 <span className={cn(
-                  'block text-[10px] font-mono',
+                  'block text-xs font-mono',
                   isProficient ? 'text-verdant/70' : 'text-forge-2',
                 )}>
                   {bonus >= 0 ? `+${bonus}` : bonus}
@@ -578,7 +578,7 @@ function CharacterPresets({
                   aria-label={`${weapon.name} damage: ${weapon.damageDice} + ${damageMod}`}
                 >
                   <span className="block">{weapon.name}</span>
-                  <span className="block text-[10px] text-ember/70 font-mono">
+                  <span className="block text-xs text-ember/70 font-mono">
                     {weapon.damageDice}{damageMod >= 0 ? `+${damageMod}` : damageMod} {weapon.damageType}
                   </span>
                 </button>

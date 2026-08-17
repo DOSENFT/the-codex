@@ -459,21 +459,21 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
               <p className={cn('text-lg font-display font-bold', getScoreColor(averages.voice * 2))}>
                 {averages.voice}
               </p>
-              <p className="text-[10px] text-forge-2">/5</p>
+              <p className="text-xs text-forge-2">/5</p>
             </div>
             <div className="stat-frame">
               <p className="text-xs text-forge-2 font-medium">Vocab</p>
               <p className={cn('text-lg font-display font-bold', getScoreColor(averages.vocab * 2))}>
                 {averages.vocab}
               </p>
-              <p className="text-[10px] text-forge-2">/5</p>
+              <p className="text-xs text-forge-2">/5</p>
             </div>
             <div className="stat-frame">
               <p className="text-xs text-forge-2 font-medium">Register</p>
               <p className={cn('text-lg font-display font-bold', getScoreColor(averages.emotion * 2))}>
                 {averages.emotion}
               </p>
-              <p className="text-[10px] text-forge-2">/5</p>
+              <p className="text-xs text-forge-2">/5</p>
             </div>
           </div>
 
@@ -593,22 +593,22 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
               {/* Coaching Badge */}
               <div className="flex items-center gap-3 mr-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-forge-2">Voice</span>
+                  <span className="text-xs text-forge-2">Voice</span>
                   {renderDots(exchange.coaching.voiceConsistency)}
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-forge-2">Vocab</span>
+                  <span className="text-xs text-forge-2">Vocab</span>
                   {renderDots(exchange.coaching.vocabularyMatch)}
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-forge-2">Register</span>
+                  <span className="text-xs text-forge-2">Register</span>
                   {renderDots(exchange.coaching.emotionalRegister)}
                 </div>
               </div>
 
               {/* Coaching Note */}
               {exchange.coaching.note && (
-                <p className="text-[11px] text-forge-2 italic mr-1 max-w-[85%] text-right">
+                <p className="text-xs text-forge-2 italic mr-1 max-w-[85%] text-right">
                   {exchange.coaching.note}
                 </p>
               )}
@@ -734,7 +734,7 @@ export function ConversationDrill({ character, onComplete, onBack }: Conversatio
             </Button>
           </div>
 
-          <p className="text-[10px] text-forge-2 text-center">
+          <p className="text-xs text-forge-2 text-center">
             Press Enter to send, Shift+Enter for new line
           </p>
         </div>

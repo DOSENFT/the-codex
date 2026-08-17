@@ -149,7 +149,7 @@ export function SpellSlotSigils({
             {/* Roman numeral level label — grimoire chapter number */}
             <span
               className={cn(
-                'font-display text-[11px] font-bold gold-gradient-text',
+                'font-display text-xs font-bold gold-gradient-text',
                 'tracking-[0.1em] leading-none',
                 'w-8 shrink-0 text-right pr-2',
                 'select-none',
@@ -268,7 +268,7 @@ export function SpellSlotSigils({
             {/* Count — right-aligned, micro parchment-card badge */}
             <span
               className={cn(
-                'font-mono text-[10px] text-ink-muted',
+                'font-mono text-xs text-ink-muted',
                 'shrink-0 tabular-nums',
                 'pl-2 w-10 text-right',
                 'bg-ash-mid rounded px-1.5 py-0.5',
