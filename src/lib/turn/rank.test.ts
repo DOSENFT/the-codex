@@ -333,3 +333,67 @@ describe('on Nix’s real sheet', () => {
     expect(total).toBe(unrankedTotal)
   })
 })
+
+describe('the reaction weight, read twice — Slice 7', () => {
+  /* One fact about the world — whose turn it is — read from both sides. The
+     same weight that buries a reaction on your turn is what lifts it during
+     the moment, and the tests below are the argument for the sign flip and,
+     separately, for the SILENCE that goes with it. */
+
+  const MOMENT: RankContext = { ...HEALTHY, yourTurn: false }
+  const react = () => opt({ cost: { slot: 'reaction', label: 'Reaction' } })
+
+  it('buries a reaction below a bonus action on your turn', () => {
+    expect(score(react())).toBeLessThan(score(opt({ cost: { slot: 'bonusAction', label: 'Bonus' } })))
+  })
+
+  it('lifts it above an action during the moment', () => {
+    // Above `action`, not merely positive: off-turn an action is not weaker
+    // than a reaction, it is illegal, and the ordering has to say so.
+    expect(score(react(), MOMENT)).toBeGreaterThan(score(opt(), MOMENT))
+  })
+
+  it('flips the sign rather than merely softening it', () => {
+    expect(score(react())).toBeLessThan(0)
+    expect(score(react(), MOMENT)).toBeGreaterThan(0)
+  })
+
+  it('says "Not on your turn" only when that is true', () => {
+    expect(why(react())).toBe('Not on your turn')
+    expect(why(react(), MOMENT)).toBeUndefined()
+  })
+
+  it('stays silent during the moment rather than repeating the screen', () => {
+    // The band above the list already says someone else is acting. A row that
+    // says it again, quieter, is the "Undertow — Undertow" fault of Slice 6c.
+    // Silence here is a decision, so it is pinned like one.
+    expect(scoreOption(react(), MOMENT).factors.some(f => f.phrase !== undefined)).toBe(false)
+  })
+
+  it('leaves a heal free to outrank the reaction when he is dying', () => {
+    // The lift must not become a rule that a reaction always wins. Off-turn a
+    // heal is blocked anyway, but the ranking is not allowed to depend on that
+    // — the composer blocks rows, this file only orders them.
+    const heal = opt({ detail: 'restores hit points' })
+    expect(score(heal, { ...DYING, yourTurn: false })).toBeGreaterThan(score(react(), MOMENT))
+  })
+
+  it('treats an absent yourTurn exactly as it treated every caller before it', () => {
+    // The field is optional so that Marcus's saved encounters, and every
+    // context written before Slice 7, keep their meaning rather than silently
+    // acquiring the opposite one.
+    const explicit: RankContext = { ...HEALTHY, yourTurn: true }
+    expect(scoreOption(react(), HEALTHY)).toStrictEqual(scoreOption(react(), explicit))
+  })
+
+  it('does not touch an action, a bonus action or a free thing', () => {
+    for (const cost of [
+      { slot: 'action' as const, label: 'Action' },
+      { slot: 'bonusAction' as const, label: 'Bonus' },
+      { slot: 'free' as const, label: 'Free' },
+    ]) {
+      const o = opt({ cost })
+      expect(score(o, MOMENT)).toBe(score(o))
+    }
+  })
+})

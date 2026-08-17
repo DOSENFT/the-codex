@@ -69,7 +69,8 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 6c — the open-world pass: a fixture of **entirely invented content** must compose, rank, spend and undo correctly **— DONE 2026-08-16, see below**
 
 **Wave 2 — the missing 40% of combat**
-- [ ] 7 — reactions, opportunity attacks, readied actions
+- [x] 7 — reactions + opportunity attacks + **the moment** (readied actions deferred to **7b** — see below) **— DONE 2026-08-16, see below**
+- [ ] 7b — readied actions ("I ready an attack for when he opens the door"), which need a *trigger* the app can hold and re-offer
 - [ ] 8 — concentration surfacing + Bloodied edge detection
 - [ ] 9 — mobs (8 goblins, 8 pips)
 
@@ -823,6 +824,129 @@ Nix assertions are byte-unchanged.
   *(from 6b)*.
 - **iPad layout**: for a character with few options the third column is nearly empty and the lower
   two-thirds of the screen is blank. Pre-existing, not caused by this slice — scope for 13/14.
+
+## ✅ Slice 7 — REACTIONS, AND THE MOMENT, done 2026-08-16
+
+**Why this slice existed.** The app had no notion of *whose turn it is*. Everything followed from
+that. A reaction was ranked to the bottom of every list with the note *"Not on your turn"* — on
+every turn, forever, because there was no other kind of turn — so it could be read but never
+reached. **Opportunity Attack was prose in `dnd-data.ts`'s `REACTIONS` array, read by nothing,
+offered on no turn of no fight, ever.** And `endTurn` reset all four economy slots at the round
+boundary, which handed back a reaction spent on your own turn *the instant you tapped End turn* —
+the exact window in which you would reach for it a second time.
+
+At the table that is the loudest gap in the product: for four fifths of a combat round it is not
+Marcus's turn, and for four fifths of a combat round the screen was a list of things he could not do,
+headed **YOUR TURN**.
+
+### What the engine gained
+- `CombatState.yourTurn?: boolean` — **optional on purpose**. `reconcile` reads a missing field as
+  `true`, so every encounter already sitting in Marcus's localStorage opens on his own turn exactly
+  as it did before. Proven in the browser, not asserted in a comment (proof §1).
+- `beginTurn`, a **separate event** from `endTurn`, all the way up through the reducer, the
+  `CombatApi` and the screen. 2024 refreshes the reaction at the **start** of your turn. The stretch
+  between the two verbs *is* the moment; one button that did both would delete the window and, with
+  it, the rule.
+- `rank.ts` gained `reactionNow: +40` — the **exact mirror** of the existing `reaction: -40`. One
+  fact about the world read twice: the same weight that buries a reaction on your turn lifts it
+  above `action` (+20) during the moment, because off-turn an action is not weaker, it is illegal.
+- `compose.ts` **synthesises the opportunity attack** from every melee weapon on the sheet, carrying
+  that weapon's real dice, to-hit and mastery rider, with the trigger prepended to the mechanics
+  line: *"When a creature you can see leaves your reach · +7 to hit …"*. Not in `options.ts`, which
+  stays pinned byte-identical to the legacy `TurnSummary` code.
+- Off-turn the two halves of the list **swap**: reactions become the shortlist, everything else falls
+  to *Everything else*, greyed with *"It is not your turn"* — D greys with a reason, it never hides.
+
+### The guard test that was made MORE precise, never looser
+`compose.equivalence.test.ts` exists to prove the composer **invents nothing** — and this slice
+deliberately invents a row, so four of its assertions failed. The fix was not to widen what it
+tolerates. `TurnOption` gained `synthetic?: boolean`, the test gained a `fromSheet()` filter, and
+**14 new assertions pin exactly what may be invented**: one row, named for the weapon, melee only
+(the thrown Javelin gets none), carrying that weapon's own dice and rider, with an id nothing else
+shares. Anything the composer invents now has to **say so out loud**.
+
+### Wording changed in the reducer, and only where it had become false
+*"Your reaction is already spent **this turn**"* is read during a turn that is not yours, and says
+something untrue about the turn it is being read in — an action is spent this turn and returns with
+the next one; a reaction, once spent, stays spent through everybody else's turns. It now reads
+*"— it returns when your turn does."* **Only the reaction's wording moved.** The other three slots
+are untouched, and a test asserts the phrase *"this turn"* is absent from that one refusal.
+
+### THE FRONT END — the moment, designed rather than assumed
+Three treatments were built **over the real app, with Nix's real sheet, in the real off-turn state**
+and shot on both devices — not drawings. **A** *The Dimming*: full-screen scrim, fixed bottom slab.
+**B** *The Turning Page*: the same page turns over in place. **C** *The Armed Rail*: a fixed rail of
+lit sigils. Seven screenshots at `_shots-moment/`.
+
+**B ships**, with A's naming band and C's *what-you-still-hold* honesty grafted in. A and C both
+**build a second screen**: the slab and the rail cover the sheet at the exact instant Marcus is
+deciding whether to spend his Reaction, and both imply a modal, dismissable moment **the engine
+cannot detect** — there is no board until Slice 9 and nothing in this build knows a goblin moved.
+
+So nothing is covered. The band names what is happening, the caption stops lying, the one or two
+genuinely live rows take a lit amber 3px edge and 60px of height, and everything else stays exactly
+where it was.
+
+**Nothing is dimmed by opacity, and that was measured.** The obvious move — side columns to `.55` so
+the middle glows — computes `--d-dim` (5.40:1) down to about **2.3:1**. Focus bought by pushing every
+label on the sheet under AA, at a table, in candlelight. All emphasis here is additive. The columns
+*do* go quiet, honestly: off-turn the engine reports Action, Bonus and Move closed, so the economy
+strip unlights itself because it **is** unlit.
+
+### Two defects found by LOOKING at the shots — the 6c lesson, still paying
+1. **The caption said "YOUR TURN" over a list of reactions.** The composer had been correct about
+   `yourTurn` for the whole of the engine work; the heading was a string literal from Slice 1 that no
+   unit test reads. Now `{turn.yourTurn ? 'Your turn' : 'The moment'}`, pinned in the proof.
+2. **Every live row repeated the band back at him.** The rank note under each reaction read *"This is
+   the moment"*, directly beneath a band that had just said it louder. That is **"Undertow —
+   Undertow" again**. The phrase was dropped and only the weight kept: off-turn the score moves and
+   the row stays quiet, which is what `rank.ts`'s own rule already demanded — *the row speaks only
+   when it has something the screen does not already show*. Pinned by `rank.test.ts` and by the proof.
+
+### 🔴 What was deliberately NOT built, and why
+- **No "Let it pass" button.** Every treatment sketched one. There is **no moment-event to dismiss**
+  until Slice 9 supplies a board, so it would be a control wired to nothing — the half-built-feature
+  rule made visible, and the exact sin the dead *"Log damage"* button was removed for in Slice 6.
+- **No named trigger.** *"The goblin steps out of your reach"* is a sentence this build cannot check,
+  and it would be printed in the one place Marcus would trust it most. The band says only what the
+  app knows: *"Someone else is acting"* / *"Your Reaction is the one thing that is yours right now."*
+  The second line is read off `economy.reaction` and flips to *"Your Reaction is spent — it returns
+  when your turn does"* once he has used it. **The named trigger, and A's escalation with it, arrive
+  with Slice 9's board.**
+- **Readied actions → 7b.** A readied action is a *stored trigger the app must hold across turns and
+  re-offer*, which is a state machine, not a ranking change. Folding it in here would have shipped
+  two half-things instead of one whole one.
+
+### Proof
+`npx tsc -b --force` clean · `npx vitest run` **282/282** across 10 files (252 at the start of Slice
+7) · `npx vite build` clean · **8/8 mutations killed**, each `cmp`-guarded: `yourTurn` always true ·
+the fold never turns over · economy ignores whose turn it is · no off-turn block reason · OA for
+ranged weapons too · the reaction penalty never inverts · `endTurn` hands the reaction back (this one
+**SURVIVED** first time and forced a missing six-test group into existence) · no off-turn refusal in
+the reducer.
+
+`docs/plans/codex-v1/reference/prove-slice7.mjs` — Playwright against a real `vite build`, **45/45,
+console clean**: an encounter saved *without* the field opens on his turn · the OA is on screen at the
+bottom with `1d8+4` and *Sap* · exactly one, none for the Javelin · End turn → the caption, the band,
+the economy and the footer all turn over together · the live rows take the lit 3px edge and the
+blocked ones keep the plain 2px *(read off computed style — a typo in that selector fails silently
+and beautifully)* · his sword is greyed with a reason, not hidden · spend → the reaction is gone from
+storage and the band stops promising it · a second reach is **not merely refused, it is not
+pressable** · reload, the iPad sleeping through the rest of the round → still spent, undo still
+offered · *My turn begins* → the reaction comes back **with the turn, not before it**.
+
+`prove-slice6b.mjs` and `prove-slice6c.mjs` re-run: **both still ALL PASS.**
+
+Shots: `_shots-app/slice7-{moment,yourturn}-{phone,ipad}.png`, `_shots-moment/moment-{a,b,c}-*.png`.
+
+### Still open, carried forward
+- Everything carried from 6b/6c below is unchanged.
+- **Off-turn, five blocked rows each print *"It is not your turn"* in ember.** Honest, and each row
+  genuinely owes a screen reader its own reason — but five identical ember lines under a band that
+  already said it is loud. Fixing it properly needs a *tone* on `blockedReason` in the model;
+  `TurnScreenD` must not learn to recognise a rules string. **Scope for Slice 13.**
+- **`Opportunity Attack — Hearthbrand` wraps to two lines of Cinzel on a 390px phone.** Readable, but
+  the row is tall. Slice 14's typography pass.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

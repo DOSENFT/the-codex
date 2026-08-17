@@ -50,6 +50,13 @@ export interface TakenOption {
 export type CombatEvent =
   | { type: 'takeOption'; option: TakenOption }
   | { type: 'endTurn' }
+  /** Slice 7. My turn comes round again — the moment my Reaction returns.
+   *
+   *  Split out of `endTurn` because 2024 refreshes the reaction at the START
+   *  of your turn, not at the end of it. A reaction spent on the rogue's turn
+   *  must still be spent while the ogre swings, which is precisely the moment
+   *  you would reach for it a second time and the app has to say no. */
+  | { type: 'beginTurn' }
   | { type: 'startCombat' }
   | { type: 'endCombat' }
 

@@ -109,8 +109,24 @@ function sameSlots(a: CombatSlots, b: CombatSlots): boolean {
  *  after every reduce. */
 export function reconcile(state: SessionState): SessionState {
   const spellSlots = mirrorOf(state.character)
-  if (sameSlots(state.combat.spellSlots ?? {}, spellSlots)) return state
-  return { ...state, combat: { ...state.combat, spellSlots } }
+  const slotsAgree = sameSlots(state.combat.spellSlots ?? {}, spellSlots)
+  // Slice 7. A combat state written before this build has no `yourTurn`, and
+  // Marcus has one sitting in localStorage right now. Absent reads as TRUE —
+  // "it is your turn" is the only behaviour the app has ever had, so nothing
+  // he has saved changes meaning when he loads this build.
+  const turnKnown = typeof state.combat.yourTurn === 'boolean'
+  // Identity is preserved when there is nothing to fix. Callers compare states
+  // with strictEqual to prove an event changed nothing, and a fresh object
+  // every time would quietly turn those proofs into tautologies.
+  if (slotsAgree && turnKnown) return state
+  return {
+    ...state,
+    combat: {
+      ...state.combat,
+      ...(slotsAgree ? {} : { spellSlots }),
+      ...(turnKnown ? {} : { yourTurn: true }),
+    },
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -174,6 +190,8 @@ export function reduce(
       return takeOption(state, event, event.option, log)
     case 'endTurn':
       return endTurn(state, event)
+    case 'beginTurn':
+      return beginTurn(state, event)
     case 'startCombat':
       return startCombat(state, event)
     case 'endCombat':
@@ -204,8 +222,28 @@ function takeOption(
   const slot = option.slot
   if (slot === 'action' || slot === 'bonusAction' || slot === 'reaction') {
     if (combat.turnActions?.[slot]) {
-      return refuse(state, `Your ${SLOT_WORD[slot]} is already spent this turn.`)
+      // Slice 7 dropped "this turn" from the reaction's refusal, and only the
+      // reaction's. An action IS spent this turn and comes back with the next
+      // one; a reaction, once spent, stays spent through everybody else's turns
+      // until yours comes round — so "already spent this turn" was the one
+      // phrase guaranteed to be read during a turn that is not yours, saying
+      // something false about the turn it is being read in. The other three
+      // keep their wording untouched.
+      const when = slot === 'reaction' ? ' — it returns when your turn does' : ' this turn'
+      return refuse(state, `Your ${SLOT_WORD[slot]} is already spent${when}.`)
     }
+  }
+
+  // Slice 7. Off-turn, a reaction is the ONLY thing you own. The screen already
+  // greys everything else, but the screen is a view and this is the authority:
+  // a stale render, a double-tap that lands after the turn flipped, or a log
+  // entry replayed from a build that did not know about turns all arrive here.
+  //
+  // `free` is not refused. A free rider is bookkeeping, not an action — the
+  // reducer has always treated it as costing nothing, and taking that away
+  // off-turn would remove capability to enforce a rule nobody is breaking.
+  if (combat.yourTurn === false && slot !== 'reaction' && slot !== 'free') {
+    return refuse(state, `It is not your turn — only a Reaction is yours right now.`)
   }
 
   // -- 2. the spell slot -----------------------------------------------------
@@ -309,7 +347,51 @@ function endTurn(state: SessionState, event: CombatEvent): Applied {
       combat: {
         ...combat,
         round: combat.round + 1,
+        // SLICE 7 — THE ONE CHANGE HERE, AND IT IS A RULES FIX.
+        //
+        // The action, the bonus action and the movement are gone the instant
+        // your turn is: you cannot take any of them while the ogre swings.
+        // The REACTION is the exception — it is the only thing you own during
+        // everybody else's turn, and 2024 gives it back at the START of your
+        // next turn, not at the end of this one. Clearing it here (as every
+        // build before this one did) meant a reaction spent on your own turn
+        // was silently handed back to you the moment you tapped End turn, and
+        // you could spend it again before your next turn ever arrived.
+        //
+        // So it survives, and `beginTurn` is what returns it.
+        turnActions: {
+          action: false,
+          bonusAction: false,
+          movement: false,
+          reaction: combat.turnActions?.reaction === true,
+        },
+        yourTurn: false,
+      },
+    },
+    entry,
+  }
+}
+
+/** My turn comes round again. Everything refreshes, including the reaction.
+ *
+ *  Deliberately NOT folded into `endTurn`. The gap between the two is the
+ *  whole point of the slice: it is the stretch of table time where Marcus owns
+ *  exactly one thing, and until now the app pretended it did not exist. */
+function beginTurn(state: SessionState, event: CombatEvent): Applied {
+  const { combat } = state
+  const entry: LogEntry = {
+    event,
+    restore: { combat: snap(combat) },
+    label: `Start of round ${combat.round}`,
+    round: combat.round,
+  }
+  return {
+    state: {
+      ...state,
+      combat: {
+        ...combat,
         turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
+        yourTurn: true,
       },
     },
     entry,

@@ -51,6 +51,13 @@ export interface CombatApi {
   inCombat: boolean
   take: (option: TurnOption) => void
   endTurn: () => void
+  /** Your turn comes round again — and with it, your Reaction.  Slice 7.
+   *
+   *  Deliberately a separate verb from `endTurn`, all the way up to here. The
+   *  stretch between the two is everyone else's turn, and it is the only window
+   *  in which a Reaction is the whole of what you own. Collapsing the pair into
+   *  one button would delete that window and, with it, the rule. */
+  beginTurn: () => void
   startEncounter: () => void
   endEncounter: () => void
   undoLast: () => void
@@ -170,6 +177,7 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
     [dispatch],
   )
   const endTurn = useCallback(() => dispatch({ type: 'endTurn' }), [dispatch])
+  const beginTurn = useCallback(() => dispatch({ type: 'beginTurn' }), [dispatch])
   const startEncounter = useCallback(() => dispatch({ type: 'startCombat' }), [dispatch])
   const endEncounter = useCallback(() => dispatch({ type: 'endCombat' }), [dispatch])
 
@@ -191,6 +199,7 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
       inCombat: combat.inCombat,
       take,
       endTurn,
+      beginTurn,
       startEncounter,
       endEncounter,
       undoLast,
@@ -198,7 +207,7 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
       refusal,
       dismissRefusal: () => setRefusal(null),
     }),
-    [turn, combat.inCombat, take, endTurn, startEncounter, endEncounter, undoLast, log, refusal],
+    [turn, combat.inCombat, take, endTurn, beginTurn, startEncounter, endEncounter, undoLast, log, refusal],
   )
 
   return <CombatContext.Provider value={value}>{children}</CombatContext.Provider>

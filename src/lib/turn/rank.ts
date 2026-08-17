@@ -42,6 +42,14 @@ export interface RankContext {
   bloodied: boolean
   /** Name of the spell already held, or null.  Drives the clash factor. */
   concentratingOn: string | null
+  /** Is it the character's own turn?  Slice 7.
+   *
+   *  OPTIONAL, and absent means `true`. Every caller before Slice 7 was, by
+   *  construction, ranking a turn that belonged to the player — there was no
+   *  other kind — so a missing value carries exactly the meaning those callers
+   *  intended, and rank.test.ts's existing contexts keep their old scores to
+   *  the point. */
+  yourTurn?: boolean
 }
 
 /** One reason the score moved, kept so the number is never a black box.
@@ -69,6 +77,13 @@ const W = {
   /** A reaction happens on someone ELSE's turn.  Large and blunt on purpose:
    *  no reaction should ever outrank a real move on the "your turn" list. */
   reaction: -40,
+  /** ...and the exact mirror of it during the moment.  Slice 7.
+   *
+   *  When it is NOT your turn, a reaction is not merely allowed, it is the only
+   *  thing that can happen — so the same weight that buried it now lifts it,
+   *  above `action` (20), because an action is at that instant illegal. The
+   *  sign flip is the whole idea: one fact about the world, read twice. */
+  reactionNow: 40,
   /** Spending a slot costs more the higher the tier.  A 3rd-level slot is a
    *  real decision; the app should not casually put it at the top. */
   slotBase: -6,
@@ -161,7 +176,30 @@ export function scoreOption(option: TurnOption, ctx: RankContext, hints: RankHin
   // -- structure: what kind of turn-thing is this ---------------------------
   if (option.cost.slot === 'action') add('action', W.action)
   else if (option.cost.slot === 'bonusAction') add('bonus action', W.bonusAction)
-  else if (option.cost.slot === 'reaction') add('reaction', W.reaction, 'Not on your turn')
+  else if (option.cost.slot === 'reaction') {
+    // THE WEIGHT FLIPS AND THE PHRASE VANISHES — the two are not symmetric, and
+    // the asymmetry is the point.
+    //
+    // "Not on your turn" earns its line on your turn: the row is one of a dozen
+    // and it has sunk below the rest, so it owes an explanation for where it
+    // sits. During the moment there is nothing to explain. It sank past nothing
+    // and it is not competing with anything, because every other row on the
+    // screen is greyed.
+    //
+    // The phrase written here first was "This is the moment", and the off-turn
+    // screenshot is what killed it: the band at the top of the list already
+    // says someone else is acting, and underneath it every live row repeated
+    // "This is the moment" in dim grey — two rows saying, in a quieter voice,
+    // the sentence directly above them. That is the same fault Slice 6c found
+    // rendering "Undertow — Undertow": a line that repeats what the screen has
+    // already said teaches nothing and costs a line of phone.
+    //
+    // So off-turn the score moves and the row stays quiet, which is exactly
+    // what this file's rule asks for — the row speaks only when it has
+    // something the screen does not already show.
+    if (ctx.yourTurn === false) add('reaction', W.reactionNow)
+    else add('reaction', W.reaction, 'Not on your turn')
+  }
 
   // No magnitude term — see the note above the weights. `option.dice` is read
   // by nothing here on purpose, and a passing glance at it should stop.

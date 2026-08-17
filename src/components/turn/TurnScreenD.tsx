@@ -25,6 +25,14 @@ export interface TurnScreenDProps {
   /** Take an option.  Rows are inert text until this is supplied. */
   onTake?: (option: TurnOption) => void
   onEndTurn?: () => void
+  /** Your turn comes round again.  Slice 7.
+   *
+   *  A SEPARATE prop from `onEndTurn` because they are separate facts, and the
+   *  screen has to be able to show the gap between them: "End turn" hands the
+   *  round to the table, and until "My turn begins" is pressed the only thing
+   *  Nix owns is his Reaction. One button that did both would erase the very
+   *  window this slice exists to render. */
+  onBeginTurn?: () => void
   onUndo?: () => void
   /** What the last entry was called — "Divine Smite".  Null disables Undo. */
   undoLabel?: string | null
@@ -37,6 +45,7 @@ export function TurnScreenD({
   turn,
   onTake,
   onEndTurn,
+  onBeginTurn,
   onUndo,
   undoLabel = null,
   refusal = null,
@@ -45,9 +54,12 @@ export function TurnScreenD({
   const { actor, vitals, economy } = turn
   const hpPct = Math.max(0, Math.min(100, (vitals.hp / vitals.maxHp) * 100))
   const markPct = (vitals.bloodiedAt / vitals.maxHp) * 100
+  // Read once and named, because five things below hang off it and
+  // `!turn.yourTurn` scattered five times is how one of them ends up inverted.
+  const moment = !turn.yourTurn
 
   return (
-    <div className="dturn">
+    <div className={`dturn${moment ? ' moment' : ''}`}>
       <header className="chrome">
         <div className="who">
           <span className="nm">{actor.name}</span>
@@ -107,9 +119,32 @@ export function TurnScreenD({
         </div>
 
         <div className="colB">
+          {/* THE BAND — the page turning over.  Slice 7.
+              It says only what the app can presently know. There is no board
+              until Slice 9, so it does NOT name the creature or the trigger:
+              "The goblin steps away" would be a sentence this build cannot
+              check, printed in the one place Marcus would trust it most. What
+              it can say is whose turn it is not, and what he still holds — and
+              that second line is read off `economy.reaction`, which is the
+              engine's answer, not a guess made here. */}
+          {moment && (
+            <section className="mband">
+              <span className="mtrig">Someone else is acting</span>
+              <span className="msub">
+                {economy.reaction
+                  ? 'Your Reaction is the one thing that is yours right now.'
+                  : 'Your Reaction is spent — it returns when your turn does.'}
+              </span>
+            </section>
+          )}
+
           <section className="list">
             <div className="cap">
-              <span className="lbl">Your turn</span>
+              {/* Slices 1-6 hard-coded "Your turn" here, which the Slice 7
+                  off-turn shoot caught saying exactly the wrong thing over a
+                  list of reactions. The caption is now the same fact the rest
+                  of the screen is composed from. */}
+              <span className="lbl">{turn.yourTurn ? 'Your turn' : 'The moment'}</span>
               <span className="n">{turn.ranked.length} ready</span>
             </div>
             {turn.ranked.map(o => (
@@ -180,9 +215,25 @@ export function TurnScreenD({
         >
           {undoLabel ? `Undo ${undoLabel}` : 'Undo'}
         </button>
-        <button type="button" className="btn primary" onClick={onEndTurn} disabled={!onEndTurn}>
-          End turn
-        </button>
+        {/* THE FOOTER SWAPS, and it swaps rather than growing a third button.
+            "End turn" while it is not your turn is a control for something
+            that already happened, and two of the three states it could be in
+            would be wrong. One primary button, and it always names the next
+            true thing. */}
+        {moment ? (
+          <button
+            type="button"
+            className="btn primary"
+            onClick={onBeginTurn}
+            disabled={!onBeginTurn}
+          >
+            My turn begins
+          </button>
+        ) : (
+          <button type="button" className="btn primary" onClick={onEndTurn} disabled={!onEndTurn}>
+            End turn
+          </button>
+        )}
       </footer>
     </div>
   )

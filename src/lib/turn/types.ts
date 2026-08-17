@@ -110,6 +110,16 @@ export interface TurnOption {
   source?: string
   /** Set when the content is not book content.  Presentation only. */
   homebrew?: boolean
+  /** This row was BUILT BY THE COMPOSER, not read off the character sheet.
+   *  Slice 7.
+   *
+   *  Everything else on this screen traces back to something Marcus wrote down:
+   *  a weapon, a prepared spell, a class feature. The Opportunity Attack traces
+   *  back to the rulebook instead — it is yours because you have hands and a
+   *  reach, and no sheet will ever list it. `compose.equivalence.test.ts` exists
+   *  to prove the composer invents nothing, so anything it DOES invent has to
+   *  say so out loud rather than quietly widening what that test tolerates. */
+  synthetic?: boolean
 }
 
 /** Several options, one economy slot, pick one.
@@ -196,6 +206,18 @@ export interface ComposedTurn {
     homebrewSubclass?: boolean
   }
   round: number
+  /** Is the screen showing YOUR turn, or the moment inside someone else's?
+   *  Slice 7.
+   *
+   *  Not optional here, unlike the field of the same name on `CombatState`.
+   *  That one is persisted and had to stay kind to what is already sitting in
+   *  Marcus's browser; this one is computed fresh on every compose, so there is
+   *  no old value to be careful of and every reader is owed a straight answer.
+   *
+   *  When this is false the screen is not a smaller version of itself. Actions,
+   *  bonus actions and movement are all illegal, the reaction list is the whole
+   *  list, and `ranked` holds the things you may actually do RIGHT NOW. */
+  yourTurn: boolean
   vitals: TurnVitals
   upon: UponYou[]
   economy: EconomyState

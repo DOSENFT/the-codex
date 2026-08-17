@@ -460,3 +460,68 @@
   -webkit-appearance: none;
   appearance: none;
 }
+
+/* ============================================================================
+   SLICE 7 — THE MOMENT.  What the screen looks like when the turn is not yours
+   ----------------------------------------------------------------------------
+   Three treatments were built over the real app with Nix's real sheet and shot
+   on both devices before one was chosen: a full-screen dimming with a bottom
+   slab, a fixed rail of sigils, and this — THE TURNING PAGE.  The page wins
+   because it is the only one of the three that does not build a second screen.
+   The slab and the rail both take over the display and hide the sheet behind
+   them, which is wrong twice: it costs Marcus the vitals and the ledger at the
+   exact instant he is deciding whether to spend his Reaction, and it implies a
+   modal moment the engine cannot actually detect, because there is no board
+   until Slice 9 and nothing here knows a goblin moved.
+
+   So nothing is covered and nothing is hidden.  The SAME page turns over: the
+   band names what is happening, the caption stops saying "your turn", the one
+   or two rows that are genuinely live take a lit amber edge and room to be hit,
+   and everything else stays exactly where it was, readable, in its own place.
+
+   NOTHING IS DIMMED BY OPACITY.  The obvious move — drop the side columns to
+   .55 so the middle glows — was measured and dropped: `--d-dim` is a 5.40:1 ink
+   and at .55 over `--d-bg` it computes to about 2.3:1, so "focus" would have
+   been bought by pushing every label on the sheet under AA, at the table, in
+   candlelight.  The emphasis here is all additive.  The columns do dim, but
+   honestly: off-turn the engine reports Action, Bonus and Move as closed, so
+   the economy strip goes unlit on its own, because it IS unlit.
+   ========================================================================== */
+.dturn .mband {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: var(--d-s3) var(--pad) 0;
+  padding: var(--d-s2) var(--d-s3);
+  border-radius: var(--d-radius);
+  border: 1px solid var(--d-rule-lit);
+  border-left: 3px solid var(--d-amber);
+  background: var(--d-e1);
+}
+/* Cinzel at the title floor: this is the one sentence on screen that changes
+   what every other line means, so it is set as a heading and not as a notice. */
+.dturn .mband .mtrig {
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  color: var(--d-cream);
+}
+/* Cream, not dim, and body size rather than label size — "what you still hold"
+   is the operative half of the band, and the register it is set in is the
+   difference between a fact and a footnote. */
+.dturn .mband .msub { font-size: var(--d-fs-body); color: var(--d-cream); }
+
+/* The caption follows the band's ink so the two read as one statement.
+   `:first-child` on purpose — "Everything else" further down the list is not
+   part of that statement and stays the dim label it has always been. */
+.dturn.moment .list > .cap:first-child .lbl { color: var(--d-amber); }
+
+/* THE LIT ROW.  Wider edge, warmer edge, and a wash that falls off before it
+   reaches the cost — the gradient stops at 60% so the price stays on plain
+   ground and is never read through gold.  The extra height is not decoration:
+   off-turn this row is pressed under time pressure on someone else's turn. */
+.dturn.moment .act:not(.blocked) {
+  min-height: 60px;
+  border-left: 3px solid var(--d-amber);
+  background: linear-gradient(90deg, rgba(212, 167, 74, 0.1), var(--d-e1) 60%);
+}

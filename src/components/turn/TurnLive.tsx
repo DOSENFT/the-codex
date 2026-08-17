@@ -17,6 +17,7 @@ function Screen() {
       turn={combat.turn}
       onTake={combat.take}
       onEndTurn={combat.endTurn}
+      onBeginTurn={combat.beginTurn}
       onUndo={combat.undoLast}
       undoLabel={combat.undoLabel}
       refusal={combat.refusal}

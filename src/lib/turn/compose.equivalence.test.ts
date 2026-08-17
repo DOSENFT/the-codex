@@ -22,6 +22,16 @@ import type { TurnOption } from './types'
                                           a reason, and nothing else
 
    Anything composeTurn invents, or anything it loses, fails here.
+
+   ── SLICE 7 AMENDMENT ─────────────────────────────────────────────────────
+   Slice 7 gave the composer one thing it is allowed to invent: the Opportunity
+   Attack, which no character sheet has ever listed because you have it for
+   having hands and a reach. Rather than widen the tests above until they stop
+   catching anything — the usual way a guard like this dies — the invention has
+   to DECLARE ITSELF (`synthetic: true`), the comparisons below run over the
+   declared-sheet rows only, and a new group at the bottom of this file pins
+   what the composer is permitted to invent, exactly, by shape and by count.
+   The net effect is more assertions than before, not fewer.
    ========================================================================== */
 
 const census = (c: CategorizedOptions) =>
@@ -32,6 +42,12 @@ const listed = (t: ReturnType<typeof composeTurn>): TurnOption[] => [
   ...t.rest,
   ...t.mutex.flatMap(g => g.faces),
 ]
+
+/** Every row that came off the character sheet — i.e. everything the census
+ *  above could possibly know about. Slice 7's synthesised rows are held out
+ *  here and pinned separately, in "what the composer is allowed to invent". */
+const fromSheet = (t: ReturnType<typeof composeTurn>): TurnOption[] =>
+  listed(t).filter(o => !o.synthetic)
 
 const fresh = (): CombatState => ({
   inCombat: true,
@@ -75,16 +91,18 @@ describe('composeTurn agrees with the screen it was extracted from', () => {
   it('offers exactly what TurnSummary offers, when nothing is spent', () => {
     // Nix is unwounded, unconditioned, and has used nothing. Under those
     // conditions the two must be the same set — no more, no fewer.
-    const available = listed(turn)
+    const available = fromSheet(turn)
       .filter(o => o.available)
       .map(o => o.name)
       .sort()
     expect(available).toEqual(census(categorizeTurnOptions(NIX)))
   })
 
-  it('invents nothing — every option traces to the builder', () => {
+  it('invents nothing it has not declared — every other option traces back', () => {
     const known = new Set(census(categorizeTurnOptions(NIX, { includeUnaffordable: true })))
-    for (const option of listed(turn)) expect(known.has(option.name)).toBe(true)
+    for (const option of fromSheet(turn)) expect(known.has(option.name)).toBe(true)
+    // And the hold-out is not a loophole big enough to drive a screen through.
+    expect(listed(turn).filter(o => o.synthetic)).toHaveLength(1)
   })
 
   it('loses nothing — the wide census is fully accounted for', () => {
@@ -96,7 +114,7 @@ describe('composeTurn agrees with the screen it was extracted from', () => {
 
   it("shows the affordability drops blocked, and that is the ONLY difference", () => {
     const strict = new Set(census(categorizeTurnOptions(NIX)))
-    const extras = listed(turn)
+    const extras = fromSheet(turn)
       .filter(o => !strict.has(o.name))
       .map(o => o.name)
       .sort()
@@ -110,7 +128,7 @@ describe('composeTurn agrees with the screen it was extracted from', () => {
 
   it('gives every one of those extras a reason, never a bare grey row', () => {
     const strict = new Set(census(categorizeTurnOptions(NIX)))
-    for (const option of listed(turn).filter(o => !strict.has(o.name))) {
+    for (const option of fromSheet(turn).filter(o => !strict.has(o.name))) {
       expect(option.available).toBe(false)
       expect(option.blockedReason).toBeTruthy()
     }
@@ -402,6 +420,137 @@ describe('what the extraction must carry across', () => {
     const hurt = withCharacter({ hitPoints: { max: 76, current: 38 } })
     const t = composeTurn({ character: hurt, combat: null })
     expect(t.vitals).toMatchObject({ hp: 38, maxHp: 76, bloodiedAt: 38, bloodied: true })
+  })
+})
+
+describe('what the composer is allowed to invent — Slice 7', () => {
+  const turn = composeTurn({ character: NIX, combat: fresh() })
+  const oa = () => listed(turn).find(o => o.synthetic)
+
+  it('gives Nix an Opportunity Attack he never wrote down', () => {
+    // The whole of Slice 7 in one assertion. Before this, `REACTIONS` in
+    // dnd-data.ts described the opportunity attack in prose that nothing read,
+    // and the app offered it on no turn of no fight, ever.
+    expect(oa()?.name).toBe('Opportunity Attack — Hearthbrand')
+    expect(oa()?.cost.slot).toBe('reaction')
+    expect(oa()?.available).toBe(true)
+  })
+
+  it('states the trigger, because a reaction without one is a dead button', () => {
+    // The Named Trigger. A row that says only "Opportunity Attack" tells a
+    // player what it is called, not when it is his.
+    expect(oa()?.detail.toLowerCase()).toContain('leaves your reach')
+  })
+
+  it('carries the real weapon maths, not a second opinion about it', () => {
+    // Derived from the option options.ts already built, so the to-hit, the
+    // damage and the magic bonus cannot drift from the attack row above it.
+    const swing = listed(turn).find(o => o.name === 'Hearthbrand')
+    expect(swing).toBeDefined()
+    expect(oa()?.dice).toBe(swing?.dice)
+    for (const fact of ['1d8', 'Slashing']) {
+      expect(oa()?.detail).toContain(fact)
+      expect(swing?.detail).toContain(fact)
+    }
+  })
+
+  it('keeps the mastery, which does apply on an opportunity attack', () => {
+    expect(oa()?.rider).toMatchObject({ property: 'Sap', known: true })
+  })
+
+  it('invents one per MELEE weapon and none for the javelin', () => {
+    const names = listed(turn).filter(o => o.synthetic).map(o => o.name)
+    expect(names).toEqual(['Opportunity Attack — Hearthbrand'])
+    // Nix's javelin is `attackType: 'ranged'`. You cannot make an opportunity
+    // attack by throwing something, and a row offering it would be a rules bug
+    // the app taught him.
+    expect(names.join(' ')).not.toContain('Javelin')
+  })
+
+  it('does not collide with the weapon row it was grown from', () => {
+    const ids = listed(turn).map(o => o.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(oa()?.id).not.toBe(listed(turn).find(o => o.name === 'Hearthbrand')?.id)
+  })
+
+  it('sits in the fold on your own turn, never in the shortlist', () => {
+    // It is a reaction. On your turn it is a thing you HAVE, not a thing you
+    // do, and putting it in the top five would push out a real move.
+    expect(turn.ranked.some(o => o.synthetic)).toBe(false)
+    expect(turn.rest.some(o => o.synthetic)).toBe(true)
+    expect(oa()?.why).toBe('Not on your turn')
+  })
+})
+
+describe('the moment — when it is NOT your turn, Slice 7', () => {
+  const off = (): CombatState => ({ ...fresh(), yourTurn: false })
+  const turn = composeTurn({ character: NIX, combat: off() })
+
+  it('says so, out loud, on the composed turn', () => {
+    expect(turn.yourTurn).toBe(false)
+    expect(composeTurn({ character: NIX, combat: fresh() }).yourTurn).toBe(true)
+  })
+
+  it('lights the reaction pip and nothing else', () => {
+    expect(turn.economy).toMatchObject({
+      action: false,
+      bonusAction: false,
+      movement: false,
+      reaction: true,
+    })
+  })
+
+  it('promotes the reactions into the shortlist — the fold turns over', () => {
+    expect(turn.ranked.length).toBeGreaterThan(0)
+    for (const option of turn.ranked) expect(option.cost.slot).toBe('reaction')
+    // And the opportunity attack is one of them. This is the moment it exists
+    // for: the goblin is walking away and Marcus has four seconds to decide.
+    expect(turn.ranked.some(o => o.synthetic)).toBe(true)
+  })
+
+  it('stops calling the reaction "Not on your turn" while offering it', () => {
+    for (const option of turn.ranked) expect(option.why).not.toBe('Not on your turn')
+  })
+
+  it('greys every action rather than hiding it, and says why', () => {
+    // D never hides. Hearthbrand is still on the screen during the ogre's
+    // swing; it is simply not yours to swing yet, and the row says which.
+    const swing = listed(turn).find(o => o.name === 'Hearthbrand')
+    expect(swing).toBeDefined()
+    expect(swing?.available).toBe(false)
+    expect(swing?.blockedReason).toBe('It is not your turn')
+  })
+
+  it('still lets a condition speak over the clock', () => {
+    // Precedence holds off-turn too: Incapacitated outlives the moment, "it is
+    // not your turn" does not. Telling a paralysed player to wait his turn
+    // would be advice that never comes good.
+    const stunned = withCharacter({ conditions: ['Stunned'] })
+    const all = listed(composeTurn({ character: stunned, combat: off() }))
+    expect(all.length).toBeGreaterThan(0)
+    for (const option of all) expect(option.blockedReason).toBe('You are Incapacitated')
+  })
+
+  it('names the empty pool over the moment, for the same reason', () => {
+    const divineSense = listed(turn).find(o => o.name === 'Divine Sense')
+    expect(divineSense?.blockedReason).toBe('No uses left until a long rest')
+  })
+
+  it('loses nothing to the turnover — every row is still on the screen', () => {
+    const on = composeTurn({ character: NIX, combat: fresh() })
+    expect(listed(turn).map(o => o.id).sort()).toEqual(listed(on).map(o => o.id).sort())
+  })
+
+  it('closes the reaction list once the reaction is spent', () => {
+    const used = composeTurn({
+      character: NIX,
+      combat: { ...off(), turnActions: { ...off().turnActions, reaction: true } },
+    })
+    expect(used.economy.reaction).toBe(false)
+    expect(used.ranked).toHaveLength(0)
+    const oa = listed(used).find(o => o.synthetic)
+    expect(oa?.available).toBe(false)
+    expect(oa?.blockedReason).toBe('Your reaction is spent')
   })
 })
 

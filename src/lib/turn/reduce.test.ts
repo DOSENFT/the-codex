@@ -141,10 +141,16 @@ describe('the round-trip proof — undo restores, it does not recompute', () => 
     // The property that actually matters at the table: four things taken over
     // two rounds, then Undo pressed four times, back to the start.
     const start = session()
+    // Slice 7 inserted `beginTurn`. Ending your turn no longer starts the next
+    // one — the gap between them is where a reaction lives — so a script that
+    // acts again has to say that its turn came round. The round-trip is one
+    // event LONGER than before, not one assertion weaker: `beginTurn` now has
+    // to unwind cleanly too, and it is the event that hands back the reaction.
     const script: CombatEvent[] = [
       { type: 'takeOption', option: SMITE },
       { type: 'takeOption', option: taken({ name: 'Hearthbrand' }) },
       { type: 'endTurn' },
+      { type: 'beginTurn' },
       { type: 'takeOption', option: LAY_ON_HANDS },
     ]
 
@@ -156,10 +162,10 @@ describe('the round-trip proof — undo restores, it does not recompute', () => 
       state = applied.state
       log = append(log, applied.entry!)
     }
-    expect(log).toHaveLength(4)
+    expect(log).toHaveLength(5)
     expect(state).not.toStrictEqual(start)
 
-    for (let i = 0; i < 4; i += 1) {
+    for (let i = 0; i < 5; i += 1) {
       const stepped = undo(state, log)
       state = stepped.state
       log = stepped.log
@@ -379,15 +385,32 @@ describe('refusals — the four ways a tap could corrupt the sheet', () => {
     expect(second.state.character.spellSlots[2]!.current).toBe(2)
   })
 
-  it('allows the second slot once the turn has ended', () => {
+  it('allows the second slot once the NEXT TURN HAS BEGUN', () => {
+    // Renamed from "once the turn has ended", and the change of word is the
+    // Slice 7 rule. Ending your turn does not start the next one; the stretch
+    // in between belongs to everyone else, and a bonus action is not yours
+    // during it. The one-slot-per-turn rule still lifts — that is what this
+    // test has always been for — it just lifts at the correct moment.
     const state = session()
     const first = reduce(state, { type: 'takeOption', option: SMITE }, [])
     const log = append([], first.entry!)
     const turned = reduce(first.state, { type: 'endTurn' }, log)
-    const next = append(log, turned.entry!)
+    const afterEnd = append(log, turned.entry!)
+
+    // Off-turn, it is still refused — and NOT by the spell-slot rule.
+    const tooEarly = reduce(
+      turned.state,
+      { type: 'takeOption', option: taken({ slot: 'bonusAction', spellSlotLevel: 1 }) },
+      afterEnd,
+    )
+    expect(tooEarly.refused).toBe('It is not your turn — only a Reaction is yours right now.')
+    expect(tooEarly.state.character.spellSlots[1]!.current).toBe(2)
+
+    const begun = reduce(turned.state, { type: 'beginTurn' }, afterEnd)
+    const next = append(afterEnd, begun.entry!)
 
     const second = reduce(
-      turned.state,
+      begun.state,
       { type: 'takeOption', option: taken({ slot: 'bonusAction', spellSlotLevel: 1 }) },
       next,
     )
@@ -839,5 +862,121 @@ describe('homebrew conditions — a condition Marcus wrote that actually bites',
     const all = [...turn.ranked, ...turn.rest, ...turn.mutex.flatMap(g => g.faces)]
     expect(all.filter(o => o.cost.slot === 'reaction').some(o => o.available)).toBe(true)
     expect(turn.upon.find(u => u.name === 'Hearthbownd')).toBeDefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 4. The reaction across the turn boundary — Slice 7
+// ---------------------------------------------------------------------------
+//
+// THE BUG THIS GROUP EXISTS FOR. Under 2024 rules your Reaction refreshes at
+// the START of your turn, not at the end of it. The old `endTurn` cleared all
+// four slots together, which meant a Reaction spent on your own turn was handed
+// straight back the instant you tapped "End turn" — and the window it was handed
+// back into is precisely the one where you would reach for it a second time,
+// while the ogre swings. The app would have let Marcus take two Reactions in a
+// round and told him it was fine.
+//
+// A mutation sweep is how this group got written: restoring `reaction: false`
+// in `endTurn` — the exact old line — SURVIVED the whole suite. Nothing in 268
+// tests noticed the rule. So these are here now.
+
+describe('the reaction refreshes at the START of your turn, not the end', () => {
+  const SHIELD: TakenOption = { id: 'spell-shield', name: 'Shield', slot: 'reaction' }
+
+  /** Spend the reaction, then end the turn. The state everything below asks
+   *  questions of. */
+  const spentThenEnded = () => {
+    const start = session()
+    const used = reduce(start, { type: 'takeOption', option: SHIELD }, [])
+    expect(used.refused).toBeUndefined()
+    expect(used.state.combat.turnActions.reaction).toBe(true)
+    const log = append([], used.entry!)
+    const ended = reduce(used.state, { type: 'endTurn' }, log)
+    return { ended, log: append(log, ended.entry!) }
+  }
+
+  it('keeps the reaction SPENT across the end of your turn', () => {
+    const { ended } = spentThenEnded()
+    expect(ended.state.combat.turnActions.reaction).toBe(true)
+    // ...while everything that genuinely does refresh at the round boundary,
+    // does. This is the assertion that stops the fix over-reaching into
+    // "nothing refreshes ever".
+    expect(ended.state.combat.turnActions).toMatchObject({
+      action: false,
+      bonusAction: false,
+      movement: false,
+    })
+    expect(ended.state.combat.yourTurn).toBe(false)
+  })
+
+  it('refuses the second reaction while it is someone else\'s turn', () => {
+    const { ended, log } = spentThenEnded()
+    const again = reduce(ended.state, { type: 'takeOption', option: SHIELD }, log)
+    // Not "it is not your turn" — a Reaction is exactly the thing that IS yours
+    // off-turn. The refusal has to be about the slot, or it teaches the wrong
+    // rule to the person reading it at the table.
+    expect(again.refused).toBe('Your reaction is already spent — it returns when your turn does.')
+    // And it does NOT say "this turn". Read during the ogre's swing, that would
+    // be a sentence about a turn that is not yours, and it would be false.
+    expect(again.refused).not.toContain('this turn')
+    // A refusal writes nothing to the log, so there is nothing to undo.
+    expect(again.entry).toBeNull()
+  })
+
+  it('hands it back the moment your turn begins again', () => {
+    const { ended, log } = spentThenEnded()
+    const begun = reduce(ended.state, { type: 'beginTurn' }, log)
+    expect(begun.state.combat.turnActions.reaction).toBe(false)
+    expect(begun.state.combat.yourTurn).toBe(true)
+    const now = reduce(begun.state, { type: 'takeOption', option: SHIELD }, append(log, begun.entry!))
+    expect(now.refused).toBeUndefined()
+  })
+
+  it('shows the composed screen the same story, off-turn', () => {
+    // The engine and the screen must not disagree about this. Off-turn with the
+    // reaction spent, D has nothing to offer and says so by offering nothing —
+    // every row greyed, none in the shortlist.
+    const { ended } = spentThenEnded()
+    const turn = composeTurn({ character: ended.state.character, combat: ended.state.combat })
+    expect(turn.yourTurn).toBe(false)
+    expect(turn.economy.reaction).toBe(false)
+    expect(turn.ranked).toHaveLength(0)
+    const all = [...turn.ranked, ...turn.rest, ...turn.mutex.flatMap(g => g.faces)]
+    expect(all.length).toBeGreaterThan(0)
+    for (const o of all) expect(o.available).toBe(false)
+  })
+
+  it('survives the whole cycle without disagreeing with itself', () => {
+    // end → begin → end → begin, with a reaction spent off-turn in the middle.
+    // The failure this catches is a `beginTurn` that refreshes the reaction it
+    // should not yet have refreshed, or an `endTurn` that quietly re-arms.
+    let state = session()
+    let log: LogEntry[] = []
+    const step = (event: CombatEvent) => {
+      const out = reduce(state, event, log)
+      expect(out.refused).toBeUndefined()
+      state = out.state
+      if (out.entry) log = append(log, out.entry)
+    }
+
+    step({ type: 'endTurn' })                              // now off-turn, reaction fresh
+    expect(state.combat.turnActions.reaction).toBe(false)
+    step({ type: 'takeOption', option: SHIELD })           // spent during the ogre's swing
+    expect(state.combat.turnActions.reaction).toBe(true)
+    step({ type: 'beginTurn' })                            // my turn: it comes back
+    expect(state.combat.turnActions.reaction).toBe(false)
+    step({ type: 'takeOption', option: SHIELD })           // and can be spent again
+    step({ type: 'endTurn' })                              // and stays spent past the boundary
+    expect(state.combat.turnActions.reaction).toBe(true)
+  })
+
+  it('undoes the boundary without losing the reaction it was protecting', () => {
+    // The round-trip property, aimed straight at the field this slice added.
+    const { ended } = spentThenEnded()
+    const before = ended.state
+    const begun = reduce(before, { type: 'beginTurn' }, [])
+    expect(begun.state.combat.turnActions.reaction).toBe(false)
+    expect(revert(begun.state, begun.entry!)).toStrictEqual(before)
   })
 })

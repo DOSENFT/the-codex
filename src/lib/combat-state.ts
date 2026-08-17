@@ -45,6 +45,20 @@ export interface CombatState {
   turnActions: { action: boolean; bonusAction: boolean; reaction: boolean; movement: boolean }
   spellSlots: Record<number, { used: number; max: number }>
   concentrating: string | null
+  /** Is it MY turn right now?  Slice 7.
+   *
+   *  Until Slice 7 the app had no answer to this question, and so it had no
+   *  place to put a reaction: every reaction-slot option was ranked to the
+   *  bottom of the list with the note "Not on your turn" and could never be
+   *  taken, on any turn, ever. An opportunity attack — the single most common
+   *  thing a melee character does off-turn — was documented in `dnd-data.ts`
+   *  and implemented nowhere.
+   *
+   *  OPTIONAL ON PURPOSE. Marcus's live combat state is in his browser's
+   *  localStorage and predates this field; `reconcile` reads a missing value
+   *  as `true`, which is exactly the behaviour he has today. Nothing he has
+   *  saved changes meaning. */
+  yourTurn?: boolean
 }
 
 const STORAGE_PREFIX = 'codex-combat-'
@@ -61,6 +75,7 @@ export function createCombatState(character: Character): CombatState {
     turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
     spellSlots,
     concentrating: null,
+    yourTurn: true,
   }
 }
 

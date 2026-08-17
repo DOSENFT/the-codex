@@ -108,6 +108,13 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   const round = combat?.round ?? 1
   const hitPoints = character.hitPoints ?? { max: 0, current: 0 }
 
+  // Slice 7. `!== false`, not `=== true`: a combat state saved before this
+  // field existed, and the null combat state of a character standing outside a
+  // fight, both mean "your turn" — which is the behaviour Marcus has today and
+  // the only sane default for a screen you opened deliberately. The one way to
+  // land off-turn is for something to have said so out loud.
+  const yourTurn = combat?.yourTurn !== false
+
   // -- what is upon you ------------------------------------------------------
   const conditionNames = Array.isArray(character.conditions) ? character.conditions : []
   // Slice 6b. Marcus's own conditions are consulted before the book's, so a
@@ -173,6 +180,18 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       blockedReason = `You are ${blamed}`
     } else if (option.unaffordableReason) {
       blockedReason = option.unaffordableReason
+    } else if (!yourTurn && slot !== 'reaction' && slot !== 'free') {
+      // Slice 7, and it sits HERE for the same reason the rest of this chain is
+      // ordered the way it is. It is below a condition and below an empty pool,
+      // both of which outlive the moment; it is above "your action is spent",
+      // which off-turn is not merely less useful but usually not even true —
+      // `endTurn` cleared those flags, so the row would otherwise show as
+      // perfectly available in the middle of the ogre's swing.
+      //
+      // `free` is exempt on purpose, matching the reducer: a free rider is
+      // bookkeeping attached to something else, not a thing you spend a turn on.
+      // Reactions are exempt because they are the entire point of the moment.
+      blockedReason = 'It is not your turn'
     } else if (spent(slot)) {
       blockedReason = `Your ${ECONOMY_LABEL[slot].toLowerCase()} is spent`
     } else if (cost.spellSlotLevel !== undefined && slotSpentThisTurn) {
@@ -215,6 +234,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
     hpFraction: hitPoints.max > 0 ? Math.max(0, Math.min(1, hitPoints.current / hitPoints.max)) : 1,
     bloodied: isBloodied(hitPoints),
     concentratingOn: combat?.concentrating ?? null,
+    yourTurn,
   }
   const rank = (o: ActionOption, slot: EconomySlot): TurnOption => {
     const built = build(o, slot)
@@ -223,10 +243,63 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       ...(o.isConcentration !== undefined ? { concentration: o.isConcentration } : {}),
     })
   }
+
+  // -- the opportunity attack ------------------------------------------------
+  //
+  // 2024 PHB: when a creature you can see leaves your reach, you may spend your
+  // Reaction to make ONE melee attack against it with a weapon or an Unarmed
+  // Strike. It is the single most common thing a melee character does off-turn.
+  // It was written down in `dnd-data.ts`'s REACTIONS array as prose, read by
+  // nothing, and until this slice it was offered to Marcus never — on any turn,
+  // in any fight, since the app was built.
+  //
+  // Synthesised HERE and not in options.ts on purpose. options.ts is pinned
+  // byte-identical to the code that shipped inside TurnSummary.tsx, and Slice
+  // 2's seven characterization tests exist to keep it that way; adding a row
+  // there would silently change what the V0.9 screen renders. The composer is
+  // the layer that is allowed to know about the action economy, so it is the
+  // layer that gets to know about reactions.
+  //
+  // Derived from the weapon options options.ts ALREADY built, rather than from
+  // the Weapon records directly, so the to-hit bonus, the magic bonus, the feat
+  // tips and the damage line are computed in exactly one place. An opportunity
+  // attack can never quietly disagree with the attack row above it about what
+  // Hearthbrand does, because it is the same object with a different price.
+  const opportunityAttacks: TurnOption[] = raw.actions
+    .filter(o => o.type === 'weapon' && weaponsByName.get(o.name)?.attackType === 'melee')
+    .map(o => {
+      const built = rank(
+        {
+          ...o,
+          name: `Opportunity Attack — ${o.name}`,
+          actionEconomy: 'reaction',
+          // THE NAMED TRIGGER, and it goes at the FRONT of the mechanics line
+          // rather than in `summary`, because `detailOf` builds the row from
+          // mechanics + effects and falls back to the summary only when both
+          // are empty — which for a weapon they never are. A reaction row that
+          // does not say WHEN is a button that does nothing when pressed, so
+          // the trigger has to be the first thing under the name, ahead of the
+          // to-hit. Everything after it is the weapon's own arithmetic,
+          // untouched.
+          mechanicsLine: `When a creature you can see leaves your reach · ${o.mechanicsLine}`,
+          summary: `One melee attack with ${o.name}, as a Reaction.`,
+        },
+        'reaction',
+      )
+      // build() finds a weapon's mastery rider by looking the NAME up, and this
+      // option's name is deliberately no longer the weapon's. Restored by hand
+      // because a mastery does apply on an opportunity attack, and Nix shoving
+      // the goblin as it disengages is the whole reason he took the property.
+      const weapon = weaponsByName.get(o.name)
+      const rider = weapon ? riderOf(weapon) : undefined
+      return { ...built, synthetic: true, ...(rider ? { rider } : {}) }
+    })
+
   const everything: TurnOption[] = [
     ...raw.actions.map(o => rank(o, 'action')),
     ...raw.bonusActions.map(o => rank(o, 'bonusAction')),
     ...raw.reactions.map(o => rank(o, 'reaction')),
+    ...opportunityAttacks,
   ]
 
   // Contention runs over EVERYTHING, before the split, because a bracket that
@@ -248,8 +321,16 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   // would have been telling him to do something he cannot do yet. It is not
   // hidden: D never hides. It drops to the fold, and Slice 7 gives reactions a
   // home of their own.
-  const now = affordable.filter(o => o.cost.slot !== 'reaction')
-  const later = affordable.filter(o => o.cost.slot === 'reaction')
+  //
+  // SLICE 7 — AND OFF-TURN THE TWO HALVES SIMPLY SWAP. During the moment a
+  // reaction is not "later"; it is the only thing there is, and every action,
+  // bonus action and movement row has already been greyed with "It is not your
+  // turn" by build() above. Same two lists, same fold, one fact read the other
+  // way round, and the shortlist keeps its single meaning in both worlds:
+  // THESE ARE THE THINGS YOU MAY DO RIGHT NOW.
+  const isReaction = (o: TurnOption) => o.cost.slot === 'reaction'
+  const now = affordable.filter(o => (yourTurn ? !isReaction(o) : isReaction(o)))
+  const later = affordable.filter(o => (yourTurn ? isReaction(o) : !isReaction(o)))
   const shortlist = now.slice(0, shortlistSize)
   const rest = [...now.slice(shortlistSize), ...later, ...blocked]
 
@@ -283,6 +364,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       ...(character.subclass in HOMEBREW_CONTENT ? { homebrewSubclass: true } : {}),
     },
     round,
+    yourTurn,
 
     vitals: {
       hp: hitPoints.current,
@@ -300,10 +382,15 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       // SPENT; `EconomyState` is true when it is OPEN. Getting this backwards
       // would offer a player everything he had just used, so it is stated once,
       // here, and nowhere else.
-      action: !spent('action') && !forbidden.includes('action'),
-      bonusAction: !spent('bonusAction') && !forbidden.includes('bonusAction'),
+      //
+      // Slice 7: and `yourTurn` closes three of the four. Off-turn the reaction
+      // pip is the ONLY one lit, which is what makes the strip readable at a
+      // glance during someone else's turn — one dot of gold in a row of dim,
+      // saying exactly what you still hold.
+      action: yourTurn && !spent('action') && !forbidden.includes('action'),
+      bonusAction: yourTurn && !spent('bonusAction') && !forbidden.includes('bonusAction'),
       reaction: !spent('reaction') && !forbidden.includes('reaction'),
-      movement: !spent('movement') && !forbidden.includes('movement'),
+      movement: yourTurn && !spent('movement') && !forbidden.includes('movement'),
       spellSlotUsedThisTurn: slotSpentThisTurn,
     },
 
