@@ -91,22 +91,30 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   }, [])
 
   /* ------ auto-fetch Ollama models when provider is ollama ------ */
-  const refreshOllamaModels = useCallback(async (url: string) => {
+  const refreshOllamaModels = useCallback(async (url: string, signal?: AbortSignal) => {
     setModelsLoading(true)
     try {
-      const models = await fetchOllamaModels(url)
-      setOllamaModels(models)
+      const models = await fetchOllamaModels(url, signal)
+      if (!signal?.aborted) setOllamaModels(models)
     } catch {
-      setOllamaModels([])
+      if (!signal?.aborted) setOllamaModels([])
     } finally {
-      setModelsLoading(false)
+      if (!signal?.aborted) setModelsLoading(false)
     }
   }, [])
 
+  // Typing a URL is not thirty requests. This effect keys on `ollamaUrl`, so
+  // before the bound existed every keystroke opened a probe that could hang
+  // until the OS gave up, and whichever one happened to answer last won the
+  // model list — including one for a half-typed host. Now: settle for 400ms,
+  // and abandon the previous probe the moment a newer character arrives.
   useEffect(() => {
-    if (provider === 'ollama' && ollamaUrl) {
-      refreshOllamaModels(ollamaUrl)
-    }
+    // Leaving Ollama abandons any probe, and the spinner goes with it — an
+    // aborted request deliberately writes no state, so it cannot clear this.
+    if (provider !== 'ollama' || !ollamaUrl) { setModelsLoading(false); return }
+    const controller = new AbortController()
+    const timer = setTimeout(() => { void refreshOllamaModels(ollamaUrl, controller.signal) }, 400)
+    return () => { clearTimeout(timer); controller.abort() }
   }, [provider, ollamaUrl, refreshOllamaModels])
 
   /* ------ handlers ------ */
@@ -574,7 +582,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
             label="Ollama URL"
             value={ollamaUrl}
             onChange={(e) => setOllamaUrl(e.target.value)}
-            placeholder="http://192.168.1.174:11434"
+            placeholder="http://localhost:11434"
           />
         </div>
       )}

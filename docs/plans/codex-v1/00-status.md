@@ -77,7 +77,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 **Wave 3 — the table**
 - [x] 10 — PWA: manifest, service worker, **self-hosted fonts**, offline shell **— DONE 2026-08-16, see below**
 - [ ] 10a — install ergonomics: an "Add to Home Screen" nudge and an update prompt when a new build is waiting *(deferred deliberately — see the Slice 10 section)*
-- [ ] 11 — AI hardening: config'd base URL, never blocks combat
+- [x] 11 — AI hardening: config'd base URL, never blocks combat **— DONE 2026-08-16, see below**
 - [ ] 12 — safety: lines, veils, consent, always-available veil
 
 **Wave 4 — finish**
@@ -1050,6 +1050,97 @@ On the iPad, the economy column (`.colA`) ends in a tall empty field below *Move
   needs a `waiting` worker to talk about, which is only interesting once there is a second deploy.
 - **`public/` art is still 88MB of PNG.** Converting the brass to WebP/AVIF is a real win and belongs
   in Slice 14's asset pass, not in the slice that must not change how anything looks.
+
+## ✅ Slice 11 — THE AI MAY NEVER BLOCK COMBAT, done 2026-08-16
+
+That sentence is written verbatim at the top of `src/lib/ai.ts`, because everything in the file
+exists to serve it. The advisor is a convenience. The turn is the product. When the two disagree —
+when the model is slow, the laptop is asleep, the key is wrong, the iPad is on a different network —
+the turn wins, every time, and it wins *quickly*.
+
+### Six defects, three of them confirmed by execution rather than reading
+
+1. **No timeout anywhere.** Nine `fetch` calls in `ai.ts`, zero `AbortController`. A request to a
+   machine that is off does not fail — it waits for the OS, which is minutes. `CombatHelper`
+   disables its input and five buttons while `loading`, so "minutes" is the panel frozen mid-fight.
+   Fixed with `bound()`: two clocks in sequence, an 8s **connect** clock and a 30s **idle** clock
+   restarted by every token that arrives, joined to any caller signal. A model that is talking is
+   never cut off; a host that is silent is given eight seconds and no more.
+2. **A hard-coded LAN address in three places** — `192.168.1.174:11434`, one machine on one network,
+   compiled into a bundle that ships to an iPad. Now `getDefaultOllamaUrl()` returns a same-origin
+   `/ollama` path, and section 0 of the proof greps the built bundle for `/192\.168\.\d+\.\d+/`.
+3. **`fallbackEnabled: false` meant *on*.** `A && B && C ? x : y` parses as `(A && B && C) ? x : y`,
+   so turning fallback off made the whole condition false and handed the decision to the else
+   branch — "is the other provider configured?" — which said yes. A setting that said "do not send
+   my table's text to Google" was sending it to Google. Now three early returns, one per reason.
+4. **The Gemini key was in the query string** (`?key=…`), which is browser history, proxy logs, the
+   `Referer` header, and any screenshot of a network tab. Moved to the `x-goog-api-key` header.
+5. **A dead host cost two bounds** — found while *designing* the proof, not while reading the code.
+   `queryAIStream`'s catch handed every nothing-arrived failure to `queryAI`, which put a second
+   full clock on the same unreachable address: the bound that promises eight seconds quietly cost
+   sixteen. Now a `timeout`/`network` failure either falls back to the *other provider* or throws;
+   only a failure about **streaming specifically** (a gateway that 404s the SSE endpoint) retries
+   the plain endpoint on the same host.
+6. **`loading` had no way out.** Bounding the transport is necessary and not sufficient — eight
+   seconds of a dead panel is still eight seconds. `useAI` gained `cancel()` (strictly additive, so
+   all ~20 consumers are untouched), an abort-on-unmount, and a generation counter so a superseded
+   request cannot write state at all. The second bug that flag had: ask, wait, ask again, and the
+   first answer to arrive won `response` while the second cleared `loading` — the answer to the
+   question you didn't ask, in a panel that says it is done.
+
+### A deliberate divergence, recorded rather than hidden
+
+The old comment said "only fall back on network errors." The old *code* fell back on nearly
+everything, and that is the behaviour Marcus actually used at the table. Restoring the comment's
+promise would have been a silent capability cut, which V0.9's prime law forbids. So the new rule is
+the generous one, stated honestly: **fall back on anything except a user cancel or a missing
+credential — and obey `fallbackEnabled: false` absolutely.**
+
+### The proof — 32 checks, `prove-slice11.mjs`
+
+The one that matters is section 2: **combat keeps working while the AI hangs.** A Playwright route
+swallows every request to the Ollama host and never answers it, the advisor is asked a question and
+left hanging, and then — with the panel mid-spin — the Action economy slot is spent and a 1st-level
+slot is expended, both read back out of localStorage (`codex-combat-*.turnActions.action === true`,
+`codex-character-*.spellSlots[1].current` decreased). The rest: the Stop button appears and Send
+steps aside; Stop is instant and silent (no red text — a cancel is a decision, not a fault); the
+shipped 8s clock ends the wait on its own with a message naming Settings, timed to prove it happened
+inside **one** bound; nothing reaches Gemini with fallback off; the key rides in the header and not
+the URL; and a whole-run URL audit plus a clean console.
+
+### The mutation run — 6/6 killed, `mutate-slice11.mjs`
+
+Each mutation restores, faithfully, the state the slice was opened to change. The last one is
+**wholesale across two files**: a mutation that removes only the button leaves the controller
+standing, and one that removes only the controller leaves the button standing — either alone is a
+mutation that hasn't undone the fix, not a proof that fails to test it.
+
+### Three things only running the thing could have told us
+
+- **The model-list probe ignored every timeout override**, because `fetchOllamaModels` called
+  `bound()` with a bare config literal. A test timed out at 5s and the honest read was that the code
+  was wrong, not the test. `timeoutMs` is now a parameter — a constant is a clock no test can watch.
+- **This repo has mixed line endings.** `ai.ts` is LF; `CombatHelper.tsx` is CRLF. A multi-line
+  mutation anchor written one way silently matches nothing in the other and reports INVALID, which
+  is honest but useless — the harness would be reporting on its own newlines. It now retries every
+  anchor in CRLF and carries the file's own endings into the replacement.
+- **The first screenshot was of the wrong part of the page** — the advisor was below the fold, so it
+  was a picture of nothing being tested. With that fixed, reading the corrected shot found a real
+  design defect: the Stop control was an **✕**, sitting inches below the panel's *other* ✕, the one
+  that clears a finished answer. Two identical marks doing different things, in the middle of a
+  fight. It is now the **word "Stop"**, which cannot be misread. (There were also two of them; the
+  duplicate in the status row is gone.)
+
+### Non-degradation
+`npx tsc -b --force` clean · `npx vite build` clean · `npx vitest run` **308/308 across 11 files**
+(~26 of them new, in `src/lib/ai.test.ts`) · `prove-slice6b`, `prove-slice6c`, `prove-slice7`,
+`prove-slice10` all re-run, all still pass.
+Shot: `reference/baseline/slice11-hung-advisor.png` — the panel spinning, the turn still working.
+
+### Deferred deliberately
+- **The duplicated section title** — "COMBAT ADVISOR" as both the collapsible header and the card
+  header inside it, and "SPELL SLOTS" the same way. It is systemic across the v0.9 surface, so it
+  belongs to Slice 13's D-language pass, not to a slice about the network.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

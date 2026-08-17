@@ -565,6 +565,7 @@ function AICombatAdvisor({
   loading,
   error,
   onQuery,
+  onCancel,
   onClear,
 }: {
   character: Character
@@ -572,6 +573,9 @@ function AICombatAdvisor({
   loading: boolean
   error: string | null
   onQuery: (message: string) => void
+  /** The way out. See the Stop button below — this panel disables its own
+   *  input while it waits, so without this there was no way out. */
+  onCancel: () => void
   onClear: () => void
 }) {
   const [inputValue, setInputValue] = useState('')
@@ -637,17 +641,38 @@ function AICombatAdvisor({
             icon={Sword}
           />
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleSubmit}
-          loading={loading}
-          disabled={!inputValue.trim() || loading}
-          aria-label="Send combat question"
-          className="shrink-0"
-        >
-          <Send size={16} />
-        </Button>
+        {/* While it is thinking, the send button IS the stop button. The panel
+            locks its own input during a query, so putting the escape anywhere
+            else would mean hunting for it mid-fight — it belongs under the
+            thumb that is already there.
+
+            The WORD, not a glyph. This was an ✕ until the first screenshot of
+            it, which showed an ✕ sitting four inches below the panel's other
+            ✕ — the one that clears a finished answer. Two identical marks that
+            do different things, in the one place where the whole point is not
+            having to think. "Stop" cannot be misread. */}
+        {loading ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onCancel}
+            aria-label="Stop the advisor"
+            className="shrink-0"
+          >
+            Stop
+          </Button>
+        ) : (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleSubmit}
+            disabled={!inputValue.trim()}
+            aria-label="Send combat question"
+            className="shrink-0"
+          >
+            <Send size={16} />
+          </Button>
+        )}
       </div>
 
       {/* Error state */}
@@ -662,7 +687,10 @@ function AICombatAdvisor({
       {loading && !response && (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02]">
           <Loader2 size={18} className="animate-spin text-arcane" aria-hidden />
-          <p className="text-sm text-forge-2">Analyzing the battlefield...</p>
+          {/* Status, not a control. There was a second Stop here; two controls
+              for one decision is a decision to make, and this row's job is to
+              say what is happening. */}
+          <p className="text-sm text-forge-2">Analyzing the battlefield&hellip;</p>
         </div>
       )}
 
@@ -1275,7 +1303,7 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
   const concentrationSpell = combatState.concentrating
 
   // AI hook
-  const { response, loading, error, queryStream, clearResponse } = useAI()
+  const { response, loading, error, queryStream, cancel, clearResponse } = useAI()
 
   // Persist combat state whenever it changes
   useEffect(() => {
@@ -1692,6 +1720,7 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
           loading={loading}
           error={error}
           onQuery={handleAIQuery}
+          onCancel={cancel}
           onClear={clearResponse}
         />
       </CollapsibleCombatSection>

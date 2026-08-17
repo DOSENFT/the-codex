@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
-import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, GEMINI_MODELS, type AIProvider } from '../lib/ai'
+import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, GEMINI_MODELS, type AIProvider } from '../lib/ai'
 import { generateId, type Character, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
 import {
   CLASSES,
@@ -166,7 +166,10 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
   const [aiProvider, setAiProvider] = useState<AIProvider>('ollama')
   const [geminiKey, setGeminiKey] = useState('')
   const [geminiModel, setGeminiModel] = useState('gemini-2.0-flash')
-  const [ollamaUrl, setOllamaUrl] = useState('http://192.168.1.174:11434')
+  // Not an address. One machine's LAN IP was compiled in here, which meant
+  // first-run setup on the iPad offered a host that existed only on the
+  // desktop's network — see the note in lib/ai.ts.
+  const [ollamaUrl, setOllamaUrl] = useState(getDefaultOllamaUrl)
   const [ollamaModel, setOllamaModel] = useState('gemma3-27b-abliterated:latest')
   const [showKey, setShowKey] = useState(false)
   const [aiTestSuccess, setAiTestSuccess] = useState(false)
@@ -177,15 +180,15 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
   const [ollamaModels, setOllamaModels] = useState<Array<{ name: string; size: string; family: string }>>([])
   const [modelsLoading, setModelsLoading] = useState(false)
 
-  const refreshOllamaModels = useCallback(async (url: string) => {
+  const refreshOllamaModels = useCallback(async (url: string, signal?: AbortSignal) => {
     setModelsLoading(true)
     try {
-      const models = await fetchOllamaModels(url)
-      setOllamaModels(models)
+      const models = await fetchOllamaModels(url, signal)
+      if (!signal?.aborted) setOllamaModels(models)
     } catch {
-      setOllamaModels([])
+      if (!signal?.aborted) setOllamaModels([])
     } finally {
-      setModelsLoading(false)
+      if (!signal?.aborted) setModelsLoading(false)
     }
   }, [])
 
@@ -199,11 +202,14 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
     if (config.ollamaModel) setOllamaModel(config.ollamaModel)
   }, [])
 
-  // Auto-fetch Ollama models when on the AI step with Ollama selected
+  // Auto-fetch Ollama models when on the AI step with Ollama selected.
+  // Debounced and abortable for the same reason as Settings: this effect keys
+  // on the URL field, so it used to fire once per typed character.
   useEffect(() => {
-    if (aiProvider === 'ollama' && ollamaUrl && step === 10) {
-      refreshOllamaModels(ollamaUrl)
-    }
+    if (aiProvider !== 'ollama' || !ollamaUrl || step !== 10) { setModelsLoading(false); return }
+    const controller = new AbortController()
+    const timer = setTimeout(() => { void refreshOllamaModels(ollamaUrl, controller.signal) }, 400)
+    return () => { clearTimeout(timer); controller.abort() }
   }, [aiProvider, ollamaUrl, step, refreshOllamaModels])
 
   const hasApiKey = aiProvider === 'gemini' ? geminiKey.trim().length > 0 : ollamaUrl.trim().length > 0
@@ -749,7 +755,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                   label="Ollama URL"
                   value={ollamaUrl}
                   onChange={(e) => setOllamaUrl(e.target.value)}
-                  placeholder="http://192.168.1.174:11434"
+                  placeholder="http://localhost:11434"
                 />
                 {/* Model picker */}
                 <div className="flex flex-col gap-1.5">
