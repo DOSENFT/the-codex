@@ -25,6 +25,7 @@ import { cn } from '../lib/cn'
 import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, GEMINI_MODELS, type AIProvider } from '../lib/ai'
 import { useAI } from '../hooks/useAI'
 import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
+import { parseCharacterFile, formatList } from '../lib/import-character'
 import { ASTERA_PERSONA } from '../lib/dnd-data'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
@@ -172,6 +173,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   /* ------ export / import ------ */
   const [importError, setImportError] = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState(false)
+  const [importWarnings, setImportWarnings] = useState<string[]>([])
 
   const handleExport = useCallback(() => {
     const data = JSON.stringify(character, null, 2)
@@ -190,36 +192,35 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   const handleImport = useCallback(() => {
     setImportError(null)
     setImportSuccess(false)
+    setImportWarnings([])
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = '.json'
+    // See CharacterSetup for why this is not a bare `.json` — iOS greys the file
+    // out in the picker, which reads as the app refusing it.
+    input.accept = '.json,.txt,application/json,text/json,text/plain'
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
       const reader = new FileReader()
       reader.onload = (ev) => {
-        try {
-          const parsed = JSON.parse(ev.target?.result as string)
-          // Basic validation: check required Character fields
-          if (!parsed.name || !parsed.class || !parsed.race || !parsed.level) {
-            setImportError('Invalid character file — missing name, class, race, or level.')
-            return
-          }
-          if (!parsed.spells || !parsed.spellSlots) {
-            setImportError('Invalid character file — missing spells or spell slot data.')
-            return
-          }
-          if (!parsed.id) {
-            parsed.id = generateId()
-          }
-          parsed.updatedAt = new Date().toISOString()
-          onCharacterUpdate(parsed as Character)
-          setImportSuccess(true)
-          setTimeout(() => setImportSuccess(false), 3000)
-        } catch {
-          setImportError('Could not read file — make sure it is a valid Codex character JSON.')
+        const result = parseCharacterFile(String(ev.target?.result ?? ''))
+        if (!result.ok) {
+          setImportError(result.error)
+          return
         }
+        onCharacterUpdate(result.character)
+        /* A thin old export is still a real import, so it succeeds — but the
+           green tick alone would let it pass as complete when it isn't. The
+           amber notice stays put instead of self-dismissing: what it says is
+           still true in five minutes. */
+        if (result.warnings.length > 0) {
+          setImportWarnings(result.warnings)
+          return
+        }
+        setImportSuccess(true)
+        setTimeout(() => setImportSuccess(false), 3000)
       }
+      reader.onerror = () => setImportError('That file could not be read off the device.')
       reader.readAsText(file)
     }
     input.click()
@@ -692,6 +693,19 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
         <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-verdant/10 border border-verdant/25 animate-fade-in">
           <CheckCircle2 size={16} className="text-verdant shrink-0" aria-hidden />
           <span className="text-sm text-verdant">Character imported successfully</span>
+        </div>
+      )}
+
+      {importWarnings.length > 0 && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/25 animate-fade-in"
+        >
+          <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" aria-hidden />
+          <span className="text-sm text-amber-200">
+            Imported — but that was an older export, with no {formatList(importWarnings)}. Everything
+            else came across; you'll need to add those back.
+          </span>
         </div>
       )}
 

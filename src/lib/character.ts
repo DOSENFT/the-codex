@@ -404,15 +404,27 @@ export function saveCharacter(character: Character): void {
   updateRosterEntry(character)
 }
 
-/** Load a specific character by id. Applies migration defaults for new fields. */
-export function loadCharacter(id: string): Character | null {
-  const saved = localStorage.getItem(CHAR_PREFIX + id)
-  if (!saved) return null
-  try {
-    const parsed = JSON.parse(saved) as Partial<Character>
-    return {
-      ...parsed,
-      id: parsed.id ?? id,
+/**
+ * Make a partial character safe to render.
+ *
+ * This was the body of `loadCharacter`, and living in there is what caused the
+ * import bug of 2026-08-17. Marcus exported Nix from an older build, imported
+ * the file on a new device, and the app white-screened — because `loadCharacter`
+ * defaulted every required field while BOTH import paths did `parsed as
+ * Character`, a cast that promises the compiler something the file does not
+ * contain. His real export was missing `feats`, `customHooks`, `resourcePools`
+ * and `customConditions`; an older one was also missing `abilityScores` and
+ * `weapons`. Each of those is read without a guard during boot.
+ *
+ * A cast is not a check. Every route by which a character enters this app —
+ * storage, file import, paste — goes through here now, so there is one place
+ * that knows what a complete character is, and adding a required field means
+ * adding one default here rather than remembering three call sites.
+ */
+export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: string): Character {
+  return {
+    ...parsed,
+    id: parsed.id ?? fallbackId ?? generateId(),
       // Everything below this comment is a REQUIRED field of Character that
       // was not being defaulted. A stored character missing any of them
       // white-screens the whole app ABOVE every error boundary, before a
@@ -448,6 +460,22 @@ export function loadCharacter(id: string): Character | null {
       savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
       weapons: (parsed.weapons ?? []).map((w: Partial<Weapon>) => ({
         ...w,
+        // `properties` is REQUIRED by the type and was still arriving undefined
+        // from real files, which is the top-level import bug one layer down:
+        // defaulting the character is not the same as defaulting what is inside
+        // it. Seven places spread or iterate this without a guard
+        // (`...weapon.properties` in turn/options.ts and print/CharacterRecord,
+        // `.map`/`.includes` in CharacterPage, `.some` in skill-guide), and a
+        // spread of undefined throws "not iterable" — a white screen, above
+        // every error boundary. Found 2026-08-17 by a synthetic export that had
+        // a weapon at all; Marcus's own file has none, so it hid.
+        properties: w.properties ?? [],
+        name: w.name ?? 'Weapon',
+        attackType: w.attackType ?? 'melee',
+        abilityMod: w.abilityMod ?? 'STR',
+        proficient: w.proficient ?? true,
+        damageDice: w.damageDice ?? '1d4',
+        damageType: w.damageType ?? 'bludgeoning',
         description: w.description ?? undefined,
         range: w.range ?? undefined,
         masteryProperty: w.masteryProperty ?? undefined,
@@ -461,14 +489,31 @@ export function loadCharacter(id: string): Character | null {
       activeIdentityId: parsed.activeIdentityId ?? undefined,
       campaignId: parsed.campaignId ?? undefined,
       customHooks: parsed.customHooks ?? [],
-      feats: parsed.feats ?? [],
+      // Same story as `weapons.properties`: `effects` is required by the type,
+      // arrives missing from older exports, and is read with `.length` without
+      // a guard — which is a white screen at boot, not a missing bullet list.
+      feats: (parsed.feats ?? []).map((f: Partial<CharacterFeat>) => ({
+        ...f,
+        name: f.name ?? 'Feat',
+        description: f.description ?? '',
+        isHomebrew: f.isHomebrew ?? false,
+        effects: f.effects ?? [],
+      })) as CharacterFeat[],
       // Slice 6b. Defaulted to [] rather than left undefined so that every
       // reader can iterate without a guard, and so a sheet written before 6b
       // gains the fields the first time it is saved — no migration step, no
       // version stamp, and nothing existing is touched.
       resourcePools: parsed.resourcePools ?? [],
       customConditions: parsed.customConditions ?? [],
-    } as Character
+  } as Character
+}
+
+/** Load a specific character by id. Applies migration defaults for new fields. */
+export function loadCharacter(id: string): Character | null {
+  const saved = localStorage.getItem(CHAR_PREFIX + id)
+  if (!saved) return null
+  try {
+    return normalizeCharacter(JSON.parse(saved) as Partial<Character>, id)
   } catch {
     return null
   }

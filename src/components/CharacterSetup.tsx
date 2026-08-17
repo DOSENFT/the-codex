@@ -27,6 +27,7 @@ import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
 import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, GEMINI_MODELS, type AIProvider } from '../lib/ai'
 import { generateId, type Character, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
+import { parseCharacterFile, formatList } from '../lib/import-character'
 import {
   CLASSES,
   RACES,
@@ -114,36 +115,43 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
   const { loading, error, queryStructured, clearResponse } = useAI()
   const [forgeError, setForgeError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
+  /* An older export can be *valid* and still be thin — Marcus's 9KB file has no
+     ability scores and no weapons. Importing it silently hands him a Paladin
+     with 10s across the board, which looks like the app got his character wrong
+     rather than the file being old. So a thin file is held here and named
+     before it is accepted, instead of arriving as a surprise at the table. */
+  const [pendingImport, setPendingImport] = useState<{ character: Character; warnings: string[] } | null>(null)
 
   const handleImportCharacter = useCallback(() => {
     setImportError(null)
+    setPendingImport(null)
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = '.json'
+    /* NOT `.json` alone. iOS maps a file picker's `accept` onto its own type
+       system, does not recognise a bare `.json`, and greys the file out in the
+       Files app so it cannot be chosen at all — which looks exactly like the app
+       refusing the file, and is the first thing to suspect when Marcus says it
+       "won't accept" one. The MIME types and `text/plain` are what make it
+       selectable on an iPhone and iPad; mail clients also save these as
+       `.txt`. */
+    input.accept = '.json,.txt,application/json,text/json,text/plain'
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
       const reader = new FileReader()
       reader.onload = (ev) => {
-        try {
-          const parsed = JSON.parse(ev.target?.result as string)
-          if (!parsed.name || !parsed.class || !parsed.race || !parsed.level) {
-            setImportError('Invalid character file — missing name, class, race, or level.')
-            return
-          }
-          if (!parsed.spells || !parsed.spellSlots) {
-            setImportError('Invalid character file — missing spells or spell slot data.')
-            return
-          }
-          if (!parsed.id) {
-            parsed.id = generateId()
-          }
-          parsed.updatedAt = new Date().toISOString()
-          onComplete(parsed as Character)
-        } catch {
-          setImportError('Could not read file — make sure it is a valid Codex character JSON.')
+        const result = parseCharacterFile(String(ev.target?.result ?? ''))
+        if (!result.ok) {
+          setImportError(result.error)
+          return
         }
+        if (result.warnings.length > 0) {
+          setPendingImport({ character: result.character, warnings: result.warnings })
+          return
+        }
+        onComplete(result.character)
       }
+      reader.onerror = () => setImportError('That file could not be read off the device.')
       reader.readAsText(file)
     }
     input.click()
@@ -911,6 +919,41 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             <div className="flex items-start gap-2 p-3 mt-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-fade-in">
               <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" aria-hidden />
               <p className="text-sm text-red-300">{importError}</p>
+            </div>
+          )}
+
+          {pendingImport && (
+            <div
+              role="alert"
+              className="flex flex-col gap-3 p-3 mt-4 rounded-xl bg-amber-500/10 border border-amber-500/25 animate-fade-in"
+            >
+              <div className="flex items-start gap-2">
+                <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" aria-hidden />
+                <p className="text-sm text-amber-200">
+                  <span className="font-medium">{pendingImport.character.name}</span> is in that file,
+                  but it's an older export — it has no {formatList(pendingImport.warnings)}. You can
+                  import it and fill those in, or go back and export again from the device that has
+                  the up-to-date character.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => onComplete(pendingImport.character)}
+                  className="flex-1"
+                >
+                  Import anyway
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPendingImport(null)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           )}
 

@@ -1869,6 +1869,59 @@ Ordered by how much it changes what happens at the table.
    (concentration/bloodied), 9 (mobs), 10a (install nudge), and the three dead components in
    `combat/` still reported-not-deleted because deleting files is ASK-FIRST.
 
+## 🩹 Slice 15a — the import, which was broken the whole time (2026-08-17)
+
+Marcus, after the release: *"nor will it accept my jasn file."* He was right, and it was worse than
+refusing. Three bugs, all in the one path that a new phone has to come in through.
+
+**1. The cast.** Both import handlers — `CharacterSetup.handleImportCharacter` and
+`Settings.handleImport`, byte-identical copies — ended in `parsed as Character`. That is a promise to
+the compiler, not a check on the file. `loadCharacter` carries a large migration/defaults block whose
+own comment warns that a character missing any of those fields *"white-screens the whole app ABOVE
+every error boundary"* — and import walked straight past it. Reproduced with his own two files: both
+were **accepted**, **saved**, and then the app went white. Because it saved, the welcome screen was
+gone too; the file he'd dug out of an email had bricked the app rather than been rejected by it.
+
+**2. Nested fields, the same bug one layer down.** Fixing the top level was not enough.
+`Weapon.properties` and `CharacterFeat.effects` are both *required* by the type, both absent from
+older exports, and both read without a guard — `...weapon.properties` in `turn/options.ts` and
+`print/CharacterRecord.tsx`, `.map`/`.includes` in `CharacterPage`, `.some` in `skill-guide.ts`,
+`.length` for feats. A spread of `undefined` throws "not iterable". These hid from every check
+including the first fix, because **Marcus's own file has no weapons and no feats.** They were found
+only by a synthetic export that had one of each. Both now default in `normalizeCharacter`.
+
+**3. The iOS picker.** `accept='.json'` alone greys the file out in the Files app — iOS maps
+`accept` onto UTIs and does not know a bare `.json`. Indistinguishable, from the sofa, from the app
+refusing the file. Now `.json,.txt,application/json,text/json,text/plain`.
+
+**What changed, in behaviour:**
+
+- One shared path: `src/lib/import-character.ts` → `parseCharacterFile`, used by both surfaces.
+- `normalizeCharacter` extracted out of `loadCharacter`, so **every** door — storage, file, paste —
+  defaults the same way. Nested weapons and feats normalised too.
+- Errors name the actual problem. An empty `{}` (which is what a failed export writes, and he has
+  two of them) now says *the export didn't work*, not "invalid character file".
+- `race`/`species` both accepted; only `name` is genuinely required.
+- A thin old export is no longer accepted silently. It is **held at a gate** that names what's
+  missing — "no ability scores, weapons and equipment" — with *Import anyway* / *Cancel*. Silently
+  handing him a Paladin with 10s across the board would read as the app getting his character wrong.
+
+**Proof.** `reference/prove-import.mjs` — **33 checks**, the first in this repo to touch the import
+door at all. Every other proof seeds localStorage directly, which is exactly how this shipped broken.
+It drives the real button, then reloads (the crash was *after* the save), then walks all 7 screens
+with one bare item of each kind. Fixtures are synthetic on purpose: his real exports carry his
+persona and 1,800 words of backstory, which do not belong in a repo. Unit side:
+`src/lib/import-character.test.ts`, 15 tests. Both mutation-checked — restoring `parsed as Character`
+reds 2 unit tests; removing either nested default reds the browser proof.
+
+**Verified against his real files** (out-of-repo, `_import-verify.mjs`, not committed): name, level,
+class, subclass, HP, AC, ability scores, 10 spells, 5 features, spell slots, save DC, the 17-key
+persona and the 1,803-character homebrew notes all arrive intact, no field dropped, and a reload
+after import does not white-screen. **The good file is `codex-nix-lvl7 (1).json`** — the 2-byte
+`codex-character-data.json` is a failed export.
+
+Sweep after: tsc clean, 338 unit tests, 302 browser checks across slices 6–15, all green.
+
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 
 Verbatim: *"we are not starting from scratch. I previously had a fully working prototype. Make that
