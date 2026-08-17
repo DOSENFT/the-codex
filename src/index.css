@@ -83,6 +83,59 @@
   to { transform: translateX(0); }
 }
 
+/* ─── The motion budget's one enforceable rule ───────────────────────────────
+   `prefers-reduced-motion: reduce` is an accessibility setting, not a question
+   of taste, and until Slice 14 this app very nearly ignored it.
+
+   The reason is worth keeping. `tokens.css` zeroes --d-dur-tap / -state /
+   -ceremony under the media query, which is correct and achieves almost
+   nothing: a variable only stills what CONSUMES it, and exactly two rules in
+   the whole of `src/` do. Everything else carries its own hardcoded Tailwind
+   duration and cannot hear the switch. Measured with the switch ON, 816
+   elements still declared motion and 86 animations were still running on
+   screen. (`reference/audit-d14.mjs`)
+
+   So this rule is global and blunt, deliberately: any rule that ENUMERATES
+   what to still is a rule that goes stale at the next component. The same
+   mistake in a different costume is what the token block already made.
+
+   It is safe because every keyframe above ENDS at the resting state — fadeIn
+   at opacity 1, slideUp at translateY(0), objectEnter and drawerEnter at their
+   settled transforms, diceTumble and diceLand at scale(1), pulseGlow at zero
+   glow. Collapsing a duration to ~0 therefore lands on the finished frame, not
+   a half-played one. That was checked keyframe by keyframe. If you add a
+   keyframe whose LAST frame is not the resting state, this rule will strand it
+   there — put the resting state at 100%.
+
+   Nothing in `src/` listens for `transitionend` or `animationend`, so no logic
+   waits on a duration this shortens. Also checked, not assumed.
+
+   ONE CARVE-OUT — `animate-spin`. A spinner is not decoration; it is the app
+   saying "still working". Freezing it mid-arc reads as a hung app, which is a
+   worse outcome for the same user than the motion was. It also rotates about
+   its own centre, carrying none of the vestibular risk this setting exists to
+   remove. So it is SLOWED, not stopped.
+
+   JS-driven motion cannot be reached from here at all — a media query does not
+   apply to the Web Animations API. That half is handled by `<MotionConfig
+   reducedMotion="user">` in `main.tsx`; the two together are the whole fix.
+   ────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-spin {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
 /* A resource pip is 12px of paint and was 12px of target. At a table, one
    handed, in the dark, that is a miss waiting to happen — and the miss expends
    a spell slot you did not mean to spend.

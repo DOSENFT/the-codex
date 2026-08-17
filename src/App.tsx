@@ -14,6 +14,7 @@ import { SessionCockpit } from './components/session'
 import { CharacterPage } from './components/CharacterPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { TurnLive } from './components/turn/TurnLive'
+import { CharacterRecord } from './components/print/CharacterRecord'
 import type { Character } from './lib/character'
 
 const MODE_STORAGE_KEY = 'codex-app-mode'
@@ -111,9 +112,12 @@ export default function App() {
      the bug class V0.9 spent a year on. */
   if (D_PREVIEW) {
     return (
-      <ErrorBoundary surface="Turn (preview)">
-        <TurnLive character={character} onCharacterUpdate={setCharacter} />
-      </ErrorBoundary>
+      <>
+        <ErrorBoundary surface="Turn (preview)">
+          <TurnLive character={character} onCharacterUpdate={setCharacter} />
+        </ErrorBoundary>
+        <CharacterRecord character={character} />
+      </>
     )
   }
 
@@ -122,6 +126,13 @@ export default function App() {
   }
 
   return (
+    <>
+    {/* Slice 14 — the paper fallback, and it is OUTSIDE <Layout> on purpose.
+        Inside it, the print stylesheet's "hide the app shell" rule would hide
+        the record along with everything else. Out here it is a sibling of the
+        shell, so Ctrl+P from any tab prints the whole character rather than
+        whichever tab happened to be mounted. See design/print.css. */}
+    <CharacterRecord character={character} />
     <Layout
       character={character}
       activeTab={activeTab}
@@ -205,5 +216,6 @@ export default function App() {
       )}
       </motion.div>
     </Layout>
+    </>
   )
 }

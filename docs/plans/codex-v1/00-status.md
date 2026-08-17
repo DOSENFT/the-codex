@@ -9,6 +9,35 @@ Prior ledger: `V1.0-EVOLUTION-PLAN.md` (slices 1–3 landed, 4–5 partial, 6–
 - Gate 3 — Program Design: **APPROVED 2026-08-15**
 - Gate 4 — Slice plan: **APPROVED 2026-08-15** → `04-slices.md` · amended 2026-08-16 (homebrew: 6b, 6c) · **amendment approved 2026-08-16** by Marcus's standing directive, verbatim: *"Just finish the full product instead. Full bore ahead on the real build."* The amendment only **added** slices; nothing approved at Gate 4 was removed or reinterpreted.
 
+## 🔒 SCOPE BOUNDARY — campaign memory belongs to The Vault. Marcus, 2026-08-17.
+
+The Vault is a separate product (Cowork is building it; at Gate 1 as of this date): audio,
+transcript and AI chronicle per session, assembled into one page per NPC, faction, quest and open
+thread, every fact linked to the second it happened. Its success test is that a player who has not
+thought about the campaign since May can cold-open it and, inside ten minutes, say who they are,
+what they promised, and who is trying to kill them.
+
+**The Codex is the character-and-combat tool. The Vault is campaign memory.** The dividing test:
+
+> If the fact would still be true with the campaign deleted, it is the Codex's.
+> If it exists only because a session happened, it is the Vault's.
+
+Consequences, binding on every remaining slice:
+
+- **`campaign.notableNPCs`, `partyMembers`, `currentQuest`, `sessionNotes` and the
+  `codex-session-log-*` RP moments are FROZEN.** They keep working exactly as they do — there is
+  real typing in them and the prime law forbids degrading it — but no slice adds to them.
+- **Slice 14's "print chronicle" is CANCELLED.** An offline, un-searchable, un-timestamped session
+  log printed from the Codex would be a strictly worse second copy of the Vault, and two copies of
+  "who's trying to kill me" is precisely the state the Vault's ten-minute test fails. Slice 14 is now
+  **motion budget + printable character record**.
+- **A Vault → Codex briefing feed is post-V1 work**, not in this plan. One direction only (the Vault
+  writes, the Codex reads); the Codex must stay fully usable with the Vault unreachable, inheriting
+  the rule Slice 11 already proved for the AI layer.
+
+The full contract, written for Cowork to design the Vault's Gate 2 against, is
+**`docs/external/vault-boundary.md`**. Hand that to Cowork.
+
 ## 🔒 THE CHARACTER IS NIX — OATH OF THE HEARTH (HOMEBREW). Marcus, 2026-08-16.
 
 Not Vaelin Ashgrove, not Oath of Vengeance — that was invented demo data in the mockups and is
@@ -83,7 +112,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 **Wave 4 — finish**
 - [x] 13 — legibility and reach: D's discipline enforced app-wide **— DONE 2026-08-16, see below**
 - [x] 13b — the deferral list from 13, worked: the Cinzel root cause, the two-tier touch floor, skill-dot reach **— DONE 2026-08-17, see below**
-- [ ] 14 — motion budget + print chronicle
+- [x] 14 — motion budget + printable character record *(the print-chronicle half was cancelled 2026-08-17 — campaign memory is the Vault's; see the scope boundary above)* **— DONE 2026-08-17, see below**
 - [ ] 15 — release: regression sweep vs. V0.9 baseline, licensing resolved, `v1` → `main`, one real session *(team: adversarial sweep)*
 
 ### 🔍 Known process debt — named here so it cannot pass as done (audit 2026-08-16)
@@ -94,9 +123,15 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
    for the turn brain — 6, 6b, 6c, 7 — have never been shown able to go red. Those are the checks we
    lean on hardest during every non-degradation sweep, so an untested proof there is the most
    expensive kind. → **a mutation pass over 6/6b/6c/7 is a required part of Slice 15**, not optional.
-2. **Marcus has not read a diff in nine slices.** The playbook says nudge at a slice boundary,
-   because losing touch with the codebase costs weeks exactly when the agent hits a bug it cannot
-   solve. He asked to see progress at Slice 7 and has been shown screenshots since, not code.
+2. ~~**Marcus has not read a diff in nine slices.**~~ **RESOLVED as a process change, 2026-08-17.**
+   Nudged again at the Slice 13b boundary; Marcus: *"Reading a diff is so long and hard to
+   understand that I cant really make anything of it."* **Stop nudging him to read diffs — it
+   produces zero review, not partial review.** The playbook's intent (he must not lose touch with
+   what is being built) still stands, so keep the intent and change the medium: at every slice
+   boundary give him (a) before/after screenshots of the surfaces that changed, (b) a plain-language
+   "what moved and why" written in terms of the app's behaviour, not the code, and (c) the measured
+   numbers. Code-level detail belongs in these docs. When a decision genuinely needs his judgement,
+   put the choice in product terms and ask — do not hand him a diff and hope.
 3. **Working-tree drift.** Nine modified baseline screenshots and a stack of untracked root-level
    audit/handoff markdown from earlier sessions sit uncommitted, plus `reference/_probe11.mjs`,
    which is scratch and must never be committed. Deleting files is ASK-FIRST, so they stay.
@@ -1554,6 +1589,131 @@ that parity gap is real work that no current slice owns. It has to be named befo
   `combat/Block1Skeleton.tsx`. All three are exported from `combat/index.ts` and imported nowhere.
   Deleting files is ASK-FIRST, so they are reported here rather than removed. (Mutations aimed at
   dead code survive and look like proof holes — that already cost time in Slice 13.)
+
+## ✅ Slice 14 — the motion budget, and the page that comes out of the printer (2026-08-17)
+
+Two halves, both about the app behaving when the screen is not the point: **motion that stops when
+the operating system says stop**, and **Ctrl+P producing a sheet you could play a session from with
+a pencil and no battery**. The print-**chronicle** half was cancelled the same day — campaign
+records belong to The Vault (see §SCOPE BOUNDARY above and `docs/external/vault-boundary.md`).
+
+### Half one — reduced motion was near-broken, and the reason is structural
+
+The app had a `prefers-reduced-motion` block, and it did almost nothing. Measured on 10 surfaces ×
+2 viewports before the fix:
+
+| | before | after |
+|---|---|---|
+| elements still declaring motion under `reduce` | **816** | **0** |
+| animations actually *running* under `reduce` | **86** | **0** (spinners excluded, by design) |
+| animations running with **no** preference set | 88 | 88 (peak 8 concurrent — motion is intact) |
+| controls slower than the 220ms tap ceiling | 0 | 0 |
+| animations over the 700ms ceremony ceiling | 0 | 0 |
+
+Two fixes, because there are two animation systems and **a CSS media query cannot reach the Web
+Animations API**:
+
+1. **`src/index.css`** — a blanket `*, *::before, *::after` rule collapsing durations to `0.01ms`
+   (*not* `0` — zero cancels `transitionend` and breaks handlers that wait for it), with one
+   deliberate carve-out: `.animate-spin` keeps its 1.5s. A frozen spinner reads as a hung app, which
+   is a worse accessibility outcome than the thing being fixed.
+2. **`src/main.tsx`** — `<MotionConfig reducedMotion="user">` around the whole tree. 17 files import
+   `motion`; only 6 consulted `useReducedMotion`, so 11 animated regardless of the setting and no
+   CSS-only probe would ever have seen it. It sits in `main.tsx`, not `App.tsx`, because App returns
+   early three times — a config mounted inside it is absent on exactly the screens nobody checks.
+
+**Judged not a bug, deliberately:** 828 elements are off the three budget *integers* (90 / 220 / 700)
+and 530 use `transition-all`. The budget's **tiers** hold — nothing exceeds a ceiling. Forcing 828
+elements onto exact integers is invisible churn with real regression risk. Same call as 13b's 44–47px
+band: report it, don't chase it.
+
+### Half two — Ctrl+P printed a clipped dark tab; now it prints a record
+
+`CharacterSheet.tsx` is a bottom sheet with five tabs, and **inactive tabs are not rendered**. No
+stylesheet can reveal a component React never mounted — so print CSS on the existing sheet was never
+going to work. The fix is a **second document**: `src/components/print/CharacterRecord.tsx`
+(~330 lines), black on white, switched in by `src/design/print.css`.
+
+Three structural decisions worth keeping:
+
+- **It is mounted outside `<Layout>`**, as a sibling in both `App`'s main return and the `?d=1`
+  branch. Inside `Layout`, the "hide the app shell" print rule would hide the record along with
+  everything else. It lives in `App` and not in its own tree because `useCharacter()` is a **hook
+  with per-instance state, not a context** — a second instance would be a stale second reader of
+  localStorage.
+- **`display: none`, never `visibility: hidden`**, for the shell. A hidden-but-laid-out shell is how
+  you get four blank pages before the sheet. Verified there is **no `createPortal` anywhere in
+  `src/`**, so `#root > *:not(.print-record)` is a complete rule.
+- **Paper is a play aid, not a plan.** Nix is level 8 and his feature list runs to level 20. The
+  record filters to `f.level <= c.level`, matching the gate `poolsOf()` already applies to counters.
+  A record that offers a feature you cannot use tonight is worse than one that omits it.
+
+What is on the page: identity header with a write-in HP blank, vitals strip (AC / Prof / Init /
+Passive Perception / Spell DC / Spell Atk / death-save boxes), conditions, abilities and saves
+running **across** the page, all 18 skills in three columns with proficient/expert pips, attacks with
+computed bonus and mastery notes, resource pools with write-in tracks, slot pip boxes, prepared
+spells and cantrips grouped by level with 2-line clamped descriptions, available features, feats,
+gear. A print button (`Printer` icon, 44px) sits next to the sheet's close button.
+
+Measured: **1457px at A4 width ≈ 1.30 pages.** The first draft was 1537px / 1.37 pages; restructuring
+the abilities table from 4 columns down to 6 columns × 3 rows and stopping "60 feet" from wrapping
+recovered 80px. Artefacts: `_shots-d14/nix-record.pdf`, `print-record.png`, `print-before.png`.
+
+### Proof
+
+`reference/prove-slice14.mjs` — **31 checks, 31 pass, 0 fail.** Eight sections: reduce stills the app
+on all 10 surfaces · the spinner carve-out survives · normal motion is *not* killed (peak 8
+concurrent) · the 220ms/700ms ceilings hold on 10 surfaces × 2 viewports · the record is
+`display:none` on screen and complete in print (6 abilities, 3 rows, 18 skills, weapons, spells, slot
+levels, pools, features, shell hidden, ink `rgb(0,0,0)` on `rgb(255,255,255)`, no above-level
+feature) · it prints from every surface **and** from `?d=1` · the print control clears 44px · console
+clean.
+
+### Mutation
+
+`reference/mutate-slice14.mjs` — **9/9 killed.** Nine rather than five because both halves fake
+easily. Two are deliberate **over-corrections**: kill the spinner carve-out, and change
+`@media (prefers-reduced-motion: reduce)` to `@media all` — both make every reduced-motion number
+read zero. A proof that only asked "is anything moving under reduce" would have called both a
+success; check 3 ("motion is still declared with no preference") is the one that refuses them.
+The other seven: each half of the fix deleted, a 1000ms tab bar, the shell printing over the record,
+the record leaking onto the screen, five skills instead of eighteen, and the level gate removed.
+
+`mutate-slice13b.mjs` re-run alongside: **5/5 killed** — no regression in the previous slice's proof.
+
+### Instrument errors found (three; the sixth, seventh and eighth in this project)
+
+1. **`"0.01ms"` vs `"1e-05s"`.** Chrome serialises the collapsed duration in scientific notation. The
+   proof compared strings. Fixed by parsing to a number and asserting `< 1ms` is stilled.
+2. **"Animations still run with no preference" measured 0** — because it sampled 120ms after
+   `networkidle`, by which time the entrance wave had finished. Fixed with a rAF **high-water-mark
+   sampler** installed via `addInitScript`, plus a tab click. Peak: 8.
+3. **"Paper is white" failed for the wrong reason** during mutation 4. Switching `emulateMedia` puts
+   `background-color` into a transition, and `getComputedStyle` read in the same task returns the
+   value *before* it. Fixed with a one-frame wait after the media switch. This surfaced as a
+   MISDIRECT verdict — the proof failed, but not on the predicted check — which is exactly what the
+   mutation harness exists to catch.
+
+A fourth, not an instrument error but the same shape: two proof checks failed because **the preview
+server serves `dist`**, and the level filter had been added after the last `vite build`. Every source
+edit needs a rebuild before the proof runs.
+
+### Non-degradation
+
+`npx tsc --noEmit` clean · `npx vite build` clean · `npx vitest run` **323/323 across 12 files** ·
+prove-slice12 ALL CHECKS PASS · prove-slice13 **35 passed** · prove-slice13b **15 passed** ·
+prove-slice14 **31 passed**.
+
+### Honest deferral list (carried into 15)
+
+- **530 `transition-all` uses across 83 distinct sites**, and **828 elements off the budget's exact
+  integers.** Tiers hold; integers were never adopted. Judged churn — see above.
+- **126 Cinzel-under-20px**, **178 contrast failures**, **77 targets under 44px** — all unchanged
+  from 13b, all still real.
+- **Three dead components** in `combat/` (`StatsBar`, `Block1Empty`, `Block1Skeleton`): exported,
+  imported nowhere. Deleting files is ASK-FIRST, so they stay reported.
+- **The `TurnScreenD` parity gap** (§ above) is still unowned and still blocks the honesty of Slice
+  15's "regression sweep vs. V0.9 baseline".
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

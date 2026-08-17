@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Plus, Trash2, Edit3, Check, Shield, Swords, Brain, Eye, Backpack } from 'lucide-react'
+import { X, Plus, Trash2, Edit3, Check, Shield, Swords, Brain, Eye, Backpack, Printer } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
@@ -478,14 +478,28 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
               {character.race} {character.class} ({character.subclass}) &middot; Lvl {character.level}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06] transition-all active:scale-95"
-            aria-label="Close character sheet"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Slice 14. Ctrl+P is not a gesture that exists on the iPad this
+                app is played on, so the paper record needs a control. It does
+                NOT print this sheet — it prints `components/print/
+                CharacterRecord`, which holds all five tabs at once. */}
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06] transition-all active:scale-95"
+              aria-label="Print character record"
+            >
+              <Printer size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-forge-2 hover:text-forge-0 hover:bg-gold/[0.06] transition-all active:scale-95"
+              aria-label="Close character sheet"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Quick Stats Row */}

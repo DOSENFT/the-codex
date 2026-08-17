@@ -128,7 +128,10 @@ always available and can never be switched off.
 **Slice 13 — the rest of the app in D's language.** Grimoire, identity, dice — built as real
 components from `tokens.css`. The other surfaces inherit the tokens.
 **Slice 14 — motion budget + print.** Long and ceremonial for consequential moments, near-instant for
-taps, nothing decorative. Print chronicle and character record.
+taps, nothing decorative. ~~Print chronicle and~~ printable character record.
+> **Amended 2026-08-17 (Marcus).** The chronicle half is **cancelled**: campaign memory belongs to
+> The Vault, a separate product now at Gate 1. See the scope boundary in `00-status.md` and the full
+> contract in `docs/external/vault-boundary.md`. Slice 14 is motion + the character record.
 **Slice 15 — release.** Full Playwright pass against the V0.9 baseline shots, licensing attribution
 resolved (see below), merge `v1` → `main`, live deploy, and one real session at the table.
 
