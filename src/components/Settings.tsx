@@ -32,6 +32,7 @@ import { ParchmentCard } from './ui/ParchmentCard'
 import { OrnateHeader } from './ui/OrnateHeader'
 import { Input } from './ui/Input'
 import { CampaignEditor } from './CampaignEditor'
+import { TableCovenant } from './safety/TableCovenant'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -951,6 +952,9 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       {/* Header */}
       <OrnateHeader className="mb-1">Settings</OrnateHeader>
 
+      {/* Above the AI card and the character card on purpose. What the table
+          agreed to outranks which model answers questions. */}
+      <TableCovenant />
       {renderAIConfig()}
       {renderCharacterInfo()}
       {/* Campaign & World */}

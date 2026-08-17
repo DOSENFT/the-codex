@@ -7,7 +7,7 @@ Prior ledger: `V1.0-EVOLUTION-PLAN.md` (slices 1–3 landed, 4–5 partial, 6–
 - Gate 1 — Product: **APPROVED 2026-08-15** (frame + direction D, both signed off by Marcus)
 - Gate 2 — Architecture: **APPROVED 2026-08-15**
 - Gate 3 — Program Design: **APPROVED 2026-08-15**
-- Gate 4 — Slice plan: **APPROVED 2026-08-15** → `04-slices.md` · **amended 2026-08-16 (homebrew), awaiting re-approval of the amendment only**
+- Gate 4 — Slice plan: **APPROVED 2026-08-15** → `04-slices.md` · amended 2026-08-16 (homebrew: 6b, 6c) · **amendment approved 2026-08-16** by Marcus's standing directive, verbatim: *"Just finish the full product instead. Full bore ahead on the real build."* The amendment only **added** slices; nothing approved at Gate 4 was removed or reinterpreted.
 
 ## 🔒 THE CHARACTER IS NIX — OATH OF THE HEARTH (HOMEBREW). Marcus, 2026-08-16.
 
@@ -78,12 +78,31 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 10 — PWA: manifest, service worker, **self-hosted fonts**, offline shell **— DONE 2026-08-16, see below**
 - [ ] 10a — install ergonomics: an "Add to Home Screen" nudge and an update prompt when a new build is waiting *(deferred deliberately — see the Slice 10 section)*
 - [x] 11 — AI hardening: config'd base URL, never blocks combat **— DONE 2026-08-16, see below**
-- [ ] 12 — safety: lines, veils, consent, always-available veil
+- [x] 12 — safety: lines, veils, consent, always-available veil **— DONE 2026-08-16, see below**
 
 **Wave 4 — finish**
 - [ ] 13 — grimoire / identity / dice as real components in D's language
 - [ ] 14 — motion budget + print chronicle
 - [ ] 15 — release: regression sweep vs. V0.9 baseline, licensing resolved, `v1` → `main`, one real session *(team: adversarial sweep)*
+
+### 🔍 Known process debt — named here so it cannot pass as done (audit 2026-08-16)
+
+1. **Mutation coverage is uneven, and it is thinnest where the product actually lives.**
+   `mutate-slice10.mjs` and `mutate-slice11.mjs` exist; slices 1–7 have **prove** scripts with no
+   mutation harness behind them. Their 300-odd unit tests are strong, but the *browser-level* proofs
+   for the turn brain — 6, 6b, 6c, 7 — have never been shown able to go red. Those are the checks we
+   lean on hardest during every non-degradation sweep, so an untested proof there is the most
+   expensive kind. → **a mutation pass over 6/6b/6c/7 is a required part of Slice 15**, not optional.
+2. **Marcus has not read a diff in nine slices.** The playbook says nudge at a slice boundary,
+   because losing touch with the codebase costs weeks exactly when the agent hits a bug it cannot
+   solve. He asked to see progress at Slice 7 and has been shown screenshots since, not code.
+3. **Working-tree drift.** Nine modified baseline screenshots and a stack of untracked root-level
+   audit/handoff markdown from earlier sessions sit uncommitted, plus `reference/_probe11.mjs`,
+   which is scratch and must never be committed. Deleting files is ASK-FIRST, so they stay.
+4. **The deferral queue is real work, not notes:** 6a (the `CombatHelper` shrink), 7b (readied
+   actions), 10a (install nudge + art format). Plus carried items: merging *Class Resources* into
+   the ledger without losing Aura Range, the sparse iPad `.colA`, the nested `<button>` at
+   `GrimoireCard.tsx:68`, and the `race` → `species` alias.
 
 ## ✅ Slice 1 — TRACER BULLET, done 2026-08-16
 
@@ -1141,6 +1160,98 @@ Shot: `reference/baseline/slice11-hung-advisor.png` — the panel spinning, the 
 - **The duplicated section title** — "COMBAT ADVISOR" as both the collapsible header and the card
   header inside it, and "SPELL SLOTS" the same way. It is systemic across the v0.9 surface, so it
   belongs to Slice 13's D-language pass, not to a slice about the network.
+
+## ✅ Slice 12 — safety: the covenant, and the one control that cannot be switched off (2026-08-16)
+
+**The sentence this slice serves:** *the escape hatch is always there, because there is no switch —
+and it writes nothing down, because nobody should have to explain afterwards.*
+
+Two objects, and they are deliberately not wired to each other. **The Table Covenant** is the
+agreement written down before play (lines that never happen, veils that happen off-screen), living
+in Settings. **The veil** is the control you press mid-scene. The covenant does not gate the veil,
+and the veil does not consult the covenant — a table that forgot to fill in the list still gets the
+button, on the night it turns out they needed it.
+
+### Where the veil mounts is the whole design
+`<Veil />` is a **sibling of `<App />` in `main.tsx`**, not a child of `Layout`. `App` returns early
+three separate times — the loading frame (`if (!ready) return null`), `<CharacterSetup>` when there
+is no character yet, and `<TurnLive>` behind `?d=1`. Anything inside `Layout` is absent on all
+three. "Always available" has to mean *always*, including on the screens that are not the app
+proper. This is the one line in the slice a tidy-minded reader is most likely to "fix" — so the
+mutation harness makes that exact refactor and watches it break `?d=1`.
+
+The component **takes no props and reads no settings**. There is nothing to pass it and nothing that
+could be passed to make it go away. It writes **no** count, timestamp, combat-log line, or reducer
+event; the missing persistence call is load-bearing, and the proof measures storage byte-for-byte
+across a full raise-and-lower cycle to keep it missing.
+
+### Three defects found by execution, not by reading
+1. **Focus escaped the veiled scene.** The proof's first run failed on *the focused button still
+   works from the keyboard*. Tapping the backdrop blurred the button, focus fell to `<body>`, and
+   from there Tab walked straight into the fight behind the veil — visually covered, still reachable
+   by keyboard and screen reader. `aria-modal` tells assistive tech the rest is inert; it does not
+   make it so. Fixed with a `focusin` trap — which then caught Tab but **not** the backdrop tap,
+   because a tap on nothing focusable fires no `focusin` at all. Only the *leaving* is observable,
+   so a `focusout` handler on `relatedTarget` was added, deferred a tick because a browser will not
+   honour `focus()` while it is still tearing the old one down.
+2. **A save that was not a save.** `globalThis.localStorage?.setItem(...)` was the tidy line and the
+   wrong one: on a device with no storage the optional chain does nothing, throws nothing, and
+   reports success. Now an explicit `if (!store) return { ok: false, ... }`, pinned by the unit test
+   *reports failure when there is no storage at all*. `TableCovenant` funnels every change through
+   one `commit()` that refuses to move the UI on when the write failed.
+3. **The veil faded in over 220ms.** `--d-dur-state` is the house transition and looked right in
+   isolation. This is the one place in the app where motion is not a nicety but a delay on the only
+   function that matters — for a fifth of a second the thing you asked to stop is still showing
+   through. The veil is now instant.
+
+### Look at the screenshots — both findings came from the PNGs
+- `baseline/slice12-veiled.png` came back showing **the combat screen** while all 38 checks were
+  green. `_probe12.mjs` reported the scene correct in every measurable way except one:
+  `animation: veil-fall 0.22s`. The shot had been captured two frames into the fade, and Playwright's
+  `isVisible()` is true at opacity 0. That is defect 3 above; the new check *opaque the instant it is
+  raised, with nothing animating in* is measured with **no settle wait on purpose**.
+- `baseline/slice12-control-iPad.png` failed *it does not sit on the navigation* — and reading it
+  showed the VEIL pill at the foot of the full-height left rail, covering no tab at all. The **check**
+  was wrong, not the layout: it tested region overlap instead of "covers something pressable". It was
+  rewritten to measure against every `role=tab` bounding box individually — a more precise check, not
+  a weaker one — and the pill aligned to `left: 12px` to match the rail's own inset.
+
+### Proof
+- `src/lib/covenant.test.ts` — **15/15**, organised as the three rules the module claims: *a line is
+  never dropped* (an unrecognised `kind` becomes the **stricter** of the two; a row that lost its id
+  gets a new one; a bad `note` never costs you the entries; clearing an entry's text does not delete
+  the row), *a failed write is not a save*, *this is not a log* (asserts the saved keys are exactly
+  `entries` / `note` / `updatedAt` and that no forbidden word appears anywhere in the payload).
+- `prove-slice12.mjs` — **44 checks, ALL PASS**, console clean. Seven sections: the control on every
+  surface (3 session tabs, 4 prep tabs, over the Settings sheet, behind `?d=1`, and **in a second
+  browser context with no character at all** for the setup screen); collision measurement at phone
+  and iPad against every tab box; every plausible "off" key seeded and the button still there; it
+  does not come down by accident (Escape, backdrop, focus containment, Tab, Enter); the scene covers
+  the table (opacity + tap-through + screenshot); it is not a log (byte-for-byte storage diff); the
+  covenant written once, surviving reload, and **not** inside the character record.
+- `mutate-slice12.mjs` — **7/7 killed, first run, no INVALID and no MISDIRECT.** Because this slice is
+  mostly a claim about *absence*, every mutation **adds the forbidden thing back**: mount it inside
+  App · a settings switch that turns it off · backdrop-dismiss · delete the `focusout` trap · restore
+  the fade · count the raises · make `saveCovenant` never actually write. Same discipline as Slice 11
+  — per-file originals, `cmp`-guarded restore, CRLF retry on every anchor, build-refused = INVALID,
+  wrong-line failure = MISDIRECT.
+
+### Non-degradation
+`npx tsc -b --force` clean · `npx vite build` clean · `npx vitest run` **323/323 across 12 files**
+(308 + 15 new) · `prove-slice6b` 24 · `prove-slice6c` 25 · `prove-slice7` 48 · `prove-slice10` 45 ·
+`prove-slice11` 31 — every one still green. New storage key `codex-covenant`, **global rather than
+per-character** (the agreement belongs to the table, not to Nix); no existing key, field, or load
+path was touched.
+
+### Deferred deliberately
+- **On the phone the veil pill floats over content** — it can overlap a condition chip, exactly as the
+  pre-existing dice FAB already does. Consistent with v0.9 precedent rather than a new sin; it belongs
+  to the Slice 13/14 layout pass, where both floating controls get resolved together.
+- **`TableCovenant` is still in v0.9 card language** (`GlassCard` / `OrnateHeader` / `Button`), not
+  direction D. Converting it is Slice 13's job, and doing it here would have been a look change
+  smuggled into a safety slice.
+- **No AI anywhere near the covenant, and no sharing or export.** Both are absences on purpose, not
+  gaps: a model must never see the list, and a boundary is not content to publish.
 
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 

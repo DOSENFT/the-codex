@@ -1,0 +1,130 @@
+/* ============================================================================
+   The veil — direction D
+   ----------------------------------------------------------------------------
+   Two objects. A control that is always on the screen, and a state that covers
+   the whole of it.
+
+   The control is deliberately QUIET. Safety tools that shout go unused: a red
+   panic button is a thing you have to be in crisis to justify pressing, and the
+   whole point is that raising a veil should cost nothing — no drama, no
+   explanation, no moment where everyone looks at you. So it sits at the same
+   weight as any other affordance on the surface, in gold because a veil is a
+   mechanic of this table like any other, and it never animates for attention.
+
+   It mirrors the dice button across the screen — same height, opposite side —
+   so the two can never be confused and can never overlap on any width.
+   ========================================================================== */
+
+.veil-btn {
+  position: fixed;
+  z-index: 90; /* over the app's own z-50 chrome; under .veil-scene */
+  left: var(--d-s4);
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  min-height: var(--d-touch-min);
+  min-width: var(--d-touch-min);
+  padding: 0 var(--d-s4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--d-s2);
+
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--d-gold);
+
+  background: var(--d-e2);
+  border: 1px solid var(--d-rule-lit);
+  border-radius: var(--d-radius-lg);
+  cursor: pointer;
+  transition: background var(--d-dur-tap) var(--d-ease);
+}
+
+/* At iPad width and up the phone's tab bar becomes a left rail, and the veil
+   takes the foot of it — below the last tab, aligned to the rail's own 12px
+   inset so it reads as part of that column rather than as something dropped on
+   top of it. Deliberately NOT floated into the content area: the one control
+   that is always present must never be the thing sitting over the fight. */
+@media (min-width: 1024px) {
+  .veil-btn {
+    left: 12px;
+    bottom: var(--d-s5);
+  }
+}
+
+.veil-btn:hover,
+.veil-btn:focus-visible {
+  background: var(--d-e3);
+}
+
+.veil-btn:focus-visible {
+  outline: 2px solid var(--d-gold);
+  outline-offset: 2px;
+}
+
+/* ---- The scene ------------------------------------------------------------
+   Opaque, not translucent. A blur over the fight still shows the fight, and
+   half-seeing the thing you asked to move past is worse than not asking. */
+.veil-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--d-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--d-s5);
+  padding: var(--d-s5);
+  text-align: center;
+  /* NO FADE IN. There was one — a 220ms `--d-dur-state` dissolve, which is the
+     house transition and looked right in isolation. The screenshot caught what
+     it actually costs: for a fifth of a second after the press, the thing you
+     just asked to stop is still on the screen, showing through. That is the
+     one moment in this app where motion is not a nicety but a delay on the
+     only function that matters. The veil is instant. It may soften on the way
+     back out, when nothing is at stake. */
+}
+
+.veil-scene .vtitle {
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-name);
+  line-height: var(--d-lh-tight);
+  color: var(--d-cream);
+  margin: 0;
+}
+
+.veil-scene .vbody {
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+  line-height: var(--d-lh-body);
+  color: var(--d-cream);
+  max-width: 34ch;
+  margin: 0;
+}
+
+.veil-scene .vback {
+  min-height: var(--d-touch-min);
+  padding: 0 var(--d-s5);
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+  color: var(--d-cream);
+  background: var(--d-e2);
+  border: 1px solid var(--d-rule-lit);
+  border-radius: var(--d-radius-lg);
+  cursor: pointer;
+}
+
+.veil-scene .vback:focus-visible {
+  outline: 2px solid var(--d-gold);
+  outline-offset: 2px;
+}
+
+/* The one line of small print, and the only place the covenant's own promise
+   is restated: nothing about this was written down. */
+.veil-scene .vquiet {
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  margin: 0;
+}
