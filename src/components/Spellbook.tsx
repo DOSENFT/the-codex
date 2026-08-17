@@ -582,7 +582,7 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
             ) : (
               <Swords size={16} className="text-eldritch shrink-0" aria-hidden />
             )}
-            <h2 className="font-display text-sm font-bold text-forge-0 truncate">
+            <h2 className="font-display text-xl font-bold text-forge-0 truncate">
               {mode === 'explain' ? 'Spell Explanation' : 'Tactical Advice'}: {spellName}
             </h2>
           </div>
@@ -1163,7 +1163,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
               <div key={spell.name}>
                 {showLevelDivider && (
                   <div className="ornate-divider my-2" aria-hidden>
-                    <span className="text-xs font-display uppercase tracking-widest text-gold/60">
+                    <span className="text-xs uppercase tracking-widest text-gold/60">
                       {spell.level === 0 ? 'Cantrips' : `Level ${spell.level}`}
                     </span>
                   </div>

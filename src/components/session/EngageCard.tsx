@@ -369,7 +369,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
                   'inline-flex items-center gap-1.5',
-                  'min-h-[36px] px-3 py-1.5 rounded-full',
+                  'min-h-[44px] px-3 py-1.5 rounded-full',
                   'text-xs font-medium uppercase tracking-wider',
                   'transition-all duration-200 ease-forge',
                   'active:scale-[0.97]',
@@ -418,7 +418,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                     onClick={() => setAddCategory(cat)}
                     className={cn(
                       'inline-flex items-center gap-1',
-                      'min-h-[32px] px-2.5 py-1 rounded-full',
+                      'min-h-[44px] px-2.5 py-1 rounded-full',
                       'text-xs font-medium uppercase tracking-wider',
                       'transition-all duration-200 ease-forge',
                       'active:scale-[0.97]',
@@ -457,7 +457,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                 disabled={!addText.trim()}
                 className={cn(
                   'flex-1 inline-flex items-center justify-center gap-1.5',
-                  'min-h-[40px] px-3 py-2 rounded-lg',
+                  'min-h-[44px] px-3 py-2 rounded-lg',
                   'bg-verdant/15 border border-verdant/30',
                   'text-sm font-medium text-verdant',
                   'transition-all duration-200 ease-forge',
@@ -473,7 +473,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                 type="button"
                 onClick={() => { setShowAddForm(false); setAddText('') }}
                 className={cn(
-                  'min-h-[40px] min-w-[40px] inline-flex items-center justify-center',
+                  'min-h-[44px] min-w-[40px] inline-flex items-center justify-center',
                   'rounded-lg',
                   'bg-white/[0.04] border border-white/10',
                   'text-forge-2',
@@ -526,7 +526,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                     <button
                       type="button"
                       onClick={() => handleCopy(hook.text, hook.id)}
-                      className="shrink-0 min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors"
+                      className="shrink-0 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors"
                     >
                       <Copy size={14} className="text-forge-2" aria-hidden />
                     </button>
@@ -535,7 +535,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                     type="button"
                     onClick={() => handleDelete(hook)}
                     className={cn(
-                      'shrink-0 min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg',
+                      'shrink-0 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg',
                       'opacity-0 group-hover:opacity-100 focus:opacity-100',
                       'hover:bg-red-500/10 transition-all',
                     )}
@@ -586,7 +586,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                       <button
                         type="button"
                         onClick={() => handleCopy(hook.text, hook.id)}
-                        className="shrink-0 min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors"
+                        className="shrink-0 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors"
                       >
                         <Copy size={14} className="text-forge-2" aria-hidden />
                       </button>
@@ -595,7 +595,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                       type="button"
                       onClick={() => setAiHooks(prev => prev.filter(h => h.id !== hook.id))}
                       className={cn(
-                        'shrink-0 min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg',
+                        'shrink-0 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg',
                         'opacity-0 group-hover:opacity-100 focus:opacity-100',
                         'hover:bg-red-500/10 transition-all',
                       )}
@@ -694,7 +694,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                   type="button"
                   onClick={() => { setTargetTab(tab.key); setSelectedMember(null); setSelectedSceneType(null); setSelectedNPC(null) }}
                   className={cn(
-                    'flex-1 min-h-[36px] px-2 py-1.5 rounded-md',
+                    'flex-1 min-h-[44px] px-2 py-1.5 rounded-md',
                     'text-xs font-medium text-center',
                     'transition-all duration-200 ease-forge',
                     'active:scale-[0.97]',
@@ -716,7 +716,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                   type="button"
                   onClick={() => setSelectedMember(pm.name === selectedMember ? null : pm.name)}
                   className={cn(
-                    'min-h-[36px] px-3 py-1.5 rounded-full',
+                    'min-h-[44px] px-3 py-1.5 rounded-full',
                     'text-xs font-medium',
                     'transition-all duration-200 ease-forge',
                     'active:scale-[0.97]',
@@ -738,7 +738,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                   type="button"
                   onClick={() => setSelectedSceneType(scene === selectedSceneType ? null : scene)}
                   className={cn(
-                    'min-h-[36px] px-3 py-1.5 rounded-full',
+                    'min-h-[44px] px-3 py-1.5 rounded-full',
                     'text-xs font-medium capitalize',
                     'transition-all duration-200 ease-forge',
                     'active:scale-[0.97]',
@@ -760,7 +760,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                   type="button"
                   onClick={() => setSelectedNPC(npc.name === selectedNPC ? null : npc.name)}
                   className={cn(
-                    'min-h-[36px] px-3 py-1.5 rounded-full',
+                    'min-h-[44px] px-3 py-1.5 rounded-full',
                     'text-xs font-medium',
                     'transition-all duration-200 ease-forge',
                     'active:scale-[0.97]',

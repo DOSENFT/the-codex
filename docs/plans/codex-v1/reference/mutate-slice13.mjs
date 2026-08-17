@@ -53,7 +53,7 @@ const MUTATIONS = [
     // The touch floor, removed. The pips paint the same, so only a measured
     // target height notices.
     name: 'the pips lose their expanded hit area',
-    edits: [{ file: 'src/index.css', from: '  height: var(--d-touch-min, 48px);\n  transform: translateY(-50%);', to: '  height: 12px;\n  transform: translateY(-50%);' }],
+    edits: [{ file: 'src/index.css', from: '  height: var(--d-touch-goal, 48px);\n  transform: translateY(-50%);', to: '  height: 12px;\n  transform: translateY(-50%);' }],
     expect: 'the pip target reaches the 48px floor',
   },
   {

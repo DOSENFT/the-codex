@@ -203,7 +203,7 @@ export function InlineDiceSection({ character, onOpenFullRoller }: InlineDiceSec
             type="button"
             onClick={() => handleDieSelect(sides)}
             className={cn(
-              'min-h-[36px] min-w-[36px] rounded-lg',
+              'min-h-[44px] min-w-[44px] rounded-lg',
               'text-xs font-mono font-bold',
               'transition-all duration-150',
               'active:scale-[0.97]',

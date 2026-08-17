@@ -342,7 +342,7 @@ export function TurnSummary({
                 onClick={() => setExpandedAction(expandedAction === p.name ? null : p.name)}
                 className={cn(
                   'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg',
-                  'text-xs font-medium border min-h-[32px]',
+                  'text-xs font-medium border min-h-[44px]',
                   'transition-all duration-200 active:scale-[0.96]',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verdant',
                   expandedAction === p.name
@@ -778,14 +778,14 @@ function ExpandedActionPanel({
             <div className="flex items-center gap-1.5 justify-end">
               <button
                 onClick={() => setEditingTip(false)}
-                className="min-h-[32px] px-2.5 rounded text-xs text-forge-2 hover:text-forge-0 transition-colors"
+                className="min-h-[44px] px-2.5 rounded text-xs text-forge-2 hover:text-forge-0 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveTip}
                 className={cn(
-                  'min-h-[32px] px-2.5 rounded text-xs font-medium',
+                  'min-h-[44px] px-2.5 rounded text-xs font-medium',
                   'bg-arcane/20 text-arcane hover:bg-arcane/30 transition-colors',
                   'flex items-center gap-1',
                 )}
@@ -806,7 +806,7 @@ function ExpandedActionPanel({
                 setEditingTip(true)
               }}
               className={cn(
-                'min-w-[28px] min-h-[28px] flex items-center justify-center shrink-0',
+                'min-w-[28px] min-h-[44px] flex items-center justify-center shrink-0',
                 'rounded text-forge-2/40 hover:text-arcane hover:bg-white/[0.06]',
                 'transition-all duration-200',
               )}
@@ -836,7 +836,7 @@ function ExpandedActionPanel({
                 <button
                   onClick={() => handleDeleteNote(i)}
                   className={cn(
-                    'min-w-[24px] min-h-[24px] flex items-center justify-center',
+                    'min-w-[24px] min-h-[44px] flex items-center justify-center',
                     'rounded text-forge-2/30 hover:text-red-400 hover:bg-red-400/10',
                     'transition-colors',
                   )}
@@ -880,7 +880,7 @@ function ExpandedActionPanel({
           <div className="flex items-center gap-1.5 justify-end mt-1">
             <button
               onClick={() => { setAddingNote(false); setNewNoteLabel(''); setNewNoteText('') }}
-              className="min-h-[32px] px-2.5 rounded text-xs text-forge-2 hover:text-forge-0 transition-colors"
+              className="min-h-[44px] px-2.5 rounded text-xs text-forge-2 hover:text-forge-0 transition-colors"
             >
               Cancel
             </button>
@@ -888,7 +888,7 @@ function ExpandedActionPanel({
               onClick={handleAddNote}
               disabled={!newNoteLabel.trim() || !newNoteText.trim()}
               className={cn(
-                'min-h-[32px] px-2.5 rounded text-xs font-medium',
+                'min-h-[44px] px-2.5 rounded text-xs font-medium',
                 'bg-arcane/20 text-arcane hover:bg-arcane/30 transition-colors',
                 'flex items-center gap-1',
                 'disabled:opacity-30 disabled:pointer-events-none',
@@ -903,7 +903,7 @@ function ExpandedActionPanel({
         <button
           onClick={() => setAddingNote(true)}
           className={cn(
-            'w-full min-h-[32px] px-2.5 rounded-md mb-2',
+            'w-full min-h-[44px] px-2.5 rounded-md mb-2',
             'flex items-center justify-center gap-1.5',
             'text-xs text-forge-2/50 hover:text-arcane',
             'border border-dashed border-white/5 hover:border-arcane/20',

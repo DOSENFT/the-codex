@@ -46,7 +46,7 @@ export function CharacterHero({ character }: CharacterHeroProps) {
 
       {/* ── Character Name — gold gradient headline, reveal-up ── */}
       <motion.h2
-        className="font-display text-[28px] font-bold gold-gradient-text tracking-[0.06em] uppercase leading-tight"
+        className="text-[28px] font-bold gold-gradient-text tracking-[0.06em] uppercase leading-tight"
         initial={revealUp.initial}
         animate={revealUp.animate}
         transition={revealUp.transition}

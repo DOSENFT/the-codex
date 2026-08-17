@@ -81,7 +81,7 @@ function MechanicsEntryCard({ entry }: { entry: MechanicsEntry }) {
           'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gold',
         )}
       >
-        <h3 className="font-display text-sm font-bold text-forge-0 leading-tight">
+        <h3 className="text-sm font-bold text-forge-0 leading-tight">
           {entry.question}
         </h3>
         <p className="mt-1.5 text-xs text-forge-1 leading-relaxed">

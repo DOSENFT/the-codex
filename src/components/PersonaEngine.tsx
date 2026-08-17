@@ -88,7 +88,7 @@ function EditableList({
               <button
                 type="button"
                 onClick={() => onRemove(idx)}
-                className="min-h-[28px] min-w-[28px] flex items-center justify-center rounded text-current opacity-60 hover:opacity-100 transition-opacity"
+                className="min-h-[44px] min-w-[28px] flex items-center justify-center rounded text-current opacity-60 hover:opacity-100 transition-opacity"
                 aria-label={`Remove ${item}`}
               >
                 <Trash2 size={12} aria-hidden />

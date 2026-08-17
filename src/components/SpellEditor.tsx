@@ -266,7 +266,7 @@ export function SpellEditor({
         <div className="flex items-center justify-between p-4 border-b border-bronze/15 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <Wand2 size={16} className="text-arcane shrink-0" aria-hidden />
-            <h2 className="font-display text-sm font-bold text-forge-0 truncate">
+            <h2 className="font-display text-xl font-bold text-forge-0 truncate">
               {isEditMode ? 'Edit Spell' : 'Add Spell'}
             </h2>
           </div>

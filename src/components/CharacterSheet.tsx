@@ -107,7 +107,7 @@ function SavingThrowsList({ character, onUpdate }: { character: Character; onUpd
             type="button"
             onClick={() => toggleSave(ability)}
             className={cn(
-              'flex items-center justify-between min-h-[40px] px-3 py-1.5 rounded-lg',
+              'flex items-center justify-between min-h-[44px] px-3 py-1.5 rounded-lg',
               'transition-all duration-200 ease-forge active:scale-[0.98]',
               proficient
                 ? 'bg-verdant/8 border border-verdant/20 ornate-border'
@@ -169,7 +169,7 @@ function SkillsList({ character, onUpdate }: { character: Character; onUpdate: (
             type="button"
             onClick={() => toggleSkill(skill)}
             className={cn(
-              'combat-card flex items-center justify-between min-h-[36px] px-3 py-1 rounded-lg',
+              'combat-card flex items-center justify-between min-h-[44px] px-3 py-1 rounded-lg',
               'transition-all duration-200 ease-forge active:scale-[0.98]',
               expertise
                 ? 'bg-arcane/8 border border-arcane/20'
@@ -271,14 +271,14 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
             placeholder="Weapon name"
             value={newWeapon.name}
             onChange={(e) => setNewWeapon({ ...newWeapon, name: e.target.value })}
-            className="min-h-[40px] w-full rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
+            className="min-h-[44px] w-full rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
             autoFocus
           />
           <div className="grid grid-cols-2 gap-2">
             <select
               value={newWeapon.abilityMod}
               onChange={(e) => setNewWeapon({ ...newWeapon, abilityMod: e.target.value as AbilityKey })}
-              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 outline-none"
+              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 outline-none"
             >
               {ALL_ABILITIES.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
@@ -287,7 +287,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
               placeholder="Damage (e.g. 1d8)"
               value={newWeapon.damageDice}
               onChange={(e) => setNewWeapon({ ...newWeapon, damageDice: e.target.value })}
-              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -296,12 +296,12 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
               placeholder="Damage type"
               value={newWeapon.damageType}
               onChange={(e) => setNewWeapon({ ...newWeapon, damageType: e.target.value })}
-              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
             />
             <select
               value={newWeapon.attackType}
               onChange={(e) => setNewWeapon({ ...newWeapon, attackType: e.target.value as 'melee' | 'ranged' })}
-              className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 outline-none"
+              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 outline-none"
             >
               <option value="melee">Melee</option>
               <option value="ranged">Ranged</option>
@@ -323,14 +323,14 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
                 placeholder="+Hit bonus"
                 value={newWeapon.bonusToHit ?? ''}
                 onChange={(e) => setNewWeapon({ ...newWeapon, bonusToHit: Number(e.target.value) || 0 })}
-                className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+                className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
               />
               <input
                 type="number"
                 placeholder="+Dmg bonus"
                 value={newWeapon.bonusDamage ?? ''}
                 onChange={(e) => setNewWeapon({ ...newWeapon, bonusDamage: Number(e.target.value) || 0 })}
-                className="min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+                className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
               />
             </div>
           )}
@@ -400,7 +400,7 @@ function EquipmentList({ character, onUpdate }: { character: Character; onUpdate
               onChange={(e) => setNewItem(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addItem(type)}
               placeholder={type === 'equipment' ? 'Rope, torch, etc.' : 'Health Potion x3'}
-              className="flex-1 min-h-[40px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
+              className="flex-1 min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
               autoFocus
             />
             <Button variant="primary" size="sm" onClick={() => addItem(type)} className="gap-1">
@@ -523,7 +523,7 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
                 type="button"
                 onClick={() => setActiveSection(id)}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-1.5 min-h-[40px] rounded-lg text-xs font-medium',
+                  'flex-1 flex items-center justify-center gap-1.5 min-h-[44px] rounded-lg text-xs font-medium',
                   'transition-all duration-200 ease-forge active:scale-[0.97]',
                   activeSection === id
                     ? 'bg-arcane/15 text-arcane border border-arcane/25'

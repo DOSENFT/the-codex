@@ -422,7 +422,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                 type="button"
                 onClick={() => setOllamaUrl(`${window.location.origin}/ollama`)}
                 className={cn(
-                  'flex items-center gap-2 min-h-[40px] px-3 rounded-lg text-left text-sm',
+                  'flex items-center gap-2 min-h-[44px] px-3 rounded-lg text-left text-sm',
                   'bg-verdant/10 border border-verdant/25 text-verdant',
                   'transition-all duration-200 active:scale-[0.98]',
                 )}
@@ -558,7 +558,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                     type="button"
                     onClick={() => setGeminiModel(m.id)}
                     className={cn(
-                      'min-h-[36px] px-3 rounded-lg text-xs font-medium transition-all duration-200 active:scale-[0.97] border',
+                      'min-h-[44px] px-3 rounded-lg text-xs font-medium transition-all duration-200 active:scale-[0.97] border',
                       geminiModel === m.id
                         ? 'bg-arcane/10 border-arcane/30 text-arcane ornate-border'
                         : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:text-forge-1',

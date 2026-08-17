@@ -303,7 +303,7 @@ function RollResultDisplay({
             <span
               key={`kept-${i}`}
               className={cn(
-                'inline-flex items-center justify-center min-w-[32px] h-8 px-2',
+                'inline-flex items-center justify-center min-w-[44px] h-8 px-2',
                 'rounded-lg font-mono text-sm font-semibold',
                 'animate-fade-in',
                 isD20Nat20 && 'bg-verdant/20 text-verdant border border-verdant/30',
@@ -322,7 +322,7 @@ function RollResultDisplay({
           <span
             key={`dropped-${i}`}
             className={cn(
-              'inline-flex items-center justify-center min-w-[32px] h-8 px-2',
+              'inline-flex items-center justify-center min-w-[44px] h-8 px-2',
               'rounded-lg font-mono text-sm font-medium',
               'bg-gold/[0.03] text-forge-2/60 border border-bronze/15 line-through',
               'animate-fade-in',

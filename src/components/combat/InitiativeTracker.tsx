@@ -184,8 +184,8 @@ export function InitiativeTracker({
           onClick={() => setFormOpen(true)}
           className={cn(
             'mt-2 w-full flex items-center justify-center gap-1',
-            'min-h-[36px] rounded-lg',
-            'text-xs font-display uppercase tracking-wider text-ink-muted',
+            'min-h-[44px] rounded-lg',
+            'text-xs uppercase tracking-wider text-ink-muted',
             'border border-dashed border-gold/15',
             'hover:border-gold/30 hover:text-ink-secondary hover:bg-gold/[0.04]',
             'transition-all duration-200',
@@ -213,7 +213,7 @@ export function InitiativeTracker({
               onChange={(e) => setName(e.target.value)}
               placeholder="Goblin"
               className={cn(
-                'col-span-2 min-h-[36px] rounded-lg px-2.5',
+                'col-span-2 min-h-[44px] rounded-lg px-2.5',
                 'bg-ash-mid/60 text-ink-primary placeholder:text-ink-muted',
                 'border border-gold-dim/20 text-xs',
                 'transition-all duration-200',
@@ -227,7 +227,7 @@ export function InitiativeTracker({
               onChange={(e) => setInitiative(e.target.value)}
               placeholder="15"
               className={cn(
-                'min-h-[36px] rounded-lg px-2.5',
+                'min-h-[44px] rounded-lg px-2.5',
                 'bg-ash-mid/60 text-ink-primary placeholder:text-ink-muted',
                 'border border-gold-dim/20 text-xs font-mono text-center',
                 'transition-all duration-200',
@@ -244,7 +244,7 @@ export function InitiativeTracker({
               onChange={(e) => setHp(e.target.value)}
               placeholder="24/24"
               className={cn(
-                'flex-1 min-h-[36px] rounded-lg px-2.5',
+                'flex-1 min-h-[44px] rounded-lg px-2.5',
                 'bg-ash-mid/60 text-ink-primary placeholder:text-ink-muted',
                 'border border-gold-dim/20 text-xs font-mono',
                 'transition-all duration-200',
@@ -256,7 +256,7 @@ export function InitiativeTracker({
             <label
               className={cn(
                 'flex items-center gap-1 text-xs text-ink-muted select-none cursor-pointer shrink-0',
-                'min-h-[36px] px-2 rounded-lg',
+                'min-h-[44px] px-2 rounded-lg',
                 'hover:bg-gold/[0.04] transition-colors',
               )}
             >
@@ -275,8 +275,8 @@ export function InitiativeTracker({
               type="submit"
               disabled={!name.trim() || !initiative}
               className={cn(
-                'flex-1 min-h-[36px] rounded-lg',
-                'bg-arcane/20 text-arcane font-display text-xs uppercase tracking-wider',
+                'flex-1 min-h-[44px] rounded-lg',
+                'bg-arcane/20 text-arcane text-xs uppercase tracking-wider',
                 'border border-arcane/25',
                 'hover:bg-arcane/30 transition-all duration-200',
                 'disabled:opacity-40 disabled:cursor-not-allowed',
@@ -296,7 +296,7 @@ export function InitiativeTracker({
                 setIsPC(false)
               }}
               className={cn(
-                'min-h-[36px] px-3 rounded-lg',
+                'min-h-[44px] px-3 rounded-lg',
                 'text-ink-muted text-xs',
                 'hover:text-ink-secondary hover:bg-ash-mid/60 transition-all duration-200',
                 'active:scale-[0.97]',
@@ -317,7 +317,7 @@ export function InitiativeTracker({
         className={cn(
           'mt-3 w-full min-h-[44px] rounded-xl',
           'bg-ash-mid border border-gold/25 text-ink-primary',
-          'font-display text-xs uppercase tracking-wider',
+          'text-xs uppercase tracking-wider',
           'transition-all duration-200',
           'hover:border-gold/40 hover:bg-ash-mid/90',
           'disabled:opacity-40 disabled:cursor-not-allowed',

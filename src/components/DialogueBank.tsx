@@ -945,7 +945,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
             onChange={e => setScenarioFilter(e.target.value)}
             placeholder="Filter by scenario tag..."
             className={cn(
-              'min-h-[36px] flex-1 rounded-lg',
+              'min-h-[44px] flex-1 rounded-lg',
               'bg-void-2/40 text-forge-0 placeholder:text-forge-2',
               'border border-bronze/15',
               'font-body text-xs px-3 py-1.5',
@@ -2266,7 +2266,7 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
                 onClick={() => setActiveMode(mode)}
                 className={cn(
                   'inline-flex items-center justify-center gap-1.5',
-                  'min-h-[40px] px-3 rounded-lg whitespace-nowrap',
+                  'min-h-[44px] px-3 rounded-lg whitespace-nowrap',
                   'text-xs font-medium select-none',
                   'transition-all duration-200 ease-forge',
                   'active:scale-[0.97]',

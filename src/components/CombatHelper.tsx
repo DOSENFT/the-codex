@@ -160,7 +160,7 @@ function ActionEconomyBar({
   return (
     <GlassCard className="p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+        <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase">
           Action Economy
         </h3>
         <button
@@ -226,7 +226,7 @@ function SpellSlotsDisplay({
 
   return (
     <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-3">
+      <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase mb-3">
         Spell Slots
       </h3>
 
@@ -323,7 +323,7 @@ function PaladinResourceTracker({
 
   return (
     <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-4">
+      <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase mb-4">
         Paladin Resources
       </h3>
 
@@ -508,7 +508,7 @@ function ConcentrationTracker({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Focus size={16} className={cn(concentrationSpell ? 'text-ember' : 'text-forge-2')} aria-hidden />
-          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+          <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase">
             Concentration
           </h3>
         </div>
@@ -610,7 +610,7 @@ function AICombatAdvisor({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-arcane" aria-hidden />
-          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+          <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase">
             Combat Advisor
           </h3>
         </div>
@@ -788,7 +788,7 @@ function SmartActionsPanel({
 
   return (
     <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase mb-3">
+      <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase mb-3">
         Actions
       </h3>
 
@@ -1117,7 +1117,7 @@ function PersonaCard({ persona }: { persona: NonNullable<Character['persona']> }
       >
         <div className="flex items-center gap-2">
           <User size={16} className="text-eldritch" aria-hidden />
-          <h3 className="text-sm font-semibold text-forge-0 font-display tracking-wide uppercase">
+          <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase">
             Character Persona
           </h3>
         </div>

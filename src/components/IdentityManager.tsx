@@ -86,7 +86,7 @@ function TagInput({
               <button
                 type="button"
                 onClick={() => onRemove(idx)}
-                className="min-h-[24px] min-w-[24px] flex items-center justify-center rounded-full text-current opacity-60 hover:opacity-100 transition-opacity"
+                className="min-h-[44px] min-w-[24px] flex items-center justify-center rounded-full text-current opacity-60 hover:opacity-100 transition-opacity"
                 aria-label={`Remove ${item}`}
               >
                 <X size={10} aria-hidden />

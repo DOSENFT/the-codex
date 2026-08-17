@@ -101,7 +101,7 @@ export function ConditionsGrid({ conditions, onToggle }: ConditionsGridProps) {
               type="button"
               onClick={() => onToggle(condition.name)}
               className={cn(
-                'min-h-[36px] rounded-lg px-2 py-1.5',
+                'min-h-[44px] rounded-lg px-2 py-1.5',
                 'border transition-all duration-200 ease-snap',
                 'active:scale-[0.95]',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',

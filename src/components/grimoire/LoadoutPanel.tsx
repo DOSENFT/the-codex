@@ -54,7 +54,7 @@ function getCombatWeapons(weapons: Weapon[]): Weapon[] {
 
 function StatusIndicator({ ok, label }: { ok: boolean; label: string }) {
   return (
-    <div className="flex items-center gap-2 min-h-[36px]">
+    <div className="flex items-center gap-2 min-h-[44px]">
       <div
         className={cn(
           'w-5 h-5 rounded-full flex items-center justify-center shrink-0',
@@ -120,7 +120,7 @@ function SpellChip({
       onClick={isCantrip ? undefined : onToggle}
       disabled={isCantrip}
       className={cn(
-        'min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-medium',
+        'min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-medium',
         'border transition-all duration-200 ease-forge',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
         isCantrip

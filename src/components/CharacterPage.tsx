@@ -450,7 +450,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   <button
                     onClick={() => toggleSaveProf(key)}
                     className={cn(
-                      'flex-1 min-h-[32px] rounded-lg text-xs font-semibold',
+                      'flex-1 min-h-[44px] rounded-lg text-xs font-semibold',
                       'flex items-center justify-center gap-1',
                       'transition-all duration-200 active:scale-95',
                       isSavingProf
@@ -465,7 +465,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   <button
                     onClick={() => setStudyingAbility(studyingAbility === key ? null : key)}
                     className={cn(
-                      'min-h-[32px] min-w-[32px] rounded-lg',
+                      'min-h-[44px] min-w-[44px] rounded-lg',
                       'flex items-center justify-center',
                       'transition-all duration-200 active:scale-95',
                       studyingAbility === key
@@ -572,7 +572,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   <button
                     onClick={() => cycleSkillProf(skill)}
                     className={cn(
-                      'w-6 h-6 rounded-full mr-2 flex items-center justify-center shrink-0',
+                      'row-tap w-6 h-6 rounded-full mr-2 flex items-center justify-center shrink-0',
                       'transition-all duration-200 active:scale-90',
                       isExpert
                         ? 'bg-verdant/20 border-2 border-verdant text-verdant'
@@ -1139,7 +1139,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                             })
                           }}
                           className={cn(
-                            'inline-flex items-center rounded-full border px-2.5 py-1 min-h-[36px]',
+                            'inline-flex items-center rounded-full border px-2.5 py-1 min-h-[44px]',
                             'text-xs font-medium leading-none whitespace-nowrap select-none',
                             'transition-all duration-200 active:scale-95',
                             isSelected
@@ -1212,7 +1212,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                             })
                           }}
                           className={cn(
-                            'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 min-h-[32px]',
+                            'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 min-h-[44px]',
                             'text-xs font-medium bg-arcane/10 text-arcane border-arcane/20',
                             'hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400',
                             'transition-all duration-200 active:scale-95',
@@ -1347,7 +1347,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                                 type="button"
                                 onClick={() => setWeaponFormAbilities(weaponFormAbilities.filter((_, j) => j !== ai))}
                                 className={cn(
-                                  'min-h-[36px] min-w-[36px] flex items-center justify-center',
+                                  'min-h-[44px] min-w-[44px] flex items-center justify-center',
                                   'rounded-lg text-forge-2 hover:text-red-400 hover:bg-red-500/10',
                                   'transition-all duration-200 active:scale-95',
                                 )}
@@ -1490,7 +1490,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     'text-xs font-medium bg-white/8 text-forge-1 border-white/10',
                     'hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400',
                     'transition-all duration-200 active:scale-95',
-                    'min-h-[36px]',
+                    'min-h-[44px]',
                   )}
                   aria-label={`Remove ${item}`}
                 >
@@ -1542,7 +1542,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     'text-xs font-medium bg-white/8 text-forge-1 border-white/10',
                     'hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400',
                     'transition-all duration-200 active:scale-95',
-                    'min-h-[36px]',
+                    'min-h-[44px]',
                   )}
                   aria-label={`Remove ${item}`}
                 >
@@ -1867,7 +1867,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                         type="button"
                         onClick={() => setFeatEffects(featEffects.filter((_, j) => j !== ei))}
                         className={cn(
-                          'min-h-[32px] min-w-[32px] flex items-center justify-center',
+                          'min-h-[44px] min-w-[44px] flex items-center justify-center',
                           'rounded-lg text-forge-2 hover:text-red-400 hover:bg-red-500/10',
                           'transition-all duration-200 active:scale-95',
                         )}

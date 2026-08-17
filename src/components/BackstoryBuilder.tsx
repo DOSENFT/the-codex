@@ -186,7 +186,7 @@ function SimpleListEditor({
                 type="button"
                 onClick={() => onRemove(idx)}
                 className={cn(
-                  'min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg',
+                  'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg',
                   'text-forge-2 hover:text-red-400',
                   'transition-colors duration-200',
                   'active:scale-[0.95]',
@@ -680,7 +680,7 @@ export function BackstoryBuilder({ character, onUpdate, onStartDrill }: Backstor
                   type="button"
                   onClick={() => removeRelationship(idx)}
                   className={cn(
-                    'min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg',
+                    'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg',
                     'text-forge-2 hover:text-red-400',
                     'transition-colors duration-200',
                     'active:scale-[0.95]',

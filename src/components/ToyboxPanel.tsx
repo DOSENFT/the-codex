@@ -717,7 +717,7 @@ export function ToyboxPanel({
                     onClick={() => setComboFilter(c.value)}
                     className={cn(
                       'px-3 py-1.5 rounded-full text-xs font-medium border',
-                      'min-h-[34px] transition-all duration-200 ease-forge',
+                      'min-h-[44px] transition-all duration-200 ease-forge',
                       'active:scale-[0.97]',
                       comboFilter === c.value
                         ? 'bg-arcane/15 border-arcane/30 text-arcane'
@@ -809,7 +809,7 @@ export function ToyboxPanel({
                           onClick={() => setComboCategory(comboCategory === c.value ? undefined : c.value as ComboCategory)}
                           className={cn(
                             'px-3 py-1.5 rounded-full text-xs font-medium border',
-                            'min-h-[34px] transition-all duration-200 ease-forge',
+                            'min-h-[44px] transition-all duration-200 ease-forge',
                             'active:scale-[0.97]',
                             comboCategory === c.value
                               ? 'bg-arcane/15 border-arcane/30 text-arcane'
@@ -838,7 +838,7 @@ export function ToyboxPanel({
                           <span className="text-sm text-forge-0 truncate flex-1">{block.label}</span>
                           <button
                             onClick={() => removeBlock(block.id)}
-                            className="min-w-[34px] min-h-[34px] flex items-center justify-center text-forge-2 hover:text-red-400 transition-colors active:scale-[0.97]"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-forge-2 hover:text-red-400 transition-colors active:scale-[0.97]"
                             aria-label={`Remove step ${i + 1}`}
                           >
                             <Trash2 size={14} />
@@ -861,7 +861,7 @@ export function ToyboxPanel({
                             onClick={() => setBlockType(t)}
                             className={cn(
                               'px-2.5 py-1 rounded-lg text-xs font-semibold uppercase border',
-                              'min-h-[34px] transition-all duration-200',
+                              'min-h-[44px] transition-all duration-200',
                               'active:scale-[0.97]',
                               blockType === t
                                 ? BLOCK_TYPE_COLORS[t]
@@ -889,7 +889,7 @@ export function ToyboxPanel({
                             onClick={() => setBlockSource(s)}
                             className={cn(
                               'px-2.5 py-1 rounded-lg text-xs font-medium capitalize border',
-                              'min-h-[34px] transition-all duration-200',
+                              'min-h-[44px] transition-all duration-200',
                               'active:scale-[0.97]',
                               blockSource === s
                                 ? 'bg-eldritch/15 border-eldritch/30 text-eldritch'
@@ -987,7 +987,7 @@ export function ToyboxPanel({
                     onClick={() => setTacticFilter(c.value)}
                     className={cn(
                       'px-3 py-1.5 rounded-full text-xs font-medium border',
-                      'min-h-[34px] transition-all duration-200 ease-forge',
+                      'min-h-[44px] transition-all duration-200 ease-forge',
                       'active:scale-[0.97]',
                       tacticFilter === c.value
                         ? 'bg-arcane/15 border-arcane/30 text-arcane'
@@ -1089,7 +1089,7 @@ export function ToyboxPanel({
                           {tacticActions.length > 1 && (
                             <button
                               onClick={() => setTacticActions(tacticActions.filter((_, j) => j !== i))}
-                              className="min-w-[34px] min-h-[34px] flex items-center justify-center text-forge-2 hover:text-red-400 transition-colors active:scale-[0.97]"
+                              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-forge-2 hover:text-red-400 transition-colors active:scale-[0.97]"
                               aria-label={`Remove action ${i + 1}`}
                             >
                               <Trash2 size={14} />
@@ -1119,7 +1119,7 @@ export function ToyboxPanel({
                           onClick={() => setTacticPriority(p)}
                           className={cn(
                             'px-3 py-1.5 rounded-full text-xs font-medium border capitalize',
-                            'min-h-[34px] transition-all duration-200 ease-forge',
+                            'min-h-[44px] transition-all duration-200 ease-forge',
                             'active:scale-[0.97]',
                             tacticPriority === p
                               ? p === 'critical'
@@ -1146,7 +1146,7 @@ export function ToyboxPanel({
                           onClick={() => setTacticCategory(tacticCategory === c.value ? undefined : c.value as TacticCategory)}
                           className={cn(
                             'px-3 py-1.5 rounded-full text-xs font-medium border',
-                            'min-h-[34px] transition-all duration-200 ease-forge',
+                            'min-h-[44px] transition-all duration-200 ease-forge',
                             'active:scale-[0.97]',
                             tacticCategory === c.value
                               ? 'bg-arcane/15 border-arcane/30 text-arcane'
@@ -1302,7 +1302,7 @@ export function ToyboxPanel({
                           {personaPhrases.length > 1 && (
                             <button
                               onClick={() => setPersonaPhrases(personaPhrases.filter((_, j) => j !== i))}
-                              className="min-w-[34px] min-h-[34px] flex items-center justify-center text-forge-2 hover:text-red-400 transition-colors active:scale-[0.97]"
+                              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-forge-2 hover:text-red-400 transition-colors active:scale-[0.97]"
                               aria-label={`Remove phrase ${i + 1}`}
                             >
                               <Trash2 size={14} />

@@ -95,12 +95,18 @@ export function Layout({
       <header className="fixed top-0 inset-x-0 z-40 h-14 flex items-center justify-between px-3 bg-void-0/90 backdrop-blur-md border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
           {/* Mode Toggle */}
-          <div className="flex rounded-lg overflow-hidden border border-white/10 h-8">
+          {/* h-11 (44px), not h-8. This is the most-pressed control in the app —
+              it switches the whole machine between play and prep — and it was
+              30px tall, which is under even WCAG 2.2 AA's 24px floor once you
+              account for the icon eating the middle. The header is h-14 (56px),
+              so this grows honestly rather than faking a hit area the way the
+              spell pips have to. */}
+          <div className="flex rounded-lg overflow-hidden border border-white/10 h-[46px]">
             <button
               type="button"
               onClick={() => onModeChange('session')}
               className={cn(
-                'px-2.5 text-xs font-bold uppercase tracking-wider',
+                'px-2.5 min-h-[44px] text-xs font-bold uppercase tracking-wider',
                 'flex items-center gap-1',
                 'transition-all duration-200 ease-forge',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -117,7 +123,7 @@ export function Layout({
               type="button"
               onClick={() => onModeChange('prep')}
               className={cn(
-                'px-2.5 text-xs font-bold uppercase tracking-wider',
+                'px-2.5 min-h-[44px] text-xs font-bold uppercase tracking-wider',
                 'flex items-center gap-1',
                 'transition-all duration-200 ease-forge',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -193,7 +199,7 @@ export function Layout({
           </button>
           <button
             onClick={() => setSheetOpen(true)}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 min-h-[44px] cursor-pointer hover:opacity-80 transition-opacity"
             aria-label="Open character sheet"
           >
             <span className="text-sm text-forge-1 truncate max-w-[80px]">

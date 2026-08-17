@@ -111,7 +111,31 @@
   top: 50%;
   left: -2px;
   right: -2px;
-  height: var(--d-touch-min, 48px);
+  height: var(--d-touch-goal, 48px);
+  transform: translateY(-50%);
+}
+
+/* .row-tap — the same trick as .pip-tap, with the opposite safety argument, and
+   the difference is the whole point.
+
+   The skill list's proficiency dot is 24px inside a row that is already 44px
+   tall. So its hit area can grow to fill exactly its own row and stop.
+
+   It is 44px and NOT var(--d-touch-goal): at 48px the area would spill 2px into
+   the rows above and below, and unlike the spell pips — where every filled pip
+   at a level calls the same handler, which is what made overlap harmless there
+   — each skill dot cycles a DIFFERENT skill. A 2px overlap would let a press
+   near a row edge toggle Acrobatics when the player meant Athletics. Silently
+   setting the wrong proficiency is worse than a small target, because the
+   player will not notice until a roll is already wrong at the table. */
+.row-tap { position: relative; }
+.row-tap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 44px;
   transform: translateY(-50%);
 }
 
@@ -134,8 +158,28 @@
     overscroll-behavior: none;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  /* Cinzel is claimed by the top of the hierarchy only.
+
+     This rule used to cover h1-h6, which meant the font was chosen by HTML
+     semantics rather than by role. A dense reference list correctly uses <h3>
+     for each of its fifty question headings, and every one of them was
+     therefore rendered in a high-contrast display serif at 14px — 600 of the
+     778 Cinzel-under-20px findings in the Slice 13b audit came from that one
+     rule, and none of them from a class anyone wrote. Editing the classes did
+     nothing, because the elements were inheriting.
+
+     Direction D's position is that Cinzel is ceremony and IBM Plex is
+     information. h1/h2 are the ceremony: page and card titles, one or two per
+     screen, always large enough to carry the serif. h3-h6 are structure inside
+     a card, usually small and usually repeated, which is Plex's job. Anything
+     below h2 that genuinely wants the display face asks for it with
+     `font-display` and pays the 20px floor. */
+  h1, h2 {
     font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  h3, h4, h5, h6 {
     font-weight: 600;
   }
 

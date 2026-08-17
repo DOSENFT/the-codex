@@ -386,7 +386,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
             key={id}
             onClick={() => setTypeFilter(id)}
             className={cn(
-              'min-h-[36px] px-3 rounded-lg text-xs font-medium',
+              'min-h-[44px] px-3 rounded-lg text-xs font-medium',
               'border transition-all duration-200 ease-forge',
               'active:scale-[0.95]',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -405,7 +405,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
           aria-label="Toggle action type filters"
           aria-expanded={showFilters}
           className={cn(
-            'min-h-[36px] px-3 rounded-lg text-xs font-medium',
+            'min-h-[44px] px-3 rounded-lg text-xs font-medium',
             'border transition-all duration-200 ease-forge',
             'active:scale-[0.95]',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -422,7 +422,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
         <button
           onClick={() => setPreparedOnly(!preparedOnly)}
           className={cn(
-            'min-h-[36px] px-3 rounded-lg text-xs font-medium',
+            'min-h-[44px] px-3 rounded-lg text-xs font-medium',
             'border transition-all duration-200 ease-forge',
             'active:scale-[0.95]',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -450,7 +450,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
               key={id}
               onClick={() => setActionFilter(id)}
               className={cn(
-                'min-h-[36px] px-3 rounded-lg text-xs font-medium',
+                'min-h-[44px] px-3 rounded-lg text-xs font-medium',
                 'border transition-all duration-200 ease-forge',
                 'active:scale-[0.95]',
                 actionFilter === id

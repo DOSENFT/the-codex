@@ -420,7 +420,7 @@ export function GrimoireCard({
               <button
                 onClick={handleRoll}
                 className={cn(
-                  'flex items-center gap-1.5 min-h-[36px] px-3 rounded-lg',
+                  'flex items-center gap-1.5 min-h-[44px] px-3 rounded-lg',
                   'text-xs font-medium',
                   'bg-eldritch/15 text-eldritch border border-eldritch/25',
                   'transition-all duration-200 ease-forge',
@@ -436,7 +436,7 @@ export function GrimoireCard({
             <button
               onClick={handleCopy}
               className={cn(
-                'flex items-center gap-1.5 min-h-[36px] px-3 rounded-lg',
+                'flex items-center gap-1.5 min-h-[44px] px-3 rounded-lg',
                 'text-xs font-medium',
                 'bg-white/[0.04] text-forge-2 border border-white/8',
                 'transition-all duration-200 ease-forge',
@@ -484,7 +484,7 @@ export function GrimoireCard({
               <button
                 onClick={onEdit}
                 className={cn(
-                  'flex items-center gap-1.5 min-h-[36px] px-3 rounded-lg',
+                  'flex items-center gap-1.5 min-h-[44px] px-3 rounded-lg',
                   'text-xs font-medium',
                   'bg-white/[0.04] text-forge-2 border border-white/8',
                   'transition-all duration-200 ease-forge',
@@ -501,7 +501,7 @@ export function GrimoireCard({
               <button
                 onClick={onDelete}
                 className={cn(
-                  'flex items-center gap-1.5 min-h-[36px] px-3 rounded-lg',
+                  'flex items-center gap-1.5 min-h-[44px] px-3 rounded-lg',
                   'text-xs font-medium',
                   'bg-white/[0.04] text-red-400 border border-white/8',
                   'transition-all duration-200 ease-forge',

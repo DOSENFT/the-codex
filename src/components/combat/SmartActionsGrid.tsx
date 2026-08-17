@@ -135,7 +135,7 @@ export function SmartActionsGrid({
             'hover:text-arcane transition-colors duration-200',
             'active:scale-[0.97]',
             'focus-visible:outline-2 focus-visible:outline-gold',
-            'min-h-[28px] px-2',
+            'min-h-[44px] px-2',
           )}
         >
           Manage Actions

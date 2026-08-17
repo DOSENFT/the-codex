@@ -153,7 +153,7 @@ export function ImpulseEngine({ character, sceneContext, expanded, onToggle, onM
               onClick={handleBackToGrid}
               className={cn(
                 'inline-flex items-center gap-1.5',
-                'min-h-[36px] px-2 rounded-lg',
+                'min-h-[44px] px-2 rounded-lg',
                 'text-sm text-forge-2',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.97]',

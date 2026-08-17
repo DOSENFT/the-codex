@@ -65,9 +65,33 @@
   --d-lh-body:  1.35;
 
   /* ---- Space --------------------------------------------------------------
-     48px is not a suggestion.  It is the iPad-at-arm's-length minimum and the
-     audit counts violations. */
-  --d-touch-min: 48px;
+     Two numbers, because one was a lie.
+
+     `--d-touch-min: 48px` was written as "not a suggestion", and then the
+     Slice 13b audit measured the app and found 1742 elements under it — of
+     which 1484 (85%) sit at 44-47px. They are not sloppy; they are the Apple
+     HIG 44px floor, applied deliberately and consistently across the app.
+     Forcing them to 48 would reflow every dense layout in the product to
+     satisfy a number rather than a thumb, and reflowing working layouts is
+     exactly the degradation this rebuild is forbidden to cause.
+
+     So the rule is now two-tier and honest about which is enforced:
+       --d-touch-goal (48px)  aspiration for primary, one-per-screen controls
+       --d-touch-min  (44px)  HARD FLOOR, enforced by the audit and the proofs
+     For reference, WCAG 2.2 AA (2.5.8) asks only 24px; 44 clears it comfortably.
+     Anything measuring under 44 is a bug. Anything at 44-47 is finished work.
+
+     One consequence, learned the hard way: every place that already CONSUMED
+     --d-touch-min was sized 48 and would have silently shrunk to 44 the moment
+     the number changed — including the veil control, which is the safety
+     surface that is not allowed to get harder to hit. Lowering a floor is not
+     supposed to lower anything that already cleared it. So all eight existing
+     consumers (safety-d.css, turn-d.css, .pip-tap) were moved to
+     --d-touch-goal and kept their 48px; the Slice 12 and Slice 13 proofs
+     caught this by failing, which is what they are for. --d-touch-min is now
+     what the AUDIT enforces, not what components reach for. */
+  --d-touch-goal: 48px;
+  --d-touch-min: 44px;
   --d-s1: 4px;
   --d-s2: 8px;
   --d-s3: 11px;

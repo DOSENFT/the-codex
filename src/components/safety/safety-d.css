@@ -20,8 +20,8 @@
   z-index: 90; /* over the app's own z-50 chrome; under .veil-scene */
   left: var(--d-s4);
   bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
-  min-height: var(--d-touch-min);
-  min-width: var(--d-touch-min);
+  min-height: var(--d-touch-goal);
+  min-width: var(--d-touch-goal);
   padding: 0 var(--d-s4);
   display: inline-flex;
   align-items: center;
@@ -104,7 +104,7 @@
 }
 
 .veil-scene .vback {
-  min-height: var(--d-touch-min);
+  min-height: var(--d-touch-goal);
   padding: 0 var(--d-s5);
   font-family: var(--d-font-body);
   font-size: var(--d-fs-body);

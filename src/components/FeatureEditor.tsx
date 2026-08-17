@@ -198,7 +198,7 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
         <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <Shield size={16} className="text-eldritch shrink-0" aria-hidden />
-            <h2 className="font-display text-sm font-bold text-forge-0 truncate">
+            <h2 className="font-display text-xl font-bold text-forge-0 truncate">
               {isEditMode ? 'Edit Feature' : 'Add Feature'}
             </h2>
           </div>

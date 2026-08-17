@@ -108,7 +108,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
   return (
     <div>
       {/* Section Header — gold gradient text, no combat-section-header wrapper */}
-      <h3 className="gold-gradient-text font-display text-[0.65rem] font-semibold uppercase tracking-[0.12em] mb-2">
+      <h3 className="gold-gradient-text text-[0.65rem] font-semibold uppercase tracking-[0.12em] mb-2">
         Rest Management
       </h3>
 
@@ -134,7 +134,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
             <>
               <span className="text-gold-dim"><MoonSeal /></span>
               <Moon size={20} className="text-arcane shrink-0" />
-              <span className="font-display text-xs font-bold text-arcane uppercase tracking-wider">
+              <span className="text-xs font-bold text-arcane uppercase tracking-wider">
                 Confirm?
               </span>
               <span className="text-xs text-arcane/80">
@@ -145,7 +145,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
             <>
               <span className="text-gold-dim"><MoonSeal /></span>
               <Moon size={20} className="text-arcane shrink-0" />
-              <span className="font-display text-xs font-bold text-ink-primary uppercase tracking-wider">
+              <span className="text-xs font-bold text-ink-primary uppercase tracking-wider">
                 Short Rest
               </span>
               <span className="text-xs text-ink-muted leading-tight">
@@ -172,7 +172,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
             <>
               <span className="text-gold-dim"><SunSeal /></span>
               <Sun size={20} className="text-ember shrink-0" />
-              <span className="font-display text-xs font-bold text-arcane uppercase tracking-wider">
+              <span className="text-xs font-bold text-arcane uppercase tracking-wider">
                 Confirm?
               </span>
               <span className="text-xs text-arcane/80">
@@ -183,7 +183,7 @@ export function RestManagement({ onShortRest, onLongRest }: RestManagementProps)
             <>
               <span className="text-gold-dim"><SunSeal /></span>
               <Sun size={20} className="text-ember shrink-0" />
-              <span className="font-display text-xs font-bold text-ink-primary uppercase tracking-wider">
+              <span className="text-xs font-bold text-ink-primary uppercase tracking-wider">
                 Long Rest
               </span>
               <span className="text-xs text-ink-muted leading-tight">

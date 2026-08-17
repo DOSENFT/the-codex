@@ -391,7 +391,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
             </div>
           ) : (
             <>
-              <h4 className="font-display text-xs font-semibold text-forge-2 uppercase tracking-wider text-center">
+              <h4 className="text-xs font-semibold text-forge-2 uppercase tracking-wider text-center">
                 Death Saves
               </h4>
 
@@ -470,7 +470,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
 
       {/* Conditions Section */}
       <div className="space-y-3 pt-2 border-t border-bronze/15">
-        <h4 className="font-display text-xs font-semibold text-forge-2 uppercase tracking-wider">
+        <h4 className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
           Active Conditions
         </h4>
 

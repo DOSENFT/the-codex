@@ -289,7 +289,7 @@ export function StatsBar({
             className={cn(
               'group relative flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5',
               'rounded-lg border border-gold-dim/20 bg-ash-mid/60',
-              'font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
+              'text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
               'transition-all duration-200 ease-snap',
               'hover:bg-red-400/10 hover:border-red-400/30 hover:text-red-400',
               'active:scale-[0.97]',
@@ -308,7 +308,7 @@ export function StatsBar({
             className={cn(
               'group relative flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5',
               'rounded-lg border border-gold-dim/20 bg-ash-mid/60',
-              'font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
+              'text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
               'transition-all duration-200 ease-snap',
               'hover:bg-verdant/10 hover:border-verdant/30 hover:text-verdant',
               'active:scale-[0.97]',
@@ -327,7 +327,7 @@ export function StatsBar({
             className={cn(
               'group relative flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5',
               'rounded-lg border border-gold-dim/20 bg-ash-mid/60',
-              'font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
+              'text-xs font-semibold uppercase tracking-[0.1em] text-ink-secondary',
               'transition-all duration-200 ease-snap',
               'hover:bg-arcane/10 hover:border-arcane/30 hover:text-arcane',
               'active:scale-[0.97]',
@@ -345,7 +345,7 @@ export function StatsBar({
         <div className="animate-fade-in space-y-2">
           <span
             className={cn(
-              'font-display text-xs font-semibold uppercase tracking-[0.12em]',
+              'text-xs font-semibold uppercase tracking-[0.12em]',
               INPUT_MODE_COLORS[inputMode].text,
             )}
           >
@@ -546,7 +546,7 @@ export function StatsBar({
             type="button"
             onClick={handleResetDeathSaves}
             className={cn(
-              'ml-2 min-h-[36px] min-w-[36px] inline-flex items-center justify-center',
+              'ml-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center',
               'rounded-lg text-ink-muted hover:text-ink-secondary',
               'bg-transparent hover:bg-gold/[0.06]',
               'transition-all duration-200 ease-snap',
