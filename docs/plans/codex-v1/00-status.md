@@ -113,7 +113,7 @@ deploy. `main` is merged only at wave boundaries, after Marcus has seen the work
 - [x] 13 — legibility and reach: D's discipline enforced app-wide **— DONE 2026-08-16, see below**
 - [x] 13b — the deferral list from 13, worked: the Cinzel root cause, the two-tier touch floor, skill-dot reach **— DONE 2026-08-17, see below**
 - [x] 14 — motion budget + printable character record *(the print-chronicle half was cancelled 2026-08-17 — campaign memory is the Vault's; see the scope boundary above)* **— DONE 2026-08-17, see below**
-- [x] 15 — release: regression sweep vs. V0.9 baseline, licensing resolved, the turn-brain mutation debt paid **— DONE 2026-08-17, see below.** *(the `v1` → `main` merge and the one real session are deliberately NOT included: every push to `main` is a live public deploy, which is ASK-FIRST, and Marcus has not been asked yet)*
+- [x] 15 — release: regression sweep vs. V0.9 baseline, licensing resolved, the turn-brain mutation debt paid, **SHIPPED — https://dosenft.github.io/the-codex/** **— DONE 2026-08-17, see below.** *(the one real session at the table is Marcus's to run)*
 
 ### 🔍 Known process debt — named here so it cannot pass as done (audit 2026-08-16)
 
@@ -1818,6 +1818,35 @@ on Pages; and a declared-but-missing icon passed a status-only check because `vi
 any unknown path with `index.html` and a 200. The icon check now requires a `content-type` of
 `image/*` — GitHub Pages 404s properly, so the old check would have shipped a blank home-screen tile
 and never complained.
+
+### 5. It shipped — and the live site was proven where it lives
+
+Marcus was asked (the deploy is ASK-FIRST) and chose GitHub Pages. `main` fast-forwarded to `v1` —
+17 commits, no merge commit, `main` was a strict ancestor — and the Pages workflow deployed clean.
+
+**Live: https://dosenft.github.io/the-codex/**
+
+Local green is not shipped green, so `reference/live-check.mjs` boots the DEPLOYED site in a real
+browser, because `vite preview` and GitHub Pages disagree about the only thing that matters at this
+step: preview answers *any* unknown path with `index.html` and a 200, while Pages 404s properly. A
+build that passes every local check can still ship a blank home-screen tile. Against the live URL:
+
+- it boots cold for someone who has never opened it — the create/import screen, not a 404;
+- the service worker registers at `https://dosenft.github.io/the-codex/`, the app's own scope;
+- the manifest is served with `scope` and `start_url` both `/the-codex/` and `display: standalone`;
+- **all four declared icons return 200 AND `content-type: image/png`** — the 192, the 512, the
+  maskable, and the apple-touch-icon the iPad uses for its home screen;
+- **with the network cut, it still opens.** Offline works at the table.
+- clean console.
+
+One check failed and it was the instrument, not the app: the tab title is `The Codex`, and the long
+`Illuminated Tactical Grimoire` lives in the manifest, which is what the install prompt reads. Two
+names on purpose. Corrected in the checker.
+
+**The one thing Marcus has to do himself:** his Nix lives in the localStorage of whatever browser he
+last played on, and localStorage does not travel. Settings → **Export** writes
+`codex-nix-lvl8.json`; Settings → **Import** on the phone and the iPad reads it back. Do that once
+per device before the session, not during it.
 
 ### 🌊 Wave 5 — what is actually left (recorded here so it survives this session)
 
