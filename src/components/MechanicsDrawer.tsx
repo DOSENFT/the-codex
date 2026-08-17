@@ -10,6 +10,7 @@ import {
   searchMechanics,
 } from '../lib/mechanics-reference'
 import { OrnateHeader } from './ui/OrnateHeader'
+import { useInertWhenClosed } from '../hooks/useInertWhenClosed'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -200,6 +201,12 @@ export function MechanicsDrawer({ isOpen, onClose }: MechanicsDrawerProps) {
     document.addEventListener('keydown', handleTab)
     return () => document.removeEventListener('keydown', handleTab)
   }, [isOpen])
+
+  // ── Closed means closed (Slice 15) ──
+  // This panel stays mounted and slides off-screen, so without this its 35
+  // controls remain tabbable and it keeps telling screen readers it is an
+  // open modal. See the hook for the full reasoning.
+  useInertWhenClosed(panelRef, isOpen)
 
   // ── Escape key ──
   useEffect(() => {

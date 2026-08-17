@@ -939,9 +939,46 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       <OrnateHeader className="mb-5">About</OrnateHeader>
 
       <div className="space-y-2 text-sm">
-        <p className="text-forge-0 font-display font-semibold text-lg">The Codex v2.0</p>
-        <p className="text-forge-1">D&D 2024 Combat Companion</p>
-        <p className="text-forge-2">Part of Ash & Archive</p>
+        <p className="text-forge-0 font-display font-semibold text-lg">The Codex V1.0</p>
+        <p className="text-forge-1">D&amp;D 2024 Combat Companion</p>
+        <p className="text-forge-2">Part of Ash &amp; Archive</p>
+      </div>
+
+      {/* Slice 15 — the whole of the SRD licensing obligation.
+          The SRD 5.2.1 is published under CC BY 4.0, which asks for exactly one
+          thing: credit, stated where a reader can find it. This is that credit,
+          and it is the reason no further licensing decision is outstanding.
+
+          Nix and the Oath of the Hearth are deliberately NOT covered by it —
+          they are Marcus's own homebrew, which is why the second line exists.
+          Deleting this block does not break a build; it breaks the licence. */}
+      <div className="mt-5 pt-4 border-t border-forge-3/30 space-y-2 text-xs text-forge-2">
+        <p>
+          This work includes material from the System Reference Document 5.2.1
+          (&ldquo;SRD 5.2.1&rdquo;) by Wizards of the Coast LLC, available at{' '}
+          <a
+            href="https://www.dndbeyond.com/srd"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-gold underline underline-offset-2"
+          >
+            dndbeyond.com/srd
+          </a>
+          . The SRD 5.2.1 is licensed under the{' '}
+          <a
+            href="https://creativecommons.org/licenses/by/4.0/legalcode"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-gold underline underline-offset-2"
+          >
+            Creative Commons Attribution 4.0 International License
+          </a>
+          .
+        </p>
+        <p>
+          Homebrew content — including Nix and the Oath of the Hearth — is the
+          original work of its author and is not covered by that licence.
+        </p>
       </div>
     </GlassCard>
   )

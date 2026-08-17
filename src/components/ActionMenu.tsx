@@ -20,6 +20,7 @@ import { SPRING_SETTLE, SHEET_EXIT } from '../lib/motion-utils'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
+import { useInertWhenClosed } from '../hooks/useInertWhenClosed'
 import type { Character } from '../lib/character'
 import { attackBonus, abilityModifier } from '../lib/character'
 import type { CombatState } from '../lib/combat-state'
@@ -241,6 +242,10 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
     document.addEventListener('keydown', handleTab)
     return () => document.removeEventListener('keydown', handleTab)
   }, [isOpen])
+
+  // ── Closed means closed (Slice 15) ──
+  // Mounted-and-slid-off-screen, so its 11 controls stay tabbable without this.
+  useInertWhenClosed(panelRef, isOpen)
 
   // ── Escape key ──
   useEffect(() => {

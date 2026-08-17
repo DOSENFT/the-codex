@@ -4,6 +4,7 @@ import { motion } from 'motion/react'
 import { cn } from '../lib/cn'
 import { SPRING_SETTLE, SHEET_EXIT } from '../lib/motion-utils'
 import { useMotionPreference } from '../hooks/useReducedMotion'
+import { useInertWhenClosed } from '../hooks/useInertWhenClosed'
 
 /* GPU dice stage — lazy so three.js loads only when the roller is first used */
 const DiceStage = lazy(() => import('./dice/DiceStage'))
@@ -696,6 +697,10 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
     document.addEventListener('keydown', handleTab)
     return () => document.removeEventListener('keydown', handleTab)
   }, [isOpen])
+
+  /* ── Closed means closed (Slice 15) ── */
+  // Mounted-and-slid-off-screen, so its 22 controls stay tabbable without this.
+  useInertWhenClosed(panelRef, isOpen)
 
   /* ── Escape Key ── */
   useEffect(() => {
