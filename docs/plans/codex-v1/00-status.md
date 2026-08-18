@@ -1922,6 +1922,43 @@ after import does not white-screen. **The good file is `codex-nix-lvl7 (1).json`
 
 Sweep after: tsc clean, 338 unit tests, 302 browser checks across slices 6–15, all green.
 
+### 15b — the proof was lying, and the live site caught it (same day)
+
+The above was committed, deployed, and then verified against the **deployed** site — and the live run
+printed `Combat stopped. The rest of the app is still running`. The 33 checks had passed. They were
+wrong.
+
+**Why they were wrong.** They asked *"is the screen blank?"*. A React error that a boundary **catches**
+never reaches `pageerror` — it goes to `console.error` — and the boundary replaces the panel with a
+polite notice, so the page is full of text and the check says ok. **A caught error is not a handled
+error when the thing it kills is the reason he opens the app.** The combat screen was dead and the
+proof was green.
+
+`prove-import.mjs` now fails on a caught error and on any boundary text, not only on a blank body.
+Turning that on immediately exposed **five more dead screens** that had been passing all along:
+
+| in the file | what died | why |
+|---|---|---|
+| a spell or feature with no `description` | **the combat panel** | `.slice(0,80)` in a `.map` in `ActionMenu`, `.split(/\.\s/)` in `turn/options.ts` |
+| an object in `equipment` / `supplies` | the Character tab | both are `string[]`; an object child is React error #31 |
+| an identity missing its arrays | the Persona tab | `.length` unguarded |
+| a hook with no `text` | the Roleplay tab | `.slice` unguarded |
+| `persona: {}` | the Academy tab | `.map` over `physicalTics` etc., and `patron.domains` |
+
+All six now default in `normalizeCharacter` (plus two helpers, `toStringList` and `normalizePersona`).
+Fixed at the door rather than guarded at each read site, so the next person to reach for
+`.description` cannot reintroduce it.
+
+**The lesson worth keeping.** Three rounds of one bug, each found only by a check strictly stronger
+than the last: the cast (found by using his real file), the nested fields (found by a *synthetic*
+file, because his has no weapons and no feats), and these five (found by counting a caught error as a
+failure). Each round, the previous proof was green. The instrument kept being the weakest part —
+which is the same finding as the Slice 6 stale-expectation and the turn-brain mutation pass, now
+three for three.
+
+Proof now 34 checks; sweep re-run clean — tsc, 338 unit tests, 302 browser checks, and both of
+Marcus's real files still round-trip intact.
+
 ## 🔒 Standing instruction — the prototype is not scratch (Marcus, 2026-08-15)
 
 Verbatim: *"we are not starting from scratch. I previously had a fully working prototype. Make that

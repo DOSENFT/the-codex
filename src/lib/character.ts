@@ -421,6 +421,52 @@ export function saveCharacter(character: Character): void {
  * that knows what a complete character is, and adding a required field means
  * adding one default here rather than remembering three call sites.
  */
+/**
+ * `equipment` and `supplies` are plain `string[]`, and the screens render them
+ * directly. An object in there is React error #31 — "objects are not valid as a
+ * React child" — which takes out the whole Character tab. Coerce rather than
+ * trust: an object with a name becomes its name, anything else is dropped.
+ */
+function toStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map(v => {
+      if (typeof v === 'string') return v
+      if (v && typeof v === 'object') {
+        const o = v as { name?: unknown; quantity?: unknown }
+        if (typeof o.name === 'string') {
+          const qty = typeof o.quantity === 'number' && o.quantity > 1 ? ` x${o.quantity}` : ''
+          return o.name + qty
+        }
+      }
+      return ''
+    })
+    .filter(Boolean)
+}
+
+/**
+ * A persona is optional; a HALF-written persona is not. The Academy screen maps
+ * `physicalTics`/`sceneInstincts`/`quietTexture` and the Persona screen reads
+ * `patron.domains`, none of them guarded — so `persona: {}` in a file killed two
+ * screens while the rest of the app carried on looking healthy.
+ */
+function normalizePersona(p: Partial<CharacterPersona>): CharacterPersona {
+  return {
+    ...p,
+    defaultState: p.defaultState ?? '',
+    decisionTree: p.decisionTree ?? '',
+    physicalTics: p.physicalTics ?? [],
+    sceneInstincts: p.sceneInstincts ?? [],
+    quietTexture: p.quietTexture ?? [],
+    patron: {
+      name: p.patron?.name ?? '',
+      domains: p.patron?.domains ?? [],
+      symbol: p.patron?.symbol ?? '',
+      rpNotes: p.patron?.rpNotes ?? '',
+    },
+  }
+}
+
 export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: string): Character {
   return {
     ...parsed,
@@ -446,8 +492,37 @@ export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: stri
       spellAttackBonus: parsed.spellAttackBonus ?? 0,
       canPrepareSpells: parsed.canPrepareSpells ?? false,
       maxPreparedSpells: parsed.maxPreparedSpells ?? 0,
-      spells: parsed.spells ?? [],
-      features: parsed.features ?? [],
+      /* The third instance of the same bug, found 2026-08-17 by importing a
+         spell that had only a name. `description` is required by both types and
+         is read raw in at least four places — `spell.description.slice(0, 80)`
+         and `feature.description.slice(0, 100)` inside a `.map` in
+         ActionMenu.tsx, and `.split(/\.\s/)` in turn/options.ts. Undefined
+         there does not white-screen; it trips the combat error boundary, so the
+         app says "Combat stopped" while everything else keeps running. That is
+         WORSE than a blank page, because it reads as handled — the one screen
+         Marcus actually uses at the table is dead and the app looks fine.
+         Defaulted here rather than guarded at each read site, so the next
+         person to reach for `.description` cannot reintroduce it. */
+      spells: (parsed.spells ?? []).map((s: Partial<Spell>) => ({
+        ...s,
+        name: s.name ?? 'Spell',
+        level: s.level ?? 0,
+        school: s.school ?? '',
+        castingTime: s.castingTime ?? '1 action',
+        range: s.range ?? '',
+        components: s.components ?? '',
+        duration: s.duration ?? 'Instantaneous',
+        concentration: s.concentration ?? false,
+        ritual: s.ritual ?? false,
+        description: s.description ?? '',
+        prepared: s.prepared ?? false,
+      })) as Spell[],
+      features: (parsed.features ?? []).map((f: Partial<ClassFeature>) => ({
+        ...f,
+        name: f.name ?? 'Feature',
+        level: f.level ?? 1,
+        description: f.description ?? '',
+      })) as ClassFeature[],
       spellSlots: parsed.spellSlots ?? {},
       createdAt: parsed.createdAt ?? new Date().toISOString(),
       updatedAt: parsed.updatedAt ?? new Date().toISOString(),
@@ -483,12 +558,35 @@ export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: stri
       })) as Weapon[],
       gender: parsed.gender ?? '',
       pronouns: parsed.pronouns ?? '',
-      equipment: parsed.equipment ?? [],
-      supplies: parsed.supplies ?? [],
-      identities: parsed.identities ?? [],
+      /* These two are `string[]`, and a file that puts objects in them renders
+         the object as a React child — error #31, which kills the whole
+         Character screen. Coerced rather than trusted: the file is not ours. */
+      equipment: toStringList(parsed.equipment),
+      supplies: toStringList(parsed.supplies),
+      identities: (parsed.identities ?? []).map((i: Partial<CharacterIdentity>) => ({
+        ...i,
+        id: i.id ?? generateId(),
+        name: i.name ?? 'Identity',
+        isDefault: i.isDefault ?? false,
+        voiceNotes: i.voiceNotes ?? '',
+        mannerisms: i.mannerisms ?? [],
+        personalityTraits: i.personalityTraits ?? [],
+        triggers: i.triggers ?? [],
+        dialogueLines: i.dialogueLines ?? [],
+      })) as CharacterIdentity[],
       activeIdentityId: parsed.activeIdentityId ?? undefined,
       campaignId: parsed.campaignId ?? undefined,
-      customHooks: parsed.customHooks ?? [],
+      customHooks: (parsed.customHooks ?? []).map((h: Partial<CustomRPHook>) => ({
+        ...h,
+        id: h.id ?? generateId(),
+        category: h.category ?? 'ask',
+        text: h.text ?? '',
+        createdAt: h.createdAt ?? new Date().toISOString(),
+      })) as CustomRPHook[],
+      // `persona` is optional, but a HALF-written one is not: the Academy screen
+      // maps its arrays and the Persona screen reads the patron's domains, both
+      // without a guard. An empty `{}` persona killed two screens.
+      persona: parsed.persona ? normalizePersona(parsed.persona) : undefined,
       // Same story as `weapons.properties`: `effects` is required by the type,
       // arrives missing from older exports, and is read with `.length` without
       // a guard — which is a white screen at boot, not a missing bullet list.

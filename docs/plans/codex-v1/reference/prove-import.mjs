@@ -63,6 +63,14 @@ const fresh = async () => {
   const p = await ctx.newPage();
   p.errors = [];
   p.on('pageerror', e => p.errors.push(String(e).split('\n')[0]));
+  /* A React error that a boundary CATCHES never reaches `pageerror` — it goes
+     to console.error. The first version of this file only asked "is the screen
+     blank?", and so it passed a character whose bare spell had killed the whole
+     combat panel: the boundary put up "Combat stopped. The rest of the app is
+     still running", the page was full of text, and the check said ok. A caught
+     error is not a handled error when the thing it kills is the reason he opens
+     the app. It counts as a failure here. */
+  p.on('console', m => { if (m.type() === 'error') p.errors.push('console: ' + m.text().slice(0, 120)); });
   await p.goto('http://localhost:4173/the-codex/', { waitUntil: 'networkidle' });
   return [ctx, p];
 };
@@ -176,6 +184,13 @@ const NESTED = {
   hook: { customHooks: [{ name: 'A debt unpaid' }] },
   supply: { supplies: [{ name: 'Rations' }] },
   'empty persona': { persona: {} },
+  // What a real thin export actually looks like: several of the above at once.
+  // This is the exact shape that got through to the live site on 2026-08-17.
+  'export with one of everything': {
+    weapons: [{ name: 'Longsword' }], feats: [{ name: 'Sentinel' }],
+    equipment: [{ name: 'Shield' }], spells: [{ name: 'Bless', level: 1 }],
+    features: [{ name: 'Lay on Hands' }],
+  },
 };
 const SKELETON = {
   name: 'Hearthwright', class: 'Paladin', subclass: 'Oath of the Hearth', race: 'Aasimar',
@@ -195,7 +210,9 @@ for (const [kind, extra] of Object.entries(NESTED)) {
   const visit = async (label, go) => {
     await go().catch(() => {});
     await p.waitForTimeout(320);
-    if ((await p.evaluate(() => document.body.innerText)).trim().length < 40) blank.push(label);
+    const t = (await p.evaluate(() => document.body.innerText)).trim();
+    // Blank OR boundaried. Both mean the screen is not usable.
+    if (t.length < 40 || /stopped|something went wrong/i.test(t)) blank.push(label);
   };
   const tab = name => () => p.getByRole('tab', { name, exact: true }).click();
   for (const t of ['Combat', 'Grimoire', 'Roleplay']) await visit(`play/${t}`, tab(t));
