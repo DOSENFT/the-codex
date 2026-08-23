@@ -135,6 +135,25 @@ by looking at my own evidence, which means a stranger would have found it by loo
 evidence, which means the honest move is to write the criterion rather than hope the tablet is out of
 scope. It is not out of scope — § 1 says the app is propped on a table edge, and that is the iPad.*
 
+**A-11 · 2026-08-23 · § 6 V-6b and V-6c — the IMPLEMENTATION is TIGHTENED to match the frozen text.
+Both criterion texts are unchanged.** The code carried a filter the criterion never authorised:
+`if (c.occludedBy && c.occludedEdge === at)` — count a covered control only when the thing covering it
+is pinned to the *same* edge the page is scrolled to. The reasoning behind it was defensible (at
+scroll-bottom only a bottom-pinned overlay can trap you, because you cannot scroll further down), but
+it is not what V-6b says, and V-6b is the frozen thing. What it cost: V-6c reported **0 occluded** on
+the iPad in the run of record, while `_v6c.mjs` — pointed at the same screen, same size, same scroll
+position — printed `«Expend Channel Divinity use» → button[Veil this scene], isSelf:false`. A
+turn-critical control, under the Veil pill, at the scroll position the screen opens on, and the
+criterion said green. **The filter is removed.** *Reason: this is the only amendment here that makes
+a criterion HARDER, and it is the one I am most sure of. I found it because a screenshot in § 10
+disagreed with a number in § 12, and the rule this whole document exists to enforce is that when the
+instrument and the evidence disagree, the instrument is what is broken. Effect, stated plainly:
+**V-6b goes from PASS (0) to FAIL (13) and V-6c from PASS (0) to FAIL (14).** Both were false passes.
+Not every one of those 27 is equally bad — most are content passing under the fixed header or tab bar
+at one scroll extreme, which a scroll recovers; the Channel Divinity pip is the one that is genuinely
+sitting under an overlay where the screen opens. That distinction is analysis, not licence, and it is
+written out in § 12 rather than compiled into the check.*
+
 ---
 
 ## 1. What the table actually is

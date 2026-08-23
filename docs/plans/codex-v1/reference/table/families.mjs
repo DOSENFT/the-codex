@@ -683,7 +683,16 @@ export async function familyV(b, R, opts) {
       }
       const a = await audit(page);
       for (const c of a.touch)
-        if (c.occludedBy && c.occludedEdge === at) {
+        // Amendment A-11 — the `&& c.occludedEdge === at` that used to be here
+        // is gone. It only counted a control when the coverer was pinned to the
+        // SAME edge the page was scrolled to, so a control lying under the
+        // bottom-pinned Veil pill at scroll-TOP was silently dropped. That is
+        // narrower than the criterion, which says: at scroll-top and at
+        // scroll-bottom, elementFromPoint at the centre must resolve to the
+        // control. It said 0 occluded on the iPad while _v6c.mjs printed
+        // «Expend Channel Divinity use» → button[Veil this scene]. The
+        // implementation was softer than its own frozen text; the text wins.
+        if (c.occludedBy) {
           // Amendment A-8: a control clipped to nothing by an ancestor is not
           // being painted, so it has no on-screen position to occlude. Counted
           // out loud below — never silently dropped.
@@ -738,7 +747,7 @@ export async function familyV(b, R, opts) {
       }
       const a = await audit(tab.page);
       for (const c of a.touch)
-        if (c.occludedBy && c.occludedEdge === at) {
+        if (c.occludedBy) { // A-11, same correction as V-6b above
           if (c.clipped) { all.notPainted.push(`tablet ${s.id} @${at} «${c.label}» inside ${c.clipped}`); continue; }
           all.occludedTablet.push(`${s.id} @${at} «${c.label}» covered by ${c.occludedBy}`);
         }
