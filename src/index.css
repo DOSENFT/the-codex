@@ -221,6 +221,16 @@
   background: var(--color-eldritch-lit);
   box-shadow: 0 0 8px -1px color-mix(in srgb, var(--color-eldritch-lit) 60%, transparent);
 }
+/* Channel Divinity is ember — the oath's fire, and the third resource this one
+   instrument now draws. It was the last hand-rolled pip left: 44px, its own
+   border treatment, its own glow, in a screen where the two resources beside it
+   were already speaking the primitive's language. V-5b caught it at 56×44
+   against the 48 floor, which is the sizing half; the rest of the reason to
+   move it is that three resources drawn three ways is three things to learn. */
+.pip-tap[data-tone='ember'][data-slot='full'] > i {
+  background: var(--color-ember);
+  box-shadow: 0 0 8px -1px color-mix(in srgb, var(--color-ember) 65%, transparent);
+}
 .pip-tap[data-slot='spent'] > i {
   background: var(--color-void-1);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-bronze) 85%, transparent);

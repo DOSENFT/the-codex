@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, lazy, Suspense } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { SPRING_SETTLE } from './lib/motion-utils'
 import { useCharacter } from './hooks/useCharacter'
@@ -8,35 +8,35 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { SaveAlarm } from './components/SaveAlarm'
 import type { Character } from './lib/character'
 
-/* ── The cold path is one screen ─────────────────────────────────────────────
-   TABLE-READY S-1 budgets 2000ms from a dead origin at 4x CPU to the moment his
-   name is painted, and this was measuring 3115ms. The cause was not slow code;
-   it was that the launch parsed all of it. Every surface below was a static
-   import, so booting into play/Combat also paid for the Academy (which pulls
-   the 2329-line DialogueBank and four drills), the 2095-line CharacterPage,
-   Settings, the Spellbook and the print record: a 1056kB entry chunk to render
-   one screen.
+/* ── Every surface is a static import, and that is deliberate ────────────────
+   These ten were briefly React.lazy(), to cut the 1056kB entry chunk down to
+   466kB for S-1 (cold launch <=2000ms). It bought 119ms — 3115 to 2996 — on a
+   criterion that still failed by a full second, and it cost this:
 
-   CombatHelper stays eager and stays above this comment, because it IS the cold
-   path — he opens the app in combat. Everything else is fetched when he first
-   goes there, and sw.js precaches `assets/*`, so "when he first goes there" is
-   a read from local cache even with the origin dead. S-2 (tab switch <=400ms)
-   and N-2 (every screen offline) are the two criteria that would catch this
-   trade going wrong, and they are both graded on every run.
+     offline, no service worker, tap PREP
+     → "Character stopped. The rest of the app is still running."
 
-   The fallback is `null`, deliberately. A spinner would be a new visible state
-   in an app whose behaviour is sealed; nothing here should announce that a
-   boundary exists. From precache these resolve inside a frame or two. */
-const CharacterSetup  = lazy(() => import('./components/CharacterSetup').then(m => ({ default: m.CharacterSetup })))
-const Spellbook       = lazy(() => import('./components/Spellbook').then(m => ({ default: m.Spellbook })))
-const GrimoirePage    = lazy(() => import('./components/GrimoirePage').then(m => ({ default: m.GrimoirePage })))
-const IdentityPage    = lazy(() => import('./components/IdentityPage').then(m => ({ default: m.IdentityPage })))
-const AcademyPage     = lazy(() => import('./components/AcademyPage').then(m => ({ default: m.AcademyPage })))
-const Settings        = lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })))
-const SessionCockpit  = lazy(() => import('./components/session').then(m => ({ default: m.SessionCockpit })))
-const CharacterPage   = lazy(() => import('./components/CharacterPage').then(m => ({ default: m.CharacterPage })))
-const TurnLive        = lazy(() => import('./components/turn/TurnLive').then(m => ({ default: m.TurnLive })))
-const CharacterRecord = lazy(() => import('./components/print/CharacterRecord').then(m => ({ default: m.CharacterRecord })))
+   A chunk that cannot be fetched is a thrown promise, and a thrown promise
+   reaches the surface's ErrorBoundary, which renders a calm notice where the
+   screen should be. That is the failure this project has shipped three times
+   and the reason TABLE-READY exists: a polite boundary instead of the thing,
+   with the checks green. It cost D-7 too — his export button lives on that
+   screen, and export is his only backup at the table.
+
+   N-1 passes with the worker warm, so precache does cover the chunks. It does
+   not cover the window before the worker installs, the case where he turned it
+   off, or a cache the browser has evicted. The entry chunk is the only thing
+   guaranteed to be in memory once the app has painted, so every screen he can
+   reach lives in it. S-1's real cause is sw.js:132 — see TABLE-READY § 9.8.
+   Reproduced by docs/plans/codex-v1/reference/table/_d7.mjs. */
+import { CharacterSetup } from './components/CharacterSetup'
+import { GrimoirePage } from './components/GrimoirePage'
+import { IdentityPage } from './components/IdentityPage'
+import { AcademyPage } from './components/AcademyPage'
+import { SessionCockpit } from './components/session'
+import { CharacterPage } from './components/CharacterPage'
+import { TurnLive } from './components/turn/TurnLive'
+import { CharacterRecord } from './components/print/CharacterRecord'
 
 const MODE_STORAGE_KEY = 'codex-app-mode'
 
@@ -115,13 +115,11 @@ export default function App() {
     return (
       <>
         <ErrorBoundary surface="Character setup">
-          <Suspense fallback={null}>
           <CharacterSetup
             onComplete={createCharacter}
             roster={roster}
             onSelectCharacter={switchCharacter}
           />
-          </Suspense>
         </ErrorBoundary>
         <SaveAlarm reason={saveError} onDismiss={dismissSaveError} />
       </>
@@ -142,11 +140,9 @@ export default function App() {
     return (
       <>
         <ErrorBoundary surface="Turn (preview)">
-          <Suspense fallback={null}>
-            <TurnLive character={character} onCharacterUpdate={setCharacter} />
-          </Suspense>
+          <TurnLive character={character} onCharacterUpdate={setCharacter} />
         </ErrorBoundary>
-        <Suspense fallback={null}><CharacterRecord character={character} /></Suspense>
+        <CharacterRecord character={character} />
         <SaveAlarm reason={saveError} onDismiss={dismissSaveError} />
       </>
     )
@@ -163,7 +159,7 @@ export default function App() {
         the record along with everything else. Out here it is a sibling of the
         shell, so Ctrl+P from any tab prints the whole character rather than
         whichever tab happened to be mounted. See design/print.css. */}
-    <Suspense fallback={null}><CharacterRecord character={character} /></Suspense>
+    <CharacterRecord character={character} />
     <Layout
       character={character}
       activeTab={activeTab}
@@ -187,14 +183,7 @@ export default function App() {
       >
       {/* ─── Session Mode Tabs ─── */}
       {/* One boundary per surface, so a crash in one cannot white-screen the
-          others. Combat in particular must survive anything else failing.
-
-          One Suspense for all of them, not one each: exactly one surface is
-          mounted at a time, so nine boundaries would be nine ways to write the
-          same thing. It sits INSIDE the ErrorBoundaries' scope rather than
-          outside, because a chunk that fails to load is an error and should
-          reach the surface's own boundary, not blank the shell. */}
-      <Suspense fallback={null}>
+          others. Combat in particular must survive anything else failing. */}
       {appMode === 'session' && activeTab === 'combat' && (
         <ErrorBoundary surface="Combat">
           <CombatHelper
@@ -252,7 +241,6 @@ export default function App() {
           <AcademyPage character={character} onCharacterUpdate={handleCharacterUpdate} />
         </ErrorBoundary>
       )}
-      </Suspense>
       </motion.div>
     </Layout>
     {/* Outside <Layout> on purpose, like CharacterRecord: a write that did not

@@ -418,7 +418,15 @@ function PaladinResourceTracker({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex gap-1.5 flex-wrap">
+          {/* The third resource on this screen, and until now the third way of
+              drawing one: a 44px ring with a 10px core, its own border, its own
+              glow. Spell slots and class-feature uses already share .pip-tap.
+              This one now does too, in ember — the tone says which resource,
+              the geometry says how to press it, and V-5b's 48px floor for a
+              control pressed during a turn is met by the primitive rather than
+              by a min-height bolted onto a 28px button. Behaviour untouched:
+              same tap to expend, same tap-when-empty to restore. */}
+          <div className="pip-row">
             {Array.from({ length: channelDivinity.max }).map((_, i) => {
               const available = i < channelDivinity.current
               return (
@@ -432,27 +440,11 @@ function PaladinResourceTracker({
                       ? 'Expend Channel Divinity use'
                       : 'Restore Channel Divinity use'
                   }
-                  className={cn(
-                    'w-[28px] h-[28px] min-h-[44px] min-w-[44px]',
-                    'p-0 flex items-center justify-center',
-                    'rounded-full border-2 transition-all duration-200 ease-forge',
-                    'active:scale-[0.9]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                    available
-                      ? [
-                          'bg-ember/30 border-ember/60',
-                          'shadow-[0_0_8px_-2px_rgba(244,181,69,0.4)]',
-                          'hover:bg-ember/40 hover:border-ember/80',
-                        ]
-                      : [
-                          'bg-white/[0.03] border-white/10',
-                          'hover:bg-white/[0.06] hover:border-white/20',
-                        ],
-                  )}
+                  className="pip-tap"
+                  data-tone="ember"
+                  data-slot={available ? 'full' : 'spent'}
                 >
-                  {available && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-ember shadow-[0_0_6px_rgba(244,181,69,0.6)]" />
-                  )}
+                  <i />
                 </button>
               )
             })}
