@@ -23,7 +23,7 @@ import { normalizeCharacter, type Character } from './character'
  *      cannot be told apart in the roster.
  */
 export type ImportResult =
-  | { ok: true; character: Character; warnings: string[] }
+  | { ok: true; character: Character; warnings: string[]; repairs: string[] }
   | { ok: false; error: string }
 
 export function parseCharacterFile(text: string): ImportResult {
@@ -74,7 +74,17 @@ export function parseCharacterFile(text: string): ImportResult {
   if (!raw.equipment?.length) warnings.push('equipment')
   if (!raw.spells?.length) warnings.push('spells')
 
-  return { ok: true, character: normalizeCharacter(raw), warnings }
+  /* `warnings` is about what the file NEVER HAD — a thin old export missing its
+     kit. `repairs` is about what the file HAD WRONG and this app changed on the
+     way in: a spell that was `null`, a weapon whose `properties` was the string
+     "finesse", a homebrew condition with no name. Those used to be a blank
+     screen or a polite boundary notice; they are now a coercion, and a coercion
+     Marcus is not told about is just a quieter way of losing his data. Two
+     lists, because "your file is old" and "your file is damaged and I altered
+     it" are different sentences and he should not have to guess which he got. */
+  const repairs: string[] = []
+  const character = normalizeCharacter(raw, undefined, repairs)
+  return { ok: true, character, warnings, repairs }
 }
 
 /** "weapons, equipment and spells" — for reading a warning list out loud. */

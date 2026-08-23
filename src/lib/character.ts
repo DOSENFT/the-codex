@@ -528,19 +528,116 @@ function normalizePersona(p: Partial<CharacterPersona>): CharacterPersona {
     ...p,
     defaultState: p.defaultState ?? '',
     decisionTree: p.decisionTree ?? '',
-    physicalTics: p.physicalTics ?? [],
-    sceneInstincts: p.sceneInstincts ?? [],
-    quietTexture: p.quietTexture ?? [],
+    physicalTics: texts(p.physicalTics, 'Persona physical tics'),
+    sceneInstincts: texts(p.sceneInstincts, 'Persona scene instincts'),
+    quietTexture: texts(p.quietTexture, 'Persona quiet texture'),
     patron: {
-      name: p.patron?.name ?? '',
-      domains: p.patron?.domains ?? [],
+      name: text(p.patron?.name, '', 'A patron name'),
+      domains: texts(p.patron?.domains, 'Patron domains'),
       symbol: p.patron?.symbol ?? '',
       rpNotes: p.patron?.rpNotes ?? '',
     },
   }
 }
 
-export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: string): Character {
+/* ── Coercion: the fourth time, and the last ──────────────────────────────────
+   Everything below this comment defaults fields that are MISSING. That is three
+   bugs' worth of hard-won defaulting and it is still not enough, because the
+   fourth shape of this bug is a field that is PRESENT and the wrong type. An
+   independent verifier found six of them in one afternoon, on a build I had just
+   finished calling clean:
+
+     {"spells":[null]}                     → (null).name          · 7 screens hollow
+     {"features":[null]}                   → the same             · 7 screens hollow
+     {"weapons":[{"properties":"finesse"}]} → w.properties.map is not a function
+                                              · prep/Character renders the polite
+                                                boundary notice — the exact thing
+                                                TABLE-READY.md exists to prevent
+     {"spells":[{"description":{"text":"x"}}]} → React #31 · ALL SEVEN BLANK
+     {"customConditions":[{}]}             → (undefined).trim()
+
+   `?? []` cannot see any of these. `properties: w.properties ?? []` passes a
+   STRING straight through, because a string is not nullish, and then seven call
+   sites spread or `.map` it. The frozen twelve hostile shapes in the check suite
+   all pass — they are the survivors, not a sample.
+
+   So: coerce by TYPE, not by presence. A record that is not a record is dropped,
+   a string that is an object becomes blank, a list that is not a list becomes
+   empty — and every one of those is written down and handed back, because
+   silently eating half a character is how you find out at the table that your
+   spells are gone. Marcus gets told exactly which record and which field.
+
+   These are deliberately not exported. The only correct place to distrust a file
+   is the moment it is read, and that is here. */
+let repairLog: string[] | null = null
+const note = (msg: string) => { if (repairLog && !repairLog.includes(msg)) repairLog.push(msg) }
+
+/** A list of records, with everything that is not a record removed and named. */
+function records<T>(value: unknown, field: string): Partial<T>[] {
+  if (value === undefined || value === null) return []
+  if (!Array.isArray(value)) { note(`${field} was not a list, so none were loaded`); return [] }
+  const out: Partial<T>[] = []
+  value.forEach((v, i) => {
+    if (v && typeof v === 'object' && !Array.isArray(v)) out.push(v as Partial<T>)
+    else note(`${field} #${i + 1} was ${v === null ? 'empty' : `a ${typeof v}`}, not an entry, so it was dropped`)
+  })
+  return out
+}
+
+/** Text, or the fallback. Never an object — React renders those as error #31. */
+function text(value: unknown, fallback: string, field: string): string {
+  if (typeof value === 'string') return value
+  if (value === undefined || value === null) return fallback
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  const was = Array.isArray(value) ? 'a list' : 'an object'
+  note(`${field} was ${was} rather than text, so ${fallback ? `it fell back to “${fallback}”` : 'it was left blank'}`)
+  return fallback
+}
+
+/** A list of plain strings, with anything else dropped. */
+function texts(value: unknown, field: string): string[] {
+  if (value === undefined || value === null) return []
+  if (!Array.isArray(value)) { note(`${field} was not a list, so it was left empty`); return [] }
+  const out: string[] = []
+  value.forEach(v => { if (typeof v === 'string') out.push(v) })
+  const lost = value.length - out.length
+  if (lost) note(`${field}: ${lost} ${lost === 1 ? 'entry was' : 'entries were'} not text, so ${lost === 1 ? 'it was' : 'they were'} dropped`)
+  return out
+}
+
+function num(value: unknown, fallback: number, field: string): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (value === undefined || value === null) return fallback
+  const n = Number(value)
+  if (Number.isFinite(n)) return n
+  note(`${field} was not a number, so it was set to ${fallback}`)
+  return fallback
+}
+
+const bool = (value: unknown, fallback: boolean): boolean =>
+  typeof value === 'boolean' ? value : value === undefined || value === null ? fallback : Boolean(value)
+
+/**
+ * Normalise a character read from anywhere untrusted — a file, localStorage, an
+ * older version of this app.
+ *
+ * @param repairs if supplied, every coercion made is appended to it in plain
+ *   language, so the caller can tell Marcus what changed instead of guessing.
+ */
+export function normalizeCharacter(
+  parsed: Partial<Character>,
+  fallbackId?: string,
+  repairs?: string[],
+): Character {
+  repairLog = repairs ?? null
+  try {
+    return normalizeInner(parsed, fallbackId)
+  } finally {
+    repairLog = null
+  }
+}
+
+function normalizeInner(parsed: Partial<Character>, fallbackId?: string): Character {
   return {
     ...parsed,
     id: parsed.id ?? fallbackId ?? generateId(),
@@ -576,25 +673,25 @@ export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: stri
          Marcus actually uses at the table is dead and the app looks fine.
          Defaulted here rather than guarded at each read site, so the next
          person to reach for `.description` cannot reintroduce it. */
-      spells: (parsed.spells ?? []).map((s: Partial<Spell>) => ({
+      spells: records<Spell>(parsed.spells, 'A spell').map(s => ({
         ...s,
-        name: s.name ?? 'Spell',
-        level: s.level ?? 0,
-        school: s.school ?? '',
-        castingTime: s.castingTime ?? '1 action',
-        range: s.range ?? '',
-        components: s.components ?? '',
-        duration: s.duration ?? 'Instantaneous',
-        concentration: s.concentration ?? false,
-        ritual: s.ritual ?? false,
-        description: s.description ?? '',
-        prepared: s.prepared ?? false,
+        name: text(s.name, 'Spell', 'A spell name'),
+        level: num(s.level, 0, 'A spell level'),
+        school: text(s.school, '', 'A spell school'),
+        castingTime: text(s.castingTime, '1 action', 'A casting time'),
+        range: text(s.range, '', 'A spell range'),
+        components: text(s.components, '', 'Spell components'),
+        duration: text(s.duration, 'Instantaneous', 'A spell duration'),
+        concentration: bool(s.concentration, false),
+        ritual: bool(s.ritual, false),
+        description: text(s.description, '', 'A spell description'),
+        prepared: bool(s.prepared, false),
       })) as Spell[],
-      features: (parsed.features ?? []).map((f: Partial<ClassFeature>) => ({
+      features: records<ClassFeature>(parsed.features, 'A feature').map(f => ({
         ...f,
-        name: f.name ?? 'Feature',
-        level: f.level ?? 1,
-        description: f.description ?? '',
+        name: text(f.name, 'Feature', 'A feature name'),
+        level: num(f.level, 1, 'A feature level'),
+        description: text(f.description, '', 'A feature description'),
       })) as ClassFeature[],
       spellSlots: parsed.spellSlots ?? {},
       createdAt: parsed.createdAt ?? new Date().toISOString(),
@@ -606,7 +703,7 @@ export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: stri
       skillProficiencies: parsed.skillProficiencies ?? [],
       skillExpertise: parsed.skillExpertise ?? [],
       savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
-      weapons: (parsed.weapons ?? []).map((w: Partial<Weapon>) => ({
+      weapons: records<Weapon>(parsed.weapons, 'A weapon').map(w => ({
         ...w,
         // `properties` is REQUIRED by the type and was still arriving undefined
         // from real files, which is the top-level import bug one layer down:
@@ -617,13 +714,16 @@ export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: stri
         // spread of undefined throws "not iterable" — a white screen, above
         // every error boundary. Found 2026-08-17 by a synthetic export that had
         // a weapon at all; Marcus's own file has none, so it hid.
-        properties: w.properties ?? [],
-        name: w.name ?? 'Weapon',
+        // …and the fourth instance was `properties: "finesse"` — a STRING, which
+        // is not nullish, so `?? []` waved it through and `.map` threw one frame
+        // later. Typed coercion, not presence: a list or nothing.
+        properties: texts(w.properties, 'Weapon properties') as Weapon['properties'],
+        name: text(w.name, 'Weapon', 'A weapon name'),
         attackType: w.attackType ?? 'melee',
         abilityMod: w.abilityMod ?? 'STR',
-        proficient: w.proficient ?? true,
-        damageDice: w.damageDice ?? '1d4',
-        damageType: w.damageType ?? 'bludgeoning',
+        proficient: bool(w.proficient, true),
+        damageDice: text(w.damageDice, '1d4', 'Weapon damage dice'),
+        damageType: text(w.damageType, 'bludgeoning', 'A weapon damage type') as Weapon['damageType'],
         description: w.description ?? undefined,
         range: w.range ?? undefined,
         masteryProperty: w.masteryProperty ?? undefined,
@@ -636,46 +736,72 @@ export function normalizeCharacter(parsed: Partial<Character>, fallbackId?: stri
          Character screen. Coerced rather than trusted: the file is not ours. */
       equipment: toStringList(parsed.equipment),
       supplies: toStringList(parsed.supplies),
-      identities: (parsed.identities ?? []).map((i: Partial<CharacterIdentity>) => ({
+      identities: records<CharacterIdentity>(parsed.identities, 'An identity').map(i => ({
         ...i,
-        id: i.id ?? generateId(),
-        name: i.name ?? 'Identity',
-        isDefault: i.isDefault ?? false,
-        voiceNotes: i.voiceNotes ?? '',
-        mannerisms: i.mannerisms ?? [],
-        personalityTraits: i.personalityTraits ?? [],
-        triggers: i.triggers ?? [],
-        dialogueLines: i.dialogueLines ?? [],
+        id: text(i.id, generateId(), 'An identity id'),
+        name: text(i.name, 'Identity', 'An identity name'),
+        isDefault: bool(i.isDefault, false),
+        voiceNotes: text(i.voiceNotes, '', 'Identity voice notes'),
+        mannerisms: texts(i.mannerisms, 'Identity mannerisms'),
+        personalityTraits: texts(i.personalityTraits, 'Identity personality traits'),
+        triggers: texts(i.triggers, 'Identity triggers'),
+        /* NOT `texts()` — these are records, not strings, and the typechecker
+           caught me writing it the easy way. A bare string here reaches the
+           Roleplay screen as `l.text === undefined` and renders an empty row
+           with a dead favourite toggle, so it is dropped and named instead. */
+        dialogueLines: records<DialogueLine>(i.dialogueLines, 'An identity dialogue line').map(l => ({
+          ...l,
+          text: text(l.text, '', 'A dialogue line'),
+          context: text(l.context, 'social', 'A dialogue line context'),
+          favorite: bool(l.favorite, false),
+        })) as DialogueLine[],
       })) as CharacterIdentity[],
       activeIdentityId: parsed.activeIdentityId ?? undefined,
       campaignId: parsed.campaignId ?? undefined,
-      customHooks: (parsed.customHooks ?? []).map((h: Partial<CustomRPHook>) => ({
+      customHooks: records<CustomRPHook>(parsed.customHooks, 'A roleplay hook').map(h => ({
         ...h,
-        id: h.id ?? generateId(),
+        id: text(h.id, generateId(), 'A hook id'),
         category: h.category ?? 'ask',
-        text: h.text ?? '',
-        createdAt: h.createdAt ?? new Date().toISOString(),
+        text: text(h.text, '', 'A hook'),
+        createdAt: text(h.createdAt, new Date().toISOString(), 'A hook timestamp'),
       })) as CustomRPHook[],
       // `persona` is optional, but a HALF-written one is not: the Academy screen
       // maps its arrays and the Persona screen reads the patron's domains, both
       // without a guard. An empty `{}` persona killed two screens.
-      persona: parsed.persona ? normalizePersona(parsed.persona) : undefined,
+      persona: parsed.persona && typeof parsed.persona === 'object' && !Array.isArray(parsed.persona)
+        ? normalizePersona(parsed.persona)
+        : undefined,
       // Same story as `weapons.properties`: `effects` is required by the type,
       // arrives missing from older exports, and is read with `.length` without
       // a guard — which is a white screen at boot, not a missing bullet list.
-      feats: (parsed.feats ?? []).map((f: Partial<CharacterFeat>) => ({
+      feats: records<CharacterFeat>(parsed.feats, 'A feat').map(f => ({
         ...f,
-        name: f.name ?? 'Feat',
-        description: f.description ?? '',
-        isHomebrew: f.isHomebrew ?? false,
-        effects: f.effects ?? [],
+        name: text(f.name, 'Feat', 'A feat name'),
+        description: text(f.description, '', 'A feat description'),
+        isHomebrew: bool(f.isHomebrew, false),
+        effects: Array.isArray(f.effects) ? f.effects : [],
       })) as CharacterFeat[],
       // Slice 6b. Defaulted to [] rather than left undefined so that every
       // reader can iterate without a guard, and so a sheet written before 6b
       // gains the fields the first time it is saved — no migration step, no
       // version stamp, and nothing existing is touched.
-      resourcePools: parsed.resourcePools ?? [],
-      customConditions: parsed.customConditions ?? [],
+      /* These two were the only record arrays passed through entirely raw, and
+         `customConditions: [{}]` — a condition with no name — reached a bare
+         `.trim()` and took prep/Character down behind its boundary. A homebrew
+         condition is hand-written by definition; it is the LAST thing that
+         should have been trusted. */
+      resourcePools: records<ResourcePool>(parsed.resourcePools, 'A resource pool').map(p => ({
+        ...p,
+        id: text(p.id, generateId(), 'A pool id'),
+        name: text(p.name, 'Resource', 'A pool name'),
+        current: num(p.current, 0, 'A pool value'),
+        max: num(p.max, 0, 'A pool maximum'),
+      })) as ResourcePool[],
+      customConditions: records<CustomCondition>(parsed.customConditions, 'A homebrew condition').map(c => ({
+        ...c,
+        name: text(c.name, 'Condition', 'A condition name'),
+        cascades: texts(c.cascades, 'Condition cascades'),
+      })) as CustomCondition[],
   } as Character
 }
 

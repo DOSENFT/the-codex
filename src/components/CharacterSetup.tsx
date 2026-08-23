@@ -120,7 +120,13 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
      with 10s across the board, which looks like the app got his character wrong
      rather than the file being old. So a thin file is held here and named
      before it is accepted, instead of arriving as a surprise at the table. */
-  const [pendingImport, setPendingImport] = useState<{ character: Character; warnings: string[] } | null>(null)
+  /* `repairs` is the other half, added after the fourth time a malformed file
+     shipped past a green check: not "your file is old" but "your file was
+     damaged and I altered it on the way in". Marcus is told before he accepts
+     it, because a silent coercion is a quieter way of losing his data. */
+  const [pendingImport, setPendingImport] = useState<
+    { character: Character; warnings: string[]; repairs: string[] } | null
+  >(null)
 
   const handleImportCharacter = useCallback(() => {
     setImportError(null)
@@ -145,8 +151,9 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
           setImportError(result.error)
           return
         }
-        if (result.warnings.length > 0) {
-          setPendingImport({ character: result.character, warnings: result.warnings })
+        if (result.warnings.length > 0 || result.repairs.length > 0) {
+          const { character, warnings, repairs } = result
+          setPendingImport({ character, warnings, repairs })
           return
         }
         onComplete(result.character)
@@ -930,12 +937,32 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
               <div className="flex items-start gap-2">
                 <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" aria-hidden />
                 <p className="text-sm text-amber-200">
-                  <span className="font-medium">{pendingImport.character.name}</span> is in that file,
-                  but it's an older export — it has no {formatList(pendingImport.warnings)}. You can
-                  import it and fill those in, or go back and export again from the device that has
-                  the up-to-date character.
+                  <span className="font-medium">{pendingImport.character.name}</span> is in that file
+                  {pendingImport.warnings.length > 0 ? (
+                    <>
+                      , but it's an older export — it has no{' '}
+                      {formatList(pendingImport.warnings)}. You can import it and fill those in, or
+                      go back and export again from the device that has the up-to-date character.
+                    </>
+                  ) : (
+                    <>, but parts of it were damaged and had to be repaired to open it.</>
+                  )}
                 </p>
               </div>
+              {pendingImport.repairs.length > 0 && (
+                <div className="text-sm text-amber-200/90 pl-6">
+                  <p className="font-medium">Changed on the way in:</p>
+                  <ul className="mt-1 list-disc pl-4 space-y-0.5">
+                    {pendingImport.repairs.map((r) => (
+                      <li key={r}>{r}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-1.5 text-amber-200/70">
+                    Everything else came through intact. Export again from the device that has the
+                    good copy if you'd rather not lose those.
+                  </p>
+                </div>
+              )}
               <div className="flex gap-2">
                 <Button
                   variant="primary"

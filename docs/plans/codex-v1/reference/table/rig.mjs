@@ -156,9 +156,28 @@ export async function freshCtx(browser, {
  *  onto a phone that has never seen this app. Never via localStorage: seeding
  *  storage walks straight past the code that has broken three times. */
 export async function importFile(page, file, { anyway = true } = {}) {
-  const chooser = page.waitForEvent('filechooser');
-  await page.getByRole('button', { name: /Import Character/i }).first().click();
-  await (await chooser).setFiles(file);
+  /* Amendment A-15 — this used to read
+     //   const chooser = page.waitForEvent('filechooser');
+     //   await page.getByRole('button', …).first().click();
+     //   await (await chooser).setFiles(file);
+     with no wait for the control and no retry. The button is in the DOM before
+     React has attached its handler, so a click can land on a live, visible,
+     enabled element and do nothing at all. F-3b opens seventeen contexts back
+     to back; under that load the race lost, and the harness reported a 30s
+     Playwright timeout — a harness flake wearing the costume of a product
+     failure, which is this project's oldest problem in the other direction.
+     Wait for the control, and allow exactly one retry. If neither click opens a
+     chooser, that is a real failure and it is thrown, not swallowed. */
+  const btn = page.getByRole('button', { name: /Import Character/i }).first();
+  await btn.waitFor({ state: 'visible', timeout: 15000 });
+  let opened = false;
+  for (let attempt = 0; attempt < 2 && !opened; attempt++) {
+    const chooser = page.waitForEvent('filechooser', { timeout: 12000 }).catch(() => null);
+    await btn.click();
+    const c = await chooser;
+    if (c) { await c.setFiles(file); opened = true; }
+  }
+  if (!opened) throw new Error('Import Character never opened a file chooser after two clicks');
   await page.waitForTimeout(900);
   if (anyway) {
     const gate = page.getByRole('button', { name: /^Import anyway$/ });

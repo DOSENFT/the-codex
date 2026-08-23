@@ -174,6 +174,10 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   const [importError, setImportError] = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState(false)
   const [importWarnings, setImportWarnings] = useState<string[]>([])
+  /* Separate from `importWarnings` on purpose — "your file is old" and "your
+     file was damaged and I altered it" are different sentences, and Marcus
+     should not have to work out which one he got. */
+  const [importRepairs, setImportRepairs] = useState<string[]>([])
 
   const handleExport = useCallback(() => {
     const data = JSON.stringify(character, null, 2)
@@ -193,6 +197,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
     setImportError(null)
     setImportSuccess(false)
     setImportWarnings([])
+    setImportRepairs([])
     const input = document.createElement('input')
     input.type = 'file'
     // See CharacterSetup for why this is not a bare `.json` — iOS greys the file
@@ -213,10 +218,12 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
            green tick alone would let it pass as complete when it isn't. The
            amber notice stays put instead of self-dismissing: what it says is
            still true in five minutes. */
+        if (result.repairs.length > 0) setImportRepairs(result.repairs)
         if (result.warnings.length > 0) {
           setImportWarnings(result.warnings)
           return
         }
+        if (result.repairs.length > 0) return
         setImportSuccess(true)
         setTimeout(() => setImportSuccess(false), 3000)
       }
@@ -706,6 +713,27 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
             Imported — but that was an older export, with no {formatList(importWarnings)}. Everything
             else came across; you'll need to add those back.
           </span>
+        </div>
+      )}
+
+      {importRepairs.length > 0 && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/25 animate-fade-in"
+        >
+          <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" aria-hidden />
+          <div className="text-sm text-amber-200">
+            <p>Imported — but parts of that file were damaged and were changed to open it:</p>
+            <ul className="mt-1 list-disc pl-4 space-y-0.5">
+              {importRepairs.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+            <p className="mt-1.5 text-amber-200/70">
+              Everything else came across intact. Export again from the device with the good copy if
+              you'd rather not lose those.
+            </p>
+          </div>
         </div>
       )}
 

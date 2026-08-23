@@ -147,6 +147,71 @@ export async function familyF(b, R, opts) {
     }
     R.check('F-3', '12 hostile-but-legal inner shapes × 7 screens = 84 renders', bad.length === 0, bad.join('\n         '));
   }
+  { /* F-3b — the shapes that killed HEAD, and every other field asked the same
+       question. F-3 is frozen at twelve and stays frozen at twelve (§4: criteria
+       may be added, never rewritten), so these live in their own check. What
+       makes them different from the twelve: the twelve are fields that are
+       ABSENT. These are fields that are PRESENT and the wrong TYPE, which is the
+       one thing `?? []` cannot see, and which is why F-3 was green on a build
+       that faulted on five of the first six shapes a stranger tried. The first
+       five below are §9.11 verbatim; the rest are the same question put to every
+       other array and every other string on the record. */
+    const TYPED = {
+      'null in spells':           { spells: [null] },
+      'null in features':         { features: [null] },
+      'properties as a string':   { weapons: [{ name: 'Sword', properties: 'finesse' }] },
+      'description as an object': { spells: [{ name: 'Bless', level: 1, description: { text: 'x' } }] },
+      'condition with no name':   { customConditions: [{}] },
+      'null in weapons':          { weapons: [null] },
+      'strings in identities':    { identities: ['Ash'] },
+      'string dialogue line':     { identities: [{ name: 'Ash', dialogueLines: ['a line'] }] },
+      'spells not a list':        { spells: { name: 'Bless' } },
+      'equipment not a list':     { equipment: { name: 'Rope' } },
+      'level as a string':        { spells: [{ name: 'Bless', level: '1' }] },
+      'pool numbers as strings':  { resourcePools: [{ name: 'Embers', current: '3', max: '5' }] },
+      'cascades as a string':     { customConditions: [{ name: 'Emberburn', cascades: 'Prone' }] },
+      'name as a number':         { features: [{ name: 42 }] },
+      'persona fields wrong':     { persona: { physicalTics: 'taps the coal', patron: { name: { n: 'Aesis' }, domains: 'hearth' } } },
+      'nested object as text':    { features: [{ name: 'Lay on Hands', description: { long: 'x' } }] },
+      'all of them at once':      {
+        spells: [null], features: [null], customConditions: [{}], identities: ['Ash'],
+        weapons: [{ name: 'S', properties: 'finesse' }], equipment: { name: 'Rope' },
+      },
+    };
+    const worse = [];
+    for (const [kind, extra] of Object.entries(TYPED)) {
+      const f = write(`typed-${kind.replace(/\W/g, '-')}.json`, { ...SKELETON, ...extra });
+      const { ctx, page } = await freshCtx(b, opts);
+      await importFile(page, f);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(700);
+      const dead = await walk(page, CHROME);
+      if (dead.length) worse.push(`${kind} -> ${dead.join(' ; ')}`);
+      await ctx.close();
+    }
+    const n = Object.keys(TYPED).length;
+    R.check('F-3b', `${n} shapes whose fields are PRESENT and the wrong type x 7 screens = ${n * 7} renders`,
+      worse.length === 0, worse.join('\n         '));
+  }
+  { /* F-3c — surviving is half of it. A coercion Marcus is not told about is a
+       quieter way of losing his data, so the repair must be named, and named
+       BEFORE the file is accepted rather than after. This deliberately does not
+       click "Import anyway": the gate itself is what is under test. */
+    const f = write('typed-say-so.json', {
+      ...SKELETON, spells: [null], weapons: [{ name: 'Sword', properties: 'finesse' }],
+    });
+    const { ctx, page } = await freshCtx(b, opts);
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: /Import Character/i }).first().click();
+    await (await chooser).setFiles(f);
+    await page.waitForTimeout(900);
+    const seen = await page.evaluate(() => document.body.innerText);
+    const gated = (await page.getByRole('button', { name: /^Import anyway$/ }).count()) > 0;
+    const named = gated && /Changed on the way in/i.test(seen) && /spell/i.test(seen);
+    R.check('F-3c', 'a repaired file names what was changed, and says so before it is accepted',
+      named, named ? '' : `gated=${gated}\n         ${seen.replace(/\s+/g, ' ').slice(0, 400)}`);
+    await ctx.close();
+  }
   { // F-4
     const { ctx, page } = await freshCtx(b, opts);
     await importFile(page, realCopy('full'));
