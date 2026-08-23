@@ -124,6 +124,17 @@ one. Widening a selector only ever catches more, so this needs no licence beyond
 but it is logged because "V-5b passed" meant something different before this line than after it, and
 anyone reading an older run should know that.*
 
+**A-10 · 2026-08-23 · § 6 — one criterion ADDED (V-6c). Nothing softened, nothing removed.** V-6b
+grades occlusion at 390×844 only, and it grades *controls* only. Two things fall through that hole,
+and the § 10 screenshots — taken from the shipped build, after P0-a was repaired — show both:
+`phone-play-Combat.png` has the Veil pill lying across the CLASS RESOURCES title, and
+`tablet-play-Combat.png` has it lying across a Channel Divinity pip, which is a control, at a
+viewport V-6b never visits. **V-6c** is added to close the second: the same occlusion test, run at
+834×1112. It is added knowing it fails, and it is recorded as a FAIL in § 12. *Reason: I found this
+by looking at my own evidence, which means a stranger would have found it by looking at the same
+evidence, which means the honest move is to write the criterion rather than hope the tablet is out of
+scope. It is not out of scope — § 1 says the app is propped on a table edge, and that is the iPad.*
+
 ---
 
 ## 1. What the table actually is
@@ -299,6 +310,7 @@ element is walked; contrast is computed against the actual painted background be
 | **V-5** | **Everything tappable is reachable.** Every interactive element ≥ **44 × 44 px** hit area (WCAG 2.2 AA); every control used *during a turn* ≥ **48 × 48 px**. | **0 below** |
 | **V-6** | **Thumb zone.** On 390 × 844, every control that spends a resource, and the tab bar, lies within the **bottom 60%** of the viewport. One hand, lower third. | **0 outside** |
 | **V-6b** | **Nothing that is reachable on paper is unreachable in fact.** *(ADDED 2026-08-23 alongside A-7.)* At scroll-top and at scroll-bottom, on every screen, `document.elementFromPoint()` at the centre of every interactive element's hit rect must resolve to that element or a descendant of it. A control sitting under the fixed tab bar, under a sticky header, or under a full-bleed overlay has perfect geometry and cannot be pressed — the failure V-5 and V-6 are both structurally blind to, because both read `getBoundingClientRect()` and neither reads the stack above it. | **0 occluded** |
+| **V-6c** | **The same, on the iPad.** *(ADDED 2026-08-23 by A-10.)* V-6b re-run at **834×1112 DPR2** — the size the app is at when it is propped on the table edge rather than held. Same rule: at scroll-top and scroll-bottom, on every screen, `elementFromPoint()` at the centre of every control's hit rect resolves to that control or a descendant. | **0 occluded** |
 | **V-7** | **It does not look like a component-library demo.** Judged by the `impeccable` design gate, run as a named gate, verdict pasted verbatim into § 8 including anything it fails. | § 8 verdict + screenshots |
 | **V-8** | **Screenshot of every screen at real device size**, phone and iPad, in `_shots-app/`, linked in § 10, at the SHA that shipped. A stranger looks at these and fails me or doesn't. | § 10 |
 
@@ -482,6 +494,22 @@ the action economy and the slot/resource pips, with the rest of the sheet scroll
 a decision about what happens to it on the other six screens. It changes what the app *does* — a
 control that was scrollable becomes permanent — so it is sealed. *Buys:* V-6 outright, and it is the
 single largest table win available. **This is the one I would build first.**
+
+**9.1b · The two fixed overlays still float over mid-scroll content, and the § 10 screenshots show it.**
+P0-a in § 8 was repaired by reserving 9rem of bottom padding, which guarantees the *end* of every page
+clears the Veil pill and the dice roller. It does not — cannot — stop the two of them floating over
+whatever happens to be under them at any other scroll position, and
+[`phone-play-Combat.png`](docs/plans/codex-v1/_shots-app/phone-play-Combat.png) is the proof: at
+default scroll the Veil pill sits across the CLASS RESOURCES title and you read "…ESOURCES".
+[`tablet-play-Combat.png`](docs/plans/codex-v1/_shots-app/tablet-play-Combat.png) is worse — there it
+covers part of a Channel Divinity pip, i.e. a control. V-6b does not catch either one: it grades
+scroll-top and scroll-bottom on 390×844 only, and the phone case is a *title*, not a control. This is
+not a separate problem from 9.1 — it is the same problem seen from the other side. A fixed overlay
+that owns a strip of screen is only honest if the layout knows the strip is spoken for, and the only
+composition where it is, is the bottom deck. **Listed here rather than fixed** because every fix
+available to a design pass makes something else worse: shrinking the Veil to an icon takes the word
+off the one control that may never be missing, in a dim room; moving it into the header takes it out
+of thumb reach; deleting it is not on the table. *Cost:* subsumed by 9.1. *Buys:* the last of P0-a.
 
 **9.2 · There is no undo on the combat screen. S-4 is UNPROVEN for that reason, not because it is slow.**
 S-4 asks that a mis-tap be reversible within 100 ms. On the default combat screen there is no

@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   freshCtx, goScreen, SCREENS, importFile, storedChars, storedChar, judge, audit, drain,
-  deadOrigin, settle,
+  deadOrigin, settle, TABLET,
 } from './rig.mjs';
 
 export const THRESH = {
@@ -643,7 +643,7 @@ export async function familyS(b, R, opts) {
 export async function familyV(b, R, opts) {
   R.section('V — arm\'s length, bad light');
 
-  const all = { small: [], low: [], lowNum: [], cinzel: [], touch: [], turnTouch: [], thumb: [], occluded: [], notPainted: [], onImage: 0 };
+  const all = { small: [], low: [], lowNum: [], cinzel: [], touch: [], turnTouch: [], thumb: [], occluded: [], occludedTablet: [], notPainted: [], onImage: 0 };
   const { ctx, page } = await freshCtx(b, opts);
   await importFile(page, realCopy('full'));
 
@@ -718,6 +718,34 @@ export async function familyV(b, R, opts) {
       }
     }
   }
+  await ctx.close();
+
+  /* V-6c (amendment A-10) — the same occlusion rule, on the iPad. § 1 says the
+     app is held in one hand OR propped on a table edge; V-6b only ever visited
+     the hand. The two fixed overlays are anchored to the viewport and the
+     content beneath them reflows at 834px, so "what is under the Veil pill" is
+     a different set of controls at this size — tablet-play-Combat.png shows it
+     landing on a Channel Divinity pip. A separate context rather than a resize,
+     so the app boots at this width instead of being stretched into it. */
+  const tab = await freshCtx(b, { ...opts, viewport: TABLET, dpr: 2 });
+  await importFile(tab.page, realCopy('full'));
+  for (const s of SCREENS) {
+    await goScreen(tab.page, s);
+    for (const at of ['top', 'bottom']) {
+      for (let k = 0; k < 3; k++) {
+        await tab.page.evaluate(w => window.scrollTo(0, w === 'top' ? 0 : document.documentElement.scrollHeight), at);
+        await settle(tab.page);
+      }
+      const a = await audit(tab.page);
+      for (const c of a.touch)
+        if (c.occludedBy && c.occludedEdge === at) {
+          if (c.clipped) { all.notPainted.push(`tablet ${s.id} @${at} «${c.label}» inside ${c.clipped}`); continue; }
+          all.occludedTablet.push(`${s.id} @${at} «${c.label}» covered by ${c.occludedBy}`);
+        }
+    }
+  }
+  await tab.ctx.close();
+
   const u = a => [...new Set(a)];
   const cap = a => u(a).slice(0, 14).join('\n         ') + (u(a).length > 14 ? `\n         … +${u(a).length - 14} more` : '');
   R.check('V-1', `no visible text under ${THRESH.V1_size}px  [${u(all.small).length} found]`, u(all.small).length === 0, cap(all.small));
@@ -728,9 +756,9 @@ export async function familyV(b, R, opts) {
   R.check('V-5b', `turn controls ≥${THRESH.V5_turn}px  [${u(all.turnTouch).length} below]`, u(all.turnTouch).length === 0, cap(all.turnTouch));
   R.check('V-6', `turn controls in the bottom ${THRESH.V6_thumb * 100}% of a 390×844 screen  [${u(all.thumb).length} outside]`, u(all.thumb).length === 0, cap(all.thumb));
   R.check('V-6b', `no control covered by anything  [${u(all.occluded).length} occluded]`, u(all.occluded).length === 0, cap(all.occluded));
-  if (all.notPainted.length) console.log(`         (A-8: ${u(all.notPainted).length} controls skipped by V-6/V-6b — clipped to nothing by an ancestor, so not painted and having no on-screen position. Size/type/contrast still graded.)`);
+  R.check('V-6c', `the same, on the iPad at 834×1112  [${u(all.occludedTablet).length} occluded]`, u(all.occludedTablet).length === 0, cap(all.occludedTablet));
+  if (all.notPainted.length) console.log(`         (A-8: ${u(all.notPainted).length} controls skipped by V-6/V-6b/V-6c — clipped to nothing by an ancestor, so not painted and having no on-screen position. Size/type/contrast still graded.)`);
   if (all.onImage) console.log(`         (${all.onImage} text nodes sit on an image/gradient — contrast UNMEASURABLE, reported not passed)`);
-  await ctx.close();
 }
 
 /* ══ N — NO WIFI ═══════════════════════════════════════════════════════════ */
