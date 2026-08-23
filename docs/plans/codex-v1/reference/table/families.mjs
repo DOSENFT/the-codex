@@ -698,7 +698,13 @@ export async function familyV(b, R, opts) {
       await page.waitForTimeout(200);
       const a = await audit(page);
       for (const c of a.touch) {
-        if (!/heal|spend|action|bonus|reaction|move|combat|grimoire|roleplay/i.test(c.label)) continue;
+        // Amendment A-9 — the selector, widened. It did not contain "expend", and
+        // "Expend 1st level spell slot" does not contain "spend", so the spell-slot
+        // pips — the most-tapped controls of any turn — were invisible to V-5b and
+        // V-6 the entire time. They were sitting at exactly 44px against a 48px
+        // floor. Widening a selector only ever catches MORE, so this needs no
+        // licence beyond saying it out loud.
+        if (!/heal|expend|restore|slot|spend|action|bonus|reaction|move|combat|grimoire|roleplay/i.test(c.label)) continue;
         // Size is intrinsic and stays graded even when clipped (A-8); position
         // is not, so V-6 skips what is not painted and says how many.
         if (c.hitW < THRESH.V5_turn || c.hitH < THRESH.V5_turn) all.turnTouch.push(`«${c.label}» ${c.hitW}×${c.hitH}`);

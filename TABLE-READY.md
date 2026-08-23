@@ -111,6 +111,19 @@ narrow: size, type and contrast are intrinsic properties that a closed disclosur
 26px pip is still a 26px pip the moment you open it — so V-1 through V-5b keep grading clipped
 controls, and the 60 on Roleplay are still held to every one of them.*
 
+**A-9 · 2026-08-23 · § 6 V-5b and V-6 — the selector WIDENED. Both criterion texts are unchanged, and
+this one makes things harder to pass, not easier.** V-5b and V-6 grade "every control that spends a
+resource," and the predicate implementing that read
+`/heal|spend|action|bonus|reaction|move|combat|grimoire|roleplay/i` against the control's label. The
+spell-slot pips are labelled *"Expend 1st level spell slot"* — and `"Expend"` does not contain
+`"spend"`. **The most-tapped controls of any turn in a spellcaster's session were invisible to both
+criteria for the whole of this run**, and they were sitting at exactly 44px against V-5b's 48px floor.
+New pattern: `/heal|expend|restore|slot|spend|action|bonus|reaction|move|combat|grimoire|roleplay/i`.
+*Reason: a criterion that cannot see the thing it is about is not a passing criterion, it is an absent
+one. Widening a selector only ever catches more, so this needs no licence beyond being said out loud —
+but it is logged because "V-5b passed" meant something different before this line than after it, and
+anyone reading an older run should know that.*
+
 ---
 
 ## 1. What the table actually is
@@ -380,7 +393,75 @@ and it walks all seven screens for 12 bare shapes.
 
 ## 8. Design gate — `impeccable`
 
-*Filled in from the gate run. Verdict pasted verbatim, including failures.*
+Run as a named gate on the seven screens at 390×844 DPR3 and 834×1112 DPR2, against his real full
+export. Verdict below is the gate's, pasted including what it failed. **This gate was run by the
+builder and is therefore not proof of itself** — § 11 is the independent check. Its value here is that
+it found things the criteria could not: every finding below except P1-b was invisible to all
+twenty-four automated checks.
+
+**Mode: Operate.** The visitor completes a task under a timer. Scanability, consistency and the real
+usage scene outrank expression; brand lives in the precise details.
+
+**Mechanical detector** — `node .claude/skills/impeccable/scripts/detect.mjs --json` over the 14
+changed surfaces: **1 finding, now 0.** `bounce-easing` (warning, slop) at `src/index.css:478` —
+`cubic-bezier(0.22, 1.25, 0.36, 1)` on `.animate-object-enter`, in use on `CharacterPage` and three
+editors. Fixed; re-run returns `[]`.
+
+### IMPLEMENTATION INTEGRITY — the verdict that comes first
+
+**PASS.** This is not a component-library assembly. The visual world is specific and it is committed
+to: Cinzel small-caps display headers set against hairline rules, forged near-black panels, warm ink
+in a forge/ember/gold scale, and a consistent card idiom that is bordered rather than filled. A
+stranger could not name the library it came from, because there isn't one. The `prep/Character`
+identity card and the `play/Grimoire` header are the strongest evidence — both are composed, not
+arranged. **One element failed this test and has been changed:** the floating dice button was a 56px
+`rounded-2xl` filled with `bg-eldritch/90`, white ink, coloured glow — the Material FAB, exactly, and
+the only thing in the app that could have come from anywhere. See P1-a.
+
+### Scores
+
+| Dimension | Score | Why |
+|---|---|---|
+| Visual identity & POV | **4** / 4 | A real point of view, sustained across seven screens. Cinzel as a naming face and nothing else; the forge palette used as a hierarchy, not decoration. |
+| Typographic craft | **3** / 4 | The label/value split now holds everywhere and the display face is no longer doing label work. Docked one for the four-deep chrome stack on `prep/Academy` — mode tabs, section tabs, Study/In-Session, then the card's own disclosure, before the first fact. |
+| Layout, rhythm & hierarchy | **2** / 4 | The single weakest dimension and the one the criteria agree with. Duplicated section titles on the most contested screen (P0-b); the turn deck still can't fit the thumb zone (V-6, 17 outside); floating chrome sitting on content on all seven screens (P0-a). |
+| Colour & material | **3** / 4 | Coherent and dark-room-correct after the contrast work. Docked one for the same data rendering in two colours across two screens (P1-b). |
+| Motion & interaction | **3** / 4 | Purposeful, spring-settled, `prefers-reduced-motion` honoured throughout. Docked one for the overshoot easing, now fixed, and for the closed sheet that stayed in the focus order until `inert` was added. |
+
+**15 / 20.**
+
+### Findings
+
+**P0-a · Two fixed overlays sit on top of content on all seven screens.** The Veil button (89×48,
+bottom-left) and the dice roller (56×56, bottom-right) are `position: fixed` and nothing reserved
+space for either; `main` reserved 5rem for a 65px tab bar and nothing at all for these. Their top edge
+is 136px above the viewport bottom, so the last ~70px of every page was permanently unreadable —
+visible in the § 10 screenshots covering a trait row on Persona, a physical tic on Academy, and the
+Class Resources heading on Combat. **Fixed:** `main` bottom padding 5rem → 9rem. *Not one automated
+check saw this. V-6b tests controls, and what sits under these is mostly text.*
+
+**P0-b · `play/Combat` prints its section titles twice.** "ACTION ECONOMY" appeared as the collapsible
+section chip and again as the card's own `<h3>` 40px below it; likewise "SPELL SLOTS". Two type
+treatments of one string, on the one screen with a criterion devoted to how little vertical space it
+has. **Fixed:** the inner headings are gone; the section names it, the card carries the controls.
+
+**P1-a · The dice button was a component-library FAB.** **Fixed:** it now wears what the app's other
+persistent chrome wears — `bg-void-0/90`, `backdrop-blur-md`, hairline gold rule, gold ink, neutral
+drop shadow, `rounded-xl` to rhyme with the cards. It is chrome, so it looks like chrome. Size,
+position, icon and behaviour untouched.
+
+**P1-b · The same spell slots were two different colours on two screens.** Violet, bespoke, 44px on
+`play/Combat`; gold, shared `.pip-tap` primitive, 48px on `play/Grimoire`. One character, one session,
+one set of slots. **Fixed:** Combat adopts the shared primitive, which resolves the colour and the
+geometry together and invents nothing. *This is the finding that exposed A-9 — the pips were labelled
+"Expend…", the selector matched `spend`, and the turn-size floor had never once looked at them.*
+
+**P2-a · A motif used once is not a motif.** The ✛ corner ornaments appear on the Persona Quick
+Reference card on `prep/Academy` and on no other card in the app. Either it is the card idiom or it is
+a leftover. **Not fixed** — deciding which is a call about the design language, not a defect.
+
+**P2-b · `prep/Academy` stacks four layers of navigation above the first fact.** **Not fixed** —
+flattening it moves what a screen *is*, not how it looks, and that is sealed.
 
 ## 9. Behaviour changes believed necessary — WRITTEN UP, LEFT UNBUILT
 
@@ -476,7 +557,29 @@ the point; the criterion is not worth more than the rule that behaviour is seale
 
 ## 10. Screenshots
 
-*Every screen, phone and iPad, at the shipped SHA.*
+Every screen at both sizes this app is actually held at, with his real full export loaded, at the
+shipped SHA. Regenerate with `node docs/plans/codex-v1/reference/table/shots.mjs`. Nothing is staged:
+real data, default scroll position, no hover states, no props. Viewport-only rather than full-page,
+because the criterion is what he can see at once.
+
+- **390×844 DPR3** — iPhone 14/15 class. The one hand, the dim room. This is the viewport every V
+  criterion is graded against, so a screenshot here and a V failure are describing the same pixels.
+- **834×1112 DPR2** — iPad. Propped on the table edge.
+
+| Screen | Phone | Tablet |
+|---|---|---|
+| play/Combat | [`phone-play-Combat.png`](docs/plans/codex-v1/_shots-app/phone-play-Combat.png) | [`tablet-play-Combat.png`](docs/plans/codex-v1/_shots-app/tablet-play-Combat.png) |
+| play/Grimoire | [`phone-play-Grimoire.png`](docs/plans/codex-v1/_shots-app/phone-play-Grimoire.png) | [`tablet-play-Grimoire.png`](docs/plans/codex-v1/_shots-app/tablet-play-Grimoire.png) |
+| play/Roleplay | [`phone-play-Roleplay.png`](docs/plans/codex-v1/_shots-app/phone-play-Roleplay.png) | [`tablet-play-Roleplay.png`](docs/plans/codex-v1/_shots-app/tablet-play-Roleplay.png) |
+| prep/Character | [`phone-prep-Character.png`](docs/plans/codex-v1/_shots-app/phone-prep-Character.png) | [`tablet-prep-Character.png`](docs/plans/codex-v1/_shots-app/tablet-prep-Character.png) |
+| prep/Grimoire | [`phone-prep-Grimoire.png`](docs/plans/codex-v1/_shots-app/phone-prep-Grimoire.png) | [`tablet-prep-Grimoire.png`](docs/plans/codex-v1/_shots-app/tablet-prep-Grimoire.png) |
+| prep/Persona | [`phone-prep-Persona.png`](docs/plans/codex-v1/_shots-app/phone-prep-Persona.png) | [`tablet-prep-Persona.png`](docs/plans/codex-v1/_shots-app/tablet-prep-Persona.png) |
+| prep/Academy | [`phone-prep-Academy.png`](docs/plans/codex-v1/_shots-app/phone-prep-Academy.png) | [`tablet-prep-Academy.png`](docs/plans/codex-v1/_shots-app/tablet-prep-Academy.png) |
+
+One extra, kept because it is the evidence for amendment A-8 rather than a screen:
+[`_occ-roleplay-bottom.png`](docs/plans/codex-v1/_shots-app/_occ-roleplay-bottom.png) — `play/Roleplay`
+scrolled to its true bottom. The Impulse / Recall / Engage accordions are closed and that strip of
+screen is empty, which is why the two controls V-6b reported under the tab bar were never there.
 
 ## 11. Independent verification
 

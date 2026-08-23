@@ -270,25 +270,62 @@ export function Layout({
            scroll — TABLE-READY V-6b, which exists for exactly this and found
            exactly this. 5rem is not a tighter guess, it is deliberate slack: the
            next change to the tab bar should not be able to silently re-bury the
-           last thing on the page. */}
-      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pl-52 lg:pb-8">
+           last thing on the page.
+
+           5rem → 9rem, because the tab bar is not the only thing down there.
+           Two more elements float in that corner on all seven screens: the Veil
+           button (89×48, bottom-left) and the dice roller (56×56, bottom-right),
+           both `position: fixed`, and nothing reserved space for either. Their
+           top edge is 136px above the viewport bottom, so the last ~70px of
+           every page sat underneath them permanently — visible in the § 10
+           screenshots on all seven, covering a trait row on Persona, a physical
+           tic on Academy, and the Class Resources heading on Combat. 9rem = 144px
+           clears the higher of the two with 8px to spare.
+
+           The cost is that every page is 64px longer to scroll and the honest
+           trade is that scrolling further is strictly better than not being able
+           to read a thing at all. It costs nothing in the thumb zone: this is
+           padding AFTER the content, so no control moves and V-6 is unchanged. */}
+      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(9rem+env(safe-area-inset-bottom,0px))] lg:pl-52 lg:pb-8">
         <div className="px-4 py-4 mx-auto w-full max-w-3xl lg:px-8 lg:py-6">
           {children}
         </div>
       </main>
 
-      {/* ─── Floating Dice Button ─── */}
+      {/* ─── Floating Dice Button ───
+           This was a 56px `rounded-2xl` filled with `bg-eldritch/90`, white ink,
+           and a coloured glow — which is to say it was the Material floating
+           action button, and it was the one element in the app that could have
+           come out of any component library. Nothing else here is a filled,
+           high-chroma, glowing blob: this app is forged panels, hairline rules
+           and warm ink on near-black.
+
+           The principle for what it becomes: this button is CHROME. It is fixed,
+           it is on all seven screens, it floats over content and it never
+           scrolls — which is exactly what the header and the tab bar are. So it
+           wears what they wear (`bg-void-0/90` + `backdrop-blur-md` + a hairline
+           border) rather than dressing as a content action, and takes gold ink
+           because a d20 you reach for mid-turn earns the accent. Filled gold was
+           the other candidate and is the app's primary-action language — but it
+           belongs to buttons inside the page ("Start Combat", "What would I
+           say?"), and a permanent one in the corner would compete with them on
+           every screen.
+
+           `rounded-xl` to rhyme with the cards; the drop shadow is neutral and
+           deep instead of a coloured halo, so it reads as lift rather than glow.
+           Size, position, icon and behaviour are untouched. */}
       <button
         onClick={() => setDiceOpen(true)}
         className={cn(
           'fixed z-50 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:right-8 lg:bottom-8',
-          'w-14 h-14 rounded-2xl',
-          'bg-eldritch/90 text-white shadow-lg shadow-eldritch/25',
+          'w-14 h-14 rounded-xl',
+          'bg-void-0/90 backdrop-blur-md text-gold border border-gold/25',
+          'shadow-[0_6px_24px_rgba(0,0,0,0.55)]',
           'flex items-center justify-center',
           'transition-all duration-200 ease-forge',
-          'hover:bg-eldritch hover:shadow-eldritch/40 hover:scale-105',
+          'hover:border-gold/60 hover:bg-void-0 hover:scale-105',
           'active:scale-95',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
         )}
         aria-label="Open dice roller"
       >

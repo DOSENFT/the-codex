@@ -159,10 +159,13 @@ function ActionEconomyBar({
 
   return (
     <GlassCard className="p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase">
-          Action Economy
-        </h3>
+      {/* The collapsible section immediately above this card is already titled
+          "Action Economy", so an <h3> here printed the same string twice, 40px
+          apart, in two type treatments — on the one screen where vertical space
+          is contested hard enough to have its own criterion (V-6). The heading
+          is the section's; the card carries the controls. `justify-end` keeps
+          the reset where it was rather than sliding it under the chevron. */}
+      <div className="flex items-center justify-end mb-3">
         <button
           onClick={onReset}
           className={cn(
@@ -226,10 +229,9 @@ function SpellSlotsDisplay({
 
   return (
     <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase mb-3">
-        Spell Slots
-      </h3>
-
+      {/* Titled by the collapsible section above it — see the note in the
+          action-economy card. Nothing else in here was a heading, so the
+          duplicate simply goes and the pips move up one line. */}
       <div className="flex flex-col gap-3">
         {levels.map(({ level, max, current }) => (
           <div key={level} className="flex items-center gap-3">
@@ -237,7 +239,7 @@ function SpellSlotsDisplay({
               {LEVEL_LABELS[level] ?? `${level}th`}
             </span>
 
-            <div className="flex gap-1.5 flex-wrap">
+            <div className="pip-row">
               {Array.from({ length: max }).map((_, i) => {
                 const available = i < current
                 return (
@@ -253,27 +255,19 @@ function SpellSlotsDisplay({
                         ? `Expend ${LEVEL_LABELS[level] ?? level} level spell slot`
                         : `Restore ${LEVEL_LABELS[level] ?? level} level spell slot`
                     }
-                    className={cn(
-                      'w-[28px] h-[28px] min-h-[44px] min-w-[44px]',
-                      'p-0 flex items-center justify-center',
-                      'rounded-full border-2 transition-all duration-200 ease-forge',
-                      'active:scale-[0.9]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                      available
-                        ? [
-                            'bg-eldritch/30 border-eldritch/60',
-                            'shadow-[0_0_8px_-2px_rgba(139,92,246,0.4)]',
-                            'hover:bg-eldritch/40 hover:border-eldritch/80',
-                          ]
-                        : [
-                            'bg-white/[0.03] border-white/10',
-                            'hover:bg-white/[0.06] hover:border-white/20',
-                          ],
-                    )}
+                    /* These were bespoke: a violet 44px pip hand-rolled here,
+                       while play/Grimoire draws the SAME SLOTS with the shared
+                       .pip-tap primitive in gold at 48px. One character, one
+                       session, one set of spell slots, two colours and two
+                       geometries depending on which tab you were on. The
+                       primitive wins — it is the app's own component, it already
+                       clears the 48px turn floor (V-5b), and adopting it deletes
+                       both inconsistencies without inventing anything. The tap
+                       and the right-click-to-restore are untouched. */
+                    className="pip-tap"
+                    data-slot={available ? 'full' : 'spent'}
                   >
-                    {available && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-eldritch shadow-[0_0_6px_rgba(139,92,246,0.6)]" />
-                    )}
+                    <i />
                   </button>
                 )
               })}
