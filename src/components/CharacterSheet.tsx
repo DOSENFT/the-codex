@@ -519,7 +519,7 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
             </div>
             <div className="stat-frame flex flex-col items-center p-2 rounded-lg">
               <span className="text-xs font-mono text-forge-2 uppercase">Spell</span>
-              <span className="text-lg font-bold text-eldritch">{formatMod(spellAtk)}</span>
+              <span className="text-lg font-bold text-eldritch-lit">{formatMod(spellAtk)}</span>
             </div>
           </div>
           <div className="mt-2 flex items-center justify-center gap-1 text-xs text-forge-2">

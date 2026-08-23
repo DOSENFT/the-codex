@@ -157,7 +157,13 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
             ) : (
               <ShieldAlert size={18} className="text-ember" aria-hidden />
             )}
-            <span className="text-sm font-display font-semibold text-forge-0">Session Status</span>
+            {/* A label, so it wears the label face. It was 14px Cinzel, which is
+                the display face doing a label's job (TABLE-READY V-4) — and the
+                fix is not to inflate it to 20px, because it is not a heading:
+                it sits inline beside a 18px icon and a badge, framing them. So
+                it takes the treatment every other label on this card already
+                has, and Cinzel goes back to naming things. */}
+            <span className="text-xs font-semibold text-forge-1 uppercase tracking-wider">Session Status</span>
           </div>
           <Badge variant={isReady ? 'verdant' : 'ember'}>
             {isReady ? 'Ready for Battle' : 'Needs Prep'}
@@ -175,8 +181,11 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-lg font-semibold text-arcane tabular-nums">{preparedCount}</span>
+                {/* The denominator is a number, not an annotation: "4 / 7" is one
+                    value read in one glance, and half of it at 5.4:1 is the half
+                    you squint at. forge-1 is the tally step (V-3, ≥7:1). */}
                 {character.canPrepareSpells && (
-                  <span className="text-xs text-forge-2">/ {character.maxPreparedSpells + character.spells.filter(s => s.level === 0).length}</span>
+                  <span className="text-xs text-forge-1 tabular-nums">/ {character.maxPreparedSpells + character.spells.filter(s => s.level === 0).length}</span>
                 )}
               </div>
               {character.canPrepareSpells && (
@@ -220,7 +229,7 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
                 <span className="text-xs text-forge-2 uppercase tracking-wider">Features</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-semibold text-eldritch tabular-nums">{chargedCount}</span>
+                <span className="text-lg font-semibold text-eldritch-lit tabular-nums">{chargedCount}</span>
                 <span className="text-xs text-forge-2">/ {featuresWithUses.length} charged</span>
               </div>
               <ProgressBar current={chargedCount} max={featuresWithUses.length} color="eldritch" />

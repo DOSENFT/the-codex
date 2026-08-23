@@ -917,7 +917,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
           <SlidersHorizontal size={14} aria-hidden />
           Advanced Filters
           {advancedFilterCount > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-eldritch/30 text-eldritch text-xs font-bold">
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-eldritch/30 text-eldritch-lit text-xs font-bold">
               {advancedFilterCount}
             </span>
           )}

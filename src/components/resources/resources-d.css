@@ -214,10 +214,13 @@
   color: var(--d-gold);
   line-height: 1;
 }
+/* "of 35" is still a number, and V-3 puts every number at 7:1. --d-dim is
+   5.15:1 on this card. The hierarchy against .dres-v does not need the ink to
+   carry it — 30px gold beside 15px tally is already two steps apart. */
 .dres-of {
   font-family: var(--d-font-mono);
   font-size: 15px;
-  color: var(--d-dim);
+  color: var(--d-tally);
 }
 .dres-sp {
   margin-left: auto;
@@ -236,8 +239,15 @@
   cursor: pointer;
   font-family: var(--d-font-body);
 }
+/* A stepper at its limit was drawn in --d-rule-lit: 1.59:1, an edge colour used
+   as ink. WCAG exempts disabled controls; TABLE-READY V-2 does not, and V-2 is
+   right about this one. A "+" you cannot see is not a disabled control, it is a
+   missing one — at the table that reads as the app having lost the button, not
+   as the resource being full. Dim is quiet enough to say "not now" beside a
+   cream sibling, and legible enough to say it at arm's length. */
 .dres-sp button:disabled {
-  color: var(--d-rule-lit);
+  color: var(--d-dim);
+  border-color: var(--d-rule);
   cursor: default;
 }
 .dres-track {

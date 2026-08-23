@@ -262,8 +262,16 @@ export function Layout({
       )}
       </AnimatePresence>
 
-      {/* ─── Scrollable Content Area ─── */}
-      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] lg:pl-52 lg:pb-8">
+      {/* ─── Scrollable Content Area ───
+           The bottom padding is the space the fixed tab bar occupies, and it has
+           to be at least as tall as the bar actually is. It was 4rem = 64px; the
+           bar measures 65. One pixel, and the last control on the longest screen
+           (Roleplay, scrolled to the end) sat under it with nowhere left to
+           scroll — TABLE-READY V-6b, which exists for exactly this and found
+           exactly this. 5rem is not a tighter guess, it is deliberate slack: the
+           next change to the tab bar should not be able to silently re-bury the
+           last thing on the page. */}
+      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pl-52 lg:pb-8">
         <div className="px-4 py-4 mx-auto w-full max-w-3xl lg:px-8 lg:py-6">
           {children}
         </div>

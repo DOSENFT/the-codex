@@ -9,6 +9,14 @@
   /* Accents */
   --color-arcane: #d4a74a;
   --color-eldritch: #8b5cf6;
+  /* Eldritch is a 4.68:1 violet. That is enough to fill a chip, draw a border
+     or carry a 16px+ word, and it is NOT enough to carry a numeral: TABLE-READY
+     V-3 puts any counter, level or tally at 7:1, and the two places eldritch was
+     printing a number — the Academy drill-count badge and the Grimoire slot
+     count — measured 4.68:1 at 12px. Same hue, same role, lit to 8.60:1 so the
+     colour coding survives the legibility floor instead of losing to it.
+     (--d-ember carries the same annotation for the same reason.) */
+  --color-eldritch-lit: #b39cff;
   --color-ember: #e8924a;
   --color-verdant: #39d98a;
   --color-gold: #c5a55a;
@@ -24,7 +32,14 @@
      found. #8b8578 is direction D's `--d-dim`, measures 4.85:1 on the same
      surface, and reads as the same colour in the same role — the hierarchy is
      unchanged, it is simply legible now. Dim is for LABELS; if something needs
-     to be read as prose, it should be forge-1 or brighter. */
+     to be read as prose, it should be forge-1 or brighter.
+
+     Nor a NUMBER. forge-2 is 5.40:1 and TABLE-READY V-3 puts every numeral,
+     counter and HP value at 7:1, because at 60 cm in a dim room the value IS
+     the thing being read and 4.5:1 is a squint. A numeral is never forge-2:
+     the WORD beside it may be dim, the VALUE is forge-1 (9.75:1) or brighter.
+     See --d-tally in design/tokens.css — the same ink under the name direction
+     D gives it. */
   --color-forge-2: #8b8578;
 
   /* Fonts */
@@ -136,61 +151,113 @@
   }
 }
 
-/* A resource pip is 12px of paint and was 12px of target. At a table, one
-   handed, in the dark, that is a miss waiting to happen — and the miss expends
-   a spell slot you did not mean to spend.
+/* ─── THE PIP PASS ───────────────────────────────────────────────────────────
+   The block that used to live here grew a spell-slot pip's hit area with an
+   invisible ::after, and closed by naming its own residual: "the target is
+   still only ~14px WIDE. Making the pips themselves bigger is the real answer
+   and it is a visual redesign, so it belongs to the pip pass, not to this one."
 
-   The obvious fix is a 48px hit area centred on each pip, and it is WRONG here:
-   the pips sit 2px apart, so a 48px circle on pip 1 swallows pips 2, 3 and 4
-   and you can no longer press the one you aimed at. A touch floor applied
-   blindly to adjacent controls makes them less usable, not more.
+   This is the pip pass. TABLE-READY V-5 measured what the ::after could not
+   fix: 26×14. A pseudo-element also cannot be measured — getBoundingClientRect
+   returns the button's own box — so the old mechanism was invisible to every
+   audit that would have caught it. Geometry that only the author can see is not
+   geometry, it is a promise.
 
-   What makes an honest fix possible is what the pips actually do. Every filled
-   pip in a row calls the same expend handler and every empty pip calls the same
-   restore handler — the row is a two-way stepper drawn as a gauge, not N
-   distinct buttons. So horizontal bleed between same-state neighbours costs
-   nothing; the only boundary that must stay crisp is the one between the last
-   filled pip and the first empty one. This grows the target vertically to the
-   48px floor and horizontally only into the gap, which never crosses that
-   boundary. The pip looks identical; it is simply catchable now.
+   So the pip is now a real 48×48 cell with a real 20px sigil painted in the
+   middle of it, and the ::after is gone. Nothing is hidden and nothing needs
+   trusting: the element you press is the element the ruler measures.
 
-   Residual, stated rather than hidden: the target is still only ~14px WIDE.
-   Making the pips themselves bigger is the real answer and it is a visual
-   redesign, so it belongs to the pip pass, not to this one. */
-.pip-tap { position: relative; }
-.pip-tap::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -2px;
-  right: -2px;
-  height: var(--d-touch-goal, 48px);
-  transform: translateY(-50%);
+   The row is a GAUGE, not four loose dots. A hairline rail runs behind the
+   cells through their centre so the slots read as one instrument with a
+   left-to-right direction — spent on the left, available on the right, the way
+   the underlying stepper actually works. The sigils are opaque and mask the
+   rail where they sit, so it passes behind them rather than through them. That
+   is why an empty slot is a filled void tone with a ring and not a translucent
+   wash: translucency would let the rail print straight across the dot.
+
+   48 and not 44 because expending a slot is a turn action, and TABLE-READY
+   V-5b puts the floor for anything pressed during a turn at 48. */
+.pip-row {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
-
-/* .row-tap — the same trick as .pip-tap, with the opposite safety argument, and
-   the difference is the whole point.
-
-   The skill list's proficiency dot is 24px inside a row that is already 44px
-   tall. So its hit area can grow to fill exactly its own row and stop.
-
-   It is 44px and NOT var(--d-touch-goal): at 48px the area would spill 2px into
-   the rows above and below, and unlike the spell pips — where every filled pip
-   at a level calls the same handler, which is what made overlap harmless there
-   — each skill dot cycles a DIFFERENT skill. A 2px overlap would let a press
-   near a row edge toggle Acrobatics when the player meant Athletics. Silently
-   setting the wrong proficiency is worse than a small target, because the
-   player will not notice until a roll is already wrong at the table. */
-.row-tap { position: relative; }
-.row-tap::after {
+.pip-row::before {
   content: '';
   position: absolute;
   top: 50%;
-  left: 0;
-  right: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--color-bronze) 55%, transparent),
+    color-mix(in srgb, var(--color-bronze) 22%, transparent));
+  pointer-events: none;
+}
+.pip-tap {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.pip-tap > i {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  transition: transform 200ms var(--ease-forge), box-shadow 200ms var(--ease-forge);
+}
+.pip-tap[data-slot='full'] > i {
+  background: var(--color-arcane);
+  box-shadow: 0 0 8px -1px color-mix(in srgb, var(--color-arcane) 65%, transparent);
+}
+/* A class feature's uses are eldritch, not arcane — same instrument, different
+   resource, and the colour is the only thing that says which. */
+.pip-tap[data-tone='eldritch'][data-slot='full'] > i {
+  background: var(--color-eldritch-lit);
+  box-shadow: 0 0 8px -1px color-mix(in srgb, var(--color-eldritch-lit) 60%, transparent);
+}
+.pip-tap[data-slot='spent'] > i {
+  background: var(--color-void-1);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-bronze) 85%, transparent);
+}
+.pip-tap:active > i { transform: scale(0.88); }
+
+/* .row-tap — the skill list's proficiency dot, and the same correction.
+   It was a 24px button wearing a 44px-tall ::after that was still only 24px
+   WIDE, so it measured 36×36 and pressed like 24. It is now a real 44×44 cell
+   with the 24px dot painted inside it.
+
+   44 and NOT 48, and the reason is the one thing about this control worth
+   preserving from the block it replaces: the rows are 44px tall and each dot
+   cycles a DIFFERENT skill. A 48px cell would spill 2px into the rows above and
+   below, and a press near a row edge would silently set proficiency on the
+   wrong skill — which the player does not notice until a roll is already wrong
+   at the table. A cell that fills its own row exactly, and stops, is correct
+   here in a way that the larger number would not be. */
+.row-tap {
+  position: relative;
+  width: 44px;
   height: 44px;
-  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
 }
+.row-tap > i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  transition: transform 200ms var(--ease-forge), background-color 200ms var(--ease-forge), box-shadow 200ms var(--ease-forge);
+}
+.row-tap:active > i { transform: scale(0.9); }
 
 @layer base {
   * { box-sizing: border-box; }

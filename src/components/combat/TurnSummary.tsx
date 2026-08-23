@@ -806,7 +806,7 @@ function ExpandedActionPanel({
                 setEditingTip(true)
               }}
               className={cn(
-                'min-w-[28px] min-h-[44px] flex items-center justify-center shrink-0',
+                'min-w-[48px] min-h-[48px] flex items-center justify-center shrink-0',
                 'rounded text-forge-2/40 hover:text-arcane hover:bg-white/[0.06]',
                 'transition-all duration-200',
               )}

@@ -194,8 +194,14 @@ export function GrimoireCard({
             {isSpell && (
               <span className="text-xs text-forge-2">{levelLabel(spellLevel)}</span>
             )}
+            {/* The word is the label, the number is the value. --d-dim (forge-2) is
+                for "Lvl" and "DC"; the numeral goes one step up to forge-1, which is
+                the only ink in the scale that clears the 7:1 floor a value has to
+                clear at arm's length. Splitting the span is the whole fix. */}
             {!isSpell && feature && (
-              <span className="text-xs text-forge-2">Lvl {feature.level}</span>
+              <span className="text-xs text-forge-2">
+                Lvl <span className="text-forge-1 tabular-nums">{feature.level}</span>
+              </span>
             )}
             {damageDice && (
               <span className="text-xs font-mono text-ember">
@@ -203,7 +209,9 @@ export function GrimoireCard({
               </span>
             )}
             {saveType && (
-              <span className="text-xs text-forge-2">DC {character.spellSaveDC} {saveType}</span>
+              <span className="text-xs text-forge-2">
+                DC <span className="text-forge-1 tabular-nums">{character.spellSaveDC}</span> {saveType}
+              </span>
             )}
             {isSpell && spell?.prepared && (
               <Star size={10} className="text-verdant fill-verdant" aria-label="Prepared" />
@@ -214,7 +222,7 @@ export function GrimoireCard({
           {hasUses && (
             <div className="flex items-center gap-1.5 mt-1.5">
               <span className="text-xs text-forge-2">Uses:</span>
-              <div className="flex gap-0.5">
+              <div className="pip-row -my-2">
                 {Array.from({ length: feature!.usesMax! }).map((_, i) => (
                   <button
                     key={i}
@@ -223,18 +231,16 @@ export function GrimoireCard({
                       if (i < feature!.usesCurrent!) onExpendUse?.()
                       else onRestoreUse?.()
                     }}
-                    className={cn(
-                      'pip-tap w-3 h-3 rounded-full transition-all duration-200',
-                      'active:scale-90',
-                      i < feature!.usesCurrent!
-                        ? 'bg-eldritch shadow-[0_0_4px_rgba(157,78,221,0.4)]'
-                        : 'bg-white/10 border border-white/20',
-                    )}
+                    className="pip-tap"
+                    data-slot={i < feature!.usesCurrent! ? 'full' : 'spent'}
+                    data-tone="eldritch"
                     aria-label={i < feature!.usesCurrent! ? 'Expend use' : 'Restore use'}
-                  />
+                  >
+                    <i />
+                  </button>
                 ))}
               </div>
-              <span className="text-xs text-forge-2">
+              <span className="text-xs font-mono text-forge-1">
                 {feature!.usesCurrent}/{feature!.usesMax}
               </span>
             </div>
@@ -243,20 +249,25 @@ export function GrimoireCard({
           {spellSlot && (
             <div className="flex items-center gap-1.5 mt-1.5">
               <span className="text-xs text-forge-2">Slots:</span>
-              <div className="flex gap-0.5">
+              {/* Read-only. These are a readout of the level's slots, not the
+                  controls that spend them — the controls live on the Combat and
+                  Grimoire session cards. A readout does not need a 48px cell and
+                  should not pretend to be pressable, so it draws the small dot
+                  directly instead of borrowing .pip-tap's tap geometry. */}
+              <div className="flex gap-1">
                 {Array.from({ length: spellSlot.max }).map((_, i) => (
                   <span
                     key={i}
                     className={cn(
-                      'pip-tap w-3 h-3 rounded-full transition-all duration-200',
+                      'w-2.5 h-2.5 rounded-full',
                       i < spellSlot.current
                         ? 'bg-arcane shadow-[0_0_4px_rgba(61,210,255,0.4)]'
-                        : 'bg-white/10 border border-white/20',
+                        : 'bg-void-1 ring-1 ring-bronze/85',
                     )}
                   />
                 ))}
               </div>
-              <span className="text-xs text-forge-2">
+              <span className="text-xs font-mono text-forge-1">
                 {spellSlot.current}/{spellSlot.max}
               </span>
             </div>

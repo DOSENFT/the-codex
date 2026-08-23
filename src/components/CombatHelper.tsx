@@ -166,7 +166,7 @@ function ActionEconomyBar({
         <button
           onClick={onReset}
           className={cn(
-            'min-h-[44px] min-w-[44px] flex items-center justify-center',
+            'min-h-[48px] min-w-[48px] flex items-center justify-center',
             'rounded-lg text-forge-2 hover:text-arcane hover:bg-white/[0.06]',
             'transition-all duration-200 active:scale-[0.95]',
           )}
@@ -185,7 +185,7 @@ function ActionEconomyBar({
               onClick={() => onToggle(key)}
               aria-pressed={used}
               className={cn(
-                'min-h-[44px] px-3.5 rounded-xl',
+                'min-h-[48px] px-3.5 rounded-xl',
                 'flex items-center gap-2',
                 'border transition-all duration-200 ease-forge',
                 'active:scale-[0.97] select-none',
@@ -355,7 +355,7 @@ function PaladinResourceTracker({
               onClick={() => onExpendLayOnHands(amount)}
               disabled={layOnHands.current < amount}
               className={cn(
-                'min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-medium',
+                'min-h-[48px] px-3.5 py-1.5 rounded-lg text-xs font-medium',
                 'bg-verdant/10 border border-verdant/25 text-verdant',
                 'hover:bg-verdant/20 hover:border-verdant/40',
                 'transition-all duration-200 active:scale-[0.97]',
@@ -385,7 +385,7 @@ function PaladinResourceTracker({
                 }
               }}
               className={cn(
-                'w-full min-h-[44px] px-3 py-2 rounded-lg text-sm',
+                'w-full min-h-[48px] px-3 py-2 rounded-lg text-sm',
                 'bg-white/[0.04] border border-white/10 text-forge-1',
                 'placeholder:text-forge-2/50',
                 'focus:outline-none focus:ring-2 focus:ring-verdant/40 focus:border-verdant/40',
@@ -397,7 +397,7 @@ function PaladinResourceTracker({
             onClick={handleCustomSpend}
             disabled={!customAmount || layOnHands.current <= 0}
             className={cn(
-              'min-h-[44px] min-w-[44px] px-3 rounded-lg text-xs font-medium',
+              'min-h-[48px] min-w-[48px] flex items-center justify-center px-3 rounded-lg text-xs font-medium',
               'bg-verdant/10 border border-verdant/25 text-verdant',
               'hover:bg-verdant/20 hover:border-verdant/40',
               'transition-all duration-200 active:scale-[0.97]',
@@ -1618,12 +1618,15 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
         </GlassCard>
       )}
 
-      {/* ── Always visible: HP Tracker ── */}
-      <HPTracker
-        character={character}
-        onCharacterUpdate={onCharacterUpdate}
-      />
-
+      {/* ── The turn deck ───────────────────────────────────────────────────
+           Order here is the whole of the V-6 work that sealed behaviour allows.
+           These three cards are what a turn SPENDS — the economy, the slots, the
+           class resources — and they used to sit below the HP tracker, the
+           condition reminders and the damage log, which put the first spell-slot
+           pip at y=1647 on an 844-tall phone. Nothing in this block changed; it
+           moved. HP went below them because HP changes on the DM's tempo, not on
+           yours: you read it constantly and you tap it rarely, and the thing you
+           TAP under a six-second timer has the stronger claim on the thumb. ── */}
       {/* ── Collapsible: Action Economy (only when NOT in combat — TurnSummary handles it during combat) ── */}
       {!combatState.inCombat && (
         <CollapsibleCombatSection
@@ -1673,6 +1676,12 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
           />
         </CollapsibleCombatSection>
       )}
+
+      {/* ── Always visible: HP Tracker ── */}
+      <HPTracker
+        character={character}
+        onCharacterUpdate={onCharacterUpdate}
+      />
 
       {/* ── Collapsible: Concentration (only when NOT in combat — TurnSummary handles it during combat) ── */}
       {!combatState.inCombat && (

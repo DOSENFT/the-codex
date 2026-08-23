@@ -175,7 +175,7 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
               <Icon size={16} aria-hidden />
               {m.label}
               {showDueBadge && (
-                <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-eldritch/20 text-eldritch text-xs font-bold">
+                <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-eldritch/20 text-eldritch-lit text-xs font-bold">
                   {dueCount}
                 </span>
               )}

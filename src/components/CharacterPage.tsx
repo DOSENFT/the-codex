@@ -571,22 +571,25 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                   {/* Proficiency cycle button */}
                   <button
                     onClick={() => cycleSkillProf(skill)}
-                    className={cn(
-                      'row-tap w-6 h-6 rounded-full mr-2 flex items-center justify-center shrink-0',
-                      'transition-all duration-200 active:scale-90',
+                    className="row-tap -ml-1.5 mr-1"
+                    aria-label={`${skill}: ${isExpert ? 'expertise' : isProficient ? 'proficient' : 'not proficient'}. Tap to change.`}
+                  >
+                    {/* The dot is the paint; the 44px cell around it is the
+                        target. They are different elements on purpose — see
+                        .row-tap in index.css. */}
+                    <i className={cn(
                       isExpert
                         ? 'bg-verdant/20 border-2 border-verdant text-verdant'
                         : isProficient
                           ? 'bg-arcane/20 border-2 border-arcane text-arcane'
                           : 'bg-white/[0.03] border border-white/10 text-forge-2 hover:border-arcane/40',
-                    )}
-                    aria-label={`${skill}: ${isExpert ? 'expertise' : isProficient ? 'proficient' : 'not proficient'}. Tap to change.`}
-                  >
-                    {isExpert ? (
-                      <Star size={10} aria-hidden />
-                    ) : isProficient ? (
-                      <Check size={10} aria-hidden />
-                    ) : null}
+                    )}>
+                      {isExpert ? (
+                        <Star size={11} aria-hidden />
+                      ) : isProficient ? (
+                        <Check size={11} aria-hidden />
+                      ) : null}
+                    </i>
                   </button>
 
                   {/* Skill name — tap to study */}
@@ -600,13 +603,13 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     )}
                   >
                     <span className="truncate">{skill}</span>
-                    <span className="text-xs text-forge-2 ml-1.5 opacity-60">({abilityKey})</span>
+                    <span className="text-xs text-forge-2 ml-1.5">({abilityKey})</span>
                   </button>
 
                   {/* Bonus */}
                   <span className={cn(
                     'font-mono text-sm font-semibold shrink-0 ml-2',
-                    isExpert ? 'text-verdant' : isProficient ? 'text-arcane' : 'text-forge-2',
+                    isExpert ? 'text-verdant' : isProficient ? 'text-arcane' : 'text-forge-1',
                   )}>
                     {formatMod(bonus)}
                   </span>
@@ -826,7 +829,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono text-forge-2 w-10 text-right">
+                        <span className="text-xs font-mono text-forge-1 w-10 text-right">
                           {profCount}/{cat.skills.length}
                         </span>
                         {isBest && <Badge variant="verdant" className="text-xs px-1.5 py-0">Best</Badge>}
@@ -1613,7 +1616,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium text-forge-0">Lay on Hands</span>
-                <span className="text-xs font-mono text-forge-2">
+                <span className="text-xs font-mono text-forge-1">
                   {character.paladinResources.layOnHands.current}/{character.paladinResources.layOnHands.max} HP
                 </span>
               </div>
@@ -1629,7 +1632,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium text-forge-0">Channel Divinity</span>
-                <span className="text-xs font-mono text-forge-2">
+                <span className="text-xs font-mono text-forge-1">
                   {character.paladinResources.channelDivinity.current}/{character.paladinResources.channelDivinity.max}
                 </span>
               </div>

@@ -289,7 +289,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
                 <div className="flex items-center gap-1.5">
                   <Zap size={12} className="text-eldritch shrink-0" aria-hidden />
                   <span className="text-xs text-forge-1">
-                    <span className="font-semibold text-eldritch">{featuresReadyCount}</span> {featuresReadyCount === 1 ? 'feature' : 'features'} ready
+                    <span className="font-semibold text-eldritch-lit">{featuresReadyCount}</span> {featuresReadyCount === 1 ? 'feature' : 'features'} ready
                   </span>
                 </div>
               )}
@@ -386,13 +386,13 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
             key={id}
             onClick={() => setTypeFilter(id)}
             className={cn(
-              'min-h-[44px] px-3 rounded-lg text-xs font-medium',
+              'min-h-[48px] px-3.5 rounded-lg text-xs font-medium',
               'border transition-all duration-200 ease-forge',
               'active:scale-[0.95]',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
               typeFilter === id
                 ? 'bg-arcane/15 text-arcane border-arcane/25'
-                : 'bg-white/[0.03] text-forge-2 border-white/8 hover:bg-white/[0.06] hover:text-forge-1',
+                : 'bg-white/[0.03] text-forge-1 border-white/8 hover:bg-white/[0.06] hover:text-forge-0',
             )}
           >
             {label} ({count})
@@ -405,13 +405,13 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
           aria-label="Toggle action type filters"
           aria-expanded={showFilters}
           className={cn(
-            'min-h-[44px] px-3 rounded-lg text-xs font-medium',
+            'min-h-[48px] px-3.5 rounded-lg text-xs font-medium',
             'border transition-all duration-200 ease-forge',
             'active:scale-[0.95]',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
             showFilters || actionFilter !== 'all'
               ? 'bg-ember/15 text-ember border-ember/25'
-              : 'bg-white/[0.03] text-forge-2 border-white/8 hover:bg-white/[0.06] hover:text-forge-1',
+              : 'bg-white/[0.03] text-forge-1 border-white/8 hover:bg-white/[0.06] hover:text-forge-0',
           )}
         >
           <Filter size={12} className="inline mr-1" aria-hidden />
@@ -422,13 +422,13 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
         <button
           onClick={() => setPreparedOnly(!preparedOnly)}
           className={cn(
-            'min-h-[44px] px-3 rounded-lg text-xs font-medium',
+            'min-h-[48px] px-3.5 rounded-lg text-xs font-medium',
             'border transition-all duration-200 ease-forge',
             'active:scale-[0.95]',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
             preparedOnly
               ? 'bg-verdant/15 text-verdant border-verdant/25'
-              : 'bg-white/[0.03] text-forge-2 border-white/8 hover:bg-white/[0.06] hover:text-forge-1',
+              : 'bg-white/[0.03] text-forge-1 border-white/8 hover:bg-white/[0.06] hover:text-forge-0',
           )}
         >
           <Star size={12} className="inline mr-1" aria-hidden />
@@ -450,12 +450,12 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
               key={id}
               onClick={() => setActionFilter(id)}
               className={cn(
-                'min-h-[44px] px-3 rounded-lg text-xs font-medium',
+                'min-h-[48px] px-3.5 rounded-lg text-xs font-medium',
                 'border transition-all duration-200 ease-forge',
                 'active:scale-[0.95]',
                 actionFilter === id
                   ? 'bg-ember/15 text-ember border-ember/25'
-                  : 'bg-white/[0.03] text-forge-2 border-white/8 hover:bg-white/[0.06] hover:text-forge-1',
+                  : 'bg-white/[0.03] text-forge-1 border-white/8 hover:bg-white/[0.06] hover:text-forge-0',
               )}
             >
               {label}
@@ -471,30 +471,38 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
             <Sparkles size={14} className="text-arcane" aria-hidden />
             <span className="text-xs font-semibold text-forge-1 uppercase tracking-wider">Spell Slots</span>
           </div>
-          <div className="flex flex-wrap gap-3">
+          {/* One level per line, and the line IS the gauge. Four 14px dots on a
+              shared row was compact and unpressable: 26×14 measured, against a
+              48px floor for anything spent during a turn. Giving each slot its
+              own 48px cell costs vertical space that a level-per-line layout
+              pays for by reading better anyway — level on the left, the slots
+              along a rail, the count on the right, the same left-to-right
+              direction the stepper underneath actually has. */}
+          <div className="flex flex-col">
             {Object.entries(character.spellSlots)
               .filter(([_, slot]) => slot.max > 0)
               .sort(([a], [b]) => Number(a) - Number(b))
               .map(([level, slot]) => (
-                <div key={level} className="flex items-center gap-1.5">
-                  <span className="text-xs text-forge-2 font-medium">{levelLabel(Number(level))}:</span>
-                  <div className="flex gap-0.5">
+                <div key={level} className="flex items-center gap-2">
+                  <span className="text-xs text-forge-2 font-medium uppercase tracking-wider w-9 shrink-0">
+                    {levelLabel(Number(level))}
+                  </span>
+                  <div className="pip-row">
                     {Array.from({ length: slot.max }).map((_, i) => (
                       <button
                         key={i}
                         onClick={() => i < slot.current ? handleExpendSlot(Number(level)) : handleRestoreSlot(Number(level))}
-                        className={cn(
-                          'pip-tap w-3.5 h-3.5 rounded-full transition-all duration-200',
-                          'active:scale-90',
-                          i < slot.current
-                            ? 'bg-arcane shadow-[0_0_4px_rgba(61,210,255,0.4)]'
-                            : 'bg-white/10 border border-white/20',
-                        )}
+                        className="pip-tap"
+                        data-slot={i < slot.current ? 'full' : 'spent'}
                         aria-label={i < slot.current ? `Expend ${levelLabel(Number(level))} slot` : `Restore ${levelLabel(Number(level))} slot`}
-                      />
+                      >
+                        <i />
+                      </button>
                     ))}
                   </div>
-                  <span className="text-xs text-forge-2">{slot.current}/{slot.max}</span>
+                  <span className="text-sm font-mono text-forge-1 ml-auto tabular-nums">
+                    {slot.current}/{slot.max}
+                  </span>
                 </div>
               ))}
           </div>

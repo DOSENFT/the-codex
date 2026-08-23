@@ -25,7 +25,29 @@
      --d-dim is 5.40:1 — passes AA for text but is reserved for LABELS ONLY.
      Body copy is always cream.  This is fault #2 that D exists to drop. */
   --d-cream: #f0e6d3;   /* 16.01:1  body copy, every sentence the player reads */
+  --d-tally: #bfb5a0;   /*  8.55:1  THE NUMBER. see below                      */
   --d-dim:   #8b8578;   /*  5.40:1  labels, units, annotations — never a sentence */
+
+  /* --d-tally exists because the ink scale had a hole in the middle of it, and
+     the hole was exactly where the numerals were living.
+
+     The rule this encodes: A NUMERAL IS NEVER DIM. --d-dim is for the WORD that
+     frames a value — "SLOTS", "AC", "1st:". The VALUE itself is the thing he
+     reads at arm's length in a dim room while five people wait, and 5.40:1 is a
+     squint at that distance. TABLE-READY V-3 puts the floor for any numeral,
+     counter or HP value at 7:1; --d-dim cannot reach it and cream flattens the
+     hierarchy the dim/cream pair exists to make.
+
+     The value is not new. It is #bfb5a0 — the same ink as --color-forge-1 in
+     index.css, completing a correspondence the two systems already had and were
+     missing the middle step of:
+
+         --d-cream = --color-forge-0 = #f0e6d3
+         --d-tally = --color-forge-1 = #bfb5a0   <- was missing
+         --d-dim   = --color-forge-2 = #8b8578
+
+     Measured 8.55:1 on --d-e2, the lightest ground it is ever painted on, so it
+     clears 7:1 on every surface in the app rather than only on the darkest. */
 
   /* ---- Lit ink ------------------------------------------------------------
      Gold names the mechanic.  It is a HIGHLIGHT, and a highlight that covers

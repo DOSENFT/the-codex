@@ -77,7 +77,7 @@ function MenuSection({
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         className={cn(
-          'flex items-center gap-2 min-h-[44px] px-2 -mx-2 rounded-lg',
+          'flex items-center gap-2 min-h-[48px] px-2 -mx-2 rounded-lg',
           'text-sm font-semibold text-forge-1',
           'transition-all duration-200 ease-forge',
           'hover:bg-white/[0.04] hover:text-forge-0',
@@ -423,6 +423,13 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
         initial={false}
         animate={isOpen ? { y: 0 } : { y: '100%' }}
         transition={isOpen ? SPRING_SETTLE : SHEET_EXIT}
+        /* A closed sheet is translated off the bottom edge and made
+           pointer-events-none, which stops the thumb but not the screen reader
+           and not the Tab key: every control in here stayed in the a11y tree and
+           in the focus order while invisible. `inert` is the one attribute that
+           removes both at once. React 18 has no typed prop for it, hence the
+           spread. Nothing about what the sheet DOES changes. */
+        {...(!isOpen ? ({ inert: '', 'aria-hidden': true } as Record<string, unknown>) : {})}
         className={cn(
           'fixed inset-x-0 bottom-0 z-50',
           'max-h-[85dvh] overflow-y-auto overscroll-contain',

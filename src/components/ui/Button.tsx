@@ -35,14 +35,22 @@ const variantStyles: Record<ButtonVariant, string> = {
   ].join(' '),
 }
 
+/* 48 is the floor, not 44.
+   44 is WCAG 2.2 AA — the number that says a control is reachable by a person
+   who is sitting still and paying attention. This app is pressed one-handed, in
+   a dim room, on a turn that has to resolve in about six seconds while five
+   people wait. TABLE-READY V-5b sets 48 for anything pressed during a turn, and
+   on this app every screen is a turn screen, so the floor moved for all of them
+   rather than being sprinkled onto the controls that happened to get measured.
+   `lg` was already past it at 52 and did not move. */
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'min-h-[44px] px-3.5 text-sm rounded-lg gap-1.5',
-  md: 'min-h-[44px] px-5 text-sm rounded-xl gap-2',
+  sm: 'min-h-[48px] px-3.5 text-sm rounded-lg gap-1.5',
+  md: 'min-h-[48px] px-5 text-sm rounded-xl gap-2',
   lg: 'min-h-[52px] px-7 text-base rounded-xl gap-2.5',
 }
 
 /**
- * Multi-variant button with press feedback, loading spinner, and 44px+ touch
+ * Multi-variant button with press feedback, loading spinner, and 48px turn-floor touch
  * targets across all sizes. Supports ref forwarding.
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

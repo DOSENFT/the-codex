@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import {
   Character, RosterEntry,
-  loadCharacter, saveCharacter, deleteCharacter,
+  loadCharacter, saveCharacter, deleteCharacter, onCharacterSaveFailure,
   loadRoster, getActiveId, setActiveId, migrateFromLegacy,
   expendSpellSlot, restoreSpellSlot, longRest, shortRest,
   toggleSpellPrepared, getPreparedSpells,
@@ -13,6 +13,12 @@ export function useCharacter() {
   const [character, setCharacterState] = useState<Character | null>(null)
   const [roster, setRoster] = useState<RosterEntry[]>([])
   const [ready, setReady] = useState(false)
+  // A write that did not happen. Held here rather than passed down through
+  // every spend so that no call site can forget to look at it. See the header
+  // over `saveCharacter` in lib/character.ts.
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  useEffect(() => onCharacterSaveFailure(setSaveError), [])
 
   // Boot: migrate legacy, load roster, restore active character
   useEffect(() => {
@@ -137,6 +143,8 @@ export function useCharacter() {
     character,
     roster,
     ready,
+    saveError,
+    dismissSaveError: () => setSaveError(null),
     setCharacter: update,
     createCharacter,
     switchCharacter,

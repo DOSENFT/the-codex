@@ -88,7 +88,7 @@ function EditableList({
               <button
                 type="button"
                 onClick={() => onRemove(idx)}
-                className="min-h-[44px] min-w-[28px] flex items-center justify-center rounded text-current opacity-60 hover:opacity-100 transition-opacity"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded text-current opacity-80 hover:opacity-100 transition-opacity"
                 aria-label={`Remove ${item}`}
               >
                 <Trash2 size={12} aria-hidden />
@@ -202,11 +202,13 @@ export function PersonaEngine({ character, onUpdate }: PersonaEngineProps) {
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-lg font-semibold text-forge-0">
+        {/* text-xl, not text-lg: 20px is the Cinzel floor (--d-fs-title). This
+            is the screen's own name and was rendering one step under it. */}
+        <h2 className="font-display text-xl font-semibold text-forge-0">
           Persona Engine
         </h2>
         {persona.lastEditedAt && (
-          <span className="text-xs text-forge-2">
+          <span className="text-xs text-forge-1 text-right">
             Last edited: {new Date(persona.lastEditedAt).toLocaleDateString()}
           </span>
         )}

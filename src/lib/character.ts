@@ -397,11 +397,84 @@ const ROSTER_KEY = 'codex-roster'
 const ACTIVE_ID_KEY = 'codex-active-id'
 const CHAR_PREFIX = 'codex-character-'
 
-/** Save a character to its per-id slot and update the roster. */
-export function saveCharacter(character: Character): void {
+/* ---------------------------------------------------------------------------
+   A FAILED WRITE IS NOT A SAVE.
+
+   This is already the law of this codebase — `lib/covenant.ts` states it as
+   Rule 2 and obeys it. `saveCharacter` did not. On a full disk, or on an iPad
+   in private browsing, `localStorage.setItem` throws `QuotaExceededError`; the
+   throw travelled up through every spend, the React tree unwound to the nearest
+   boundary, and Marcus was told nothing at all. Measured 2026-08-23 under
+   TABLE-READY D-5: the previous save survived (`intact=true`) but
+   `userWasTold=false`, with an uncaught `QuotaExceededError` on the console.
+
+   Two things change and nothing else does. The write no longer throws, and a
+   write that did not happen is announced. What any feature DOES is untouched:
+   the same value is written, at the same moment, by the same callers.
+   --------------------------------------------------------------------------- */
+
+export type SaveOutcome = { ok: true } | { ok: false; reason: string }
+
+type SaveFailureListener = (reason: string) => void
+const saveFailureListeners = new Set<SaveFailureListener>()
+
+/** Subscribe to writes that did not happen. Returns the unsubscribe. */
+export function onCharacterSaveFailure(fn: SaveFailureListener): () => void {
+  saveFailureListeners.add(fn)
+  return () => saveFailureListeners.delete(fn)
+}
+
+function announceFailure(reason: string): void {
+  for (const fn of saveFailureListeners) {
+    // A listener that throws must not turn a storage problem into a crash.
+    try { fn(reason) } catch { /* the alarm is not allowed to be the fire */ }
+  }
+}
+
+/** The reason a player would recognise, not the reason a stack trace gives. */
+function reasonFor(err: unknown): string {
+  const name = err instanceof Error ? err.name : ''
+  if (/quota|QuotaExceeded|NS_ERROR_DOM_QUOTA/i.test(name + String(err))) {
+    return 'This device is out of storage, so that change was not saved. Your last saved character is untouched — export it now (Settings → Export Character) before you free up space.'
+  }
+  return 'This device would not store that change. Your last saved character is untouched — export it now (Settings → Export Character).'
+}
+
+/** One guarded write. Never throws; says whether the bytes landed. */
+function put(key: string, value: string): SaveOutcome {
+  const store = globalThis.localStorage
+  // `localStorage?.setItem(...)` is the tidy line and the wrong one: with no
+  // storage at all it does nothing, throws nothing, and reports a save that
+  // never happened. Absent storage is a failed write, stated as one.
+  if (!store) return { ok: false, reason: 'This device has nowhere to store your character.' }
+  try {
+    store.setItem(key, value)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, reason: reasonFor(err) }
+  }
+}
+
+/**
+ * Save a character to its per-id slot and update the roster.
+ *
+ * Returns the outcome for callers that can act on it, and announces a failure
+ * to every subscriber for the ones that cannot. It does not throw: a spend that
+ * cannot be persisted must still leave the sheet on screen and the previous
+ * save on disk.
+ */
+export function saveCharacter(character: Character): SaveOutcome {
   character.updatedAt = new Date().toISOString()
-  localStorage.setItem(CHAR_PREFIX + character.id, JSON.stringify(character))
-  updateRosterEntry(character)
+  const wrote = put(CHAR_PREFIX + character.id, JSON.stringify(character))
+  if (!wrote.ok) {
+    announceFailure(wrote.reason)
+    return wrote
+  }
+  // The roster is an index, not the character. If it cannot be updated the
+  // character itself is still safely on disk, so this is reported, not fatal.
+  const indexed = updateRosterEntry(character)
+  if (!indexed.ok) announceFailure(indexed.reason)
+  return indexed
 }
 
 /**
@@ -645,7 +718,7 @@ export function loadRoster(): RosterEntry[] {
 }
 
 /** Update or insert a roster entry from a Character object. */
-function updateRosterEntry(char: Character): void {
+function updateRosterEntry(char: Character): SaveOutcome {
   const roster = loadRoster()
   const entry: RosterEntry = {
     id: char.id,
@@ -661,7 +734,7 @@ function updateRosterEntry(char: Character): void {
   } else {
     roster.push(entry)
   }
-  localStorage.setItem(ROSTER_KEY, JSON.stringify(roster))
+  return put(ROSTER_KEY, JSON.stringify(roster))
 }
 
 // ---------------------------------------------------------------------------
@@ -673,9 +746,12 @@ export function getActiveId(): string | null {
   return localStorage.getItem(ACTIVE_ID_KEY)
 }
 
-/** Set the active character id. */
-export function setActiveId(id: string): void {
-  localStorage.setItem(ACTIVE_ID_KEY, id)
+/** Set the active character id. Guarded for the same reason as the rest: a
+ *  device that cannot remember who is active must not take the sheet down. */
+export function setActiveId(id: string): SaveOutcome {
+  const wrote = put(ACTIVE_ID_KEY, id)
+  if (!wrote.ok) announceFailure(wrote.reason)
+  return wrote
 }
 
 // ---------------------------------------------------------------------------

@@ -13,6 +13,7 @@ import { Settings } from './components/Settings'
 import { SessionCockpit } from './components/session'
 import { CharacterPage } from './components/CharacterPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { SaveAlarm } from './components/SaveAlarm'
 import { TurnLive } from './components/turn/TurnLive'
 import { CharacterRecord } from './components/print/CharacterRecord'
 import type { Character } from './lib/character'
@@ -46,6 +47,8 @@ export default function App() {
     character,
     roster,
     ready,
+    saveError,
+    dismissSaveError,
     setCharacter,
     createCharacter,
     switchCharacter,
@@ -90,13 +93,16 @@ export default function App() {
   // No active character → show setup/selector
   if (!character) {
     return (
-      <ErrorBoundary surface="Character setup">
-        <CharacterSetup
-          onComplete={createCharacter}
-          roster={roster}
-          onSelectCharacter={switchCharacter}
-        />
-      </ErrorBoundary>
+      <>
+        <ErrorBoundary surface="Character setup">
+          <CharacterSetup
+            onComplete={createCharacter}
+            roster={roster}
+            onSelectCharacter={switchCharacter}
+          />
+        </ErrorBoundary>
+        <SaveAlarm reason={saveError} onDismiss={dismissSaveError} />
+      </>
     )
   }
 
@@ -117,6 +123,7 @@ export default function App() {
           <TurnLive character={character} onCharacterUpdate={setCharacter} />
         </ErrorBoundary>
         <CharacterRecord character={character} />
+        <SaveAlarm reason={saveError} onDismiss={dismissSaveError} />
       </>
     )
   }
@@ -216,6 +223,10 @@ export default function App() {
       )}
       </motion.div>
     </Layout>
+    {/* Outside <Layout> on purpose, like CharacterRecord: a write that did not
+        happen must be visible on every tab, in every mode, and must not be a
+        child of the surface whose error boundary might be what caught it. */}
+    <SaveAlarm reason={saveError} onDismiss={dismissSaveError} />
     </>
   )
 }
