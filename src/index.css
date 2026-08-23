@@ -474,12 +474,20 @@
     font-family: "Cinzel", serif;
   }
 
+  /* Both of these were hand-written near-copies of --ease-forge with an
+     overshoot dialled in: 1.25 and 1.1 past the endpoint. An overshoot means
+     the thing you are reaching for is not yet where it is going to be, and the
+     premise of this whole document is a dark room and six seconds. It is also
+     the app contradicting its own motion — --ease-forge IS cubic-bezier(0.22,
+     1, 0.36, 1), the same curve without the bounce, and it is what every
+     transition in this file already uses. The animations are unchanged except
+     that they now decelerate into place instead of springing back into it. */
   .animate-object-enter {
-    animation: objectEnter 0.38s cubic-bezier(0.22, 1.25, 0.36, 1) both;
+    animation: objectEnter 0.38s var(--ease-forge) both;
   }
 
   .animate-drawer-enter {
-    animation: drawerEnter 0.4s cubic-bezier(0.22, 1.1, 0.36, 1) both;
+    animation: drawerEnter 0.4s var(--ease-forge) both;
   }
 
   @media (prefers-reduced-motion: reduce) {

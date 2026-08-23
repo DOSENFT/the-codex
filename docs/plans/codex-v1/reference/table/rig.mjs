@@ -318,6 +318,28 @@ export const AUDIT_DOM = () => {
     // a control may reach the floor via padding on a wrapper it fills
     const p = el.parentElement ? el.parentElement.getBoundingClientRect() : r;
     const hit = { w: Math.max(r.width, Math.min(p.width, r.width + 12)), h: Math.max(r.height, Math.min(p.height, r.height + 12)) };
+    // CLIPPED — the third thing getBoundingClientRect() lies about. A collapsed
+    // accordion is `grid-rows-[0fr]` over an `overflow-hidden` wrapper measuring
+    // h=0; its children keep reporting their full unclipped boxes, so 60 of the
+    // 102 controls on play/Roleplay have coordinates for a place they are not
+    // being drawn. `visible()` cannot catch it — nothing on the element itself
+    // is display:none, hidden, transparent or zero-sized; the erasure happens
+    // two ancestors up. So: intersect the rect against every clipping ancestor,
+    // and if the intersection is empty, the control is not painted right now.
+    // This flag gates POSITION only (see families.mjs V-6 / V-6b). Size, type
+    // and contrast are intrinsic — a 26px pip inside a closed disclosure is
+    // still a 26px pip the moment you open it — and stay graded regardless.
+    let clipped = '';
+    for (let n = el.parentElement; n && n !== document.documentElement; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      if (cs.overflowY === 'visible' && cs.overflowX === 'visible') continue;
+      const cr = n.getBoundingClientRect();
+      if (Math.min(r.right, cr.right) - Math.max(r.left, cr.left) <= 0 ||
+          Math.min(r.bottom, cr.bottom) - Math.max(r.top, cr.top) <= 0) {
+        clipped = n.tagName.toLowerCase() + (n.className ? '.' + String(n.className).split(/\s+/).slice(0, 2).join('.') : '');
+        break;
+      }
+    }
     // V-6b — geometry says reachable; the hit test says pressable. Every number
     // above comes from getBoundingClientRect, which knows nothing about what is
     // painted on top: a control under the fixed tab bar measures 48x48 and cannot
@@ -358,7 +380,7 @@ export const AUDIT_DOM = () => {
       w: Math.round(r.width), h: Math.round(r.height),
       hitW: Math.round(hit.w), hitH: Math.round(hit.h),
       y: Math.round(r.top + r.height / 2),
-      occludedBy, occludedEdge,
+      occludedBy, occludedEdge, clipped,
     });
   }
   return {

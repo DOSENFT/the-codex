@@ -90,6 +90,27 @@ the Actions Reference rows out at y=3844 — is past `y > vh` and fails under th
 new one alike. To make sure the correction bought no slack anywhere else, **V-6b is added below**
 (§ 6 V), covering a failure neither predicate could ever see.*
 
+**A-8 · 2026-08-23 · § 6 V-6 and V-6b — the IMPLEMENTATION gains a visibility precondition. Both
+criterion texts are unchanged.** V-6 grades *where a control is on the screen*; V-6b grades *whether
+anything is painted on top of it*. Both are meaningless for a control that is not being painted at
+all. `getBoundingClientRect()` reports an element's full unclipped box even when an ancestor has
+clipped it to nothing — a closed accordion is `grid-rows-[0fr]` over an `overflow-hidden` wrapper
+measuring `h=0`, and every control inside it keeps reporting coordinates for a place it is not drawn.
+On `play/Roleplay` that is **60 of 102 controls**. The audit's existing visibility gate cannot see it:
+nothing on the element itself is `display:none`, `visibility:hidden`, transparent, or zero-sized — the
+erasure happens two ancestors up. New precondition, applied *only* to V-6 and V-6b: intersect the
+control's rect against every clipping ancestor, and if the intersection is empty, the control has no
+on-screen position and is skipped. The count skipped is printed on every run.
+*Reason: this is the second amendment that makes something easier to pass, so it gets the same
+plainness as A-7. **It reclassifies both remaining V-6b findings from fail to pass**, and it is the
+whole of what it buys: those two controls are inside the closed Impulse/Recall/Engage accordions at the
+bottom of `play/Roleplay`, and the screenshot at § 10 shows that strip of screen is empty. They were
+never under the tab bar; their phantom rect was. **V-6 is unchanged by this — `play/Combat`, the only
+screen V-6 grades, has 0 clipped controls, so all 17 failures stand.** The precondition is deliberately
+narrow: size, type and contrast are intrinsic properties that a closed disclosure does not alter — a
+26px pip is still a 26px pip the moment you open it — so V-1 through V-5b keep grading clipped
+controls, and the 60 on Roleplay are still held to every one of them.*
+
 ---
 
 ## 1. What the table actually is
@@ -363,7 +384,95 @@ and it walks all seven screens for 12 bare shapes.
 
 ## 9. Behaviour changes believed necessary — WRITTEN UP, LEFT UNBUILT
 
-*Filled in as found. Nothing in this section is in the diff.*
+Behaviour is sealed. Everything below is a change I believe the table wants and did **not** make.
+None of it is in the diff. Each entry says what it would change, what it would cost, and what it
+would buy — enough for Marcus to say yes or no without re-deriving the problem.
+
+**9.1 · The turn deck should be anchored to the bottom, not merely early. — This is the real V-6 fix.**
+V-6 asks that every control which spends a resource sit in the bottom 60% of the first screen. It is
+failing 17 controls and it will keep failing them, because the fix available to a design pass is
+*ordering* and ordering has a ceiling: put the spend controls first and they land at the **top** of
+the screen, which fails V-6 in the other direction; put them later and they fall off the bottom.
+I moved the deck up and got 22 → 9 off-screen out of combat, and the first spell-slot pip from
+y=1647 to y=903 in combat — real, and still short. The only composition that satisfies the criterion
+is one where the turn deck does not scroll at all: a fixed bottom sheet, above the tab bar, holding
+the action economy and the slot/resource pips, with the rest of the sheet scrolling behind it.
+*Cost:* a new persistent surface in `Layout.tsx` and `CombatHelper.tsx`, roughly 150–250 lines, plus
+a decision about what happens to it on the other six screens. It changes what the app *does* — a
+control that was scrollable becomes permanent — so it is sealed. *Buys:* V-6 outright, and it is the
+single largest table win available. **This is the one I would build first.**
+
+**9.2 · There is no undo on the combat screen. S-4 is UNPROVEN for that reason, not because it is slow.**
+S-4 asks that a mis-tap be reversible within 100 ms. On the default combat screen there is no
+Undo and no Restore, so there is nothing to measure and the criterion cannot be graded. A wrong tap
+during a six-second turn is a real event — the whole premise of this document is that it is dark and
+you are hurrying — and the current recovery is "open the tracker and count back up." *Cost:* an undo
+stack for resource spends, small (a ring buffer of the last N mutations in `useCharacter`) but
+genuinely new behaviour with its own edge cases around persistence. *Buys:* S-4, and the difference
+between a mis-tap being a shrug and a mis-tap being a thirty-second interruption while five people
+wait.
+
+**9.3 · `?d=1` still gates the direction-D turn screen.** The better turn screen exists and ships,
+and no one at the table will ever type a query string to reach it. Either it becomes the turn screen
+or the flag comes out; leaving a finished surface behind an undiscoverable gate is the "half-built
+feature running as if done" failure mode by another name. *Cost:* a routing decision, not code.
+*Note:* F-4 grades `?d=1` and passes it, so the criterion does not force the issue — deliberately.
+This is Marcus's call about the product, not the instrument's.
+
+**9.4 · "Bloodied" appears only on the D screen.** The state exists in `character.ts` and the D turn
+screen surfaces it; the play/Combat HP tracker does not. Two screens disagreeing about whether a
+concept is worth showing is a seam, and at the table it is the seam that matters most — bloodied is
+the number the DM asks about. *Cost:* small. *Sealed because:* showing a state that was not shown is
+a behaviour change, however small it looks.
+
+**9.5 · `race` vs the 2024 `species`.** `character.ts:216` reads `race`. Save files in the wild
+use both spellings depending on when they were exported. This currently works because the loader is
+forgiving, and the frozen rule is that existing save files load unchanged — so nothing here is broken
+today. It is written up because the next person to touch the loader will not know that, and the
+D-family criteria are the only thing standing between that person and a fourth shipped import bug.
+
+**9.6 · A `<button>` is nested inside a `<button>` in `GrimoireCard`.** The row is a button; the
+expand affordance inside it is also a button. This is invalid HTML, and what it does at the table is
+make one of the two unreliable to hit — the browser resolves it, but not the way either element was
+written to expect. It is a real defect and the fix is a genuine interaction change (splitting one
+control into two, or demoting the outer to a non-button with an explicit handler), so it is sealed.
+*Cost:* small, localised. *Buys:* nothing on the criteria list — no V criterion catches it, which is
+worth noticing.
+
+**9.8 · The service worker waits for a network that is not there. This is the whole of S-1. — 2337 ms.**
+S-1 budgets 2000 ms from a dead origin to his name on the screen and measures 2923 ms. I assumed that
+was the bundle and split it — the entry chunk went 1056 kB → 466 kB (gzip 268 → 131), which is real,
+and it bought **190 ms**. So I measured instead of assuming again, and the answer is not the app:
+
+| | TTFB | FCP | "Nix" painted |
+|---|---|---|---|
+| origin **alive** | 3 ms | 0 ms | **305 ms** |
+| origin **dead** | **2337 ms** | 2480 ms | — |
+
+Every asset after TTFB loads in 1–2 ms; they are all in the precache. The app cold-starts in 305 ms.
+The other 2337 ms is one line: `sw.js:132` handles navigations network-first with no timeout —
+`const fresh = await fetch(request)` — and falls back to the cached shell only in the `catch`. With no
+wifi, the app is not allowed to start until the browser gives up on a connection that was never going
+to answer. On this harness that costs 2337 ms; on a real phone with a weak signal or a captive portal
+it is worse, because a hanging socket takes longer to fail than a refused one.
+*Why it is not fixed here:* the obvious fix — serve the cached shell and revalidate behind it — changes
+when a deploy is picked up, from "this launch" to "the next one". And this app precaches
+content-hashed assets, so a launch that serves yesterday's `index.html` after today's precache has
+replaced the assets it names is a white screen. **That is the exact failure class that shipped three
+times.** Rewriting the update semantics of the one file that survives a bad deploy is not something a
+design pass gets to do on its own judgment. *The change I would make:* race the network against the
+cache lookup with a short deadline (~250 ms), serve whichever answers first, always write the fresh
+response back — and gate it on the precache build id matching, so a shell is never served against a
+mismatched asset set. *Buys:* S-1 outright, with ~2500 ms of margin, and it is the single biggest
+number on this page.
+
+**9.7 · Disclosure — D-5 and `SaveAlarm.tsx` are a behaviour change I DID make, and Marcus can veto it.**
+Every other entry in this section is unbuilt. This one is built, and it is named here so it is not
+smuggled in under "design work." D-5 asks that the app tell you when a save has failed rather than
+failing silently, and `SaveAlarm` is the surface that does it. I judged silent data loss to be a data-
+safety floor rather than a feature, which is why it is in the diff — but it is new visible behaviour
+by any honest reading, and if Marcus disagrees it comes out and D-5 becomes UNPROVEN. Flagging it is
+the point; the criterion is not worth more than the rule that behaviour is sealed.
 
 ## 10. Screenshots
 
@@ -380,5 +489,27 @@ and it walks all seven screens for 12 bare shapes.
 ---
 
 ## 13. The Vault
+
+`github.com/DOSENFT/dwk-vault` is the audio archive for this campaign — same table, same DM, shipped.
+It is a browsing surface: you sit with it, you scroll a session list, you play a recording. The Codex
+is a doing surface: you hold it in one hand in the dark and you spend a resource in six seconds. That
+difference is not a detail, it is the whole answer, and it points three different ways for the three
+things they could share. **Design language: no — and the cost is measurable, not aesthetic.** The
+Vault's identity is small uppercase mono labels, 8.5–11.5px, Fraunces over JetBrains Mono, on
+`--pitch #12100e` with `--rust #b5502a` and `--gold #c39a4e`. Every one of those label sizes is below
+the Codex's frozen V-1 floor of 12px, and the type pairing collides with V-4's rule that Cinzel is
+never asked to work under 20px. Importing the Vault's scale would mean amending V-1 and V-4 downward,
+which the freeze forbids for exactly this reason: the Vault's labels are legible because you are
+holding it under a lamp with time to spare, and the Codex's floor exists because you are not. What
+they *should* share is narrower and cheaper — the palette's warm end (`--rust`, `--gold`, `--pitch`)
+already rhymes with the Codex's forge/ember ink, and agreeing on those three hexes costs one token
+file edit and makes two apps by the same hand look like two apps by the same hand without either
+inheriting the other's constraints. **Data: no.** The Vault's unit is a session recording; the
+Codex's is a character. They share a campaign, not a schema, and a shared schema would couple two
+release cadences for a join nobody at the table performs. **A link at the table: yes, and it is the
+only one of the three worth building.** One line in the Codex's session surface pointing at the Vault
+session that matches — "last session, 2h11m" — costs a URL and a date, no shared code, no shared
+build, no shared deploy. It is the cheapest thing on this page and the only one that changes anything
+for the five people waiting. *Per the task, none of this is built this run.*
 
 *One paragraph. Written after reading `github.com/DOSENFT/dwk-vault`.*

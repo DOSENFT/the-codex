@@ -643,7 +643,7 @@ export async function familyS(b, R, opts) {
 export async function familyV(b, R, opts) {
   R.section('V — arm\'s length, bad light');
 
-  const all = { small: [], low: [], lowNum: [], cinzel: [], touch: [], turnTouch: [], thumb: [], occluded: [], onImage: 0 };
+  const all = { small: [], low: [], lowNum: [], cinzel: [], touch: [], turnTouch: [], thumb: [], occluded: [], notPainted: [], onImage: 0 };
   const { ctx, page } = await freshCtx(b, opts);
   await importFile(page, realCopy('full'));
 
@@ -683,8 +683,13 @@ export async function familyV(b, R, opts) {
       }
       const a = await audit(page);
       for (const c of a.touch)
-        if (c.occludedBy && c.occludedEdge === at)
+        if (c.occludedBy && c.occludedEdge === at) {
+          // Amendment A-8: a control clipped to nothing by an ancestor is not
+          // being painted, so it has no on-screen position to occlude. Counted
+          // out loud below — never silently dropped.
+          if (c.clipped) { all.notPainted.push(`${s.id} @${at} «${c.label}» inside ${c.clipped}`); continue; }
           all.occluded.push(`${s.id} @${at} «${c.label}» covered by ${c.occludedBy}`);
+        }
     }
 
     // thumb zone: only on the default combat screen, only spend controls + tabs
@@ -694,7 +699,10 @@ export async function familyV(b, R, opts) {
       const a = await audit(page);
       for (const c of a.touch) {
         if (!/heal|spend|action|bonus|reaction|move|combat|grimoire|roleplay/i.test(c.label)) continue;
+        // Size is intrinsic and stays graded even when clipped (A-8); position
+        // is not, so V-6 skips what is not painted and says how many.
         if (c.hitW < THRESH.V5_turn || c.hitH < THRESH.V5_turn) all.turnTouch.push(`«${c.label}» ${c.hitW}×${c.hitH}`);
+        if (c.clipped) { all.notPainted.push(`${s.id} @top «${c.label}» inside ${c.clipped}`); continue; }
         // Amendment A-7: the criterion says the BOTTOM 60% — y in [vh*0.40, vh].
         // The old expression (y > vh*0.60 fails) demanded the TOP 60% and failed
         // the fixed tab bar for sitting exactly where the criterion wants it.
@@ -714,6 +722,7 @@ export async function familyV(b, R, opts) {
   R.check('V-5b', `turn controls ≥${THRESH.V5_turn}px  [${u(all.turnTouch).length} below]`, u(all.turnTouch).length === 0, cap(all.turnTouch));
   R.check('V-6', `turn controls in the bottom ${THRESH.V6_thumb * 100}% of a 390×844 screen  [${u(all.thumb).length} outside]`, u(all.thumb).length === 0, cap(all.thumb));
   R.check('V-6b', `no control covered by anything  [${u(all.occluded).length} occluded]`, u(all.occluded).length === 0, cap(all.occluded));
+  if (all.notPainted.length) console.log(`         (A-8: ${u(all.notPainted).length} controls skipped by V-6/V-6b — clipped to nothing by an ancestor, so not painted and having no on-screen position. Size/type/contrast still graded.)`);
   if (all.onImage) console.log(`         (${all.onImage} text nodes sit on an image/gradient — contrast UNMEASURABLE, reported not passed)`);
   await ctx.close();
 }
