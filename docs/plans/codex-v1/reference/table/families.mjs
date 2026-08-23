@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   freshCtx, goScreen, SCREENS, importFile, storedChars, storedChar, judge, audit, drain,
-  deadOrigin, settle, TABLET,
+  deadOrigin, settle, TABLET, pixelContrast,
 } from './rig.mjs';
 
 export const THRESH = {
@@ -643,7 +643,7 @@ export async function familyS(b, R, opts) {
 export async function familyV(b, R, opts) {
   R.section('V — arm\'s length, bad light');
 
-  const all = { small: [], low: [], lowNum: [], cinzel: [], touch: [], turnTouch: [], thumb: [], occluded: [], occludedTablet: [], notPainted: [], onImage: 0 };
+  const all = { small: [], low: [], lowNum: [], lowPix: [], lowNumPix: [], cinzel: [], touch: [], turnTouch: [], thumb: [], occluded: [], occludedTablet: [], notPainted: [], onImage: 0 };
   const { ctx, page } = await freshCtx(b, opts);
   await importFile(page, realCopy('full'));
 
@@ -655,13 +655,31 @@ export async function familyV(b, R, opts) {
       await page.evaluate(n => window.scrollTo(0, n * window.innerHeight), i);
       await page.waitForTimeout(220);
       const a = await audit(page);
+      // A-14 — the nodes bgOf() could not divide, measured from the painted
+      // pixels instead of dropped. One screenshot per scroll position.
+      for (const p of await pixelContrast(page, a.text.filter(t => t.onImage))) {
+        const where = `${s.id} «${p.t}» ${p.size}px`;
+        if (p.pixel < THRESH.V2_contrast) all.lowPix.push(`${where} ${p.pixel}:1`);
+        else if (p.numeric && p.pixel < THRESH.V3_contrast) all.lowNumPix.push(`${where} ${p.pixel}:1`);
+      }
       for (const t of a.text) {
         const where = `${s.id} «${t.t}» ${t.size}px`;
-        if (t.onImage) { all.onImage++; continue; }
+        // Amendment A-13 — `if (t.onImage) continue;` used to sit on the line
+        // above, before all four tests. bgOf() flags a node as onImage when ANY
+        // ancestor has a background-image, and this app tints its cards with a
+        // 3.5%-alpha linear-gradient — so 3140 of 4804 text nodes were flagged,
+        // and one background heuristic silently switched off FOUR criteria at
+        // once. V-1 (is it 12px) and V-4 (is Cinzel ≥20px) are geometry. They do
+        // not care what is painted behind the glyph and they never should have
+        // been gated on it. They now grade every node.
         if (t.size < THRESH.V1_size) all.small.push(where);
+        if (/cinzel/i.test(t.family) && t.size < THRESH.V4_cinzel) all.cinzel.push(where);
+        // Contrast genuinely needs a background colour to divide by. The nodes
+        // whose background is a gradient are counted, and graded from the
+        // painted pixels by V-2b/V-3b (amendment A-14) — never dropped.
+        if (t.onImage) { all.onImage++; continue; }
         if (t.contrast !== null && t.contrast < THRESH.V2_contrast) all.low.push(`${where} ${t.contrast}:1`);
         else if (t.numeric && t.contrast !== null && t.contrast < THRESH.V3_contrast) all.lowNum.push(`${where} ${t.contrast}:1`);
-        if (/cinzel/i.test(t.family) && t.size < THRESH.V4_cinzel) all.cinzel.push(where);
       }
       for (const c of a.touch) {
         if (c.hitW < THRESH.V5_touch || c.hitH < THRESH.V5_touch) all.touch.push(`${s.id} «${c.label}» ${c.hitW}×${c.hitH}`);
@@ -760,6 +778,8 @@ export async function familyV(b, R, opts) {
   R.check('V-1', `no visible text under ${THRESH.V1_size}px  [${u(all.small).length} found]`, u(all.small).length === 0, cap(all.small));
   R.check('V-2', `every text node ≥${THRESH.V2_contrast}:1  [${u(all.low).length} below]`, u(all.low).length === 0, cap(all.low));
   R.check('V-3', `numerals and counters ≥${THRESH.V3_contrast}:1  [${u(all.lowNum).length} below]`, u(all.lowNum).length === 0, cap(all.lowNum));
+  R.check('V-2b', `the same, measured off the painted pixels for the ${all.onImage} nodes on a gradient  [${u(all.lowPix).length} below]`, u(all.lowPix).length === 0, cap(all.lowPix));
+  R.check('V-3b', `the same, for numerals on a gradient  [${u(all.lowNumPix).length} below]`, u(all.lowNumPix).length === 0, cap(all.lowNumPix));
   R.check('V-4', `Cinzel never under ${THRESH.V4_cinzel}px  [${u(all.cinzel).length} found]`, u(all.cinzel).length === 0, cap(all.cinzel));
   R.check('V-5', `every control ≥${THRESH.V5_touch}px  [${u(all.touch).length} below]`, u(all.touch).length === 0, cap(all.touch));
   R.check('V-5b', `turn controls ≥${THRESH.V5_turn}px  [${u(all.turnTouch).length} below]`, u(all.turnTouch).length === 0, cap(all.turnTouch));

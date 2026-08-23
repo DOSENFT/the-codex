@@ -154,6 +154,47 @@ at one scroll extreme, which a scroll recovers; the Channel Divinity pip is the 
 sitting under an overlay where the screen opens. That distinction is analysis, not licence, and it is
 written out in § 12 rather than compiled into the check.*
 
+**A-12 · 2026-08-23 · § 6 V-5 and V-5b — the IMPLEMENTATION is TIGHTENED. Both criterion texts are
+unchanged.** `rig.mjs` measured a control's hit area as
+`Math.max(r.width, Math.min(parent.width, r.width + 12))` — a flat twelve-pixel credit added to every
+control's box before it was compared against the 44px and 48px floors, justified in the comment as
+*"a control may reach the floor via padding on a wrapper it fills."* It does not. Padding belongs to
+the wrapper; a thumb that lands on it hits a `div` and the button does not fire. **The credit is
+removed; the tappable area is the control's own border box and nothing else.** *Reason: this is a
+check I softened until the thing under it passed, which is the one act this document forbids by name.
+I did not find it — the § 11 verifier did, and it took him one read of the line. Effect: **V-5 goes
+from PASS (0) to FAIL (6)** — six suggestion buttons on play/Roleplay whose real box is 170×40, not
+182×52 — **and V-5b from PASS (0) to FAIL (3)**: two condition chips at 155×44 and the Action Economy
+control at 118×44, all three pressed during a turn, all three under the 48px floor.*
+
+**A-13 · 2026-08-23 · § 6 V-1 and V-4 — the IMPLEMENTATION is TIGHTENED. Both criterion texts are
+unchanged.** The V loop opened with `if (t.onImage) continue;` — placed *above* all four text tests.
+`bgOf()` sets `onImage` when **any** ancestor carries a `background-image`, and this app tints its
+cards with `linear-gradient(rgba(240,230,211,0.035), …)`, a 3.5%-alpha wash that reads as a flat
+panel. So the flag caught **3140 of 4804 text nodes — 65% of the app** — and one background heuristic
+silently switched off four criteria at once. V-1 (nothing under 12px) and V-4 (Cinzel never under
+20px) are *geometry*: they do not care what is painted behind the glyph and were never entitled to
+skip a node because of it. **They now grade every node.** *Reason: same class of defect as A-12 and
+found the same way. Effect: V-1 stays PASS (0 found, now over the full set); **V-4 goes from PASS (0)
+to FAIL (5)** — `play/Combat «Choose Action» 16px`, `«Nix» 18px` on two screens, and on prep/Academy
+a 16px «Persona Quick Reference» and a 14px numeral.*
+
+**A-14 · 2026-08-23 · § 6 — two criteria ADDED (V-2b, V-3b). Nothing softened, nothing removed.**
+A-13 fixes the geometry half; the contrast half needed something built. Contrast genuinely needs a
+background colour to divide by, and `bgOf()` climbing to a gradient has none — so for 65% of the
+app's text V-2 and V-3 were an *absence of evidence*, printed as a pass and admitted only in a
+parenthetical at the bottom of the log. **V-2b and V-3b re-ask V-2's and V-3's exact questions of
+exactly those nodes, measured off the painted pixels**: screenshot the viewport, read every pixel
+inside the node's box, take the modal colour as the background (glyphs are a minority of a text line
+box, so the mode is whatever is actually behind them), and divide the already-composited ink colour
+by it. New helper `pixelContrast()` in `rig.mjs`; thresholds are V-2's and V-3's, untouched.
+*Reason: an unmeasurable criterion is not a passing criterion, and this app's whole visual argument
+is legibility at arm's length in a dim room — grading a third of it and reporting all of it is the
+same failure as a green check over a boundaried screen. Effect, first run: **V-2b FAIL — 19 text
+nodes below 4.5:1**, worst of them condition names on play/Combat; **V-3b FAIL — 19 numerals below
+7:1**, including AC `«18»` and HP `«67»` at 4.89:1 and the Lay on Hands pool at 5.37:1. Those are the
+exact numbers V-3's text says he reads under pressure.*
+
 ---
 
 ## 1. What the table actually is
@@ -325,6 +366,8 @@ element is walked; contrast is computed against the actual painted background be
 | **V-1** | **Nothing below the reading floor.** No visible text node under **12px** computed. | **0 nodes** |
 | **V-2** | **Contrast, everywhere.** Every visible text node ≥ **4.5:1** against its painted background. | **0 nodes below** |
 | **V-3** | **The things he reads under pressure are AAA.** Every numeral, resource counter, HP value and primary sentence ≥ **7:1**. In a dim room at 60 cm, 4.5:1 is a squint. | **0 nodes below** |
+| **V-2b** | **The same question, asked of the two thirds V-2 could not divide.** *(ADDED 2026-08-23 by A-14.)* For every text node whose background is a gradient or image — 3140 of 4804 here — the background is read from the **painted pixels** (modal colour inside the node's box) and the composited ink divided by it. Same **4.5:1**. A node V-2 cannot measure is not a node that passed. | **0 nodes below** |
+| **V-3b** | **The same, for numerals.** *(ADDED 2026-08-23 by A-14.)* V-3's **7:1** applied to the pixel-measured set. | **0 nodes below** |
 | **V-4** | **The display face is never a label face.** Cinzel appears at **≥ 20px**, never smaller. Its root cause was fixed in Slice 13b; this proves it stayed fixed. | **0 nodes below** |
 | **V-5** | **Everything tappable is reachable.** Every interactive element ≥ **44 × 44 px** hit area (WCAG 2.2 AA); every control used *during a turn* ≥ **48 × 48 px**. | **0 below** |
 | **V-6** | **Thumb zone.** On 390 × 844, every control that spends a resource, and the tab bar, lies within the **bottom 60%** of the viewport. One hand, lower third. | **0 outside** |
@@ -602,6 +645,58 @@ safety floor rather than a feature, which is why it is in the diff — but it is
 by any honest reading, and if Marcus disagrees it comes out and D-5 becomes UNPROVEN. Flagging it is
 the point; the criterion is not worth more than the rule that behaviour is sealed.
 
+**9.9 · A second tab silently eats the first tab's spend. D-4 FAILS on it.** Found by §11, not by me.
+Two tabs on the same origin, pool at 35: tab 1 spends 5 and stores 30; tab 2 — which has been sitting
+there since before that write, holding a stale character in memory — spends 5 and stores **30**. Two
+spends of five, and the file says thirty. Worse than the arithmetic: both tabs now *display* 30/35,
+so nothing on screen says a write was lost. At the table this is one phone with the app open twice,
+or the app open beside a browser tab left over from an import, and the pool he is rationing all night
+is quietly wrong. **The fix is a behaviour change and is not built:** every write carries the
+`updatedAt` it was read at, and a write whose stored `updatedAt` has moved on is refused and the tab
+told to reload — last-write-wins replaced by refuse-and-reconcile. That is new refusal behaviour, new
+copy, and a new failure state on a screen, which is exactly the class §3 seals. *Cost:* the write
+path in `useCharacter`, a reconcile notice, and a test that opens two contexts. *Buys:* D-4, and the
+only silent-data-loss path anywhere in the app.
+
+**9.10 · Offline with a poisoned cache, the app is a blank page and the kill switch does not save it.
+N-4 FAILS on it.** Also found by §11, and it is the single worst thing in this document for the
+scenario §1 describes. The old check used `ctx.setOffline(true)` — which `rig.mjs`'s own comment
+says does not behave like a dead network — and, critically, restored the network *before* trying
+`?sw=off`. So it graded the network coming back. Killed properly: a poisoned shell cache plus a dead
+origin gives `document.body.innerText.length === 0`, permanently, and `?sw=off` recovers **nothing**
+while still offline. The kill switch works by asking the browser to fetch the app without the worker;
+with no network there is nothing to fetch. In a basement with no wifi, a corrupted cache is a brick.
+**The fix is a behaviour change and is not built:** the worker must keep the last-known-good shell in
+a second, never-overwritten cache and fall back to it when the active one fails to satisfy the
+navigation — a real rollback rather than a bypass. *Cost:* `sw.js` cache lifecycle, a version pin,
+and a test that genuinely kills the origin instead of simulating it. *Buys:* N-4, and the difference
+between "the app is slow tonight" and "the app is gone tonight".
+
+**9.11 · The twelve hostile shapes are the survivors, not a sample — and six more of the same kind
+kill this build.** F-3 is frozen at twelve and stays frozen at twelve; §4 says criteria may be added
+but not rewritten, and quietly widening F-3's set would make its history unreadable. So the six live
+here, in the exact shapes §11 used, and the honest reading of F-3's PASS is printed beside it in §12:
+
+```
+{"spells":[null]}                                    TypeError: … null (reading 'name')  · 7 screens hollow
+{"features":[null]}                                  the same throw                      · 7 screens hollow
+{"weapons":[{"name":"Sword","properties":"finesse"}]} w.properties.map is not a function · prep/Character BOUNDARIED
+{"spells":[{"name":"Bless","level":1,"description":{"text":"x"}}]}
+                                                     React #31, object with keys {text}  · all 7 screens BLANK
+{"customConditions":[{}]}                            … undefined (reading 'trim')        · prep/Character BOUNDARIED
+```
+
+The weapon case renders *"stopped … The rest of the app is still running"* — the polite notice this
+whole document exists because of, on HEAD, today. The frozen twelve contain "a weapon with no
+`properties`"; make `properties` a **string** instead of absent and it dies. That is the same bug
+class that shipped three times, and it is still here — it was simply never asked the right question.
+**Left unbuilt** because the fix is a normaliser at the import boundary that coerces or drops
+malformed inner records, and what it does with a bad record — drop it silently, drop it loudly,
+refuse the file — is a product decision about his data, not a presentation one. My recommendation, in
+one line: drop the malformed record, keep the character, and tell him exactly which record and which
+field, in the R-family voice. *Cost:* one pass in `character.ts` plus copy. *Buys:* the failure mode
+that has shipped four times.
+
 ## 10. Screenshots
 
 Every screen at both sizes this app is actually held at, with his real full export loaded, at the
@@ -630,11 +725,279 @@ screen is empty, which is why the two controls V-6b reported under the tab bar w
 
 ## 11. Independent verification
 
-*Fresh subagent, local and live.*
+A fresh agent that had not seen this build was given §6, the criteria, the two scope rules, and the
+project's history — and nothing else. It was told in as many words that an independent verifier who
+confirms everything has done nothing. It wrote seventeen probes of its own (`_verify1.mjs` …
+`_verify17.mjs`), each armed with `pageerror`, a console-error listener, a `console.error`
+monkey-patch, `requestfailed`, and an `unhandledrejection` handler, and drove both the local `dist/`
+and the live URL.
+
+**It broke five of my green criteria, found two real behavioural defects the suite is blind to, and
+found that the thing Marcus can actually open is not the thing I graded.** Its report follows
+verbatim. Nothing in it has been edited, shortened, or answered back.
+
+---
+
+**37 CONFIRMED · 11 CONTRADICTED · 11 UNVERIFIED (+ P-3, this document).**
+
+**The single biggest finding is not in the criteria table at all: the build at
+`https://dosenft.github.io/the-codex/` is `73c45d8` — the harness's own `BROKEN_SHA` negative
+control.** The last successful Pages run is `73c45d8`, 2026-08-18; its asset hashes
+(`icons-B88RK-58.js`, `react-DiLVnSTo.js`) do not match local `dist/` (`icons-DHSOI1xk.js`,
+`react-C6YXHfuv.js`). I ran the twelve frozen hostile shapes against it: **10 of 14 shapes fault, up
+to 14 dead screens each.** The 48-green run is against a build that has never shipped, and
+`results-local.json` is `mode: "local"` — there is no `results-live.json`, so P-2 was never run at
+all.
+
+Second: the V family's contrast checks graded roughly a third of the app. `bgOf()` marks any node
+with a `background-image` anywhere in its ancestor chain as unmeasurable, which in this app includes
+3.5%-alpha `linear-gradient` card tints — **3140 of 4804 text nodes skipped**, and the `continue`
+fires before V-1, V-2, V-3 *and* V-4. Re-measured against painted pixels: 25 nodes below 4.5:1, 18
+numerals below 7:1, 4 Cinzel nodes under 20px.
+
+Third: **the app does throw.** Six hostile-but-legal shapes beyond the frozen twelve kill HEAD's
+build, one of them straight into the exact ErrorBoundary notice this whole document exists to
+prevent.
+
+| criterion | verdict | evidence |
+|---|---|---|
+| P-0.1 | UNVERIFIED | Negative control is `AppData/Local/Temp/codex-broken/dist`, outside the repo (`git ls-files` → 0 matches). Not reproducible by a stranger, which §2 requires. |
+| P-0.2–P-0.6 | UNVERIFIED | Same reason. I did not re-run `--selftest`. |
+| P-0.7 | CONFIRMED | Independently: `73c45d8` (live) faults **10/14** shapes. Bare spell → 5 dead screens, `TypeError: Cannot read properties of undefined (reading 'slice')`; one-of-everything → 10 dead screens. |
+| P-0.8 | CONFIRMED | Every one of those 8 shapes passes clean on HEAD's dist, same probe, same file. |
+| F-1 | CONFIRMED | Full real export, phone **and** tablet, local and live: 7/7 screens show own content, zero errors. |
+| F-2 | CONFIRMED | Thin export, both viewports, both targets: 7/7, zero errors. |
+| F-3 | CONFIRMED *(literally)* | All 12 shapes clean on HEAD under my listeners. But see prose — the twelve are the survivors, not a sample. |
+| F-4 | UNVERIFIED | `R.check('F-4', …, faults.length===0 && actions > 2)` counts **buttons**. The criterion's "ranked shortlist" is never checked by any line of code, and I did not verify it either. The spend half is real: 1st-level spellSlots 4→3. |
+| F-5 | CONFIRMED | Veil present on 7/7 both modes; mid-import it is present, `elementFromPoint` resolves to it, and it clicks; behind a forced boundary (`ctx.route(/DiceStage.*\.js/, r=>r.abort())`) it survives. The harness checks none of those three. |
+| F-6 | CONFIRMED | `scrollWidth ≤ clientWidth+1` on 7/7. |
+| D-1 | CONFIRMED | Real **Export** button, not `localStorage`: 36/36 keys deep-equal (full), 19/19 (thin). |
+| D-2 | CONFIRMED | Three cold reloads, byte-identical including `updatedAt`. |
+| D-3 | CONFIRMED | Every refusal/cancel leaves the roster key count unchanged. |
+| D-4 | **CONTRADICTED** | Two tabs, same origin. Stored pool `35` → tab 1 spends 5 → `30` → stale tab 2 spends 5 → **`30`**. Two spends of 5 must read 25. Tab 1's write was silently lost; both tabs display `30/35`. The harness cannot see this: `const clobbered = wrote && after1 !== after2` where `wrote` is true merely because a click landed, and its tab 2 clicks a *tab*, which never triggers a save. |
+| D-5 | CONFIRMED | Forced `QuotaExceededError`: a real SaveAlarm appears and the stored character is intact. |
+| D-6 | CONFIRMED | Drove all four. `Delete Character` → confirm appears and **names Nix**. `Long Rest` → confirm. `New Character` → no confirm, but non-destructive. `Reset action economy` → no confirm, resets turn state not a character. The harness's `asked` counts *any* `^(Cancel|Never ?mind|Keep)` button anywhere; I measured **0** such buttons before driving, so it wasn't trivially satisfied — but the logic still can't tell a confirm from a coincidence. |
+| D-7 | CONFIRMED | Origin **killed** (not `ctx.setOffline`): export in 2 taps, 36 keys, `missing=[]`, `not-deep-equal=[]`. The harness only checks key *presence*, never the value. |
+| S-1 | CONFIRMED *(fail is real)* | Dead origin, worker warm, 4× CPU: **2946 / 2978 / 3043 ms**. Threshold 2000. |
+| S-2 | CONFIRMED | Worst input→paint 152 ms (`prep/Grimoire`), worst wall-clock 233 ms. All 7 under 400. |
+| S-3 | **CONTRADICTED** *(in the builder's favour)* | 3 trials, observers `buffered:false`, throttle applied only after import: worst input→paint **88 / 72 / 80 ms**. The reported 104 ms did not reproduce. |
+| S-4 | UNVERIFIED | I did not independently search for an Undo/Restore control. |
+| S-5 | CONFIRMED | 3 trials × 10 actions at 4× CPU: longest task **64 / 58 / 56 ms**. Zero over 200. *(A first pass reporting 403 ms was `buffered:true` replaying boot. Discarded.)* |
+| S-6 | CONFIRMED | CLS **0.0000** on all 3 turn trials, and across a scrolled walk of all 7 screens. |
+| R-1…R-6, R-8 | CONFIRMED | All seven reproduced with the exact on-screen copy captured. R-5's 12 MB file does not freeze the UI — though the harness's `if (ms > 1000+900)` is timing its own `waitForTimeout(900)`, not the app. |
+| R-7 | CONFIRMED *(and further)* | The harness never accepts the payload. I did: `importFile(page, f, {anyway:true})` with `__proto__`, `constructor.prototype` and a nested spell-level `__proto__`. `({}).pwned`, `Object.prototype.pwned`, `pwned2`, `pwned3` → all `undefined`. Clean. |
+| R-9 | UNVERIFIED | The harness's `getByRole('button',{name:/Import Character/i})` finds nothing after an import, so `if (await again.count())` skips the entire test and prints `before=1 after=1` as a PASS. The real door exists and is labelled **`"Import"`** — the regex cannot match it. Driving it myself: no duplicate roster key, but the healed pool reverted **30 → 35**. I could not establish whether the overwrite was announced by a confirm or by incidental page text, so I will not call it either way. |
+| V-1 | CONFIRMED | 0 nodes under 12 px — including all 3140 the harness skipped. |
+| V-2 | **CONTRADICTED** | 25 nodes below 4.5:1, measured from the painted PNG on both sides. Worst: `play/Combat «Paralyzed»` **1.05:1**, `«Petrified»` 1.05, `«No active conditions»` 1.10, `«Exhaustion»/«Incapacitated»/«Stunned»/«Unconscious»` 1.14, `«Damage»` 1.16. Also `prep/Persona «abandonment»` 4.13, `prep/Academy «due»` 3.90. Reported "0 below". |
+| V-3 | **CONTRADICTED** | 18 numerals below 7:1 — including the exact values the criterion names. Lay on Hands `«35»` **5.37:1**. AC `«18»` and HP `«67»` **4.89:1**. `play/Combat «3»`/`«2»` 5.19. Reported "0 below". |
+| V-4 | **CONTRADICTED** | 4 Cinzel nodes under 20 px: `play/Roleplay «Nix»` 18 px, `prep/Character «Nix»` 18 px, `prep/Academy «Persona Quick Reference»` 16 px, `prep/Academy «1»` **14 px**. Reported "0 below". |
+| V-5 | **CONTRADICTED** | 6 controls on `play/Roleplay` with a **raw** box of **170×40**. `AUDIT_DOM` inflates them to 182×52 via `Math.min(p.width, r.width + 12)` — a flat +12 borrowed from the *parent's* box. That parent is a wrapper with `padT=8 padB=8 gap=8`; the padding is the wrapper's, not the button's. |
+| V-5b | **CONTRADICTED** | 3 `play/Combat` turn controls with a raw box under 48: `«Incapacitated: …»` **155×44**, `«Prone: …»` 155×44, `«Action Economy»` **118×44**. Inflated to 167×56 / 130×48. |
+| V-6 | CONFIRMED *(fail is real)* | By my own stricter spend-shaped filter: 6 above the 337 px line, incl. `«Action»/«Bonus»/«Reaction»` at top=327 px. Builder said 15. Same verdict. |
+| V-6b | CONFIRMED *(fail is real)* | **13 occluded**, exactly the reported count. |
+| V-6c | CONFIRMED *(fail is real)* | **14 occluded** at 834×1112 DPR2, exactly the reported count. |
+| V-7 | UNVERIFIED | A judgement gate run by the builder. I cannot re-run a judgement independently and will not pretend to. |
+| V-8 | CONFIRMED | 14 files present (7 `phone-*`, 7 `tablet-*`). They are shots of a build that has never shipped — see P-1. |
+| N-1 | UNVERIFIED | Partial: dead-origin cold boots painted Nix 3/3, and the app boots clean from a killed origin. |
+| N-2 | CONFIRMED *(and the harness's check is vacuous)* | The harness's route `/11434\|ollama\|generativelanguage\|googleapis/` intercepted **0 requests** during its own N-2 sequence — it black-holed nothing and graded a normal spend. I drove the AI controls first, got **4 requests hanging** on `localhost:11434/api/chat`, *then* took a turn: input→paint **24 ms**, 0 spinners alive 6.5 s later, 0 dead screens, 0 errors. The app genuinely passes. |
+| N-3 | CONFIRMED | Zero foreign origins during boot + a full 7-screen walk. |
+| N-4 | **CONTRADICTED** | With a **genuinely dead origin** and a poisoned shell cache: `document.body.innerText` is **0 characters — permanently blank**, and `?sw=off` **while still offline recovers nothing** (0 chars). Only restoring the network recovered it. The harness uses `ctx.setOffline(true)` — the artefact `rig.mjs` itself documents as an invalid offline simulation — and puts the network back *before* trying `?sw=off`. It is grading the network coming back, not the repair. |
+| E-0 | CONFIRMED | Zero errors across a 200-action endurance run. |
+| E-1 | CONFIRMED | 200 **varied** actions: 10.00 MB → 10.00 MB, **0.0 %**. Caveat: `usedJSHeapSize` is quantised, so a sub-bucket leak is invisible by construction. |
+| E-2 | CONFIRMED | 1058 → 1058 nodes, **0 net**. |
+| E-3 | CONFIRMED *(the harness's number is wrong by 87×)* | The harness counts localStorage only: 29 KB. True origin usage: localStorage 29 KB **+ service-worker precache 2528 KB = `navigator.storage.estimate().usage` 2545 KB** against a 4096 KB ceiling. It passes — with 38 % headroom, not the 99 % the reported number implies. |
+| E-4 | CONFIRMED | Action 201: input→paint **24 ms**, landed=true. |
+| P-1 | **CONTRADICTED** | Deployed `73c45d8` ≠ results-table `60265a1` ≠ local HEAD. Three different SHAs. |
+| P-2 | **CONTRADICTED** | Never run. No `results-live.json` exists. When I ran F and R against the live URL myself: F-1/F-2 clean, but **10/14 hostile shapes fault**, e.g. `null-in-spells` → 14 dead screens, `TypeError: Cannot read properties of null (reading 'prepared')`. |
+| P-4 | **CONTRADICTED** | The most recent Pages deploy is 2026-08-18T01:40:12Z. This run is 2026-08-23. There has been no deploy to check after. |
+
+### What I found that the builder's suite did not
+
+**The product he can open is not the product that was graded.** `selftest.mjs:277` says out loud:
+*"the harness FAILS 73c45d8 — the SHA deployed right now"*. That line is correct and it is the whole
+problem. The negative control and the live site are the same build. Everything green in
+`results-local.json` describes a `dist/` that exists only on this machine. If Marcus opens the app at
+the table tonight, he opens the build P-0.7 was written to prove is broken, and I have now proved it
+independently: 10 of 14 hostile shapes fault, `bare spell` alone kills 5 screens, `one of everything`
+kills 10, and `spells:[null]` kills all 14 screen-loads.
+
+**The twelve hostile shapes are the survivors, not a sample.** They pass. I wrote sixteen more of the
+same kind — shapes a hand-edited file or an older export genuinely has — and **six kill HEAD's
+build**:
+
+- `{"spells":[null]}` → `PAGEERROR: TypeError: Cannot read properties of null (reading 'name')`, all 7 screens hollow.
+- `{"features":[null]}` → the same throw, all 7 screens hollow.
+- `{"weapons":[{"name":"Sword","properties":"finesse"}]}` → `TypeError: w.properties.map is not a function`, and `prep/Character` renders **"stopped … The rest of the app is still running"** — the exact polite notice this document was written because of, reproduced on HEAD. The frozen twelve contain "a weapon with no `properties`"; make `properties` a string instead of absent and it dies.
+- `{"spells":[{"name":"Bless","level":1,"description":{"text":"x"}}]}` → `Minified React error #31 … object with keys {text}` and **all seven screens go completely blank**. The boundary does not even catch this one.
+- `{"customConditions":[{}]}` → `TypeError: Cannot read properties of undefined (reading 'trim')`, `prep/Character` boundaried.
+
+F-3's criterion text is satisfied. F-3's *promise* is not.
+
+**The V family measured about a third of the app and reported it as all of it.** `bgOf()` sets
+`img = true` if *any* ancestor has `backgroundImage !== 'none'`. This app tints cards with
+`linear-gradient(rgba(240,230,211,0.035), …)` — visually a flat panel. `run-local.log` records the
+consequence in its own words: *"(3140 text nodes sit on an image/gradient — contrast UNMEASURABLE,
+reported not passed)"*. 3140 of 4804 is 65.4 %. And `if (t.onImage) { … continue; }` fires **before**
+V-1, V-2, V-3 and V-4 — so a single misfiring background heuristic silently disables four criteria at
+once. Measuring from the painted PNG on both sides, the four "0 below" results become 0 / 25 / 18 /
+4. The V-3 failures are precisely the things the criterion says he reads under pressure: the Lay on
+Hands counter at 5.37:1, AC and HP at 4.89:1.
+
+**Three criteria are graded by code that cannot fail.** R-9's `if (await again.count()) { … }` finds
+no control, asserts nothing, prints PASS — because the button is labelled `"Import"` while the regex
+is `/Import Character/i`. N-2's route intercepted **zero** requests during its own run. D-6's `asked`
+is satisfied by *any* button whose label starts with Cancel/Never mind/Keep, anywhere on the page. In
+all three the app happens to behave correctly — I checked each by hand — but the green came from an
+absence of evidence, which is the exact shape of the failure this document was written to end.
+
+**Two more graders measure the harness rather than the app.** R-5 grades `ms > 1000 + 900`, where the
+900 is `importFile`'s own `waitForTimeout(900)`. D-7 and N-4 both call `ctx.setOffline(true)` — the
+flag `rig.mjs`'s own comment says *"does NOT behave the way a dead network does"*. When I killed the
+server instead, D-7 still passed, but **N-4 flipped**: poisoned cache + genuinely dead origin = a
+blank page, and `?sw=off` recovered nothing until the network came back. That is the basement with no
+wifi, and in it the app is bricked.
+
+**Two structural notes.** The `REAL` fixtures live in `C:/Users/marcu/Downloads`, and the P-0
+negative control in `AppData/Local/Temp/codex-broken/dist` — both outside the repo. No stranger can
+reproduce a single run of this instrument, which §2 says is the point of it. And `serveDist` returns
+HTTP 200 with `index.html` for every missing path, so no local run can ever observe a 404; GitHub
+Pages does not behave that way.
+
+### The three questions
+
+**1. Does the app throw anything, anywhere reachable?** On the two real exports — full and thin,
+phone and tablet, local and live — **no**: zero `pageerror`, zero console errors, zero unhandled
+rejections, no boundary text, across every probe I wrote. On hostile-but-legal inner shapes, **yes**,
+on HEAD:
+
+```
+TypeError: Cannot read properties of null (reading 'name')
+TypeError: w.properties.map is not a function
+[Codex] Character crashed TypeError: w.properties.map is not a function
+TypeError: Cannot read properties of undefined (reading 'trim')
+Error: Minified React error #31 … object with keys {text}
+```
+
+and on the **live** build, which is what he actually opens:
+
+```
+TypeError: Cannot read properties of null (reading 'prepared')
+TypeError: Cannot read properties of null (reading 'level')
+TypeError: Cannot read properties of undefined (reading 'slice')
+TypeError: Cannot read properties of undefined (reading 'length')
+TypeError: Cannot read properties of undefined (reading 'map')
+Error: Minified React error #31 … object with keys {name}
+```
+
+The `w.properties.map` case renders the boundary notice verbatim: **"stopped … The rest of the app is
+still running."** That is the fourth time.
+
+**2. Criteria whose stated text is not what the code checks.** F-4 (says "ranked shortlist"; counts
+buttons). F-5 (says "mid-import and behind an error boundary"; checks neither). D-1 (says "export it
+again"; reads `localStorage`). D-4 (says "must not overwrite with stale state"; infers a write from a
+click landing and makes tab 2 click a *tab*). D-7 (says "satisfies D-1"; checks key presence only).
+R-5 (says "without freezing the UI"; times the harness's own sleep). R-9 (says "imported twice in a
+row"; skips when the control isn't found by a regex that cannot match the control). N-2 (says "with
+the AI endpoint black-holed"; black-holes nothing). N-4 (says "must not leave a permanently blank
+app"; computes `bricked` and then doesn't grade on it). E-3 (says "total origin usage"; counts
+localStorage only). V-1/V-2/V-3/V-4 (say "every visible text node"; skip 65 % of them).
+
+**3. False passes.** Seven, in order of how much they matter: **V-2, V-3, V-4, V-5, V-5b** — the app
+fails all five and the grader cannot see it. **D-4** — a second tab does clobber the first, silently,
+and both tabs then show the same wrong number. **N-4** — offline with a poisoned cache the app is
+blank and `?sw=off` does not save it. Plus **R-9 and N-2**, which are green for the right outcome but
+the wrong reason: the code proves nothing, and if the behaviour regressed the check would stay green.
+And above all of them, **P-1/P-2/P-4** — the thing on his phone is `73c45d8`, and it is broken in ten
+of fourteen ways I tried.
+
+---
+
+### What I did with it
+
+Every instrument defect it named, I checked in my own source and found true. Four amendments came
+straight out of this report — **A-12** (the +12 hit-box credit, deleted), **A-13** (the `onImage`
+skip, moved below the geometry tests), **A-14** (V-2b/V-3b, pixel-measured contrast for the 3140
+nodes that were never graded). Re-running V with the tightened instrument reproduces its numbers
+almost exactly: V-5 **6** controls at 170×40 (it said 6), V-5b **3** at 155×44 and 118×44 (it said
+3), V-4 **5** Cinzel nodes under 20px (it said 4; the fifth is `play/Combat «Choose Action»` at
+16px), V-2b **19** below 4.5:1 (it said 25), V-3b **19** numerals below 7:1 (it said 18). The
+remaining gaps are node-set differences between its screenshot sampler and mine, not disagreements
+about direction.
+
+**I did not upgrade S-3 on its say-so.** It measured 88/72/80 ms where I measured 104 ms worst and
+called the failure unreproducible — in my favour. A second opinion that turns a FAIL green is exactly
+the move §4 forbids, whoever offers it. S-3 stays FAIL until a run I can point at says otherwise.
+
+The two behavioural defects it found — **D-4** cross-tab clobber and **N-4** blank-and-unrecoverable
+offline — are behaviour, and behaviour is sealed. They are FAIL in §12 and written up unbuilt in §9.9
+and §9.10.
+
+The six new killing shapes are the most important thing in the report and are **not** folded into
+F-3, because F-3 is frozen at twelve. They are recorded in §9.11 as the twelve's replacement, and the
+honest reading of F-3 is now printed next to its PASS in §12.
 
 ## 12. Results
 
-*Criterion-by-criterion, PASS / FAIL / UNPROVEN.*
+Run of record: `node docs/plans/codex-v1/reference/prove-table.mjs` at **`60265a1`**, 745 s, P-0 green
+on all eight — plus the V family re-run at **`2d3da37`+A-12/13/14**, 70 s, which supersedes the V rows.
+`results-local.json` and `run-local.log` are committed beside the harness.
+
+**44 PASS · 15 FAIL · 3 UNPROVEN.**
+
+The five P-family rows are the ones that matter most, and four of the five are red. Read them first.
+
+| ID | Verdict | Number |
+|---|---|---|
+| P-0.1 – P-0.8 | **PASS** | instrument sound; 6/6 detectors load-bearing by deletion; harness fails `73c45d8` on 8/12 shapes and passes HEAD on the same 8. *Caveat from §11: the negative control lives outside the repo, so a stranger cannot re-run P-0.* |
+| F-1 | **PASS** | full real export → 7/7 screens carry his data, zero faults |
+| F-2 | **PASS** | thin real export (the shape that shipped broken 3×) → 7/7 |
+| F-3 | **PASS** *(read §9.11)* | 12 hostile shapes × 7 screens = 84 clean renders. Independently confirmed — and independently shown to be the survivors rather than a sample. Six further shapes of the same kind kill this build. |
+| F-4 | **UNPROVEN** | the check counts buttons; "ranked shortlist" is graded by no line of code |
+| F-5 | **PASS** | Veil on 7/7 both modes; verified further as present mid-import, hit-testable, and alive behind a forced boundary |
+| F-6 | **PASS** | no horizontal scroll on any screen |
+| D-1 | **PASS** | export → 36/36 keys deep-equal on the full file, 19/19 on the thin |
+| D-2 | **PASS** | three cold reloads byte-identical |
+| D-3 | **PASS** | every refusal path leaves the roster untouched |
+| **D-4** | **FAIL** | two tabs: 35 → spend 5 → 30 → stale tab spends 5 → **30**. Correct answer 25. One write silently lost, both tabs then showing the same wrong number. §9.9 |
+| D-5 | **PASS** | forced quota failure raises a real alarm; stored character intact |
+| D-6 | **PASS** | destructive actions confirm, and the delete confirm names Nix |
+| D-7 | **PASS** | origin killed: export reachable in 2 taps, values deep-equal |
+| **S-1** | **FAIL** | cold launch, dead origin, 4× CPU → 2981 ms worst / 2852 median, against 2000. Independently 2946/2978/3043. Cause is `sw.js:132`, §9.8 |
+| S-2 | **PASS** | tab switch worst 152 ms, all 7 under 400 |
+| **S-3** | **FAIL** | spend input→paint 104 ms worst, against 100. §11 measured 88/72/80 and called it unreproducible; a FAIL is not upgraded on a second opinion |
+| S-4 | **UNPROVEN** | there is no undo control to grade. §9.2 |
+| S-5 | **PASS** | longest task 64 ms at 4× CPU, against 200 |
+| S-6 | **PASS** | CLS 0.0000 through a turn and a full scrolled walk |
+| R-1 – R-8 | **PASS** | eight bad-input paths, each refused in his own words, character intact. R-7's prototype payload proven inert by driving it past the guard |
+| R-9 | **UNPROVEN** | the check's regex cannot match the control it needs, so it asserted nothing. Driven by hand there is no duplicate roster key, but the healed pool reverts 30 → 35 and the announcement could not be established |
+| V-1 | **PASS** | 0 text nodes under 12px, now across all 4804 rather than 1664 |
+| V-2 / V-3 | **PASS** | 0 below 4.5:1 / 7:1 — **on the 1664 nodes with a divisible background.** The other 3140 are V-2b/V-3b |
+| **V-2b** | **FAIL** | **19** nodes below 4.5:1 measured off the painted pixels. Worst are condition names on play/Combat |
+| **V-3b** | **FAIL** | **19** numerals below 7:1 — AC `«18»` and HP `«67»` at 4.89:1, Lay on Hands `«35»` at 5.37:1. The exact values V-3's text names |
+| **V-4** | **FAIL** | **5** Cinzel nodes under 20px: «Choose Action» 16px, «Nix» 18px ×2, «Persona Quick Reference» 16px, a 14px numeral |
+| **V-5** | **FAIL** | **6** controls at a true 170×40, against the 44px floor. They were 182×52 until A-12 deleted the credit |
+| **V-5b** | **FAIL** | **3** turn controls at 44px tall against the 48px floor: two condition chips and Action Economy |
+| **V-6** | **FAIL** | **15** turn controls outside the bottom 60%. The structural fix is §9.1's bottom deck, unbuilt |
+| **V-6b** | **FAIL** | **13** controls covered by a fixed overlay at a scroll extreme |
+| **V-6c** | **FAIL** | **14** of the same on the iPad. Includes a Channel Divinity pip under the Veil pill at the scroll position the screen opens on |
+| V-7 | **PASS** *(unverifiable)* | the design gate ran and its verdict is in §8. §11 declined to re-run a judgement, correctly |
+| V-8 | **PASS** | 14 screenshots, 7 screens × 2 device sizes, in §10 |
+| N-1 | **PASS** | origin killed, cold boot: 7 screens + a spend persists + reload survives. 16 files precached, 12 served |
+| N-2 | **PASS** *(check is vacuous)* | independently: 4 requests left hanging on the AI endpoint, then a turn in 24 ms. The app passes; the grader intercepted nothing and proves nothing |
+| N-3 | **PASS** | zero third-party requests during boot and a full walk |
+| **N-4** | **FAIL** | with a genuinely dead origin and a poisoned cache the app is **0 characters of text**, and `?sw=off` recovers nothing until the network returns. The check used `setOffline`, which the rig's own comment says is invalid, and restored the network before testing the repair. §9.10 |
+| E-0 – E-4 | **PASS** | 200 actions: 0.0 % heap growth, 0 net DOM nodes, 0 errors, action 201 as fast as action 10. E-3 passes at a true 2545 KB of 4096 KB, not the 29 KB reported |
+| **P-1** | **FAIL** | deployed SHA is **`73c45d8`**. Graded SHA is `60265a1`. They are not the same and the gap is five days and nine commits |
+| **P-2** | **FAIL** | never run. There is no `results-live.json`. §11 ran F and R against the live URL by hand: **10 of 14 hostile shapes fault**, up to 14 dead screens |
+| P-3 | **PASS** | this document, frozen, with fourteen amendments logged old-text/new-text/reason |
+| **P-4** | **FAIL** | the last Pages deploy is 2026-08-18. Nothing has been deployed to check after |
+
+### The one sentence
+
+**The app on this machine is in better shape than it has ever been and the app on his phone is the
+build my own negative control is made of.** Eleven of the fifteen failures are things I can name,
+measure and hand to the next session; the four that matter tonight are P-1, P-2, P-4 and N-4, and
+three of those four close the moment `main` is pushed.
 
 ---
 

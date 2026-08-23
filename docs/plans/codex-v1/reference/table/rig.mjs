@@ -307,6 +307,11 @@ export const AUDIT_DOM = () => {
       onImage: bg.img,
       numeric: NUMERIC.test(t),
       y: Math.round(r.top), h: Math.round(r.height),
+      // Amendment A-14 — the ink colour (already alpha-composited) and the full
+      // rect, so V-2b/V-3b can go back to the painted pixels for the nodes whose
+      // background is a gradient and divide by what is actually behind the glyph
+      // instead of dropping them.
+      ink: eff, x: Math.round(r.left), w: Math.round(r.width),
     });
   }
 
@@ -315,9 +320,22 @@ export const AUDIT_DOM = () => {
     if (!visible(el)) continue;
     if (el.closest('[aria-hidden="true"]')) continue;
     const r = el.getBoundingClientRect();
-    // a control may reach the floor via padding on a wrapper it fills
-    const p = el.parentElement ? el.parentElement.getBoundingClientRect() : r;
-    const hit = { w: Math.max(r.width, Math.min(p.width, r.width + 12)), h: Math.max(r.height, Math.min(p.height, r.height + 12)) };
+    // Amendment A-12 — this used to read
+    //
+    //   const p = el.parentElement.getBoundingClientRect();
+    //   hit = { w: Math.max(r.width, Math.min(p.width, r.width + 12)), h: … }
+    //
+    // under the comment "a control may reach the floor via padding on a wrapper
+    // it fills". It does not. Padding belongs to the wrapper; a thumb that lands
+    // on it hits a div, and the button does not fire. That flat +12 was a credit
+    // the instrument handed every control on the way to comparing it against the
+    // 44px and 48px floors, and it is how six 170×40 buttons on play/Roleplay and
+    // three 44-tall turn controls on play/Combat were reported as passing. An
+    // independent verifier found it; I wrote it. It is the exact thing this
+    // document forbids — a check softened until the thing under it passed.
+    //
+    // The tappable area is the control's own border box. Nothing else.
+    const hit = { w: r.width, h: r.height };
     // CLIPPED — the third thing getBoundingClientRect() lies about. A collapsed
     // accordion is `grid-rows-[0fr]` over an `overflow-hidden` wrapper measuring
     // h=0; its children keep reporting their full unclipped boxes, so 60 of the
@@ -391,6 +409,73 @@ export const AUDIT_DOM = () => {
 };
 
 export const audit = page => page.evaluate(AUDIT_DOM);
+
+/* ── pixel contrast (amendment A-14) ──────────────────────────────────────────
+   bgOf() climbs the tree adding background COLOURS. When it meets a
+   background-IMAGE it cannot divide by anything, so it sets `img` and the node's
+   contrast comes back null. That was a reasonable admission of ignorance and a
+   catastrophic default: this app tints its cards with
+
+     linear-gradient(rgba(240,230,211,0.035), rgba(0,0,0,0.02))
+
+   — a 3.5%-alpha wash that reads as a flat panel — and the flag caught 3140 of
+   4804 text nodes. Two thirds of the app's contrast was never graded, and the
+   log line said so out loud while the criterion printed PASS.
+
+   The screen knows the answer. Screenshot the viewport, and for each node read
+   the pixels inside its box: the glyphs are a minority of a text line box, so
+   the modal colour IS the background, whatever painted it. The ink is already
+   known exactly — `eff`, the composited colour — so there is nothing to guess.
+   Colours are binned at 5 bits per channel so antialiasing does not split the
+   background across a thousand buckets, then averaged back to full precision
+   inside the winning bin.
+
+   This measures what his eye receives in a dim room, which is what V-2 and V-3
+   were always about. Costs one screenshot per scroll position. */
+export async function pixelContrast(page, nodes) {
+  const want = nodes.filter(n => n.ink && n.w >= 2 && n.h >= 2);
+  if (!want.length) return [];
+  const shot = (await page.screenshot({ type: 'png' })).toString('base64');
+  return page.evaluate(async ({ shot, want }) => {
+    const img = new Image();
+    img.src = 'data:image/png;base64,' + shot;
+    await img.decode();
+    const dpr = img.width / window.innerWidth;
+    const cv = document.createElement('canvas');
+    cv.width = img.width; cv.height = img.height;
+    const cx = cv.getContext('2d', { willReadFrequently: true });
+    cx.drawImage(img, 0, 0);
+    const lum = c => {
+      const f = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+      return 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2];
+    };
+    const ratio = (a, b) => {
+      const l1 = lum(a), l2 = lum(b);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    };
+    const out = [];
+    for (const n of want) {
+      const x = Math.round(n.x * dpr), y = Math.round(n.y * dpr);
+      const w = Math.round(n.w * dpr), h = Math.round(n.h * dpr);
+      // off-screen, or clipped by the viewport edge — no painted pixels to read
+      if (x < 0 || y < 0 || w < 2 || h < 2 || x + w > cv.width || y + h > cv.height) continue;
+      const d = cx.getImageData(x, y, w, h).data;
+      const bins = new Map();
+      for (let i = 0; i < d.length; i += 4) {
+        const k = ((d[i] >> 3) << 10) | ((d[i + 1] >> 3) << 5) | (d[i + 2] >> 3);
+        const b = bins.get(k);
+        if (b) { b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2]; }
+        else bins.set(k, { n: 1, r: d[i], g: d[i + 1], b: d[i + 2] });
+      }
+      let top = null;
+      for (const b of bins.values()) if (!top || b.n > top.n) top = b;
+      const bg = [Math.round(top.r / top.n), Math.round(top.g / top.n), Math.round(top.b / top.n)];
+      out.push({ t: n.t, size: n.size, numeric: n.numeric,
+        pixel: Math.round(ratio(n.ink, bg) * 100) / 100 });
+    }
+    return out;
+  }, { shot, want });
+}
 
 /* ── reporting ───────────────────────────────────────────────────────────── */
 
