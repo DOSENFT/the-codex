@@ -106,7 +106,11 @@ export function Layout({
               type="button"
               onClick={() => onModeChange('session')}
               className={cn(
-                'px-2.5 min-h-[44px] text-xs font-bold uppercase tracking-wider',
+                /* A-23: px-2.5 → px-2. Ten pixels across the two of them is
+                   exactly what the character-sheet button needed to reach a
+                   44px target instead of a 21px one. The label and the icon
+                   are untouched; only the air around them is tighter. */
+                'px-2 min-h-[44px] text-xs font-bold uppercase tracking-wider',
                 'flex items-center gap-1',
                 'transition-all duration-200 ease-forge',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -123,7 +127,11 @@ export function Layout({
               type="button"
               onClick={() => onModeChange('prep')}
               className={cn(
-                'px-2.5 min-h-[44px] text-xs font-bold uppercase tracking-wider',
+                /* A-23: px-2.5 → px-2. Ten pixels across the two of them is
+                   exactly what the character-sheet button needed to reach a
+                   44px target instead of a 21px one. The label and the icon
+                   are untouched; only the air around them is tighter. */
+                'px-2 min-h-[44px] text-xs font-bold uppercase tracking-wider',
                 'flex items-center gap-1',
                 'transition-all duration-200 ease-forge',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -156,7 +164,10 @@ export function Layout({
           </span>
         </div>
 
-        <div className="flex items-center gap-1">
+        {/* A-23: gap-1 → gap-0.5. The last six pixels. Each of these is a full
+            44px target in its own right, so the air between them is spacing,
+            not hit area, and it is the cheapest thing in this row to spend. */}
+        <div className="flex items-center gap-0.5">
           {/* Settings */}
           <button
             onClick={() => setSettingsOpen(true)}
@@ -197,15 +208,31 @@ export function Layout({
           >
             <HelpCircle size={18} aria-hidden />
           </button>
+          {/* A-23 — the class badge is off the phone, and it was taking the
+              button with it.
+
+              Measured at 390px with a real character: this header's content is
+              448px wide. The overflow is 58px, and all of it lands on this
+              button — 92px wide, of which 34 are on screen. The control that
+              opens the character sheet had 37% of its tap area, on all seven
+              screens, permanently. «Paladin» itself ran x=385..448 and was
+              simply not on the device.
+
+              The badge goes at phone width and comes back at `sm`. It is the
+              one thing in this cluster that is decoration: the class is on the
+              character sheet this very button opens, and on prep/Character. The
+              name stays, because that is the identity, and it is what tells you
+              which sheet you are looking at when the roster has more than one.
+              Nothing else in the header moves. */}
           <button
             onClick={() => setSheetOpen(true)}
-            className="flex items-center gap-2 min-h-[44px] cursor-pointer hover:opacity-80 transition-opacity"
-            aria-label="Open character sheet"
+            className="flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-1 cursor-pointer hover:opacity-80 transition-opacity"
+            aria-label={`Open character sheet for ${character.name}, ${character.class}`}
           >
             <span className="text-sm text-forge-1 truncate max-w-[80px]">
               {character.name}
             </span>
-            <Badge variant="eldritch">
+            <Badge variant="eldritch" className="hidden sm:inline-flex">
               {character.class}
             </Badge>
           </button>

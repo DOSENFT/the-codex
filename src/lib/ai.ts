@@ -105,28 +105,87 @@ export class AIError extends Error {
   }
 }
 
+/* ─── Where the page is served from decides whether Ollama can exist ──────────
+
+   THE DEFECT THIS BLOCK REPLACES, measured on the live site on 2026-08-22.
+   Opening Settings on https://dosenft.github.io/the-codex/ fired
+
+       GET https://dosenft.github.io/ollama/api/tags   →  404
+
+   on every visit, and a 404 on a subresource is a console error. The old
+   `getDefaultOllamaUrl` returned `${origin}/ollama` for any non-localhost host
+   under the belief that a same-origin proxy would be there to catch it. That
+   was true of the cloudflared tunnel it was written for. It is not true of
+   GitHub Pages, which is static file hosting and cannot proxy anything, so the
+   address the app invented for itself could never resolve. The app was probing
+   a URL it had made up.
+
+   And there is no address that WOULD have worked. The deployed page is https;
+   a browser refuses outright to let an https page fetch `http://<lan-ip>:11434`
+   or `http://localhost:11434`. Ollama is alive and well on the desktop — it
+   answers 200 all day — but it is unreachable from a page served the way this
+   one is served, and no amount of configuration changes that.
+
+   So the rule is now about the ORIGIN, not about a URL: Ollama is offered when
+   the page is served from the machine that could be running it, and otherwise
+   the app says so in a sentence and defaults to Gemini. It probes nothing it
+   has invented. Marcus can still type any address he likes into Settings — if
+   he stands up a tunnel that really does proxy Ollama over https, that is his
+   assertion to make and the app will use it. What the app will not do is
+   fabricate one and then report its own fiction as an error.
+   ------------------------------------------------------------------------- */
+
+/** Is the page being served from this player's own machine?
+ *
+ *  This is the only question that decides the default, because it is the only
+ *  question whose answer a browser will not override. */
+export function isLocallyServed(): boolean {
+  if (typeof window === 'undefined') return true   // node: tests, and the build
+  const host = window.location.hostname
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]'
+}
+
+/** Why Ollama is not on offer here, in one sentence for a person who does not
+ *  write software — or `null` when it IS on offer and there is nothing to say.
+ *
+ *  Two sentences rather than one because there are two genuinely different
+ *  situations and telling someone the wrong one is worse than telling them
+ *  nothing. A page served over https CANNOT reach a local Ollama and no typing
+ *  will fix it. A page served over plain http from another machine on the LAN
+ *  can, given the address — so it gets told that instead of being shut out. */
+export function ollamaBlockedReason(): string | null {
+  if (typeof window === 'undefined') return null
+  if (isLocallyServed()) return null
+  if (window.location.protocol === 'https:') {
+    return 'This page is served over https, and a page served that way is not allowed to reach an Ollama server running on your own machine. On this device, use a free Gemini key instead.'
+  }
+  return 'This page is not being served from your own machine, so there is no Ollama address it can work out for you. Type the address of your Ollama server below, or use a free Gemini key instead.'
+}
+
+/** The provider a device gets before anyone has chosen one. */
+export function getDefaultProvider(): AIProvider {
+  return isLocallyServed() ? 'ollama' : 'gemini'
+}
+
 /** Resolve the Ollama URL from where the app is actually being served.
  *
- *  No address is compiled in any more. On the desktop that runs the model,
- *  localhost. Everywhere else — the phone, the iPad, whatever host name the
- *  cloudflared tunnel invented this evening — the same-origin `/ollama` proxy,
- *  which is the only option that needs neither a CORS grant nor a LAN address
- *  that changes with the DHCP lease. Marcus can still type anything he likes
- *  into Settings; this is only what he gets before he does. */
+ *  No address is compiled in any more, and — since the 404 above — none is
+ *  invented either. Off the local machine this returns the empty string, which
+ *  every caller already treats as "not configured": no URL, no probe, no
+ *  request, and therefore no 404 to log. An empty string is an honest answer to
+ *  "what is the Ollama address here?" when there is no way to know. */
 export function getDefaultOllamaUrl(): string {
-  if (typeof window === 'undefined') return 'http://localhost:11434'
-  const host = window.location.hostname
-  if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:11434'
-  return `${window.location.origin}/ollama`
+  return isLocallyServed() ? 'http://localhost:11434' : ''
 }
 
 const CONFIG_KEY = 'codex-ai-config'
 
 function defaultConfig(): AIConfig {
+  const url = getDefaultOllamaUrl()
   return {
-    provider: 'ollama',
+    provider: getDefaultProvider(),
     geminiModel: 'gemini-2.0-flash',
-    ollamaUrl: getDefaultOllamaUrl(),
+    ollamaUrl: url || undefined,
     ollamaModel: 'gemma3-27b-abliterated:latest',
     fallbackEnabled: true,
   }
@@ -155,13 +214,36 @@ export function loadAIConfig(): AIConfig {
   const config = { ...defaultConfig(), ...parsed } as AIConfig
   // Migration: default fallback to true
   if (parsed.fallbackEnabled === undefined) config.fallbackEnabled = true
-  // Migration: swap a saved LAN address for the proxy when accessed remotely.
-  // Marcus's saved URL is otherwise left exactly as he typed it — this slice
-  // removed the baked-in address, it does not get to overwrite his.
-  if (config.ollamaUrl?.includes('192.168.') && typeof window !== 'undefined') {
-    const host = window.location.hostname
-    if (host !== 'localhost' && host !== '127.0.0.1' && !host.startsWith('192.168.')) {
-      config.ollamaUrl = `${window.location.origin}/ollama`
+
+  /* Migration: forget an address that cannot be reached from where we are.
+   *
+   * Fixing the default alone would have fixed nothing on the device that has
+   * the defect. Every phone and laptop that has already opened the live site
+   * has `{"provider":"ollama","ollamaUrl":"https://dosenft.github.io/ollama"}`
+   * sitting in its localStorage, written by the code above this one, and a
+   * saved value beats a default forever. So the stored value has to be dropped
+   * too, or the 404 outlives the fix.
+   *
+   * The previous version of this migration did the opposite — it REWROTE a
+   * saved LAN address INTO `${origin}/ollama`, manufacturing the very URL that
+   * 404s. That is why it is gone rather than adjusted.
+   *
+   * Scope is deliberately narrow. Only two kinds of address are dropped: the
+   * one the old code fabricated, and a private/loopback address that an https
+   * page is simply not permitted to open. Anything else Marcus typed is left
+   * exactly as he typed it — a tunnel that really does proxy Ollama is his
+   * call to make, and this function does not get to second-guess it. */
+  if (typeof window !== 'undefined' && !isLocallyServed()) {
+    const url = config.ollamaUrl ?? ''
+    const fabricated = url === `${window.location.origin}/ollama`
+    const unreachable = /^https?:\/\/(?:192\.168\.|10\.|127\.|localhost\b|\[?::1\]?)/i.test(url)
+    if (url && (fabricated || unreachable)) {
+      config.ollamaUrl = undefined
+      // A provider whose address we just dropped is not a provider. Move to
+      // the one that can actually work here, so the message he gets is "add a
+      // Gemini key" — which he can act on — rather than "no Ollama address",
+      // which on this device he cannot.
+      if (config.provider === 'ollama') config.provider = 'gemini'
     }
   }
   return config

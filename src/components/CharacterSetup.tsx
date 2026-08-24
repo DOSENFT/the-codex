@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
-import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, GEMINI_MODELS, type AIProvider } from '../lib/ai'
+import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, GEMINI_MODELS, type AIProvider } from '../lib/ai'
 import { generateId, type Character, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
 import { parseCharacterFile, formatList } from '../lib/import-character'
 import {
@@ -178,7 +178,9 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
   const [hitPointsMax, setHitPointsMax] = useState(45)
 
   // AI config state
-  const [aiProvider, setAiProvider] = useState<AIProvider>('ollama')
+  // Seeded from the origin, not from a constant: on a device that cannot reach
+  // an Ollama server at all, first-run setup must not open on Ollama.
+  const [aiProvider, setAiProvider] = useState<AIProvider>(getDefaultProvider)
   const [geminiKey, setGeminiKey] = useState('')
   const [geminiModel, setGeminiModel] = useState('gemini-2.0-flash')
   // Not an address. One machine's LAN IP was compiled in here, which meant
@@ -685,7 +687,9 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                         : 'bg-gold/[0.04] text-forge-2 hover:bg-gold/[0.08] hover:text-forge-1',
                     )}
                   >
-                    {p === 'gemini' ? 'Gemini (Free)' : 'Ollama (Local)'}
+                    {p === 'gemini'
+                      ? 'Gemini (Free)'
+                      : ollamaBlockedReason() ? 'Ollama (not here)' : 'Ollama (Local)'}
                   </button>
                 ))}
               </div>
@@ -765,12 +769,21 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
               </>
             ) : (
               <>
+                {/* First-run setup is the worst place to be handed a control
+                    that cannot work — he has no context yet for why it failed.
+                    Say it here, plainly, before he types. */}
+                {ollamaBlockedReason() && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-ember/10 border border-ember/25">
+                    <AlertTriangle size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
+                    <p className="text-xs text-ember">{ollamaBlockedReason()}</p>
+                  </div>
+                )}
                 <Input
                   icon={Server}
                   label="Ollama URL"
                   value={ollamaUrl}
                   onChange={(e) => setOllamaUrl(e.target.value)}
-                  placeholder="http://localhost:11434"
+                  placeholder={getDefaultOllamaUrl() || 'No address — nothing will be contacted'}
                 />
                 {/* Model picker */}
                 <div className="flex flex-col gap-1.5">

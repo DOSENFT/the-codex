@@ -85,7 +85,11 @@ export function AcademyPage({ character, onCharacterUpdate }: AcademyPageProps) 
       <Icon size={16} aria-hidden />
       {label}
       {badge !== undefined && badge > 0 && tab !== id && (
-        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-eldritch/20 text-eldritch-lit text-xs font-bold border border-eldritch/30">
+        /* The lit violet measured 6.55:1 on this pill: fine for a word, four
+           tenths short of the numeral floor — and the numeral is the whole
+           reason the dot is there. Cream on a violet ground keeps the signal
+           and clears the floor. */
+        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-eldritch/30 text-forge-0 font-mono text-xs font-bold border border-eldritch/50">
           {badge}
         </span>
       )}

@@ -1,0 +1,179 @@
+
+A-22  prep/Character and prep/Academy at 390x844 DPR3   C:/Users/marcu/Documents/Powerhouse/projects/the-codex/dist
+      floors: text 4.5:1 · numeral 7:1 · Cinzel 20px · control 44px (goal 48px)
+
+── prep/Character  (all sections open) ─────────────────
+     showing: Nix Changeling Paladin (Oath of the Hearth) · Level 7 AC 18 HP 67/67 PRO
+  V-2  text < 4.5:1  1 found   (275 text nodes)
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  6 found
+      4.89:1   12px  «18»  div > div.rounded-lg.bg-white/[0.03].border > span.text-xs.text-forge-2.uppercase  [pixel]
+      4.89:1   12px  «67»  div > div.rounded-lg.bg-white/[0.03].border > span.text-xs.text-forge-2.uppercase  [pixel]
+      5.15:1   14px  «7»  div > div.min-w-0 > p.text-sm.text-forge-2  [pixel]
+      6.12:1   12px  «0»  button.min-h-[52px].rounded-xl.border > div > span.rounded-full.border.text-xs  [pixel]
+      6.12:1   12px  «2»  button.min-h-[52px].rounded-xl.border > div > span.rounded-full.border.text-xs  [pixel]
+      6.12:1   12px  «0»  button.min-h-[52px].rounded-xl.border > div > span.rounded-full.border.text-xs  [pixel]
+  V-4  Cinzel < 20px  1 found
+        18px «Nix»  div > div.min-w-0 > h2.font-display.text-lg.font-bold
+  V-5  control < 44px  none   (98 controls)
+       band 68 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+          66x44 «Add STR saving throw proficiency»
+          44x44 «Study Strength»
+          66x44 «Add DEX saving throw proficiency»
+          44x44 «Study Dexterity»
+          66x44 «Add CON saving throw proficiency»
+          44x44 «Study Constitution»
+       read 264/275 nodes graded off painted pixels, 11 off the computed climb
+
+── prep/Academy    (Training) ──────────────────────────
+     showing: Level 1 0 XP 100 XP 0 Best: 0 0 sessions 21 cards due Complete quizzes a
+  V-2  text < 4.5:1  11 found   (73 text nodes)
+       3.5:1   12px  «Rolls a coin or small token between fingers when thi»  div > div > span.rounded-full.border.text-xs  [pixel]
+      3.54:1   12px  «Stands slightly in front of allies without realizing»  div > div > span.rounded-full.border.text-xs  [pixel]
+      3.55:1   12px  «Breathes through pain rather than vocalizing it»  div > div > span.rounded-full.border.text-xs  [pixel]
+      3.67:1   12px  «Physical Tic»  div > div.rounded-xl.border.text-center > span.rounded-full.border.text-xs  [pixel]
+       3.9:1   12px  «card»  div > div > span.rounded-full.border.font-medium  [pixel]
+       3.9:1   12px  «s»  div > div > span.rounded-full.border.font-medium  [pixel]
+       3.9:1   12px  «due»  div > div > span.rounded-full.border.font-medium  [pixel]
+      4.08:1   12px  «Adjusts gear that doesn't need adjusting — especiall»  div > div > span.rounded-full.border.text-xs  [computed]
+      4.08:1   12px  «Touches the hearthfire manifestation (floating ember»  div > div > span.rounded-full.border.text-xs  [computed]
+      4.08:1   12px  «Looks at exits before looking at people when enterin»  div > div > span.rounded-full.border.text-xs  [computed]
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  8 found
+       3.9:1   12px  «21»  div > div > span.rounded-full.border.font-medium  [pixel]
+      5.02:1   12px  «0»  div.min-w-[120px] > div > span.text-xs.text-forge-2.font-medium  [pixel]
+      5.02:1   12px  «100»  div.min-w-[120px] > div > span.text-xs.text-forge-2  [pixel]
+      5.19:1   12px  «0»  div > div.text-xs.text-forge-2 > span  [pixel]
+      5.19:1   12px  «0»  div > div.text-xs.text-forge-2 > span  [pixel]
+      5.19:1   12px  «1»  div.glass-card.transition-all.duration-300 > div > p.text-xs.text-forge-2.font-mono  [pixel]
+      5.19:1   12px  «17»  div.glass-card.transition-all.duration-300 > div > p.text-xs.text-forge-2.font-mono  [pixel]
+      6.58:1   12px  «21»  div.rounded-xl.bg-void-2/60.border > button.min-h-[44px].rounded-lg.text-sm > span.-top-1.-right-1.w-5  [pixel]
+  V-4  Cinzel < 20px  2 found
+        14px «1»  div > div.stat-frame > span.text-arcane.font-display.font-bold
+        16px «Persona Quick Reference»  button.min-h-[44px].text-left.active:scale-[0.99] > div > span.font-lore.text-base.font-semibold
+  V-5  control < 44px  none   (28 controls)
+       band 17 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+       113.3x44 «Training»
+       111.3x44 «Quizzes21»
+       111.3x44 «Accent»
+         171x44 «Study»
+         169x44 «In-Session»
+         316x44 «Persona Quick Reference»
+          … and 5 more
+       read 59/73 nodes graded off painted pixels, 14 off the computed climb
+
+── prep/Academy    (Quizzes) ───────────────────────────
+     showing: Level 1 0 XP 100 XP 0 Best: 0 0 sessions 21 cards due Complete quizzes a
+  V-2  text < 4.5:1  4 found   (57 text nodes)
+       3.9:1   12px  «card»  div > div > span.rounded-full.border.font-medium  [pixel]
+       3.9:1   12px  «s»  div > div > span.rounded-full.border.font-medium  [pixel]
+       3.9:1   12px  «due»  div > div > span.rounded-full.border.font-medium  [pixel]
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  5 found
+       3.9:1   12px  «21»  div > div > span.rounded-full.border.font-medium  [pixel]
+      5.02:1   12px  «0»  div.min-w-[120px] > div > span.text-xs.text-forge-2.font-medium  [pixel]
+      5.02:1   12px  «100»  div.min-w-[120px] > div > span.text-xs.text-forge-2  [pixel]
+      5.19:1   12px  «0»  div > div.text-xs.text-forge-2 > span  [pixel]
+      5.19:1   12px  «0»  div > div.text-xs.text-forge-2 > span  [pixel]
+  V-4  Cinzel < 20px  1 found
+        14px «1»  div > div.stat-frame > span.text-arcane.font-display.font-bold
+  V-5  control < 44px  none   (24 controls)
+       band 14 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+       111.3x44 «Training»
+       113.3x44 «Quizzes»
+       111.3x44 «Accent»
+       165.1x46 «Spell Knowledge»
+       156.2x46 «Combat Tactics»
+       148.7x46 «Rules Mastery»
+          … and 2 more
+       read 46/57 nodes graded off painted pixels, 11 off the computed climb
+
+── prep/Academy    (Accent) ────────────────────────────
+     showing: Level 1 0 XP 100 XP 0 Best: 0 0 sessions 21 cards due Complete quizzes a
+  V-2  text < 4.5:1  13 found   (283 text nodes)
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.68:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+      3.77:1   12px  «Fantasy»  div > div.shrink-0 > span.rounded-full.border.text-xs  [pixel]
+       3.9:1   12px  «card»  div > div > span.rounded-full.border.font-medium  [pixel]
+       3.9:1   12px  «s»  div > div > span.rounded-full.border.font-medium  [pixel]
+       3.9:1   12px  «due»  div > div > span.rounded-full.border.font-medium  [pixel]
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  6 found
+       3.9:1   12px  «21»  div > div > span.rounded-full.border.font-medium  [pixel]
+      5.02:1   12px  «0»  div.min-w-[120px] > div > span.text-xs.text-forge-2.font-medium  [pixel]
+      5.02:1   12px  «100»  div.min-w-[120px] > div > span.text-xs.text-forge-2  [pixel]
+      5.19:1   12px  «0»  div > div.text-xs.text-forge-2 > span  [pixel]
+      5.19:1   12px  «0»  div > div.text-xs.text-forge-2 > span  [pixel]
+      6.55:1   12px  «21»  div.rounded-xl.bg-void-2/60.border > button.min-h-[44px].rounded-lg.text-sm > span.-top-1.-right-1.w-5  [pixel]
+  V-4  Cinzel < 20px  26 found
+        14px «1»  div > div.stat-frame > span.text-arcane.font-display.font-bold
+        14px «Dwarven (Scottish-Inspired)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Elvish (Welsh/Ethereal)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Orcish (Guttural)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Noble Court (RP English)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Pirate (West Country)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Fey (Ethereal/Whimsical)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Infernal/Tiefling (Eastern European)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Draconic (Ancient/Resonant)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Goblinoid (Cockney-Influenced)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Undead/Lich (Hollow/Whispered)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Scottish Highland»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Irish (Southern)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Cockney (East London)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «RP English (Received Pronunciation)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «French-Accented English»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Germanic English»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Russian/Slavic English»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Nordic (Scandinavian)»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Appalachian»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Texan/Deep South»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «New York»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Australian»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Caribbean»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        14px «Arabic-Influenced English»  button.text-left.min-h-[44px].focus-visible:outline-2 > div > h4.font-display.text-sm.font-semibold
+        16px «Accent Library»  div > div > h3.font-display.text-base.font-semibold
+  V-5  control < 44px  none   (49 controls)
+       band 19 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+       111.3x44 «Training»
+       111.3x44 «Quizzes21»
+       113.3x44 «Accent»
+       102.8x44 «Library»
+          95x44 «Rapid»
+        93.8x44 «Forge»
+          … and 7 more
+       read 270/283 nodes graded off painted pixels, 13 off the computed climb
+
+  A-22 FAILS — 84 finding(s) at the enforced floors, 118 in the 44-47px advisory band
+
+  raw → docs/plans/codex-v1/reference/table/a22-before.json
+

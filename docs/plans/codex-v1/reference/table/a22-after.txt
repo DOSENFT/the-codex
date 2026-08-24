@@ -1,0 +1,100 @@
+
+A-22  prep/Character and prep/Academy at 390x844 DPR3   C:/Users/marcu/Documents/Powerhouse/projects/the-codex/dist
+      floors: text 4.5:1 · numeral 7:1 · Cinzel 20px · control 44px (goal 48px)
+
+── prep/Character  (all sections open) ─────────────────
+     showing: Nix Changeling Paladin (Oath of the Hearth) · Level 7 AC 18 HP 67/67 PRO
+  V-2  text < 4.5:1  1 found   (277 text nodes)
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  none
+  V-4  Cinzel < 20px  none
+  V-5  control < 44px  none   (98 controls)
+       band 68 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+          66x44 «Add STR saving throw proficiency»
+          44x44 «Study Strength»
+          66x44 «Add DEX saving throw proficiency»
+          44x44 «Study Dexterity»
+          66x44 «Add CON saving throw proficiency»
+          44x44 «Study Constitution»
+          … and 56 more
+       read 266/277 nodes graded off painted pixels, 11 off the computed climb
+
+── prep/Academy    (Training) ──────────────────────────
+     showing: Level 1 0 XP 100 XP 0 Best: 0 0 sessions 21 cards due Complete quizzes a
+  V-2  text < 4.5:1  1 found   (73 text nodes)
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  none
+  V-4  Cinzel < 20px  none
+  V-5  control < 44px  none   (28 controls)
+       band 17 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+       113.3x44 «Training»
+       111.3x44 «Quizzes21»
+       111.3x44 «Accent»
+         171x44 «Study»
+         169x44 «In-Session»
+         316x44 «Persona Quick Reference»
+          … and 5 more
+       read 62/73 nodes graded off painted pixels, 11 off the computed climb
+
+── prep/Academy    (Quizzes) ───────────────────────────
+     showing: Level 1 0 XP 100 XP 0 Best: 0 0 sessions 21 cards due Complete quizzes a
+  V-2  text < 4.5:1  1 found   (57 text nodes)
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  none
+  V-4  Cinzel < 20px  none
+  V-5  control < 44px  none   (24 controls)
+       band 14 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+       111.3x44 «Training»
+       113.3x44 «Quizzes»
+       111.3x44 «Accent»
+       165.1x46 «Spell Knowledge»
+       156.2x46 «Combat Tactics»
+       148.7x46 «Rules Mastery»
+          … and 2 more
+       read 46/57 nodes graded off painted pixels, 11 off the computed climb
+
+── prep/Academy    (Accent) ────────────────────────────
+     showing: Level 1 0 XP 100 XP 0 Best: 0 0 sessions 21 cards due Complete quizzes a
+  V-2  text < 4.5:1  1 found   (283 text nodes)
+      4.17:1   12px  «Paladin»  div > button.min-h-[44px].cursor-pointer.hover:opacity-80 > span.rounded-full.border.text-xs  [computed]
+  V-3  numeral < 7:1  none
+  V-4  Cinzel < 20px  none
+  V-5  control < 44px  none   (49 controls)
+       band 19 control(s) at 44-47px — the enforced floor, under the goal:
+        67.4x44 «Switch to session mode»
+          69x44 «Switch to prep mode»
+          44x44 «Open settings»
+          44x44 «Open The Toybox»
+          44x44 «Open mechanics reference»
+        91.7x44 «Open character sheet»
+       111.3x44 «Training»
+       111.3x44 «Quizzes21»
+       113.3x44 «Accent»
+       102.8x44 «Library»
+          95x44 «Rapid»
+        93.8x44 «Forge»
+          … and 7 more
+       read 270/283 nodes graded off painted pixels, 13 off the computed climb
+
+  A-22 FAILS — 4 finding(s) at the enforced floors, 118 in the 44-47px advisory band
+
+  raw → docs/plans/codex-v1/reference/table/a22-after.json
+

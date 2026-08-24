@@ -99,7 +99,11 @@ function Section({
         <div className="flex items-center gap-3">
           <Icon size={18} className="text-forge-1" aria-hidden />
           <span className="text-sm font-semibold text-forge-0">{title}</span>
-          {badge && <Badge variant="arcane">{badge}</Badge>}
+          {/* The tinted pill lifts its own background, so amber ink on it
+              measured 6.12:1 — under the 7:1 a numeral has to hold. The tint
+              still carries the category; the cream carries the count, which is
+              the part a tired person is reading. */}
+          {badge && <Badge variant="arcane" className="text-forge-0">{badge}</Badge>}
         </div>
         {isOpen ? (
           <ChevronUp size={16} className="text-forge-2" aria-hidden />
@@ -373,9 +377,17 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
             <User size={24} className="text-eldritch" aria-hidden />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-display text-lg font-bold text-forge-0 truncate">{character.name}</h2>
+            {/* text-xl, not text-lg: 18px is below the Cinzel floor in
+                tokens.css, and this is the one word on the screen that has to
+                win at arm's length. */}
+            <h2 className="font-display text-xl font-bold text-forge-0 truncate leading-tight">{character.name}</h2>
             <p className="text-sm text-forge-2">
-              {character.race} {character.class}{character.subclass ? ` (${character.subclass})` : ''} · Level {character.level}
+              {character.race} {character.class}{character.subclass ? ` (${character.subclass})` : ''} ·{' '}
+              {/* The level is a numeral, and a numeral is never dim (tokens.css).
+                  forge-2 measured 5.15:1 here; the tally ink clears the 7:1
+                  numeral floor and gives the line the one thing a player is
+                  actually asked for out loud. Same words, same order. */}
+              <span className="text-forge-1 font-semibold">Level {character.level}</span>
             </p>
           </div>
         </div>
@@ -771,7 +783,14 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                     <span className="text-xs font-mono font-semibold text-ember">{bestDamage}</span>
                   </div>
                   <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
-                    <span className="text-xs text-forge-2 uppercase block">AC {character.armorClass} / HP {character.hitPoints.max}</span>
+                    {/* The two numerals in this label measured 4.89:1 wearing
+                        the label ink. The words stay quiet; the numbers get the
+                        tally ink and the mono face, which is also how every
+                        other value in this grid is set. */}
+                    <span className="text-xs text-forge-2 uppercase block">
+                      AC <span className="font-mono text-forge-1">{character.armorClass}</span>
+                      {' / '}HP <span className="font-mono text-forge-1">{character.hitPoints.max}</span>
+                    </span>
                     <span className="text-xs font-semibold text-forge-0">{acAssessment}</span>
                   </div>
                 </div>

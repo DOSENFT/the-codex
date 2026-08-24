@@ -64,7 +64,11 @@ export function TrainingProgress({ profile }: TrainingProgressProps) {
           {/* Level badge */}
           <div className="stat-frame">
             <span className="text-xs text-forge-2">Level</span>
-            <span className="text-arcane font-display font-bold text-sm">
+            {/* Was font-display at 14px — six under the Cinzel floor, and the
+                display face is the wrong instrument for a readout anyway. The
+                mono face is what every other number in this card wears, and it
+                lines the level up with the streak frame beside it. */}
+            <span className="text-arcane font-mono font-bold text-base">
               {profile.level}
             </span>
           </div>
@@ -72,11 +76,15 @@ export function TrainingProgress({ profile }: TrainingProgressProps) {
           {/* XP progress */}
           <div className="flex-1 min-w-[120px]">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-forge-2 font-medium">
-                {profile.totalXP} XP
+              {/* Both numerals measured 5.02:1 in label ink. They are not the
+                  same rank, though: where you are is read every session, where
+                  you are going is read once. Cream for the first, tally for the
+                  second — both clear 7:1 and the pair now has an order. */}
+              <span className="text-xs font-medium text-forge-2">
+                <span className="font-mono text-sm font-bold text-forge-0">{profile.totalXP}</span> XP
               </span>
               <span className="text-xs text-forge-2">
-                {nextLevelXP} XP
+                <span className="font-mono text-forge-1">{nextLevelXP}</span> XP
               </span>
             </div>
             <div className="h-2.5 rounded-full bg-gold/[0.06] border border-bronze/25 overflow-hidden">
@@ -98,21 +106,34 @@ export function TrainingProgress({ profile }: TrainingProgressProps) {
 
         {/* Stats row: Best streak, sessions, due cards */}
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Words stay quiet, numbers do not. Both of these read 5.19:1 when
+              the whole line wears the label ink. */}
           <div className="flex items-center gap-1.5 text-xs text-forge-2">
             <Trophy size={13} className="text-ember" aria-hidden />
-            <span>Best: {profile.quizStreaks.best}</span>
+            <span>Best: <span className="font-mono text-forge-1">{profile.quizStreaks.best}</span></span>
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-forge-2">
             <Calendar size={13} className="text-arcane" aria-hidden />
-            <span>{profile.totalSessions} sessions</span>
+            <span><span className="font-mono text-forge-1">{profile.totalSessions}</span> sessions</span>
           </div>
 
+          {/* This was a Badge in the eldritch variant: 3.9:1, the dimmest thing
+              on the screen — and the only thing on it that tells a tired person
+              what to do next. Same pill shape and same violet signal, but the
+              count is cream and set in mono, so the one actionable number on
+              prep/Academy is now the loudest mark in this row. */}
           {dueCards.length > 0 && (
-            <Badge variant="eldritch" className="text-xs">
-              <BookOpen size={11} className="mr-1" aria-hidden />
-              {dueCards.length} card{dueCards.length !== 1 ? 's' : ''} due
-            </Badge>
+            <span className={cn(
+              'inline-flex items-center gap-1.5 select-none',
+              'rounded-full border border-eldritch/35 bg-eldritch/10 px-2.5 py-0.5',
+            )}>
+              <BookOpen size={12} className="text-eldritch-lit" aria-hidden />
+              <span className="font-mono text-sm font-bold leading-none text-forge-0">{dueCards.length}</span>
+              {/* The space is explicit: two sibling spans concatenate to
+                  "21cards due" for a screen reader otherwise. */}
+              <span className="text-xs leading-none text-forge-1">{' '}card{dueCards.length !== 1 ? 's' : ''} due</span>
+            </span>
           )}
         </div>
 

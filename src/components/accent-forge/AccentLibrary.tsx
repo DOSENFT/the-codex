@@ -120,7 +120,10 @@ export function AccentLibrary({ onSelectAccent }: AccentLibraryProps) {
           <Mic size={20} className="text-arcane" aria-hidden />
         </div>
         <div>
-          <h3 className="font-display text-base font-semibold text-forge-0">
+          {/* 16px was four under the Cinzel floor and, more to the point, the
+              same size as the twenty-four card titles under it — nothing said
+              which one was the room and which were the doors. */}
+          <h3 className="font-display text-2xl font-semibold text-forge-0 leading-tight">
             Accent Library
           </h3>
           <p className="text-xs text-forge-2">
@@ -205,12 +208,23 @@ export function AccentLibrary({ onSelectAccent }: AccentLibraryProps) {
                 )}
               >
                 {/* Title row */}
+                {/* Twenty-four of these ran at 14px in the display face: six
+                    under the Cinzel floor, and the name of the accent is the
+                    only thing on the card you are choosing between. 20px sits
+                    one step under the 24px section head above, so the column
+                    now has two ranks instead of one flat wall. */}
                 <div className="flex items-start justify-between gap-2 w-full">
-                  <h4 className="font-display text-sm font-semibold text-forge-0 leading-tight">
+                  <h4 className="font-display text-xl font-semibold text-forge-0 leading-tight">
                     {accent.name}
                   </h4>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge variant={categoryVariant(accent.category)}>
+                    {/* The eldritch variant carries Fantasy and measured
+                        3.68:1. Lit here, not in ui/Badge.tsx — that primitive
+                        is shared with surfaces another pass owns. */}
+                    <Badge
+                      variant={categoryVariant(accent.category)}
+                      className={accent.category === 'fantasy' ? 'text-eldritch-lit' : undefined}
+                    >
                       {categoryLabel(accent.category)}
                     </Badge>
                   </div>

@@ -246,7 +246,13 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
         >
           <div className="flex items-center gap-2.5">
             <User size={18} className="text-eldritch" aria-hidden />
-            <span className="font-lore text-base font-semibold text-forge-0">
+            {/* Was font-lore at 16px — four under the Cinzel floor. It does not
+                get raised to 20px: "Roleplay Coach" already owns the display
+                face on this screen, and a second 20px Cinzel line directly
+                under it would flatten the two into one rank. This is a
+                disclosure control, so it takes the body face and reads as
+                something you press. */}
+            <span className="font-body text-base font-semibold tracking-wide text-forge-0">
               Persona Quick Reference
             </span>
           </div>
@@ -260,7 +266,11 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
         {/* In-Session mode: show collapsed essential view */}
         {mode === 'session' && !personaOpen && (
           <div className="mt-3 flex flex-wrap gap-2 animate-fade-in">
-            <Badge variant="eldritch">{persona.defaultState.split('.')[0]}</Badge>
+            {/* Same two defects as the physical tics had, in the branch my
+                harness does not drive: a whole sentence inside a
+                `whitespace-nowrap` pill, in ink that measures 3.9:1. Allowed to
+                wrap, and lit. Declared unmeasured in the report. */}
+            <Badge variant="eldritch" className="whitespace-normal text-eldritch-lit">{persona.defaultState.split('.')[0]}</Badge>
             {persona.catchphrases && persona.catchphrases.length > 0 && (
               <Badge variant="arcane">
                 {persona.catchphrases.length} catchphrase{persona.catchphrases.length !== 1 ? 's' : ''}
@@ -287,13 +297,20 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
               <p className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-2">
                 Physical Tics
               </p>
-              <div className="flex flex-wrap gap-2">
+              {/* These were pills. A Badge is `whitespace-nowrap`, and a
+                  physical tic is a whole sentence, so at 390px each one ran off
+                  the right edge of the card with its tail cut off — and the
+                  eldritch variant put what survived at 3.5:1. They are a list,
+                  so they are set as one: same shape as Scene Instincts
+                  directly below, tally ink at 14px, nothing clipped. */}
+              <ul className="flex flex-col gap-1.5">
                 {persona.physicalTics.map((tic, i) => (
-                  <Badge key={i} variant="eldritch" className="cursor-default">
-                    {tic}
-                  </Badge>
+                  <li key={i} className="flex items-start gap-2 text-sm text-forge-1">
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-eldritch-lit" aria-hidden />
+                    <span>{tic}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
             {/* Scene Instincts - only in Study mode */}
@@ -713,6 +730,11 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
                 mode === 'session' && 'min-h-[88px] p-4',
               )}
             >
+              {/* The eldritch variant's own violet (#8b5cf6) measures 4.68:1
+                  against pure void and 3.67:1 once the pill lifts the ground
+                  under it. The lit violet is the same signal at a legible
+                  weight. Overridden here rather than in ui/Badge.tsx: that
+                  primitive is shared with surfaces another pass owns. */}
               <Badge
                 variant={
                   allMannerisms[flashcardIndex].type === 'Physical Tic'
@@ -721,6 +743,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
                       ? 'arcane'
                       : 'verdant'
                 }
+                className={allMannerisms[flashcardIndex].type === 'Physical Tic' ? 'text-eldritch-lit' : undefined}
               >
                 {allMannerisms[flashcardIndex].type}
               </Badge>
@@ -733,7 +756,9 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             </div>
 
             {/* Counter */}
-            <p className="text-xs text-forge-2 font-mono">
+            {/* "1 / 17" is a position, and a position is a numeral: 5.19:1 in
+                label ink, 8.55:1 in tally ink. */}
+            <p className="text-xs text-forge-1 font-mono">
               {flashcardIndex + 1} / {allMannerisms.length}
             </p>
 

@@ -22,7 +22,7 @@ import {
   ClipboardPaste,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
-import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, GEMINI_MODELS, type AIProvider } from '../lib/ai'
+import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, GEMINI_MODELS, type AIProvider } from '../lib/ai'
 import { useAI } from '../hooks/useAI'
 import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
 import { parseCharacterFile, formatList } from '../lib/import-character'
@@ -54,10 +54,16 @@ interface SettingsProps {
 
 export function Settings({ character, onCharacterUpdate, onResetCharacter, roster, onSwitchCharacter, onCreateNew }: SettingsProps) {
   /* ------ AI config state ------ */
-  const [provider, setProvider] = useState<AIProvider>('ollama')
+  /* Both of these are seeded from the ORIGIN, not from a constant. The old
+     `useState<AIProvider>('ollama')` meant that for the first frame — before
+     the mount effect below had read the saved config — a device that has never
+     been able to reach Ollama was nonetheless in the Ollama state, with a
+     fabricated URL, and the probe effect fired against it. Seeding it right is
+     what makes "no request" true from the first render rather than eventually. */
+  const [provider, setProvider] = useState<AIProvider>(getDefaultProvider)
   const [geminiKey, setGeminiKey] = useState('')
   const [geminiModel, setGeminiModel] = useState('gemini-2.0-flash')
-  const [ollamaUrl, setOllamaUrl] = useState(getDefaultOllamaUrl())
+  const [ollamaUrl, setOllamaUrl] = useState(getDefaultOllamaUrl)
   const [ollamaModel, setOllamaModel] = useState('gemma3-27b-abliterated:latest')
   const [fallbackEnabled, setFallbackEnabled] = useState(true)
 
@@ -312,6 +318,11 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   }, [character, onCharacterUpdate])
 
   /* ------ sections ------ */
+  /* `null` on the desktop that runs the model; a plain sentence anywhere else.
+     Computed per render rather than stored, because it is a fact about the URL
+     bar and nothing in this component can change it. */
+  const ollamaBlocked = ollamaBlockedReason()
+
   const renderAIConfig = () => (
     <GlassCard className="ornate-border">
       <OrnateHeader className="mb-5">AI Configuration</OrnateHeader>
@@ -335,7 +346,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                   : 'bg-gold/[0.04] text-forge-2 hover:bg-gold/[0.08] hover:text-forge-1',
               )}
             >
-              {p === 'gemini' ? 'Gemini' : 'Ollama'}
+              {p === 'gemini' ? 'Gemini' : ollamaBlocked ? 'Ollama (not here)' : 'Ollama'}
             </button>
           ))}
         </div>
@@ -417,28 +428,25 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       {/* Ollama config */}
       {provider === 'ollama' && (
         <div className="flex flex-col gap-4 mb-5">
+          {/* Say it before he types anything, not after a request fails.
+              What stood here was a button reading "Use built-in proxy
+              (recommended for remote access)" which set the URL to
+              `${origin}/ollama` — the address that 404s on GitHub Pages. It
+              recommended the defect. There is no proxy; it is gone. */}
+          {ollamaBlocked && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-ember/10 border border-ember/25">
+              <AlertTriangle size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
+              <p className="text-xs text-ember">{ollamaBlocked}</p>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <Input
               icon={Server}
               label="Ollama URL"
               value={ollamaUrl}
               onChange={(e) => setOllamaUrl(e.target.value)}
-              placeholder={getDefaultOllamaUrl()}
+              placeholder={getDefaultOllamaUrl() || 'No address — nothing will be contacted'}
             />
-            {typeof window !== 'undefined' && !window.location.hostname.startsWith('192.168.') && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !ollamaUrl.includes(window.location.origin) && (
-              <button
-                type="button"
-                onClick={() => setOllamaUrl(`${window.location.origin}/ollama`)}
-                className={cn(
-                  'flex items-center gap-2 min-h-[44px] px-3 rounded-lg text-left text-sm',
-                  'bg-verdant/10 border border-verdant/25 text-verdant',
-                  'transition-all duration-200 active:scale-[0.98]',
-                )}
-              >
-                <Wifi size={14} aria-hidden />
-                Use built-in proxy (recommended for remote access)
-              </button>
-            )}
           </div>
 
           {/* Model picker */}
@@ -489,7 +497,9 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
           <p className="text-xs text-forge-2 mt-0.5">
             {provider === 'ollama'
               ? 'Use Gemini automatically when Ollama is unreachable (away from home WiFi)'
-              : 'Use Ollama automatically when Gemini is unavailable'}
+              : ollamaBlocked
+                ? 'There is no second provider to fall back to on this device — Ollama cannot be reached from here.'
+                : 'Use Ollama automatically when Gemini is unavailable'}
           </p>
         </div>
         <button
@@ -581,7 +591,11 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
         </div>
       )}
 
-      {fallbackEnabled && provider === 'gemini' && (
+      {/* Only offer an Ollama address as the fallback where one could be used.
+          On the deployed site this box invited Marcus to type an address that
+          the browser would refuse to open — a control presented as though it
+          might work, over a thing that cannot. */}
+      {fallbackEnabled && provider === 'gemini' && !ollamaBlocked && (
         <div className="mb-5 p-3 rounded-xl bg-gold/[0.02] border border-bronze/20">
           <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-2">
             Fallback: Ollama
