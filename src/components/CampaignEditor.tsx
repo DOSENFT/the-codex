@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import type { Character, CampaignData, PartyMember, CampaignNPC, SessionNote } from '../lib/character'
-import { generateId, saveCharacter } from '../lib/character'
+import { generateId } from '../lib/character'
 import { createDefaultCampaign, saveCampaign, loadCampaign } from '../lib/campaign'
 import { GlassCard } from './ui/GlassCard'
 import { OrnateHeader } from './ui/OrnateHeader'
@@ -157,8 +157,12 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
     const newCampaign = createDefaultCampaign()
     saveCampaign(newCampaign)
     const updated = { ...character, campaignId: newCampaign.id }
+    /* A-19: `onCharacterUpdate` IS the save path. It was followed by a raw
+       `saveCharacter(updated)`, so this one mount wrote the same key twice —
+       the second write unguarded, and behind the hook's back. That is how a
+       stale tab erased another tab's spends by doing nothing but opening
+       Settings. One writer; same data, same key. */
     onCharacterUpdate(updated)
-    saveCharacter(updated)
     setCampaign(newCampaign)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [character.id])

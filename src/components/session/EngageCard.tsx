@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { Character, CampaignData, CustomRPHook } from '../../lib/character'
-import { saveCharacter, generateId } from '../../lib/character'
+import { generateId } from '../../lib/character'
 import { loadCampaign } from '../../lib/campaign'
 import { generateStaticHooks, shuffleHooks, type RPHook, type HookCategory } from '../../lib/rp-hooks'
 import { ActionCard } from './ActionCard'
@@ -165,7 +165,8 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
         ...character,
         customHooks: (character.customHooks ?? []).filter(ch => ch.id !== rawId),
       }
-      saveCharacter(updated)
+      // A-19: one writer. `onCharacterUpdate` saves; the raw `saveCharacter`
+      // that used to sit above it wrote the same key a second time, unguarded.
       onCharacterUpdate(updated)
     } else {
       // Session-only deletion for static hooks
@@ -189,8 +190,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
       ...character,
       customHooks: [...(character.customHooks ?? []), newHook],
     }
-    saveCharacter(updated)
-    onCharacterUpdate(updated)
+    onCharacterUpdate(updated)      // A-19: one writer — see handleDelete above
     setAddText('')
     setShowAddForm(false)
   }, [addText, addCategory, character, onCharacterUpdate])

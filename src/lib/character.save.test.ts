@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { saveCharacter, onCharacterSaveFailure, normalizeCharacter, characterStamp } from './character'
+import {
+  saveCharacter, onCharacterSaveFailure, normalizeCharacter, characterStamp,
+  loadCharacter, deleteCharacter, type Character,
+} from './character'
 
 /* ============================================================================
    A FAILED WRITE IS NOT A SAVE — for characters, not just the covenant.
@@ -120,56 +123,69 @@ describe('saveCharacter on a device that will not store', () => {
 
    Pins the defect measured under TABLE-READY D-4: two tabs, pool at 35, tab one
    spends twice and stores 25, tab two — stale since before that write — spends
-   once and stores 30. Every one of these fails against the pre-change code,
-   which took no `readAt` and wrote unconditionally.
+   once and stores 30. Last-write-wins is silent data loss.
 
-   The two tabs are simulated by holding a character object across a write made
-   by "someone else": that IS the bug. There is no timing here, no interleaving,
-   nothing racy — just an in-memory copy that stopped matching disk.
+   AMENDMENT A-19 rewrote this block. The first version threaded a `readAt`
+   string in from `useCharacter`, and independent verification found that only
+   three of its eight tests could tell the fixed code from the broken code —
+   the other five went red merely because a helper they imported did not exist
+   yet, which is a compile error wearing the costume of a regression test. It
+   also found the design itself wrong: three components write straight to
+   `saveCharacter` without passing through the hook, so the hook's record went
+   stale inside a SINGLE tab and refused good spends.
+
+   So: "what this tab has seen" now lives at the write, and the other window is
+   simulated the only way that is now honest — by writing to the store
+   DIRECTLY, behind `saveCharacter`'s back. That is exactly what another tab
+   looks like from in here. Every test below is red against `e4a8035`, and the
+   last four are red against `c2aa5bb` as well.
    ========================================================================== */
 describe('saveCharacter when another window has written since', () => {
-  beforeEach(() => { setStorage(fakeStorage().api) })
+  let store: Store
+  beforeEach(() => { const f = fakeStorage(); store = f.store; setStorage(f.api) })
   afterEach(() => {
     if (original) Object.defineProperty(globalThis, 'localStorage', original)
     else setStorage(undefined)
   })
 
-  /** What tab two is holding: a character read at time T, unchanged since. */
-  const readAtDisk = () => {
-    const c = nix()
-    saveCharacter(c)                       // c.updatedAt is now what disk holds
-    return { held: { ...c }, at: characterStamp('test-id')! }
+  /* Each test gets its own id. `seenOnDisk` is module state that outlives one
+     test — as it must, being a tab-lifetime record — so sharing an id across
+     tests would make them order-dependent. */
+  let n = 0
+  const fresh = () => normalizeCharacter({ name: 'Nix', level: 7 }, `d4-${++n}`)
+  const key = (c: Character) => 'codex-character-' + c.id
+
+  /** The other window: a write this tab cannot see happen. */
+  const otherWindowWrites = (c: Character, name: string) => {
+    store[key(c)] = JSON.stringify({ ...c, name, updatedAt: '2099-01-01T00:00:00.000Z' })
   }
 
-  it('refuses a write whose stamp is behind what is on disk', () => {
-    const { held, at } = readAtDisk()
-    saveCharacter({ ...held, name: 'the other window wrote this' })   // tab one
-    const result = saveCharacter({ ...held, name: 'the stale tab' }, at)
+  it('refuses a write when disk moved under this tab', () => {
+    const c = fresh()
+    saveCharacter(c)
+    otherWindowWrites(c, 'the other window wrote this')
+    const result = saveCharacter({ ...c, name: 'the stale tab' })
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.stale).toBe(true)
   })
 
   it('leaves the other window’s write intact — nothing is overwritten', () => {
-    const { store, api } = fakeStorage()
-    setStorage(api)
-    const c = nix()
+    const c = fresh()
     saveCharacter(c)
-    const at = characterStamp('test-id')!
-    const held = { ...c }
-    saveCharacter({ ...held, name: 'the other window wrote this' })
-    const onDisk = store['codex-character-test-id']
-
-    saveCharacter({ ...held, name: 'the stale tab' }, at)
-    expect(store['codex-character-test-id']).toBe(onDisk)
-    expect(store['codex-character-test-id']).toContain('the other window wrote this')
+    otherWindowWrites(c, 'the other window wrote this')
+    const onDisk = store[key(c)]
+    saveCharacter({ ...c, name: 'the stale tab' })
+    expect(store[key(c)]).toBe(onDisk)
+    expect(store[key(c)]).toContain('the other window wrote this')
   })
 
   it('tells the tab, in words that name the cause rather than blame the disk', () => {
     const heard: string[] = []
     const off = onCharacterSaveFailure(r => heard.push(r))
-    const { held, at } = readAtDisk()
-    saveCharacter({ ...held, name: 'the other window wrote this' })
-    saveCharacter({ ...held, name: 'the stale tab' }, at)
+    const c = fresh()
+    saveCharacter(c)
+    otherWindowWrites(c, 'the other window wrote this')
+    saveCharacter({ ...c, name: 'the stale tab' })
     off()
     expect(heard).toHaveLength(1)
     expect(heard[0]).toMatch(/another window/i)
@@ -177,34 +193,83 @@ describe('saveCharacter when another window has written since', () => {
   })
 
   it('allows the write when nothing has moved — the common case is untouched', () => {
-    const { held, at } = readAtDisk()
-    expect(saveCharacter({ ...held, name: 'same tab, next spend' }, at)).toEqual({ ok: true })
+    const c = fresh()
+    saveCharacter(c)
+    expect(saveCharacter({ ...c, name: 'same tab, next spend' })).toEqual({ ok: true })
   })
 
-  it('never refuses without a readAt — an import replaces the record on purpose', () => {
-    const { held } = readAtDisk()
-    saveCharacter({ ...held, name: 'the other window wrote this' })
-    expect(saveCharacter({ ...held, name: 'an imported file' })).toEqual({ ok: true })
-  })
-
-  it('never refuses when there is nothing on disk to conflict with', () => {
-    const fresh = normalizeCharacter({ name: 'Nix', level: 7 }, 'unseen-id')
-    expect(saveCharacter(fresh, '2020-01-01T00:00:00.000Z')).toEqual({ ok: true })
+  it('never refuses a record this tab has never seen', () => {
+    const c = fresh()
+    store[key(c)] = JSON.stringify({ ...c, updatedAt: '2099-01-01T00:00:00.000Z' })
+    expect(saveCharacter(c)).toEqual({ ok: true })
   })
 
   it('never refuses on an unreadable stored record — a guard must not be the outage', () => {
-    const { store, api } = fakeStorage()
-    setStorage(api)
-    store['codex-character-test-id'] = '{ not json'
-    expect(saveCharacter(nix(), '2020-01-01T00:00:00.000Z')).toEqual({ ok: true })
+    const c = fresh()
+    saveCharacter(c)
+    store[key(c)] = '{ not json'
+    expect(saveCharacter({ ...c, name: 'next spend' })).toEqual({ ok: true })
+  })
+
+  it('replacing: true overwrites a moved record, for a caller that means to', () => {
+    const c = fresh()
+    saveCharacter(c)
+    otherWindowWrites(c, 'the other window wrote this')
+    expect(saveCharacter({ ...c, name: 'deliberate replace' }, { replacing: true })).toEqual({ ok: true })
+    expect(store[key(c)]).toContain('deliberate replace')
+  })
+
+  /* ---- the four A-19 regression guards --------------------------------- */
+
+  it('a SECOND WRITER IN THIS TAB does not make the next save look foreign', () => {
+    /* The shape of CampaignEditor and EngageCard: some component calls
+       saveCharacter itself, then the ordinary spend path saves. Against
+       `e4a8035` the spend here was refused and Marcus was told another window
+       had changed his file — in a tab that was the only tab open. It cost him
+       a Lay on Hands charge every time he opened Settings. */
+    const c = fresh()
+    saveCharacter(c)
+    saveCharacter({ ...c, campaignName: 'auto-created on mount' } as Character)
+    const spend = saveCharacter({ ...c, name: 'the spend right after' })
+    expect(spend).toEqual({ ok: true })
+    expect(store[key(c)]).toContain('the spend right after')
+  })
+
+  it('raises no false alarm when this tab is the only writer', () => {
+    const heard: string[] = []
+    const off = onCharacterSaveFailure(r => heard.push(r))
+    const c = fresh()
+    saveCharacter(c)
+    saveCharacter({ ...c, campaignName: 'auto-created on mount' } as Character)
+    saveCharacter({ ...c, name: 'the spend right after' })
+    off()
+    expect(heard).toEqual([])
+  })
+
+  it('reloading after a refusal makes the retry work — the notice tells the truth', () => {
+    const c = fresh()
+    saveCharacter(c)
+    otherWindowWrites(c, 'the other window wrote this')
+    expect(saveCharacter({ ...c, name: 'refused' }).ok).toBe(false)
+    const reloaded = loadCharacter(c.id)!          // what the notice asks him to do
+    expect(saveCharacter({ ...reloaded, name: 'do it again here' })).toEqual({ ok: true })
+    expect(store[key(c)]).toContain('do it again here')
+  })
+
+  it('deleting a character forgets it, so re-using the id is not refused on a ghost', () => {
+    const c = fresh()
+    saveCharacter(c)
+    deleteCharacter(c.id)
+    store[key(c)] = JSON.stringify({ ...c, updatedAt: '2099-01-01T00:00:00.000Z' })
+    expect(saveCharacter({ ...c, name: 'a new sheet on the same id' })).toEqual({ ok: true })
   })
 
   it('characterStamp reads back what landed, not what the caller passed in', () => {
-    const c = nix()
+    const c = fresh()
     c.updatedAt = '1999-01-01T00:00:00.000Z'
     saveCharacter(c)
-    expect(characterStamp('test-id')).toBe(c.updatedAt)     // saveCharacter restamped it
-    expect(characterStamp('test-id')).not.toBe('1999-01-01T00:00:00.000Z')
+    expect(characterStamp(c.id)).toBe(c.updatedAt)     // saveCharacter restamped it
+    expect(characterStamp(c.id)).not.toBe('1999-01-01T00:00:00.000Z')
     expect(characterStamp('no-such-id')).toBeNull()
   })
 })

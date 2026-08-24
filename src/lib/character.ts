@@ -476,6 +476,28 @@ function put(key: string, value: string): SaveOutcome {
    refuses saves on a hunch is worse than the bug it was added for.
    --------------------------------------------------------------------------- */
 
+/** What THIS TAB has last seen on disk for each character id.
+ *
+ *  AMENDMENT A-19 — this was a `readAt` string threaded in from `useCharacter`,
+ *  and independent verification proved that wrong in a way the two-tab browser
+ *  proof could not see. Four call sites write directly and never touch the
+ *  hook: `EngageCard` ×2, `CampaignEditor`, and `migrateFromLegacy` below.
+ *  Those writes moved disk without moving the hook's ref, so the next ordinary
+ *  spend IN THE SAME TAB was refused as a foreign write and Marcus was told a
+ *  window that does not exist had changed his file. Opening Settings mounts
+ *  `CampaignEditor`, so it cost him a Lay on Hands charge every single time.
+ *
+ *  Keeping the record here, at the write, means it cannot go stale no matter
+ *  who calls. The guard stops depending on the convention "everything goes
+ *  through the hook" — a convention four call sites already broke, that
+ *  neither the types nor a test enforced, and that nothing stops a fifth from
+ *  breaking tomorrow. It also means the three bypassing call sites are now
+ *  guarded against the other tab for free, which they were not.
+ *
+ *  Module-level and deliberately not persisted: it describes what this tab
+ *  has observed, and a tab that has observed nothing must never refuse. */
+const seenOnDisk: Record<string, string> = {}
+
 /** The stored `updatedAt` for `id`, or null if there is nothing comparable. */
 function storedStamp(id: string): string | null {
   const store = globalThis.localStorage
@@ -535,16 +557,26 @@ const STALE_REASON =
  * cannot be persisted must still leave the sheet on screen and the previous
  * save on disk.
  *
- * `readAt` is the `updatedAt` the caller last saw on disk. Pass it and the
- * write is refused when someone else has written since — `{ stale: true }`,
- * so the caller can reload rather than treat it as a storage fault. Omit it
- * and the write is unconditional, which is what a caller replacing the record
- * wholesale (a fresh character, an imported file) actually means to do.
+ * The write is refused when disk has moved since this tab last saw it —
+ * `{ stale: true }`, so the caller can reload rather than treat it as a
+ * storage fault. No argument is needed for that: `seenOnDisk` above is kept by
+ * this function, so every call site is guarded and none of them can hold a
+ * stale idea of what disk contains.
+ *
+ * `replacing: true` writes unconditionally, for a caller that means to replace
+ * the record wholesale no matter what is under it. Nothing in the app passes
+ * it today — an import from this tab is not in conflict with this tab — and it
+ * exists so that a future caller which genuinely does mean "overwrite" has to
+ * say so in the source rather than by omitting an argument.
  */
-export function saveCharacter(character: Character, readAt?: string): SaveOutcome {
-  if (readAt) {
+export function saveCharacter(
+  character: Character,
+  opts: { replacing?: boolean } = {},
+): SaveOutcome {
+  const seen = seenOnDisk[character.id]
+  if (!opts.replacing && seen) {
     const on = storedStamp(character.id)
-    if (on && on !== readAt) {
+    if (on && on !== seen) {
       const refused: SaveOutcome = { ok: false, reason: STALE_REASON, stale: true }
       announceFailure(STALE_REASON)
       return refused
@@ -556,6 +588,9 @@ export function saveCharacter(character: Character, readAt?: string): SaveOutcom
     announceFailure(wrote.reason)
     return wrote
   }
+  // The bytes are down, so this IS now what disk holds — recorded before the
+  // roster, because a roster failure does not un-write the character.
+  seenOnDisk[character.id] = character.updatedAt
   // The roster is an index, not the character. If it cannot be updated the
   // character itself is still safely on disk, so this is reported, not fatal.
   const indexed = updateRosterEntry(character)
@@ -896,7 +931,13 @@ export function loadCharacter(id: string): Character | null {
   const saved = localStorage.getItem(CHAR_PREFIX + id)
   if (!saved) return null
   try {
-    return normalizeCharacter(JSON.parse(saved) as Partial<Character>, id)
+    const character = normalizeCharacter(JSON.parse(saved) as Partial<Character>, id)
+    // Reading IS seeing. This is what makes a refusal recoverable: the caller
+    // reloads from disk, and the next attempt is measured against what it just
+    // read rather than against the state it was holding when it lost.
+    const at = storedStamp(id)
+    if (at) seenOnDisk[id] = at
+    return character
   } catch {
     return null
   }
@@ -904,6 +945,9 @@ export function loadCharacter(id: string): Character | null {
 
 /** Delete a character by id — removes per-id key, training data, and roster entry. */
 export function deleteCharacter(id: string): void {
+  // Forget what we saw, or re-creating this id later would be measured against
+  // a record that no longer exists and refused on a ghost.
+  delete seenOnDisk[id]
   localStorage.removeItem(CHAR_PREFIX + id)
   localStorage.removeItem(`codex-training-${id}`)
   const roster = loadRoster().filter(e => e.id !== id)

@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   Character, RosterEntry,
-  loadCharacter, saveCharacter, deleteCharacter, onCharacterSaveFailure, characterStamp,
+  loadCharacter, saveCharacter, deleteCharacter, onCharacterSaveFailure,
   loadRoster, getActiveId, setActiveId, migrateFromLegacy,
   expendSpellSlot, restoreSpellSlot, longRest, shortRest,
   toggleSpellPrepared, getPreparedSpells,
@@ -20,24 +20,16 @@ export function useCharacter() {
 
   useEffect(() => onCharacterSaveFailure(setSaveError), [])
 
-  /* What this tab last saw on disk, per character id — the other half of the
-     refuse-and-reconcile note over `saveCharacter`.
+  /* AMENDMENT A-19 — "what this tab last saw on disk" used to live here, in a
+     ref this hook maintained, and it was the wrong place for it. Three
+     components and one migration call `saveCharacter` without ever passing
+     through here, so their writes moved disk while this ref stood still, and
+     the next spend in the SAME TAB was refused with a notice blaming a second
+     window that did not exist. Opening Settings did it every time.
 
-     A ref and not state, and read here rather than off the incoming character,
-     for two separate reasons. A ref because `update` is handed down as
-     `setCharacter` and is depended on by every spend callback; giving it a
-     changing identity every time a character changes would churn a tree that
-     currently has one stable writer. And read from here because the incoming
-     character is not always derived from what this tab loaded — an imported
-     file arrives carrying the `updatedAt` of whatever device wrote it, and
-     comparing THAT against disk would refuse a perfectly good import. This
-     records what this tab read; that is the only thing a conflict is about. */
-  const readAt = useRef<Record<string, string>>({})
-  const remember = useCallback((id: string) => {
-    const at = characterStamp(id)
-    if (at) readAt.current[id] = at
-    else delete readAt.current[id]   // nothing comparable on disk: never refuse
-  }, [])
+     It now lives beside the write, in `lib/character.ts`. This hook does not
+     track it, cannot desynchronise from it, and no future call site has to
+     remember to come through here to stay correct. */
 
   // Boot: migrate legacy, load roster, restore active character
   useEffect(() => {
@@ -47,13 +39,10 @@ export function useCharacter() {
     const activeId = getActiveId()
     if (activeId) {
       const char = loadCharacter(activeId)
-      if (char) {
-        remember(char.id)
-        setCharacterState(char)
-      }
+      if (char) setCharacterState(char)
     }
     setReady(true)
-  }, [remember])
+  }, [])
 
   // Refresh roster from storage
   const refreshRoster = useCallback(() => {
@@ -68,10 +57,11 @@ export function useCharacter() {
    * invisible. `saveCharacter` has already announced the reason, so the tab is
    * told; here it just stops being wrong. */
   const update = useCallback((char: Character) => {
-    const outcome = saveCharacter(char, readAt.current[char.id])
+    const outcome = saveCharacter(char)
     if (!outcome.ok && outcome.stale) {
+      // `loadCharacter` is also what re-syncs the record of what disk holds, so
+      // the retry this notice asks for is measured against what was just read.
       const onDisk = loadCharacter(char.id)
-      remember(char.id)
       if (onDisk) {
         setActiveId(onDisk.id)
         setCharacterState(onDisk)
@@ -79,31 +69,28 @@ export function useCharacter() {
       setRoster(loadRoster())
       return
     }
-    remember(char.id)
     setActiveId(char.id)
     setCharacterState(char)
     // Refresh roster to reflect any name/level/class changes
     setRoster(loadRoster())
-  }, [remember])
+  }, [])
 
   // Create a new character and make it active
   const createCharacter = useCallback((char: Character) => {
-    saveCharacter(char)   // no `readAt`: a new sheet is not in conflict with anything
-    remember(char.id)
+    saveCharacter(char)
     setActiveId(char.id)
     setCharacterState(char)
     setRoster(loadRoster())
-  }, [remember])
+  }, [])
 
   // Switch to an existing character by id
   const switchCharacter = useCallback((id: string) => {
     const char = loadCharacter(id)
     if (char) {
-      remember(id)
       setActiveId(id)
       setCharacterState(char)
     }
-  }, [remember])
+  }, [])
 
   // Clear active character (go to setup screen without deleting anything)
   const clearActive = useCallback(() => {
@@ -119,14 +106,13 @@ export function useCharacter() {
     if (remaining.length > 0) {
       const next = loadCharacter(remaining[0].id)
       if (next) {
-        remember(next.id)
         setActiveId(next.id)
         setCharacterState(next)
         return
       }
     }
     setCharacterState(null)
-  }, [character, remember])
+  }, [character])
 
   // Spell slot management
   const useSlot = useCallback((level: number) => {
