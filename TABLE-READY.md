@@ -14,6 +14,28 @@ node docs/plans/codex-v1/reference/prove-table.mjs --live   # https://dosenft.gi
 
 ## Amendments
 
+**U-1 · 2026-08-23 · § 3 — BEHAVIOUR UNSEALED, for exactly three items, by Marcus.** This is the one
+kind of change this document cannot make for itself, so it is logged first and separately.
+
+*Old text (§ 3):* **"Frozen — behaviour is sealed for this run.** Design work moves presentation,
+composition, hierarchy, type, motion and rhythm. It never moves what a feature does. Behaviour
+changes I believe are necessary are written up in § 9 and left **unbuilt**."
+
+*New text (§ 3):* the same paragraph, plus: **"Unsealed 2026-08-23 by Marcus, for § 9.9, § 9.10 and
+§ 9.11 only.** Those three are built. Every other item in § 9 stays unbuilt, and the seal is
+otherwise unchanged: nothing else in this run moves what a feature does."
+
+*Reason:* the seal exists so that a design pass cannot quietly become a rewrite. It is not a reason
+to ship a known data-loss bug. § 9.9 (a second tab silently eats a spend), § 9.10 (offline with a
+poisoned cache the app is a brick and the kill switch cannot save it) and § 9.11 (a present-but
+wrong-typed field kills seven screens) were the three § 9 items whose *absence* falsifies a
+criterion — D-4, N-4 and F-3b respectively — and all three are silent-failure or
+unrecoverable-at-the-table classes. Asked directly, Marcus unsealed those three and no others. Each
+was already written up in § 9 with its cost and what it buys **before** approval was sought, which is
+the whole point of writing them up rather than building them. The § 9 entries are now marked BUILT
+with the evidence, and are otherwise left exactly as written so the record of what was proposed
+survives the record of what was done.
+
 **A-1 · 2026-08-23 · § 5 — two criteria ADDED (P-0.7, P-0.8).** Nothing softened, nothing removed.
 P-0.1–P-0.6 were written to be calibrated against *injected* defects. While building the harness a
 real known-bad build became available — `73c45d8`, the SHA deployed at the live URL right now — so
@@ -195,6 +217,260 @@ nodes below 4.5:1**, worst of them condition names on play/Combat; **V-3b FAIL �
 7:1**, including AC `«18»` and HP `«67»` at 4.89:1 and the Lay on Hands pool at 5.37:1. Those are the
 exact numbers V-3's text says he reads under pressure.*
 
+**A-15 · 2026-08-23 · § 4 — the HARNESS is hardened. No criterion text changed, no threshold moved.**
+`rig.mjs`'s `importFile` opened a file chooser with no wait for the control and no retry: it called
+`page.waitForEvent('filechooser')`, clicked, and set the files. The Import button is in the DOM
+before React has attached its handler, so a click can land on a live, visible, enabled element and do
+nothing at all. F-3b opens seventeen contexts back to back; under that load the race lost and the
+harness reported a 30-second Playwright timeout. **Now: wait for the control to be visible, allow
+exactly one retry, and if neither click opens a chooser, throw.** *Reason: that failure is a harness
+flake wearing the costume of a product failure — this project's oldest problem pointed the other way,
+and a proof that cries wolf gets ignored exactly like a proof that never cries at all. Fixed in the
+rig, not worked around in the criterion; nothing about what F-3b asks of the app changed.*
+
+**A-16 · 2026-08-23 · § 6 N-4 — grading TIGHTENED, and one criterion ADDED (N-4b).** N-4's text is
+unchanged. What changed is the situation it is asked in. **Old method:** `ctx.setOffline(true)`, a
+CDP flag whose own comment in `rig.mjs` says it does not behave like a dead network — and, fatally,
+the network was **restored before `?sw=off` was tried**, so the check graded the network coming back.
+**New method:** install and precache from a server the harness owns, kill the server, poison the
+active shell cache *after* the origin is dead, and grade both the cold boot and the `?sw=off` boot
+with the network still gone, start to finish. **N-4b (ADDED):** with the origin **up**, `?sw=off`
+must still leave zero registrations, zero caches and zero faults. *Reason: N-4 is the criterion for
+"a basement with no wifi" and it was being graded in a room with wifi. Tightening it alone would have
+handed me a cheap pass — a worker that simply never tears down satisfies N-4 and destroys the kill
+switch — so N-4b pins the other side. Effect: **N-4 went from a false PASS to FAIL** (`BLANK` on cold
+boot, `BLANK | HOLLOW(/Nix/)` on `?sw=off`) and back to PASS only after § 9.10 was built. § 11 found
+all three defects in the old grader; I verified each against the source before rewriting it.*
+
+**A-17 · 2026-08-23 · § 6 D-4 — grading TIGHTENED. The criterion text is unchanged.** The old block
+was unsound in three ways and **could not have failed**, which is why it was green throughout a
+period when the bug it names was sitting in `useCharacter`. *Old implementation:* `const clobbered =
+wrote && after1 !== after2`, where `wrote` was true because **a click landed**, not because anything
+was stored; where tab two's action was **clicking a *tab***, which triggers no save at all; and where
+both tabs spent the same amount from the same pool — so a clobber and a correct refusal produce the
+identical stored number, 30 either way. *New implementation:* tab one spends **twice** (35 → 25) and
+the stale tab spends once, which makes the two outcomes arithmetically distinguishable — 30 is a
+number reachable only by a lost write. It additionally requires that the stale tab **is told**, that
+its screen **stops showing a stale pool**, and that it **can spend again afterwards**, because a tab
+that refuses for ever is a brick rather than a fix. Proven to discriminate by `table/control-d4.mjs`,
+which runs the identical scenario against `c2aa5bb`, the commit immediately before the fix: **PREV
+stores 30, is not told, does not reconcile — FAIL. HEAD stores 25, is told, reconciles, spends again
+to 20 — PASS.** *Reason: § 11 found this clobber by hand on a build the grader had just called clean.
+A check that cannot fail is not a check, and this one was three separate kinds of that.*
+
+**A-18 · 2026-08-23 · § 6 F — two criteria ADDED (F-3b, F-3c). F-3 is untouched at twelve shapes.**
+F-3's twelve hostile shapes are all fields that are **missing**. The fourth shape of this project's
+oldest bug is a field that is **present and the wrong type**, which `?? []` cannot see. **F-3b
+(ADDED):** seventeen wrong-type shapes — `spells: [null]`, `weapons: [{properties: "finesse"}]`,
+`spells: [{description: {text: "x"}}]`, `persona` fields as scalars, `spells` not a list, and twelve
+more — each imported alone, reloaded, and walked across all seven screens. **F-3c (ADDED):** a file
+that had to be altered on the way in must **say so before he accepts it** — the import gate names
+what was changed, and the check deliberately does *not* click "Import anyway". Proven to discriminate
+by `table/control-f3b.mjs`: **7 of 17 fault on `3d9b351`, 0 of 17 on HEAD**, and that 7 is stated as a
+**lower bound** because the control reads only the landing screen. *Reason: F-3 was frozen at twelve
+and stays frozen at twelve — new shapes went into new criteria, per § 4. Adding them to F-3 would
+have rewritten a criterion that had already been reported against.*
+
+**A-19 · 2026-08-23 · § 9.9 — a CLAIM CORRECTED, and the fix it claimed for REPLACED.** This is the
+worst entry in this file and it is deliberately first among the late ones.
+
+*Old text (§ 9.9 BUILT block):* "*Proven:* **D-4 PASS** under the tightened grading of A-17, **8 new
+unit tests** (353 total)…"
+
+*New text:* "*Proven:* **D-4 PASS** under the tightened grading of A-17, **12 unit tests, of which 4
+are the A-19 regression guards** (376 total)…"
+
+*Reason:* independent verification measured the eight tests that sentence was written about. **Only
+three of the eight could tell the fixed code from the broken code.** The other five failed against
+`c2aa5bb` with `TypeError: (0, characterStamp) is not a function` — they imported a helper that did
+not exist yet. That is a compile error wearing the costume of a regression test, and counting it as
+evidence is the same act as the green checks in this project's founding story. The commit message
+for `e4a8035` says "every one red against the pre-change code". It was not true when written.
+
+The same verification then found the fix itself wrong, in a way the two-tab browser proof was
+structurally unable to see. `e4a8035` kept "what this tab last saw on disk" in a ref inside
+`useCharacter`. Three components and one migration call `saveCharacter` directly and never pass
+through that hook — `CampaignEditor` on mount, `EngageCard` twice, `migrateFromLegacy`. Measured:
+
+```
+ONE TAB, NO SECOND WINDOW    pool 35 → open Settings → one Heal 5 → still 35, and the player is
+                             told another window changed his file. Opening Settings mounts
+                             CampaignEditor, which writes; disk moved, the hook's ref did not.
+                             It cost a Lay on Hands charge every single time.
+TWO TABS, STILL CLOBBERING   stale tab's write refused → the hook reconciles by calling
+                             loadCharacter, which re-syncs the ref → the component's own raw
+                             saveCharacter then sails through carrying the pre-refusal object.
+                             disk 25 → 35. The exact loss D-4 exists to stop, on a path D-4
+                             never measured.
+```
+
+So D-4 as shipped was a **net regression at the table**: it stopped the one path it was measured on,
+left the same silent clobber live on two others, and added a new one-tab defect where a good spend is
+discarded and the player is told a lie about why. The fix is structural rather than conventional —
+the record of what disk holds moved out of the hook and into `lib/character.ts` beside the write, so
+a call site cannot bypass it by not knowing about it, and `{ replacing: true }` must be said in
+source rather than achieved by omitting an argument. Two controls, both watched failing first:
+
+```
+table/control-a19.mjs    one tab: import, open Settings, one Heal 5
+                         e4a8035  35 → 35, "changed in another window"   FAIL
+                         58187ed  35 → 30, no alarm                      PASS
+table/_a19-clobber.mjs   two tabs, stale tab acts via a bypassing site
+                         e4a8035  disk 25 → 35, clobbered                FAIL
+                         58187ed  disk 25 → 25, held                     PASS
+```
+
+*The general lesson, recorded because it will recur:* a guard whose state lives in a React hook is
+only as correct as the convention that every writer routes through that hook, and four call sites
+already broke that convention before the guard was written. Moving the record to the write makes the
+guard independent of convention. **No criterion was softened. D-4's text is unchanged.**
+
+**A-20 · 2026-08-23 · § 6 V — one criterion ADDED (V-9). Nothing softened.** **V-9 (ADDED): no
+transient notice may overlap any `position: fixed` control, on any screen.** § 11 measured `SaveAlarm`
+at 31% of a 390×844 screen, anchored to the bottom — and the bottom 144px of this app is where every
+fixed control lives. Measured across all seven screens it covered six at once: «Open dice roller»
+100%, **«Veil this scene» 100%**, and the four navigation tabs at 71–81%. F-5 says the Veil may never
+be missing; a banner whose own source comment reads "at the table Marcus keeps playing" while sitting
+on the button he presses when he needs *out* is not a notice, it is an obstruction — and unlike page
+content, none of it can be scrolled out from under. Repaired by anchoring under the fixed header,
+which is the one band holding no fixed control on any screen. Position only; nothing about what it
+says, when it appears, or how it is dismissed moved, so the seal is not touched. Proven by
+`table/control-a20.mjs`: **58187ed 7 of 7 screens measured, worst covered 6 · HEAD 7 of 7, worst
+covered 0.** *Reason: V-6 and V-6b already ask whether content is reachable under fixed chrome. Nothing
+asked whether the app's own overlays do the same thing, and the one that did it was the one overlay
+that appears when something has already gone wrong.*
+
+> **The first version of `control-a20.mjs` was itself dishonest and is recorded here as such.** It
+> drove a separate write on each screen and silently scored five of the seven `NOT TESTED`, because
+> prep screens have no Heal button — while printing a green PASS based on two. It was rewritten to
+> raise the alarm once and walk the tabs without dismissing it. A control that quietly measures two
+> sevenths of what it claims is the precise failure this document exists to stop, and I wrote one.
+
+**A-21 · 2026-08-23 · § 6 N — one criterion ADDED (N-5). Nothing softened.** **N-5 (ADDED): the
+deployed build makes no request that cannot succeed by construction.** Measured on the live site:
+opening Settings fired `GET https://dosenft.github.io/ollama/api/tags` → **404 + console error**,
+on every open. `getDefaultOllamaUrl()` returned `${origin}/ollama` for any non-localhost host. GitHub
+Pages is static hosting and cannot proxy, so that endpoint can never exist — and *no* Ollama endpoint
+can exist there, because the site is https and a browser hard-blocks an https page from fetching
+`http://<lan-ip>:11434` as mixed content. The app was inventing an address about itself and then
+reporting the failure as if it were news. Off localhost the URL is now empty and the provider
+defaults to Gemini; on localhost nothing changes. **The load-bearing part is the migration**, not the
+default: every device that has opened the live site already holds the fabricated string in
+localStorage, a saved value beats a default forever, and the old migration actively rewrote saved LAN
+addresses *into* the dead URL. Proven by `table/control-a21.mjs`, which serves the real dist routed
+to the browser **as** `https://dosenft.github.io/the-codex/` with a handler that 404s outside
+`/the-codex/` the way Pages does: **PREV 9 checks failed · HEAD 0 of 15 failed.** *Reason: § 11 and
+every prior harness run measured a build served from localhost, which is the one origin on which this
+defect is invisible. A criterion that can only be evaluated against the deployed origin needs a check
+that uses the deployed origin.*
+
+> `control-a21.mjs` deliberately does **not** use `rig.mjs`'s `watch()`. That helper drops console
+> errors matching `/11434|ollama|generativelanguage/` (`rig.mjs:65`) — correct for N-2, and fatal
+> here, since the filter hides the exact error being measured. A control inheriting it would have
+> printed PASS against the broken build. Any future check whose subject is a filtered class must
+> attach its own listeners, and say in its header that it did.
+
+**A-22 · 2026-08-23 · § 6 V-2/V-3/V-4/V-5 — the INSTRUMENT corrected. No threshold moved.** 4.5:1,
+7:1, 20px and 44px are exactly as frozen. What changed is that the tool measuring them was wrong in
+four ways, **and all four made the app look better than it is**:
+
+| bug | what it produced | fix |
+|---|---|---|
+| Tailwind 4 emits `oklch()`, unparsed | 31 nodes scored "no measurable ink" and skipped | 1×1 canvas colour parse |
+| closed bottom sheets were graded | DiceRoller scored at 1.04:1 while invisible | skip `[inert]` / `[aria-hidden]` |
+| Academy segment click never landed (`textContent` is `"Quizzes21"`, not `"Quizzes"`) | Training measured 3× and printed as **3 passes** | scoped non-anchored regex + a printed per-surface fingerprint |
+| wrong scroll container + `scroll-behavior: smooth` | **prep/Character graded 50 of 275 nodes off pixels** | document is the scroller; `scrollTop` with smooth disabled |
+
+`table/control-a22.mjs` now prints its own pixel-coverage ratio on **every** run, passing or failing,
+so a future reader can see how much of the screen a green actually covered. On the two surfaces it
+owns: **84 findings → 0.** *Reason: a measurement that silently covers a fifth of the screen and
+reports a pass is worse than no measurement, because it also spends the credibility of the ones that
+are sound. Recording the ratio is cheap; discovering it was 18% by accident is not.*
+
+> **Four of the five failures in the § 8 design brief did not reproduce at HEAD and were not
+> "fixed".** STR/DEX/CON/INT/WIS/CHA pass. No 1.59:1 "+" glyph exists on either surface. Ability
+> modifiers are not a V-3 failure. The skill toggles are 44×44, not 36×36 — `index.css` already
+> documents that repair and why it is 44 and not 48. The brief was stale, and measuring before
+> changing is the only reason that is known rather than papered over with a diff.
+
+**A-23 · 2026-08-23 · § 6 V — one criterion ADDED (V-10). Nothing softened.** **V-10 (ADDED): no
+fixed chrome may exceed the device width; every control in it is wholly on screen at its full target
+size.** Measured with a real character at 390px: the header's content is **448px**. All 58px of
+overflow landed on one control — **«Open character sheet» is 92px wide with 34px on screen, 37% of
+its tap area, on all seven screens, permanently** — and the «Paladin» badge ran x=385..448, entirely
+off the device. Repaired: the badge hides at phone width and returns at `sm` (the class is on the
+sheet that button opens); that alone left the button at 21px, which is a different failure, so the
+mode toggle's padding returns 10px and the icon gap 6. Header content is now **exactly 390** with all
+four buttons a full 44×44. `ui/Badge.tsx`'s `eldritch` variant is fixed at the primitive in the same
+pass: it printed `#8b5cf6` ink on its own `bg-eldritch/15`, and the tint lifts the ground under the
+word, so it measured **3.67–3.90:1 in situ while reading 4.68:1 as a swatch** — 11 of A-22's 84
+findings on its own. *Reason: V-5 asks whether a control is big enough and V-6 asks whether content is
+reachable. Neither asks whether the control is on the phone at all, and the answer for the header was
+no. The Badge case is the same shape one level down: every check that measured the token passed, and
+only a check that measured the rendered pixel caught it — contrast is a property of the composite,
+never of the colour.*
+
+**A-24 · 2026-08-23 · § 6 F-4 and R-9 — two GRADERS rewritten, one criterion ADDED (R-10). No
+criterion text softened; F-4's and R-9's requirements are unchanged, and both now have more asserted
+against them than before.** This amendment is about the checks, not the app.
+
+*F-4 — old grader, verbatim:*
+
+```js
+const actions = await page.locator('button').count();
+R.check('F-4', '?d=1 turn screen renders Nix and offers actions',
+  faults.length === 0 && actions > 2, …);
+```
+
+F-4's criterion is three clauses — the `?d=1` screen shows **his real sheet**, a **ranked shortlist
+containing at least one action**, and **spends a real resource**. `actions > 2` asserts none of them.
+The dice roller alone is ten buttons, so `> 2` is true of every screen in this app including ones
+with no shortlist and no spend; `faults.length === 0` is the error floor every check already carries.
+Two of the three clauses were asserted by nothing whatsoever, and the third — "renders Nix" — was
+asserted by the string `Nix`, which is on screen whether or not a single number came from his file.
+*New grader:* the five headline numbers on the turn screen (level, class, max HP, AC, Lay on Hands
+pool) are read **out of the save file on disk** and each must appear on screen; at least one
+shortlisted control must name the action-economy slot it costs; and a 1st-level slot is spent for
+real with the pool read from `localStorage` before and after, requiring `s1 === s0 - 1`.
+
+*R-9 — old grader, verbatim:*
+
+```js
+const again = page.getByRole('button', { name: /Import Character/i });
+if (await again.count()) { await importFile(page, realCopy('full')); }
+R.check('R-9', 'importing the same character twice makes no duplicate', n2 <= n1 + 1 && …);
+```
+
+R-9's entire scenario is the **second** import. `/Import Character/i` is the **empty-state** label;
+once a character is loaded the re-import control lives in Settings and is labelled just `Import`, so
+after a load that locator matched **zero** elements, the `if` was false, the second import never
+happened, and the assertion compared the roster against itself — `1 <= 1 + 1`. A check that skips its
+own scenario and then reports PASS is worse than no check, because it occupies the slot where a real
+one would go. *New grader:* the second import is driven through Settings → Import (`rig.mjs`'s
+`importFile` grew a `via` option for exactly this), and **failing to start it is a FAIL, not a skip**
+— "the second import could not be started at all — scenario NOT RUN".
+
+*R-10 (ADDED):* the other half of R-9's original row — *"no silent overwrite of unsaved state"* — was
+never asserted by any code, in R-9 or anywhere else. It is now its own criterion so it can be its own
+result, and **its result is FAIL.** Spend 5 Lay on Hands (35 → 30), re-import the same file: the pool
+returns to **35** and the only thing the app adds to the screen is *"Imported was older export, no
+weapons equipment. Everything came across; you'll need those back."* Nothing said the session was
+discarded. Written up as § 9.13 and left unbuilt — the fix is behaviour, and behaviour is sealed.
+
+*The negative control is `table/control-a24.mjs`, and it is not a worktree diff.* The defect was in
+the **check**, not the app, so checking out an older commit gives back the same app and the same
+green — the control has to sabotage the behaviour each clause claims, at runtime, and demand that the
+**old** grader stays green while the **new** one goes red. Both rows came back the right way: with
+`localStorage.setItem` dropping every `codex-character-*` write, the turn screen still rendered, still
+said Nix, still offered 13 buttons, and the slot went **4 → 4** — old F-4 **PASSES blind**, new F-4
+FAILS. `/Import Character/i` matched **0** controls after a load — old R-9 **PASSES blind** by
+skipping, new R-9 FAILS. *Reason this is logged rather than quietly fixed: § 4 says a grader that
+cannot fail is a lie in the shape of a result, and three of them were sitting in this file printing
+PASS. Two are now honest. The third was honest only after I caught myself writing it dishonestly —
+R-10's first version tested its "did it say so" regex against the **whole page**, matched a word that
+happens to appear elsewhere in Settings, and printed PASS. It grades the words the import ADDED
+because of that, and the moment it did, it failed.*
+
 ---
 
 ## 1. What the table actually is
@@ -259,6 +535,11 @@ firmly in scope as a hazard: it may never block, slow, or break a turn (**N-2**)
 hierarchy, type, motion and rhythm. It never moves what a feature does. Behaviour changes I believe
 are necessary are written up in § 9 and left **unbuilt**.
 
+**Unsealed 2026-08-23 by Marcus, for § 9.9, § 9.10 and § 9.11 only** — see **U-1** in § Amendments
+for the request, the reason and what was ruled out. Those three are built. Every other item in § 9
+stays unbuilt, and the seal is otherwise unchanged: nothing else in this run moves what a feature
+does.
+
 ---
 
 ## 4. Grading
@@ -310,6 +591,8 @@ or error-boundary text on screen. These are not separate criteria. They are a fl
 | **F-1** | Marcus's full real export (`codex-nix-lvl7 (1).json`) imports onto a device with empty storage, and **all seven** default-reachable screens render their own content. Not "not blank" — each screen must show a named artefact of its own (Combat: an action; Grimoire: a spell; Character: an ability score; etc.). | `prove-table.mjs` § F-1, seven rows |
 | **F-2** | The **thin** real export (`codex-nix-lvl7.json`, 19 keys, no `abilityScores`/`weapons`/`equipment`) is accepted through the gate and leaves all seven screens standing. This is the file shape that shipped broken three times. | `prove-table.mjs` § F-2 |
 | **F-3** | Twelve hostile-but-legal inner shapes — a spell with no `description`, an object in `equipment`, `persona: {}`, an identity with no arrays, a hook with no `text`, a weapon with no `properties`, a feat with no `effects`, a bare pool, a bare condition, a bare supply, a bare feature, and one export carrying several at once — each imported alone, reloaded, then **walked across all seven screens**. Zero dead screens, zero errors. | `prove-table.mjs` § F-3, 12 × 7 = 84 rows |
+| **F-3b** | *(ADDED, A-18.)* **Seventeen hostile-but-legal shapes where the field is PRESENT and the wrong type** — `spells: [null]`, `features: [null]`, `weapons: [{properties: "finesse"}]`, a spell whose `description` is an object, a condition with no `name`, `spells` not a list, `equipment` not a list, `level` as a string, pool numbers as strings, `cascades` as a string, `name` as a number, strings where identity records belong, a string dialogue line, persona fields as scalars, a nested object where text belongs, and two more. Each imported alone, reloaded, then **walked across all seven screens**. Zero dead screens, zero errors. `?? []` cannot see any of these; three of them shipped. | `prove-table.mjs` § F-3b, 17 × 7 = 119 rows |
+| **F-3c** | *(ADDED, A-18.)* **A file that had to be altered on the way in says so before he accepts it.** Import a wrong-typed file and the gate must name what was changed — not "your file is old", which is a different sentence — and must still be sitting there un-accepted. A coercion he is not told about is a quieter way of losing his data. | `prove-table.mjs` § F-3c |
 | **F-4** | The `?d=1` turn screen renders Nix's real sheet, shows a ranked shortlist with at least one action in it, and spends a real resource. | `prove-table.mjs` § F-4 |
 | **F-5** | The veil / safety exit is present and operable on **every** screen, in both modes, including mid-import and behind an error boundary. It is the one control that may never be missing. | `prove-table.mjs` § F-5, seven rows |
 | **F-6** | No screen requires horizontal scrolling at 390 px. `scrollWidth <= clientWidth + 1` on every screen, both modes. | `prove-table.mjs` § F-6 |
@@ -354,7 +637,8 @@ untouched (D-3), (c) leave the app usable enough to try again, (d) raise zero er
 | **R-6** | A JSON array at the root | Refused, not coerced |
 | **R-7** | A JSON carrying `__proto__` / `constructor` / `prototype` keys | Refused or neutralised; `Object.prototype` is unpolluted afterwards |
 | **R-8** | A binary file renamed `.json` | Refused, named |
-| **R-9** | The **same** character imported twice in a row | No duplicate roster entry, no silent overwrite of unsaved state |
+| **R-9** | The **same** character imported twice in a row | No duplicate roster entry. *(The second half of this row's original text is now **R-10**, which no code ever asserted — see A-24.)* |
+| **R-10** | The same character imported twice **mid-session, after resources have been spent** *(ADDED 2026-08-23 by A-24)* | Either session state survives, **or** the app says in its own notice that it is discarding it. Measured on disk before and after, and graded on the words the import **added** to the screen — not on words already there. |
 
 ### V — THE VISUAL WORK: arm's length, bad light
 
@@ -375,6 +659,8 @@ element is walked; contrast is computed against the actual painted background be
 | **V-6c** | **The same, on the iPad.** *(ADDED 2026-08-23 by A-10.)* V-6b re-run at **834×1112 DPR2** — the size the app is at when it is propped on the table edge rather than held. Same rule: at scroll-top and scroll-bottom, on every screen, `elementFromPoint()` at the centre of every control's hit rect resolves to that control or a descendant. | **0 occluded** |
 | **V-7** | **It does not look like a component-library demo.** Judged by the `impeccable` design gate, run as a named gate, verdict pasted verbatim into § 8 including anything it fails. | § 8 verdict + screenshots |
 | **V-8** | **Screenshot of every screen at real device size**, phone and iPad, in `_shots-app/`, linked in § 10, at the SHA that shipped. A stranger looks at these and fails me or doesn't. | § 10 |
+| **V-9** | **The app's own overlays do not obstruct the app.** *(ADDED 2026-08-23 by A-20.)* No transient notice — save alarm, toast, banner — may geometrically overlap any `position: fixed` control, on any screen. Measured by raising the notice **for real** once and walking all seven screens without dismissing it; a screen the notice did not survive to is NOT TESTED, not a pass. V-6b asks whether the app's chrome hides content; nothing asked whether the app's own warnings hide the chrome, and the one that did covered the Veil. | **0 fixed controls overlapped, 7 of 7 screens measured** · `table/control-a20.mjs` |
+| **V-10** | **Nothing fixed is wider than the phone.** *(ADDED 2026-08-23 by A-23.)* At 390×844 no `position: fixed` element's rect may exceed the viewport width, and every control inside fixed chrome must be **wholly on screen at its full target size** — not clipped down to a reachable stub. A control whose right edge is off-screen still measures 44px to V-5 and still resolves to itself under V-6b at the centre point that remains; both are structurally blind to amputation. | **0 overflowing, 0 clipped** · `table/control-a22.mjs` |
 
 ### N — NO WIFI
 
@@ -383,7 +669,9 @@ element is walked; contrast is computed against the actual painted background be
 | **N-1** | **Cold boot, airplane mode.** One warm load, then network hard-off and the process restarted: the app boots from the standalone `start_url`, Nix loads, all seven screens render, a spend persists, a reload survives. | `prove-table.mjs` § N-1 |
 | **N-2** | **The AI may never block combat.** With the AI endpoint black-holed (connect timeout, not refusal — the slow failure, which is the dangerous one), S-3 still holds and no screen shows a spinner that outlives the turn. | `prove-table.mjs` § N-2 |
 | **N-3** | **No runtime third-party fetch.** Zero requests to any origin other than the app's own during a full cold boot and a walk of all seven screens. Fonts included. | `prove-table.mjs` § N-3, request log |
-| **N-4** | **A stale cache cannot brick it.** A cached `index.html` naming bundles that no longer exist must not leave a permanently blank app; `?sw=off` must recover it. | `prove-table.mjs` § N-4 |
+| **N-4** | **A stale cache cannot brick it.** A cached `index.html` naming bundles that no longer exist must not leave a permanently blank app; `?sw=off` must recover it. *(Grading tightened by A-16: the origin is genuinely dead throughout, and is never restored before `?sw=off` is tried.)* | `prove-table.mjs` § N-4 |
+| **N-4b** | *(ADDED, A-16.)* **The off switch still switches off.** With the origin **up**, `?sw=off` leaves zero service-worker registrations, zero `codex-` caches and zero faults. N-4's fix must not be bought by a worker that simply never tears down. | `prove-table.mjs` § N-4b |
+| **N-5** | **The deployed build makes no request that cannot succeed by construction.** *(ADDED 2026-08-23 by A-21.)* Measured against the **deployed origin shape** — https, served at `/the-codex/`, 404 outside it — not against localhost. No request may be issued to an address the hosting can never answer or the browser will always block. An app that invents an address about itself and then reports the failure as news is failing offline-first before the network is even involved. **Must be measured with its own console listeners:** `rig.mjs:65`'s `watch()` filters `/11434|ollama|generativelanguage/` and would hide exactly this. | **0 of 15 checks failed** · `table/control-a21.mjs` |
 
 ### E — ENDURANCE: hour four
 
@@ -543,6 +831,12 @@ Behaviour is sealed. Everything below is a change I believe the table wants and 
 None of it is in the diff. Each entry says what it would change, what it would cost, and what it
 would buy — enough for Marcus to say yes or no without re-deriving the problem.
 
+> **Three of these were later unsealed and built — 9.9, 9.10 and 9.11, and only those.** See **U-1**
+> in § Amendments. Their entries below are left **exactly as first written**, with a BUILT block
+> appended: the record of what was proposed has to survive the record of what was done, or the next
+> reader cannot tell a decision from a rationalisation. Everything else in § 9 is still unbuilt and
+> still just a line in this file.
+
 **9.1 · The turn deck should be anchored to the bottom, not merely early. — This is the real V-6 fix.**
 V-6 asks that every control which spends a resource sit in the bottom 60% of the first screen. It is
 failing 17 controls and it will keep failing them, because the fix available to a design pass is
@@ -658,6 +952,57 @@ copy, and a new failure state on a screen, which is exactly the class §3 seals.
 path in `useCharacter`, a reconcile notice, and a test that opens two contexts. *Buys:* D-4, and the
 only silent-data-loss path anywhere in the app.
 
+> **BUILT — `e4a8035`, under U-1.** Refuse-and-reconcile, exactly as written above. A write carries
+> the `updatedAt` it was read at; a write whose stored stamp has moved on is refused, announced
+> through the channel D-5 already built for writes that did not happen, and the tab is put back to
+> what is on disk. **Refuse rather than merge:** merging two spends means guessing which one the
+> player meant, and a wrong guess is the same lost charge wearing a confident face. Every uncertainty
+> resolves the other way — no `readAt`, no stored record, unparseable JSON, or a record with no stamp
+> all fall through to the write, because a guard that refuses saves on a hunch is worse than the bug
+> it was added for.
+>
+> Two details that are not obvious and were both learned the hard way. **The stamp is read back from
+> disk after every write, never assumed from the object passed in** — a write can land, half-land
+> (character yes, roster no), or not land at all, and only the file knows which. And it is tracked in
+> the hook rather than taken off the incoming character, because an imported file arrives carrying
+> the `updatedAt` of whatever device wrote it; comparing *that* against disk would refuse a perfectly
+> good import.
+>
+> **What the unit tests caught, and the browser proof never would have.**
+> `new Date().toISOString()` is millisecond-resolution, and the first version compared two stamps
+> written inside the same millisecond, found them equal, and waved through precisely the write it
+> exists to refuse. The unit tests write both tabs back to back and hit that every single run; a
+> browser proof cannot, because human taps are hundreds of milliseconds apart. `nextStamp` now
+> guarantees that **every successful write leaves a stamp different from the one it replaced**. The
+> gap between "cannot happen at a table" and "cannot happen" is this project's oldest way of being
+> wrong, and it was not going to be left inside the one guard whose whole job is comparing stamps.
+>
+> *Proven:* **D-4 PASS** under the tightened grading of A-17, **12 unit tests, of which 4 are the
+> A-19 regression guards** (376 total), and the negative control `table/control-d4.mjs` against
+> `c2aa5bb`, the commit immediately before:
+>
+> ```
+> PREV c2aa5bb   35 → tab1 spends 5 twice → 25 → stale tab writes 30 · not told · not reconciled  FAIL
+> HEAD e4a8035   35 → tab1 spends 5 twice → 25 → stale tab REFUSED,  25 · told · 25 on screen ·
+>                                                          spends again to 20                     PASS
+> ```
+>
+> **⚠ The paragraph above was written at `e4a8035` and both of its claims were wrong. Read A-19
+> before believing any of it.** Of the eight tests it counts, only three could tell the fixed code
+> from the broken code; the other five failed against `c2aa5bb` with a `TypeError` because they
+> imported a helper that did not exist yet. And the fix those tests were guarding was itself wrong:
+> it kept the record of what disk holds in a ref inside `useCharacter`, and four call sites write
+> without passing through that hook. `58187ed` moved that record to `lib/character.ts` beside the
+> write. The numbers above are left standing rather than rewritten because the point of this section
+> is what was believed at the time.
+>
+> **One honest note on the arithmetic.** The paragraph above says "two spends of five, and the file
+> says thirty… must read 25". Under refuse-and-reconcile the stale tab's spend does not happen at all,
+> so with the *original* one-spend-each scenario the file would read 30 and be **correct** — tab one's
+> write intact, tab two told its click did not land. That is why A-17 changed the scenario rather than
+> the criterion: with tab one spending twice, 30 becomes a number reachable only by a lost write and
+> 25 the only correct answer, so the check can finally tell the two outcomes apart.
+
 **9.10 · Offline with a poisoned cache, the app is a blank page and the kill switch does not save it.
 N-4 FAILS on it.** Also found by §11, and it is the single worst thing in this document for the
 scenario §1 describes. The old check used `ctx.setOffline(true)` — which `rig.mjs`'s own comment
@@ -671,6 +1016,29 @@ a second, never-overwritten cache and fall back to it when the active one fails 
 navigation — a real rollback rather than a bypass. *Cost:* `sw.js` cache lifecycle, a version pin,
 and a test that genuinely kills the origin instead of simulating it. *Buys:* N-4, and the difference
 between "the app is slow tonight" and "the app is gone tonight".
+
+> **BUILT — `c2aa5bb`, under U-1.** The last-known-good shell went in as described: a second cache
+> the install path never overwrites, and a navigation that falls back to it when the active shell
+> cannot satisfy the request. Building it took four measured failures, each one a smaller version of
+> the same mistake — *the fix becoming the outage*:
+>
+> 1. Parachute alone: still `BLANK | HOLLOW(/Nix/)` on the `?sw=off` path, because `?sw=off`
+>    unregistered the worker and purged the caches while the origin was dead. With nothing to fetch
+>    and nothing left to serve, the kill switch **was** the brick.
+> 2. Guarding the teardown on `navigator.onLine === false`: never fired. That property reports the
+>    radio, not whether the origin answers — with the HTTP server closed and Wi-Fi up it reads `true`.
+> 3. Probing reachability with a `fetch` in page context: **the probe was itself a defect.** It wrote
+>    `net::ERR_CONNECTION_REFUSED` to the console, and by this document's own rule a console error is
+>    a failure. Measured as two errors on the `?sw=off` path.
+> 4. Moving the probe **into the worker** (`codex-sw-reachable`): a worker's failed fetch is silent to
+>    the page, which N-1 already proves by passing with zero errors while the worker tries the network
+>    on every navigation. → **N-4 PASS**, zero faults.
+>
+> So `?sw=off` now **defers** rather than refuses: the flag is written to localStorage immediately and
+> the teardown happens on the first boot that can actually re-download the app. Nothing is lost by
+> waiting, because the poisoned cache it existed to escape is now handled without it. *Proven:*
+> **N-4 PASS** with the origin dead start to finish and never restored, and **N-4b PASS** — with the
+> origin up, `?sw=off` still leaves zero registrations, zero caches, zero faults. Both under A-16.
 
 **9.11 · The twelve hostile shapes are the survivors, not a sample — and six more of the same kind
 kill this build.** F-3 is frozen at twelve and stays frozen at twelve; §4 says criteria may be added
@@ -696,6 +1064,104 @@ refuse the file — is a product decision about his data, not a presentation one
 one line: drop the malformed record, keep the character, and tell him exactly which record and which
 field, in the R-family voice. *Cost:* one pass in `character.ts` plus copy. *Buys:* the failure mode
 that has shipped four times.
+
+> **BUILT — `dc90c22`, under U-1.** Built as recommended: coerce what can be coerced, drop what
+> cannot, keep the character, and **name every change before he accepts it**. `parseCharacterFile`
+> now returns two lists, not one — `warnings` for what the file never had ("your file is old") and
+> `repairs` for what it had wrong and this app altered ("your file is damaged and I changed it"),
+> because those are different sentences and he should not have to guess which he got. Five helpers in
+> `character.ts` (`records`, `text`, `texts`, `num`, `bool`) replace every bare `?? []` on an imported
+> array or string field, each one logging what it dropped and why in the R-family voice.
+> **The typechecker caught me writing the easy version:** `dialogueLines` took `texts()`, and a bare
+> string there reaches the Roleplay screen as `l.text === undefined` and renders an empty row with a
+> dead favourite toggle. It is `records<DialogueLine>()` now, and the note is in the source, because
+> that is the exact mistake the pass exists to stop. *Proven:* **F-3b 17/17, F-3c PASS**, and the
+> negative control `table/control-f3b.mjs` puts **7 of 17 red on `3d9b351`** against **0 of 17 on
+> HEAD** — a lower bound, since the control reads only the landing screen.
+
+**9.12 · The Academy has no questions in it. Every single one is a live model call, and § 1 says
+"sometimes no wifi".** Marcus's stated reason for shipping — *"so I can fully prep my character and
+study"* — is this screen, and this screen is the one part of the app with no offline story at all.
+Measured by `table/probe-study.mjs` against the real save, with no provider configured:
+
+```
+Training · Generate Scene      404, told "Failed to generate scene"
+Training · Random Catchphrase  works — reads his own persona, no network
+Quizzes  · Generate Question   404, told "Failed to generate question · Ollama error: 404 · Try Again"
+Quizzes  · Start Drill         404, nothing generated
+Accent   · Train               NOT MEASURED — no starter control on that segment
+```
+
+**The app is honest about it.** No spinner outlives the failure, no unhandled rejection, no error
+boundary — the panel says what broke and offers "Try Again". R and N hold. The defect is not that it
+lies; it is that there is nothing behind it. `QuizArena.tsx:57–87` defines all five quiz modes —
+Spell Knowledge, Combat Tactics, Rules Mastery, Class Features, Dice Rolls — as five prompt strings.
+`ConditionDrill` is the same. There is no `src/data/`, no static bank, nothing to fall back to. The
+one study surface that survives a dead model is **Flashcards**, and only because its cards are
+derived from his own persona (`TrainingHub.tsx:95–105`): 6 physical tics, 6 scene instincts, 5 quiet
+textures, 4 catchphrases — **21 cards** on his real file.
+
+*And the model is dead in both places he would use it.* On this machine Ollama answers
+`/api/version` with `0.21.0` and `/api/tags` with **`{"models":[]}`** — the server is running and has
+zero models pulled, which is the 404 above. On the deployed site A-21 already established that no
+Ollama endpoint can ever be reached, because an https page cannot fetch `http://<lan-ip>:11434`.
+So "study on the way to the table" currently means twenty-one flashcards.
+
+**Left unbuilt** because it is a content decision, not a presentation one, and a large one: what the
+questions *are* is the product. Writing a bank of D&D 2024 rules questions and stapling it in is a
+behaviour change of exactly the kind §3 seals, and guessing at it would be worse than the gap.
+
+*My recommendation, in one line:* generate the bank **from his own character sheet**, deterministic
+and offline — his spells' levels, ranges, components and durations, his weapons' dice, his class
+features' uses-per-rest are all already in the save file and all already exactly the facts the five
+prompts ask the model to invent — and keep the model as the enrichment path rather than the only
+path. *Cost:* one pure module that turns a `Character` into a question list, plus the fallback wiring
+at two call sites. *Buys:* the difference between "study offline" and "twenty-one flashcards", and it
+buys it without inventing a single rule, because every answer is read from his file rather than
+recalled by a model — which is also the only version of this that cannot be confidently wrong at the
+table.
+
+> **Two smaller things the same probe found, recorded so they are not lost.** `Accent · Train` has no
+> control that starts anything, so it was NOT MEASURED rather than passed — an unexercised segment,
+> not a working one. And the Academy's segment strip is two levels deep: `Study` and `In-Session` are
+> sub-tabs *inside* Training, not siblings of it. The first version of the probe flattened them and
+> reported two live segments as absent; it is fixed and the mistake is in its source comment.
+
+**9.13 · Re-importing his own save file mid-session silently rolls back everything he has spent, and
+tells him something else.** *(This is the R-10 FAIL. Added 2026-08-23 with A-24.)*
+
+Measured on disk, not inferred. `codex-nix-lvl7-full.json` says Lay on Hands is **35/35**. Load it,
+heal for 5 at the table — disk now says **30**. Re-import the same file, which is exactly what a
+player does when he is not sure the session took and wants to be safe: the pool is **35** again. Two
+uses of a once-per-long-rest pool, returned to him by an action he took to protect his data. The only
+words the import puts on screen are:
+
+> *"Imported was older export, no weapons equipment. Everything came across; you'll need those back."*
+
+That notice is about **equipment**. It is true, and it is about the wrong thing. Nothing on screen —
+not a word — says that the session was discarded. "Everything came across" is, if anything, an
+assurance that nothing was lost, printed at the moment something was. It is not the app lying on
+purpose; it is a notice written for the file-shape problem being the only notice present when the
+data-loss problem happens.
+
+**Why this is worse at a table than it looks on a page.** § 1 says four hours, five people waiting,
+sometimes no wifi. The re-import is a *reassurance* gesture — it is what he does when the app has
+been backgrounded, or the phone slept, or he simply wants to be sure. The gesture that is supposed to
+be safe is the destructive one, it is silent, and the damage is to resources he has already spent
+and has therefore already stopped tracking in his head. He will not notice at the moment; he will
+notice three encounters later when the pool disagrees with the fight he remembers.
+
+**Left unbuilt.** Both plausible repairs are behaviour, and § 3 seals behaviour. *(a)* Merge — keep
+the higher-entropy side per pool, i.e. an import never *raises* a spent resource. *(b)* Name it —
+compare the incoming file to session state before writing, and if any pool would move backwards, say
+so in the notice and offer Cancel, which is the shape R-3 already uses for the thin export and which
+therefore already exists in this codebase.
+
+*My recommendation, in one line:* **(b)**, because *(a)* silently decides for him and this document's
+own position is that the app's job is to tell him the truth and let him choose — and because R-3
+proves the "gated, with a way forward and a way back" pattern already works here. *Cost:* one pure
+diff function over two `Character` objects, plus the existing gate component at one call site. Until
+it exists, R-10 stands as a **FAIL on the record**, not as a caveat.
 
 ## 10. Screenshots
 
@@ -938,89 +1404,108 @@ honest reading of F-3 is now printed next to its PASS in §12.
 
 ## 12. Results
 
-Run of record: `node docs/plans/codex-v1/reference/prove-table.mjs` at **`60265a1`**, 745 s, P-0 green
-on all eight — plus the V family re-run at **`2d3da37`+A-12/13/14**, 70 s, which supersedes the V rows.
-`results-local.json` and `run-local.log` are committed beside the harness.
+**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`2300ec7`**, **939 s**,
+full — not `--only`, so P-0 ran and the run is not PARTIAL. `results-local.json` is written beside the
+harness. **48 PASS · 11 FAIL · 1 UNPROVEN**, against the previous run of record's 44 · 15 · 3.
 
-**44 PASS · 15 FAIL · 3 UNPROVEN.**
+Three criteria are graded by their own controls rather than by `prove-table.mjs`, and all three were
+re-run at this same SHA: **V-9** by `control-a20.mjs` (PASS, 7 of 7 screens measured, 0 fixed controls
+covered), **V-10** by `control-a22.mjs` (PASS, 0 findings at the enforced floors, 118 in the 44–47px
+advisory band), **N-5** by `control-a21.mjs` (PASS, 0 of 15 checks failed). **A-24**'s control passes
+too — both rewritten graders were watched failing on a sabotaged app while the graders they replaced
+printed PASS. Unit suite: **376 tests, 15 files, green.**
 
-The five P-family rows are the ones that matter most, and four of the five are red. Read them first.
+Everything in this section is one run at one SHA. Nothing below is carried over from an earlier run,
+and no row's number was taken from a friendlier measurement than the one the criterion names.
 
 | ID | Verdict | Number |
 |---|---|---|
-| P-0.1 – P-0.8 | **PASS** | instrument sound; 6/6 detectors load-bearing by deletion; harness fails `73c45d8` on 8/12 shapes and passes HEAD on the same 8. *Caveat from §11: the negative control lives outside the repo, so a stranger cannot re-run P-0.* |
+| P-0.1 – P-0.8 | **PASS** | the instrument. All six detectors load-bearing by deletion (6/6); the harness FAILS `73c45d8` — the SHA that was live — on 8 of 12 hostile shapes and PASSES HEAD on the same 8. *Caveat, unchanged: the negative-control worktree lives outside the repo, so a stranger cannot re-run P-0 from a clone.* |
 | F-1 | **PASS** | full real export → 7/7 screens carry his data, zero faults |
-| F-2 | **PASS** | thin real export (the shape that shipped broken 3×) → 7/7 |
-| F-3 | **PASS** *(read §9.11)* | 12 hostile shapes × 7 screens = 84 clean renders. Independently confirmed — and independently shown to be the survivors rather than a sample. Six further shapes of the same kind kill this build. |
-| F-4 | **UNPROVEN** | the check counts buttons; "ranked shortlist" is graded by no line of code |
-| F-5 | **PASS** | Veil on 7/7 both modes; verified further as present mid-import, hit-testable, and alive behind a forced boundary |
-| F-6 | **PASS** | no horizontal scroll on any screen |
-| D-1 | **PASS** | export → 36/36 keys deep-equal on the full file, 19/19 on the thin |
-| D-2 | **PASS** | three cold reloads byte-identical |
-| D-3 | **PASS** | every refusal path leaves the roster untouched |
-| **D-4** | **FAIL** | two tabs: 35 → spend 5 → 30 → stale tab spends 5 → **30**. Correct answer 25. One write silently lost, both tabs then showing the same wrong number. §9.9 |
-| D-5 | **PASS** | forced quota failure raises a real alarm; stored character intact |
-| D-6 | **PASS** | destructive actions confirm, and the delete confirm names Nix |
-| D-7 | **PASS** | origin killed: export reachable in 2 taps, values deep-equal |
-| **S-1** | **FAIL** | cold launch, dead origin, 4× CPU → 2981 ms worst / 2852 median, against 2000. Independently 2946/2978/3043. Cause is `sw.js:132`, §9.8 |
-| S-2 | **PASS** | tab switch worst 152 ms, all 7 under 400 |
-| **S-3** | **FAIL** | spend input→paint 104 ms worst, against 100. §11 measured 88/72/80 and called it unreproducible; a FAIL is not upgraded on a second opinion |
-| S-4 | **UNPROVEN** | there is no undo control to grade. §9.2 |
-| S-5 | **PASS** | longest task 64 ms at 4× CPU, against 200 |
-| S-6 | **PASS** | CLS 0.0000 through a turn and a full scrolled walk |
-| R-1 – R-8 | **PASS** | eight bad-input paths, each refused in his own words, character intact. R-7's prototype payload proven inert by driving it past the guard |
-| R-9 | **UNPROVEN** | the check's regex cannot match the control it needs, so it asserted nothing. Driven by hand there is no duplicate roster key, but the healed pool reverts 30 → 35 and the announcement could not be established |
-| V-1 | **PASS** | 0 text nodes under 12px, now across all 4804 rather than 1664 |
-| V-2 / V-3 | **PASS** | 0 below 4.5:1 / 7:1 — **on the 1664 nodes with a divisible background.** The other 3140 are V-2b/V-3b |
-| **V-2b** | **FAIL** | **19** nodes below 4.5:1 measured off the painted pixels. Worst are condition names on play/Combat |
-| **V-3b** | **FAIL** | **19** numerals below 7:1 — AC `«18»` and HP `«67»` at 4.89:1, Lay on Hands `«35»` at 5.37:1. The exact values V-3's text names |
-| **V-4** | **FAIL** | **5** Cinzel nodes under 20px: «Choose Action» 16px, «Nix» 18px ×2, «Persona Quick Reference» 16px, a 14px numeral |
-| **V-5** | **FAIL** | **6** controls at a true 170×40, against the 44px floor. They were 182×52 until A-12 deleted the credit |
-| **V-5b** | **FAIL** | **3** turn controls at 44px tall against the 48px floor: two condition chips and Action Economy |
-| **V-6** | **FAIL** | **15** turn controls outside the bottom 60%. The structural fix is §9.1's bottom deck, unbuilt |
-| **V-6b** | **FAIL** | **13** controls covered by a fixed overlay at a scroll extreme |
-| **V-6c** | **FAIL** | **14** of the same on the iPad. Includes a Channel Divinity pip under the Veil pill at the scroll position the screen opens on |
-| V-7 | **PASS** *(unverifiable)* | the design gate ran and its verdict is in §8. §11 declined to re-run a judgement, correctly |
-| V-8 | **PASS** | 14 screenshots, 7 screens × 2 device sizes, in §10 |
-| N-1 | **PASS** | origin killed, cold boot: 7 screens + a spend persists + reload survives. 16 files precached, 12 served |
-| N-2 | **PASS** *(check is vacuous)* | independently: 4 requests left hanging on the AI endpoint, then a turn in 24 ms. The app passes; the grader intercepted nothing and proves nothing |
+| F-2 | **PASS** | thin real export — the shape that shipped broken three times — → 7/7 |
+| F-3 | **PASS** *(read § 9.11)* | 12 hostile-but-legal shapes × 7 screens = 84 clean renders. These are the survivors, not a sample |
+| F-3b | **PASS** | 17 shapes with the right fields and the **wrong types** × 7 screens = 119 renders |
+| F-3c | **PASS** | a repaired file names what was changed, and says so before it is accepted |
+| **F-4** | **PASS** *(grader rewritten — A-24)* | `?d=1` shows five numbers read out of his save file, a shortlist naming the Action it costs, and a 1st-level slot spent for real: disk 4 → 3. The old grader asserted `buttons > 2` |
+| F-5 | **PASS** | the Veil is on 7/7 screens, both modes, including the three early returns |
+| F-6 | **PASS** | no horizontal scroll at 390px on any screen |
+| D-1 | **PASS** | round-trip: every key in both real files survives import |
+| D-2 | **PASS** | three cold reloads produce a byte-identical stored character |
+| D-3 | **PASS** | a refused or cancelled import writes nothing |
+| D-4 | **PASS** | a second tab cannot clobber the first — the stale write is refused and reconciled, not eaten. This was the FAIL of § 9.9 |
+| D-5 | **PASS** | a full disk does not eat the character: he is told, and the prior save is intact |
+| D-6 | **PASS** | 4 destructive controls driven; every one asks first, and the delete confirm names Nix |
+| D-7 | **PASS** | export reachable offline in **2 taps** and round-trips |
+| R-1 – R-8 | **PASS** | eight bad-input paths, each refused in his own words, character intact. R-7's prototype payload proven inert by driving it *past* the guard |
+| **R-9** | **PASS** *(grader rewritten — A-24)* | the second import now actually happens, through Settings → Import: roster 1 → 1. The old grader's locator matched zero controls and skipped the scenario |
+| **R-10** | **FAIL** *(ADDED — A-24)* | spend 5 Lay on Hands (disk 35 → 30), re-import the same file: disk is **35** again, and the only words the import adds are *"Imported was older export, no weapons equipment. Everything came across; you'll need those back."* Nothing says the session was discarded. § 9.13, left unbuilt — the fix is behaviour |
+| **S-1** | **FAIL** | cold launch, origin dead, 4× CPU → "Nix" painted: **worst 2971 ms, median 2807 ms**, against 2000. Five runs, 2783–2971, so it is stable and it is over. Cause is `sw.js:132`, § 9.8 |
+| S-2 | **PASS** | every tab switch ≤ 400 ms |
+| **S-3** | **FAIL** | a spend registers in **104 ms worst**, against 100. Median 56 ms across 30 input events. It misses by 4 ms on the worst of thirty, and a FAIL is not upgraded because the median is comfortable |
+| S-4 | **UNPROVEN** | there is no undo/restore control on the default combat screen to grade. § 9.2 |
+| S-5 | **PASS** | no long task > 200 ms during a 10-action turn |
+| S-6 | **PASS** | CLS **0.0000** under the thumb, against 0.02 |
+| V-1 | **PASS** | 0 visible text nodes under 12px |
+| V-2 / V-3 | **PASS** | 0 below 4.5:1 / 0 below 7:1 — on the nodes with a divisible background |
+| **V-2b** | **FAIL** | **11** nodes below 4.5:1 measured off the painted pixels of the 3240 that sit on a gradient. Worst are condition names on play/Combat at 4.34:1. Was 19 |
+| **V-3b** | **FAIL** | **11** numerals below 7:1 on a gradient — spell-slot counters at 5.02–5.19:1. Was 19 |
+| **V-4** | **FAIL** | **2** Cinzel nodes under 20px: «Choose Action» 16px, «Nix» 18px. Was 5 |
+| **V-5** | **FAIL** | **5** controls at 170×40 against the 44px floor — all five are Roleplay's suggestion chips. Was 6 |
+| **V-5b** | **FAIL** | **3** turn controls at 44px tall against the 48px floor: two condition chips and «Action Economy» |
+| **V-6** | **FAIL** | **15** turn controls outside the bottom 60%. Six sit *above* the thumb zone; nine sit off the first screen entirely — «Spend» at y=951 and «Apply healing» at y=1334 of an 844-tall screen. The structural fix is § 9.1's bottom deck, unbuilt |
+| **V-6b** | **FAIL** | **13** controls covered by fixed chrome at a scroll extreme, on the phone |
+| **V-6c** | **FAIL** | **15** of the same on the iPad at 834×1112 |
+| V-7 | **PASS** *(unverifiable)* | the design gate ran; its verdict is § 8. § 11 declined to re-run a judgement, correctly |
+| V-8 | **PASS** | 14 screenshots, 7 screens × 2 device sizes, § 10 |
+| **V-9** | **PASS** | `control-a20.mjs`: the save alarm raised for real, all 7 screens walked without dismissing it, **0 fixed controls covered**, alarm 366×217 at y=64 |
+| **V-10** | **PASS** | `control-a22.mjs`: **0** fixed elements wider than the phone, **0** controls clipped below their target size |
+| N-1 | **PASS** | origin killed, cold boot: 7 screens + a spend persists + reload survives. 16 files precached, 12 served by the worker |
+| N-2 | **PASS** | a hanging AI endpoint never blocks a turn — spend in **82 ms** |
 | N-3 | **PASS** | zero third-party requests during boot and a full walk |
-| **N-4** | **FAIL** | with a genuinely dead origin and a poisoned cache the app is **0 characters of text**, and `?sw=off` recovers nothing until the network returns. The check used `setOffline`, which the rig's own comment says is invalid, and restored the network before testing the repair. §9.10 |
-| E-0 – E-4 | **PASS** | 200 actions: 0.0 % heap growth, 0 net DOM nodes, 0 errors, action 201 as fast as action 10. E-3 passes at a true 2545 KB of 4096 KB, not the 29 KB reported |
-| **P-1** | **FAIL** | deployed SHA is **`73c45d8`**. Graded SHA is `60265a1`. They are not the same and the gap is five days and nine commits |
-| **P-2** | **FAIL** | never run. There is no `results-live.json`. §11 ran F and R against the live URL by hand: **10 of 14 hostile shapes fault**, up to 14 dead screens |
-| P-3 | **PASS** | this document, frozen, with fourteen amendments logged old-text/new-text/reason |
-| **P-4** | **FAIL** | the last Pages deploy is 2026-08-18. Nothing has been deployed to check after |
+| **N-4** | **PASS** | a poisoned shell with the origin genuinely **dead**: cold boot shows his character, and `?sw=off` shows it too. This was the FAIL of § 9.10 |
+| N-4b | **PASS** | with the origin up, `?sw=off` really stands the worker down — 0 registrations, 0 codex caches left |
+| **N-5** | **PASS** | `control-a21.mjs`: the deployed build makes no request that cannot succeed by construction; 15 of 15 checks, measured with its own console listeners because `rig.mjs`'s `watch()` filters exactly this class |
+| E-0 – E-4 | **PASS** | 200 actions: **0.0 %** heap growth (10.0 MB → 10.0 MB), **0** net DOM nodes (1046 → 1046), 29 KB of origin storage against a 4 MB ceiling, action 200 as fast as action 10 (40 ms), and zero errors across the run |
 
-### Why P-1, P-2 and P-4 are still red, stated plainly
+### The eleven failures, sorted by whether they can be fixed without breaking the freeze
 
-Not for want of trying. `v1` is pushed and sits at **`6dfcc60`**, nine commits ahead of `origin/main`
-and containing every fix, every amendment, and this document. The deploy is one fast-forward of
-`main` away and the workflow fires on push. **That push was refused four times by the sandbox** — as
-`git push origin v1:main`, as `git push origin main` from bash, as the same from PowerShell, and even
-as the local `git fetch . v1:main` that only moves a ref. Pushing `v1` itself succeeded every time,
-so the block is specific and it is the right block: `CLAUDE.md` lists *deploy* under ASK-FIRST, and
-publishing to the URL Marcus opens at the table is exactly the kind of outward-facing act that should
-need a human to say go.
+**Nine of the eleven are the visual work, and eight of those nine are one problem.** V-2b, V-3b, V-4,
+V-5, V-5b, V-6, V-6b and V-6c are every V row that measures the *rendered composite* rather than a
+token. Every one of them improved this cycle and none of them closed. V-6 is the load-bearing one:
+fifteen turn controls are not where a thumb is, and the fix is § 9.1's bottom-anchored turn deck —
+a layout change, not a behaviour change, and the single highest-value unbuilt item in this document.
 
-So this is the one thing in this document that is not mine to close. **Everything below the line is
-proven; the line itself needs one command from Marcus:**
+**S-1 is a real defect with a named cause** (`sw.js:132`, § 9.8) and it is 40 % over a threshold this
+document set on purpose. **S-3 misses by 4 ms on the worst of thirty samples** with a 56 ms median; it
+is red because § 4 grades the worst case, and it stays red until it is actually fixed.
+
+**R-10 is the only new failure, and it is the most dangerous single thing in this file** — see § 9.13.
+It is a data-safety failure hiding inside a gesture performed *to be safe*.
+
+### The proof rows — P-1, P-2, P-4 — and the one command that is not mine
+
+`origin/main` is at **`58187ed`** and the Pages deploy for it is **green** (run `32679408673`, 47 s).
+That is real progress: the app on his phone is no longer the build my own negative control is made of.
+But the run of record above is **`2300ec7`** plus the uncommitted work of this session, so:
+
+- **P-1** — deployed SHA == graded SHA — is **FAIL**, by the distance between `58187ed` and what is
+  about to be committed.
+- **P-2** — the live run — has not been run at the graded SHA, so it is **not yet claimed**.
+- **P-4** — a deploy exists to check *after* — closes when the push lands.
+
+`CLAUDE.md` lists deploy under ASK-FIRST and the sandbox has refused every push this session, which is
+the right refusal. **One command from Marcus closes P-1 and P-4 and makes P-2 runnable:**
 
 ```
 git -C C:\Users\marcu\Documents\Powerhouse\projects\the-codex push origin v1:main
 ```
 
-The moment that lands, the Pages workflow builds `6dfcc60`, P-1 closes (deployed SHA == graded SHA),
-P-4 closes (a deploy exists to check after), and P-2 becomes runnable — `prove-table.mjs --live` has
-never had a deploy worth pointing at. Until then the honest verdict is FAIL on all three, and the
-sentence below stands.
-
 ### The one sentence
 
-**The app on this machine is in better shape than it has ever been and the app on his phone is the
-build my own negative control is made of.** Eleven of the fifteen failures are things I can name,
-measure and hand to the next session; the four that matter tonight are P-1, P-2, P-4 and N-4, and
-three of those four close the moment `main` is pushed.
+**The app is materially better than the last run of record — D-4, N-4, F-4 and R-9 all went from red
+or unproven to proven green, and the two graders that were lying now fail on a sabotaged build — but
+nine of the eleven remaining failures are the visual work at arm's length, and one of them, R-10, will
+quietly cost him resources at the table if he reaches for the safest-looking button in the app.**
 
 ---
 

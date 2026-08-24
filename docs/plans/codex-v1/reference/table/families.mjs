@@ -212,15 +212,69 @@ export async function familyF(b, R, opts) {
       named, named ? '' : `gated=${gated}\n         ${seen.replace(/\s+/g, ' ').slice(0, 400)}`);
     await ctx.close();
   }
-  { // F-4
+  { /* F-4 — REWRITTEN by A-24. The previous grader asserted
+       `faults.length === 0 && actions > 2` where `actions` was
+       `page.locator('button').count()`, and printed PASS on that. F-4's
+       criterion has three clauses: renders Nix's REAL SHEET, shows a RANKED
+       SHORTLIST with at least one action in it, and SPENDS A REAL RESOURCE.
+       The dice roller alone is ten buttons, so `> 2` is true of every screen in
+       this app — including screens with no shortlist and no spend. Two of the
+       three clauses were asserted by nothing whatsoever, and the criterion text
+       was never the thing being measured. Every clause is now checked against
+       the save file on disk, which is the only witness that can tell a real
+       spend from a re-render. No clause was softened; three were added. */
     const { ctx, page } = await freshCtx(b, opts);
     await importFile(page, realCopy('full'));
     await page.goto(opts.base + '?d=1', { waitUntil: 'networkidle' });
     await page.waitForTimeout(900);
     const { text, faults } = await judge(page, { needs: [/Nix/] });
-    const actions = await page.locator('button').count();
-    R.check('F-4', '?d=1 turn screen renders Nix and offers actions',
-      faults.length === 0 && actions > 2, faults.join(' | ') || `buttons=${actions}\n         ${text.slice(0, 300)}`);
+    const problems = [...faults];
+
+    /* clause 1 — his real sheet, not a placeholder: the numbers on screen are
+       the numbers in the file. */
+    const disk = await page.evaluate(() => {
+      const k = Object.keys(localStorage).find(k => k.startsWith('codex-character-'));
+      return k ? JSON.parse(localStorage.getItem(k)) : null;
+    });
+    if (!disk) problems.push('no character on disk');
+    else {
+      const flat = text.replace(/\s+/g, ' ');
+      for (const [what, needle] of [
+        ['level', String(disk.level)],
+        ['class', disk.class],
+        ['max HP', String(disk.hp?.max)],
+        ['AC', String(disk.ac)],
+        ['Lay on Hands pool', String(disk.paladinResources?.layOnHands?.current)],
+      ]) if (needle && needle !== 'undefined' && !flat.includes(needle))
+        problems.push(`${what} (${needle}) from the save file is not on the turn screen`);
+    }
+
+    /* clause 2 — a ranked shortlist with at least one ACTION in it. Not "some
+       buttons exist": a control that names the action-economy slot it costs. */
+    const shortlist = await page.evaluate(() => [...document.querySelectorAll('button')]
+      .map(e => (e.textContent || '').replace(/\s+/g, ' '))
+      .filter(t => /\bAction\b/.test(t)).length);
+    if (shortlist < 1) problems.push(`no shortlisted control names an Action (${shortlist} found)`);
+
+    /* clause 3 — a real resource is spent, measured on disk before and after. */
+    const slot1 = () => page.evaluate(() => {
+      const k = Object.keys(localStorage).find(k => k.startsWith('codex-character-'));
+      return JSON.parse(localStorage.getItem(k))?.spellSlots?.['1']?.current ?? null;
+    });
+    const s0 = await slot1();
+    const caster = page.getByRole('button', { name: /Action · 1st-level slot/ }).first();
+    if (!(await caster.count())) problems.push('no control that spends a 1st-level slot');
+    else {
+      await caster.click({ timeout: 3000 }).catch(() => {});
+      await page.waitForTimeout(900);
+      const s1 = await slot1();
+      if (!(s0 !== null && s1 === s0 - 1))
+        problems.push(`spending a 1st-level slot did not reach disk: ${s0} → ${s1}`);
+    }
+    problems.push(...(await judge(page)).faults);
+
+    R.check('F-4', '?d=1 shows his real sheet, a ranked shortlist with an action, and spends a real resource',
+      problems.length === 0, problems.join('; ') || `\n         ${text.slice(0, 300)}`);
     await ctx.close();
   }
   { // F-5
@@ -573,18 +627,91 @@ export async function familyR(b, R, opts) {
     await ctx.close();
   }
 
-  { // R-9 same character twice
+  /* R-9 / R-10 — REWRITTEN and SPLIT by A-24.
+     The old R-9 read:
+         const again = page.getByRole('button', { name: /Import Character/i });
+         if (await again.count()) { await importFile(page, realCopy('full')); }
+     `Import Character` is the EMPTY-STATE label. After a character is loaded it
+     matches nothing, so `again.count()` was 0, the second import never ran, and
+     the assertion `n2 <= n1 + 1` compared 1 against 1 and printed PASS. R-9 has
+     never once performed the scenario it is named for. The real re-import
+     control lives in Settings and is labelled `Import`.
+     R-9's criterion is two clauses — "no duplicate roster entry" AND "no silent
+     overwrite of unsaved state" — and only the first was ever written down as
+     code. They are now separate checks, because they can fail independently and
+     a combined verdict hides which one did. */
+  const reimport = async (page, file) => {
+    await page.getByRole('button', { name: /Open settings/i }).first().click();
+    await page.waitForTimeout(700);
+    await importFile(page, file, { via: /^Import$/ });
+  };
+  const pool = page => page.evaluate(() => {
+    const k = Object.keys(localStorage).find(k => k.startsWith('codex-character-'));
+    return k ? JSON.parse(localStorage.getItem(k))?.paladinResources?.layOnHands?.current ?? null : null;
+  });
+
+  { // R-9 — no duplicate roster entry
     const { ctx, page } = await freshCtx(b, opts);
     await importFile(page, realCopy('full'));
     const n1 = await storedChars(page);
     await goScreen(page, SCREENS.find(s => s.id === 'prep/Character'));
-    // return to a place an import can be started again
-    const again = page.getByRole('button', { name: /Import Character/i });
-    if (await again.count()) { await importFile(page, realCopy('full')); }
+    let ran = true;
+    await reimport(page, realCopy('full')).catch(e => { ran = false; R.note?.(String(e)); });
     const n2 = await storedChars(page);
     const { faults } = await judge(page);
-    R.check('R-9', 'importing the same character twice makes no duplicate', n2 <= n1 + 1 && faults.length === 0,
-      `before=${n1} after=${n2} ${faults.join('|')}`);
+    const problems = [...faults];
+    if (!ran) problems.push('the second import could not be started at all — scenario NOT RUN');
+    if (n2 !== n1) problems.push(`roster went ${n1} → ${n2}; the same character must not make a second entry`);
+    R.check('R-9', 'the same character imported twice in a row makes no duplicate roster entry',
+      problems.length === 0, problems.join('; ') || `before=${n1} after=${n2}`);
+    await ctx.close();
+  }
+
+  { /* R-10 — ADDED by A-24. The other half of R-9's criterion, which no code
+       ever asserted: re-importing a backup mid-session must not silently throw
+       away what has happened since. He is at the table, he has spent five Lay
+       on Hands, he re-imports his file for any reason — the file says 35. If
+       the app writes 35 over his 30 and says nothing, he has lost session state
+       to a button labelled "Import", and the only way he finds out is by
+       noticing a number he was not looking at. Either outcome is acceptable;
+       being told is not optional. */
+    const { ctx, page } = await freshCtx(b, opts);
+    await importFile(page, realCopy('full'));
+    const before = await pool(page);
+    await goScreen(page, SCREENS.find(s => s.id === 'play/Combat'));
+    await page.getByRole('button', { name: /^Heal 5$/i }).first().click().catch(() => {});
+    await page.waitForTimeout(900);
+    const spent = await pool(page);
+    const problems = [];
+    if (!(spent !== null && spent === before - 5)) problems.push(`could not establish session state: ${before} → ${spent}`);
+    else {
+      const body = () => page.evaluate(() => document.body.innerText.replace(/\s+/g, ' '));
+      /* Snapshot with Settings already OPEN, so the delta is the import's own
+         notice and not the settings panel's copy arriving. */
+      await page.getByRole('button', { name: /Open settings/i }).first().click();
+      await page.waitForTimeout(700);
+      const wasOnScreen = new Set((await body()).split(' '));
+      await importFile(page, realCopy('full'), { via: /^Import$/ })
+        .catch(e => problems.push('second import could not start: ' + e.message));
+      await settle(page);
+      const after = await pool(page);
+      /* Read only the words the re-import ADDED. The first version of this
+         tested the whole of `document.body.innerText`, and passed — on the word
+         "replace" occurring somewhere else entirely in Settings. A check that
+         can be satisfied by unrelated copy on the same page is not measuring
+         its subject, which is the defect A-24 exists to fix; writing it again
+         inside the fix would have been the third time in this file. */
+      const added = (await body()).split(' ').filter(w => !wasOnScreen.has(w)).join(' ');
+      const overwritten = after === before;
+      const named = /replac|overwrit|discard|you will lose|you'll lose|lost|since you|current progress|in.session|had spent/i.test(added);
+      if (overwritten && !named)
+        problems.push(`session state silently overwritten: ${spent} → ${after}, and the only thing it said was "${added.slice(0, 120)}"`);
+      if (!overwritten && after !== spent)
+        problems.push(`re-import left the pool at ${after}, which is neither the file (${before}) nor the session (${spent})`);
+    }
+    problems.push(...(await judge(page)).faults);
+    R.check('R-10', 're-importing the same file mid-session does not silently discard session state',
+      problems.length === 0, problems.join('; '));
     await ctx.close();
   }
 }

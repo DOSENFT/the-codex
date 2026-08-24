@@ -155,7 +155,15 @@ export async function freshCtx(browser, {
 /** Put a character in through the front door — the import path, the only door
  *  onto a phone that has never seen this app. Never via localStorage: seeding
  *  storage walks straight past the code that has broken three times. */
-export async function importFile(page, file, { anyway = true } = {}) {
+export async function importFile(page, file, { anyway = true, via = /Import Character/i } = {}) {
+  /* Amendment A-24 — `via` exists because the import control is not always
+     called "Import Character". That is the EMPTY-STATE label; once a character
+     is loaded the re-import control lives in Settings and is labelled just
+     "Import". R-9's entire scenario is the SECOND import, and it was written
+     `if (await again.count()) { … }` against the empty-state name — which after
+     a load matches zero elements. So the second import never ran, the roster
+     count never moved, and `n2 <= n1 + 1` passed on a scenario that had not
+     happened. Callers that need the other door now pass it. */
   /* Amendment A-15 — this used to read
      //   const chooser = page.waitForEvent('filechooser');
      //   await page.getByRole('button', …).first().click();
@@ -168,7 +176,7 @@ export async function importFile(page, file, { anyway = true } = {}) {
      failure, which is this project's oldest problem in the other direction.
      Wait for the control, and allow exactly one retry. If neither click opens a
      chooser, that is a real failure and it is thrown, not swallowed. */
-  const btn = page.getByRole('button', { name: /Import Character/i }).first();
+  const btn = page.getByRole('button', { name: via }).first();
   await btn.waitFor({ state: 'visible', timeout: 15000 });
   let opened = false;
   for (let attempt = 0; attempt < 2 && !opened; attempt++) {
@@ -177,7 +185,7 @@ export async function importFile(page, file, { anyway = true } = {}) {
     const c = await chooser;
     if (c) { await c.setFiles(file); opened = true; }
   }
-  if (!opened) throw new Error('Import Character never opened a file chooser after two clicks');
+  if (!opened) throw new Error(`the import control ${via} never opened a file chooser after two clicks`);
   await page.waitForTimeout(900);
   if (anyway) {
     const gate = page.getByRole('button', { name: /^Import anyway$/ });
