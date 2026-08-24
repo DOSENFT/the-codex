@@ -19,7 +19,19 @@
    It is not dismissible by tapping outside, it does not time out, and it does
    not cover the sheet: at the table Marcus keeps playing, and the alarm keeps
    standing until he acknowledges it.
-   ========================================================================== */
+
+   AMENDMENT A-20 — it used to stand at the BOTTOM, and "does not cover the
+   sheet" was not true there. Independent verification measured it at 31% of a
+   390×844 screen, and the bottom 144px of this app is where every fixed
+   control lives: the tab bar, the dice roller, and the Veil — the safety
+   control that F-5 says may never be missing. So the one banner whose whole
+   job is "keep playing, but know this" was sitting on top of the controls you
+   keep playing with, including the one you press when you need out.
+
+   It now sits directly under the fixed header instead. That band holds no
+   fixed control on any of the seven screens, and what it does cover — the top
+   of the page — scrolls, which the tab bar and the Veil do not. Nothing about
+   what it says or when it appears has moved. */
 
 interface Props {
   /** The player-facing reason. Null while nothing is wrong. */
@@ -38,7 +50,8 @@ export function SaveAlarm({ reason, onDismiss }: Props) {
         position: 'fixed',
         left: 12,
         right: 12,
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+        // 56px is the fixed header; 8px of air under it. A-20.
+        top: 'calc(env(safe-area-inset-top, 0px) + 64px)',
         zIndex: 2147483000,
         margin: '0 auto',
         maxWidth: 520,
