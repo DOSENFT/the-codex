@@ -69,7 +69,67 @@ function releaseController(): Promise<void> {
   })
 }
 
+/** Can this device actually re-download the app right now?
+ *
+ *  NOT `navigator.onLine`. That property reports whether the radio is on, not
+ *  whether the origin answers, and the difference is the whole bug: with the
+ *  server closed and Wi-Fi up it reads `true`, so a guard built on it never
+ *  fires in the one situation it exists for. Measured — the tightened N-4 failed
+ *  exactly that way before this replaced it.
+ *
+ *  The probe is delegated to the worker rather than run here, because a fetch
+ *  that fails in page context writes `net::ERR_CONNECTION_REFUSED` to the
+ *  console, and a console error is a failure by this project's rules — the
+ *  first version of this check was itself a defect, worth two errors on the
+ *  `?sw=off` path. The same fetch failing inside the worker is silent. See the
+ *  `codex-sw-reachable` handler in `sw.js`.
+ *
+ *  `onLine === false` is still checked first, because when the radio is off the
+ *  answer is free and instant. `=== false` rather than `!onLine`, so a browser
+ *  that leaves the property undefined falls through to the real probe instead
+ *  of being read as offline.
+ *
+ *  No worker, or a worker that never answers, resolves to `true`: with nothing
+ *  controlling the page there is nothing serving those caches anyway, and a
+ *  worker too broken to reply is exactly what `?sw=off` was typed to remove. */
+function askWorker(): Promise<boolean | null> {
+  const worker = navigator.serviceWorker.controller
+  if (!worker) return Promise.resolve(null)
+  return new Promise(resolve => {
+    const done = (v: boolean | null) => {
+      navigator.serviceWorker.removeEventListener('message', onMessage)
+      clearTimeout(timer)
+      resolve(v)
+    }
+    const onMessage = (e: MessageEvent) => {
+      if (e.data === 'codex-sw-reachable:yes') done(true)
+      else if (e.data === 'codex-sw-reachable:no') done(false)
+    }
+    navigator.serviceWorker.addEventListener('message', onMessage)
+    const timer = setTimeout(() => done(null), 5000)
+    worker.postMessage('codex-sw-reachable')
+  })
+}
+
+async function originReachable(): Promise<boolean> {
+  if (navigator.onLine === false) return false
+  return (await askWorker()) ?? true
+}
+
+/** The off switch, and the check that stops it becoming the outage.
+ *
+ *  Unregistering is what makes `?sw=off` work, and it is also the one act that
+ *  cannot be undone in a basement: with no worker, the next navigation goes to
+ *  an origin that is not there, and nothing serves the caches that are still
+ *  sitting on the disk. So the teardown happens only when the app can be
+ *  fetched again, and otherwise waits — the flag is already in localStorage, so
+ *  the first boot with a network honours it.
+ *
+ *  Nothing is lost by waiting. The worker now falls back to a last-known-good
+ *  shell, so the poisoned cache `?sw=off` exists to escape is already handled
+ *  without it. */
 async function unregisterAll(): Promise<void> {
+  if (!(await originReachable())) return
   await releaseController()
   const regs = await navigator.serviceWorker.getRegistrations()
   await Promise.all(regs.map(r => r.unregister()))
@@ -85,7 +145,7 @@ export function registerServiceWorker(): void {
   if (flag === 'on') localStorage.removeItem(OFF_KEY)
 
   if (localStorage.getItem(OFF_KEY) === '1') {
-    void unregisterAll()
+    void unregisterAll()   // defers itself when the origin is unreachable
     return
   }
 

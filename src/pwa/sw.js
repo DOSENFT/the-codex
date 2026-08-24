@@ -29,6 +29,11 @@
        switch nobody has pulled is a kill switch nobody knows is broken, so the
        Slice 10 proof pulls it.
 
+   4.  THERE IS ALWAYS A WAY BACK, AND IT DOES NOT NEED THE NETWORK.  See the
+       LAST-KNOWN-GOOD block below. Rule 3 on its own is a bypass, not a
+       rollback: it hands the page to a network that, in a basement, is not
+       there. This rule is the one that was missing.
+
    The two placeholders below are substituted at build time by `precachePlugin`
    in vite.config.ts with the real content-hashed asset list and a build id
    derived from it — and the build FAILS if either substitution does not happen,
@@ -54,6 +59,58 @@ const MEDIA = 'codex-media-v1'
  *  trimmed oldest-first is enough: the failure mode of overshooting is a slow
  *  eviction, and the failure mode of no cap is the browser evicting the SHELL. */
 const MEDIA_MAX = 120
+
+/* ============================================================================
+   THE LAST-KNOWN-GOOD SHELL — the parachute
+   ----------------------------------------------------------------------------
+   THE INCIDENT.  Criterion N-4, reproduced honestly: kill the origin for real
+   (not `context.setOffline`, which leaves the worker out of the loop and lies
+   about it — see the note in reference/table/rig.mjs), poison the one entry in
+   the shell cache that is NOT content-hashed, and reload. The app is a white
+   screen. `document.body.innerText.length === 0`. Then pull the documented kill
+   switch — `?sw=off`, the URL he can type at the table — and it recovers
+   NOTHING, because the kill switch works by getting out of the way so the
+   browser can fetch the app fresh, and in a basement there is nothing to fetch.
+   The app only came back when the wifi did. At a table that is: the sheet is
+   gone for the night, and the printed instructions for saving it do not work.
+
+   Rule 1 is why the hole exists and rule 1 is still right. index.html is the
+   only file in the precache whose name is not its hash, so it is the only one
+   that can be replaced by something wrong and still be found. A half-written
+   install, an eviction that lands mid-write, a corrupt disk sector, a proxy
+   that returns its own captive-portal page with a 200 — all of them end at the
+   same place: one bad document in the cache, pinned, with no network to correct
+   it and no second copy to fall back to.
+
+   So there is a second copy. `codex-shell-lkg` holds the last set of bytes this
+   worker watched boot: the document plus every hashed asset that document
+   names. It is written ONLY by `promote()` below, ONLY after that exact set has
+   been checked end to end, and NEVER by an install — an install writes to the
+   versioned SHELL and nowhere else, which is what makes this a rollback target
+   rather than a second thing to corrupt in the same breath.
+
+   WHY THE NAME IS NOT VERSIONED, and the trap in that. A parachute that is
+   thrown away by the deploy it exists to survive is not a parachute. But the
+   activate handler below deletes every `codex-shell-` cache that is not the
+   current one, so an unversioned name in that family would be swept on the
+   first activation — the fix would delete itself, silently, and the proof would
+   still be green because the poison comes later. Hence the explicit exemption
+   there. Do not remove it.
+
+   WHY THIS IS NOT "STALE FOREVER", which is the other half of the argument.
+   The LKG is read on exactly one path: a navigation whose network fetch has
+   already failed. Online, nothing changes — navigations are still network
+   first, a new deploy still lands, and promote() replaces the LKG with the new
+   build the moment that build is shown to boot. What the LKG buys is the case
+   where the new build is NOT shown to boot: promote() declines, the old set
+   stays, and the basement gets yesterday's working app instead of a white
+   screen. Old and readable beats current and blank. That is the whole trade.
+   ========================================================================== */
+const LKG = 'codex-shell-lkg'
+/** Written LAST by promote(), so a promotion interrupted halfway leaves a stamp
+ *  that does not match and is therefore retried, rather than a half-copied
+ *  shell wearing a badge that says it is complete. */
+const LKG_STAMP = () => new Request(`${SCOPE.href}__lkg-build`)
 
 /** Flipped by the off switch, and the reason the off switch works.
  *
@@ -91,10 +148,20 @@ self.addEventListener('activate', event => {
       const names = await caches.keys()
       await Promise.all(
         names
-          .filter(n => n.startsWith('codex-shell-') && n !== SHELL)
+          // `n !== LKG` is load-bearing, not defensive. The parachute lives in
+          // the `codex-shell-` family so it is obvious in DevTools next to the
+          // thing it backs up, and this sweep would otherwise delete it on the
+          // first activation after every deploy — leaving the fix in the source
+          // and nothing on the disk.
+          .filter(n => n.startsWith('codex-shell-') && n !== SHELL && n !== LKG)
           .map(n => caches.delete(n)),
       )
       await self.clients.claim()
+      // The new shell has just finished installing and the old ones are gone.
+      // If it can stand on its own — see promote() — this is the moment it
+      // becomes the thing we fall back TO. If it cannot, the previous build
+      // stays the parachute and this deploy simply does not get one yet.
+      await promote().catch(() => {})
     })(),
   )
 })
@@ -124,8 +191,14 @@ self.addEventListener('fetch', event => {
   // told in Marcus's voice.
   if (url.pathname.includes('/ollama')) return
 
-  // -- navigations: network first, cache second, shell last ------------------
+  // -- navigations: network first, cache second, parachute last --------------
   if (request.mode === 'navigate') {
+    // The rescue URL. He typed `?sw=off` because the app on this device is
+    // wrong, so on this one path the ACTIVE cache is the prime suspect and the
+    // parachute is asked first. register.ts will unregister and purge a moment
+    // after this document loads; the only job here is to make sure there IS a
+    // document for it to load, which before this change there was not.
+    const rescuing = url.searchParams.get('sw') === 'off'
     event.respondWith(
       (async () => {
         try {
@@ -133,14 +206,21 @@ self.addEventListener('fetch', event => {
           // `RELEASED` is re-read after the await, here and at every other put
           // below: a request that was in flight when the switch was pulled
           // would otherwise re-open the cache it was pulled to delete.
-          if (!RELEASED) (await caches.open(SHELL)).put(indexRequest(), fresh.clone())
+          if (!RELEASED) {
+            ;(await caches.open(SHELL)).put(indexRequest(), fresh.clone())
+            // The network is up and this worker just answered a navigation with
+            // it. Second of the two moments a shell can earn the parachute.
+            // Nothing downstream may reject: an unhandled rejection in here is
+            // a console error at a table, and the response is already decided.
+            const promotion = promote().catch(() => false)
+            try { event.waitUntil(promotion) } catch { /* lifetime already settled */ }
+          }
           return fresh
         } catch {
           // Offline. Any route in this app is the same index.html — it is a
           // single-page app — so the shell copy answers a deep link too.
-          const cached = (await caches.match(indexRequest())) || (await caches.match(request))
-          if (cached) return cached
-          throw new Error('offline and no shell cached')
+          try { return await lastGoodDocument(request, rescuing) }
+          catch { return offlineNotice() }
         }
       })(),
     )
@@ -198,6 +278,162 @@ self.addEventListener('fetch', event => {
  *  whatever deep link happened to be open when it was stored. */
 const indexRequest = () => new Request(SCOPE.href, { cache: 'reload' })
 
+/* ── can this document actually boot, offline, right now? ──────────────────── */
+
+/** Every same-origin hashed asset the document NAMES: the entry module, the
+ *  modulepreloads, the stylesheet. Read off the bytes rather than off
+ *  PRECACHE_URLS, because the question being asked is "can THIS document boot",
+ *  and a poisoned or half-written document names a different set than the build
+ *  does — which is exactly how you tell them apart.
+ *
+ *  A regex over HTML is normally a bad idea. Here the input is a Vite-emitted
+ *  index.html whose asset references are machine-written `src=` / `href=`
+ *  attributes, and the cost of a false positive is one extra cache lookup that
+ *  misses. There is no HTML parser in a service worker and pulling one in would
+ *  be several hundred lines of trunk to answer a question this settles.
+ *  Fonts are skipped: they are referenced from the CSS, never from the
+ *  document, and the build deliberately leaves legacy .woff out of the
+ *  precache — a missing typeface is not a white screen. */
+async function namedAssets(doc) {
+  const html = await doc.clone().text()
+  const out = new Set()
+  for (const m of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+)["']/gi)) {
+    let u
+    try { u = new URL(m[1], SCOPE.href) } catch { continue }
+    if (u.origin !== self.location.origin) continue
+    if (!isHashedAsset(u)) continue
+    if (/\.woff2?$/i.test(u.pathname)) continue
+    out.add(u.href)
+  }
+  return [...out]
+}
+
+/** The whole test, and the reason `?sw=off` used to be the only answer: a
+ *  cached index.html that is WRONG is still a perfectly valid 200 with a
+ *  content-type of text/html and a `<div id="root">` in it. Status tells you
+ *  nothing. What tells you something is whether the bundles it names are on
+ *  this disk — because with the origin dead, a script tag pointing at a file
+ *  nobody holds is a white screen and nothing else.
+ *
+ *  Zero named assets is also a failure, not a pass. That is the truncated
+ *  write, the captive-portal page and the empty-string put; a document that
+ *  asks for no JavaScript renders no app. */
+async function bootable(doc) {
+  if (!doc) return false
+  let urls
+  try { urls = await namedAssets(doc) } catch { return false }
+  if (!urls.length) return false
+  for (const u of urls) if (!(await caches.match(u))) return false
+  return true
+}
+
+/* ── writing the parachute ─────────────────────────────────────────────────── */
+
+/** Copy the current shell into the LKG cache — but only if the current shell
+ *  passes the same test the offline path will later apply to it. Promoting a
+ *  shell we have not checked would just be corrupting two caches instead of
+ *  one, on a schedule.
+ *
+ *  Cheap to call repeatedly: after the first successful promotion for a build
+ *  the stamp short-circuits it, so the per-navigation call is one cache hit.
+ *
+ *  The write order is deliberate — assets, then the document, then the stamp,
+ *  then the prune. At every instant in that sequence the LKG cache is either
+ *  the old complete set or the new complete set; there is no window in which it
+ *  holds a document whose assets have not landed yet. A parachute that can be
+ *  interrupted into an unopenable state is not one. */
+async function promote() {
+  if (RELEASED) return false
+  const shell = await caches.open(SHELL)
+  const doc = await shell.match(indexRequest())
+  if (!(await bootable(doc))) return false
+
+  const lkg = await caches.open(LKG)
+  const stamp = await lkg.match(LKG_STAMP())
+  if (stamp && (await stamp.text()) === BUILD_ID) return true
+
+  const index = indexRequest()
+  const assets = [...new Set([
+    ...PRECACHE_URLS.map(u => new URL(u, SCOPE.href).href),
+    ...(await namedAssets(doc)),
+  ])].filter(u => u !== index.url)
+
+  for (const u of assets) {
+    const hit = (await shell.match(u)) || (await caches.match(u))
+    if (!hit) continue          // not fatal: bootable() already vouched for the
+    if (RELEASED) return false  // set that matters, the rest is belt and braces
+    await lkg.put(u, hit.clone())
+  }
+  if (RELEASED) return false
+  await lkg.put(index, doc.clone())
+  await lkg.put(LKG_STAMP(), new Response(BUILD_ID, { headers: { 'content-type': 'text/plain' } }))
+
+  // Only now, with the new set complete and stamped, is it safe to drop what
+  // the previous build left behind.
+  const keep = new Set([...assets, index.url, LKG_STAMP().url])
+  for (const k of await lkg.keys()) if (!keep.has(k.url)) await lkg.delete(k)
+  return true
+}
+
+/* ── reading it ────────────────────────────────────────────────────────────── */
+
+/** The offline answer to a navigation, in order of preference, with every
+ *  candidate held to the same bar: it has to be able to boot.
+ *
+ *  Before this existed the line here was `caches.match(indexRequest())`, and
+ *  CacheStorage.match searches caches in creation order — so the poisoned shell
+ *  won, every time, and won again on the reload, and the parachute (had there
+ *  been one) would never have been reached. The caches are named explicitly
+ *  below for that reason. */
+async function lastGoodDocument(request, rescuing) {
+  const shell = await caches.open(SHELL)
+  const lkg = await caches.open(LKG)
+  const active = await shell.match(indexRequest())
+  const parachute = await lkg.match(indexRequest())
+
+  for (const doc of rescuing ? [parachute, active] : [active, parachute]) {
+    if (await bootable(doc)) return doc
+  }
+  // A deep link stored under its own URL, from an older shape of this file.
+  const deep = await caches.match(request)
+  if (await bootable(deep)) return deep
+
+  return offlineNotice()
+}
+
+/** Rule 4: never hand the client zero bytes. A blank body is indistinguishable
+ *  from a dead device — he cannot tell whether the app is broken, the phone is
+ *  broken, or his character is gone — and it is the state that made N-4 the
+ *  worst failure this product has. A page that says what happened and confirms
+ *  the sheet is safe is not a fix, but it is not nothing, and "not nothing" is
+ *  the entire bar here.
+ *
+ *  Served 200 on purpose. A 5xx invites the browser to substitute its own error
+ *  page, which would put us straight back to a blank body — the one outcome
+ *  this function exists to make impossible. The status code has no reader; the
+ *  man at the table does. */
+const offlineNotice = () => new Response(
+  `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Codex — offline</title>
+<style>
+ html,body{margin:0;height:100%;background:#0a0a08;color:#e8e2d4;
+   font:16px/1.6 ui-sans-serif,system-ui,sans-serif}
+ main{max-width:34rem;margin:0 auto;padding:18vh 1.5rem 2rem}
+ h1{font-size:1.25rem;letter-spacing:.08em;text-transform:uppercase;color:#c9a227;margin:0 0 1rem}
+ p{margin:0 0 1rem}
+</style></head><body><main>
+<h1>The Codex &mdash; offline</h1>
+<p>There is no network, and there is no usable copy of the app saved on this
+   device, so there is nothing here to start from yet.</p>
+<p><strong>Your character is safe.</strong> Sheets are stored separately from the
+   app itself and nothing above has touched them.</p>
+<p>Reconnect to any network and reload. The app repairs itself on the first
+   successful load, and your sheet will be exactly where you left it.</p>
+</main></body></html>`,
+  { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } },
+)
+
 async function trim(cache) {
   const keys = await cache.keys()
   if (keys.length <= MEDIA_MAX) return
@@ -209,8 +445,38 @@ async function trim(cache) {
  *  a worker already handling fetches will keep doing so until its clients are
  *  gone, so it is also told to let go of everything it is holding. */
 self.addEventListener('message', event => {
+  /* "Can this device actually re-download the app right now?", asked by
+     register.ts before it tears the worker down.
+     The page cannot answer this itself. A fetch that fails in a document logs
+     `net::ERR_CONNECTION_REFUSED` to the console, and by this project's own
+     rules a console error is a failure — so the honest probe was itself a
+     defect, measured as two errors on the ?sw=off path. The identical fetch
+     failing in HERE logs nothing to the page, which is why this worker has
+     always been free to try the network first on every navigation. So the
+     worker takes the hit and reports the answer back. */
+  if (event.data === 'codex-sw-reachable') {
+    const client = event.source
+    event.waitUntil((async () => {
+      let ok = false
+      try {
+        // A unique query so nothing — HTTP cache, Cache Storage, a proxy — can
+        // answer this from a copy. Reachability is the only question.
+        const probe = new URL(SCOPE.pathname, self.location.origin)
+        probe.searchParams.set('codex-reachable', String(Date.now()))
+        ok = (await fetch(probe.href, { cache: 'no-store' })).ok
+      } catch { ok = false }
+      if (client) client.postMessage(`codex-sw-reachable:${ok ? 'yes' : 'no'}`)
+    })())
+    return
+  }
   if (event.data !== 'codex-sw-purge') return
   RELEASED = true
+  // The parachute goes too. It is not exempt and must not be: the off switch
+  // means "let go of everything", and register.ts's own purge() sweeps every
+  // `codex-` cache from page context a moment later regardless, so exempting it
+  // here would buy nothing and would leave two files disagreeing about what the
+  // kill switch does. The parachute's job is finished by this point — it is
+  // what served the `?sw=off` document that is running this line.
   event.waitUntil(
     (async () => {
       const names = await caches.keys()

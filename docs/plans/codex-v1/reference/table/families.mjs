@@ -976,37 +976,90 @@ export async function familyN(b, R, opts) {
     R.check('N-3', 'zero third-party requests during boot + a full walk', foreign.size === 0, [...foreign].join(', '));
     await ctx.close();
   }
-  { // N-4 a stale cache cannot brick it
-    const ctx = await b.newContext({ viewport: opts.viewport, deviceScaleFactor: 3 });
-    const page = await ctx.newPage();
-    const { watch } = await import('./rig.mjs');
-    watch(page);
-    await page.goto(opts.base, { waitUntil: 'networkidle' });
-    await importFile(page, realCopy('full'));
-    await page.waitForTimeout(3000);
-    // poison the shell cache with an index.html naming bundles that do not exist
-    const poisoned = await page.evaluate(async base => {
+  { /* N-4 — a stale cache cannot brick it.
+       Amendment A-16. The version this replaces was unsound three ways, each
+       measured rather than argued (see §11):
+
+         · it went offline with `ctx.setOffline(true)`, which rig.mjs's own
+           comment already records as a CDP artefact that does not behave like a
+           dead network — under it the navigation reaches the worker but every
+           subresource comes back `workerStart = 0`, so the app cannot boot no
+           matter what the worker does. "bricked-while-poisoned=true" was a
+           statement about Playwright, not about this app.
+         · `bricked` was computed, interpolated into the label, and never
+           asserted. The failure state the criterion exists to catch could not
+           fail the criterion.
+         · `setOffline(false)` ran BEFORE the recovery test, so the one
+           assertion in it was made with the network up. It graded "does
+           ?sw=off clear a bad cache", never "does it work in a basement".
+
+       And `/Nix|Import Character/` passed on an empty app offering an import
+       button — i.e. satisfiable with his character gone.
+
+       So: the origin is really closed, by `deadOrigin`, the same way N-1 does
+       it; the poison goes in while the origin is still alive; the network is
+       never restored; and both boots are graded by `judge` needing /Nix/, so
+       blankness, a boundary notice, a console error and a missing character
+       each fail it. Nothing here is easier than what it replaced. */
+    const POISON = '<!doctype html><html><head><script type="module" src="./assets/GONE-0000.js"></script></head><body><div id="root"></div></body></html>';
+    const { ctx, page, base, cached } = await deadOrigin(b, {
+      viewport: opts.viewport, dpr: opts.dpr,
+      before: async p => {
+        await importFile(p, realCopy('full'));
+        await p.waitForTimeout(3000);
+      },
+    });
+    // The origin is dead from here down. Nothing below restores it.
+    const poisoned = await page.evaluate(async ({ base, POISON }) => {
       const names = await caches.keys();
-      const shell = names.find(n => n.startsWith('codex-shell'));
+      const shell = names.find(n => n.startsWith('codex-shell') && !n.endsWith('-lkg'));
       if (!shell) return 'no shell cache';
       const c = await caches.open(shell);
-      await c.put(base, new Response(
-        '<!doctype html><html><head><script type="module" src="./assets/GONE-0000.js"></script></head><body><div id="root"></div></body></html>',
-        { headers: { 'content-type': 'text/html' } }));
+      await c.put(base, new Response(POISON, { headers: { 'content-type': 'text/html' } }));
       return shell;
-    }, opts.base);
-    await ctx.setOffline(true);
+    }, { base, POISON });
+
+    // (a) the poisoned cold boot itself — the parachute is what has to catch it
     await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
-    await page.waitForTimeout(1500);
-    const bricked = (await page.evaluate(() => document.body.innerText)).trim().length < 40;
-    await ctx.setOffline(false);
-    await page.goto(opts.base + '?sw=off', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(2200);
+    const cold = await judge(page, { needs: [/Nix/] });
+    const coldErrs = page.errs.slice();
+    page.errs.length = 0;
+
+    // (b) the kill switch, pulled in the basement, with the origin still gone
+    await page.goto(base + '?sw=off', { waitUntil: 'domcontentloaded' }).catch(() => {});
     await page.waitForTimeout(2500);
-    await page.goto(opts.base, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1500);
-    const recovered = /Nix|Import Character/.test(await page.evaluate(() => document.body.innerText));
-    R.check('N-4', `?sw=off recovers a poisoned cache  [bricked-while-poisoned=${bricked}]`,
-      recovered, `cache=${poisoned} recovered=${recovered}`);
+    await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
+    await page.waitForTimeout(1800);
+    const off = await judge(page, { needs: [/Nix/] });
+
+    const ok = cold.faults.length === 0 && coldErrs.length === 0 && off.faults.length === 0;
+    R.check('N-4', `a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [${cached} precached, poisoned ${poisoned}]`,
+      ok, [cold.faults.length ? 'cold: ' + cold.faults.join(' | ') : '',
+           coldErrs.length ? 'cold errs: ' + coldErrs.slice(0, 3).join(' | ') : '',
+           off.faults.length ? '?sw=off: ' + off.faults.join(' | ') : ''].filter(Boolean).join('\n         '));
+    await ctx.close();
+  }
+  { /* N-4b — added with A-16, and it is the half of the old N-4 that was worth
+       keeping. The rewrite above grades the off switch in a basement, where the
+       right answer is "defer the teardown". That leaves an obvious way to pass
+       both: never tear down at all. So this asserts the other side — with the
+       origin UP, `?sw=off` must still do what it says: no worker registered, no
+       `codex-` cache left standing. Between them there is no build that is
+       green on both by doing nothing. */
+    const { ctx, page } = await freshCtx(b, opts);
+    await importFile(page, realCopy('full'));
+    await page.waitForTimeout(3000);
+    await page.goto(opts.base + '?sw=off', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(3000);
+    const after = await page.evaluate(async () => ({
+      regs: (await navigator.serviceWorker.getRegistrations()).length,
+      caches: (await caches.keys()).filter(n => n.startsWith('codex-')).length,
+    }));
+    const { faults } = await judge(page, { needs: [/Nix/] });
+    R.check('N-4b', `with the origin UP, ?sw=off really does stand the worker down  [${after.regs} registrations, ${after.caches} codex caches left]`,
+      after.regs === 0 && after.caches === 0 && faults.length === 0,
+      `regs=${after.regs} caches=${after.caches} ${faults.join(' | ')}`);
     await ctx.close();
   }
 }
