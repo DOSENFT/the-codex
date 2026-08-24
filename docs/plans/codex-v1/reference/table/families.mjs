@@ -7,7 +7,7 @@ import { writeFileSync, mkdtempSync, readFileSync, copyFileSync } from 'node:fs'
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  freshCtx, goScreen, SCREENS, importFile, storedChars, storedChar, judge, audit, drain,
+  freshCtx, goScreen, SCREENS, importFile, storedChars, storedChar, judge, audit, drain, watch,
   deadOrigin, settle, TABLET, pixelContrast,
 } from './rig.mjs';
 
@@ -329,30 +329,82 @@ export async function familyD(b, R, opts) {
     }
     R.check('D-3', 'a refused or cancelled import writes nothing', leaks.length === 0, leaks.join('; '));
   }
-  { // D-4 two tabs
+  { /* D-4 two tabs — Amendment A-17.
+       The old version of this block was unsound in three ways and is quoted in
+       full in TABLE-READY.md §4 so the weakening is on the record. In short:
+       `wrote` was true because a CLICK LANDED, not because anything was stored;
+       tab 2's action was clicking a *tab*, which triggers no save at all; and
+       both tabs spent the same amount from the same pool, so a clobber and a
+       correct refusal produce the identical stored number — 30 either way. It
+       could not have failed, and it did not, on a build where the bug was
+       present and §11 found it by hand.
+
+       Tightened so the two outcomes are arithmetically distinguishable. Tab one
+       spends TWICE (35 → 25). Tab two, stale at 35, spends ONCE. Last-write-wins
+       stores 30 — a number that can only exist if tab one's second spend was
+       eaten. Refuse-and-reconcile leaves 25. There is no third answer, and no
+       reading of 25 that a lost write could have produced. */
+    const pool = page => page.evaluate(() => {
+      const k = Object.keys(localStorage).find(k => k.startsWith('codex-character-'));
+      if (!k) return null;
+      try { return JSON.parse(localStorage.getItem(k)).paladinResources.layOnHands.current; }
+      catch { return null; }
+    });
+    const heal5 = page => page.getByRole('button', { name: /^Heal 5$/i }).first();
     const ctx = await b.newContext({ viewport: opts.viewport, deviceScaleFactor: 3 });
     await ctx.addInitScript(() => localStorage.setItem('codex-sw-off', '1'));
-    const p1 = await ctx.newPage(); p1.errs = [];
+    const p1 = await ctx.newPage(); watch(p1);
     await p1.goto(opts.base, { waitUntil: 'networkidle' });
     await importFile(p1, realCopy('full'));
-    const p2 = await ctx.newPage(); p2.errs = [];
+    // Tab two opens BEFORE tab one writes. That is the whole scenario: its copy
+    // of the character is correct at the moment it is read and wrong afterwards.
+    const p2 = await ctx.newPage(); watch(p2);
     await p2.goto(opts.base, { waitUntil: 'networkidle' });
     await p2.waitForTimeout(1200);
-    // tab 1 writes: spend a Lay on Hands charge
+    const start = await pool(p1);
+    const drove = [];
+
     await p1.bringToFront();
-    const spend = p1.getByRole('button', { name: /Heal 5/i }).first();
-    let wrote = false;
-    if (await spend.count()) { await spend.click(); await p1.waitForTimeout(700); wrote = true; }
-    const after1 = await storedChar(p1);
-    // tab 2, which has stale state, now does something that saves
+    let spent1 = 0;
+    if (await heal5(p1).count()) {
+      for (let i = 0; i < 2; i++) { await heal5(p1).click(); await p1.waitForTimeout(650); spent1++; }
+    }
+    const after1 = await pool(p1);
+    if (spent1 !== 2 || start === null || after1 !== start - 10) {
+      drove.push(`tab 1 did not store two spends (start ${start} → ${after1} after ${spent1} clicks)`);
+    }
+
     await p2.bringToFront();
-    await p2.getByRole('tab', { name: 'Grimoire', exact: true }).first().click().catch(() => {});
-    await p2.waitForTimeout(900);
-    const after2 = await storedChar(p2);
-    const clobbered = wrote && after1 !== after2;
-    if (!wrote) R.unproven('D-4', 'a second tab cannot clobber the first', 'no spend control found to drive the write');
-    else R.check('D-4', 'a second tab cannot clobber the first', !clobbered,
-      clobbered ? 'tab 2 overwrote tab 1: stored value changed after tab 2 acted' : '');
+    let spent2 = false;
+    if (await heal5(p2).count()) { await heal5(p2).click(); await p2.waitForTimeout(900); spent2 = true; }
+    if (!spent2) drove.push('tab 2 found no spend control');
+    const after2 = await pool(p2);
+
+    // Was the stale tab TOLD? A refusal nobody sees is the same lost charge.
+    const alert = await p2.evaluate(() => {
+      const a = document.querySelector('[role="alert"]');
+      return a ? a.innerText.replace(/\s+/g, ' ').trim() : '';
+    });
+    // …and did its screen stop lying? Tab 2 displayed 35/35 a moment ago.
+    const onScreen = (await p2.evaluate(() => document.body.innerText)).replace(/\s+/g, ' ');
+    const reconciled = after1 !== null && new RegExp(`\\b${after1}/`).test(onScreen);
+
+    // …and is it USABLE again? A tab that refuses for ever is a brick, not a fix.
+    await p2.getByRole('button', { name: /^I understand$/i }).first().click().catch(() => {});
+    await p2.waitForTimeout(400);
+    if (await heal5(p2).count()) { await heal5(p2).click(); await p2.waitForTimeout(800); }
+    const after3 = await pool(p2);
+
+    const faults = [...(await judge(p1)).faults, ...(await judge(p2)).faults];
+    const bad = [];
+    if (after2 !== after1) bad.push(`tab 1's write was overwritten: stored ${after1} → ${after2} (a clobber reads ${start - 5})`);
+    if (!/another window/i.test(alert)) bad.push(`the stale tab was not told: alert text ${JSON.stringify(alert.slice(0, 90))}`);
+    if (!reconciled) bad.push(`the stale tab still shows a stale pool (expected ${after1}/… on screen)`);
+    if (after3 !== after1 - 5) bad.push(`the stale tab could not spend after reconciling: ${after1} → ${after3}`);
+    if (faults.length) bad.push(faults.join(' | '));
+
+    if (drove.length) R.unproven('D-4', 'a second tab cannot clobber the first', drove.join('; '));
+    else R.check('D-4', 'a second tab cannot clobber the first', bad.length === 0, bad.join('; '));
     await ctx.close();
   }
   { // D-5 quota

@@ -413,7 +413,7 @@ const CHAR_PREFIX = 'codex-character-'
    the same value is written, at the same moment, by the same callers.
    --------------------------------------------------------------------------- */
 
-export type SaveOutcome = { ok: true } | { ok: false; reason: string }
+export type SaveOutcome = { ok: true } | { ok: false; reason: string; stale?: true }
 
 type SaveFailureListener = (reason: string) => void
 const saveFailureListeners = new Set<SaveFailureListener>()
@@ -455,6 +455,78 @@ function put(key: string, value: string): SaveOutcome {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   LAST-WRITE-WINS IS SILENT DATA LOSS.
+
+   Measured under TABLE-READY D-4: two tabs on the same origin, pool at 35. Tab
+   one spends and stores 25. Tab two — sitting there since before that write,
+   holding a stale character in memory — spends and stores 30. Tab one's write
+   is gone, nothing on either screen says so, and the pool Marcus rations all
+   night is wrong. One phone with the app open twice is all it takes.
+
+   So a write now carries the `updatedAt` it was read at, and a write whose
+   stored `updatedAt` has moved on is REFUSED rather than applied. Refuse, not
+   merge: merging two spends means guessing which one the player meant, and a
+   wrong guess is the same lost charge with a confident face on it. The caller
+   reloads from disk and says so.
+
+   Everything here is failure-shaped, and every uncertainty resolves to "no
+   conflict": no `readAt`, no stored record, unparseable JSON, or a stored
+   record with no `updatedAt` all fall through to the write. A guard that
+   refuses saves on a hunch is worse than the bug it was added for.
+   --------------------------------------------------------------------------- */
+
+/** The stored `updatedAt` for `id`, or null if there is nothing comparable. */
+function storedStamp(id: string): string | null {
+  const store = globalThis.localStorage
+  if (!store) return null
+  try {
+    const raw = store.getItem(CHAR_PREFIX + id)
+    if (!raw) return null
+    const at = (JSON.parse(raw) as { updatedAt?: unknown }).updatedAt
+    return typeof at === 'string' ? at : null
+  } catch {
+    return null
+  }
+}
+
+/** The stored `updatedAt`, for a caller that needs to know what disk holds —
+ *  read back after a write rather than assumed from the object it passed in,
+ *  because a write can land, half-land (character yes, roster no), or not land
+ *  at all, and only the file knows which happened. */
+export function characterStamp(id: string): string | null {
+  return storedStamp(id)
+}
+
+/** The stamp for the write about to happen, guaranteed to differ from the one
+ *  already on disk.
+ *
+ *  `new Date().toISOString()` is millisecond-resolution, and two writes inside
+ *  one millisecond produce the same string — so the conflict check above would
+ *  compare a stale tab's stamp against a stamp the other tab had just written
+ *  and find them equal. The guard would then wave through exactly the write it
+ *  exists to refuse. Caught by the unit tests, which write both tabs back to
+ *  back and hit the same millisecond every single run; the browser proof never
+ *  would, because human taps are hundreds of milliseconds apart. That gap
+ *  between "cannot happen at a table" and "cannot happen" is this project's
+ *  oldest way of being wrong.
+ *
+ *  `<=` and not `<`, so a clock that has gone backwards — a device that just
+ *  synced NTP, or crossed a DST boundary with a bad implementation — cannot
+ *  issue a stamp that sorts before one already on disk either. The invariant
+ *  the check depends on is the only thing being bought here: EVERY successful
+ *  write leaves a stamp different from the one it replaced. */
+function nextStamp(id: string): string {
+  const now = new Date().toISOString()
+  const prev = storedStamp(id)
+  if (!prev || now > prev) return now
+  const bumped = Date.parse(prev) + 1
+  return Number.isNaN(bumped) ? now : new Date(bumped).toISOString()
+}
+
+const STALE_REASON =
+  'This character was changed in another window since this one opened it, so that change was NOT saved — saving it would have erased the other window’s. This sheet has been refreshed to what is on disk. Do it again here, and close the other window.'
+
 /**
  * Save a character to its per-id slot and update the roster.
  *
@@ -462,9 +534,23 @@ function put(key: string, value: string): SaveOutcome {
  * to every subscriber for the ones that cannot. It does not throw: a spend that
  * cannot be persisted must still leave the sheet on screen and the previous
  * save on disk.
+ *
+ * `readAt` is the `updatedAt` the caller last saw on disk. Pass it and the
+ * write is refused when someone else has written since — `{ stale: true }`,
+ * so the caller can reload rather than treat it as a storage fault. Omit it
+ * and the write is unconditional, which is what a caller replacing the record
+ * wholesale (a fresh character, an imported file) actually means to do.
  */
-export function saveCharacter(character: Character): SaveOutcome {
-  character.updatedAt = new Date().toISOString()
+export function saveCharacter(character: Character, readAt?: string): SaveOutcome {
+  if (readAt) {
+    const on = storedStamp(character.id)
+    if (on && on !== readAt) {
+      const refused: SaveOutcome = { ok: false, reason: STALE_REASON, stale: true }
+      announceFailure(STALE_REASON)
+      return refused
+    }
+  }
+  character.updatedAt = nextStamp(character.id)
   const wrote = put(CHAR_PREFIX + character.id, JSON.stringify(character))
   if (!wrote.ok) {
     announceFailure(wrote.reason)
