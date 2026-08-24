@@ -471,6 +471,33 @@ R-10's first version tested its "did it say so" regex against the **whole page**
 happens to appear elsewhere in Settings, and printed PASS. It grades the words the import ADDED
 because of that, and the moment it did, it failed.*
 
+**A-25 · 2026-08-24 · § 6 N-5 — a NOTE I wrote about the instrument was false, and is corrected. No
+threshold moved; the criterion is unchanged and the requirement it carries is kept.** Found by the
+independent verifier of § 11.4, not by me.
+
+*Old text (the closing sentence of N-5):* *"Must be measured with its own console listeners:
+`rig.mjs:65`'s `watch()` filters `/11434|ollama|generativelanguage/` and would hide exactly this."*
+
+*New text:* *"Must be measured with its own console listeners, because `watch()` sees only
+`page.on('console')` **text**, and a request failure's URL is not in that text."* `rig.mjs:65`'s AI
+exemption requires `/net::ERR_|Failed to load resource/` **and** `/11434|ollama|generativelanguage/i`
+in the **same** message string. Measured (`_a25-filter.mjs`): a failed request to
+`http://localhost:11434/api/chat` produces `text = "Failed to load resource: the server responded
+with a status of 400 (Bad Request)"`, with the URL in `m.location().url` instead. **The second clause
+therefore never matches a resource-load failure, and the exemption never fires.** `watch()` is
+*stricter* than this document claimed, not laxer — but it is also blind to *which* endpoint failed,
+so a check whose subject is the endpoint must still listen for itself.
+
+*Reason:* I wrote the old sentence from reading the regex rather than from running it, which is the
+exact failure mode this document exists to stop, committed inside the document itself. Two
+consequences, both worth stating rather than burying. **In the safe direction:** nothing that ever
+passed was passed by this filter, so no green anywhere in § 12 was bought by it. **In the direction
+that matters:** N-2's declared exemption — *"a failed fetch to a black-holed AI endpoint is the
+CONDITION of N-2, not a defect"* — is **dead code** and has never suppressed anything. § 11 had
+already found that N-2's route intercepted **0 requests**; this is the same hole seen from the other
+side, and together they mean N-2 passes because the app is genuinely fine, not because the harness
+was kind to it.
+
 ---
 
 ## 1. What the table actually is
@@ -671,7 +698,7 @@ element is walked; contrast is computed against the actual painted background be
 | **N-3** | **No runtime third-party fetch.** Zero requests to any origin other than the app's own during a full cold boot and a walk of all seven screens. Fonts included. | `prove-table.mjs` § N-3, request log |
 | **N-4** | **A stale cache cannot brick it.** A cached `index.html` naming bundles that no longer exist must not leave a permanently blank app; `?sw=off` must recover it. *(Grading tightened by A-16: the origin is genuinely dead throughout, and is never restored before `?sw=off` is tried.)* | `prove-table.mjs` § N-4 |
 | **N-4b** | *(ADDED, A-16.)* **The off switch still switches off.** With the origin **up**, `?sw=off` leaves zero service-worker registrations, zero `codex-` caches and zero faults. N-4's fix must not be bought by a worker that simply never tears down. | `prove-table.mjs` § N-4b |
-| **N-5** | **The deployed build makes no request that cannot succeed by construction.** *(ADDED 2026-08-23 by A-21.)* Measured against the **deployed origin shape** — https, served at `/the-codex/`, 404 outside it — not against localhost. No request may be issued to an address the hosting can never answer or the browser will always block. An app that invents an address about itself and then reports the failure as news is failing offline-first before the network is even involved. **Must be measured with its own console listeners:** `rig.mjs:65`'s `watch()` filters `/11434|ollama|generativelanguage/` and would hide exactly this. | **0 of 15 checks failed** · `table/control-a21.mjs` |
+| **N-5** | **The deployed build makes no request that cannot succeed by construction.** *(ADDED 2026-08-23 by A-21.)* Measured against the **deployed origin shape** — https, served at `/the-codex/`, 404 outside it — not against localhost. No request may be issued to an address the hosting can never answer or the browser will always block. An app that invents an address about itself and then reports the failure as news is failing offline-first before the network is even involved. **Must be measured with its own console listeners**, because `watch()` sees only console *text* and a request failure's URL is not in that text — it cannot tell which endpoint failed. *(Sentence corrected 2026-08-24 by A-25; the original claimed `watch()` would suppress this class, and it does not.)* | **0 of 15 checks failed** · `table/control-a21.mjs` |
 
 ### E — ENDURANCE: hour four
 
@@ -1163,6 +1190,45 @@ proves the "gated, with a way forward and a way back" pattern already works here
 diff function over two `Character` objects, plus the existing gate component at one call site. Until
 it exists, R-10 stands as a **FAIL on the record**, not as a caveat.
 
+**9.14 · Five more, all found by the independent verifier of § 11.4 and none of them asked for.**
+*(Added 2026-08-24. All behaviour or copy, therefore all left unbuilt.)* Recorded here rather than
+summarised, because § 9's job is to be the place a defect cannot quietly fall out of.
+
+**(a) The re-import rolls back far more than Lay on Hands, and the notice names none of it.** § 9.13
+measured one pool because one pool is enough to fail R-10. The verifier measured the rest of the
+sheet: **Channel Divinity 1 → 2**, **1st-level slots 3/4 → 4/4**, **conditions `["Charmed"] → []`**.
+The single sentence the app adds is still about weapons and equipment. This makes § 9.13 strictly
+worse than R-10's row states, and the recommended repair — diff the incoming file against session
+state and name what moves — is unchanged, only larger in what it must name.
+
+**(b) After that re-import, Nix is concentrating on a spell he has not cast.** The slot that paid for
+Bless is refunded to 4/4, but `codex-combat-*.concentrating` stays `"Bless"`. The character is now in
+a state the rules have no name for: full slots and an active concentration. At the table this is the
+worst kind of wrong, because nothing on screen looks broken — it looks like he still has the spell up
+*and* still has the slot, and he will play it that way.
+
+**(c) A stale tab shows wrong numbers indefinitely and is never told.** D-4 passes and deserves to:
+the stale *write* is refused, reconciled, and explained in the app's own words. But until he tries to
+write, the stale tab sat on `LAY ON HANDS 35/35` while disk said `25/35`, through a focus change and a
+one-second wait, with an empty `role=alert`. **The data is safe and the number is a lie.** D-4 asks
+whether a write can be lost; nothing asks whether a *reading* can be stale, and at a table he acts on
+the reading. Candidate criterion for the next cycle, written here so it is not lost: *a screen that
+has been contradicted on disk says so before it is acted on.*
+
+**(d) `rank.ts:141` demotes protective spells by reading their description for the words "hit
+points".** `HEALS = /…\bhit points?\b…/` matches Warding Bond's *"Share hit points with an ally"*, so
+`rank.ts:221` attaches the reason *"You are at full health"* and pushes a purely protective spell down
+the shortlist. Aid, which raises the maximum, misfires the same way. The turn shortlist is the one
+feature this app exists for, and it is currently ranking on a string match against prose.
+
+**(e) The import notice is grammatically wrong and factually wrong, and it fires every time.**
+*"Imported — but that was an older export, with no weapons and equipment. Everything else came across;
+you'll need to add those back."* The negation is dropped — it means "no weapons **and no** equipment"
+— and it calls his **current** export "older". It fires on every import of his real save, because
+`weapons` and `equipment` are legitimately `[]` in that file. A message that cries wolf on every
+single import is why the one time it should have said *"and I discarded your session"* would have
+gone unread anyway.
+
 ## 10. Screenshots
 
 Every screen at both sizes this app is actually held at, with his real full export loaded, at the
@@ -1402,6 +1468,46 @@ The six new killing shapes are the most important thing in the report and are **
 F-3, because F-3 is frozen at twelve. They are recorded in §9.11 as the twelve's replacement, and the
 honest reading of F-3 is now printed next to its PASS in §12.
 
+---
+
+### 11.4 · Second independent verification — 2026-08-24, at `ce1f840`
+
+A second fresh agent, which had not seen this build either, was pointed at the four criteria that had
+just flipped from red or unproven to green (**F-4, R-9, D-4**), at the one that had just been added
+and was claimed red (**R-10**), and at the error floor. It was told explicitly to **falsify**, to
+write its own probes rather than re-run `prove-table.mjs` — *"that is the instrument under test, not
+evidence"* — and to attach its own unfiltered listeners rather than trust `watch()`. It proved its own
+listeners live first, catching a planted `console.error`, `console.warn`, unhandled rejection,
+uncaught throw and `requestfailed` before measuring anything. It wrote sixteen probes (`_ivx-*.mjs`).
+
+**It confirmed every claim it was sent to break, and then found five things nobody asked it about —
+one of which is a false statement in this document, written by me.**
+
+| Claim | Its verdict | Its number |
+|---|---|---|
+| **F-4** | CONFIRMED | disk `level 7 / Paladin / max 67 / AC 18 / LoH 35` all on screen; **10** shortlisted controls name an Action; Bless spent `spellSlots["1"] 4 → 3`, **delta exactly 1**, still 3 at +2.5 s |
+| **R-9** | CONFIRMED | Settings closed: **no button named "Import" exists at all**. Settings open: exact `"Import"` = **1**, exact `"Import Character"` = **0**. Second import → `codex-character-*` keys stay at **1**, roster stays 1 |
+| **R-10** | **could not falsify — the FAIL stands** | 35 → Heal 5 → **30** → re-import → **35**. Added text computed as a multiset difference with Settings already open: **24 words, one sentence, about equipment**, and it is the only `role=alert`/`aria-live` node added. `discard\|lost\|reset\|revert\|overwrote\|session` over the added text → **false** |
+| **D-4** | CONFIRMED, **in both directions** | 35 → A spends twice → 25 → stale B spends → stays **25** (a clobber would read 30), with a `role=alert` naming what happened and what to do; then `I understand` → spend → 20. Reversed roles, same result. *"No arithmetic reachable only via a lost write ever appeared."* |
+| **Error floor** | CONFIRMED | 7 screens + the `?d=1` turn screen + a scroll to the bottom of each: **0 pageerror, 0 console.error, 0 console.warn, 0 unhandled rejections, 0 requestfailed, 0 boundary text.** Body lengths 4794–7456 chars, all carrying his data |
+
+The only console errors it could produce anywhere were user-initiated AI calls — a genuine `404` from
+the Ollama that is running on this machine with no models, which the app surfaces on screen as
+`Ollama error: 404 · Try Again`. That is § 9.12, and it is the app being honest.
+
+**Its five unasked findings are § 9.14 (a)–(e), and its finding about `watch()` is A-25.** I ran that
+last one down myself with `_a25-filter.mjs` rather than take it on trust, and it was right: the
+exemption I documented as a hazard cannot fire at all. **A verifier that confirms everything has done
+nothing — this one confirmed the five things it was aimed at and then found five more and an error in
+the document, which is the shape of a verification worth running.**
+
+It also cleared several things it had first read as broken, and said so: the `?d=1` two-phase turn
+cycle (`End turn` → *"Someone else is acting"* → `My turn begins`) driven four times runs slots
+`4→3→2→1→0`, then correctly refuses with *"No 1st-level slots left"* and all four rows disabled;
+Lay on Hands floors at 0 rather than going negative under eight `Heal 5`s against a 35 pool;
+turn-screen spends appear on the classic screen; `Undo Bless` restores 4/4; a reload persists 25/35.
+Recorded because a verifier's cleared suspicions are evidence too.
+
 ## 12. Results
 
 **Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`2300ec7`**, **939 s**,
@@ -1417,6 +1523,12 @@ printed PASS. Unit suite: **376 tests, 15 files, green.**
 
 Everything in this section is one run at one SHA. Nothing below is carried over from an earlier run,
 and no row's number was taken from a friendlier measurement than the one the criterion names.
+
+**Independently re-measured at `ce1f840` by a fresh agent that wrote its own probes and refused to
+re-run this harness — § 11.4.** It confirmed **F-4, R-9, D-4** and the **error floor** with its own
+numbers, failed to falsify **R-10**, and found five further defects (§ 9.14) plus one false sentence
+in this document (A-25). The four rows below that flipped green this cycle are green on two
+independent measurements, not one.
 
 | ID | Verdict | Number |
 |---|---|---|
