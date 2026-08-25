@@ -14,7 +14,7 @@ const variantStyles: Record<HexVariant, string> = {
   gold: 'bg-gold/10 border-gold/30 text-gold',
   ember: 'bg-ember/10 border-ember/30 text-ember',
   verdant: 'bg-verdant/10 border-verdant/30 text-verdant',
-  eldritch: 'bg-eldritch/10 border-eldritch/30 text-eldritch',
+  eldritch: 'bg-eldritch/10 border-eldritch/30 text-eldritch-lit',
 }
 
 /**

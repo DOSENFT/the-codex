@@ -54,7 +54,7 @@ const colorMap: Record<ActionColor, {
   },
   eldritch: {
     border: 'border-eldritch/25',
-    text: 'text-eldritch',
+    text: 'text-eldritch-lit',
     tally: 'text-eldritch-lit',
     bg: 'bg-eldritch/10',
     topBorder: 'border-t-eldritch',

@@ -445,7 +445,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
                   rows={3}
                   className={cn(
                     'w-full rounded-xl border bg-gold/[0.03] px-4 py-3',
-                    'text-sm text-forge-0 placeholder:text-forge-2/60',
+                    'text-sm text-forge-0 placeholder:text-forge-2',
                     'border-bronze/25 focus:border-arcane/40 focus:ring-1 focus:ring-arcane/20',
                     'transition-all duration-200 ease-forge resize-none',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -471,7 +471,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
                   rows={3}
                   className={cn(
                     'w-full rounded-xl border bg-gold/[0.03] px-4 py-3',
-                    'text-sm text-forge-0 placeholder:text-forge-2/60',
+                    'text-sm text-forge-0 placeholder:text-forge-2',
                     'border-bronze/25 focus:border-ember/40 focus:ring-1 focus:ring-ember/20',
                     'transition-all duration-200 ease-forge resize-none',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -682,7 +682,7 @@ export function RoleplayCoach({ character }: RoleplayCoachProps) {
             'text-sm font-medium transition-all duration-200 ease-forge active:scale-[0.97]',
             'border',
             drillType === 'conversation'
-              ? 'bg-eldritch/15 text-eldritch border-eldritch/30'
+              ? 'bg-eldritch/15 text-eldritch-lit border-eldritch/30'
               : 'combat-card text-forge-2 hover:border-gold/40',
           )}
         >

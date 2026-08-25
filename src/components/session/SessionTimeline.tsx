@@ -42,7 +42,7 @@ const TYPE_CONFIG: Record<RPMoment['type'], {
   },
   spark: {
     icon: Sparkles,
-    color: 'text-eldritch',
+    color: 'text-eldritch-lit',
     bg: 'bg-eldritch/10',
     border: 'border-eldritch/20',
   },

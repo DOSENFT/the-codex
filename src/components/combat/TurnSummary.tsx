@@ -266,7 +266,7 @@ export function TurnSummary({
                       : color === 'ember'
                         ? 'bg-ember/10 border-ember/25 text-ember'
                         : color === 'eldritch'
-                          ? 'bg-eldritch/10 border-eldritch/25 text-eldritch'
+                          ? 'bg-eldritch/10 border-eldritch/25 text-eldritch-lit'
                           : 'bg-white/[0.04] border-white/10 text-forge-1',
                 )}
               >
@@ -336,7 +336,7 @@ export function TurnSummary({
         <div className="px-4 py-2 border-b border-white/5">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Radio size={10} className="text-verdant/60" aria-hidden />
-            <span className="text-xs font-semibold text-forge-2/60 uppercase tracking-wider">Always Active</span>
+            <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider">Always Active</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {passives.map(p => (
@@ -377,7 +377,7 @@ export function TurnSummary({
                 <span className="text-xs text-forge-2">{p.effectsLine}</span>
               </div>
               {p.strategicTip && (
-                <p className="text-xs text-forge-2/70 italic mt-1">{p.strategicTip}</p>
+                <p className="text-xs text-forge-2 italic mt-1">{p.strategicTip}</p>
               )}
             </div>
           ))}
@@ -468,7 +468,7 @@ export function TurnSummary({
                       )
                     })}
                   </div>
-                  <span className="text-xs font-mono text-forge-2/60">{slot.current}/{slot.max}</span>
+                  <span className="text-xs font-mono text-forge-1">{slot.current}/{slot.max}</span>
                 </div>
               )
             })}
@@ -542,7 +542,7 @@ function ActionSection({
   const colorStyles = {
     arcane: { border: 'border-arcane/20', bg: 'bg-arcane/[0.06]', text: 'text-arcane', hoverBg: 'hover:bg-arcane/10' },
     ember: { border: 'border-ember/20', bg: 'bg-ember/[0.06]', text: 'text-ember', hoverBg: 'hover:bg-ember/10' },
-    eldritch: { border: 'border-eldritch/20', bg: 'bg-eldritch/[0.06]', text: 'text-eldritch', hoverBg: 'hover:bg-eldritch/10' },
+    eldritch: { border: 'border-eldritch/20', bg: 'bg-eldritch/[0.06]', text: 'text-eldritch-lit', hoverBg: 'hover:bg-eldritch/10' },
   }
   const cs = colorStyles[color]
 
@@ -775,7 +775,7 @@ function ExpandedActionPanel({
               rows={2}
               className={cn(
                 'w-full bg-transparent text-xs text-forge-1 leading-relaxed',
-                'border-none outline-none resize-none placeholder:text-forge-2/30',
+                'border-none outline-none resize-none placeholder:text-forge-2',
               )}
             />
             <div className="flex items-center gap-1.5 justify-end">
@@ -867,7 +867,7 @@ function ExpandedActionPanel({
             placeholder="Category (e.g., Combo, Synergy, Reminder)"
             className={cn(
               'w-full bg-transparent text-xs font-semibold text-forge-0 mb-1.5',
-              'border-none outline-none placeholder:text-forge-2/30',
+              'border-none outline-none placeholder:text-forge-2',
             )}
           />
           <textarea
@@ -877,7 +877,7 @@ function ExpandedActionPanel({
             rows={2}
             className={cn(
               'w-full bg-transparent text-xs text-forge-1 leading-relaxed',
-              'border-none outline-none resize-none placeholder:text-forge-2/30',
+              'border-none outline-none resize-none placeholder:text-forge-2',
             )}
           />
           <div className="flex items-center gap-1.5 justify-end mt-1">
@@ -908,7 +908,7 @@ function ExpandedActionPanel({
           className={cn(
             'w-full min-h-[44px] px-2.5 rounded-md mb-2',
             'flex items-center justify-center gap-1.5',
-            'text-xs text-forge-2/50 hover:text-arcane',
+            'text-xs text-forge-2 hover:text-arcane',
             'border border-dashed border-white/5 hover:border-arcane/20',
             'bg-transparent hover:bg-arcane/[0.04]',
             'transition-all duration-200',
@@ -933,7 +933,7 @@ function ExpandedActionPanel({
             ? 'bg-arcane/20 text-arcane border border-arcane/30 hover:bg-arcane/30'
             : color === 'ember'
               ? 'bg-ember/20 text-ember border border-ember/30 hover:bg-ember/30'
-              : 'bg-eldritch/20 text-eldritch border border-eldritch/30 hover:bg-eldritch/30',
+              : 'bg-eldritch/20 text-eldritch-lit border border-eldritch/30 hover:bg-eldritch/30',
         )}
       >
         {opt.rollNotation ? (

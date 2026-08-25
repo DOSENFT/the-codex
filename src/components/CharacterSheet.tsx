@@ -184,7 +184,7 @@ function SkillsList({ character, onUpdate }: { character: Character; onUpdate: (
                 expertise ? 'bg-gold border-gold' : proficient ? 'bg-bronze border-bronze' : 'border-forge-2/50',
               )} />
               <span className="text-sm text-forge-1">{skill}</span>
-              <span className="text-xs text-forge-2/60 font-mono">{ability}</span>
+              <span className="text-xs text-forge-2 font-mono">{ability}</span>
             </div>
             <span className={cn(
               'font-mono text-xs font-semibold',
@@ -271,7 +271,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
             placeholder="Weapon name"
             value={newWeapon.name}
             onChange={(e) => setNewWeapon({ ...newWeapon, name: e.target.value })}
-            className="min-h-[44px] w-full rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
+            className="min-h-[44px] w-full rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2 outline-none focus:border-arcane/40"
             autoFocus
           />
           <div className="grid grid-cols-2 gap-2">
@@ -287,7 +287,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
               placeholder="Damage (e.g. 1d8)"
               value={newWeapon.damageDice}
               onChange={(e) => setNewWeapon({ ...newWeapon, damageDice: e.target.value })}
-              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2 outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -296,7 +296,7 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
               placeholder="Damage type"
               value={newWeapon.damageType}
               onChange={(e) => setNewWeapon({ ...newWeapon, damageType: e.target.value })}
-              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+              className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2 outline-none"
             />
             <select
               value={newWeapon.attackType}
@@ -323,14 +323,14 @@ function WeaponsList({ character, onUpdate }: { character: Character; onUpdate: 
                 placeholder="+Hit bonus"
                 value={newWeapon.bonusToHit ?? ''}
                 onChange={(e) => setNewWeapon({ ...newWeapon, bonusToHit: Number(e.target.value) || 0 })}
-                className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+                className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2 outline-none"
               />
               <input
                 type="number"
                 placeholder="+Dmg bonus"
                 value={newWeapon.bonusDamage ?? ''}
                 onChange={(e) => setNewWeapon({ ...newWeapon, bonusDamage: Number(e.target.value) || 0 })}
-                className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none"
+                className="min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2 outline-none"
               />
             </div>
           )}
@@ -377,7 +377,7 @@ function EquipmentList({ character, onUpdate }: { character: Character; onUpdate
       <div className="flex flex-col gap-2">
         <h4 className="text-sm font-semibold text-forge-1">{label}</h4>
         {items.length === 0 && addingTo !== type && (
-          <p className="text-xs text-forge-2/60 italic">No {label.toLowerCase()} yet</p>
+          <p className="text-xs text-forge-2 italic">No {label.toLowerCase()} yet</p>
         )}
         {items.map((item: string, i: number) => (
           <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gold/[0.03] border border-gold/15">
@@ -400,7 +400,7 @@ function EquipmentList({ character, onUpdate }: { character: Character; onUpdate
               onChange={(e) => setNewItem(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addItem(type)}
               placeholder={type === 'equipment' ? 'Rope, torch, etc.' : 'Health Potion x3'}
-              className="flex-1 min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2/50 outline-none focus:border-arcane/40"
+              className="flex-1 min-h-[44px] rounded-lg bg-gold/[0.04] border border-bronze/25 px-3 text-sm text-forge-0 placeholder:text-forge-2 outline-none focus:border-arcane/40"
               autoFocus
             />
             <Button variant="primary" size="sm" onClick={() => addItem(type)} className="gap-1">

@@ -93,7 +93,7 @@ const NPC_AVATAR_COLORS: Record<string, string> = {
   'Tavern Keeper': 'bg-ember/25 text-ember',
   'Noble': 'bg-arcane/25 text-arcane',
   'Rival Adventurer': 'bg-red-500/25 text-red-400',
-  'Deity': 'bg-eldritch/25 text-eldritch',
+  'Deity': 'bg-eldritch/25 text-eldritch-lit',
   'Scared Child': 'bg-verdant/25 text-verdant',
   'Merchant': 'bg-amber-500/25 text-amber-400',
   'Villain': 'bg-purple-500/25 text-purple-400',

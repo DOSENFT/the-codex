@@ -51,15 +51,26 @@ const ACTIVE_STYLES: Record<ConditionCategory, string> = {
   debuff:
     'text-red-400 border-red-400/40 bg-red-400/10 shadow-[0_0_10px_-3px_rgba(248,113,113,0.25)]',
   control:
-    'text-eldritch border-eldritch/40 bg-eldritch/10 shadow-[0_0_10px_-3px_rgba(139,92,246,0.25)]',
+    'text-eldritch-lit border-eldritch/40 bg-eldritch/10 shadow-[0_0_10px_-3px_rgba(139,92,246,0.25)]',
   movement:
     'text-ember border-ember/40 bg-ember/10 shadow-[0_0_10px_-3px_rgba(232,146,74,0.25)]',
   sensory:
     'text-ink-secondary border-ink-secondary/30 bg-ink-secondary/10 shadow-[0_0_10px_-3px_rgba(191,181,160,0.15)]',
 }
 
+/* `opacity-50` used to sit on this line and it was the second half of a
+   two-part defect. `text-ink-muted` resolved to nothing — the token was never
+   declared, see index.css — so the chip inherited its parent's ink, and then
+   this halved it: twelve condition names at 1.3:1, on the screen where he has
+   six seconds to find one and tap it. The token is declared now; the opacity
+   would still drag it to roughly 2.4:1, so it goes.
+
+   The active/inactive hierarchy never depended on it. An active chip is its
+   category's accent — red, eldritch, ember — with a tinted fill and a glow; an
+   inactive one is dim grey ink on a 3 %-gold wash with no glow. That difference
+   is hue and light, and it survives a dark room. Halved alpha does not. */
 const INACTIVE_STYLE =
-  'bg-gold/[0.03] border border-gold-dim/15 text-ink-muted opacity-50 hover:opacity-70'
+  'bg-gold/[0.03] border border-gold-dim/15 text-ink-muted hover:text-forge-1 hover:border-gold-dim/30'
 
 // ---------------------------------------------------------------------------
 // ConditionsGrid Component

@@ -795,7 +795,7 @@ export function AIScenePartner({ character }: AIScenePartnerProps) {
               className={cn(
                 'flex-1 min-h-[52px] px-4 py-3 rounded-xl resize-none',
                 'bg-void-2/60 border border-white/10',
-                'text-sm text-forge-0 placeholder:text-forge-2/50',
+                'text-sm text-forge-0 placeholder:text-forge-2',
                 'focus:outline-none focus:ring-2 focus:ring-arcane/50 focus:border-arcane/40',
                 'transition-all duration-200',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -813,7 +813,7 @@ export function AIScenePartner({ character }: AIScenePartnerProps) {
               <Send size={16} aria-hidden />
             </Button>
           </div>
-          <p className="text-xs text-forge-2/60 px-1">
+          <p className="text-xs text-forge-2 px-1">
             Write how you&apos;d SAY it — use the accent&apos;s eye dialect! E.g.,
             &ldquo;Aye, I dunnae think tha&apos;s wise, lad.&rdquo;
           </p>

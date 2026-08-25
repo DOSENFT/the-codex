@@ -510,13 +510,13 @@ function CharacterPresets({
             onClick={() => onRoll(20, 1, character.spellAttackBonus, 'normal')}
             className={cn(
               presetButtonClass,
-              'bg-eldritch/10 text-eldritch border border-eldritch/25',
+              'bg-eldritch/10 text-eldritch-lit border border-eldritch/25',
               'hover:bg-eldritch/20 hover:border-eldritch/40',
             )}
             aria-label={`Spell Attack: d20 + ${character.spellAttackBonus}`}
           >
             <span className="block">Spell Attack</span>
-            <span className="block text-xs text-eldritch/70 font-mono">
+            <span className="block text-xs text-eldritch-lit font-mono">
               d20{character.spellAttackBonus >= 0 ? `+${character.spellAttackBonus}` : character.spellAttackBonus}
             </span>
           </button>
@@ -896,7 +896,7 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
                   className={cn(
                     'flex-1 min-h-[44px] px-3 rounded-xl',
                     'font-mono text-sm font-semibold',
-                    'bg-eldritch/10 text-eldritch border border-eldritch/25',
+                    'bg-eldritch/10 text-eldritch-lit border border-eldritch/25',
                     'transition-all duration-200 ease-forge',
                     'enabled:hover:bg-eldritch/20 enabled:hover:border-eldritch/40',
                     'enabled:active:scale-95',

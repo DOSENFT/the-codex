@@ -98,11 +98,11 @@ function MechanicsEntryCard({ entry }: { entry: MechanicsEntry }) {
               'text-xs font-medium border',
               entry.category === 'attack' && 'bg-ember/10 text-ember border-ember/20',
               entry.category === 'saving_throw' && 'bg-arcane/10 text-arcane border-arcane/20',
-              entry.category === 'ability_check' && 'bg-eldritch/10 text-eldritch border-eldritch/20',
+              entry.category === 'ability_check' && 'bg-eldritch/10 text-eldritch-lit border-eldritch/20',
               entry.category === 'damage' && 'bg-red-400/10 text-red-400 border-red-400/20',
               entry.category === 'conditions' && 'bg-amber-400/10 text-amber-400 border-amber-400/20',
               entry.category === 'action_economy' && 'bg-verdant/10 text-verdant border-verdant/20',
-              entry.category === 'spellcasting' && 'bg-eldritch/10 text-eldritch border-eldritch/20',
+              entry.category === 'spellcasting' && 'bg-eldritch/10 text-eldritch-lit border-eldritch/20',
             )}
           >
             {MECHANICS_CATEGORIES.find(c => c.id === entry.category)?.label ?? entry.category}

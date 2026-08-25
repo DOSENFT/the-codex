@@ -481,7 +481,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
         </h4>
 
         {character.conditions.length === 0 && inputMode === null && (
-          <p className="text-xs text-forge-2/60 text-center py-1">
+          <p className="text-xs text-forge-2 text-center py-1">
             No active conditions
           </p>
         )}

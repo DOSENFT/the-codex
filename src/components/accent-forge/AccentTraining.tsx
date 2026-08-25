@@ -363,7 +363,7 @@ export function AccentTraining({ character, onSelectAccent }: AccentTrainingProp
               'min-h-[88px] px-4 py-3 rounded-xl resize-y',
               'bg-white/[0.04] border border-white/10 text-forge-0',
               'text-sm font-body leading-relaxed',
-              'placeholder:text-forge-2/60',
+              'placeholder:text-forge-2',
               'transition-all duration-200 ease-forge',
               'hover:border-white/20',
               'focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',

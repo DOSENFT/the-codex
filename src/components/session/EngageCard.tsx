@@ -842,7 +842,7 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
               'flex-1 inline-flex items-center justify-center gap-2',
               'min-h-[52px] px-4 py-3 rounded-xl',
               'bg-eldritch/15 border border-eldritch/30',
-              'text-sm font-semibold text-eldritch',
+              'text-sm font-semibold text-eldritch-lit',
               'transition-all duration-200 ease-forge',
               'active:scale-[0.97]',
               'hover:bg-eldritch/20',

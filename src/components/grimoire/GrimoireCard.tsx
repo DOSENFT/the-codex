@@ -433,7 +433,7 @@ export function GrimoireCard({
                 className={cn(
                   'flex items-center gap-1.5 min-h-[44px] px-3 rounded-lg',
                   'text-xs font-medium',
-                  'bg-eldritch/15 text-eldritch border border-eldritch/25',
+                  'bg-eldritch/15 text-eldritch-lit border border-eldritch/25',
                   'transition-all duration-200 ease-forge',
                   'hover:bg-eldritch/20 active:scale-[0.95]',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',

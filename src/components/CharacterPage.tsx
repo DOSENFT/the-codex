@@ -969,7 +969,7 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                 <div className="flex items-center gap-3 mt-1.5 text-xs text-forge-2">
                   <span className="font-mono">
                     {formatMod(bonus)} to hit
-                    <span className="text-forge-2/50 ml-1">
+                    <span className="text-forge-2 ml-1">
                       ({weapon.abilityMod} {formatMod(abilityModifier(character.abilityScores[weapon.abilityMod]))}
                       {weapon.proficient ? ' +prof' : ''}
                       {weapon.bonusToHit ? ` ${formatMod(weapon.bonusToHit)}` : ''})

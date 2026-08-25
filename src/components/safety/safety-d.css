@@ -17,7 +17,35 @@
 
 .veil-btn {
   position: fixed;
-  z-index: 90; /* over the app's own z-50 chrome; under .veil-scene */
+  /* WAS 90, annotated «over the app's own z-50 chrome; under .veil-scene».
+     Both halves of that sentence were wrong about this app. The chrome is not
+     z-50 — the header and the tab bar are z-40 and the turn deck is z-30. z-50
+     is the OVERLAY layer: every bottom sheet, drawer, editor and popover in the
+     app is z-50, and they are full-width and bottom-anchored. So 90 did not put
+     this button over the chrome, it put it over the sheets, at bottom-left,
+     which is exactly where a bottom sheet puts its first control.
+
+     _g4-veil.mjs measured the consequence rather than inferring it: on six of
+     seven screens the Dice Roller's Roll Mode «Normal» button hit-tests to
+     `button.veil-btn`. Choosing a roll mode mid-turn did not choose a roll
+     mode — it blacked out the table. A veil that fires by accident is worse
+     than an absent one: it is the same control, spending the trust it needs.
+
+     44 is read off the layer stack: above the deck (30) and the chrome (40),
+     below the menu's click-catcher (45) and the overlay layer (50). That is
+     what the old comment was reaching for, stated in this app's real numbers.
+     The rule it now obeys is the one this file already wrote at ≥1024px, forty
+     lines down: «the one control that is always present must never be the thing
+     sitting over the fight.» That was true on the phone too; only the desktop
+     breakpoint had been made to honour it.
+
+     THE COST, and it is a real one: while a sheet is open the veil is behind
+     it, so reaching the veil costs one dismissal first. TABLE-READY.md §14
+     carries that for Marcus to rule on — it is an availability change, and I
+     am not entitled to trade it away quietly just because the stacking fix is
+     obviously correct. `.veil-scene` is untouched at z-100: once raised, the
+     veil still covers everything, which is the half that had to stay absolute. */
+  z-index: 44;
   left: var(--d-s4);
   /* Rides above the turn deck, which publishes its measured height as
      --turn-deck-h (0px wherever there is no deck). The one control that must

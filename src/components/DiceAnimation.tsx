@@ -46,7 +46,7 @@ function getColorClass(dieType: number): string {
     case 20:
       return 'bg-arcane/15 text-arcane border-arcane/30'
     case 12:
-      return 'bg-eldritch/15 text-eldritch border-eldritch/30'
+      return 'bg-eldritch/15 text-eldritch-lit border-eldritch/30'
     case 10:
       return 'bg-ember/15 text-ember border-ember/30'
     case 8:
@@ -56,7 +56,7 @@ function getColorClass(dieType: number): string {
     case 4:
       return 'bg-red-400/15 text-red-400 border-red-400/30'
     case 100:
-      return 'bg-eldritch/15 text-eldritch border-eldritch/30'
+      return 'bg-eldritch/15 text-eldritch-lit border-eldritch/30'
     default:
       return 'bg-void-2/60 text-forge-0 border-gold/30'
   }

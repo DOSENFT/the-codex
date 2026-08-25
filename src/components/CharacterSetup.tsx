@@ -479,7 +479,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                     Subclass Description
                   </label>
                   <textarea
-                    className="w-full min-h-[120px] rounded-xl bg-gold/[0.04] border border-bronze/25 px-4 py-3 text-forge-0 placeholder:text-forge-2/50 focus:outline-none focus:border-arcane/50 focus:shadow-[0_0_0_3px_rgba(197,165,90,0.1)] transition-all duration-200 resize-y font-mono text-xs leading-relaxed"
+                    className="w-full min-h-[120px] rounded-xl bg-gold/[0.04] border border-bronze/25 px-4 py-3 text-forge-0 placeholder:text-forge-2 focus:outline-none focus:border-arcane/50 focus:shadow-[0_0_0_3px_rgba(197,165,90,0.1)] transition-all duration-200 resize-y font-mono text-xs leading-relaxed"
                     placeholder="Paste your homebrew subclass features, spells, and abilities here..."
                     value={homebrewNotes}
                     onChange={(e) => setHomebrewNotes(e.target.value)}
@@ -710,7 +710,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                       placeholder="Paste your Gemini API key"
                       className={cn(
                         'min-h-[44px] w-full rounded-xl',
-                        'bg-gold/[0.04] text-forge-0 placeholder:text-forge-2/50',
+                        'bg-gold/[0.04] text-forge-0 placeholder:text-forge-2',
                         'border border-bronze/25',
                         'font-mono text-sm pl-4 pr-12',
                         'transition-all duration-200 ease-forge',
@@ -997,7 +997,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
             </div>
           )}
 
-          <p className="text-xs text-forge-2/60 text-center mt-6">
+          <p className="text-xs text-forge-2 text-center mt-6">
             Import a previously exported <span className="font-mono">.json</span> character file to pick up right where you left off.
           </p>
         </GlassCard>

@@ -472,7 +472,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
               <p className="text-sm text-forge-2">
                 No {costLabel.toLowerCase()} options available.
               </p>
-              <p className="text-xs text-forge-2/60">
+              <p className="text-xs text-forge-2">
                 Your character has no abilities that cost a {costLabel.toLowerCase()}.
               </p>
             </div>

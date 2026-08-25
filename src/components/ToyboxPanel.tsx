@@ -892,7 +892,7 @@ export function ToyboxPanel({
                               'min-h-[44px] transition-all duration-200',
                               'active:scale-[0.97]',
                               blockSource === s
-                                ? 'bg-eldritch/15 border-eldritch/30 text-eldritch'
+                                ? 'bg-eldritch/15 border-eldritch/30 text-eldritch-lit'
                                 : 'bg-white/[0.04] border-white/10 text-forge-2',
                             )}
                           >

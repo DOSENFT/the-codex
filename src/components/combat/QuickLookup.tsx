@@ -147,7 +147,7 @@ export function QuickLookup({ isOpen, onClose, character, onRollDice }: QuickLoo
                     }}
                     className={cn(
                       'flex items-center gap-2 min-h-[44px] px-4 rounded-xl',
-                      'bg-eldritch/15 text-eldritch border border-eldritch/25',
+                      'bg-eldritch/15 text-eldritch-lit border border-eldritch/25',
                       'text-sm font-medium',
                       'transition-all duration-200 ease-forge',
                       'hover:bg-eldritch/20 active:scale-[0.95]',

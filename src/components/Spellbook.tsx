@@ -908,7 +908,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
             'active:scale-[0.97]',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
             advancedFilterCount > 0
-              ? 'bg-eldritch/15 text-eldritch border border-eldritch/25 ornate-border'
+              ? 'bg-eldritch/15 text-eldritch-lit border border-eldritch/25 ornate-border'
               : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
           )}
           aria-expanded={advancedOpen}
@@ -1084,7 +1084,7 @@ export function Spellbook({ character, onCharacterUpdate }: SpellbookProps) {
                         'active:scale-[0.95]',
                         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                         isActive
-                          ? 'bg-eldritch/15 text-eldritch border border-eldritch/25 ornate-border'
+                          ? 'bg-eldritch/15 text-eldritch-lit border border-eldritch/25 ornate-border'
                           : 'bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1',
                       )}
                     >

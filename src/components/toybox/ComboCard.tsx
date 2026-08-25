@@ -108,7 +108,7 @@ function StepRow({ block, index }: { block: ComboBlock; index: number }) {
 
         {/* Notes */}
         {block.notes && (
-          <p className="mt-0.5 text-forge-2/60 text-xs italic leading-snug">
+          <p className="mt-0.5 text-forge-2 text-xs italic leading-snug">
             {block.notes}
           </p>
         )}
@@ -198,7 +198,7 @@ export function ComboCard({
                 ))}
               </div>
             ) : (
-              <p className="text-forge-2/60 text-sm italic">No steps defined</p>
+              <p className="text-forge-2 text-sm italic">No steps defined</p>
             )}
 
             {/* Description */}
