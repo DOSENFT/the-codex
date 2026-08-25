@@ -16,9 +16,15 @@
    banner that is not there when it is needed. It carries the app's own type —
    Cinzel over IBM Plex — because it is part of the app, not a browser dialog.
 
-   It is not dismissible by tapping outside, it does not time out, and it does
-   not cover the sheet: at the table Marcus keeps playing, and the alarm keeps
-   standing until he acknowledges it.
+   It is not dismissible by tapping outside, it does not time out, and it
+   covers nothing you need in order to keep playing: at the table Marcus keeps
+   playing, and the alarm keeps standing until he acknowledges it.
+
+   That sentence used to read "it does not cover the sheet", which was false in
+   both positions this banner has occupied — it is an opaque band and it always
+   covers something. What changed in A-20 is WHAT it covers, and that is the
+   claim worth making, so it is now the claim the line makes. A-35 corrected the
+   wording; A-20 below is left as written, as the record of the measurement.
 
    AMENDMENT A-20 — it used to stand at the BOTTOM, and "does not cover the
    sheet" was not true there. Independent verification measured it at 31% of a

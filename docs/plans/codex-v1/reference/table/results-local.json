@@ -1,6 +1,6 @@
 {
   "target": "http://localhost:4173/the-codex/",
-  "sha": "73e4bd1a986f05b804ee20be7671c6c6a464be7f",
+  "sha": "68f61fb11fd41fb9295a6111b5b01d2faad822e3",
   "mode": "local",
   "partial": false,
   "void": false,
@@ -79,7 +79,7 @@
     "E2_nodes": 50,
     "E3_bytes": 4194304
   },
-  "seconds": 942,
+  "seconds": 940,
   "pass": 54,
   "fail": 5,
   "unproven": 1,
@@ -284,9 +284,9 @@
     },
     {
       "id": "S-1",
-      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 3071ms, median 2983ms, ≤2000]",
+      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 3030ms, median 2983ms, ≤2000]",
       "verdict": "FAIL",
-      "detail": "runs: 2948ms, 3047ms, 2966ms, 2983ms, 3071ms"
+      "detail": "runs: 2992ms, 3030ms, 2983ms, 2948ms, 2959ms"
     },
     {
       "id": "S-2",
@@ -296,9 +296,9 @@
     },
     {
       "id": "S-3",
-      "what": "a spend registers ≤100ms  [input→paint: worst 112ms, median 40ms · wall-clock incl. harness: median 134ms]",
+      "what": "a spend registers ≤100ms  [input→paint: worst 152ms, median 40ms · wall-clock incl. harness: median 133ms]",
       "verdict": "FAIL",
-      "detail": "33 input events; wall-clock runs: 208, 162, 145, 130, 123, 145, 118, 134, 129, 117ms"
+      "detail": "33 input events; wall-clock runs: 165, 139, 139, 119, 131, 136, 121, 118, 133, 125ms"
     },
     {
       "id": "S-5",
@@ -392,9 +392,9 @@
     },
     {
       "id": "N-2",
-      "what": "a hanging AI endpoint never blocks a turn  [spend 50ms]",
+      "what": "a hanging AI endpoint never blocks a turn  [spend 71ms]",
       "verdict": "PASS",
-      "detail": "50ms; "
+      "detail": "71ms; "
     },
     {
       "id": "N-3",
@@ -404,7 +404,7 @@
     },
     {
       "id": "N-4",
-      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-7f7665813d43]",
+      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-b201fa6265a9]",
       "verdict": "PASS",
       "detail": ""
     },
@@ -434,7 +434,7 @@
     },
     {
       "id": "E-4",
-      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 48ms, ≤100 · wall-clock 62ms]",
+      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 48ms, ≤100 · wall-clock 72ms]",
       "verdict": "PASS",
       "detail": ""
     },

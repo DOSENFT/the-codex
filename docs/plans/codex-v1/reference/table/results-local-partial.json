@@ -1,6 +1,6 @@
 {
   "target": "http://localhost:4173/the-codex/",
-  "sha": "618fcc330860aaa89a567b21d2555bc71b760273",
+  "sha": "68f61fb11fd41fb9295a6111b5b01d2faad822e3",
   "mode": "local",
   "partial": true,
   "void": false,
@@ -24,52 +24,76 @@
     "E2_nodes": 50,
     "E3_bytes": 4194304
   },
-  "seconds": 87,
-  "pass": 7,
-  "fail": 0,
+  "seconds": 71,
+  "pass": 8,
+  "fail": 3,
   "unproven": 0,
   "rows": [
     {
-      "id": "D-1",
-      "what": "round-trip: every key in his real files survives import",
+      "id": "V-1",
+      "what": "no visible text under 12px  [0 found]",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "D-2",
-      "what": "3 cold reloads produce an identical stored character",
+      "id": "V-2",
+      "what": "every text node ≥4.5:1  [0 below]",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "D-3",
-      "what": "a refused or cancelled import writes nothing",
+      "id": "V-3",
+      "what": "numerals and counters ≥7:1  [0 below]",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "D-4",
-      "what": "a second tab cannot clobber the first",
+      "id": "V-2b",
+      "what": "the same, measured off the painted pixels for the 3912 nodes on a gradient  [0 below]",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "D-5",
-      "what": "a full disk does not eat the character (told, and prior save intact)",
-      "verdict": "PASS",
-      "detail": "intact=true userWasTold=true"
-    },
-    {
-      "id": "D-6",
-      "what": "no destructive act without a confirm  [4 controls driven; asked first: Delete Character, Long Rest; destroyed nothing: Reset action economy, New Character]",
+      "id": "V-3b",
+      "what": "the same, for numerals on a gradient  [0 below]",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "D-7",
-      "what": "export reachable offline in 2 taps and round-trips",
+      "id": "V-4",
+      "what": "Cinzel never under 20px  [0 found]",
       "verdict": "PASS",
-      "detail": "taps=2"
+      "detail": ""
+    },
+    {
+      "id": "V-5",
+      "what": "every control ≥44px  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "V-5b",
+      "what": "turn controls ≥48px  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "V-6",
+      "what": "turn controls in the bottom 60% of a 390×844 screen  [1 outside]",
+      "verdict": "FAIL",
+      "detail": "«Apply healing» y=272/844 — above the thumb zone"
+    },
+    {
+      "id": "V-6b",
+      "what": "no control covered by anything  [7 occluded]",
+      "verdict": "FAIL",
+      "detail": "play/Roleplay @top «Burn clean, and quickly.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @top «Acrobatics: not proficient. Tap to change.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @top «Acrobatics(DEX)» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «BlessSpellAction30 feetConc1stSlots:4/4» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «Unprepare Bless» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Persona @top «Remove slow to trust, but deeply loyal once » covered by button.fixed.z-50 < div.flex.flex-col < div\n         prep/Academy @bottom «Start One-Shot Adventure» covered by span.text-xs.font-mono < div.flex.items-center < header.fixed.top-0"
+    },
+    {
+      "id": "V-6c",
+      "what": "the same, on the iPad at 834×1112  [5 occluded]",
+      "verdict": "FAIL",
+      "detail": "play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Academy @top «Random Catchphrase» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0"
     }
   ]
 }

@@ -685,10 +685,24 @@ I made the collapsed cards invisible and stopped, those three would have gone qu
 wrong at 14px in a dim room. The order matters and is the whole of the disclosure: **fix the paint,
 then stop measuring the unpainted.**
 
-*What the reader should check.* The V-2b/V-3b counts in § 12 are **0**, and they are 0 on a population
-that still includes every expanded card, every screen, and both viewports. If a future run wants to
-falsify this, expand the Roleplay action cards and re-run `table/_contrast-where.mjs`: the nodes
-return to the graded set, painted, and pass on their own colours.
+*What the reader should check.* ~~The V-2b/V-3b counts in § 12 are **0**, and they are 0 on a
+population that still includes every expanded card, every screen, and both viewports.~~ If a future run
+wants to falsify this, expand the Roleplay action cards and re-run `table/_contrast-where.mjs`: the
+nodes return to the graded set, painted, and pass on their own colours.
+
+> **CORRECTED 2026-08-25 by A-34 and A-35 — the struck sentence was the most confident claim in this
+> amendment and it was wrong twice over.** That population did **not** include every screen: the
+> grader's colour parser could not read `oklch()`, so 79.7 % of painted text nodes were silently
+> dropped before any counting began (A-34(a)); and the sweep visited two scroll positions on a surface
+> up to 3692 px tall, so it saw ~23 % of what it did reach (A-35(a)). "0 on a population that includes
+> everything" was therefore 0 on a fifth of a quarter. **The number was right about the nodes it saw
+> and the sentence was wrong about which nodes those were**, which is the more dangerous of the two
+> failures, because a count invites the reader to check it and a claim about coverage does not.
+>
+> The current denominator is printed on every run and stands at 1139 nodes, 99.1 % graded, 10 named as
+> UNPROVEN. `_contrast-where.mjs` and `_gold-what.mjs` are cited above as falsification routes and were
+> **untracked at the time — a route that exists on one laptop is not a route.** They are committed now,
+> along with the `_g4-*.mjs` probes A-35 rests on.
 
 **A-29 · 2026-08-25 · § 5 P-0.7 — a SENTENCE IN THE INSTRUMENT was false and is corrected. No
 criterion, threshold or negative control changed.** Following A-25's precedent, which is the rule that
@@ -1051,10 +1065,163 @@ and 3 on `prep/Persona` («Rehearsal», «Warmup», «Journal» — inside a nes
 vertical sweep cannot move, the same class as V-11's 13). Falsification route: a probe that drives
 every scroller on a screen rather than the largest.
 
+*(k) Four sentences in this repository were false, and a false sentence in the proof is worse than a
+red check.* A red check is a fact; a confident wrong sentence is what let the same import bug ship
+three times. Corrected in place, each with the original left visible: § 5's "the error floor is a
+floor under all of them" (block quote → (i)); A-28's population claim (struck, corrected); a citation
+to probes that were untracked at the time of writing (the probes are now committed, so the citation
+resolves); and `SaveAlarm.tsx:19`, which said the alarm "does not cover the sheet". A-20 had already
+conceded that was untrue at the banner's old position — but A-20 *moved the banner* and left the
+sentence standing, so the header's own opening claim stayed false while the correction sat fifteen
+lines below it. It is an opaque band; it always covers something. What A-20 actually changed is *what*
+it covers — scrollable page top, not the fixed controls you keep playing with — so that is now what
+the line says, and A-20 is left verbatim beneath it as the record of the measurement.
+
 *Scope.* No criterion's text, threshold or selector was softened, moved or deleted. One grader was
 strengthened (D-5). Three app fixes, each with a watched-failing and a watched-passing reading from
 the same unedited grader: 22 eldritch sites, 2 Badge rows, 1 z-index. `npm run build` clean and
 **393/393 vitest green** after every one.
+
+---
+
+**A-36 · 2026-08-25 · `bgOf()` composited translucent grounds with the wrong formula. Three V-2
+failures in the run of record were the instrument, and this is the correction that clears them —
+which is the direction that must never be taken on faith, so it is not.**
+
+*(a) What the run of record actually said.* The full run at `68f61fb` — 939 s, not `--only` — came
+back **53 PASS · 6 FAIL · 1 UNPROVEN**. Five of the six fails are rows §§ 9.2 and 9.10 already
+dissect (S-1, S-3, V-6, V-6b, V-6c). The sixth was new and was **V-2, on three nodes**:
+`prep/Persona «14» 4.15:1`, `«21» 4.17:1`, `«4» 4.17:1`, all 12 px. My own `_g4-prove` sweep had
+called the same screen green, so two graders disagreed on one build and at least one was wrong.
+
+*(b) The nodes, located rather than guessed at.* They are
+`<Badge variant="neutral">{count}</Badge>` at `IdentityPage.tsx:162` — the Persona accordion counts.
+Three instruments then gave three answers: the harness's computed path **4.15:1**, the painted-pixel
+reader **8.65–8.82:1**, and alpha arithmetic run outside the browser entirely **8.86:1**. Two
+independent measurements against one, and the one is the one with a derivable error.
+
+*(c) The error, and it is one line.* `rig.mjs`'s background walk accumulated the layer stack as
+`over(acc.rgb, c.rgb, acc.a)` — which weights the back layer by `(1 - acc.a)` and **never multiplies
+it by that layer's own alpha**. The alpha channel on the very same line accumulates correctly. The
+formula knew the layer was 4 % for the purpose of alpha and forgot it for the purpose of colour, which
+is why it read as plausible for this long. The badges are `bg-void-2/60` inside a `bg-white/[0.04]`
+button on `bg-void-0`; the 4 % white composited as **full white**, and the ground came out
+`rgb(78,77,74)` instead of `rgb(27,26,22)`. Hand-composing that chain reproduces 4.24:1 — the
+reported number, from the reported cause. It is wrong **only** where a translucent layer sits behind
+another translucent layer; with an opaque ground the two forms are algebraically identical, which is
+why most of this app never showed it.
+
+*(d) Not softening, and here is what was done instead of asserting that.* `_g5-bgof.mjs` does not
+re-implement the walk. It takes the real `AUDIT_DOM`, string-replaces that **single expression**,
+asserts the match was unique, and runs both versions over the same walk on all seven screens at both
+scroll extremes, so any delta is caused by that line or by nothing. **2627 node-readings compared ·
+815 moved by more than 0.01 · 5 verdicts changed · 0 pass → fail.** Every changed node was then
+arbitrated by the painted-pixel reader, which shares no code with either formula, and the probe was
+written to print a `DISPUTED` list and refuse the correction if any node's pixels backed the OLD
+number. **That list came back empty.** Corrected computed 8.57 / 8.74 against pixels 8.65 / 8.82.
+The `815 moved, 5 changed` pair is the honest blast radius and both halves are reported: the error was
+everywhere, and decisive in three places.
+
+*(e) The first version of this probe printed a perfect green and had measured nothing.* It compared
+`node.ratio`; the field is `node.contrast`. So 2627 comparisons of `undefined` against `undefined`
+returned **0 moved · 0 cleared · 0 created · 0 disputed** — a clean, reassuring, entirely empty
+result, from my own instrument, in the middle of a correction whose whole justification is that
+instruments lie. Caught because "0 moved" contradicted a stack I had already hand-composed. A missing
+field is now fatal in that file. *A comparison that cannot fail is the thing this document exists to
+catch, and it does not stop being that when I am the one who wrote it.*
+
+*(f) Then: can the corrected grader still go red?* A compositor that returned "plenty of contrast"
+for every input would also have cleared those three and printed a clean V-2. `_g5-selftest.mjs`
+injects four nodes with answers known in advance, **all four stacking a translucent layer behind
+another translucent layer** — because on an opaque ground the old and new forms agree and the test
+would prove nothing about the edit. Two must come out red and two green. Result: **A 1.50 RED · B
+8.74 GREEN · C 1.49 RED · D 10.68 GREEN — four of four as predicted.**
+
+*(g) `_g5-neutral.mjs`, and why the sixth row was missing.* A-23 lit one row of `Badge.tsx`'s variant
+table; A-35 computed five and lit two more; **neither modelled `neutral` at all**, because both were
+reasoning about the *accent tint* mechanism and `neutral` is not an accent — so it fell out of the
+model in silence. It is also the only row in that table that renders a bare number in this app. The
+replacement probe reads the tokens out of `index.css` and parses the variant table out of `Badge.tsx`
+rather than restating either, and prints **every** row: a variant with no row is now an error instead
+of an omission. All six rows clear 4.5:1; `gold` still misses V-3 only and is still § 14's item 9.
+
+*Scope.* No criterion's text, threshold or selector was softened, moved or deleted. One line of one
+grader was corrected, with the old expression preserved verbatim in the comment above its
+replacement. No app file was changed by this amendment — the `src/index.css` change sitting in the
+same working tree belongs to **A-37** below and is scoped there, because an amendment that says it
+touched no app file while an app file is uncommitted beside it is the kind of sentence § A-35(k)
+exists to stop. `--only V` after the correction: **V-2 0 below · V-3 0 below · V-1/V-4/V-5/V-5b
+unmoved · V-6/V-6b/V-6c unchanged.** `npm run build` clean, **393/393 vitest green.**
+
+---
+
+**A-37 · 2026-08-25 · The Tailwind scan set is a whitelist. The three numbers first published for it
+were all wrong, and the checker that produced them could not fail.**
+
+*(a) The change, and why it is a property rather than a patch.* A-35 stopped the ~140 throwaway
+probes under `docs/` from injecting utilities into the app's stylesheet with `@source not "../docs"`.
+That named one directory. `_g5-scan.mjs` then asked the next question — *is the shipped CSS still a
+function of the committed tree?* — and found the hole had moved up rather than closed: **13 untracked
+files sit at the repo root** (handoff markdown, an audit dump, a stray `.mjs`, two `game-night`
+scripts), Tailwind 4 auto-detects them, and CI never checks them out. A blacklist can only ever name
+the places a leak has already been found. `src/index.css` now reads `@import "tailwindcss"
+source(none);` with `@source "./";` and `@source "../index.html";` — nothing is auto-detected, and
+the only files that may contribute a utility are the ones that ship. Anything anyone drops anywhere
+in this repository is inert to the app's CSS **by construction**.
+
+*(b) The measurement, done properly.* `_g5-css-ab.mjs` builds **both** states from **one** tree: it
+writes the old directive into the current working tree, builds to a scratch `dist-ab/` so `dist/` is
+never touched, restores `index.css` in a `finally` (verified byte-identical, with a `.bak` written
+first), and diffs. One variable, same source, same untracked files. Result: **1329 classes → 1248.
+81 removed, 0 added.** The removed list reads exactly as it should — `max-w-7xl`, `py-32`, `py-40`,
+`bg-white/80`, `text-gray-600`, `border-slate-200/50`, `rounded-[2.5rem]` — marketing-page utilities
+with nowhere in this app to come from except the handoff markdown at the root.
+
+*(c) The first three numbers were arithmetic, not classes.* Every probe in this family shared one
+class extractor, `/\.((?:\\[^\s{,>:]|[A-Za-z0-9_-])+)/g`, and **it has no left boundary**. Every
+decimal fraction in a stylesheet therefore reads as a class name: `0.32` yields `32`, `1.5rem` yields
+`5rem`, `3.40282e38px` yields `40282e38px`. About 170 entries in the first snapshot begin with a
+digit and not one of them is a class. So the published "1374 → 1290, 84 removed" was never a count of
+classes, and — worse — that same defect had already been written into `src/index.css` as a claim
+about the app: *"FOUR shipped classes (`border-gold/50`, `text-[11px]`, `backdrop-blur`, and one
+numeric fragment) existed only in them."* The fragment was arithmetic. The comment has been
+corrected in place and says so.
+
+*(d) And the ghost test was blind to variants.* `_g5-scan.mjs`'s word-boundary allowed `:` after a
+class name but not before it. A bare utility in the stylesheet is usually written by the app under a
+variant — the CSS carries `.border-gold\/50`, `Settings.tsx:1084` writes `hover:border-gold/50` — and
+a test that will not step over the colon calls that class local-only while the app is using it. Same
+defect made the usage probe report **three regressions** (`border-gold/50`, `scale-105`,
+`scale-[0.98]`); `_g5-css-variant.mjs` looked for each token *as the app authors it*, with Tailwind's
+escaping applied, and found `.hover\:border-gold\/50:hover`, `.hover\:scale-105:hover` and
+`.active\:scale-\[0\.98\]:active` all present. Three reds, three non-events. That check is now the
+arbiter inside the usage probe rather than a thing done afterwards by hand.
+
+*(e) What the corrected probes say, and proof they can still say otherwise.* `_g5-css-used.mjs` now
+harvests **1542 distinct tokens from class attributes** across 208 shipped text files — balancing
+`className={…}` braces so conditionals and `clsx`/template bodies are included, skipping 54 binaries,
+and refusing to report at all if the harvest is implausibly small or missing `flex` (the A-36(e)
+lesson: a green produced by measuring nothing). Of the 81 dropped classes: **3** are bare forms whose
+variant the app writes and the CSS still carries, **4** appear in shipped text but never in a class
+attribute (an SVG `viewBox="0 0 32 32"`, the word "dark" inside the sentence *"it survives a dark
+room"*, and two named inside `index.css`'s own comment), and **0 leave any authored token
+unstyled.** The whitelist stands. Then the falsification: the corrected `_g5-scan.mjs`, pointed at
+the kept pre-whitelist build, goes **RED with 2 ghosts — `text-[11px]` and `backdrop-blur`** — and
+green on the whitelisted one. So the four named leaked classes were really **two**, and the checker
+that says "clean" has been watched failing on the build it is supposed to fail on.
+
+*(f) Unproven, and named as such.* The whitelist changes the artefact, and § 12's run of record was
+graded against the **pre-whitelist** `dist/`. Every contrast, geometry and paint number in this
+document was measured on a stylesheet with 81 classes the shipped one does not have. None of those 81
+is used by the app — that is (e) — so no measured value *should* move; "should" is a model, and this
+project's rule is that a model does not get to close a row. § 12 records which build each run graded
+and the full harness is re-run against the whitelisted build before any of it is called green.
+
+*Scope.* No criterion's text, threshold or selector was softened, moved or deleted. **One app file
+changed: `src/index.css`** — three lines of directive plus a corrected comment; the comment edit is
+provably inert to the artefact, since rebuilding after it produced the same content hash
+(`index-DKY436y2.css`). No component, no behaviour, nothing a save file can see. `npm run build`
+clean, **393/393 vitest green.**
 
 ---
 
@@ -1168,6 +1335,13 @@ Graded first. **If P-0 fails, every other result on the page is void**, regardle
 **Standing rule for all families below:** a criterion cannot pass while any of these is true at any
 point during its run — a caught React error, a `console.error`, an unhandled rejection, a `pageerror`,
 or error-boundary text on screen. These are not separate criteria. They are a floor under all of them.
+
+> **This sentence was false for one criterion until 2026-08-25, and the correction is A-35(i).** D-5's
+> grader discarded `judge()`'s faults and put `page.errs` into its *detail string* rather than its pass
+> condition, so D-5 could print PASS with a boundaried screen reported politely beside the word PASS.
+> The floor is now actually under it — mutation-tested red, then green on the real app. **A standing
+> rule is only standing where the grader implements it, and the way to find out is to make one fail on
+> purpose.** The rest of the family was checked against D-4's correct shape at the same time.
 
 ---
 

@@ -1,5 +1,3 @@
-@import "tailwindcss";
-
 /* The build has to be reproducible from what is committed, and it was not.
    Tailwind 4 auto-detects sources from the project root, which sweeps in
    `docs/` — including the ~140 throwaway `_*.mjs` probes under
@@ -11,8 +9,33 @@
    that was measured was not the artefact a clone produces, so a green measured
    here would not have been a green about the thing anyone else can build. The
    probes are proof infrastructure; they are not the app, and they must not be
-   able to change the app's CSS by mentioning a class name. */
-@source not "../docs";
+   able to change the app's CSS by mentioning a class name.
+
+   A-36 — the first version of this fix was `@source not "../docs";`, and it
+   named one directory. `_g5-scan.mjs` then read the built stylesheet against
+   `git ls-files` and found the hole had simply moved up: 13 untracked files sit
+   at the repo root — handoff markdown, an audit dump, a stray .mjs — and they
+   were feeding the app's stylesheet. A blacklist can only ever name the places
+   the leak has already been found.
+
+   So the scan set is a WHITELIST now: nothing is auto-detected, and the only
+   files that may contribute a utility are the ones that ship. Anything anyone
+   drops anywhere in this repository is inert to the app's CSS by construction,
+   which is a property rather than a patch.
+
+   This paragraph first said FOUR shipped classes leaked, and named them. Two of
+   the four were not classes. `_g5-css-ab.mjs` built both states of this file
+   from one tree and found that the class extractor every probe here shared had
+   no left boundary, so it read decimal fractions in the stylesheet as class
+   names (`0.32` yields `32`); and the ghost test was blind to variants, so
+   `border-gold/50` was called local-only while the app writes
+   `hover:border-gold/50`. Measured properly: 1329 classes before, 1248 after,
+   81 removed, 0 added, and no token in any class attribute under src/ is left
+   without a rule. The leak was real. The count of it was not, and a number
+   nobody checked is not worth more than no number at all. */
+@import "tailwindcss" source(none);
+@source "./";
+@source "../index.html";
 
 @theme {
   /* Background Scale — warm dark (not cool blue) */

@@ -392,7 +392,31 @@ export const AUDIT_DOM = () => {
       if (s.backgroundImage && s.backgroundImage !== 'none') img = true;
       const c = parse(s.backgroundColor);
       if (c && c.a > 0) {
-        acc = acc === null ? { rgb: c.rgb, a: c.a } : { rgb: over(acc.rgb, c.rgb, acc.a), a: acc.a + c.a * (1 - acc.a) };
+        /* A-36  source-over, premultiplied. This line used to read:
+             acc = { rgb: over(acc.rgb, c.rgb, acc.a), a: acc.a + c.a * (1 - acc.a) }
+           which weights the BACK layer by (1 - acc.a) and never multiplies it by
+           that layer's OWN alpha, so a ground painted at 4 % was composited as if
+           it were opaque. The alpha channel on the very same line accumulates
+           correctly  the formula knew the layer was 4 % for alpha and forgot it
+           for colour, which is why it read as plausible for this long.
+
+           It is wrong ONLY when a translucent layer sits behind another
+           translucent layer. Most of this app is ink on one tint on an opaque
+           ground, where c.a is 1 and the two forms are algebraically identical.
+           Measured blast radius over 7 screens x 2 scroll positions: 2627 node
+           readings, 815 moved, 5 verdicts changed, 0 pass -> fail.
+
+           What it cost: prep/Persona's accordion counts (bg-void-2/60 inside a
+           bg-white/[0.04] button on bg-void-0) came out on rgb(78,77,74) instead
+           of rgb(27,26,22), and the run of record failed V-2 on «14» 4.15:1,
+           «21» 4.17:1 and «4» 4.17:1. The painted-pixel reader  which shares no
+           code with this function  read the same three at 8.65-8.82:1, and
+           arithmetic outside the browser at 8.86:1. This form now agrees with
+           both to within 0.1. No criterion's text, threshold or selector moved. */
+        acc = acc === null ? { rgb: c.rgb, a: c.a } : (() => {
+          const na = acc.a + c.a * (1 - acc.a);
+          return { rgb: acc.rgb.map((v, i) => (v * acc.a + c.rgb[i] * c.a * (1 - acc.a)) / na), a: na };
+        })();
         if (acc.a >= 0.995) return { rgb: acc.rgb.map(Math.round), img };
       }
       node = node.parentElement;
