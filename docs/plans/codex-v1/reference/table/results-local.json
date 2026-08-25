@@ -1,6 +1,6 @@
 {
   "target": "http://localhost:4173/the-codex/",
-  "sha": "20fe1a1e169d8fb17bed52c7fdeef6af174b288b",
+  "sha": "2304c1ea9ef5f2ae997b3495f013ff3440338598",
   "mode": "local",
   "partial": false,
   "void": false,
@@ -79,7 +79,7 @@
     "E2_nodes": 50,
     "E3_bytes": 4194304
   },
-  "seconds": 936,
+  "seconds": 940,
   "pass": 54,
   "fail": 5,
   "unproven": 1,
@@ -284,9 +284,9 @@
     },
     {
       "id": "S-1",
-      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 3172ms, median 2972ms, ≤2000]",
+      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 3255ms, median 2977ms, ≤2000]",
       "verdict": "FAIL",
-      "detail": "runs: 3172ms, 2944ms, 2972ms, 2925ms, 2975ms"
+      "detail": "runs: 2980ms, 3255ms, 2977ms, 2975ms, 2953ms"
     },
     {
       "id": "S-2",
@@ -296,9 +296,9 @@
     },
     {
       "id": "S-3",
-      "what": "a spend registers ≤100ms  [input→paint: worst 120ms, median 40ms · wall-clock incl. harness: median 128ms]",
+      "what": "a spend registers ≤100ms  [input→paint: worst 112ms, median 40ms · wall-clock incl. harness: median 131ms]",
       "verdict": "FAIL",
-      "detail": "33 input events; wall-clock runs: 125, 130, 128, 135, 130, 150, 123, 119, 120, 120ms"
+      "detail": "33 input events; wall-clock runs: 180, 121, 131, 135, 132, 137, 115, 126, 124, 120ms"
     },
     {
       "id": "S-5",
@@ -382,7 +382,7 @@
       "id": "V-6c",
       "what": "the same, on the iPad at 834×1112  [5 occluded]",
       "verdict": "FAIL",
-      "detail": "play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Academy @top «Random Catchphrase» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0"
+      "detail": "play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by button.flex.items-center < div.flex.items-center < header.fixed.top-0\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Academy @top «Random Catchphrase» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0"
     },
     {
       "id": "N-1",
@@ -392,9 +392,9 @@
     },
     {
       "id": "N-2",
-      "what": "a hanging AI endpoint never blocks a turn  [spend 59ms]",
+      "what": "a hanging AI endpoint never blocks a turn  [spend 69ms]",
       "verdict": "PASS",
-      "detail": "59ms; "
+      "detail": "69ms; "
     },
     {
       "id": "N-3",
@@ -404,7 +404,7 @@
     },
     {
       "id": "N-4",
-      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-560cea8cd8ac]",
+      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-3ba71d1515d4]",
       "verdict": "PASS",
       "detail": ""
     },
@@ -434,7 +434,7 @@
     },
     {
       "id": "E-4",
-      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 48ms, ≤100 · wall-clock 61ms]",
+      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 48ms, ≤100 · wall-clock 60ms]",
       "verdict": "PASS",
       "detail": ""
     },
