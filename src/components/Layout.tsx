@@ -339,7 +339,26 @@ export function Layout({
         ref={mainRef}
         className={cn(
           'fixed left-0 right-0 top-14 overflow-y-auto',
-          'bottom-[calc(4rem+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]',
+          // 4rem → 4rem+1px. `h-16` is on the tab bar's INNER div, not on the
+          // <nav>, and the <nav> also carries `border-t`. Border-box therefore
+          // makes the bar 64+1 = 65px while this box reserved 64, so main's last
+          // painted pixel row sat under the bar's border on every screen with no
+          // turn deck. Measured, not read off the class names — _g8-chrome-gap
+          // reports main.bottom=780 against nav.top=779 on 12 of 14
+          // screen×viewport pairs, and 0px at the top, where `h-14` IS on the
+          // <header> and border-box already accounts for its border-b.
+          //
+          // This is the same pixel the comment above records being found once
+          // before. It was fixed then with trailing padding, which hides it only
+          // at the very end of the scroll; when the box became bounded rather
+          // than padded, the pixel came back. Fixing the box is where it belongs.
+          //
+          // The durable version of this fix is for the tab bar to publish its own
+          // measured height the way TurnDeck publishes --turn-deck-h, so no
+          // future change to the bar can re-open it. That is a bigger change than
+          // this one and is written up in TABLE-READY § 14 rather than smuggled
+          // in here before a table session.
+          'bottom-[calc(4rem+1px+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]',
           'pb-[5rem]',
           'lg:left-52 lg:bottom-[var(--turn-deck-h,0px)] lg:pb-8',
         )}

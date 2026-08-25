@@ -1,0 +1,111 @@
+
+[1mphone  390×844[0m
+  [35mOUTSIDE               [0m play/Combat @top  «Deafened: Can't hear; auto-fail hearing chec»
+      rect y 439..487, centre 463 · main 56..411 · centre past the edge by 52px · covered by button.w-full.min-h-[56px].rounded-xl
+  [35mOUTSIDE               [0m play/Combat @top  «Exhaustion: -2 per level to D20 Tests; speed»
+      rect y 439..487, centre 463 · main 56..411 · centre past the edge by 52px · covered by button.w-full.min-h-[56px].rounded-xl
+  [35mOUTSIDE               [0m play/Combat @top  «Frightened: Disadvantage while source visibl»
+      rect y 493..541, centre 517 · main 56..411 · centre past the edge by 106px · covered by button.min-h-[48px].flex-1.min-w-0
+  [35mOUTSIDE               [0m play/Combat @top  «Grappled: Speed 0; can escape with DC check»
+      rect y 493..541, centre 517 · main 56..411 · centre past the edge by 106px · covered by button.min-h-[48px].flex-1.min-w-0
+  [35mOUTSIDE               [0m play/Combat @top  «Incapacitated: Can't take Actions, Bonus Act»
+      rect y 547..595, centre 571 · main 56..411 · centre past the edge by 160px · covered by span.text-xs.font-mono.text-forge-1
+  [35mOUTSIDE               [0m play/Combat @top  «Invisible: Can't be seen; attacks have Advan»
+      rect y 547..595, centre 571 · main 56..411 · centre past the edge by 160px · covered by button.pip-tap
+  [35mOUTSIDE               [0m play/Combat @top  «Paralyzed: Incapacitated; auto-fail STR/DEX »
+      rect y 601..649, centre 625 · main 56..411 · centre past the edge by 214px · covered by i
+  [35mOUTSIDE               [0m play/Combat @top  «Petrified: Turned to stone; weight x10; resi»
+      rect y 601..649, centre 625 · main 56..411 · centre past the edge by 214px · covered by button.pip-tap
+  [35mOUTSIDE               [0m play/Combat @top  «Poisoned: Disadvantage on attacks and abilit»
+      rect y 655..703, centre 679 · main 56..411 · centre past the edge by 268px · covered by span.text-xs.font-semibold.tracking-wide
+  [35mOUTSIDE               [0m play/Combat @top  «Prone: Crawl to move; melee hits have Advant»
+      rect y 655..703, centre 679 · main 56..411 · centre past the edge by 268px · covered by button.min-h-[48px].px-3.rounded-xl
+  [35mOUTSIDE               [0m play/Combat @top  «Restrained: Speed 0; attacks have Disadvanta»
+      rect y 709..757, centre 733 · main 56..411 · centre past the edge by 322px · covered by div.flex.items-center.gap-2
+  [35mOUTSIDE               [0m play/Combat @top  «Stunned: Incapacitated; auto-fail STR/DEX sa»
+      rect y 709..757, centre 733 · main 56..411 · centre past the edge by 322px · covered by div.flex.items-center.gap-2
+  [35mOUTSIDE               [0m play/Combat @top  «Unconscious: Drop prone; Incapacitated; auto»
+      rect y 763..811, centre 787 · main 56..411 · centre past the edge by 376px · covered by button.relative.flex-1.flex
+  [35mOUTSIDE               [0m play/Combat @bottom  «Damage Log»
+      rect y -19..29, centre 5 · main 56..411 · centre past the edge by 51px · covered by div.flex.items-center.gap-2
+  [35mOUTSIDE               [0m play/Grimoire @top  «Hearthfire ManifestFeatureActionLvl 3»
+      rect y 787..851, centre 819 · main 56..779 · centre past the edge by 40px · covered by span.text-xs.font-medium.leading-none
+  [35mOUTSIDE               [0m play/Grimoire @bottom  «Faerie FireSpellAction60 feetConc1stSlots:4/»
+      rect y -32..54, centre 11 · main 56..779 · centre past the edge by 45px · covered by div.flex.items-center.gap-2
+  [33mSTRADDLES-FOLD-BOTTOM [0m play/Roleplay @top  «Burn clean, and quickly.»
+      rect y 761..809, centre 785 · main 56..779 · centre past the edge by 6px · covered by button.relative.flex-1.flex
+  [35mOUTSIDE               [0m play/Roleplay @bottom  «One does not buy loyalty, mister merchant. O»
+      rect y -26..52, centre 13 · main 56..779 · centre past the edge by 43px · covered by div.flex.items-center.gap-2
+  [33mSTRADDLES-FOLD-BOTTOM [0m prep/Character @top  «Acrobatics: not proficient. Tap to change.»
+      rect y 767..811, centre 789 · main 56..779 · centre past the edge by 10px · covered by button.relative.flex-1.flex
+  [33mSTRADDLES-FOLD-BOTTOM [0m prep/Character @top  «Acrobatics(DEX)»
+      rect y 767..811, centre 789 · main 56..779 · centre past the edge by 10px · covered by button.relative.flex-1.flex
+  [33mSTRADDLES-FOLD-BOTTOM [0m prep/Grimoire @top  «BlessSpellAction30 feetConc1stSlots:4/4»
+      rect y 757..869, centre 813 · main 56..779 · centre past the edge by 34px · covered by button.relative.flex-1.flex
+  [33mSTRADDLES-FOLD-BOTTOM [0m prep/Grimoire @top  «Unprepare Bless»
+      rect y 773..817, centre 795 · main 56..779 · centre past the edge by 16px · covered by button.relative.flex-1.flex
+  [31mINSIDE                [0m prep/Persona @top  «Remove slow to trust, but deeply loyal once »
+      rect y 722..766, centre 744 · main 56..779 · centre past the edge by 0px · covered by button.fixed.z-50.right-4
+  [35mOUTSIDE               [0m prep/Persona @top  «Remove values simple, hard labor»
+      rect y 788..832, centre 810 · main 56..779 · centre past the edge by 31px · covered by svg
+  [33mSTRADDLES-FOLD-TOP    [0m prep/Academy @bottom  «Start One-Shot Adventure»
+      rect y 12..60, centre 36 · main 56..779 · centre past the edge by 20px · covered by span.text-xs.font-mono.font-medium
+  ERROR FLOOR: clean
+
+[1miPad  834×1112[0m
+  [35mOUTSIDE               [0m play/Combat @top  «Unconscious: Drop prone; Incapacitated; auto»
+      rect y 763..811, centre 787 · main 56..735 · centre past the edge by 52px · covered by button.w-full.min-h-[56px].rounded-xl
+  [35mOUTSIDE               [0m play/Combat @top  «Concentration»
+      rect y 848..896, centre 872 · main 56..735 · centre past the edge by 137px · covered by button.pip-tap
+  [35mOUTSIDE               [0m play/Combat @top  «Bless»
+      rect y 953..997, centre 975 · main 56..735 · centre past the edge by 240px · covered by div.flex.items-center.gap-2
+  [35mOUTSIDE               [0m play/Combat @top  «Command»
+      rect y 953..997, centre 975 · main 56..735 · centre past the edge by 240px · covered by div.flex.items-center.gap-2
+  [35mOUTSIDE               [0m play/Combat @top  «Faerie Fire»
+      rect y 953..997, centre 975 · main 56..735 · centre past the edge by 240px · covered by button.min-h-[48px].px-3.rounded-xl
+  [35mOUTSIDE               [0m play/Combat @top  «Warding Bond»
+      rect y 953..997, centre 975 · main 56..735 · centre past the edge by 240px · covered by div.flex.items-center.gap-2
+  [35mOUTSIDE               [0m play/Combat @top  «Damage Log»
+      rect y 1030..1078, centre 1054 · main 56..735 · centre past the edge by 319px · covered by button.relative.flex-1.flex
+  [35mOUTSIDE               [0m play/Combat @bottom  «Restrained: Speed 0; attacks have Disadvanta»
+      rect y -16..32, centre 8 · main 56..735 · centre past the edge by 48px · covered by header.fixed.top-0.inset-x-0
+  [35mOUTSIDE               [0m play/Combat @bottom  «Stunned: Incapacitated; auto-fail STR/DEX sa»
+      rect y -16..32, centre 8 · main 56..735 · centre past the edge by 48px · covered by button.min-h-[44px].min-w-[44px].flex
+  [33mSTRADDLES-FOLD-TOP    [0m play/Grimoire @bottom  «BlessSpellAction30 feetConc1stSlots:4/4»
+      rect y 0..86, centre 43 · main 56..1047 · centre past the edge by 13px · covered by header.fixed.top-0.inset-x-0
+  [35mOUTSIDE               [0m play/Roleplay @top  «A warmth… not entirely natural. Show me the »
+      rect y 1061..1109, centre 1085 · main 56..1047 · centre past the edge by 38px · covered by span.text-xs.font-medium.leading-none
+  [35mOUTSIDE               [0m play/Roleplay @bottom  «This place remembers a hearth. A good sign, »
+      rect y -8..40, centre 16 · main 56..1047 · centre past the edge by 40px · covered by header.fixed.top-0.inset-x-0
+  [35mOUTSIDE               [0m prep/Character @top  «Insight: not proficient. Tap to change.»
+      rect y 1070..1114, centre 1092 · main 56..1047 · centre past the edge by 45px · covered by span.text-xs.font-medium.leading-none
+  [35mOUTSIDE               [0m prep/Character @top  «Insight(WIS)»
+      rect y 1070..1114, centre 1092 · main 56..1047 · centre past the edge by 45px · covered by button.relative.flex-1.flex
+  [35mOUTSIDE               [0m prep/Character @bottom  «+ New pool»
+      rect y -23..25, centre 1 · main 56..1047 · centre past the edge by 56px · covered by header.fixed.top-0.inset-x-0
+  [33mSTRADDLES-FOLD-TOP    [0m prep/Grimoire @bottom  «CommandSpellAction60 feetConc1stSlots:4/4»
+      rect y 11..97, centre 54 · main 56..1047 · centre past the edge by 2px · covered by header.fixed.top-0.inset-x-0
+  [33mSTRADDLES-FOLD-TOP    [0m prep/Grimoire @bottom  «Unprepare Command»
+      rect y 27..71, centre 49 · main 56..1047 · centre past the edge by 7px · covered by button.flex.items-center.justify-center
+  [35mOUTSIDE               [0m prep/Persona @top  «Remove losing those they've gathered close»
+      rect y 1072..1116, centre 1094 · main 56..1047 · centre past the edge by 47px · covered by span.text-xs.font-medium.leading-none
+  [35mOUTSIDE               [0m prep/Persona @top  «Remove being seen as 'just' a changeling, no»
+      rect y 1072..1116, centre 1094 · main 56..1047 · centre past the edge by 47px · covered by button.relative.flex-1.flex
+  [33mSTRADDLES-FOLD-TOP    [0m prep/Persona @bottom  «“A little warmth for the chill in your bones»
+      rect y 8..73, centre 40 · main 56..1047 · centre past the edge by 16px · covered by header.fixed.top-0.inset-x-0
+  [33mSTRADDLES-FOLD-BOTTOM [0m prep/Academy @top  «Random Catchphrase»
+      rect y 1030..1078, centre 1054 · main 56..1047 · centre past the edge by 7px · covered by button.relative.flex-1.flex
+  ERROR FLOOR: clean
+
+[1m46 occluded control(s) located[0m
+   34  OUTSIDE
+    6  STRADDLES-FOLD-BOTTOM
+    5  STRADDLES-FOLD-TOP
+    1  INSIDE
+
+[1mpredictions, stated in the header before this ran[0m
+  chrome-covered findings should STRADDLE a fold: 17/17 do
+  non-chrome-covered findings should be INSIDE:    7/8 are
+
+[31mVOID — the fold explanation does not hold: 1 non-chrome finding(s) straddle a fold, 0 chrome finding(s) are INSIDE.
+No mechanism is claimed. V-6b/V-6c stand at FAIL, 12 findings, unexplained.[0m
