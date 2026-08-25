@@ -1225,6 +1225,174 @@ clean, **393/393 vitest green.**
 
 ---
 
+**A-38 · 2026-08-25 · § 5 — one criterion ADDED (P-0.10). Nothing softened, nothing removed.**
+
+A-37 fixed the stylesheet leak and measured it. Nothing *grades* it, so it can come back the next time
+anyone drops a file in this repository — and it has already come back once, which is the whole reason
+A-37 exists: A-35 closed `docs/`, and the same defect reappeared at the repo root inside one cycle. A
+fix with no criterion under it is a fix with a countdown on it.
+
+**P-0.10 (ADDED): the stylesheet is a function of the committed tree.** Full text in § 5. It belongs
+in the P-family because it is a claim about the *instrument*, not the app: P-0.9 asks whether a
+stranger's clone compiles, P-0.10 asks whether it compiles to the artefact these sixty-odd rows were
+measured against. Graded by `_g5-scan.mjs`, which needs no browser — it reads the built CSS's class
+selectors, the text of every file `git ls-files` reports, and the text of every untracked file at the
+repo root, and fails on any shipped class that exists only in the second set.
+
+*Watched failing, and failing for the right reason.* The probe was pointed at the **pre-whitelist**
+build — kept deliberately by `_g5-css-ab.mjs --keep` for this purpose — and went **RED with 2 ghosts,
+`text-[11px]` and `backdrop-blur`**, both traceable to the handoff markdown at the repo root. Pointed
+at the whitelisted build: **clean, 0 of 1248 shipped classes.** Same probe, same run, one variable.
+
+*The grader was wrong twice before it was right, and both corrections are in it.* Its class extractor
+had no left boundary and read decimal fractions as class names; its word-boundary would not step over
+a variant colon, so it called `border-gold/50` local-only while the app writes `hover:border-gold/50`.
+Uncorrected it would have reported four ghosts here, two of them fictional — and it did, into
+`src/index.css`. Both fixes carry the reason in a comment above them. **A criterion added on the
+strength of a grader I had just watched invent findings would be worth less than no criterion**, which
+is why the red above is on the corrected file and not the one that produced the original number.
+
+*Scope.* One criterion added. No existing criterion's text, threshold or selector was softened, moved
+or deleted. No app file changed by this amendment. The grader is a new file; nothing else is touched.
+
+---
+
+**A-39 · 2026-08-25 · The action sheet has never been graded, because it cannot be opened. A grader
+cited in this document has been probing a button that does not exist. Third instrument defect of the
+same family.**
+
+`_g5-trapped-overlay.mjs` swept the overlay layer and printed `0 TRAPPED of 448` — with, in the same
+summary, `8 opener(s) absent on their screen`. One of the absent ones was `actions`, selector
+`button:has-text("Manage Actions")`, copied from `_g4-prove.mjs`, which has carried it since G-4. The
+first instinct was to accept the absence: a fresh import is out of combat, so of course the combat
+sheet's opener is missing. That instinct was wrong twice over.
+
+**(a) The selector can never match, in or out of combat.** «Manage Actions» exists in exactly one
+file, `src/components/combat/SmartActionsGrid.tsx`, and:
+
+```
+$ grep -rn "SmartActionsGrid" src --include=*.tsx | grep -v combat/SmartActionsGrid.tsx
+(no output)
+```
+
+Nothing imports it.
+
+**(b) Chased from the state instead of the label, the same answer arrives from the other side.**
+`setActionMenuOpen(true)` appears once in the app, inside `openActionMenu` at `CombatHelper.tsx:1198`,
+and `openActionMenu` is never called. `<ActionMenu isOpen={actionMenuOpen}>` is mounted at
+`CombatHelper.tsx:1361`, and `actionMenuOpen` can only ever be `false`. **ActionMenu is unreachable in
+the running app.** The live action surface is `SmartActionsPanel`, inside the "Actions Reference"
+collapsible — page content, swept by the ordinary V-6 passes.
+
+**(c) The instrument defect.** `_g4-prove.mjs`'s overlay pass has, for its entire life, listed the
+action sheet among the surfaces it opens, failed to find the opener, and reported its result without
+saying so. Every green that file has produced about "the overlays" was a green about two overlays and
+a silence. This is the same shape as A-36(e) and A-37: a probe whose population is not the app,
+reporting truthfully about the population. It is the third of these found in this cycle, which is
+itself the finding — the proof has been the weakest part of this project, and it still is.
+
+**(d) What was done about it.** The entry was *removed*, not repaired: there is no opener to point it
+at, and a selector kept alive out of tidiness is how this got here. In its place the overlay list was
+rebuilt by reading every `…Open(true)` in `src/` rather than by recalling which sheets exist — the
+ActionMenu entry is the evidence for what recall is worth here — giving **six** overlays where there
+were three: `dice`, `mechanics`, `settings`, `toybox`, `sheet`, `lookup`, plus the two page-rendered
+editors added in A-40. Four of the six had never been opened by any probe in this project.
+
+**(e) The counting rule that let it happen is closed.** `absent` was a number. It is now a number
+*and* a list, and an overlay absent everywhere in both combat states is printed as a named red line
+and exits non-zero. Before this change the file could print `0 TRAPPED` having graded nothing and exit
+0. That is exactly what it did on its first run.
+
+**(f) BEHAVIOUR — written up, left unbuilt.** Wiring `openActionMenu` to a control would give the app
+a capability it does not currently have. Behaviour is sealed, so it is not built. For Marcus's ruling:
+ActionMenu is a filtered slide-up action picker; `SmartActionsPanel` already covers the same ground
+from the "Actions Reference" section. The honest options are *delete ActionMenu, `SmartActionsGrid`
+and the dead state* (they are ~600 lines of code that ship in the bundle and can never run), or *wire
+it up* — but not *leave it*, because a mounted dialog nobody can open is the thing this project keeps
+promising not to ship. Recommendation: delete. See § 14.
+
+*Scope.* No app file changed by this amendment. `_g5-trapped-overlay.mjs` only. The app changes in the
+same working tree belong to **A-40**.
+
+---
+
+**A-40 · 2026-08-25 · `<main>` is `position: fixed`, so it is a stacking context, so no overlay a page
+renders can rise above the tab bar, the dice button or the veil button — whatever z-index it declares.
+Five controls measured unreachable. Three components fixed. 0 of 998 remain.**
+
+With the overlay list corrected by A-39, the sweep ran against four surfaces no probe had ever opened
+and came back **19 TRAPPED of 970**. Two of those groups were the instrument (see (d) below). The rest
+were real, and they had one cause.
+
+**(a) The symptom that made no sense.** Combat's Quick Lookup passes `z={55}`, so its panel is 56.
+Three of its spell rows hit-tested to `button.veil-btn`, which is **z-index 44**. 56 losing to 44 is
+not a z-index that needs raising — it is a sign the two numbers are not being compared in the same
+place. `_g5-stacking.mjs` was written to read that off the running page rather than reason about it:
+
+```
+measuring: "Quick Grimoire lookup"  z-index: 56
+  ★ div.fixed.inset-x-0.bottom-0    pos=fixed   z=56    position:fixed
+    section.flex.flex-col.gap-4     pos=static  z=auto
+    div.px-4.py-4.mx-auto           pos=static  z=auto
+  ★ main.fixed.left-0.right-0       pos=fixed   z=auto  position:fixed
+    div#root / body / html          pos=static  z=auto
+
+The panel's z-index 56 is resolved INSIDE <main.fixed.left-0.right-0> (z=auto).
+button.veil-btn             z=44   outside that context: true
+button.fixed.z-50.right-4   z=50   outside that context: true
+```
+
+`<main>` is the app's scroll container and is `position: fixed`, which creates a stacking context.
+Every z-index declared inside it is resolved *within* it. The tab bar (z-40), the dice FAB (z-50) and
+the veil button (z-44) are siblings of `<main>`, so they paint over the entire subtree, sheets
+included. **Raising any sheet's z-index would have changed nothing and would have looked like a fix.**
+
+**(b) What it cost, measured.**
+
+| surface | control | verdict |
+|---|---|---|
+| play/Combat → Quick Lookup | 3 spell rows, incl. two under `.veil-btn` | tapping a spell mid-turn could raise the veil instead — the exact accident `safety-d.css` already fought once, arriving a second time by a different road |
+| prep/Grimoire → spell editor | **«Add Spell»** and **«Cancel»**, 171×48 and 173×48, `room=0px` | the button the screen exists to be pressed, under the tab bar, with no scroll position that frees it |
+| prep/Grimoire → feature editor | a `<select>` and an `<input>`, both 155×44 | buried at the editor's own best scroll offset, `scrollTop=576/674` |
+
+**(c) The fix — a portal, not a number.** `ui/Sheet.tsx`, `SpellEditor.tsx` and `FeatureEditor.tsx`
+now render into `document.body`. Nothing else moves: same components, same state, same handlers, same
+styles, same `position: fixed` placement on screen — only the node's parent changes. It makes the DOM
+say what `role="dialog" aria-modal="true"` has claimed all along. `Spellbook.tsx`'s AI response modal
+got the same one-line change because it is structurally identical; **it is not separately graded — its
+opener is inside an expanded spell card, which the sweep does not reach — and is listed here as
+UNPROVEN rather than counted as a fix.**
+
+The one non-portal fix: `safety/TableCovenant.tsx`'s line/veil chooser was a `flex` row wanting 382px
+of button in a 326px column, so `Veil — happens off-screen` ran **x 214..410 of 390** — twenty pixels
+off the right edge of the device, on all seven screens, in the safety card. It is now a one-column
+grid that becomes two at `sm`. The labels were not shortened: they are the safety copy, and a
+326px-wide target is the better one at arm's length anyway.
+
+**(d) Two instrument defects corrected first, both disclosed, both in the direction that makes a FAIL
+harder.** (i) The probe rect came from `getBoundingClientRect()`, which for a **wrapped inline** `<a>`
+returns the union of its line fragments — corners landing in the gaps beside the short line, on the
+surrounding `<p>`. That convicted the Creative Commons link on all seven screens. It now takes the
+largest fragment from `getClientRects()`; block controls return one rect and are unaffected. **One
+verdict changed, red → green.** (ii) The *diagnosis* was taken at `scrollTop = home`, an offset with
+no relationship to the failure, so anything trapped near the bottom of a 2598px drawer reported
+`(off-viewport)` — a statement about the sheet's initial scroll, not about why the control could never
+be reached. It is now taken at the offset where the control was most on screen, and the printed line
+carries `x`, `y` and that offset. **No verdict changed; the covenant defect in (c) is only findable
+because of it.** Naming the wrong culprit is how a real defect gets filed as a harness artifact.
+
+**(e) Result, and it can still go red.** `0 TRAPPED of 998 controls across 43 opened overlays, error
+floor clean`, every overlay in the list opened at least once. `--selftest`, which pins an opaque bar
+across each open sheet at the overlay layer's own z-index, **convicts 107**. Both directions
+demonstrated on the same file, same run.
+
+*Scope.* Five app files: `ui/Sheet.tsx`, `SpellEditor.tsx`, `FeatureEditor.tsx`, `Spellbook.tsx`
+(portal only) and `safety/TableCovenant.tsx` (layout only). No behaviour changed — no handler, no
+state, no copy, no feature. `npm run build` clean, **393 tests / 16 files green**. No criterion was
+added, softened, moved or deleted by this amendment.
+
+---
+
 ## 1. What the table actually is
 
 Everything below is derived from this and nothing else. It is not a release checklist.
@@ -1331,6 +1499,7 @@ Graded first. **If P-0 fails, every other result on the page is void**, regardle
 | **P-0.7** *(added, A-1)* | **Sensitivity against a whole real build.** The harness must FAIL `73c45d8` — the SHA deployed at the live URL — on the input shapes that break it. An instrument that has never been shown to fail on a build known to be broken has proven nothing. | `--selftest` reports the count of the 12 hostile shapes it caught; must be > 0 |
 | **P-0.8** *(added, A-1)* | **Specificity.** The same harness, same inputs, must PASS HEAD on every shape it just failed `73c45d8` on. A check that is always red is as useless as one that is always green. | `--selftest` P-0.8 row |
 | **P-0.9** *(added, A-32)* | **The committed tree builds.** Every other criterion in this document is measured against `dist/`, and `dist/` is built from the **working tree**. A source file that exists on this laptop and was never staged is therefore invisible to all sixty of them: the app runs, the harness is green, and the repository does not compile. HEAD must be checked out into a separate worktree — what a stranger cloning this repo actually receives — and must survive the same `npm run build` that GitHub Actions runs. | `control-tree.mjs`: any `error TS…`, any unresolved module, or a non-zero build |
+| **P-0.10** *(added, A-38)* | **The stylesheet is a function of the committed tree.** P-0.9 asks whether the repository compiles; this asks whether it compiles to the *same artefact*. Tailwind 4 auto-detects its scan sources, so any file lying around this laptop — a handoff note, a throwaway probe, an audit dump — can add utilities to the app's CSS. When that happens the stylesheet measured here is not the stylesheet the deploy builds, and **every contrast, size and geometry number in this document is a number about a file nobody else can produce.** That is the strongest form of this project's oldest failure: green checks about the wrong artefact. No class selector in the built CSS may come from a file `git ls-files` does not report. | `_g5-scan.mjs`: any shipped class present only in an untracked file |
 
 **Standing rule for all families below:** a criterion cannot pass while any of these is true at any
 point during its run — a caught React error, a `console.error`, an unhandled rejection, a `pageerror`,
@@ -2798,5 +2967,30 @@ drives every scroller on a screen rather than the largest — the same probe ite
 V-11's 13. **Not built, for the reason § 9.15(c) gives: building a grader on the day you need its
 verdict is how a green gets manufactured.** Same next cycle, cold.
 
-*Added 2026-08-25 by A-33. Items 8–10 added 2026-08-25 by A-35. This section is the list; § 12 is the
-evidence.*
+**11 · ActionMenu is mounted and unreachable — delete it, or wire it up.** *(A-39(f).)*
+`<ActionMenu>` renders on every combat screen with `isOpen={actionMenuOpen}`, and `actionMenuOpen` can
+only ever be `false`: the one function that would set it true, `openActionMenu`
+(`CombatHelper.tsx:1198`), is never called. Its only intended opener, «Manage Actions», lives in
+`combat/SmartActionsGrid.tsx`, which nothing imports. Both are dead, both ship in the bundle, and a
+grader cited in this document has been probing that button for its entire life and silently reporting
+around the miss.
+
+Wiring it up is a new capability and the seal forbids it, so it is not built. **The call is delete or
+wire.** `SmartActionsPanel`, in the "Actions Reference" section, already covers the same ground, so
+the recommendation is delete — roughly 600 lines, one bundle entry, and one fewer surface that
+promises something it cannot do. **Leaving it as-is is the one option I would argue against**, because
+a mounted dialog nobody can open is precisely the "half-built feature running as if done" that the
+Command guardrails name.
+
+**12 · The veil trade of item 8 now cuts the other way too, and he should know it changed.**
+*(A-40.)* Item 8 above put `.veil-btn` behind an open sheet at z-44 — except that page-rendered sheets
+were never actually in front of it, because `<main>` is a stacking context and their z-index could not
+escape it. So for Quick Lookup and the Grimoire editors the veil was still on top, and still stealing
+taps; that is three of the five controls A-40 measured. Portalling those sheets to `<body>` makes item
+8's ruling true where it was only intended. **Nothing about the ruling changed — but it now applies to
+four sheets instead of one, and the "one dismissal away" cost he was asked to accept in item 8 is now
+actually being paid on those surfaces.** If he reverses item 8, reverse it knowing the blast radius is
+larger than it was when he was asked.
+
+*Added 2026-08-25 by A-33. Items 8–10 added 2026-08-25 by A-35. Items 11–12 added 2026-08-25 by A-39
+and A-40. This section is the list; § 12 is the evidence.*

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Search,
   ChevronDown,
@@ -550,7 +551,19 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  return (
+  /* Portalled to <body>. Same defect and same fix as SpellEditor,
+     FeatureEditor and ui/Sheet.tsx: Spellbook renders inside `<main>`, which is
+     `position: fixed` and therefore a stacking context, so this modal's `z-50`
+     is resolved below the tab bar and the veil button rather than above them.
+
+     Unlike the other three this one is NOT separately graded — its opener is
+     inside an expanded spell card, which `_g5-trapped-overlay.mjs` does not
+     reach, so no measurement of this surface exists before or after. It is
+     changed because it is structurally identical to two surfaces that were
+     measured and found broken, and leaving it out would be choosing to ship a
+     known instance of a defect I had just fixed twice. Listed as UNPROVEN in
+     TABLE-READY § A-40 rather than counted as a fix. */
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
       role="dialog"
@@ -630,7 +643,8 @@ function AIResponseModal({ spellName, mode, response, loading, error, onClose }:
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

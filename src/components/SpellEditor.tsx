@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Wand2, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { type Character, type Spell, addSpell, updateSpell } from '../lib/character'
@@ -237,7 +238,20 @@ export function SpellEditor({
 
   if (!isOpen) return null
 
-  return (
+  /* Portalled to <body> for the reason spelled out in ui/Sheet.tsx: GrimoirePage
+     renders this editor inside `<main>`, `<main>` is `position: fixed` and so
+     creates a stacking context, and `z-50` declared inside that box cannot lift
+     anything above the tab bar or the veil button, which are outside it.
+     _g5-trapped-overlay.mjs measured what that costs here — the editor's own
+     footer, on the phone, with room=0px to scroll:
+
+       XX "Cancel"     173x48   blocked by: button.relative.flex-1.flex
+       XX "Add Spell"  171x48   blocked by: button.relative.flex-1.flex
+          best case: y 779..827 of 844
+
+     «Add Spell» is the button this entire screen exists to be pressed. It was
+     underneath the tab bar, and there was no scroll position that freed it. */
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
       role="dialog"
@@ -552,6 +566,7 @@ export function SpellEditor({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

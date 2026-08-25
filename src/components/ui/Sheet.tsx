@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { cn } from '../../lib/cn'
 import { SPRING_SETTLE, SHEET_EXIT } from '../../lib/motion-utils'
@@ -105,7 +106,46 @@ export function Sheet({
       : { x: '100%' }
   const open = { x: 0, y: 0, opacity: 1 }
 
-  return (
+  /* ── Why this renders into <body> and not where it is written ──
+   *
+   * `<main>` is `position: fixed` (it is the app's scroll container). A
+   * fixed-position element creates a stacking context, so every z-index
+   * declared by anything inside `<main>` is resolved INSIDE that box and can
+   * never lift the element above a sibling of `<main>` itself.
+   *
+   * _g5-stacking.mjs read this off the running page rather than inferring it.
+   * Combat's Quick Lookup passes `z={55}`, so its panel is 56 — and three of
+   * its spell rows still hit-tested to `button.veil-btn`, which is z-index 44:
+   *
+   *     measuring: "Quick Grimoire lookup"  z-index: 56
+   *     ★ div.fixed.inset-x-0.bottom-0   pos=fixed  z=56
+   *       …
+   *     ★ main.fixed.left-0.right-0      pos=fixed  z=auto   position:fixed
+   *     button.veil-btn            z=44   outside that context: true
+   *     button.fixed.z-50.right-4  z=50   outside that context: true
+   *
+   * 56 losing to 44 is not a z-index that needs raising; raising it would have
+   * changed nothing and would have looked like a fix. The veil button, the dice
+   * FAB and the tab bar all live outside `<main>`, so they paint over the whole
+   * subtree, sheets included. Marcus taps a spell in Quick Lookup mid-turn and
+   * blacks out the table instead — the exact accident safety-d.css already
+   * fought once, arriving a second time by a different road.
+   *
+   * A portal to <body> is the fix rather than a raised number because it makes
+   * the DOM say what `role="dialog" aria-modal="true"` has been claiming all
+   * along: this surface is not part of the page behind it. Nothing else moves —
+   * same component, same state, same handlers, same styles; only the node's
+   * parent changes, and the panel positions itself with `fixed`, so where it
+   * lands on screen is unchanged. The three sheets that share this primitive —
+   * Settings, the character sheet, Quick Lookup — all get it at once.
+   *
+   * The hand-rolled sheets do NOT get it: ActionMenu, DiceRoller,
+   * MechanicsDrawer, ToyboxPanel and the Grimoire/Spellbook editors each build
+   * their own overlay. The ones Layout renders are already outside `<main>` and
+   * are unaffected either way; the ones a page renders are not, and that is
+   * measured rather than assumed — see TABLE-READY § A-40.
+   */
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -143,6 +183,7 @@ export function Sheet({
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

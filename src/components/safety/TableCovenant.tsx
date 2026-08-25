@@ -121,12 +121,33 @@ export function TableCovenant() {
 
       {/* ---- add one ---- */}
       <div className="flex flex-col gap-2 mb-4">
-        <div className="flex gap-2">
+        {/* One column on the phone, two from `sm` up.
+            These two were a single `flex` row. Their labels are the whole
+            point — «Line — never happens» and «Veil — happens off-screen» say
+            what the choice means, and are not abbreviated to fit — so the row
+            wanted 382px of button inside a 326px column and `flex` does not
+            wrap. _g5-trapped-overlay.mjs measured the consequence on all seven
+            screens:
+
+              XX "Veil — happens off-screen"  196x48
+                 best case: x 214..410 of 390
+
+            Twenty pixels of the veil button were off the right edge of the
+            device, permanently, in the one panel in this app where a
+            mis-tap costs someone at the table something real. The same species
+            as the A-23 header overflow, in the safety card.
+
+            Stacking is the fix rather than shortening the labels because the
+            labels are the safety copy, and because a full-width target is the
+            better one anyway at arm's length: each is now 326px wide instead
+            of 178 and 196, and neither can be clipped at any width. */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {(['line', 'veil'] as Boundary[]).map(kind => (
             <Button
               key={kind}
               variant={draftKind === kind ? 'primary' : 'secondary'}
               size="sm"
+              className="justify-center"
               aria-pressed={draftKind === kind}
               onClick={() => setDraftKind(kind)}
             >

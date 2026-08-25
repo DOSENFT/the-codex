@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Shield } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { type Character, type ClassFeature } from '../lib/character'
@@ -176,7 +177,14 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
 
   if (!isOpen) return null
 
-  return (
+  /* Portalled to <body> — same defect, same reason as SpellEditor and
+     ui/Sheet.tsx. Measured here as two form controls buried under the tab bar
+     at the editor's own best scroll position:
+
+       XX "NoneClassSubclassRacialFeat"  select  155x44
+       XX "(unlabelled)"                 input   155x44
+          best case: scrollTop=576/674, y 783..827 of 844 */
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
       role="dialog"
@@ -423,6 +431,7 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
