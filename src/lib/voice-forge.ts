@@ -1,4 +1,5 @@
 import { ACCENT_PROFILES, type AccentProfile } from './accent-data'
+import { saveOrAnnounce } from './character'
 
 // ---------------------------------------------------------------------------
 // Voice Parameter Definitions
@@ -301,12 +302,12 @@ export function saveVoiceProfile(profile: VoiceProfile): void {
   } else {
     profiles.push(profile)
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles))
+  saveOrAnnounce(STORAGE_KEY, JSON.stringify(profiles))
 }
 
 export function deleteVoiceProfile(id: string): void {
   const profiles = loadVoiceProfiles().filter(p => p.id !== id)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles))
+  saveOrAnnounce(STORAGE_KEY, JSON.stringify(profiles))
 }
 
 /** Generate a unique ID for a new voice profile. */

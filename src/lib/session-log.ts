@@ -1,4 +1,4 @@
-import { generateId } from './character'
+import { generateId, saveOrAnnounce } from './character'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -50,7 +50,7 @@ export function loadSessionLogs(characterId: string): SessionRPLog[] {
 export function saveSessionLogs(characterId: string, logs: SessionRPLog[]): void {
   // Keep only the most recent logs
   const capped = logs.slice(-MAX_LOGS_PER_CHARACTER)
-  localStorage.setItem(LOG_PREFIX + characterId, JSON.stringify(capped))
+  saveOrAnnounce(LOG_PREFIX + characterId, JSON.stringify(capped))
 }
 
 // ---------------------------------------------------------------------------

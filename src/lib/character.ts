@@ -455,6 +455,29 @@ function put(key: string, value: string): SaveOutcome {
   }
 }
 
+/* One guarded write that also raises the alarm — the whole of what D-5 asks,
+   in one call, for every writer that is not `saveCharacter`.
+
+   `put` and `announceFailure` were private, so the law above applied only to
+   the character file. Independent verification on 2026-08-25 measured what
+   that cost: with storage refusing `codex-*`, the FIRST tap of an encounter —
+   `Start Combat`, writing `codex-combat-*` through `saveCombatState` — threw
+   `QuotaExceededError`, unwound `play/Combat` to its error boundary, and left
+   the screen reading "Combat stopped". HP, conditions and the turn deck were
+   gone, and switching tabs and back did not bring them back; only healthy
+   storage did. Tapping `Action` mid-encounter did the same thing. The save
+   alarm this file exists to raise never appeared, because the throw happened
+   somewhere the alarm had never been wired.
+
+   Exporting this changes no behaviour on a healthy device: the same value is
+   written, at the same moment, by the same callers. It changes one thing on a
+   full one — the screen stays up and says what happened. */
+export function saveOrAnnounce(key: string, value: string): SaveOutcome {
+  const wrote = put(key, value)
+  if (!wrote.ok) announceFailure(wrote.reason)
+  return wrote
+}
+
 /* ---------------------------------------------------------------------------
    LAST-WRITE-WINS IS SILENT DATA LOSS.
 
@@ -951,7 +974,10 @@ export function deleteCharacter(id: string): void {
   localStorage.removeItem(CHAR_PREFIX + id)
   localStorage.removeItem(`codex-training-${id}`)
   const roster = loadRoster().filter(e => e.id !== id)
-  localStorage.setItem(ROSTER_KEY, JSON.stringify(roster))
+  // Guarded even though the two removeItem calls above have already freed
+  // space: if this one throws, the character's data is gone and the roster
+  // still lists it, which is the one state that reads as corruption.
+  saveOrAnnounce(ROSTER_KEY, JSON.stringify(roster))
   // If this was the active character, clear active id
   if (getActiveId() === id) {
     localStorage.removeItem(ACTIVE_ID_KEY)

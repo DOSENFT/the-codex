@@ -1,4 +1,5 @@
 import type { Character, ClassFeature } from './character'
+import { saveOrAnnounce } from './character'
 
 // ---------------------------------------------------------------------------
 // Action Economy Types & Helpers
@@ -128,8 +129,13 @@ export function setConcentration(state: CombatState, spellName: string | null): 
 // Persistence helpers (localStorage)
 // ---------------------------------------------------------------------------
 
+/* Guarded, because this is the write behind `Start Combat` and behind every
+   `Action` / `Bonus` / `Reaction` tap. Unguarded it threw straight through the
+   React tree and took `play/Combat` down to its error boundary — see the note
+   on `saveOrAnnounce` in `character.ts`. The alarm now stands and the encounter
+   keeps running on the state already in memory. */
 export function saveCombatState(characterId: string, state: CombatState): void {
-  localStorage.setItem(STORAGE_PREFIX + characterId, JSON.stringify(state))
+  saveOrAnnounce(STORAGE_PREFIX + characterId, JSON.stringify(state))
 }
 
 export function loadCombatState(characterId: string): CombatState | null {

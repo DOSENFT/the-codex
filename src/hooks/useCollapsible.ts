@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { saveOrAnnounce } from '../lib/character'
 
 const STORAGE_PREFIX = 'codex-ui-'
 
@@ -14,7 +15,7 @@ function loadCollapseState(characterId: string): Record<string, boolean> {
 
 /** Save collapse state map for a character to localStorage */
 function saveCollapseState(characterId: string, state: Record<string, boolean>): void {
-  localStorage.setItem(STORAGE_PREFIX + characterId, JSON.stringify(state))
+  saveOrAnnounce(STORAGE_PREFIX + characterId, JSON.stringify(state))
 }
 
 /**

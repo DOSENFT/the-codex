@@ -34,6 +34,7 @@ import {
   attackBonus,
   expendSpellSlot,
   restoreSpellSlot,
+  saveOrAnnounce,
 } from '../../lib/character'
 import {
   type CombatState,
@@ -74,7 +75,9 @@ function loadActionNotes(characterId: string): ActionNotesData {
 }
 
 function saveActionNotes(characterId: string, notes: ActionNotesData): void {
-  localStorage.setItem(`codex-action-notes-${characterId}`, JSON.stringify(notes))
+  // Guarded: this fires on the same taps as `saveCombatState`, and unguarded it
+  // took the combat screen down the same way. See `saveOrAnnounce`.
+  saveOrAnnounce(`codex-action-notes-${characterId}`, JSON.stringify(notes))
 }
 
 // ---------------------------------------------------------------------------

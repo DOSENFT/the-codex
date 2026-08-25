@@ -1,5 +1,5 @@
 import type { CampaignData } from './character'
-import { generateId } from './character'
+import { generateId, saveOrAnnounce } from './character'
 
 const CAMPAIGN_PREFIX = 'codex-campaign-'
 
@@ -17,7 +17,7 @@ export function createDefaultCampaign(): CampaignData {
 }
 
 export function saveCampaign(campaign: CampaignData): void {
-  localStorage.setItem(CAMPAIGN_PREFIX + campaign.id, JSON.stringify(campaign))
+  saveOrAnnounce(CAMPAIGN_PREFIX + campaign.id, JSON.stringify(campaign))
 }
 
 export function loadCampaign(id: string): CampaignData | null {

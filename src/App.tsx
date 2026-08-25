@@ -7,6 +7,7 @@ import { CombatHelper } from './components/CombatHelper'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { SaveAlarm } from './components/SaveAlarm'
 import type { Character } from './lib/character'
+import { saveOrAnnounce } from './lib/character'
 
 /* ── Every surface is a static import, and that is deliberate ────────────────
    These ten were briefly React.lazy(), to cut the 1056kB entry chunk down to
@@ -103,7 +104,12 @@ export default function App() {
   // Persist mode changes
   const handleModeChange = useCallback((mode: AppMode) => {
     setAppMode(mode)
-    localStorage.setItem(MODE_STORAGE_KEY, mode)
+    // Guarded. Unguarded, this line threw on a full device and the
+    // `setActiveTab` below it never ran: PLAY/PREP flipped but the default tab
+    // did not follow, once per switch, with an uncaught QuotaExceededError each
+    // time and nothing on screen to say so. Remembering which mode you were in
+    // is a convenience; landing on the right tab is the navigation itself.
+    saveOrAnnounce(MODE_STORAGE_KEY, mode)
     setActiveTab(mode === 'session' ? SESSION_DEFAULT_TAB : PREP_DEFAULT_TAB)
   }, [])
 

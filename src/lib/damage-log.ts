@@ -1,4 +1,4 @@
-import { generateId } from './character'
+import { generateId, saveOrAnnounce } from './character'
 
 export interface DamageEntry {
   timestamp: string
@@ -73,7 +73,7 @@ export function getAverageDPR(log: CombatLog, rounds: number): number {
 
 // Persistence
 export function saveDamageLogs(characterId: string, logs: CombatLog[]): void {
-  localStorage.setItem(STORAGE_PREFIX + characterId, JSON.stringify(logs.slice(-MAX_LOGS)))
+  saveOrAnnounce(STORAGE_PREFIX + characterId, JSON.stringify(logs.slice(-MAX_LOGS)))
 }
 
 export function loadDamageLogs(characterId: string): CombatLog[] {

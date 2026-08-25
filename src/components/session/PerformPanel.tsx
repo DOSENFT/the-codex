@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { Character } from '../../lib/character'
+import { saveOrAnnounce } from '../../lib/character'
 import type { SceneContext } from './SceneContextFilter'
 import type { RPMoment } from '../../lib/session-log'
 import { ACCENT_GUIDES } from '../../lib/accent-data'
@@ -68,7 +69,7 @@ function loadUsedLines(characterId: string): Set<string> {
 }
 
 function saveUsedLines(characterId: string, used: Set<string>): void {
-  localStorage.setItem(USED_LINES_PREFIX + characterId, JSON.stringify([...used]))
+  saveOrAnnounce(USED_LINES_PREFIX + characterId, JSON.stringify([...used]))
 }
 
 function clearUsedLines(characterId: string): void {

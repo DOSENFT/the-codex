@@ -43,6 +43,8 @@
    is never silent.
    ========================================================================== */
 
+import { saveOrAnnounce } from './character'
+
 export type AIProvider = 'gemini' | 'ollama'
 
 // Available Gemini models (each has its own separate free-tier quota)
@@ -250,7 +252,7 @@ export function loadAIConfig(): AIConfig {
 }
 
 export function saveAIConfig(config: AIConfig): void {
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(config))
+  saveOrAnnounce(CONFIG_KEY, JSON.stringify(config))
 }
 
 /* ─── The clocks ─────────────────────────────────────────────────────────── */

@@ -2,6 +2,8 @@
 // Training Academy — Persistence, XP, Spaced Repetition (SM-2)
 // ---------------------------------------------------------------------------
 
+import { saveOrAnnounce } from './character'
+
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -152,7 +154,7 @@ export function loadTrainingProfile(characterId: string): TrainingProfile {
 /** Persist training profile to localStorage. */
 export function saveTrainingProfile(profile: TrainingProfile): void {
   const key = STORAGE_PREFIX + profile.characterId
-  localStorage.setItem(key, JSON.stringify(profile))
+  saveOrAnnounce(key, JSON.stringify(profile))
 }
 
 /* ------------------------------------------------------------------ */

@@ -2,6 +2,8 @@
 // Dialogue Mastery System — Progressive training tracker for dialogue lines
 // ---------------------------------------------------------------------------
 
+import { saveOrAnnounce } from './character'
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -165,7 +167,7 @@ export function loadMasteryProfile(characterId: string): MasteryProfile {
 
 /** Persist mastery profile to localStorage. */
 export function saveMasteryProfile(profile: MasteryProfile): void {
-  localStorage.setItem(
+  saveOrAnnounce(
     STORAGE_PREFIX + profile.characterId,
     JSON.stringify(profile),
   )

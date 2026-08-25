@@ -2,6 +2,7 @@
 // Persistence: codex-toybox-{characterId} in localStorage
 
 import type { TacticDiagramData } from './tactic-diagrams'
+import { saveOrAnnounce } from './character'
 
 // === COMBO BLOCKS ===
 export interface ComboBlock {
@@ -62,7 +63,7 @@ export interface ToyboxData {
 const STORAGE_PREFIX = 'codex-toybox-'
 
 export function saveToybox(characterId: string, data: ToyboxData): void {
-  localStorage.setItem(STORAGE_PREFIX + characterId, JSON.stringify(data))
+  saveOrAnnounce(STORAGE_PREFIX + characterId, JSON.stringify(data))
 }
 
 export function loadToybox(characterId: string): ToyboxData {
