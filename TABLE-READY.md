@@ -2906,9 +2906,11 @@ exception was P-0.9: its FAIL was measured at `73e4bd1` and its PASS at `cd937f5
 three missing files is what makes it pass, and a criterion about the repository cannot be watched
 failing and passing at the same commit. **`control-tree.mjs` was re-run at `20fe1a1` and passes there**
 — clean worktree, build in 8.49 s, **0 compiler errors, 0 untracked files under `src/`** — which is the
-same SHA as the run above. The watched-failing evidence at `73e4bd1` stays in the row, because it is
-what makes the criterion load-bearing rather than decorative. Nothing else below is carried over from
-an earlier run, and no row's number was taken from a friendlier measurement than the one the criterion
+same SHA as the run above, and again at **`3e9ec51`**, the documentation-only commit that carries A-41
+itself (8.48 s, same result; no `src/` file changed between them, which is why the run of record is not
+invalidated by it). The watched-failing evidence at `73e4bd1` stays in the row, because it is what
+makes the criterion load-bearing rather than decorative. Nothing else below is carried over from an
+earlier run, and no row's number was taken from a friendlier measurement than the one the criterion
 names. *(Exception stated by A-33; retired by A-41.)*
 
 **Read A-27, A-28 and A-30 before reading the V rows.** Six V rows went from red to zero this cycle
