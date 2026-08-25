@@ -1,6 +1,6 @@
 {
   "target": "http://localhost:4173/the-codex/",
-  "sha": "2304c1ea9ef5f2ae997b3495f013ff3440338598",
+  "sha": "5870e9614b397917a3bd90d52316b8608bbe8588",
   "mode": "local",
   "partial": false,
   "void": false,
@@ -79,7 +79,7 @@
     "E2_nodes": 50,
     "E3_bytes": 4194304
   },
-  "seconds": 940,
+  "seconds": 945,
   "pass": 54,
   "fail": 5,
   "unproven": 1,
@@ -170,9 +170,9 @@
     },
     {
       "id": "F-5",
-      "what": "the veil is on every screen, including the three early returns",
+      "what": "the veil control is gone from every screen, including the three early returns (U-4)",
       "verdict": "PASS",
-      "detail": "missing on: "
+      "detail": "still present on: "
     },
     {
       "id": "F-6",
@@ -284,9 +284,9 @@
     },
     {
       "id": "S-1",
-      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 3255ms, median 2977ms, ≤2000]",
+      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 3206ms, median 3044ms, ≤2000]",
       "verdict": "FAIL",
-      "detail": "runs: 2980ms, 3255ms, 2977ms, 2975ms, 2953ms"
+      "detail": "runs: 2987ms, 3206ms, 3044ms, 3033ms, 3170ms"
     },
     {
       "id": "S-2",
@@ -296,9 +296,9 @@
     },
     {
       "id": "S-3",
-      "what": "a spend registers ≤100ms  [input→paint: worst 112ms, median 40ms · wall-clock incl. harness: median 131ms]",
+      "what": "a spend registers ≤100ms  [input→paint: worst 120ms, median 48ms · wall-clock incl. harness: median 135ms]",
       "verdict": "FAIL",
-      "detail": "33 input events; wall-clock runs: 180, 121, 131, 135, 132, 137, 115, 126, 124, 120ms"
+      "detail": "33 input events; wall-clock runs: 136, 125, 119, 130, 135, 145, 133, 133, 181, 182ms"
     },
     {
       "id": "S-5",
@@ -392,9 +392,9 @@
     },
     {
       "id": "N-2",
-      "what": "a hanging AI endpoint never blocks a turn  [spend 69ms]",
+      "what": "a hanging AI endpoint never blocks a turn  [spend 64ms]",
       "verdict": "PASS",
-      "detail": "69ms; "
+      "detail": "64ms; "
     },
     {
       "id": "N-3",
@@ -404,7 +404,7 @@
     },
     {
       "id": "N-4",
-      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-3ba71d1515d4]",
+      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-17620a769824]",
       "verdict": "PASS",
       "detail": ""
     },
@@ -424,7 +424,7 @@
       "id": "E-2",
       "what": "DOM node growth  [0, ≤50]",
       "verdict": "PASS",
-      "detail": "990 → 990"
+      "detail": "984 → 984"
     },
     {
       "id": "E-3",
@@ -434,7 +434,7 @@
     },
     {
       "id": "E-4",
-      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 48ms, ≤100 · wall-clock 60ms]",
+      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 40ms, ≤100 · wall-clock 68ms]",
       "verdict": "PASS",
       "detail": ""
     },

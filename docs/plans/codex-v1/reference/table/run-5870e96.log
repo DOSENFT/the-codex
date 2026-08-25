@@ -1,0 +1,135 @@
+
+[1mTABLE-READY — LOCAL[0m
+  target   http://localhost:4173/the-codex/
+  local HEAD 5870e96
+  viewport 390×844 @3x
+
+[1m── P-0 — THE INSTRUMENT  (if this fails, every result below is void) ─[0m
+  [32mPASS[0m P-0.1  FAIL-ON-CAUGHT — a caught React error on 73c45d8 is reported  [real defect, not injected]
+         calibration: FAIL-ON-CAUGHT ok
+  [32mPASS[0m P-0.2  FAIL-ON-CONSOLE — a console.error with no visual symptom whatsoever is reported
+         calibration: FAIL-ON-CONSOLE ok
+         ↑ every marker present, not blank, not boundaried — and throwing. This screen is what "the checks were green" looked like.
+  [32mPASS[0m P-0.3  FAIL-ON-REJECTION — an unhandled promise rejection is reported, even when the app swallows it
+         calibration: FAIL-ON-REJECTION ok
+  [32mPASS[0m P-0.4  FAIL-ON-BLANK — a blank body is reported, with no markers needed
+         calibration: FAIL-ON-BLANK ok
+  [32mPASS[0m P-0.5  FAIL-ON-HOLLOW — a screen that renders, throws nothing, and is empty of its reason to exist is reported
+         calibration: FAIL-ON-HOLLOW ok
+
+[1m── P-0.6 — deletion matrix: is each control load-bearing? ────────────[0m
+  control    caught  passes-without  bad case
+  pageerror  ✓       ✓               uncaught throw, page intact
+  console    ✓       ✓               73c45d8 bare-spell · play/Roleplay  [REAL]
+  rejection  ✓       ✓               rejection + a global swallower
+  blank      ✓       ✓               empty body, screen has no markers
+  boundary   ✓       ✓               one boundaried card, screen otherwise whole
+  hollow     ✓       ✓               renders, silent, empty of its own furniture
+  [32mPASS[0m P-0.6  every control load-bearing, proven by deletion  [6/6]
+
+[1m── P-0.7 / P-0.8 — the whole known-broken build ──────────────────────[0m
+  [32mPASS[0m P-0.7  the harness FAILS 73c45d8 — a shipped SHA a green check once blessed — on 8/12 hostile-but-legal shapes  — caught: bare spell, bare feature, object in equipment, bare identity, bare hook, bare supply, persona: {}, one of everything
+         not broken on that build: bare weapon, bare feat, bare pool, bare condition
+         his REAL thin export on 73c45d8: clean
+         his REAL full export on 73c45d8: clean
+  [32mPASS[0m P-0.8  the same harness PASSES HEAD on all 8 shapes it just failed 73c45d8 on (it is not simply always red)
+
+[1m── F — FUNCTION: the screen he needs is standing ─────────────────────[0m
+  [32mPASS[0m F-1    full real export → all 7 screens show his data
+  [32mPASS[0m F-2    THIN real export (the shape that shipped broken 3×) → all 7 stand
+  [32mPASS[0m F-3    12 hostile-but-legal inner shapes × 7 screens = 84 renders
+  [32mPASS[0m F-3b   17 shapes whose fields are PRESENT and the wrong type x 7 screens = 119 renders
+  [32mPASS[0m F-3c   a repaired file names what was changed, and says so before it is accepted
+  [32mPASS[0m F-4    ?d=1 shows his real sheet, a ranked shortlist with an action, and spends a real resource  — 
+         Nix Changeling Paladin 7 · Oath of the Hearth Round 1 67 / 67 AC 18 Bloodied at 33 Aura of Protection You and allies within 10 feet gain a bonus to saving throws equal to your Cha... Aura of Solace You and allies within your Aura of Protection have resistance to Fire, Cold, ... Action Bonus Reaction
+  [32mPASS[0m F-5    the veil control is gone from every screen, including the three early returns (U-4)  — still present on: 
+  [32mPASS[0m F-6    no horizontal scroll at 390px on any screen
+
+[1m── D — DATA SAFETY: the character survives ───────────────────────────[0m
+  [32mPASS[0m D-1    round-trip: every key in his real files survives import
+  [32mPASS[0m D-2    3 cold reloads produce an identical stored character
+  [32mPASS[0m D-3    a refused or cancelled import writes nothing
+  [32mPASS[0m D-4    a second tab cannot clobber the first
+  [32mPASS[0m D-5    a full disk does not eat the character (told, and prior save intact)  — intact=true userWasTold=true
+  [32mPASS[0m D-6    no destructive act without a confirm  [4 controls driven; asked first: Delete Character, Long Rest; destroyed nothing: Reset action economy, New Character]
+  [32mPASS[0m D-7    export reachable offline in 2 taps and round-trips  — taps=2
+
+[1m── R — RECOVERY: bad input, at the table, with people watching ───────[0m
+  [32mPASS[0m R-1    his real {} export names the EXPORT as what failed
+  [32mPASS[0m R-2    prose in a .json is refused, and says where a real export comes from
+  [32mPASS[0m R-3    the thin real export is gated with a way forward AND a way back
+  [32mPASS[0m R-4    truncated JSON is refused and named
+  [32mPASS[0m R-5    a 12MB JSON does not freeze the app
+  [32mPASS[0m R-6    a JSON array at the root is refused, not coerced
+  [32mPASS[0m R-7    prototype-pollution keys do not reach Object.prototype
+  [32mPASS[0m R-8    a binary file renamed .json is refused
+  [32mPASS[0m R-9    the same character imported twice in a row makes no duplicate roster entry  — before=1 after=1
+  [32mPASS[0m R-10   re-importing the same file mid-session does not silently discard session state
+
+[1m── S — SPEED: it costs none of the six seconds  [4× CPU throttle] ────[0m
+  [31mFAIL[0m S-1    cold launch, origin dead, 4× CPU → "Nix" painted  [worst 3206ms, median 3044ms, ≤2000]
+         runs: 2987ms, 3206ms, 3044ms, 3033ms, 3170ms
+         play/Combat      worst 225ms  (184/182/225)  [/LAY ON HANDS/i]
+         play/Grimoire    worst 212ms  (143/135/212)  [/Aura of Protection/i]
+         play/Roleplay    worst 397ms  (397/206/241)  [/CATCHPHRASES/i]
+         prep/Character   worst 272ms  (174/193/272)  [/AC 18/]
+         prep/Grimoire    worst 169ms  (136/169/119)  [/Session Status/i]
+         prep/Persona     worst 245ms  (245/181/138)  [/Core Traits/i]
+         prep/Academy     worst 175ms  (175/155/129)  [/PHYSICAL TICS/i]
+  [32mPASS[0m S-2    every tab switch ≤400ms
+  [31mFAIL[0m S-3    a spend registers ≤100ms  [input→paint: worst 120ms, median 48ms · wall-clock incl. harness: median 135ms]
+         33 input events; wall-clock runs: 136, 125, 119, 130, 135, 145, 133, 133, 181, 182ms
+  [32mPASS[0m S-5    no long task >200ms during a 10-action turn  — long tasks: ms
+  [32mPASS[0m S-6    no layout shift under the thumb  [CLS 0.0000, ≤0.02]  — CLS=0
+  [33m????[0m S-4    reversing a spend returns the resource  — UNPROVEN: no undo/restore control on the default combat screen — see TABLE-READY §9
+
+[1m── V — arm's length, bad light ───────────────────────────────────────[0m
+  [32mPASS[0m V-1    no visible text under 12px  [0 found]
+  [32mPASS[0m V-2    every text node ≥4.5:1  [0 below]
+  [32mPASS[0m V-3    numerals and counters ≥7:1  [0 below]
+  [32mPASS[0m V-2b   the same, measured off the painted pixels for the 3912 nodes on a gradient  [0 below]
+  [32mPASS[0m V-3b   the same, for numerals on a gradient  [0 below]
+  [32mPASS[0m V-4    Cinzel never under 20px  [0 found]
+  [32mPASS[0m V-5    every control ≥44px  [0 below]
+  [32mPASS[0m V-5b   turn controls ≥48px  [0 below]
+  [31mFAIL[0m V-6    turn controls in the bottom 60% of a 390×844 screen  [1 outside]
+         «Apply healing» y=272/844 — above the thumb zone
+  [31mFAIL[0m V-6b   no control covered by anything  [7 occluded]
+         play/Roleplay @top «Burn clean, and quickly.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+         prep/Character @top «Acrobatics: not proficient. Tap to change.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+         prep/Character @top «Acrobatics(DEX)» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+         prep/Grimoire @top «BlessSpellAction30 feetConc1stSlots:4/4» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+         prep/Grimoire @top «Unprepare Bless» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+         prep/Persona @top «Remove slow to trust, but deeply loyal once » covered by button.fixed.z-50 < div.flex.flex-col < div
+         prep/Academy @bottom «Start One-Shot Adventure» covered by span.text-xs.font-mo
+  [31mFAIL[0m V-6c   the same, on the iPad at 834×1112  [5 occluded]
+         play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div
+         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div
+         prep/Grimoire @bottom «Unprepare Command» covered by button.flex.items-center < div.flex.items-center < header.fixed.top-0
+         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div
+         prep/Academy @top «Random Catchphrase» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+         (A-8: 56 controls skipped by V-6/V-6b/V-6c — clipped to nothing by an ancestor, so not painted and having no on-screen position. Size/type/contrast still graded.)
+         (3912 text nodes sit on an image/gradient — contrast UNMEASURABLE, reported not passed)
+
+[1m── N — no wifi ───────────────────────────────────────────────────────[0m
+  [32mPASS[0m N-1    origin killed, then cold boot: 7 screens + a spend persists + reload survives  [16 files precached, 12 served by the worker]
+  [32mPASS[0m N-2    a hanging AI endpoint never blocks a turn  [spend 64ms]  — 64ms; 
+  [32mPASS[0m N-3    zero third-party requests during boot + a full walk
+  [32mPASS[0m N-4    a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-17620a769824]
+  [32mPASS[0m N-4b   with the origin UP, ?sw=off really does stand the worker down  [0 registrations, 0 codex caches left]  — regs=0 caches=0 
+
+[1m── E — hour four  [E-1/E-2 are declared PROXIES for 4h, not 4h] ──────[0m
+  [32mPASS[0m E-1    heap growth over 200 actions (PROXY for 4h)  [0.0%, ≤25%]  — 10.0MB → 10.0MB
+  [32mPASS[0m E-2    DOM node growth  [0, ≤50]  — 984 → 984
+  [32mPASS[0m E-3    origin storage bounded  [29KB, largest codex-character-fea43b64-e5fb-4179-a145-5a77c560f9d4 28KB, <4MB]
+  [32mPASS[0m E-4    action 200 is as fast as action 10  ["Action" input→paint 40ms, ≤100 · wall-clock 68ms]
+  [32mPASS[0m E-0    zero errors across the endurance run
+
+[1m═══ 54 pass · 5 fail · 1 unproven · 945s ═══[0m
+  [31mFAIL[0m S-1 cold launch, origin dead, 4× CPU → "Nix" painted  [worst 3206ms, median 3044ms, ≤2000]
+  [31mFAIL[0m S-3 a spend registers ≤100ms  [input→paint: worst 120ms, median 48ms · wall-clock incl. harness: median 135ms]
+  [31mFAIL[0m V-6 turn controls in the bottom 60% of a 390×844 screen  [1 outside]
+  [31mFAIL[0m V-6b no control covered by anything  [7 occluded]
+  [31mFAIL[0m V-6c the same, on the iPad at 834×1112  [5 occluded]
+  [33m????[0m S-4 reversing a spend returns the resource — no undo/restore control on the default combat screen — see TABLE-READY §9
+  → C:\Users\marcu\Documents\Powerhouse\projects\the-codex\docs\plans\codex-v1\reference\table\results-local.json

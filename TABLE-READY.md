@@ -3093,19 +3093,32 @@ Recorded because a verifier's cleared suspicions are evidence too.
 
 ## 12. Results
 
-**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`2304c1e`**, full — not
+**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`5870e96`**, full — not
 `--only`, so P-0 ran and the run is not PARTIAL. `results-local.json` is written beside the harness;
-the console transcript is **`table/run-2304c1e.log`**, and its last line, verbatim, is:
+the console transcript is **`table/run-5870e96.log`**, and its last line, verbatim, is:
 
 ```
-═══ 54 pass · 5 fail · 1 unproven · 940s ═══
+═══ 54 pass · 5 fail · 1 unproven · 945s ═══
 ```
 
-**Three full local runs now agree, at `20fe1a1`, `247beda` and `2304c1e`** — same six named rows, same
-counts, 936 s / 939 s / 940 s. Their transcripts are all three kept (`table/run-20fe1a1.log`,
-`run-247beda.log`, `run-2304c1e.log`) rather than overwritten, because the *stability* of the verdict
-set across three SHAs is itself the evidence that A-42(b)'s 1px chrome repair changed nothing here —
-a claim it would be easy to make and impossible to check if only the latest log survived.
+**Four full local runs now agree, at `20fe1a1`, `247beda`, `2304c1e` and `5870e96`** — same six named
+rows, same counts, 936 s / 939 s / 940 s / 945 s. All four transcripts are kept rather than
+overwritten, because the *stability* of the verdict set across four SHAs is itself the evidence that
+neither A-42(b)'s 1px chrome repair nor U-4's removal of the veil changed anything here — a claim it
+would be easy to make and impossible to check if only the latest log survived.
+
+**F-5 passes in its inverted form** (A-44): *"the veil control is gone from every screen, including
+the three early returns"*, `still present on:` empty across all seven screens plus `welcome` and
+`?d=1`. The removal is complete, and that is a measurement rather than a build log.
+
+**A prediction I published and then had to withdraw.** Before this run I wrote that the veil button
+"may well have been one of the V-6b occluders, and removing it could clear findings" — it was a fixed,
+always-present overlay, which is the shape that causes exactly that defect. **It was not.** V-6b is
+still 7 and V-6c still 5, the same twelve controls with the same coverers, and `.veil-btn` appears in
+none of them. The reason is in `safety-d.css`: the button had already been moved to z-44 and pinned
+bottom-*left*, deliberately out of the overlay layer, so it stopped being an occluder long before it
+stopped existing. Recorded because a plausible mechanism that survives until it is measured is the
+same failure this document was opened on — and this one was mine, published, and lasted one run.
 
 **That is the harness's number, quoted rather than restated.** *(§ 12's previous headline was
 `53 PASS · 7 FAIL · 1 UNPROVEN across 61`, which no run in this project has ever printed and which was
@@ -3119,7 +3132,7 @@ with its arithmetic in the open so a reader can check it against the log rather 
 
 | | rows | PASS | FAIL | UNPROVEN |
 |---|---|---|---|---|
-| `prove-table.mjs` at `2304c1e` | 60 | 54 | 5 | 1 |
+| `prove-table.mjs` at `5870e96` | 60 | 54 | 5 | 1 |
 | graded by their own controls | 9 | 7 | 2 | 0 |
 | **total** | **69** | **61** | **7** | **1** |
 
