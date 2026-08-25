@@ -33,6 +33,13 @@ import {
 import { realCopy, write } from './families.mjs';
 
 export const BROKEN_DIST = 'C:/Users/marcu/AppData/Local/Temp/codex-broken/dist';
+/* 73c45d8 is the build the harness is calibrated against: a real shipped SHA
+   that a green check once blessed. It is NOT "the SHA deployed right now" —
+   it was, when P-0.7's text was written, and it stopped being true the moment
+   810584c was pushed on 2026-08-25. See amendment A-29. The word that mattered
+   is KNOWN-BROKEN, not DEPLOYED: the point of P-0.7 is that the harness goes
+   red on a build a green check once passed, and that property does not expire
+   when the build stops being live. */
 export const BROKEN_SHA = '73c45d8';
 const BROKEN_PORT = 4199;
 
@@ -274,7 +281,7 @@ export async function proveInstrument(b, R, opts) {
     // his two real export shapes, for the record
     const realThin = await walkBase(b, { ...broken, file: realCopy('thin') });
     const realFull = await walkBase(b, { ...broken, file: realCopy('full') });
-    R.check('P-0.7', `the harness FAILS ${BROKEN_SHA} — the SHA deployed right now — on ${caughtShapes.length}/12 hostile-but-legal shapes`,
+    R.check('P-0.7', `the harness FAILS ${BROKEN_SHA} — a shipped SHA a green check once blessed — on ${caughtShapes.length}/12 hostile-but-legal shapes`,
       caughtShapes.length > 0,
       `caught: ${caughtShapes.join(', ')}\n         not broken on that build: ${missedShapes.join(', ') || 'none'}`);
     if (!caughtShapes.length) fail();

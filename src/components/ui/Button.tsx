@@ -16,21 +16,21 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary: [
     'bg-gradient-to-r from-gold to-arcane text-void-0 font-semibold',
     'shadow-[0_0_16px_-4px_rgba(197,165,90,0.35)]',
-    'hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)]',
-    'hover:brightness-110',
+    'enabled:hover:shadow-[0_0_24px_-2px_rgba(197,165,90,0.45)]',
+    'enabled:hover:brightness-110',
     'disabled:from-forge-2/40 disabled:to-forge-2/40 disabled:text-forge-2 disabled:shadow-none',
   ].join(' '),
 
   secondary: [
     'bg-void-2/60 text-forge-0 font-medium',
     'border border-gold/20',
-    'hover:bg-void-2/80 hover:border-gold/40',
+    'enabled:hover:bg-void-2/80 enabled:hover:border-gold/40',
     'disabled:text-forge-2 disabled:border-bronze/10 disabled:bg-transparent',
   ].join(' '),
 
   ghost: [
     'bg-transparent text-forge-1 font-medium',
-    'hover:bg-gold/[0.06] hover:text-forge-0',
+    'enabled:hover:bg-gold/[0.06] enabled:hover:text-forge-0',
     'disabled:text-forge-2 disabled:bg-transparent',
   ].join(' '),
 }
@@ -79,11 +79,26 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         'select-none whitespace-nowrap',
         'transition-all duration-200 ease-forge',
         // Press feedback
-        'active:scale-[0.97]',
+        'enabled:active:scale-[0.97]',
         // Focus ring
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
-        // Disabled cursor
-        'disabled:pointer-events-none disabled:cursor-not-allowed',
+        /* Disabled cursor.
+           `disabled:pointer-events-none` used to sit on this line and it was
+           two defects wearing one class. It made `disabled:cursor-not-allowed`
+           dead CSS — you cannot paint a cursor for an element that refuses to
+           be hit-tested — so this file said one thing and did another. And it
+           made a disabled button transparent to touch: the press fell THROUGH
+           to whatever sat underneath, which on prep/Persona is the row
+           wrapper. That is how V-6b came to report three Add buttons as
+           "covered by div.flex.gap-2" — their own parent. Nothing covers them.
+           They simply were not there to be hit.
+
+           A native <button disabled> already refuses click, focus and
+           activation, so removing this removes no guard and changes no
+           behaviour. The `hover:`/`active:` rules that were unreachable while
+           disabled are now gated on `:enabled` so they stay unreachable —
+           which is why nothing on screen moves. */
+        'disabled:cursor-not-allowed',
         // Variant + size
         variantStyles[variant],
         sizeStyles[size],
