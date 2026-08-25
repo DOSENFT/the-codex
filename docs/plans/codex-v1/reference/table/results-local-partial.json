@@ -1,6 +1,6 @@
 {
   "target": "http://localhost:4173/the-codex/",
-  "sha": "2300ec71fd2405a38daed448328991a90ed98956",
+  "sha": "618fcc330860aaa89a567b21d2555bc71b760273",
   "mode": "local",
   "partial": true,
   "void": false,
@@ -24,70 +24,52 @@
     "E2_nodes": 50,
     "E3_bytes": 4194304
   },
-  "seconds": 25,
-  "pass": 9,
-  "fail": 1,
+  "seconds": 87,
+  "pass": 7,
+  "fail": 0,
   "unproven": 0,
   "rows": [
     {
-      "id": "R-1",
-      "what": "his real {} export names the EXPORT as what failed",
+      "id": "D-1",
+      "what": "round-trip: every key in his real files survives import",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "R-2",
-      "what": "prose in a .json is refused, and says where a real export comes from",
+      "id": "D-2",
+      "what": "3 cold reloads produce an identical stored character",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "R-3",
-      "what": "the thin real export is gated with a way forward AND a way back",
+      "id": "D-3",
+      "what": "a refused or cancelled import writes nothing",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "R-4",
-      "what": "truncated JSON is refused and named",
+      "id": "D-4",
+      "what": "a second tab cannot clobber the first",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "R-5",
-      "what": "a 12MB JSON does not freeze the app",
+      "id": "D-5",
+      "what": "a full disk does not eat the character (told, and prior save intact)",
+      "verdict": "PASS",
+      "detail": "intact=true userWasTold=true"
+    },
+    {
+      "id": "D-6",
+      "what": "no destructive act without a confirm  [4 controls driven; asked first: Delete Character, Long Rest; destroyed nothing: Reset action economy, New Character]",
       "verdict": "PASS",
       "detail": ""
     },
     {
-      "id": "R-6",
-      "what": "a JSON array at the root is refused, not coerced",
+      "id": "D-7",
+      "what": "export reachable offline in 2 taps and round-trips",
       "verdict": "PASS",
-      "detail": ""
-    },
-    {
-      "id": "R-7",
-      "what": "prototype-pollution keys do not reach Object.prototype",
-      "verdict": "PASS",
-      "detail": ""
-    },
-    {
-      "id": "R-8",
-      "what": "a binary file renamed .json is refused",
-      "verdict": "PASS",
-      "detail": ""
-    },
-    {
-      "id": "R-9",
-      "what": "the same character imported twice in a row makes no duplicate roster entry",
-      "verdict": "PASS",
-      "detail": "before=1 after=1"
-    },
-    {
-      "id": "R-10",
-      "what": "re-importing the same file mid-session does not silently discard session state",
-      "verdict": "FAIL",
-      "detail": "session state silently overwritten: 30 → 35, and the only thing it said was \"35/35 Imported was older export, no weapons equipment. Everything came across; you'll need those back.\""
+      "detail": "taps=2"
     }
   ]
 }
