@@ -321,10 +321,46 @@ export const AUDIT_DOM = () => {
   const px = v => parseFloat(v) || 0;
   const srgb = c => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
   const lum = ([r, g, b]) => 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
+  /* A-34 — this used to be the regex alone, and the regex is blind.
+     Tailwind 4 authors colours as oklch() and Chrome hands them back from
+     getComputedStyle as oklab(...). `rgba?\(` matches neither, so parse()
+     returned null, `ink` came back null, and pixelContrast() filtered the node
+     out of `want` before it was ever graded. V-2b/V-3b then printed "0 below
+     4.5:1" over a population that excluded every oklch node in the app —
+     20.3 % of visible text was all that was ever pixel-read. The independent
+     verifier found a 2.36:1 node inside the 79.7 %.
+
+     The fallback is the browser's own colour converter rather than a second,
+     wider regex: canvas `fillStyle` accepts every colour syntax the engine
+     supports, and `getImageData` returns non-premultiplied sRGB bytes. Whatever
+     colour space arrives — oklch, oklab, lab, color(display-p3 …), a future one
+     — it comes back as rgb + alpha or it comes back as null.
+
+     The regex is kept as the fast path AND as a guarantee: every node that was
+     graded before this change is parsed by the same code as before and grades
+     to the same number. This can only ADD nodes to the population, which is why
+     it is a strengthening and not an amendment to any criterion's text. */
+  let _cv = null;
+  const viaCanvas = s => {
+    try {
+      if (!_cv) { _cv = document.createElement('canvas'); _cv.width = _cv.height = 1; }
+      const cx = _cv.getContext('2d', { willReadFrequently: true });
+      cx.clearRect(0, 0, 1, 1);
+      cx.fillStyle = 'rgba(0, 0, 0, 0)';
+      cx.fillStyle = s;                       // invalid input leaves the sentinel
+      if (cx.fillStyle === 'rgba(0, 0, 0, 0)') return null;
+      cx.fillRect(0, 0, 1, 1);
+      const d = cx.getImageData(0, 0, 1, 1).data;
+      return { rgb: [d[0], d[1], d[2]], a: d[3] / 255 };
+    } catch { return null; }
+  };
   const parse = s => {
-    const m = String(s).match(/rgba?\(([^)]+)\)/); if (!m) return null;
-    const p = m[1].split(/[,\s/]+/).filter(Boolean).map(Number);
-    return { rgb: p.slice(0, 3), a: p.length > 3 ? p[3] : 1 };
+    const m = String(s).match(/rgba?\(([^)]+)\)/);
+    if (m) {
+      const p = m[1].split(/[,\s/]+/).filter(Boolean).map(Number);
+      return { rgb: p.slice(0, 3), a: p.length > 3 ? p[3] : 1 };
+    }
+    return viaCanvas(s);
   };
   const over = (fg, bg, a) => fg.map((c, i) => c * a + bg[i] * (1 - a));
   const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
@@ -398,6 +434,35 @@ export const AUDIT_DOM = () => {
       // background is a gradient and divide by what is actually behind the glyph
       // instead of dropping them.
       ink: eff, x: Math.round(r.left), w: Math.round(r.width),
+      /* A-34 — the second half of the pixel reader's repair, and it must ship
+         with the first or the first produces nonsense.
+
+         `visible()` deliberately counts a node as on the page when it is below
+         the fold, because A-27 established that on this bounded layout the
+         content lives inside an inner scroller and reading extent off the
+         document dropped everything past y≈894. That is right for "does this
+         node exist". It is wrong for "read the pixels in its box", because
+         `<main>` is `overflow:auto` at 0,56 390x356 — anything outside that band
+         is CLIPPED, and the pixels at its coordinates belong to whatever is
+         actually painted there.
+
+         Caught on the first run after the oklch fix: play/Combat's «Paralyzed»
+         reported 1.30:1. Its ink is red-400 and 38 % of the pixels in its box
+         were gold — because at y=618, outside main's band, what is painted is a
+         row of spell-slot pips. A contrast failure that was really an
+         out-of-band read, and exactly the shape of finding § 9.16 documents for
+         V-9 and V-10.
+
+         `painted` is the honest test and it is not a heuristic about scrollers:
+         hit-test the node's own centre, and if the element that comes back is
+         not this node or one of its descendants, then whatever is at those
+         coordinates is not this node's ink and must not be divided by. */
+      painted: (() => {
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        if (cx < 0 || cx >= innerWidth || cy < 0 || cy >= innerHeight) return false;
+        const hit = document.elementFromPoint(cx, cy);
+        return !!hit && (hit === el || el.contains(hit));
+      })(),
     });
   }
 
@@ -519,7 +584,12 @@ export const audit = page => page.evaluate(AUDIT_DOM);
    This measures what his eye receives in a dim room, which is what V-2 and V-3
    were always about. Costs one screenshot per scroll position. */
 export async function pixelContrast(page, nodes) {
-  const want = nodes.filter(n => n.ink && n.w >= 2 && n.h >= 2);
+  /* A-34: `painted === false` means the hit test at this node's own centre
+     returned something else — it is clipped by a scroller or covered. Its
+     coordinates paint another element's pixels, so dividing ink by them
+     produces a contrast number about two unrelated things. Nodes recorded
+     before A-34 have no `painted` field at all and are admitted unchanged. */
+  const want = nodes.filter(n => n.ink && n.w >= 2 && n.h >= 2 && n.painted !== false);
   if (!want.length) return [];
   const shot = (await page.screenshot({ type: 'png' })).toString('base64');
   return page.evaluate(async ({ shot, want }) => {

@@ -477,13 +477,23 @@ export async function familyD(b, R, opts) {
     const spend = page.getByRole('button', { name: /Heal 5/i }).first();
     if (await spend.count()) { await spend.click(); await page.waitForTimeout(900); }
     await drain(page);
-    const { text } = await judge(page);
+    const { text, faults } = await judge(page);
     const told = /could not save|save failed|storage|full|out of space/i.test(text);
     await page.evaluate(() => { Object.getPrototypeOf(localStorage).setItem = window.__realSet; });
     const after = await storedChar(page);
     const intact = after === before;
+    // The faults judge() returns are part of the verdict, not decoration beside
+    // it. Before this, a quota fault that boundaried the screen could still
+    // print PASS as long as the character survived and a message appeared -
+    // and the boundary would be reported in the detail string, next to the
+    // word PASS. This is D-4's shape (line 458), applied to the one member of
+    // the family that did not have it. It can only turn PASS into FAIL.
+    const bad = [];
+    if (!intact) bad.push('the prior save did not survive the full disk');
+    if (!told) bad.push('the player was never told the save failed');
+    if (faults.length) bad.push(faults.join(' | '));
     R.check('D-5', 'a full disk does not eat the character (told, and prior save intact)',
-      intact && told, `intact=${intact} userWasTold=${told}` + (page.errs.length ? ' errs=' + page.errs.join('|') : ''));
+      bad.length === 0, bad.length ? bad.join('; ') : `intact=${intact} userWasTold=${told}`);
     await ctx.close();
   }
   { // D-6 destructive confirm
