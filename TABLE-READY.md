@@ -690,6 +690,127 @@ that still includes every expanded card, every screen, and both viewports. If a 
 falsify this, expand the Roleplay action cards and re-run `table/_contrast-where.mjs`: the nodes
 return to the graded set, painted, and pass on their own colours.
 
+**A-29 · 2026-08-25 · § 5 P-0.7 — a SENTENCE IN THE INSTRUMENT was false and is corrected. No
+criterion, threshold or negative control changed.** Following A-25's precedent, which is the rule that
+a false sentence gets an amendment even when the number it sits beside is right.
+
+*Old text* (`selftest.mjs:277`): `the harness FAILS 73c45d8 — the SHA deployed right now — on N/12
+hostile-but-legal shapes`.
+*New text:* `the harness FAILS 73c45d8 — a shipped SHA a green check once blessed — on N/12
+hostile-but-legal shapes`.
+
+*Reason.* It was true when written and stopped being true the moment Marcus pushed `810584c` on
+2026-08-25. The property P-0.7 actually asserts is that the harness goes **red on a build that a green
+check once passed** — that is what makes it a calibrated instrument rather than a hopeful one — and
+that property does not expire when the build stops being live. The old wording made the check's own
+claim decay every time we deployed, which is precisely the class of stale-green this document exists
+to catch. `BROKEN_SHA` is unchanged, the negative-control worktree is unchanged, and the shapes it is
+run against are unchanged; **the number P-0.7 reports cannot have moved.**
+
+**A-30 · 2026-08-25 · § 6 V-6b/V-6c — an APP fix that REDUCES the reported occlusion count. Disclosed
+under A-27's rule, which says a smaller graded number is a defect report until proven otherwise.**
+No criterion's text, threshold or selector moved.
+
+*The finding.* V-6b named three prep/Persona Add buttons as *"covered by `div.flex.gap-2`"* — their own
+parent. A coverer that is an element's own ancestor is not a coverer, so I probed it rather than
+accepting it. `Button.tsx` carried `disabled:pointer-events-none disabled:cursor-not-allowed` on one
+line, and those two classes contradict each other: an element that refuses to be hit-tested can never
+show a cursor, so half that line had never done anything. Worse, the half that did work made a
+disabled button **transparent to touch rather than merely inert** — `elementFromPoint` fell through to
+the row wrapper, and so would a finger.
+
+*The change.* `disabled:pointer-events-none` removed; the `hover:`/`active:` rules that were
+unreachable-by-accident while disabled are now unreachable-by-construction via Tailwind's `:enabled`
+variant.
+
+*Why this is a fix and not a hidden softening.* Three things were measured rather than argued
+(`table/_btn-disabled.mjs`): a disabled button's `.click()` still fires **nothing**, so the seal holds
+and no guard was removed; a real mouse press at the centre of a disabled Add button now reaches
+**NO listener at all**, where before it reached the wrapper; and Chromium reports **ten**
+`:enabled:hover` / `:enabled:active` selectors emitted, so the hover styling was gated, not silently
+dropped. The disabled paint — colour, background, border — is byte-identical either way.
+
+*What it does not do.* **V-6b and V-6c still FAIL.** Measured across the two runs of record either
+side of the change: **V-6b 8 → 7** (one phone finding) and **V-6c 9 → 5** (four tablet findings — the
+three Add buttons plus «Add a combat line»). The phone count moves by only one because at 390px the
+Persona lists reflow and just one of those Add buttons is at a graded scroll position. The eleven that
+remain are a separate, structural matter set out in § 9.15, and they are reported red.
+
+**A-31 · 2026-08-25 · § 12 V-9 and V-10 — two rows corrected from PASS to FAIL. Two instruments found
+defective and DELIBERATELY NOT REPAIRED.** No criterion's text, threshold or selector moved. No control
+file was edited. This amendment exists because § 12 briefly asserted a measurement I had not taken.
+
+*Old text (§ 12, third paragraph):* *"Three criteria are graded by their own controls rather than by
+`prove-table.mjs`, and all three were re-run at this same SHA: **V-9** by `control-a20.mjs` (PASS, 7 of
+7 screens measured, 0 fixed controls covered), **V-10** by `control-a22.mjs` (PASS, 0 findings at the
+enforced floors, 118 in the 44–47px advisory band), **N-5** by `control-a21.mjs` (PASS, 0 of 15 checks
+failed)."*
+
+*New text:* V-9 **FAIL** (worst screen covered 7), V-10 **FAIL** (2 findings at the enforced floors),
+N-5 PASS unchanged — with a sentence recording that the paragraph's central claim had been false when
+first written. The § 12 tally moves **54 · 5 · 1 → 52 · 7 · 1**.
+
+*Reason.* I carried three rows forward from the previous run of record and wrote "all three were re-run
+at this same SHA" before re-running them. When I did run them, two were red. A number copied from a
+friendlier run into a row that claims to be freshly measured is the softest possible form of the thing
+§ 5 was built to detect, and it nearly shipped inside the document that detects it.
+
+*Why nothing was repaired.* Both failures are, on the evidence in **§ 9.16**, defects in the
+instrument. V-9's control calls everything on the page "chrome" because `c056005` made `<main>`
+`position: fixed`; `_a20-what.mjs` shows **0 of 22 findings are true chrome** and every one is freed by
+scrolling. V-10's control reports 1.04:1 for two gold-gradient buttons because its computed climb
+cannot see `background-image`; `_a22-contrast.mjs` reads their painted pixels at **8.61:1**, and
+`git log -S` puts the ink at `9216be8`, 2026-05-03 — the app's first commit, so nothing regressed.
+
+Both controls are correctable in an afternoon and **neither was corrected**, for the reason
+§ 9.15(c) already gives: repairing a grader on the day you need its verdict, having already seen the
+verdict, is indistinguishable from softening it — and the two would look identical in this log. The
+repairs are specified at the end of § 9.16 so a later cycle can make them without having a stake in
+the answer. **Two red rows and an honest record beat two green rows and a doubt.**
+
+**A-32 · 2026-08-25 · § 5 — one criterion ADDED (P-0.9). Nothing softened, nothing removed.** It was
+added because it caught, on its first run, the fourth instance of the bug this entire document was
+written about.
+
+**P-0.9 (ADDED): the committed tree builds.** Full text in § 5.
+
+*How it was found.* Staging the docs for this commit, `git status` listed `src/components/TurnDeck.tsx`
+and `src/lib/session-rollback.ts` as **untracked** — while `git grep` showed HEAD's own
+`Layout.tsx`, `CombatHelper.tsx` and `Settings.tsx` importing them. Neither file was ignored. They had
+simply never been staged, at `c056005`, and three commits had accumulated on top.
+
+*What that would have cost.* Checking HEAD out into a clean worktree and running the real build:
+
+```
+src/components/CombatHelper.tsx(43,46):  error TS2307: Cannot find module './TurnDeck'
+src/components/Settings.tsx(29,75):      error TS2307: Cannot find module '../lib/session-rollback'
+src/components/CombatHelper.tsx(989,51): error TS7053  (cascade from the first)
+```
+
+The push was one command away. GitHub Actions builds from the repository and has no test step, so it
+would have failed, no new deploy would have replaced `810584c`, and the live URL would have kept
+serving a build from before the V-6 fix, the contrast sweep and the turn deck — silently, with this
+document claiming 52 green rows about a build that was never published. **§ 1 of this document opens
+on the fact that the same import bug shipped three times with green checks every time. This is the
+fourth. Every check was green.**
+
+*Why no check saw it.* Every criterion here measures `dist/`, and `dist/` is built from the working
+tree, where both files exist. The harness has always proven the *app*. Nothing had ever proven the
+*repository*. P-0.7 is the closest relative — it proves the harness can fail a bad build — but a bad
+build is not the same object as a tree that produces no build at all.
+
+*The negative control, run in that order and not the convenient one.* `control-tree.mjs` was written
+first and run against the broken HEAD **before** the fix was committed: **P-0.9 FAILS at `73e4bd1`,
+3 compiler errors.** The three files were then staged and it was re-run: **P-0.9 PASSES.** The
+criterion was watched failing on a real defect it was not written for and passing after the real fix,
+which is the standard § 5 sets and the only reason it is being added on the last day rather than
+deferred with the § 9.16 repairs. **A check that has caught something is evidence; one that has only
+ever been green is a hypothesis.**
+
+*Scope.* This adds a criterion and one control file. No existing criterion's text, threshold or
+selector moved, no control was edited, and no app source changed except the three files that were
+already meant to be in the repository and were not.
+
 ---
 
 ## 1. What the table actually is
@@ -797,6 +918,7 @@ Graded first. **If P-0 fails, every other result on the page is void**, regardle
 | **P-0.6** | Every one of the six controls, when **removed**, lets a known-bad case pass. That is the point: each control is load-bearing, proven by deletion, not by assertion. *(A-2)* | `--selftest` prints a 6-row table; every row reads `caught ✓ / passes-without ✓` |
 | **P-0.7** *(added, A-1)* | **Sensitivity against a whole real build.** The harness must FAIL `73c45d8` — the SHA deployed at the live URL — on the input shapes that break it. An instrument that has never been shown to fail on a build known to be broken has proven nothing. | `--selftest` reports the count of the 12 hostile shapes it caught; must be > 0 |
 | **P-0.8** *(added, A-1)* | **Specificity.** The same harness, same inputs, must PASS HEAD on every shape it just failed `73c45d8` on. A check that is always red is as useless as one that is always green. | `--selftest` P-0.8 row |
+| **P-0.9** *(added, A-32)* | **The committed tree builds.** Every other criterion in this document is measured against `dist/`, and `dist/` is built from the **working tree**. A source file that exists on this laptop and was never staged is therefore invisible to all sixty of them: the app runs, the harness is green, and the repository does not compile. HEAD must be checked out into a separate worktree — what a stranger cloning this repo actually receives — and must survive the same `npm run build` that GitHub Actions runs. | `control-tree.mjs`: any `error TS…`, any unresolved module, or a non-zero build |
 
 **Standing rule for all families below:** a criterion cannot pass while any of these is true at any
 point during its run — a caught React error, a `console.error`, an unhandled rejection, a `pageerror`,
@@ -1476,6 +1598,124 @@ you'll need to add those back."* The negation is dropped — it means "no weapon
 single import is why the one time it should have said *"and I discarded your session"* would have
 gone unread anyway.
 
+**9.15 · V-6, V-6b and V-6c: where the remaining red actually is, located rather than asserted.**
+These three are the last visual failures, they are reported **FAIL**, and no word of any of them has
+been moved. What follows is the diagnosis, because § 12 forbids reporting a number I have not found
+on the screen. Everything here was measured by `table/_v6-where.mjs` and `table/_v6-thumb.mjs`, which
+print, for every finding, its screen, its rect, the scroll offset it was found at, and how far the
+page can still scroll in the direction that would free it.
+
+**(a) V-6 — one control, and it is one of three identical siblings.** The offender is «Apply healing»
+at **y=272 of 844** on play/Combat: the Heal button in the HP card, in a `grid-cols-3` beside
+«Apply damage» and «Set temporary hit points». All three are the same button at the same y. Only Heal
+is graded, because V-6's selector reads
+`/heal|expend|restore|slot|spend|action|bonus|reaction|move|combat|grimoire|roleplay/i` and contains
+"heal" but not "damage" or "temporary". *That is a wording accident, not a design finding* — and the
+freeze rule means it stays FAIL rather than being narrowed to suit me.
+
+It is also worth saying what the button does: it does not spend anything. It **opens a numeric input
+inside the HP card**, three inches below the 67/67 it is about to change. Moving it into the turn deck
+would separate the control from the number it edits and would make the deck — already 302px, already
+flagged for Marcus in § 12 — taller still. The deck's own rule, written in `CombatHelper.tsx`, is that
+it holds *what mutates a number on disk, and nothing else*. And the healing that a **turn** actually
+spends is already in the thumb zone: «Heal 5» and «Heal 10» under LAY ON HANDS, at the bottom of the
+deck. So the intent behind V-6 — *what you press during a six-second turn is under your thumb without
+scrolling* — is met. The letter of V-6 is not. **Both sentences are true and the row stays red.**
+
+**(b) V-6b/V-6c — after A-30, every remaining finding is a scroll extreme, and each one has been
+given a number.** The criterion asks that at scroll-top *and* at scroll-bottom, `elementFromPoint` at
+a control's centre resolves to that control. For **every** finding that survives A-30, the probe
+records real scroll room in the direction that uncovers it — between **724px and 3346px**. Examples,
+verbatim from the probe: `play/Combat @top «Damage Log»` under the tab bar with **724px** of room
+down; `prep/Character @bottom «+ New pool»` under the header with **3171px** of room up;
+`prep/Academy @bottom «Start One-Shot Adventure»` with **1760px** of room up. Not one control in this
+app is unreachable. Contrast this with the three A-30 findings, which the same probe scored
+**`room-that-frees-it = 0px`** — those were real, and those are the ones that got fixed.
+
+**(c) Why the criterion cannot be satisfied by this app, or by any app shaped like it.** A screen with
+a fixed header, a fixed bottom nav, and a list longer than one viewport will *always* have list items
+passing under one bar or the other at a scroll extreme; that is what a scrolling list under fixed
+chrome is. `main` carries `padding-bottom: 80px`, which guarantees the **end** of the list clears the
+64px nav — and that is the guarantee that matters. What it cannot guarantee is that no mid-list item
+is ever beneath the bar at scroll-top, because that would require the content to stop at the bar,
+which would delete the translucent reveal the design is built on.
+
+There is a real instrument defect underneath this, named for whoever grades next. `rig.mjs` decides
+whether a coverer counts as "chrome" by walking ancestors for `position: fixed|sticky`. **The app's
+scroller is `main.fixed.left-0.right-0` — `position: fixed` itself** — so every element in the app has
+a fixed ancestor and that guard has never excluded anything in its life. **I am not touching it.**
+Loosening a guard to make a red row go green is the exact move this document was written to prevent,
+and doing it on the last day before the table would be the worst possible time to start.
+
+**What I would add, if adding rather than softening:** a criterion that grades the intent —
+*every control that mutates a resource is reachable at scroll-top on play/Combat without scrolling* —
+which the app passes today. It is **not** built, because a check authored on the same afternoon it is
+needed, by the person who needs it to pass, is not evidence. It is written here so the next cycle can
+build it cold.
+
+### 9.16 Two more instruments broke, and I found out by nearly not looking
+
+§ 12 claims that the three separately-graded criteria "were all re-run at this same SHA". When I wrote
+that sentence it was false: I had copied V-9, V-10 and N-5 forward from the previous run of record and
+was about to ship a document asserting a measurement I had not taken. Running them was the last step
+before commit, and two of the three came back red.
+
+The reflex at that point is to reach for the control and fix it, because in both cases the control is
+genuinely wrong. **That reflex is the failure mode.** § 9.15(c) refused to loosen `rig.mjs`'s occlusion
+guard for exactly this reason, and the same answer applies twice more here: the evidence goes in the
+document, the row stays red, and the instrument is left for a cycle that is not the one that needs it
+to pass. What follows is the evidence, not a case for a green row.
+
+**(a) V-9 — the alarm covers nothing it was written to protect, and the control can no longer tell.**
+`control-a20.mjs` decides "is this a control the player cannot scroll out from under?" by walking
+ancestors for `position: fixed`. On 2026-08-23, when A-20 added it, that was a faithful proxy: the
+only fixed things in this app were the header, the tab bar, the Veil and the dice roller. It stopped
+being one at **`c056005`**, this cycle, when § 9.1b bounded the scroll region so the turn deck could
+anchor — `<main>` is now `fixed left-0 right-0 top-14 bottom-[…]` with `overflow-y-auto`. Every
+control in the app now has a fixed ancestor, so the walk matches all of them, and the alarm's ordinary
+and always-intended overlap of the top of the page reads as covering chrome.
+
+`_a20-what.mjs` reproduces the control's own measurement exactly — same storage break, same geometry —
+and adds the one question the control no longer asks: is this element inside `<main>`, or is it true
+chrome? Across all seven screens, **22 findings: 0 true chrome, 0 sticky-inside-`main`, 22 ordinary
+page rows.** Every one has fixed ancestor `main.fixed.left-0`. Every one is freed by scrolling: the
+worst needs 209px against 3346px of room, the mildest needs 2px against 1760px. The three things V-9
+exists to protect — the tab bar, the Veil, the dice roller — are all bottom-anchored and all clear,
+which is what SaveAlarm's own comment promised when A-20 moved it under the header.
+
+So the app does the right thing and the row is red. Both sentences are true.
+
+**(b) V-10 — 1.04:1 is what you measure when you cannot see a gradient.** `control-a22.mjs` reported
+two findings at the enforced floors, both V-2 contrast: «Generate Scene» at 16px and «Start Drill» at
+14px, each at **1.04:1**, each tagged `[computed]`. 1.04:1 is the ratio you get for text painted on
+its own colour, which should be the tell.
+
+Both are `<Button variant="primary">` — `bg-gradient-to-r from-gold to-arcane` with `text-void-0`. A
+gradient sets `background-image` and leaves `background-color` at `rgba(0,0,0,0)`, so a contrast climb
+that reads only `background-color` walks straight through the gold and lands on the dark glass-card
+behind it. Near-black ink on a near-black card is 1.04:1. `rig.mjs`'s painted-pixel path would have
+caught this, but line 547 skips any node whose box falls outside the viewport and silently falls back
+to the computed climb — and this run's log says so out loud: *"30/72 nodes graded off painted pixels,
+42 off the computed climb."*
+
+`_a22-contrast.mjs` reads the two buttons' own pixels: dominant fill **`rgb(203,166,84)`**, ink
+**`rgb(10,10,8)`**, **8.61:1** on both. Gold, with black type on it.
+
+**This one is not a regression, and I checked rather than assumed.** `git log -S "text-void-0"` on
+`Button.tsx` returns exactly one commit: `9216be8`, 2026-05-03, the app's first. The primary button
+has been near-black on a gradient since the day it existed, and the computed climb has been blind to
+it for just as long. What changed this cycle is not the button but which nodes the camera could reach,
+because bounding the scroller moved every scroll position in the app. **A latent instrument defect
+became visible; nothing about the app got worse.** That is a better outcome than it looks, and it is
+still a red row.
+
+**What I would add, if adding rather than softening.** For (a): grade "chrome" by whether the element
+*moves when its scroll container scrolls*, measured, rather than by a computed-style proxy — the same
+repair `rig.mjs` needs, and it should be made once, in one place, for both. For (b): make the computed
+climb refuse to answer when it meets a `background-image` it cannot divide, and report the node as
+**ungraded** instead of guessing — an admission of ignorance is worth more than a confident 1.04:1.
+Neither is built. Both are for the next cycle, cold.
+
 ## 10. Screenshots
 
 Every screen at both sizes this app is actually held at, with his real full export loaded, at the
@@ -1757,29 +1997,46 @@ Recorded because a verifier's cleared suspicions are evidence too.
 
 ## 12. Results
 
-**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`2300ec7`**, **939 s**,
+**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`73e4bd1`**, **942 s**,
 full — not `--only`, so P-0 ran and the run is not PARTIAL. `results-local.json` is written beside the
-harness. **48 PASS · 11 FAIL · 1 UNPROVEN**, against the previous run of record's 44 · 15 · 3.
+harness; the console transcript is `table/run-73e4bd1.log`. **53 PASS · 7 FAIL · 1 UNPROVEN** across
+**61** criteria — one more than last cycle, because **A-32 added P-0.9** after it caught a build-breaking
+defect that all sixty of the others were structurally unable to see. Against the previous run of
+record's 48 · 11 · 1, and 44 · 15 · 3 the cycle before that.
 
 Three criteria are graded by their own controls rather than by `prove-table.mjs`, and all three were
-re-run at this same SHA: **V-9** by `control-a20.mjs` (PASS, 7 of 7 screens measured, 0 fixed controls
-covered), **V-10** by `control-a22.mjs` (PASS, 0 findings at the enforced floors, 118 in the 44–47px
-advisory band), **N-5** by `control-a21.mjs` (PASS, 0 of 15 checks failed). **A-24**'s control passes
-too — both rewritten graders were watched failing on a sabotaged app while the graders they replaced
-printed PASS. Unit suite: **376 tests, 15 files, green.**
+re-run at this same SHA. **Two of them went red when I did, and the first draft of this section said
+they were green because I had carried the previous run's numbers into rows I had not yet re-measured.**
+That is the exact move this document exists to catch, and it is caught here rather than reported:
+**V-9** by `control-a20.mjs` (**FAIL**, 7 of 7 screens measured, worst covered 7), **V-10** by
+`control-a22.mjs` (**FAIL**, 2 findings at the enforced floors, 118 in the 44–47px advisory band),
+**N-5** by `control-a21.mjs` (PASS, 0 of 15 checks failed). Both new failures are, on the evidence in
+**§ 9.16**, defects in the *instrument* rather than in the app — and both instruments are left exactly
+as they are, red rows and all, for the reason § 9.15(c) already gives. **A-24**'s control passes too —
+both rewritten graders were watched failing on a sabotaged app while the graders they replaced printed
+PASS. Unit suite: **393 tests, 16 files, green.**
 
 Everything in this section is one run at one SHA. Nothing below is carried over from an earlier run,
 and no row's number was taken from a friendlier measurement than the one the criterion names.
 
+**Read A-27, A-28 and A-30 before reading the V rows.** Six V rows went from red to zero this cycle
+and one of them (V-2b/V-3b) did so partly because the graded population shrank. That is the shape of a
+softened check and it is disclosed as one: A-28 records that the ink was fixed *first and
+independently*, at the token layer, so that the population change could not become a way to hide a
+defect. A-30 does the same for V-6b/V-6c. **No criterion's text, threshold or selector has moved
+since it was frozen.**
+
 **Independently re-measured at `ce1f840` by a fresh agent that wrote its own probes and refused to
 re-run this harness — § 11.4.** It confirmed **F-4, R-9, D-4** and the **error floor** with its own
 numbers, failed to falsify **R-10**, and found five further defects (§ 9.14) plus one false sentence
-in this document (A-25). The four rows below that flipped green this cycle are green on two
-independent measurements, not one.
+in this document (A-25). *That verification predates this cycle's V-family work and A-30; the rows
+that flipped green since are, as of this run, on one measurement — see the honesty note under the
+table.*
 
 | ID | Verdict | Number |
 |---|---|---|
-| P-0.1 – P-0.8 | **PASS** | the instrument. All six detectors load-bearing by deletion (6/6); the harness FAILS `73c45d8` — the SHA that was live — on 8 of 12 hostile shapes and PASSES HEAD on the same 8. *Caveat, unchanged: the negative-control worktree lives outside the repo, so a stranger cannot re-run P-0 from a clone.* |
+| **P-0.9** | **PASS** | *(ADDED this cycle — A-32.)* `control-tree.mjs`: HEAD checked out into a clean worktree builds with **0 compiler errors**, **0 untracked files under `src/`**. Watched failing first: at `73e4bd1`, before the fix, **3 errors — `TS2307 Cannot find module './TurnDeck'`, `TS2307 … '../lib/session-rollback'`, and a `TS7053` cascade.** Two source files imported by HEAD had never been staged. The push was one command away, CI has no test step, and the deploy would have failed silently while this document claimed green. |
+| P-0.1 – P-0.8 | **PASS** | the instrument. All six detectors load-bearing by deletion (6/6); the harness FAILS `73c45d8` — a shipped SHA a green check once blessed — on 8 of 12 hostile shapes and PASSES HEAD on the same 8. Its real thin and full exports are *clean* on that build, which is the point: the shapes that break it are not the shapes he types. *Wording corrected this cycle — A-29. Caveat, unchanged: the negative-control worktree lives outside the repo, so a stranger cannot re-run P-0 from a clone.* |
 | F-1 | **PASS** | full real export → 7/7 screens carry his data, zero faults |
 | F-2 | **PASS** | thin real export — the shape that shipped broken three times — → 7/7 |
 | F-3 | **PASS** *(read § 9.11)* | 12 hostile-but-legal shapes × 7 screens = 84 clean renders. These are the survivors, not a sample |
@@ -1797,34 +2054,34 @@ independent measurements, not one.
 | D-7 | **PASS** | export reachable offline in **2 taps** and round-trips |
 | R-1 – R-8 | **PASS** | eight bad-input paths, each refused in his own words, character intact. R-7's prototype payload proven inert by driving it *past* the guard |
 | **R-9** | **PASS** *(grader rewritten — A-24)* | the second import now actually happens, through Settings → Import: roster 1 → 1. The old grader's locator matched zero controls and skipped the scenario |
-| **R-10** | **FAIL** *(ADDED — A-24)* | spend 5 Lay on Hands (disk 35 → 30), re-import the same file: disk is **35** again, and the only words the import adds are *"Imported was older export, no weapons equipment. Everything came across; you'll need those back."* Nothing says the session was discarded. § 9.13, left unbuilt — the fix is behaviour |
-| **S-1** | **FAIL** | cold launch, origin dead, 4× CPU → "Nix" painted: **worst 2971 ms, median 2807 ms**, against 2000. Five runs, 2783–2971, so it is stable and it is over. Cause is `sw.js:132`, § 9.8 |
+| **R-10** | **PASS** *(ADDED — A-24; the fix built under U-3)* | spend 5 Lay on Hands (disk 35 → 30), re-import the same file mid-session: **the session is no longer silently discarded.** This was the most dangerous row in the previous run of record — a data-safety failure hiding inside a gesture performed *to be safe*. § 9.13 |
+| **S-1** | **FAIL** | cold launch, origin dead, 4× CPU → "Nix" painted: **worst 3071 ms, median 2983 ms**, against 2000. Five runs, 2948–3071 — stable, and over. Cause is `sw.js:132`, § 9.8. Every *individual screen* inside that boot is fast (worst 241 ms); the cost is the boot itself |
 | S-2 | **PASS** | every tab switch ≤ 400 ms |
-| **S-3** | **FAIL** | a spend registers in **104 ms worst**, against 100. Median 56 ms across 30 input events. It misses by 4 ms on the worst of thirty, and a FAIL is not upgraded because the median is comfortable |
+| **S-3** | **FAIL** | a spend registers in **112 ms worst**, against 100. Median **40 ms** across 33 input events. It misses by 12 ms on the worst of thirty-three, and a FAIL is not upgraded because the median is comfortable |
 | S-4 | **UNPROVEN** | there is no undo/restore control on the default combat screen to grade. § 9.2 |
 | S-5 | **PASS** | no long task > 200 ms during a 10-action turn |
 | S-6 | **PASS** | CLS **0.0000** under the thumb, against 0.02 |
-| V-1 | **PASS** | 0 visible text nodes under 12px |
-| V-2 / V-3 | **PASS** | 0 below 4.5:1 / 0 below 7:1 — on the nodes with a divisible background |
-| **V-2b** | **FAIL** | **11** nodes below 4.5:1 measured off the painted pixels of the 3240 that sit on a gradient. Worst are condition names on play/Combat at 4.34:1. Was 19 |
-| **V-3b** | **FAIL** | **11** numerals below 7:1 on a gradient — spell-slot counters at 5.02–5.19:1. Was 19 |
-| **V-4** | **FAIL** | **2** Cinzel nodes under 20px: «Choose Action» 16px, «Nix» 18px. Was 5 |
-| **V-5** | **FAIL** | **5** controls at 170×40 against the 44px floor — all five are Roleplay's suggestion chips. Was 6 |
-| **V-5b** | **FAIL** | **3** turn controls at 44px tall against the 48px floor: two condition chips and «Action Economy» |
-| **V-6** | **FAIL** | **15** turn controls outside the bottom 60%. Six sit *above* the thumb zone; nine sit off the first screen entirely — «Spend» at y=951 and «Apply healing» at y=1334 of an 844-tall screen. The structural fix is § 9.1's bottom deck, unbuilt |
-| **V-6b** | **FAIL** | **13** controls covered by fixed chrome at a scroll extreme, on the phone |
-| **V-6c** | **FAIL** | **15** of the same on the iPad at 834×1112 |
+| V-1 | **PASS** | **0** visible text nodes under 12px. Was 0 |
+| V-2 / V-3 | **PASS** | **0** below 4.5:1 / **0** below 7:1 — on the nodes with a divisible background |
+| **V-2b** | **PASS** *(read A-27 + A-28)* | **0** below 4.5:1, measured off the painted pixels of the **3912** nodes that sit on a gradient. Was 11. Fixed at the token layer — `--color-arcane-lit` and `--color-ember-lit` added beside the existing `--color-eldritch-lit` — not at ~30 call sites |
+| **V-3b** | **PASS** *(read A-27 + A-28)* | **0** numerals below 7:1 on a gradient. Was 11 |
+| **V-4** | **PASS** | **0** Cinzel nodes under 20px. Was 2 |
+| **V-5** | **PASS** | **0** controls under the 44px floor. Was 5 |
+| **V-5b** | **PASS** | **0** turn controls under the 48px floor. Was 3 |
+| **V-6** | **FAIL** | **1** turn control outside the bottom 60%: «Apply healing» at **y=272/844** on play/Combat. Was 15. It is one of three identical siblings in the same row, and the only one the selector's wording reaches; the healing a turn actually spends («Heal 5», «Heal 10») is in the deck, under the thumb. **Located and argued in § 9.15(a) — and left red** |
+| **V-6b** | **FAIL** | **7** controls covered by fixed chrome at a scroll extreme, on the phone. Was 13. Every one has between 724px and 3346px of scroll room in the direction that frees it — § 9.15(b), measured per finding |
+| **V-6c** | **FAIL** | **5** of the same on the iPad at 834×1112. Was 15 |
 | V-7 | **PASS** *(unverifiable)* | the design gate ran; its verdict is § 8. § 11 declined to re-run a judgement, correctly |
 | V-8 | **PASS** | 14 screenshots, 7 screens × 2 device sizes, § 10 |
-| **V-9** | **PASS** | `control-a20.mjs`: the save alarm raised for real, all 7 screens walked without dismissing it, **0 fixed controls covered**, alarm 366×217 at y=64 |
-| **V-10** | **PASS** | `control-a22.mjs`: **0** fixed elements wider than the phone, **0** controls clipped below their target size |
+| **V-9** | **FAIL** | `control-a20.mjs`: the save alarm raised for real, all 7 screens walked without dismissing it, alarm 366×217 at y=64 — **worst screen covered 7 controls** (was 0 last cycle). `_a20-what.mjs` classifies all 22 findings across the seven screens: **0 true chrome, 0 sticky-inside-`main`, 22 ordinary page rows**, every one with fixed ancestor `main.fixed.left-0` and every one freed by 2–209px of scroll against 1100–3692px of room. The control's proxy for "chrome" broke when `c056005` bounded the scroll region; the tab bar, the Veil and the dice roller — the things V-9 was written to protect — are untouched. **Instrument not repaired. § 9.16(a).** |
+| **V-10** | **FAIL** | `control-a22.mjs`: **0** fixed elements wider than the phone, **0** controls clipped, 118 in the 44–47px advisory band — but **2 findings at the enforced floors**, both V-2 contrast: «Generate Scene» 16px and «Start Drill» 14px, each reported at **1.04:1** and each graded `[computed]`. Both are `<Button variant="primary">`. `_a22-contrast.mjs` reads their own painted pixels: fill `rgb(203,166,84)`, ink `rgb(10,10,8)`, **8.61:1**. The computed climb reads `background-color: rgba(0,0,0,0)` on a gradient and walks past it to the dark card behind. **Instrument not repaired. § 9.16(b).** |
 | N-1 | **PASS** | origin killed, cold boot: 7 screens + a spend persists + reload survives. 16 files precached, 12 served by the worker |
-| N-2 | **PASS** | a hanging AI endpoint never blocks a turn — spend in **82 ms** |
+| N-2 | **PASS** | a hanging AI endpoint never blocks a turn — spend in **50 ms** |
 | N-3 | **PASS** | zero third-party requests during boot and a full walk |
 | **N-4** | **PASS** | a poisoned shell with the origin genuinely **dead**: cold boot shows his character, and `?sw=off` shows it too. This was the FAIL of § 9.10 |
 | N-4b | **PASS** | with the origin up, `?sw=off` really stands the worker down — 0 registrations, 0 codex caches left |
 | **N-5** | **PASS** | `control-a21.mjs`: the deployed build makes no request that cannot succeed by construction; 15 of 15 checks, measured with its own console listeners because `rig.mjs`'s `watch()` filters exactly this class |
-| E-0 – E-4 | **PASS** | 200 actions: **0.0 %** heap growth (10.0 MB → 10.0 MB), **0** net DOM nodes (1046 → 1046), 29 KB of origin storage against a 4 MB ceiling, action 200 as fast as action 10 (40 ms), and zero errors across the run |
+| E-0 – E-4 | **PASS** | 200 actions: **0.0 %** heap growth (10.0 MB → 10.0 MB), **0** net DOM nodes (990 → 990), 29 KB of origin storage against a 4 MB ceiling, action 200 as fast as action 10 (**48 ms**), and zero errors across the run |
 
 ### The eleven failures, sorted by whether they can be fixed without breaking the freeze
 

@@ -1,6 +1,6 @@
 {
   "target": "http://localhost:4173/the-codex/",
-  "sha": "2300ec71fd2405a38daed448328991a90ed98956",
+  "sha": "73e4bd1a986f05b804ee20be7671c6c6a464be7f",
   "mode": "local",
   "partial": false,
   "void": false,
@@ -79,9 +79,9 @@
     "E2_nodes": 50,
     "E3_bytes": 4194304
   },
-  "seconds": 939,
-  "pass": 48,
-  "fail": 11,
+  "seconds": 942,
+  "pass": 54,
+  "fail": 5,
   "unproven": 1,
   "rows": [
     {
@@ -122,7 +122,7 @@
     },
     {
       "id": "P-0.7",
-      "what": "the harness FAILS 73c45d8 — the SHA deployed right now — on 8/12 hostile-but-legal shapes",
+      "what": "the harness FAILS 73c45d8 — a shipped SHA a green check once blessed — on 8/12 hostile-but-legal shapes",
       "verdict": "PASS",
       "detail": "caught: bare spell, bare feature, object in equipment, bare identity, bare hook, bare supply, persona: {}, one of everything\n         not broken on that build: bare weapon, bare feat, bare pool, bare condition"
     },
@@ -279,14 +279,14 @@
     {
       "id": "R-10",
       "what": "re-importing the same file mid-session does not silently discard session state",
-      "verdict": "FAIL",
-      "detail": "session state silently overwritten: 30 → 35, and the only thing it said was \"35/35 Imported was older export, no weapons equipment. Everything came across; you'll need those back.\""
+      "verdict": "PASS",
+      "detail": ""
     },
     {
       "id": "S-1",
-      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 2971ms, median 2807ms, ≤2000]",
+      "what": "cold launch, origin dead, 4× CPU → \"Nix\" painted  [worst 3071ms, median 2983ms, ≤2000]",
       "verdict": "FAIL",
-      "detail": "runs: 2807ms, 2783ms, 2805ms, 2971ms, 2854ms"
+      "detail": "runs: 2948ms, 3047ms, 2966ms, 2983ms, 3071ms"
     },
     {
       "id": "S-2",
@@ -296,9 +296,9 @@
     },
     {
       "id": "S-3",
-      "what": "a spend registers ≤100ms  [input→paint: worst 104ms, median 56ms · wall-clock incl. harness: median 158ms]",
+      "what": "a spend registers ≤100ms  [input→paint: worst 112ms, median 40ms · wall-clock incl. harness: median 134ms]",
       "verdict": "FAIL",
-      "detail": "30 input events; wall-clock runs: 158, 153, 166, 154, 157, 187, 130, 173, 176, 150ms"
+      "detail": "33 input events; wall-clock runs: 208, 162, 145, 130, 123, 145, 118, 134, 129, 117ms"
     },
     {
       "id": "S-5",
@@ -338,51 +338,51 @@
     },
     {
       "id": "V-2b",
-      "what": "the same, measured off the painted pixels for the 3240 nodes on a gradient  [11 below]",
-      "verdict": "FAIL",
-      "detail": "play/Combat «Charmed» 12px 4.34:1\n         play/Combat «Frightened» 12px 4.34:1\n         play/Roleplay «Betrayal!» 14px 4.49:1\n         play/Roleplay «Insult!» 14px 4.46:1\n         play/Roleplay «3» 12px 4.13:1\n         play/Roleplay «Desires mentorship from Talon. Potential fat» 14px 1.86:1\n         play/Roleplay «Add Hook» 14px 1.59:1\n         prep/Persona «losing those they've gathered close» 14px 3.99:1\n         prep/Persona «being seen as 'just' a changeling, not a per» 14px 4.09:1\n         prep/Persona «abandonment» 14px 4.13:1\n         prep/Persona «harming those he loves» 14px 4.13:1"
+      "what": "the same, measured off the painted pixels for the 3912 nodes on a gradient  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
     },
     {
       "id": "V-3b",
-      "what": "the same, for numerals on a gradient  [11 below]",
-      "verdict": "FAIL",
-      "detail": "play/Combat «4» 12px 5.02:1\n         play/Combat «3» 12px 5.19:1\n         play/Combat «2» 12px 5.19:1\n         play/Combat «35» 12px 5.36:1\n         play/Combat «10» 12px 6.71:1\n         play/Roleplay «20» 12px 6.82:1\n         play/Roleplay «8» 12px 6.8:1\n         play/Roleplay «0» 12px 4.98:1\n         prep/Persona «1» 12px 5.18:1\n         prep/Persona «0» 12px 5.18:1\n         prep/Persona «0» 12px 5.19:1"
+      "what": "the same, for numerals on a gradient  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
     },
     {
       "id": "V-4",
-      "what": "Cinzel never under 20px  [2 found]",
-      "verdict": "FAIL",
-      "detail": "play/Combat «Choose Action» 16px\n         play/Roleplay «Nix» 18px"
+      "what": "Cinzel never under 20px  [0 found]",
+      "verdict": "PASS",
+      "detail": ""
     },
     {
       "id": "V-5",
-      "what": "every control ≥44px  [5 below]",
-      "verdict": "FAIL",
-      "detail": "play/Roleplay «*Stands slightly in front of allies without » 170×40\n         play/Roleplay «*Notice collects small, smooth stones*» 170×40\n         play/Roleplay «*Offer to stand watch so others can rest*» 170×40\n         play/Roleplay «*Offer to heal someone who looks worse for w» 170×40\n         play/Roleplay «*Whisper a prayer to Aesis the Shepherd*» 170×40"
+      "what": "every control ≥44px  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
     },
     {
       "id": "V-5b",
-      "what": "turn controls ≥48px  [3 below]",
-      "verdict": "FAIL",
-      "detail": "«Incapacitated: Can't take Actions, Bonus Act» 155×44\n         «Prone: Crawl to move; melee hits have Advant» 155×44\n         «Action Economy» 118×44"
+      "what": "turn controls ≥48px  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
     },
     {
       "id": "V-6",
-      "what": "turn controls in the bottom 60% of a 390×844 screen  [15 outside]",
+      "what": "turn controls in the bottom 60% of a 390×844 screen  [1 outside]",
       "verdict": "FAIL",
-      "detail": "«Start Combat» y=113/844 — above the thumb zone\n         «Action Economy» y=194/844 — above the thumb zone\n         «Reset action economy» y=267/844 — above the thumb zone\n         «Action» y=327/844 — above the thumb zone\n         «Bonus» y=327/844 — above the thumb zone\n         «Reaction» y=327/844 — above the thumb zone\n         «Heal 5» y=895/844 — off the first screen\n         «Heal 10» y=895/844 — off the first screen\n         «Spend» y=951/844 — off the first screen\n         «Expend Channel Divinity use» y=1043/844 — off the first screen\n         «Apply healing» y=1334/844 — off the first screen\n         «Incapacitated: Can't take Actions, Bonus Act» y=1619/844 — off the first screen\n         «Prone: Crawl to move; melee hits have Advant» y=1719/844 — off the first screen\n         «Combat Advisor» y=2200/844 — off the first screen\n         … +1 more"
+      "detail": "«Apply healing» y=272/844 — above the thumb zone"
     },
     {
       "id": "V-6b",
-      "what": "no control covered by anything  [13 occluded]",
+      "what": "no control covered by anything  [7 occluded]",
       "verdict": "FAIL",
-      "detail": "play/Combat @bottom «Restrained: Speed 0; attacks have Disadvanta» covered by button.px-2.min-h-[44px] < div.flex.rounded-lg < div.flex.items-center\n         play/Combat @bottom «Stunned: Incapacitated; auto-fail STR/DEX sa» covered by button.min-h-[44px].min-w-[44px] < div.flex.items-center < header.fixed.top-0\n         play/Grimoire @top «Hearthfire ManifestFeatureActionLvl 3» covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         play/Grimoire @bottom «Faerie FireSpellAction60 feetConc1stSlots:4/» covered by div.flex.items-center < header.fixed.top-0 < div.flex.flex-col\n         play/Roleplay @top «Burn clean, and quickly.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         play/Roleplay @bottom «One does not buy loyalty, mister merchant. O» covered by div.flex.items-center < header.fixed.top-0 < div.flex.flex-col\n         prep/Character @top «Acrobatics: not proficient. Tap to change.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @top «Acrobatics(DEX)» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «BlessSpellAction30 feetConc1stSlots:4/4» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «Unprepare Bless» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Persona @top «Remove slow to trust, but deeply loyal once » covered by button.fixed.z-50 < div.flex.flex-col < div\n         prep/Persona @top «Remove values simple, hard labor» covered by svg.[object.SVGAnimatedString] < button.relative.flex-1 < div.flex.items-stretch\n         prep/Academy @bottom «Start One-Shot Adventure» covered by span.text-xs.font-mono < div.flex.items-center < header.fixed.top-0"
+      "detail": "play/Roleplay @top «Burn clean, and quickly.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @top «Acrobatics: not proficient. Tap to change.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @top «Acrobatics(DEX)» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «BlessSpellAction30 feetConc1stSlots:4/4» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «Unprepare Bless» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Persona @top «Remove slow to trust, but deeply loyal once » covered by button.fixed.z-50 < div.flex.flex-col < div\n         prep/Academy @bottom «Start One-Shot Adventure» covered by span.text-xs.font-mono < div.flex.items-center < header.fixed.top-0"
     },
     {
       "id": "V-6c",
-      "what": "the same, on the iPad at 834×1112  [15 occluded]",
+      "what": "the same, on the iPad at 834×1112  [5 occluded]",
       "verdict": "FAIL",
-      "detail": "play/Combat @top «Expend Channel Divinity use» covered by button.veil-btn < div < body\n         play/Combat @bottom «Blinded: Can't see; attacks have Disadvantag» covered by header.fixed.top-0 < div.flex.flex-col < div\n         play/Combat @bottom «Charmed: Can't attack charmer; charmer has s» covered by button.min-h-[44px].min-w-[44px] < div.flex.items-center < header.fixed.top-0\n         play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         play/Roleplay @top «A warmth… not entirely natural. Show me the » covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         play/Roleplay @bottom «This place remembers a hearth. A good sign, » covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Character @top «Insight: not proficient. Tap to change.» covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         prep/Character @top «Insight(WIS)» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @bottom «+ New pool» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Persona @top «Remove losing those they've gathered close» covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         prep/Persona @top «Remove being seen as 'just' a changeling, no» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         … +1 more"
+      "detail": "play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Academy @top «Random Catchphrase» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0"
     },
     {
       "id": "N-1",
@@ -392,9 +392,9 @@
     },
     {
       "id": "N-2",
-      "what": "a hanging AI endpoint never blocks a turn  [spend 82ms]",
+      "what": "a hanging AI endpoint never blocks a turn  [spend 50ms]",
       "verdict": "PASS",
-      "detail": "82ms; "
+      "detail": "50ms; "
     },
     {
       "id": "N-3",
@@ -404,7 +404,7 @@
     },
     {
       "id": "N-4",
-      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-3bb8ee8a3165]",
+      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-7f7665813d43]",
       "verdict": "PASS",
       "detail": ""
     },
@@ -424,7 +424,7 @@
       "id": "E-2",
       "what": "DOM node growth  [0, ≤50]",
       "verdict": "PASS",
-      "detail": "1046 → 1046"
+      "detail": "990 → 990"
     },
     {
       "id": "E-3",
@@ -434,7 +434,7 @@
     },
     {
       "id": "E-4",
-      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 40ms, ≤100 · wall-clock 61ms]",
+      "what": "action 200 is as fast as action 10  [\"Action\" input→paint 48ms, ≤100 · wall-clock 62ms]",
       "verdict": "PASS",
       "detail": ""
     },

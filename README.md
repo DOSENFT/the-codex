@@ -39,6 +39,11 @@ Settings lives in the header (gear icon) — accessible from both modes.
 
 ## Quick Start
 
+> **Playing tonight, not building?** → **[AT-THE-TABLE.md](AT-THE-TABLE.md)**.
+> Install it on the phone, get your character in, and the short list of things
+> that will surprise you mid-session. Five minutes, no terminal.
+> The proof behind it is **[TABLE-READY.md](TABLE-READY.md)**.
+
 ```bash
 git clone https://github.com/DOSENFT/the-codex.git
 cd the-codex
