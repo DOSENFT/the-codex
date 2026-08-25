@@ -473,10 +473,10 @@ function SmartActionsPanel({
                     className={cn(
                       'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
                       'bg-white/[0.03] border border-white/8',
-                      'hover:bg-ember/8 hover:border-ember/20',
-                      'transition-all duration-200 active:scale-[0.97]',
+                      'enabled:hover:bg-ember/8 enabled:hover:border-ember/20',
+                      'transition-all duration-200 enabled:active:scale-[0.97]',
                       'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                      'disabled:opacity-40 disabled:pointer-events-none',
+                      'disabled:opacity-40 disabled:cursor-not-allowed',
                       'group',
                     )}
                   >
@@ -560,10 +560,10 @@ function SmartActionsPanel({
                             className={cn(
                               'min-h-[44px] px-3 py-2 rounded-lg text-left',
                               'bg-white/[0.03] border border-white/8',
-                              'hover:bg-eldritch/8 hover:border-eldritch/20',
-                              'transition-all duration-200 active:scale-[0.97]',
+                              'enabled:hover:bg-eldritch/8 enabled:hover:border-eldritch/20',
+                              'transition-all duration-200 enabled:active:scale-[0.97]',
                               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                              'disabled:opacity-40 disabled:pointer-events-none',
+                              'disabled:opacity-40 disabled:cursor-not-allowed',
                               'group',
                               highlightNonConc && 'border-arcane/20',
                             )}
@@ -659,10 +659,10 @@ function SmartActionsPanel({
                 className={cn(
                   'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
                   'bg-white/[0.03] border border-white/8',
-                  'hover:bg-arcane/8 hover:border-arcane/20',
-                  'transition-all duration-200 active:scale-[0.97]',
+                  'enabled:hover:bg-arcane/8 enabled:hover:border-arcane/20',
+                  'transition-all duration-200 enabled:active:scale-[0.97]',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                  'disabled:opacity-40 disabled:pointer-events-none',
+                  'disabled:opacity-40 disabled:cursor-not-allowed',
                   'group',
                 )}
               >

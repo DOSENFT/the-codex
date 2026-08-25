@@ -39,7 +39,7 @@ export function BrassButton({
         'min-h-[64px] rounded-lg',
         'inline-flex items-center justify-center gap-2.5 px-5',
         'font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-[0.08em]',
-        'disabled:opacity-40 disabled:pointer-events-none',
+        'disabled:opacity-40 disabled:cursor-not-allowed',
         className,
       )}
       whileTap={{ scale: 0.94 }}

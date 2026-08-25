@@ -357,10 +357,10 @@ export function TurnDeck({
                 className={cn(
                   'min-h-[48px] px-3 rounded-xl text-xs font-semibold shrink-0',
                   'bg-verdant/10 border border-verdant/30 text-verdant',
-                  'hover:bg-verdant/20 hover:border-verdant/50',
-                  'transition-all duration-200 active:scale-[0.97]',
+                  'enabled:hover:bg-verdant/20 enabled:hover:border-verdant/50',
+                  'transition-all duration-200 enabled:active:scale-[0.97]',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                  'disabled:opacity-30 disabled:pointer-events-none',
+                  'disabled:opacity-30 disabled:cursor-not-allowed',
                 )}
               >
                 Heal {amount}
@@ -452,10 +452,10 @@ export function TurnDeck({
               className={cn(
                 'min-h-[48px] px-3 rounded-xl text-xs font-semibold shrink-0',
                 'bg-verdant/10 border border-verdant/30 text-verdant',
-                'hover:bg-verdant/20 hover:border-verdant/50',
-                'transition-all duration-200 active:scale-[0.97]',
+                'enabled:hover:bg-verdant/20 enabled:hover:border-verdant/50',
+                'transition-all duration-200 enabled:active:scale-[0.97]',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                'disabled:opacity-30 disabled:pointer-events-none',
+                'disabled:opacity-30 disabled:cursor-not-allowed',
               )}
             >
               Spend
@@ -467,10 +467,10 @@ export function TurnDeck({
               className={cn(
                 'min-h-[48px] px-3 rounded-xl text-xs font-semibold shrink-0',
                 'bg-verdant/10 border border-verdant/30 text-verdant',
-                'hover:bg-verdant/20 hover:border-verdant/50',
-                'transition-all duration-200 active:scale-[0.97]',
+                'enabled:hover:bg-verdant/20 enabled:hover:border-verdant/50',
+                'transition-all duration-200 enabled:active:scale-[0.97]',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                'disabled:opacity-30 disabled:pointer-events-none',
+                'disabled:opacity-30 disabled:cursor-not-allowed',
               )}
             >
               Cure Poison (5)

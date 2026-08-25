@@ -892,9 +892,9 @@ function ExpandedActionPanel({
               disabled={!newNoteLabel.trim() || !newNoteText.trim()}
               className={cn(
                 'min-h-[44px] px-2.5 rounded text-xs font-medium',
-                'bg-arcane/20 text-arcane hover:bg-arcane/30 transition-colors',
+                'bg-arcane/20 text-arcane enabled:hover:bg-arcane/30 transition-colors',
                 'flex items-center gap-1',
-                'disabled:opacity-30 disabled:pointer-events-none',
+                'disabled:opacity-30 disabled:cursor-not-allowed',
               )}
             >
               <Check size={10} aria-hidden />

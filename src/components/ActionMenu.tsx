@@ -139,9 +139,9 @@ function ActionItem({
       className={cn(
         'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
         'bg-white/[0.03] border border-white/8',
-        'transition-all duration-200 active:scale-[0.97]',
+        'transition-all duration-200 enabled:active:scale-[0.97]',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-        'disabled:opacity-30 disabled:pointer-events-none',
+        'disabled:opacity-30 disabled:cursor-not-allowed',
         'group',
         variantMap[variant],
       )}

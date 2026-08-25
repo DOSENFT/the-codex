@@ -136,9 +136,9 @@ function StepperControl({
             'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
             'bg-gold/[0.04] border border-bronze/25 text-forge-1',
             'transition-all duration-200 ease-forge',
-            'hover:bg-gold/[0.08] hover:text-forge-0',
-            'active:scale-95',
-            'disabled:opacity-40 disabled:pointer-events-none',
+            'enabled:hover:bg-gold/[0.08] enabled:hover:text-forge-0',
+            'enabled:active:scale-95',
+            'disabled:opacity-40 disabled:cursor-not-allowed',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
@@ -161,9 +161,9 @@ function StepperControl({
             'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
             'bg-gold/[0.04] border border-bronze/25 text-forge-1',
             'transition-all duration-200 ease-forge',
-            'hover:bg-gold/[0.08] hover:text-forge-0',
-            'active:scale-95',
-            'disabled:opacity-40 disabled:pointer-events-none',
+            'enabled:hover:bg-gold/[0.08] enabled:hover:text-forge-0',
+            'enabled:active:scale-95',
+            'disabled:opacity-40 disabled:cursor-not-allowed',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
           )}
         >
@@ -466,8 +466,8 @@ function CharacterPresets({
     'min-h-[44px] px-3 py-2 rounded-xl',
     'text-xs font-semibold text-left',
     'transition-all duration-200 ease-forge',
-    'active:scale-95',
-    'disabled:opacity-40 disabled:pointer-events-none',
+    'enabled:active:scale-95',
+    'disabled:opacity-40 disabled:cursor-not-allowed',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
   )
 
@@ -898,9 +898,9 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
                     'font-mono text-sm font-semibold',
                     'bg-eldritch/10 text-eldritch border border-eldritch/25',
                     'transition-all duration-200 ease-forge',
-                    'hover:bg-eldritch/20 hover:border-eldritch/40',
-                    'active:scale-95',
-                    'disabled:opacity-40 disabled:pointer-events-none',
+                    'enabled:hover:bg-eldritch/20 enabled:hover:border-eldritch/40',
+                    'enabled:active:scale-95',
+                    'disabled:opacity-40 disabled:cursor-not-allowed',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   )}
                 >

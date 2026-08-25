@@ -406,9 +406,9 @@ export function StatsBar({
                 'flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5',
                 'rounded-lg font-semibold text-sm text-ash-deep',
                 'bg-gradient-to-r transition-all duration-200 ease-snap',
-                'active:scale-[0.97]',
+                'enabled:active:scale-[0.97]',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
-                'disabled:opacity-40 disabled:pointer-events-none',
+                'disabled:opacity-40 disabled:cursor-not-allowed',
                 INPUT_MODE_COLORS[inputMode].button,
               )}
             >

@@ -1212,8 +1212,8 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       className={cn(
                         'min-h-[44px] min-w-[44px] flex items-center justify-center',
                         'rounded-xl bg-arcane/10 border border-arcane/25 text-arcane',
-                        'hover:bg-arcane/20 transition-all duration-200 active:scale-95',
-                        'disabled:opacity-30 disabled:pointer-events-none',
+                        'enabled:hover:bg-arcane/20 transition-all duration-200 enabled:active:scale-95',
+                        'disabled:opacity-30 disabled:cursor-not-allowed',
                       )}
                       aria-label="Add custom property"
                     >
@@ -1541,8 +1541,8 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                 className={cn(
                   'min-h-[44px] min-w-[44px] flex items-center justify-center',
                   'rounded-xl bg-arcane/10 border border-arcane/25 text-arcane',
-                  'hover:bg-arcane/20 transition-all duration-200 active:scale-95',
-                  'disabled:opacity-30 disabled:pointer-events-none',
+                  'enabled:hover:bg-arcane/20 transition-all duration-200 enabled:active:scale-95',
+                  'disabled:opacity-30 disabled:cursor-not-allowed',
                 )}
                 aria-label="Add equipment"
               >
@@ -1593,8 +1593,8 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                 className={cn(
                   'min-h-[44px] min-w-[44px] flex items-center justify-center',
                   'rounded-xl bg-arcane/10 border border-arcane/25 text-arcane',
-                  'hover:bg-arcane/20 transition-all duration-200 active:scale-95',
-                  'disabled:opacity-30 disabled:pointer-events-none',
+                  'enabled:hover:bg-arcane/20 transition-all duration-200 enabled:active:scale-95',
+                  'disabled:opacity-30 disabled:cursor-not-allowed',
                 )}
                 aria-label="Add supply"
               >
@@ -1929,8 +1929,8 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       className={cn(
                         'min-h-[44px] min-w-[44px] flex items-center justify-center',
                         'rounded-xl bg-arcane/10 border border-arcane/25 text-arcane',
-                        'hover:bg-arcane/20 transition-all duration-200 active:scale-95',
-                        'disabled:opacity-30 disabled:pointer-events-none',
+                        'enabled:hover:bg-arcane/20 transition-all duration-200 enabled:active:scale-95',
+                        'disabled:opacity-30 disabled:cursor-not-allowed',
                       )}
                       aria-label="Add effect"
                     >
