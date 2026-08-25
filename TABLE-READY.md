@@ -882,8 +882,10 @@ while disabled stay unreachable. `group-hover:` and `focus-visible:` untouched. 
 *Watched failing, then passing, on the verifier's own instrument, run unedited.* Before: **9 of 9**
 taps reached a different control. After: **7 of 9** are absorbed by the disabled button itself
 (`pe=auto`, `[self]`), error floor clean. The 2 residual are genuine paint-over, not pass-through, and
-they are **not** defects — see § 9.17(c), where three probes were built to answer that question and
-two of them were unsound.
+~~they are **not** defects~~ **they are UNGRADED** — *corrected by A-41(b).* § 9.17(c) built three
+probes to answer that question, two of them were unsound, and the paragraph that declared the residual
+harmless has been struck: it asserted a classification it never measured. **Whether those 2 are
+defects is an open question, not a closed one.**
 
 **On the seal.** By the strict letter of § 1, catching an exception that previously propagated is a
 behaviour change: a screen that used to go blank now stays up and prints a sentence. It is stated
@@ -1390,6 +1392,163 @@ demonstrated on the same file, same run.
 (portal only) and `safety/TableCovenant.tsx` (layout only). No behaviour changed — no handler, no
 state, no copy, no feature. `npm run build` clean, **393 tests / 16 files green**. No criterion was
 added, softened, moved or deleted by this amendment.
+
+**A-41 · 2026-08-25 · § 12 published two numbers that no run produced. One of them came from a
+*comment inside a probe* that overruled the probe's own output. Both are corrected against the
+transcript, one grader is corrected in four places, and one claim is corrected in Marcus's favour.**
+
+This is the largest correction in this log, and every part of it moves the same way: against what
+§ 12 said. No criterion's text, threshold, selector or pass floor moves. Four of the six items make a
+FAIL *easier* to produce; the other two are arithmetic.
+
+**(a) The run of record's tally was misquoted, and it is not a transcription slip.**
+
+*Old text (§ 12, first paragraph):* "…the console transcript is `table/run-73e4bd1.log`. **53 PASS ·
+7 FAIL · 1 UNPROVEN** across **61** criteria…"
+
+*Old text (§ 12, second paragraph):* "…they are **not** folded into the 53 · 7 · 1 tally, which
+belongs to the `73e4bd1` run and is **left exactly as that run reported it**."
+
+*That transcript's own last line:* `═══ 54 pass · 5 fail · 1 unproven · 942s ═══`, over exactly
+**60** printed rows. No log in this project has ever printed 53 · 7 · 1. Every one on disk agrees
+with the other reading — `run-73e4bd1.log` 54 · 5 · 1 · 942 s, `_run-a37.log` 54 · 5 · 1 · 939 s,
+`run-local-new.log` 54 · 5 · 1 · 940 s — and the one outlier, `run-local.log`, is an earlier
+48 · 5 · 1.
+
+*How the wrong number was built.* A-31 wrote "the § 12 tally moves **54 · 5 · 1 → 52 · 7 · 1**" by
+subtracting V-9 and V-10 from the harness's tally when those two rows flipped to FAIL, and A-32 then
+added P-0.9 as a pass to reach 53 · 7 · 1 across 61. **But the harness does not grade V-9 or V-10.**
+It prints sixty rows and they are not among them — nor are V-7, V-8, N-5, P-0.9, P-0.10, D-5b or
+V-11, every one of which is graded by its own control. Two rows were subtracted from a total that
+never contained them. The `61` does not reconcile in the other direction either: § 5 and § 6 define
+**66** criteria excluding the P-1…P-4 proof rows, and the mapping onto the harness's sixty rows is
+not one-to-one — V-5's single criterion is printed as **two** rows (V-5 at the 44px floor, V-5b at
+48px), and the harness prints an **E-0** that § 6 never defines.
+
+*New text:* § 12 now quotes the transcript verbatim first, and states the composite **with its
+arithmetic shown**, so a reader checks it against the log rather than against me.
+
+*Reason.* This document's whole claim on anyone's trust is that its numbers come from an artefact
+rather than from its author. A headline assembled by hand across three amendments, and attributed in
+writing to a log that says something else, is § 1's own failure — a green number about a thing that
+was not the thing measured — committed by the document instead of by the app. It was found by
+opening the log.
+
+**(b) V-11's row cited a probe's *comment* over the probe's *output*. The measured number is 8, not
+0.**
+
+*Old text (§ 12, V-11 row):* "…`_g3c-trapped.mjs` sweeps the real scroller and finds them
+**reachable** — **0 trapped of 315** controls that are direct content of `main`, across 7 screens.
+**13 controls inside nested scrollers this sweep cannot drive are UNPROVEN, not failed**…"
+
+`_g3c-trapped.mjs` has printed **`13 TRAPPED of 315`** on every run it has ever made. The `0` came
+from eight lines of prose in that file's own header, asserting that all thirteen were nested-scroller
+artefacts and therefore that "the number this probe is entitled to assert is … 0." **That assertion
+was never measured.** It is now — by the probe itself, which was made to classify its own findings
+rather than have them classified for it — and it is false.
+
+*Measured, at `20fe1a1`:* **8 TRAPPED of 315**, and **0 of the 8 are inside a nested scroller** once
+driven. The class the header claimed all thirteen belonged to is **empty**. Of the 8:
+
+- **5 can never be hit even at their centre**, at any scroll offset — `best case: scrollTop=0/1100,
+  0/5 probe points on screen`. All five are controls of `ActionMenu.tsx`: «Close action menu», «1st
+  Level Spells 4 slots», «2nd Level Spells 3 slots», «Class Features», «Other Actions». That is the
+  dialog § 14 item 11 records as impossible to open, so they are unreachable for the reason A-39 and
+  A-40 already established rather than for a new one.
+- **3 take a real tap.** play/Roleplay's «Impulse», «Recall» and «Engage» are overlapped only at
+  their 4px corners, by their own sibling label `span.text-xs` and icon `path`. `_g6-roleplay-3.mjs`
+  dispatched genuine Playwright pointer events at their centres: **all three landed and all three
+  changed the screen** (5688→5725, 5725→5048, 4979→6309 characters of rendered text). Error floor
+  clean.
+
+*New text:* the V-11 row reports **8**, names that split, and stops asserting an UNPROVEN class that
+does not exist. § 14 item 7 — "The 13 UNPROVEN controls of V-11" — is corrected with it.
+
+*What did not change: V-11's verdict.* Its grader is `_iv2-disabled2.mjs` and its floor is "0 taps
+reaching a different control"; that run is unchanged at 7 of 9 absorbed, error floor clean.
+`_g3c-trapped.mjs` was *supporting evidence* for the 2 residual, and the support is **withdrawn** —
+those 2 are not shown reachable, they are ungraded. The corrected sweep is not permitted to soften
+anything, so all 8 stay TRAPPED and the reachability finding is recorded as a sub-classification
+beside them, not as a downgrade of them.
+
+**(c) `_g3c-trapped.mjs` corrected in four places — all disclosed, and three of the four make a FAIL
+*harder* to produce.** (i) It read `getBoundingClientRect()`, which for a wrapped inline element
+returns the union of its line fragments and puts probe corners in the gaps beside the short line; it
+now takes the largest fragment from `getClientRects()`. That is A-40(d)(i)'s correction, which the
+overlay sweep received and this file did not. (ii) A control inside a nested scroller was swept
+without ever being brought into view along its own axis; it now calls `scrollIntoView({block:
+'nearest', inline: 'center'})` first, and **11 of 315 sat in that position and are now judged after
+being brought into view rather than before.** (iii) The nested scroller's own offsets were being
+dragged along by the outer sweep; they are now restored at every step. (iv) It called
+`process.exit(0)` unconditionally, so a red run could not fail a shell; it now exits non-zero on
+findings. **The count still went 0 → 8, because the 0 was never a measurement.**
+
+**(d) A fourth grader was found probing a control that cannot render — so the pattern is now
+enumerated instead of discovered.**
+
+`_iv2-combatcrash.mjs`, the grader D-5b is scored by, reports **`^End Turn$ -> MISSING`** for one of
+its three scenarios. «End Turn» lives in `combat/InitiativeTracker.tsx`, which is re-exported by
+`combat/index.ts` and imported by **nothing** — the barrel keeps the name alive on paper, and nothing
+imports the barrel. Same defect as A-39's «Manage Actions» and A-40's ActionMenu: **a scenario graded
+by absence.**
+
+*D-5b's verdict stands.* Its other two scenarios drive the storage guard and end `boundary=false,
+errs=0`, and `_g1-alarm.mjs` independently returns `TOLD=true` on all three of Start Combat, Action
+and Next Turn. But the row now says which scenario never ran, instead of counting three clean.
+
+*So a fourth instance is found by construction rather than by luck:* **`table/_g6-dead-components.mjs`**
+walks the real module graph from `src/main.tsx` at **binding level** — a barrel re-export does not
+keep a name alive unless something imports *that name from the barrel*, which is exactly the
+InitiativeTracker case a file-level graph misses. Result: **176 source files · 127 reachable ·
+49 unreachable.** Test files and the URL-registered service worker are excluded by name (the first
+run listed 17 of them and `sw.js` as dead, which is precisely the false positive that makes this
+census expensive to get wrong); `export *`, dynamic `import()` and path-matching bare strings are all
+treated as keeping a file alive, so it can only **under**-report. The largest dead files are
+`Spellbook.tsx` (1238 lines), `StatsBar.tsx` (565), `TrainingHub.tsx` (483), `InitiativeTracker.tsx`
+(333), `SpellSlotSigils.tsx` (288). Five whole directories are dead, including all fourteen
+`assets/sigils/` and all six `components/brass/`. **Deleting any of it is Marcus's call — CLAUDE.md
+makes delete ASK-FIRST — and the census only reports.** It is added to § 14 as a new item.
+
+**(e) A claim in § 14 was wrong *in Marcus's favour*, and is corrected against it.**
+
+*Old text (§ 14 item 11):* "Both are dead, **both ship in the bundle**, and a grader cited in this
+document has been probing that button for its entire life…"
+
+*New text:* both are dead and **neither ships.** Rollup does not emit an unreachable module.
+
+*How it was caught, and why it matters that it was caught this way.* The census's first attribution
+heuristic searched `dist/` for a literal out of each dead file and reported "ships" for five of them.
+**Four of those five verdicts were wrong.** The literals it matched — "Spell Slots", "Roleplay
+Coach", "Initiative roll", "Short rest" — also live in reachable files, so they proved nothing about
+which module emitted them. Attribution now requires the literal to appear in **exactly one** source
+file, and the answer reverses: «Manage Actions», unique to the dead `SmartActionsGrid.tsx`, is
+**absent from the bundle**. Dead code in this project costs maintenance and a false surface; it does
+**not** cost bytes. Item 11's recommendation — delete — is unchanged, and it loses one argument while
+(b) above hands it a better one: **five of V-11's eight trapped findings are ActionMenu's own
+controls.**
+
+**(f) A-40's fix to `Spellbook.tsx` is inert, and "UNPROVEN" was too generous a word for it.**
+
+*Old text (A-40(c)):* "`Spellbook.tsx`'s AI response modal got the same one-line change because it is
+structurally identical; **it is not separately graded — its opener is inside an expanded spell card,
+which the sweep does not reach — and is listed here as UNPROVEN rather than counted as a fix.**"
+
+*New text:* the same sentence, ending instead — **it is not merely unproven, it is inert.**
+`Spellbook.tsx` is one of the 49 unreachable files in (d). Nothing imports it and it is not in the
+bundle. The portal edit was made to a file the app does not contain.
+
+*Reason.* "Unproven" means *we did not measure it*. The truth here is that there was nothing to
+measure. Those are different statements and this document is the wrong place to blur them. A-40 was
+written before the census existed; this is logged the moment it became knowable, rather than left
+standing because A-40 had already shipped.
+
+**What this amendment does not do.** No criterion added, softened, moved or deleted. No verdict
+upgraded. The three *reachable* files A-40 portalled — `ui/Sheet.tsx`, `SpellEditor.tsx`,
+`FeatureEditor.tsx` — are untouched and their fix stands. The full harness was re-run at `20fe1a1`
+(`table/run-20fe1a1.log`, **54 pass · 5 fail · 1 unproven · 936 s**) and **all sixty rows carry the
+same verdicts as `73e4bd1`**; the only differences in the transcript are HEAD, four timing figures
+and the poisoned-cache hash. The portal work broke nothing, and that is measured rather than
+asserted.
 
 ---
 
@@ -2391,15 +2550,29 @@ own `scrollPage` comment warns about that drawer by name and I walked into it an
 judge** — it reports **13 of 315**, and **0** on prep/Character, prep/Grimoire, play/Grimoire and
 prep/Academy.
 
-**Those 13 are UNPROVEN, not failed, and this is stated because the result is a green one.** They live
-inside nested scrollers — a horizontal chip strip, a scrollable card — that this probe drives exactly
-one scroller per screen and therefore cannot move. It never tested them. The number this probe is
-entitled to assert is the one for controls that are direct content of `main`, and that number is 0. A
-green with a hole in it is reported with the hole.
+~~**Those 13 are UNPROVEN, not failed, and this is stated because the result is a green one.** They
+live inside nested scrollers — a horizontal chip strip, a scrollable card — that this probe drives
+exactly one scroller per screen and therefore cannot move. It never tested them. The number this
+probe is entitled to assert is the one for controls that are direct content of `main`, and that
+number is 0. A green with a hole in it is reported with the hole.~~
 
-**Three probes, two of them unsound, and the finding they were built to inflate turned out not to
-exist.** The 2 residual `[OVERLAY]` cases are scroll-freeable, which is to say they are not defects,
-and they are recorded that way rather than as wins.
+> **STRUCK — A-41(b). Every sentence above is an assertion and none of it was measured.** The probe
+> was then made to classify its own findings instead of having them classified for it, and the
+> classification is empty: at `20fe1a1` it measures **8 TRAPPED of 315**, and **0 of the 8 are inside
+> a nested scroller** once each is brought into view along its own axis first. Eleven controls did sit
+> in that position and are now judged after being driven rather than before. **The number this probe
+> is entitled to assert is 8, not 0** — and the paragraph above, which is where the `0` in § 12's
+> V-11 row came from, is the clearest example in this document of the failure § 1 opens on: *a green
+> that came from prose about a measurement rather than from the measurement.* It survived because it
+> was written in the same file as the number it contradicted, which is exactly where nobody looks.
+> The split is in **A-41(b)**: five are `ActionMenu.tsx`'s and cannot be hit at their centre at any
+> offset; three take a real tap and are overlapped only at their 4px corners.
+
+**Three probes, two of them unsound, and the finding they were built to inflate turned out to be
+smaller than feared and larger than claimed.** The 2 residual `[OVERLAY]` cases are **ungraded** —
+the sentence that called them scroll-freeable rested on the struck paragraph above and is withdrawn
+with it. *(Corrected by A-41(b); the original read "are scroll-freeable, which is to say they are not
+defects, and they are recorded that way rather than as wins.")*
 
 ## 10. Screenshots
 
@@ -2682,39 +2855,61 @@ Recorded because a verifier's cleared suspicions are evidence too.
 
 ## 12. Results
 
-**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`73e4bd1`**, **942 s**,
-full — not `--only`, so P-0 ran and the run is not PARTIAL. `results-local.json` is written beside the
-harness; the console transcript is `table/run-73e4bd1.log`. **53 PASS · 7 FAIL · 1 UNPROVEN** across
-**61** criteria — one more than last cycle, because **A-32 added P-0.9** after it caught a build-breaking
-defect that all sixty of the others were structurally unable to see. Against the previous run of
-record's 48 · 11 · 1, and 44 · 15 · 3 the cycle before that.
+**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`20fe1a1`**, full — not
+`--only`, so P-0 ran and the run is not PARTIAL. `results-local.json` is written beside the harness;
+the console transcript is **`table/run-20fe1a1.log`**, and its last line, verbatim, is:
 
-**Two more criteria were added after that run — D-5b and V-11 (A-33) — taking the count to 63.** Both
-were added because the independent verifier's probes found defects the other sixty-one could not see:
-a full disk boundarying `play/Combat` mid-fight, and disabled controls transparent to touch at eighteen
-sites A-30 missed. Both are graded by their own controls, both were watched failing on the real defect
-and passing after the fix, and **both graders are the verifier's own files, run unedited.** Their rows
-are the last two in the table below; they are **not** folded into the 53 · 7 · 1 tally, which belongs to
-the `73e4bd1` run and is left exactly as that run reported it.
+```
+═══ 54 pass · 5 fail · 1 unproven · 936s ═══
+```
 
-Three criteria are graded by their own controls rather than by `prove-table.mjs`, and all three were
-re-run at this same SHA. **Two of them went red when I did, and the first draft of this section said
+**That is the harness's number, quoted rather than restated.** *(§ 12's previous headline was
+`53 PASS · 7 FAIL · 1 UNPROVEN across 61`, which no run in this project has ever printed and which was
+assembled by hand across three amendments — corrected by **A-41(a)**, with the arithmetic defect shown
+there.)*
+
+**Read the sixty against the nine.** The harness prints **60 rows**. Nine further rows in the table
+below are graded by their own control files and are not in that tally: **P-0.9, P-0.10, V-7, V-8, V-9,
+V-10, N-5, D-5b, V-11.** Every one of them was re-run at this same SHA for this section. The composite,
+with its arithmetic in the open so a reader can check it against the log rather than against me:
+
+| | rows | PASS | FAIL | UNPROVEN |
+|---|---|---|---|---|
+| `prove-table.mjs` at `20fe1a1` | 60 | 54 | 5 | 1 |
+| graded by their own controls | 9 | 7 | 2 | 0 |
+| **total** | **69** | **61** | **7** | **1** |
+
+**"Rows" is the honest unit here, not "criteria."** § 5 and § 6 define 66 criteria excluding the
+P-1…P-4 proof rows, and the mapping is not one-to-one: V-5 is a single criterion printed as two rows
+(V-5 at the 44px floor, V-5b at 48px), and the harness prints an **E-0** that § 6 never defines. Any
+single headline count is therefore a construction, and this one says which construction it is. Against
+the previous run of record's 48 · 11 · 1 on the same instrument, and 44 · 15 · 3 the cycle before.
+
+**All sixty harness rows carry the same verdicts here as at `73e4bd1`.** The two transcripts differ in
+HEAD, four timing figures (S-1, S-3, N-2, E-4) and the poisoned-cache hash — nothing else. That matters
+because five commits landed between them, including A-39/A-40's portal work: **the portal work broke
+nothing, and that is a diff rather than an assurance.**
+
+**Two of the nine control-graded rows are red, and the first draft of this section said
 they were green because I had carried the previous run's numbers into rows I had not yet re-measured.**
 That is the exact move this document exists to catch, and it is caught here rather than reported:
 **V-9** by `control-a20.mjs` (**FAIL**, 7 of 7 screens measured, worst covered 7), **V-10** by
 `control-a22.mjs` (**FAIL**, 2 findings at the enforced floors, 118 in the 44–47px advisory band),
-**N-5** by `control-a21.mjs` (PASS, 0 of 15 checks failed). Both new failures are, on the evidence in
+**N-5** by `control-a21.mjs` (PASS, 0 of 15 checks failed). Both failures are, on the evidence in
 **§ 9.16**, defects in the *instrument* rather than in the app — and both instruments are left exactly
 as they are, red rows and all, for the reason § 9.15(c) already gives. **A-24**'s control passes too —
 both rewritten graders were watched failing on a sabotaged app while the graders they replaced printed
 PASS. Unit suite: **393 tests, 16 files, green.**
 
-Everything in this section is one run at one SHA, **with one named exception: P-0.9.** Its FAIL was
-measured at `73e4bd1` and its PASS at `cd937f5`, because staging the three missing files is what makes
-it pass — a criterion about the repository cannot be watched failing and passing at the same commit.
-Nothing else below is carried over from an earlier run, and no row's number was taken from a friendlier
-measurement than the one the criterion names. *(Exception stated by A-33; the original sentence claimed
-no exceptions and had one.)*
+**Everything in this section is one run at one SHA, and the one named exception is now retired.** That
+exception was P-0.9: its FAIL was measured at `73e4bd1` and its PASS at `cd937f5`, because staging the
+three missing files is what makes it pass, and a criterion about the repository cannot be watched
+failing and passing at the same commit. **`control-tree.mjs` was re-run at `20fe1a1` and passes there**
+— clean worktree, build in 8.49 s, **0 compiler errors, 0 untracked files under `src/`** — which is the
+same SHA as the run above. The watched-failing evidence at `73e4bd1` stays in the row, because it is
+what makes the criterion load-bearing rather than decorative. Nothing else below is carried over from
+an earlier run, and no row's number was taken from a friendlier measurement than the one the criterion
+names. *(Exception stated by A-33; retired by A-41.)*
 
 **Read A-27, A-28 and A-30 before reading the V rows.** Six V rows went from red to zero this cycle
 and one of them (V-2b/V-3b) did so partly because the graded population shrank. That is the shape of a
@@ -2732,7 +2927,8 @@ table.*
 
 | ID | Verdict | Number |
 |---|---|---|
-| **P-0.9** | **PASS** | *(ADDED this cycle — A-32.)* `control-tree.mjs`: HEAD checked out into a clean worktree builds with **0 compiler errors**, **0 untracked files under `src/`**. Watched failing first: at `73e4bd1`, before the fix, **3 errors — `TS2307 Cannot find module './TurnDeck'`, `TS2307 … '../lib/session-rollback'`, and a `TS7053` cascade.** Two source files imported by HEAD had never been staged. The push was one command away, CI has no test step, and the deploy would have failed silently while this document claimed green. |
+| **P-0.9** | **PASS** | *(ADDED this cycle — A-32; re-run at `20fe1a1`, so the exception A-33 named is retired — A-41.)* `control-tree.mjs`: HEAD checked out into a clean worktree builds in **8.49 s** with **0 compiler errors**, **0 untracked files under `src/`**. Watched failing first: at `73e4bd1`, before the fix, **3 errors — `TS2307 Cannot find module './TurnDeck'`, `TS2307 … '../lib/session-rollback'`, and a `TS7053` cascade.** Two source files imported by HEAD had never been staged. The push was one command away, CI has no test step, and the deploy would have failed silently while this document claimed green. |
+| **P-0.10** | **PASS** | *(ADDED — A-38; re-run at `20fe1a1`.)* `_g5-scan.mjs`: the shipped stylesheet is `assets/index-DKY436y2.css`, **1248 distinct class selectors**, and **0 of them are present ONLY in an untracked file**. Thirteen untracked files at the repo root are enumerated by name in the run rather than assumed away. This is the row that decides whether every contrast, size and geometry number below is a number about an artefact a stranger can also build — and it is the strongest form of this project's oldest failure if it is ever left ungraded. |
 | P-0.1 – P-0.8 | **PASS** | the instrument. All six detectors load-bearing by deletion (6/6); the harness FAILS `73c45d8` — a shipped SHA a green check once blessed — on 8 of 12 hostile shapes and PASSES HEAD on the same 8. Its real thin and full exports are *clean* on that build, which is the point: the shapes that break it are not the shapes he types. *Wording corrected this cycle — A-29. Caveat, unchanged: the negative-control worktree lives outside the repo, so a stranger cannot re-run P-0 from a clone.* |
 | F-1 | **PASS** | full real export → 7/7 screens carry his data, zero faults |
 | F-2 | **PASS** | thin real export — the shape that shipped broken three times — → 7/7 |
@@ -2752,9 +2948,9 @@ table.*
 | R-1 – R-8 | **PASS** | eight bad-input paths, each refused in his own words, character intact. R-7's prototype payload proven inert by driving it *past* the guard |
 | **R-9** | **PASS** *(grader rewritten — A-24)* | the second import now actually happens, through Settings → Import: roster 1 → 1. The old grader's locator matched zero controls and skipped the scenario |
 | **R-10** | **PASS** *(ADDED — A-24; the fix built under U-3)* | spend 5 Lay on Hands (disk 35 → 30), re-import the same file mid-session: **the session is no longer silently discarded.** This was the most dangerous row in the previous run of record — a data-safety failure hiding inside a gesture performed *to be safe*. § 9.13 |
-| **S-1** | **FAIL** | cold launch, origin dead, 4× CPU → "Nix" painted: **worst 3071 ms, median 2983 ms**, against 2000. Five runs, 2948–3071 — stable, and over. Cause is `sw.js:132`, § 9.8. Every *individual screen* inside that boot is fast (worst 241 ms); the cost is the boot itself |
+| **S-1** | **FAIL** | cold launch, origin dead, 4× CPU → "Nix" painted: **worst 3172 ms, median 2972 ms**, against 2000. Five runs, 2925–3172 — stable, and over. Cause is `sw.js:132`, § 9.8. Every *individual screen* inside that boot is fast (worst 241 ms); the cost is the boot itself |
 | S-2 | **PASS** | every tab switch ≤ 400 ms |
-| **S-3** | **FAIL** | a spend registers in **112 ms worst**, against 100. Median **40 ms** across 33 input events. It misses by 12 ms on the worst of thirty-three, and a FAIL is not upgraded because the median is comfortable |
+| **S-3** | **FAIL** | a spend registers in **120 ms worst** (input→paint), against 100. Median **40 ms** across 33 input events. It misses by 20 ms on the worst of thirty-three, and a FAIL is not upgraded because the median is comfortable |
 | S-4 | **UNPROVEN** | there is no undo/restore control on the default combat screen to grade. § 9.2 |
 | S-5 | **PASS** | no long task > 200 ms during a 10-action turn |
 | S-6 | **PASS** | CLS **0.0000** under the thumb, against 0.02 |
@@ -2779,8 +2975,8 @@ table.*
 | N-4b | **PASS** | with the origin up, `?sw=off` really stands the worker down — 0 registrations, 0 codex caches left |
 | **N-5** | **PASS** | `control-a21.mjs`: the deployed build makes no request that cannot succeed by construction; 15 of 15 checks, measured with its own console listeners because `rig.mjs`'s `watch()` filters exactly this class |
 | E-0 – E-4 | **PASS** | 200 actions: **0.0 %** heap growth (10.0 MB → 10.0 MB), **0** net DOM nodes (990 → 990), 29 KB of origin storage against a 4 MB ceiling, action 200 as fast as action 10 (**48 ms**), and zero errors across the run |
-| **D-5b** | **PASS** | *(ADDED after the run of record — A-33; graded at `5d57b2e`.)* Disk full, every `codex-*` write throwing: all three of `_iv2-combatcrash.mjs`'s scenarios end `boundary=false`, `errs=0`, HP and turn deck still painted. Watched failing first, on the verifier's unedited probe: **Start Combat boundaried `play/Combat` to "Combat stopped" and left it there.** And he is *told* — `_g1-alarm.mjs` reads the rendered text on Start Combat, Action and Next Turn: **`TOLD=true`**, «Not saved» 328×31 **@22px** and the full sentence 328×84 **@15px**. Painted words, not a console line. D-5 was green on the same build and was right to be: it asks whether the character survives, and it did. It never asked whether the app did |
-| **V-11** | **PASS** *(2 of 9 unproven)* | *(ADDED after the run of record — A-33; graded at `618fcc3`.)* `_iv2-disabled2.mjs`, unedited: **9 of 9** taps on disabled controls used to land on a different element — one opened the dice tray. Now **7 of 9** are absorbed by the button itself (`pe=auto`, `[self]`), error floor clean. The 2 residual are genuine paint-over rather than pass-through, and `_g3c-trapped.mjs` sweeps the real scroller and finds them **reachable** — 0 trapped of 315 controls that are direct content of `main`, across 7 screens. **13 controls inside nested scrollers this sweep cannot drive are UNPROVEN, not failed, and are named as such in § 9.17(c)** |
+| **D-5b** | **PASS** *(2 of 3 scenarios; 1 cannot run — A-41(d))* | *(ADDED — A-33; re-run at `20fe1a1`.)* Disk full, every `codex-*` write throwing: `_iv2-combatcrash.mjs` ends `boundary=false`, `errs=0` throughout, HP and turn deck still painted. Watched failing first, on the verifier's unedited probe: **Start Combat boundaried `play/Combat` to "Combat stopped" and left it there.** And he is *told* — `_g1-alarm.mjs` reads the rendered text on Start Combat, Action and Next Turn: **`TOLD=true`**, «Not saved» 328×31 **@22px** and the full sentence 328×84 **@15px**. Painted words, not a console line. **But one of the three scenarios prints `^End Turn$ -> MISSING` and has never actually run:** «End Turn» lives in `combat/InitiativeTracker.tsx`, which `combat/index.ts` re-exports and nothing imports. The verdict rests on the two scenarios that do run plus `_g1-alarm.mjs`; the third is **not** counted clean. D-5 was green on the same build and was right to be: it asks whether the character survives, and it did. It never asked whether the app did |
+| **V-11** | **PASS** *(2 of 9 unproven)* | *(ADDED — A-33; re-run at `20fe1a1`.)* `_iv2-disabled2.mjs`, unedited: **9 of 9** taps on disabled controls used to land on a different element — one opened the dice tray. Now **7 of 9** are absorbed by the button itself (`pe=auto`, `[self]`), error floor clean. **The 2 residual are ungraded, not shown reachable** — the sentence that used to claim otherwise was wrong and is corrected by **A-41(b)**. `_g3c-trapped.mjs`, corrected in four disclosed places, sweeps the real scroller and measures **8 TRAPPED of 315** controls that are direct content of `main`, across 7 screens — not the 0 this row published, which came from a *comment in the probe's own header* while the probe printed 13 on every run it ever made. Of the 8: **5 cannot be hit even at their centre at any scroll offset, and all five are `ActionMenu.tsx`'s** — the dialog § 14 item 11 records as impossible to open; **3** (play/Roleplay's «Impulse», «Recall», «Engage») are overlapped only at their 4px corners and **take a real tap** — Playwright pointer events at their centres all landed and all changed the screen. **0 of the 8 are inside a nested scroller**, so the "13 UNPROVEN" class this row named is empty |
 
 ### The seven failures, sorted by whether they can be fixed without breaking the freeze
 
@@ -2799,32 +2995,35 @@ U-2 — the healing a turn actually spends is now in the deck, under the thumb. 
 left red in § 9.15(a).
 
 **S-1 is a real defect with a named cause** (`sw.js:132`, § 9.8) and it is 40 % over a threshold this
-document set on purpose. **S-3 misses by 12 ms on the worst of thirty-three input events** with a 40 ms
+document set on purpose. **S-3 misses by 20 ms on the worst of thirty-three input events** with a 40 ms
 median; it is red because § 4 grades the worst case, and it stays red until it is actually fixed.
 
 **R-10 passes.** It was the most dangerous single row in the previous run of record — a data-safety
 failure hiding inside a gesture performed *to be safe* — and the fix was built under U-3. See § 9.13.
 
-### The proof rows — P-1, P-2, P-4 — closed at `810584c`, REOPENED at `618fcc3`
+### The proof rows — P-1, P-2, P-4 — closed at `810584c`, REOPENED, and still open at `20fe1a1`
 
 Marcus pushed `810584c` to `main` on 2026-08-25. Pages built it (run `32804728040`, 55 s, success),
 and the live URL was opened and graded **after** the deploy, not before. Everything in the table below
 is a true statement **about `810584c`**.
 
-**A-33 reopens all three.** Four commits have landed since — the V-family close-out, `5d57b2e` and
-`618fcc3` — so the deployed SHA is no longer the graded SHA, and P-1's whole content is that they are
-equal. These rows do not become false; they become **stale, which this document treats as the same
-thing**, because § 1 opens on three shipments where the check was green and the artifact was not the
-one checked. Each row below carries its `810584c` verdict and a **PENDING** marker. They close again
-when Marcus pushes and `prove-table.mjs --live` plus `same-build.mjs` are re-run against the new
-deploy — not before, and not by argument.
+**A-33 reopened all three, and they have got further from closing, not nearer.** **Eleven commits have
+landed since `810584c`** — the V-family close-out, `5d57b2e`, `618fcc3`, the two instrument repairs,
+A-36/A-37's compositor fix and A-39/A-40's portal work — so the deployed SHA is no longer the graded
+SHA, and P-1's whole content is that they are equal. These rows do not become false; they become
+**stale, which this document treats as the same thing**, because § 1 opens on three shipments where
+the check was green and the artifact was not the one checked. Each row below carries its `810584c`
+verdict and a **PENDING** marker. They close again when Marcus pushes and `prove-table.mjs --live`
+plus `same-build.mjs` are re-run against the new deploy — not before, and not by argument. **This is
+the single largest gap in this document, and it is the one thing here that no amount of further
+measurement on this machine can close.**
 
 | ID | Verdict | Number |
 |---|---|---|
 | **P-1** | **PENDING** *(PASS at `810584c`)* | **deployed SHA == graded SHA == `810584c`.** Proven twice over and by a new instrument (A-26): `gh` reports Pages run `32804728040` built `810584c`, which is local HEAD; and `same-build.mjs` fetches all **79** files from the live origin and finds **75 byte-identical** and 4 differing only in five named, counted, machine-specific classes. The control `--prove` fails on a single altered byte |
 | **P-2** | **PENDING** *(PASS at `810584c`)* | `prove-table.mjs --live` at `810584c`, **696 s**: **33 pass · 9 fail · 3 unproven** against `https://dosenft.github.io/the-codex/`. `results-live.json` is committed. *Families D, S and E are declared UNPROVEN live by the harness itself* — they measure this machine, not the deploy, and are not claimed |
-| **P-3** | **PASS** | this document, frozen, now with twenty-seven amendments logged old-text / new-text / reason — including three, A-25, A-26 and A-33, that correct me. A-33 corrects eight sentences in § 12 itself, every one of them in the unflattering direction |
-| **P-4** | **PENDING** *(PASS at `810584c`)* | the deploy was 2026-08-25 and every live number above was taken after it. Reopened with P-1: HEAD is now `618fcc3` |
+| **P-3** | **PASS** | this document, frozen, now with **forty-one** amendments logged old-text / new-text / reason — including four, A-25, A-26, A-33 and A-41, that correct me. A-33 corrects eight sentences in § 12; A-41 corrects two published numbers, one of which no run ever produced, and one claim that was wrong in Marcus's favour. Every one of them moves in the unflattering direction |
+| **P-4** | **PENDING** *(PASS at `810584c`)* | the deploy was 2026-08-25 and every live number above was taken after it. Reopened with P-1: HEAD is now `20fe1a1`, **eleven commits past the deployed build** |
 
 **The live run found no failure the local run had not already found.** The 9 live failures are R-10 and
 the eight V rows — V-2b 11, V-3b 11, V-4 2, V-5 5, V-5b 3, V-6 15, V-6b 13, V-6c 15 — and R-10
@@ -2854,13 +3053,22 @@ proven by content and by provenance rather than by a filename comparison that co
 succeeded — the first time in this project's history that was true. The nine live failures were the
 nine known ones; nothing appeared on the internet that was not already on this machine.
 
-**That sentence has a shelf life and it has expired.** *(A-33.)* HEAD is `618fcc3`, four commits past
-the deployed build, and those four commits contain the V-family fixes, the storage guard and the A-30
-completion. **P-1, P-2 and P-4 are therefore marked pending below**, and the honest statement of where
-this stands is: *every green in § 12 is a green about a build on this machine, and the last build he
-could open was graded green on the nine rows named above and red on nine others, six of which are now
-fixed here and unproven there.* It is re-earned by a push and a re-run, not by leaving the sentence
-in place.
+**That sentence has a shelf life and it has expired.** *(A-33; extended by A-41.)* HEAD is `20fe1a1`,
+**eleven** commits past the deployed build, and those eleven contain the V-family fixes, the storage
+guard, the A-30 completion, two instrument repairs and the portal work. **P-1, P-2 and P-4 are
+therefore marked pending above**, and the honest statement of where this stands is: *every green in
+§ 12 is a green about a build on this machine, and the last build he could open was graded green on
+the rows named above and red on nine others, six of which are now fixed here and unproven there.*
+It is re-earned by a push and a re-run, not by leaving the sentence in place.
+
+**And one thing the sentence never said, which A-41 makes it say.** Two of the numbers this section
+published — the headline tally and V-11's `0 trapped of 315` — were not measurements at all. One was
+hand-arithmetic across three amendments attributed in writing to a log that says otherwise; the other
+was a *comment inside a probe*, believed over the probe's own output on every run it ever made. **The
+app was never the weakest part of this project. The proof was, and this is the fourth time this cycle
+that has been demonstrated rather than suspected.** Both numbers are corrected above, both corrections
+are red-ward, and the graders that produced them now exit non-zero and classify their own findings so
+that the next reader does not have to take a comment's word for anything.
 
 ---
 
@@ -2905,8 +3113,11 @@ without asking is that it is the same object as D-5's `saveCharacter` guard, whi
 and the same class — silent failure, unrecoverable at the table — he unsealed for three times. **The
 argument is not the ratification. Reverting is one `git revert` and costs nothing but the fix.**
 
-**2 · The push.** HEAD is `618fcc3`; the deploy is `810584c`, four commits behind. **P-1, P-2 and P-4
-are marked PENDING in § 12 until this happens.** I cannot run it:
+**2 · The push — and it is now the most important item on this list.** HEAD is `20fe1a1`; the deploy
+is `810584c`, **eleven commits behind**. **P-1, P-2 and P-4 are marked PENDING in § 12 until this
+happens**, and nothing further I do on this machine can close them. It is also the only route to the
+thing he has actually asked for twice: **he has not yet opened this app on his own phone**, and the
+phone can only reach the deployed build. The sandbox blocks `git push`; he runs it:
 
 ```
 git -C C:\Users\marcu\Documents\Powerhouse\projects\the-codex push origin v1:main
@@ -2932,9 +3143,16 @@ settle this in three seconds and no amount of measurement here will.**
 
 **6 · § 9.14(b), left unbuilt.** Written up and deliberately not built this cycle, per the seal.
 
-**7 · The 13 UNPROVEN controls of V-11.** § 9.17(c). Inside nested scrollers the sweep cannot drive.
-Proving them needs a probe that drives every scroller on a screen, not the largest. Not built, because
-building a grader on the day you need its verdict is the thing § 9.15(c) forbids. **Next cycle, cold.**
+**7 · ~~The 13 UNPROVEN controls of V-11.~~ CORRECTED — there are 8, none of them unproven for the
+reason this item gave, and 5 of the 8 are item 11's problem.** *(A-41(b).)* This item used to say the
+thirteen were inside nested scrollers the sweep could not drive, and that proving them needed a probe
+that drives every scroller rather than the largest. **That was a comment's claim, not a measurement.**
+The corrected `_g3c-trapped.mjs` measures **8 trapped of 315**, and **0 of the 8 are inside a nested
+scroller** once driven. Five are `ActionMenu.tsx`'s controls and disappear the moment item 11 is
+decided either way. Three — play/Roleplay's «Impulse», «Recall», «Engage» — are overlapped only at
+their 4px corners by their own label and icon, and **a real pointer event at their centre lands and
+works**, so what is left is a hairline presentation defect on three controls, not an unreachable
+surface. **Nothing here needs a new grader.** Item 10 below still does, for its own ten nodes.
 
 **8 · The veil is now behind an open sheet.** *(A-35(g).)* `.veil-btn` went from `z-index: 90` to
 `44`, because at 90 it was painted on top of every bottom sheet and was **measurably stealing six
@@ -2971,9 +3189,17 @@ verdict is how a green gets manufactured.** Same next cycle, cold.
 `<ActionMenu>` renders on every combat screen with `isOpen={actionMenuOpen}`, and `actionMenuOpen` can
 only ever be `false`: the one function that would set it true, `openActionMenu`
 (`CombatHelper.tsx:1198`), is never called. Its only intended opener, «Manage Actions», lives in
-`combat/SmartActionsGrid.tsx`, which nothing imports. Both are dead, both ship in the bundle, and a
-grader cited in this document has been probing that button for its entire life and silently reporting
-around the miss.
+`combat/SmartActionsGrid.tsx`, which nothing imports. Both are dead, and a grader cited in this
+document has been probing that button for its entire life and silently reporting around the miss.
+
+***Corrected, against my own argument — A-41(e).*** This item used to read "both ship in the bundle."
+**Neither does.** Rollup does not emit an unreachable module: «Manage Actions», a literal unique to
+the dead `SmartActionsGrid.tsx`, is **absent from `dist/`**. Dead code here costs maintenance and a
+false surface, **not bytes**, so this item loses its cheapest argument. It gains a better one:
+**five of the eight trapped controls V-11's corrected sweep found are ActionMenu's** — «Close action
+menu», «1st Level Spells», «2nd Level Spells», «Class Features», «Other Actions» — and they are
+unreachable at **every** scroll offset because the dialog they belong to cannot be opened. A mounted
+dialog nobody can open is not free; it is five permanently dead controls inside a measured screen.
 
 Wiring it up is a new capability and the seal forbids it, so it is not built. **The call is delete or
 wire.** `SmartActionsPanel`, in the "Actions Reference" section, already covers the same ground, so
@@ -2992,5 +3218,32 @@ four sheets instead of one, and the "one dismissal away" cost he was asked to ac
 actually being paid on those surfaces.** If he reverses item 8, reverse it knowing the blast radius is
 larger than it was when he was asked.
 
+**13 · 49 files under `src/` are unreachable — about 5,800 lines — and item 11 is the fourth
+instance of what that costs.** *(A-41(d).)* `table/_g6-dead-components.mjs` walks the real module
+graph from `src/main.tsx` at binding level and reports **176 source files · 127 reachable ·
+49 unreachable**. Twelve of the 49 carry a literal unique enough to test against `dist/`, and all
+twelve report the same thing: **does not ship.** The rest are untestable that way, not suspected of
+shipping.
+
+| where | what is dead |
+|---|---|
+| `components/combat/` | 18 files, ~3,000 lines — `StatsBar.tsx` 565, `InitiativeTracker.tsx` 333, `SpellSlotSigils.tsx` 288, `InlineDiceSection.tsx` 241, `ActionEconomyStrip.tsx` 211, `RestManagement.tsx` 201, `SmartActionsGrid.tsx` 148, and the barrel `index.ts` that re-exports them |
+| `components/` | `Spellbook.tsx` 1238, `TrainingHub.tsx` 483, `InlineExplainer.tsx` 177 |
+| `assets/sigils/` | all 14 files |
+| `components/brass/` | all 6 files |
+| `components/ui/`, `hooks/`, three more barrels | 8 files including `useHaptic.ts` |
+
+**Why this is on his list and not mine.** Deleting is ASK-FIRST under `CLAUDE.md`, and the census
+only reports. But three separate graders in this document have now been caught probing a control
+that cannot render — «Manage Actions» (A-39), ActionMenu (A-40), «End Turn» (A-41(d)) — and every
+one of them was found by accident, one at a time, after having reported around the miss for its
+entire life. **This file is how a fourth is found by construction.** The honest recommendation is
+delete, with the same caveat as item 11: it is roughly 5,800 lines of surface that promises things
+the app cannot do, it costs nothing in bytes, and leaving it is the option I would argue against.
+`InitiativeTracker.tsx` in particular should not be deleted quietly — **D-5b's third scenario is
+written against it**, and that scenario has to be either repointed at a control that exists or
+struck from the criterion, in the open, before the file goes.
+
 *Added 2026-08-25 by A-33. Items 8–10 added 2026-08-25 by A-35. Items 11–12 added 2026-08-25 by A-39
-and A-40. This section is the list; § 12 is the evidence.*
+and A-40. Item 13 added, and items 2, 7 and 11 corrected, 2026-08-25 by A-41. This section is the
+list; § 12 is the evidence.*
