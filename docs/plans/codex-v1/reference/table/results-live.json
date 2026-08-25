@@ -1,0 +1,358 @@
+{
+  "target": "https://dosenft.github.io/the-codex/",
+  "sha": "810584c738606d1b5f9d9943ca4afcc5bb1e3c0f",
+  "mode": "live",
+  "partial": false,
+  "void": false,
+  "detectorMatrix": [
+    {
+      "control": "pageerror",
+      "caught": true,
+      "passesWithout": true,
+      "bearing": true,
+      "real": false,
+      "note": "uncaught throw, page intact",
+      "alsoCaughtBy": []
+    },
+    {
+      "control": "console",
+      "caught": true,
+      "passesWithout": true,
+      "bearing": true,
+      "real": true,
+      "note": "73c45d8 bare-spell · play/Roleplay",
+      "alsoCaughtBy": []
+    },
+    {
+      "control": "rejection",
+      "caught": true,
+      "passesWithout": true,
+      "bearing": true,
+      "real": false,
+      "note": "rejection + a global swallower",
+      "alsoCaughtBy": []
+    },
+    {
+      "control": "blank",
+      "caught": true,
+      "passesWithout": true,
+      "bearing": true,
+      "real": false,
+      "note": "empty body, screen has no markers",
+      "alsoCaughtBy": []
+    },
+    {
+      "control": "boundary",
+      "caught": true,
+      "passesWithout": true,
+      "bearing": true,
+      "real": false,
+      "note": "one boundaried card, screen otherwise whole",
+      "alsoCaughtBy": []
+    },
+    {
+      "control": "hollow",
+      "caught": true,
+      "passesWithout": true,
+      "bearing": true,
+      "real": false,
+      "note": "renders, silent, empty of its own furniture",
+      "alsoCaughtBy": []
+    }
+  ],
+  "thresholds": {
+    "S1_cold": 2000,
+    "S2_tab": 400,
+    "S3_spend": 100,
+    "S4_undo": 100,
+    "S5_longtask": 200,
+    "S5_frame": 100,
+    "S6_cls": 0.02,
+    "V1_size": 12,
+    "V2_contrast": 4.5,
+    "V3_contrast": 7,
+    "V4_cinzel": 20,
+    "V5_touch": 44,
+    "V5_turn": 48,
+    "V6_thumb": 0.6,
+    "E1_heap": 0.25,
+    "E2_nodes": 50,
+    "E3_bytes": 4194304
+  },
+  "seconds": 696,
+  "pass": 33,
+  "fail": 9,
+  "unproven": 3,
+  "rows": [
+    {
+      "id": "P-0.1",
+      "what": "FAIL-ON-CAUGHT — a caught React error on 73c45d8 is reported  [real defect, not injected]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "P-0.2",
+      "what": "FAIL-ON-CONSOLE — a console.error with no visual symptom whatsoever is reported",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "P-0.3",
+      "what": "FAIL-ON-REJECTION — an unhandled promise rejection is reported, even when the app swallows it",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "P-0.4",
+      "what": "FAIL-ON-BLANK — a blank body is reported, with no markers needed",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "P-0.5",
+      "what": "FAIL-ON-HOLLOW — a screen that renders, throws nothing, and is empty of its reason to exist is reported",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "P-0.6",
+      "what": "every control load-bearing, proven by deletion  [6/6]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "P-0.7",
+      "what": "the harness FAILS 73c45d8 — the SHA deployed right now — on 8/12 hostile-but-legal shapes",
+      "verdict": "PASS",
+      "detail": "caught: bare spell, bare feature, object in equipment, bare identity, bare hook, bare supply, persona: {}, one of everything\n         not broken on that build: bare weapon, bare feat, bare pool, bare condition"
+    },
+    {
+      "id": "P-0.8",
+      "what": "the same harness PASSES HEAD on all 8 shapes it just failed 73c45d8 on (it is not simply always red)",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "F-1",
+      "what": "full real export → all 7 screens show his data",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "F-2",
+      "what": "THIN real export (the shape that shipped broken 3×) → all 7 stand",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "F-3",
+      "what": "12 hostile-but-legal inner shapes × 7 screens = 84 renders",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "F-3b",
+      "what": "17 shapes whose fields are PRESENT and the wrong type x 7 screens = 119 renders",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "F-3c",
+      "what": "a repaired file names what was changed, and says so before it is accepted",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "F-4",
+      "what": "?d=1 shows his real sheet, a ranked shortlist with an action, and spends a real resource",
+      "verdict": "PASS",
+      "detail": "\n         Nix Changeling Paladin 7 · Oath of the Hearth Round 1 67 / 67 AC 18 Bloodied at 33 Aura of Protection You and allies within 10 feet gain a bonus to saving throws equal to your Cha... Aura of Solace You and allies within your Aura of Protection have resistance to Fire, Cold, ... Action Bonus Reaction"
+    },
+    {
+      "id": "F-5",
+      "what": "the veil is on every screen, including the three early returns",
+      "verdict": "PASS",
+      "detail": "missing on: "
+    },
+    {
+      "id": "F-6",
+      "what": "no horizontal scroll at 390px on any screen",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "D-*",
+      "what": "family D against the deployed site",
+      "verdict": "UNPROVEN",
+      "detail": "graded locally only — measures the machine, not the deploy (see P-2)"
+    },
+    {
+      "id": "R-1",
+      "what": "his real {} export names the EXPORT as what failed",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-2",
+      "what": "prose in a .json is refused, and says where a real export comes from",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-3",
+      "what": "the thin real export is gated with a way forward AND a way back",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-4",
+      "what": "truncated JSON is refused and named",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-5",
+      "what": "a 12MB JSON does not freeze the app",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-6",
+      "what": "a JSON array at the root is refused, not coerced",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-7",
+      "what": "prototype-pollution keys do not reach Object.prototype",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-8",
+      "what": "a binary file renamed .json is refused",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "R-9",
+      "what": "the same character imported twice in a row makes no duplicate roster entry",
+      "verdict": "PASS",
+      "detail": "before=1 after=1"
+    },
+    {
+      "id": "R-10",
+      "what": "re-importing the same file mid-session does not silently discard session state",
+      "verdict": "FAIL",
+      "detail": "session state silently overwritten: 30 → 35, and the only thing it said was \"35/35 Imported was older export, weapons equipment. Everything came across; you'll need those back.\""
+    },
+    {
+      "id": "S-*",
+      "what": "family S against the deployed site",
+      "verdict": "UNPROVEN",
+      "detail": "graded locally only — measures the machine, not the deploy (see P-2)"
+    },
+    {
+      "id": "V-1",
+      "what": "no visible text under 12px  [0 found]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "V-2",
+      "what": "every text node ≥4.5:1  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "V-3",
+      "what": "numerals and counters ≥7:1  [0 below]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "V-2b",
+      "what": "the same, measured off the painted pixels for the 3240 nodes on a gradient  [11 below]",
+      "verdict": "FAIL",
+      "detail": "play/Combat «Charmed» 12px 4.34:1\n         play/Combat «Frightened» 12px 4.34:1\n         play/Roleplay «Betrayal!» 14px 4.49:1\n         play/Roleplay «Insult!» 14px 4.46:1\n         play/Roleplay «3» 12px 4.13:1\n         play/Roleplay «Desires mentorship from Talon. Potential fat» 14px 1.86:1\n         play/Roleplay «Add Hook» 14px 1.59:1\n         prep/Persona «losing those they've gathered close» 14px 3.99:1\n         prep/Persona «being seen as 'just' a changeling, not a per» 14px 4.09:1\n         prep/Persona «abandonment» 14px 4.13:1\n         prep/Persona «harming those he loves» 14px 4.13:1"
+    },
+    {
+      "id": "V-3b",
+      "what": "the same, for numerals on a gradient  [11 below]",
+      "verdict": "FAIL",
+      "detail": "play/Combat «4» 12px 5.02:1\n         play/Combat «3» 12px 5.19:1\n         play/Combat «2» 12px 5.19:1\n         play/Combat «35» 12px 5.36:1\n         play/Combat «10» 12px 6.71:1\n         play/Roleplay «20» 12px 6.82:1\n         play/Roleplay «8» 12px 6.8:1\n         play/Roleplay «0» 12px 4.98:1\n         prep/Persona «1» 12px 5.18:1\n         prep/Persona «0» 12px 5.18:1\n         prep/Persona «0» 12px 5.19:1"
+    },
+    {
+      "id": "V-4",
+      "what": "Cinzel never under 20px  [2 found]",
+      "verdict": "FAIL",
+      "detail": "play/Combat «Choose Action» 16px\n         play/Roleplay «Nix» 18px"
+    },
+    {
+      "id": "V-5",
+      "what": "every control ≥44px  [5 below]",
+      "verdict": "FAIL",
+      "detail": "play/Roleplay «*Stands slightly in front of allies without » 170×40\n         play/Roleplay «*Notice collects small, smooth stones*» 170×40\n         play/Roleplay «*Offer to stand watch so others can rest*» 170×40\n         play/Roleplay «*Offer to heal someone who looks worse for w» 170×40\n         play/Roleplay «*Whisper a prayer to Aesis the Shepherd*» 170×40"
+    },
+    {
+      "id": "V-5b",
+      "what": "turn controls ≥48px  [3 below]",
+      "verdict": "FAIL",
+      "detail": "«Incapacitated: Can't take Actions, Bonus Act» 155×44\n         «Prone: Crawl to move; melee hits have Advant» 155×44\n         «Action Economy» 118×44"
+    },
+    {
+      "id": "V-6",
+      "what": "turn controls in the bottom 60% of a 390×844 screen  [15 outside]",
+      "verdict": "FAIL",
+      "detail": "«Start Combat» y=113/844 — above the thumb zone\n         «Action Economy» y=194/844 — above the thumb zone\n         «Reset action economy» y=267/844 — above the thumb zone\n         «Action» y=327/844 — above the thumb zone\n         «Bonus» y=327/844 — above the thumb zone\n         «Reaction» y=327/844 — above the thumb zone\n         «Heal 5» y=895/844 — off the first screen\n         «Heal 10» y=895/844 — off the first screen\n         «Spend» y=951/844 — off the first screen\n         «Expend Channel Divinity use» y=1043/844 — off the first screen\n         «Apply healing» y=1334/844 — off the first screen\n         «Incapacitated: Can't take Actions, Bonus Act» y=1619/844 — off the first screen\n         «Prone: Crawl to move; melee hits have Advant» y=1719/844 — off the first screen\n         «Combat Advisor» y=2200/844 — off the first screen\n         … +1 more"
+    },
+    {
+      "id": "V-6b",
+      "what": "no control covered by anything  [13 occluded]",
+      "verdict": "FAIL",
+      "detail": "play/Combat @bottom «Restrained: Speed 0; attacks have Disadvanta» covered by button.px-2.min-h-[44px] < div.flex.rounded-lg < div.flex.items-center\n         play/Combat @bottom «Stunned: Incapacitated; auto-fail STR/DEX sa» covered by button.min-h-[44px].min-w-[44px] < div.flex.items-center < header.fixed.top-0\n         play/Grimoire @top «Hearthfire ManifestFeatureActionLvl 3» covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         play/Grimoire @bottom «Faerie FireSpellAction60 feetConc1stSlots:4/» covered by div.flex.items-center < header.fixed.top-0 < div.flex.flex-col\n         play/Roleplay @top «Burn clean, and quickly.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         play/Roleplay @bottom «One does not buy loyalty, mister merchant. O» covered by div.flex.items-center < header.fixed.top-0 < div.flex.flex-col\n         prep/Character @top «Acrobatics: not proficient. Tap to change.» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @top «Acrobatics(DEX)» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «BlessSpellAction30 feetConc1stSlots:4/4» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Grimoire @top «Unprepare Bless» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Persona @top «Remove slow to trust, but deeply loyal once » covered by button.fixed.z-50 < div.flex.flex-col < div\n         prep/Persona @top «Remove values simple, hard labor» covered by svg.[object.SVGAnimatedString] < button.relative.flex-1 < div.flex.items-stretch\n         prep/Academy @bottom «Start One-Shot Adventure» covered by span.text-xs.font-mono < div.flex.items-center < header.fixed.top-0"
+    },
+    {
+      "id": "V-6c",
+      "what": "the same, on the iPad at 834×1112  [15 occluded]",
+      "verdict": "FAIL",
+      "detail": "play/Combat @top «Expend Channel Divinity use» covered by button.veil-btn < div < body\n         play/Combat @bottom «Blinded: Can't see; attacks have Disadvantag» covered by header.fixed.top-0 < div.flex.flex-col < div\n         play/Combat @bottom «Charmed: Can't attack charmer; charmer has s» covered by button.min-h-[44px].min-w-[44px] < div.flex.items-center < header.fixed.top-0\n         play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         play/Roleplay @top «A warmth… not entirely natural. Show me the » covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         play/Roleplay @bottom «This place remembers a hearth. A good sign, » covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Character @top «Insight: not proficient. Tap to change.» covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         prep/Character @top «Insight(WIS)» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Character @bottom «+ New pool» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Persona @top «Remove losing those they've gathered close» covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch\n         prep/Persona @top «Remove being seen as 'just' a changeling, no» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         … +1 more"
+    },
+    {
+      "id": "N-1",
+      "what": "no network, deployed origin: 7 screens + a spend persists + reload survives  [16 files precached]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "N-2",
+      "what": "a hanging AI endpoint never blocks a turn  [spend 60ms]",
+      "verdict": "PASS",
+      "detail": "60ms; "
+    },
+    {
+      "id": "N-3",
+      "what": "zero third-party requests during boot + a full walk",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "N-4",
+      "what": "a poisoned shell cannot brick it with the origin DEAD — cold boot and ?sw=off both show his character  [16 precached, poisoned codex-shell-3bb8ee8a3165]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "N-4b",
+      "what": "with the origin UP, ?sw=off really does stand the worker down  [0 registrations, 0 codex caches left]",
+      "verdict": "PASS",
+      "detail": "regs=0 caches=0 "
+    },
+    {
+      "id": "E-*",
+      "what": "family E against the deployed site",
+      "verdict": "UNPROVEN",
+      "detail": "graded locally only — measures the machine, not the deploy (see P-2)"
+    }
+  ]
+}

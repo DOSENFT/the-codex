@@ -498,6 +498,51 @@ already found that N-2's route intercepted **0 requests**; this is the same hole
 side, and together they mean N-2 passes because the app is genuinely fine, not because the harness
 was kind to it.
 
+**A-26 · 2026-08-25 · § 5 P-1 — the INSTRUMENT replaced. The requirement is not softened, and it is
+now met for the first time.** P-1 asks whether the internet is serving the build that passed.
+`verify-live.mjs` answered it by comparing the main bundle's **filename** — local
+`assets/index-<hash>.js` against live — and printed **"NO — the internet is serving something else ·
+LIVE DOES NOT VERIFY"**. That verdict was wrong, and it could never have come right on this machine.
+
+*Old instrument:* `local dist bundle name === live page bundle name`.
+*New instrument:* `table/same-build.mjs` — every file this build produced is fetched from the live
+origin and compared **by content**, with five differences **named, counted and printed** rather than
+waved through, plus a provenance question asked of GitHub independently of every byte.
+
+The five, all measured, none of them the app:
+
+1. **Circular chunk hashes.** `index-*.js` lazily imports `DiceStage-*.js`, which imports
+   `index-*.js` back, so each file's hash is an input to the other's content. Rollup solves a fixed
+   point and which one it reaches is machine-dependent. Measured: the two main bundles are the **same
+   length, 1 062 762 bytes**, and differ in **exactly one place** — the DiceStage filename. DiceStage
+   differs from its twin in exactly one place — the index filename. **Nothing else differs at all.**
+2. **CRLF.** Files copied out of `public/` are checked out on Windows with CRLF; CI checks out LF.
+   `index.html` additionally carries a `\r\r\n`, a CRLF line autocrlf converted twice.
+3. **Service-worker `BUILD_ID`** — local `3bb8ee8a3165`, live `69664ff4988b`. It is *meant* to differ
+   per build; that is what busts the shell cache.
+4. **Precache order** — `sw.js`'s array is emitted in directory-listing order, which differs by
+   filesystem.
+5. **Tailwind's scan set** — and this one is *proved*, not named. The deployed CSS is **9 134 bytes
+   smaller**. Tailwind 4 generates utilities from the files it can see, and this working tree holds
+   untracked probe scripts and handoff markdown that CI never checks out, so **the local build is the
+   polluted one and the deploy is correct.** That is only safe in one direction, so both halves are
+   checked rather than assumed: the deploy ships **no rule the local build lacks**, and of the **76
+   classes present locally and absent from the deploy, exactly 0 are used by committed `src/`.**
+
+*The new instrument can fail, and was watched failing.* `same-build.mjs --prove` alters one byte of
+one local file and requires a FAIL; it fails on that file and no other. Binary files are held to
+**byte-identity with no normalisation at all** — the first draft stripped `\r` from PNGs too, which
+would let two different images compare equal, and that was fixed before any result was taken from it.
+Result at `810584c`: **79 files, 75 byte-identical, 4 differing only in the named classes**, and
+`gh` reports Pages run `32804728040` built **`810584c`**, which is local HEAD. **SAME BUILD.**
+
+*Reason this is an instrument change and not a softening:* the old check could only ever pass if a
+Windows machine and a Linux runner produced identical bytes from a bundler with a circular-hash fixed
+point, which is impossible. It was not measuring the deploy; it was measuring the bundler and the
+filesystem, and it printed a red verdict about the app for reasons that had nothing to do with the
+app. Two things I would have missed had I taken it at face value: the CSS pollution above, and the
+fact that **P-1 has been satisfiable for some time and was being reported red by a broken ruler.**
+
 ---
 
 ## 1. What the table actually is
@@ -1594,23 +1639,28 @@ is red because § 4 grades the worst case, and it stays red until it is actually
 **R-10 is the only new failure, and it is the most dangerous single thing in this file** — see § 9.13.
 It is a data-safety failure hiding inside a gesture performed *to be safe*.
 
-### The proof rows — P-1, P-2, P-4 — and the one command that is not mine
+### The proof rows — P-1, P-2, P-4 — all three now closed
 
-`origin/main` is at **`58187ed`** and the Pages deploy for it is **green** (run `32679408673`, 47 s).
-That is real progress: the app on his phone is no longer the build my own negative control is made of.
-But the run of record above is **`2300ec7`** plus the uncommitted work of this session, so:
+Marcus pushed `810584c` to `main` on 2026-08-25. Pages built it (run `32804728040`, 55 s, success),
+and the live URL was opened and graded **after** the deploy, not before.
 
-- **P-1** — deployed SHA == graded SHA — is **FAIL**, by the distance between `58187ed` and what is
-  about to be committed.
-- **P-2** — the live run — has not been run at the graded SHA, so it is **not yet claimed**.
-- **P-4** — a deploy exists to check *after* — closes when the push lands.
+| ID | Verdict | Number |
+|---|---|---|
+| **P-1** | **PASS** | **deployed SHA == graded SHA == `810584c`.** Proven twice over and by a new instrument (A-26): `gh` reports Pages run `32804728040` built `810584c`, which is local HEAD; and `same-build.mjs` fetches all **79** files from the live origin and finds **75 byte-identical** and 4 differing only in five named, counted, machine-specific classes. The control `--prove` fails on a single altered byte |
+| **P-2** | **PASS** | `prove-table.mjs --live` at `810584c`, **696 s**: **33 pass · 9 fail · 3 unproven** against `https://dosenft.github.io/the-codex/`. `results-live.json` is committed. *Families D, S and E are declared UNPROVEN live by the harness itself* — they measure this machine, not the deploy, and are not claimed |
+| **P-3** | **PASS** | this document, frozen, now with twenty-six amendments logged old-text / new-text / reason — including two, A-25 and A-26, that correct me |
+| **P-4** | **PASS** | the deploy is 2026-08-25 and every live number above was taken after it |
 
-`CLAUDE.md` lists deploy under ASK-FIRST and the sandbox has refused every push this session, which is
-the right refusal. **One command from Marcus closes P-1 and P-4 and makes P-2 runnable:**
+**The live run found no failure the local run had not already found, and no local pass failed live.**
+The 9 live failures are R-10 and the eight V rows, with numbers identical to local where the criterion
+is deterministic — V-2b 11, V-3b 11, V-4 2, V-5 5, V-5b 3, V-6 15, V-6b 13, V-6c 15. R-10 reproduces
+on the deployed build exactly as it does locally: **30 → 35**, notice unchanged.
 
-```
-git -C C:\Users\marcu\Documents\Powerhouse\projects\the-codex push origin v1:main
-```
+Two rows are worth naming because they had never been green on a deployed build before:
+**R-9 and F-4 pass live.** On the previous deploy (`58187ed`, graded during this session before the
+push) **R-9 FAILED live** — that build predates A-24's fix. The rewritten graders are therefore not
+just green on my machine; they are green on the thing in his hand, and they were red on the thing that
+was in his hand this morning.
 
 ### The one sentence
 
@@ -1618,6 +1668,12 @@ git -C C:\Users\marcu\Documents\Powerhouse\projects\the-codex push origin v1:mai
 or unproven to proven green, and the two graders that were lying now fail on a sabotaged build — but
 nine of the eleven remaining failures are the visual work at arm's length, and one of them, R-10, will
 quietly cost him resources at the table if he reaches for the safest-looking button in the app.**
+
+**And, added after the deploy:** the build he can actually open is now the build that was graded,
+proven by content and by provenance rather than by a filename comparison that could never have
+succeeded — **so for the first time in this project's history, every green in this document is a
+green about the thing in his hand.** The nine live failures are the nine known ones. Nothing new
+appeared on the internet that was not already on this machine.
 
 ---
 

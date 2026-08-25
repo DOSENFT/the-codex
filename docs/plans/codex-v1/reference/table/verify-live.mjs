@@ -5,8 +5,8 @@
    a build ran; it does not prove the bytes a phone receives are that build.
    This checks the bytes.
 
-     1. the JS bundle filename live == the JS bundle filename in local dist
-        (Vite content-hashes it, so a match is a byte-identical build)
+     1. RETIRED by A-26 — see below. Identity of build is now proven by
+        `same-build.mjs`, which compares CONTENT and asks GitHub for provenance.
      2. the page loads with no caught React error, console error, or rejection
      3. the real save file imports, and the numbers on screen are the numbers
         in the file
@@ -26,12 +26,24 @@ const localHtml = fs.readFileSync(DIST + '/index.html', 'utf8');
 const liveHtml = await (await fetch(LIVE + '?cachebust=' + process.pid)).text();
 const localBundle = bundleOf(localHtml);
 const liveBundle = bundleOf(liveHtml);
+/* A-26: `localBundle === liveBundle` is NOT a test of "same build" and this
+   script must not go on claiming it is. `index-*.js` and `DiceStage-*.js`
+   import each other, so each one's content hash is an input to the other's
+   content; Rollup solves a fixed point, and a Windows build and the Linux CI
+   build of the SAME COMMIT reach different solutions. Measured: the two main
+   bundles are the same length and differ in exactly one place — the other
+   chunk's filename. This check therefore printed "the internet is serving
+   something else" about builds that were identical, permanently, and it is why
+   P-1 read FAIL for far longer than it was actually false.
+   The filenames are still PRINTED, because they are useful to see. They no
+   longer decide anything. Run `node same-build.mjs` for the real answer. */
 const same = localBundle && liveBundle && localBundle === liveBundle;
 
 console.log(`\n\x1b[1mVERIFY LIVE\x1b[0m  ${LIVE}\n`);
 console.log(`  local  dist bundle   ${localBundle}`);
 console.log(`  live   page bundle   ${liveBundle}`);
-console.log(`  identical build      ${same ? '\x1b[32myes\x1b[0m' : '\x1b[31mNO — the internet is serving something else\x1b[0m'}`);
+console.log(`  same filename        ${same ? 'yes' : 'no — expected, and it proves nothing either way'}`);
+console.log(`  \x1b[2midentity of build is not decided here — run \x1b[0msame-build.mjs\x1b[2m (A-26)\x1b[0m`);
 
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: PHONE, deviceScaleFactor: 3 });
@@ -85,7 +97,7 @@ console.log(`  the Veil present     ${veil ? '\x1b[32myes\x1b[0m' : '\x1b[31mMIS
 const end = await judge(page);
 console.log(`  no faults at the end ${end.faults.length ? '\x1b[31m' + end.faults.join(' | ') + '\x1b[0m' : '\x1b[32mnone\x1b[0m'}`);
 
-const ok = same && !boot.faults.length && !!read.name && a19 && !!veil && !end.faults.length;
+const ok = !boot.faults.length && !!read.name && a19 && !!veil && !end.faults.length;
 console.log(`\n  ${ok ? '\x1b[32mLIVE IS THE BUILD THAT PASSED\x1b[0m' : '\x1b[31mLIVE DOES NOT VERIFY\x1b[0m'}\n`);
 
 await ctx.close(); await b.close();
