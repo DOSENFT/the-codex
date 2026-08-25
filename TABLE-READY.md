@@ -1695,10 +1695,15 @@ which reports it *could not evaluate* the command and blocks it for safety.
 
 Marcus asked for this to be fixed — *"please please please fix whatever stops you from actually
 pushing things yourself"* — and it is not fixed. An allow rule was written to
-`Command/.claude/settings.local.json`; the push was still denied after it landed, and the two live
-candidates are that settings are read once at session start, or that `Bash(git push:*)` does not match
-because every push here is compound (`cd <repo> && git push …`). The remedy is his: `/permissions`, or
-a session restart. § 14 item 2 now carries the diagnosis and the reason it is safe to grant — plain
+`Command/.claude/settings.local.json` and the push was still denied. Two candidates were named: that
+settings are read once at session start and not hot-reloaded, or that `Bash(git push:*)` fails to
+match because every push here is compound (`cd <repo> && git push …`). **The second was then tested
+and eliminated** — a single non-compound `git -C <repo> push origin v1:main` draws the identical
+denial. That leaves the reload hypothesis, and the remedy is his and cannot be mine: `/permissions`,
+or a new session. Recorded because a candidate that is *ruled out* by a test is worth more to the next
+reader than two candidates left standing.
+
+§ 14 item 2 now carries the diagnosis and the reason it is safe to grant — plain
 `git push` cannot rewrite history, and the destructive shapes are blocked independently by the Atlas
 guard hook, which proved it by **blocking the first attempt to write that very paragraph**, since the
 paragraph spelled the commands out and the hook matches call text without caring that the call was an
