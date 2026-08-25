@@ -80,7 +80,7 @@ export function PersonaStrip({ character }: PersonaStripProps) {
         <div className="flex-1 min-w-0 space-y-1.5">
           {/* Row 1: Name + active identity badge */}
           <div className="flex items-center gap-2 min-w-0">
-            <h2 className="font-display text-lg font-semibold text-forge-0 truncate">
+            <h2 className="font-display text-xl font-semibold text-forge-0 truncate">
               {character.name}
             </h2>
 

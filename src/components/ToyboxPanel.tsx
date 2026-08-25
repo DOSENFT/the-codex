@@ -581,7 +581,7 @@ export function ToyboxPanel({
         {/* ── Header ── */}
         <div className="sticky top-0 z-10 bg-void-1/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold text-forge-0 tracking-tight">
+            <h2 className="font-display text-xl font-semibold text-forge-0 tracking-tight">
               The Toybox
             </h2>
             <div className="flex items-center gap-2">
@@ -656,7 +656,7 @@ export function ToyboxPanel({
                 <GlassCard key={i} className="p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <p className="font-display text-sm font-semibold text-forge-0 truncate">
+                      <p className="text-sm font-semibold text-forge-0 truncate">
                         {(s.name as string) ?? 'Suggestion'}
                       </p>
                       {typeof s.description === 'string' && s.description && (
@@ -778,7 +778,7 @@ export function ToyboxPanel({
               {/* ── Combo Form ── */}
               {formMode !== 'closed' && activeTab === 'combos' && (
                 <GlassCard className="space-y-3">
-                  <p className="font-display text-sm font-semibold text-forge-0">
+                  <p className="text-sm font-semibold text-forge-0">
                     {formMode === 'edit' ? 'Edit Combo' : 'New Combo'}
                   </p>
 
@@ -1047,7 +1047,7 @@ export function ToyboxPanel({
               {/* ── Tactic Form ── */}
               {formMode !== 'closed' && activeTab === 'tactics' && (
                 <GlassCard className="space-y-3">
-                  <p className="font-display text-sm font-semibold text-forge-0">
+                  <p className="text-sm font-semibold text-forge-0">
                     {formMode === 'edit' ? 'Edit Tactic' : 'New Tactic'}
                   </p>
 
@@ -1253,7 +1253,7 @@ export function ToyboxPanel({
               {/* ── Persona Form ── */}
               {formMode !== 'closed' && activeTab === 'persona' && (
                 <GlassCard className="space-y-3">
-                  <p className="font-display text-sm font-semibold text-forge-0">
+                  <p className="text-sm font-semibold text-forge-0">
                     {formMode === 'edit' ? 'Edit Persona Play' : 'New Persona Play'}
                   </p>
 
@@ -1398,7 +1398,7 @@ function EmptyState({
         <Icon size={24} className="text-forge-2" aria-hidden />
       </div>
       <div>
-        <p className="font-display text-sm font-semibold text-forge-0">{title}</p>
+        <p className="text-sm font-semibold text-forge-0">{title}</p>
         <p className="text-xs text-forge-2 mt-1">{description}</p>
       </div>
       <Button variant="primary" size="sm" onClick={onAdd}>

@@ -19,7 +19,11 @@
   position: fixed;
   z-index: 90; /* over the app's own z-50 chrome; under .veil-scene */
   left: var(--d-s4);
-  bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  /* Rides above the turn deck, which publishes its measured height as
+     --turn-deck-h (0px wherever there is no deck). The one control that must
+     always be present must also always be pressable — parking it on top of the
+     spell-slot pips would trade V-6b for F-5. */
+  bottom: calc(5rem + var(--turn-deck-h, 0px) + env(safe-area-inset-bottom, 0px));
   min-height: var(--d-touch-goal);
   min-width: var(--d-touch-goal);
   padding: 0 var(--d-s4);

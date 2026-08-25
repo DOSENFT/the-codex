@@ -283,7 +283,7 @@ function SpellCard({
         {/* Row 1: Name + badges */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-1.5 min-w-0">
-            <h3 className="font-display text-base font-bold text-forge-0 leading-tight truncate">
+            <h3 className="font-display text-xl font-bold text-forge-0 leading-tight truncate">
               {spell.name}
             </h3>
             <div className="flex flex-wrap items-center gap-1.5">

@@ -1,10 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import {
   Sword,
-  Zap,
-  Shield,
-  Footprints,
-  RotateCcw,
   Send,
   Loader2,
   Sparkles,
@@ -15,13 +11,8 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  Heart,
   Flame,
   User,
-  Minus,
-  Play,
-  Square,
-  SkipForward,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import {
@@ -49,6 +40,7 @@ import {
   spellActionType,
   featureActionType,
 } from '../lib/combat-state'
+import { TurnDeck, type ActionEconomy } from './TurnDeck'
 import { BASIC_ACTIONS, PALADIN_ACTIONS } from '../lib/dnd-data'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
 import { useAI } from '../hooks/useAI'
@@ -75,13 +67,9 @@ interface CombatHelperProps {
   onOpenDiceRoller?: (prefill: { notation: string; label: string }) => void
 }
 
-interface ActionEconomy {
-  action: boolean
-  bonusAction: boolean
-  reaction: boolean
-  movement: boolean
-}
-
+/* The type moved to TurnDeck, which is now the surface that owns these four
+   slots — see § 9.1 / U-2. Imported back here because the state still lives in
+   CombatHelper and is handed down; nothing else changed about it. */
 const INITIAL_ECONOMY: ActionEconomy = {
   action: false,
   bonusAction: false,
@@ -139,334 +127,6 @@ function countAvailableSlots(spellSlots: Character['spellSlots']): number {
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
-
-/** 1. Action Economy Bar */
-function ActionEconomyBar({
-  economy,
-  onToggle,
-  onReset,
-}: {
-  economy: ActionEconomy
-  onToggle: (key: keyof ActionEconomy) => void
-  onReset: () => void
-}) {
-  const chips: { key: keyof ActionEconomy; label: string; icon: typeof Sword }[] = [
-    { key: 'action', label: 'Action', icon: Sword },
-    { key: 'bonusAction', label: 'Bonus', icon: Zap },
-    { key: 'reaction', label: 'Reaction', icon: Shield },
-    { key: 'movement', label: 'Move', icon: Footprints },
-  ]
-
-  return (
-    <GlassCard className="p-4">
-      {/* The collapsible section immediately above this card is already titled
-          "Action Economy", so an <h3> here printed the same string twice, 40px
-          apart, in two type treatments — on the one screen where vertical space
-          is contested hard enough to have its own criterion (V-6). The heading
-          is the section's; the card carries the controls. `justify-end` keeps
-          the reset where it was rather than sliding it under the chevron. */}
-      <div className="flex items-center justify-end mb-3">
-        <button
-          onClick={onReset}
-          className={cn(
-            'min-h-[48px] min-w-[48px] flex items-center justify-center',
-            'rounded-lg text-forge-2 hover:text-arcane hover:bg-white/[0.06]',
-            'transition-all duration-200 active:scale-[0.95]',
-          )}
-          aria-label="Reset action economy"
-        >
-          <RotateCcw size={16} />
-        </button>
-      </div>
-
-      <div className="flex gap-2 flex-wrap">
-        {chips.map(({ key, label, icon: Icon }) => {
-          const used = economy[key]
-          return (
-            <button
-              key={key}
-              onClick={() => onToggle(key)}
-              aria-pressed={used}
-              className={cn(
-                'min-h-[48px] px-3.5 rounded-xl',
-                'flex items-center gap-2',
-                'border transition-all duration-200 ease-forge',
-                'active:scale-[0.97] select-none',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                used
-                  ? 'bg-white/[0.03] border-white/5 text-forge-2 opacity-40'
-                  : 'bg-arcane/10 border-arcane/25 text-arcane',
-              )}
-            >
-              <Icon size={16} aria-hidden />
-              <span className="text-sm font-medium">{label}</span>
-            </button>
-          )
-        })}
-      </div>
-    </GlassCard>
-  )
-}
-
-/** 2. Spell Slots Display */
-function SpellSlotsDisplay({
-  spellSlots,
-  onExpend,
-  onRestore,
-}: {
-  spellSlots: Character['spellSlots']
-  onExpend: (level: number) => void
-  onRestore: (level: number) => void
-}) {
-  const levels = Object.entries(spellSlots)
-    .map(([lvl, data]) => ({ level: Number(lvl), ...data }))
-    .filter((s) => s.max > 0)
-    .sort((a, b) => a.level - b.level)
-
-  if (levels.length === 0) {
-    return null
-  }
-
-  return (
-    <GlassCard className="p-4">
-      {/* Titled by the collapsible section above it — see the note in the
-          action-economy card. Nothing else in here was a heading, so the
-          duplicate simply goes and the pips move up one line. */}
-      <div className="flex flex-col gap-3">
-        {levels.map(({ level, max, current }) => (
-          <div key={level} className="flex items-center gap-3">
-            <span className="text-xs font-mono text-forge-2 w-8 shrink-0">
-              {LEVEL_LABELS[level] ?? `${level}th`}
-            </span>
-
-            <div className="pip-row">
-              {Array.from({ length: max }).map((_, i) => {
-                const available = i < current
-                return (
-                  <button
-                    key={i}
-                    onClick={() => (available ? onExpend(level) : onRestore(level))}
-                    onContextMenu={(e) => {
-                      e.preventDefault()
-                      onRestore(level)
-                    }}
-                    aria-label={
-                      available
-                        ? `Expend ${LEVEL_LABELS[level] ?? level} level spell slot`
-                        : `Restore ${LEVEL_LABELS[level] ?? level} level spell slot`
-                    }
-                    /* These were bespoke: a violet 44px pip hand-rolled here,
-                       while play/Grimoire draws the SAME SLOTS with the shared
-                       .pip-tap primitive in gold at 48px. One character, one
-                       session, one set of spell slots, two colours and two
-                       geometries depending on which tab you were on. The
-                       primitive wins — it is the app's own component, it already
-                       clears the 48px turn floor (V-5b), and adopting it deletes
-                       both inconsistencies without inventing anything. The tap
-                       and the right-click-to-restore are untouched. */
-                    className="pip-tap"
-                    data-slot={available ? 'full' : 'spent'}
-                  >
-                    <i />
-                  </button>
-                )
-              })}
-            </div>
-
-            <span className="text-xs font-mono text-forge-2 ml-auto">
-              {current}/{max}
-            </span>
-          </div>
-        ))}
-      </div>
-    </GlassCard>
-  )
-}
-
-/** 2b. Paladin Resource Tracker */
-function PaladinResourceTracker({
-  resources,
-  spellSlots,
-  onExpendLayOnHands,
-  onExpendChannelDivinity,
-  onRestoreChannelDivinity,
-}: {
-  resources: PaladinResources
-  spellSlots: Character['spellSlots']
-  onExpendLayOnHands: (amount: number) => void
-  onExpendChannelDivinity: () => void
-  onRestoreChannelDivinity: () => void
-}) {
-  const [customAmount, setCustomAmount] = useState('')
-  const { layOnHands, channelDivinity, auraRange } = resources
-  const lohPercent = layOnHands.max > 0 ? (layOnHands.current / layOnHands.max) * 100 : 0
-
-  const handleCustomSpend = useCallback(() => {
-    const amount = parseInt(customAmount, 10)
-    if (!isNaN(amount) && amount > 0) {
-      onExpendLayOnHands(amount)
-      setCustomAmount('')
-    }
-  }, [customAmount, onExpendLayOnHands])
-
-  const quickSpendButtons = [
-    { label: 'Heal 5', amount: 5 },
-    { label: 'Heal 10', amount: 10 },
-    { label: 'Cure Poison (5)', amount: 5 },
-  ]
-
-  return (
-    <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase mb-4">
-        Paladin Resources
-      </h3>
-
-      {/* Lay on Hands Pool */}
-      <div className="mb-5">
-        <div className="flex items-center gap-2 mb-2">
-          <Heart size={14} className="text-verdant" aria-hidden />
-          <span className="text-xs font-semibold text-forge-1 uppercase tracking-wide">
-            Lay on Hands
-          </span>
-          <span className="text-xs font-mono text-forge-2 ml-auto">
-            {layOnHands.current}/{layOnHands.max} HP
-          </span>
-        </div>
-
-        {/* Progress bar */}
-        <div className="w-full h-3 rounded-full bg-verdant/30 overflow-hidden mb-3">
-          <div
-            className="h-full rounded-full bg-verdant transition-all duration-300 ease-forge"
-            style={{ width: `${lohPercent}%` }}
-          />
-        </div>
-
-        {/* Quick-spend buttons */}
-        <div className="flex gap-2 flex-wrap mb-2">
-          {quickSpendButtons.map(({ label, amount }) => (
-            <button
-              key={label}
-              onClick={() => onExpendLayOnHands(amount)}
-              disabled={layOnHands.current < amount}
-              className={cn(
-                'min-h-[48px] px-3.5 py-1.5 rounded-lg text-xs font-medium',
-                'bg-verdant/10 border border-verdant/25 text-verdant',
-                'hover:bg-verdant/20 hover:border-verdant/40',
-                'transition-all duration-200 active:scale-[0.97]',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                'disabled:opacity-30 disabled:pointer-events-none',
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Custom amount */}
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <input
-              type="number"
-              min={1}
-              max={layOnHands.current}
-              placeholder="Custom"
-              value={customAmount}
-              onChange={(e) => setCustomAmount(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleCustomSpend()
-                }
-              }}
-              className={cn(
-                'w-full min-h-[48px] px-3 py-2 rounded-lg text-sm',
-                'bg-white/[0.04] border border-white/10 text-forge-1',
-                'placeholder:text-forge-2/50',
-                'focus:outline-none focus:ring-2 focus:ring-verdant/40 focus:border-verdant/40',
-                'transition-all duration-200',
-              )}
-            />
-          </div>
-          <button
-            onClick={handleCustomSpend}
-            disabled={!customAmount || layOnHands.current <= 0}
-            className={cn(
-              'min-h-[48px] min-w-[48px] flex items-center justify-center px-3 rounded-lg text-xs font-medium',
-              'bg-verdant/10 border border-verdant/25 text-verdant',
-              'hover:bg-verdant/20 hover:border-verdant/40',
-              'transition-all duration-200 active:scale-[0.97]',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-              'disabled:opacity-30 disabled:pointer-events-none',
-            )}
-          >
-            <Minus size={14} aria-hidden />
-            <span className="sr-only">Spend</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Channel Divinity */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Flame size={14} className="text-ember" aria-hidden />
-          <span className="text-xs font-semibold text-forge-1 uppercase tracking-wide">
-            Channel Divinity
-          </span>
-          <span className="text-xs text-forge-2 ml-1">
-            Hearthfire Manifest
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* The third resource on this screen, and until now the third way of
-              drawing one: a 44px ring with a 10px core, its own border, its own
-              glow. Spell slots and class-feature uses already share .pip-tap.
-              This one now does too, in ember — the tone says which resource,
-              the geometry says how to press it, and V-5b's 48px floor for a
-              control pressed during a turn is met by the primitive rather than
-              by a min-height bolted onto a 28px button. Behaviour untouched:
-              same tap to expend, same tap-when-empty to restore. */}
-          <div className="pip-row">
-            {Array.from({ length: channelDivinity.max }).map((_, i) => {
-              const available = i < channelDivinity.current
-              return (
-                <button
-                  key={i}
-                  onClick={() =>
-                    available ? onExpendChannelDivinity() : onRestoreChannelDivinity()
-                  }
-                  aria-label={
-                    available
-                      ? 'Expend Channel Divinity use'
-                      : 'Restore Channel Divinity use'
-                  }
-                  className="pip-tap"
-                  data-tone="ember"
-                  data-slot={available ? 'full' : 'spent'}
-                >
-                  <i />
-                </button>
-              )
-            })}
-          </div>
-
-          <span className="text-xs font-mono text-forge-2">
-            {channelDivinity.current}/{channelDivinity.max}
-          </span>
-        </div>
-      </div>
-
-      {/* Aura of Protection */}
-      <div className="flex items-center gap-2">
-        <Badge variant="arcane">
-          <Shield size={12} className="mr-1" aria-hidden />
-          {auraRange}ft
-        </Badge>
-        <span className="text-xs text-forge-2">Aura of Protection</span>
-      </div>
-    </GlassCard>
-  )
-}
 
 /** 3. Concentration Tracker */
 function ConcentrationTracker({
@@ -1271,10 +931,10 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
   // Quick lookup panel
   const [lookupOpen, setLookupOpen] = useState(false)
 
-  // Collapsible section hooks
-  const actionDetails = useCollapsible('combat-action-details', character.id, true)
-  const spellSlotsSection = useCollapsible('combat-spell-slots', character.id, true)
-  const classResourcesSection = useCollapsible('combat-class-resources', character.id, true)
+  // Collapsible section hooks.
+  // Action economy, spell slots and class resources no longer have one: those
+  // three moved into the fixed TurnDeck (§ 9.1 / U-2), where being collapsible
+  // would defeat the point — the deck exists so a spend is always reachable.
   const concentrationSection = useCollapsible('combat-concentration', character.id, true)
   const conditionsSection = useCollapsible('combat-conditions', character.id, false)
   const aiAdvisorSection = useCollapsible('combat-ai-advisor', character.id, false)
@@ -1556,22 +1216,14 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
         />
       )}
 
-      {/* ── Always visible: Combat Toggle (when NOT in combat) ── */}
-      {!combatState.inCombat && (
-        <GlassCard className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleStartCombat}
-              >
-                <Play size={14} aria-hidden /> Start Combat
-              </Button>
-            </div>
-          </div>
-        </GlassCard>
-      )}
+      {/* ── «Start Combat» is no longer here ──
+             It moved into the fixed TurnDeck on 2026-08-25. It was a `sm`
+             button alone inside a full-width GlassCard at the top of this
+             page — y=113 on an 844px screen — and V-6 asks that turn-critical
+             controls sit in the bottom 60%. The behaviour is untouched:
+             `handleStartCombat` is the same handler, passed down. Only where
+             it is, is different. See TurnDeck.tsx's header for the full note,
+             including why a control that spends nothing is allowed there. */}
 
       {/* Condition Reminder Banner */}
       {character.conditions.length > 0 && (
@@ -1605,63 +1257,20 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
       )}
 
       {/* ── The turn deck ───────────────────────────────────────────────────
-           Order here is the whole of the V-6 work that sealed behaviour allows.
-           These three cards are what a turn SPENDS — the economy, the slots, the
-           class resources — and they used to sit below the HP tracker, the
-           condition reminders and the damage log, which put the first spell-slot
-           pip at y=1647 on an 844-tall phone. Nothing in this block changed; it
-           moved. HP went below them because HP changes on the DM's tempo, not on
-           yours: you read it constantly and you tap it rarely, and the thing you
-           TAP under a six-second timer has the stronger claim on the thumb. ── */}
-      {/* ── Collapsible: Action Economy (only when NOT in combat — TurnSummary handles it during combat) ── */}
-      {!combatState.inCombat && (
-        <CollapsibleCombatSection
-          title="Action Economy"
-          icon={Sword}
-          isOpen={actionDetails.isOpen}
-          onToggle={actionDetails.toggle}
-        >
-          <ActionEconomyBar
-            economy={economy}
-            onToggle={toggleEconomy}
-            onReset={resetEconomy}
-          />
-        </CollapsibleCombatSection>
-      )}
+           These three surfaces — the economy, the slots, the class resources —
+           are what a turn SPENDS, and they are no longer in this scroll at all.
+           They are rendered at the bottom of this component as a fixed deck
+           pinned above the tab bar (`TurnDeck.tsx`), because ordering them
+           within the page could never satisfy V-6: put them first and they land
+           at the TOP of the screen, put them later and they fall off the
+           bottom. An earlier pass moved them above the HP tracker and got the
+           first spell-slot pip from y=1647 to y=903 — real, and still past the
+           fold on an 844-tall phone.
 
-      {/* ── Collapsible: Spell Slots ── */}
-      {Object.values(character.spellSlots).some(s => s.max > 0) && (
-        <CollapsibleCombatSection
-          title="Spell Slots"
-          icon={Sparkles}
-          isOpen={spellSlotsSection.isOpen}
-          onToggle={spellSlotsSection.toggle}
-        >
-          <SpellSlotsDisplay
-            spellSlots={character.spellSlots}
-            onExpend={handleExpendSlot}
-            onRestore={handleRestoreSlot}
-          />
-        </CollapsibleCombatSection>
-      )}
-
-      {/* ── Collapsible: Class Resources ── */}
-      {character.paladinResources && (
-        <CollapsibleCombatSection
-          title="Class Resources"
-          icon={Flame}
-          isOpen={classResourcesSection.isOpen}
-          onToggle={classResourcesSection.toggle}
-        >
-          <PaladinResourceTracker
-            resources={character.paladinResources}
-            spellSlots={character.spellSlots}
-            onExpendLayOnHands={handleExpendLayOnHands}
-            onExpendChannelDivinity={handleExpendChannelDivinity}
-            onRestoreChannelDivinity={handleRestoreChannelDivinity}
-          />
-        </CollapsibleCombatSection>
-      )}
+           HP, conditions, the damage log, the advisor and the reference stay
+           here, in the page, because they are READ rather than spent. That is
+           the line the deck is drawn on: it holds what mutates a number on
+           disk, and nothing else. § 9.1 / U-2. ── */}
 
       {/* ── Always visible: HP Tracker ── */}
       <HPTracker
@@ -1764,6 +1373,24 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
         onClose={() => setLookupOpen(false)}
         character={character}
         onRollDice={onOpenDiceRoller}
+      />
+
+      {/* 11. The turn deck — fixed, above the tab bar, never scrolls.
+             Rendered last so it is the last thing in the stacking context that
+             is not an overlay; positioned by `position: fixed`, so where it
+             appears in this tree does not affect where it appears on screen. */}
+      <TurnDeck
+        character={character}
+        inCombat={combatState.inCombat}
+        onStartCombat={handleStartCombat}
+        economy={economy}
+        onToggleEconomy={toggleEconomy}
+        onResetEconomy={resetEconomy}
+        onExpendSlot={handleExpendSlot}
+        onRestoreSlot={handleRestoreSlot}
+        onExpendLayOnHands={handleExpendLayOnHands}
+        onExpendChannelDivinity={handleExpendChannelDivinity}
+        onRestoreChannelDivinity={handleRestoreChannelDivinity}
       />
     </section>
   )

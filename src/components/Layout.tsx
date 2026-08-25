@@ -313,7 +313,37 @@ export function Layout({
            trade is that scrolling further is strictly better than not being able
            to read a thing at all. It costs nothing in the thumb zone: this is
            padding AFTER the content, so no control moves and V-6 is unchanged. */}
-      <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 pb-[calc(9rem+env(safe-area-inset-bottom,0px))] lg:pl-52 lg:pb-8">
+      {/* The scroll region is BOUNDED, not padded.
+           Padding at the end of the content only guarantees you can scroll the
+           last row out from under a fixed overlay. It does nothing at any other
+           scroll position: at scroll-top, whatever happens to be at the foot of
+           the viewport is still underneath. That is § 9.1b, and when the turn
+           deck arrived it turned that latent problem into eleven newly occluded
+           condition chips in one measurement — V-6b went 13 → 24.
+
+           So the deck does not float over the page; the page ends where the
+           deck begins. `bottom` is the tab bar plus the deck's own measured
+           height (`--turn-deck-h`, published by TurnDeck with a ResizeObserver,
+           and 0px on every screen that has no deck). The same variable is read
+           at `lg`, where the deck is also present — it is only the tab bar
+           that disappears there, not the deck. A hard-coded
+           reserve would have been wrong for exactly the characters it was not
+           tested with: three spell-slot levels make a taller deck than one.
+
+           The remaining 5rem of padding is for the two overlays that still do
+           float — the dice button and the Veil pill, whose top edge sits 72px
+           above this box's bottom edge. It was 9rem when this box also had to
+           clear the tab bar itself; the tab bar is now excluded by layout, so
+           the reserve shrinks by exactly that 4rem rather than being re-guessed. */}
+      <main
+        ref={mainRef}
+        className={cn(
+          'fixed left-0 right-0 top-14 overflow-y-auto',
+          'bottom-[calc(4rem+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]',
+          'pb-[5rem]',
+          'lg:left-52 lg:bottom-[var(--turn-deck-h,0px)] lg:pb-8',
+        )}
+      >
         <div className="px-4 py-4 mx-auto w-full max-w-3xl lg:px-8 lg:py-6">
           {children}
         </div>
@@ -344,7 +374,12 @@ export function Layout({
       <button
         onClick={() => setDiceOpen(true)}
         className={cn(
-          'fixed z-50 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:right-8 lg:bottom-8',
+          /* Rides above the turn deck. Without the variable this button sat at
+             80px from the bottom, which is inside the deck — it would have
+             covered a Channel Divinity pip on the one screen the deck exists
+             for, which is precisely the V-6b failure it was already causing
+             against page content. */
+          'fixed z-50 right-4 bottom-[calc(5rem+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))] lg:right-8 lg:bottom-[calc(2rem+var(--turn-deck-h,0px))]',
           'w-14 h-14 rounded-xl',
           'bg-void-0/90 backdrop-blur-md text-gold border border-gold/25',
           'shadow-[0_6px_24px_rgba(0,0,0,0.55)]',
@@ -391,7 +426,7 @@ export function Layout({
         backdropClassName="bg-void-0/60 backdrop-blur-sm"
       >
             <div className="flex items-center justify-between p-4 border-b border-white/[0.06] sticky top-0 bg-void-1/90 backdrop-blur-md z-10">
-              <h2 className="font-display text-lg font-semibold text-forge-0">Settings</h2>
+              <h2 className="font-display text-xl font-semibold text-forge-0">Settings</h2>
               <button
                 onClick={() => setSettingsOpen(false)}
                 className={cn(

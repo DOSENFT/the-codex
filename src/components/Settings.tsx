@@ -26,6 +26,7 @@ import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, get
 import { useAI } from '../hooks/useAI'
 import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
 import { parseCharacterFile, formatList } from '../lib/import-character'
+import { findSessionRollback, describeRollback, type RollbackEntry } from '../lib/session-rollback'
 import { ASTERA_PERSONA } from '../lib/dnd-data'
 import { Button } from './ui/Button'
 import { GlassCard } from './ui/GlassCard'
@@ -184,6 +185,20 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
      file was damaged and I altered it" are different sentences, and Marcus
      should not have to work out which one he got. */
   const [importRepairs, setImportRepairs] = useState<string[]>([])
+  /* R-10. An import that would hand back a spent resource is HELD here instead
+     of written, until he has seen what it would take back and said yes. Holding
+     the whole parse result, not just the character, because the "that was an
+     older export" notice still has to fire after he confirms — the two facts
+     are independent and he is entitled to both. */
+  const [pendingImport, setPendingImport] = useState<
+    { character: Character; warnings: string[]; repairs: string[]; rollback: RollbackEntry[] } | null
+  >(null)
+  /* And if he goes ahead anyway, he is told a SECOND time, in the past tense,
+     by a notice that does not self-dismiss. Not belt-and-braces: the warning
+     above disappears the instant he taps through it, and five minutes later
+     the only question he can still answer is "what did that do?" — which is
+     precisely the question the silent version left him unable to answer. */
+  const [importRolledBack, setImportRolledBack] = useState<RollbackEntry[]>([])
 
   const handleExport = useCallback(() => {
     const data = JSON.stringify(character, null, 2)
@@ -199,11 +214,40 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
     URL.revokeObjectURL(url)
   }, [character])
 
+  /* The write, and everything he is told about it. Split out of handleImport so
+     that the R-10 confirm can reach the exact same path — a second, parallel
+     "apply" written for the confirm button is how the confirm branch quietly
+     stops matching the plain branch. */
+  const applyImport = useCallback(
+    (next: { character: Character; warnings: string[]; repairs: string[]; rollback?: RollbackEntry[] }) => {
+      onCharacterUpdate(next.character)
+      const rolled = next.rollback ?? []
+      setImportRolledBack(rolled)
+      /* A thin old export is still a real import, so it succeeds — but the
+         green tick alone would let it pass as complete when it isn't. The
+         amber notice stays put instead of self-dismissing: what it says is
+         still true in five minutes. */
+      if (next.repairs.length > 0) setImportRepairs(next.repairs)
+      if (next.warnings.length > 0) setImportWarnings(next.warnings)
+      /* The green tick is for the case where there is genuinely nothing to say.
+         § 9.13's sharpest line is that "everything came across" printed at the
+         moment something was lost reads as an assurance that nothing was — so
+         any amber notice, including the new rollback one, takes the tick's
+         place rather than sitting beside it. */
+      if (rolled.length > 0 || next.warnings.length > 0 || next.repairs.length > 0) return
+      setImportSuccess(true)
+      setTimeout(() => setImportSuccess(false), 3000)
+    },
+    [onCharacterUpdate],
+  )
+
   const handleImport = useCallback(() => {
     setImportError(null)
     setImportSuccess(false)
     setImportWarnings([])
     setImportRepairs([])
+    setImportRolledBack([])
+    setPendingImport(null)
     const input = document.createElement('input')
     input.type = 'file'
     // See CharacterSetup for why this is not a bare `.json` — iOS greys the file
@@ -219,25 +263,31 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
           setImportError(result.error)
           return
         }
-        onCharacterUpdate(result.character)
-        /* A thin old export is still a real import, so it succeeds — but the
-           green tick alone would let it pass as complete when it isn't. The
-           amber notice stays put instead of self-dismissing: what it says is
-           still true in five minutes. */
-        if (result.repairs.length > 0) setImportRepairs(result.repairs)
-        if (result.warnings.length > 0) {
-          setImportWarnings(result.warnings)
+        /* R-10 — the reason this is not just `onCharacterUpdate(...)`.
+           Re-importing your own save is a REASSURANCE gesture: you do it when
+           the phone slept, or you want to be sure the session took. Until this
+           check existed it did the opposite — it silently restored every pool
+           to whatever the file said, so a heal-for-5 followed by a re-import
+           handed Lay on Hands back to 35/35 with nothing on screen about it.
+           Damage you cannot see, because a resource you have already spent is
+           a resource you have already stopped watching. */
+        const rollback = findSessionRollback(character, result.character)
+        if (rollback.length > 0) {
+          setPendingImport({
+            character: result.character,
+            warnings: result.warnings,
+            repairs: result.repairs,
+            rollback,
+          })
           return
         }
-        if (result.repairs.length > 0) return
-        setImportSuccess(true)
-        setTimeout(() => setImportSuccess(false), 3000)
+        applyImport(result)
       }
       reader.onerror = () => setImportError('That file could not be read off the device.')
       reader.readAsText(file)
     }
     input.click()
-  }, [onCharacterUpdate])
+  }, [character, applyImport])
 
   /* ------ backstory transfer ------ */
   const [backstoryPasteOpen, setBackstoryPasteOpen] = useState(false)
@@ -710,10 +760,102 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
         </Button>
       </div>
 
+      {/* R-10 — held, not written. See handleImport for why this is not a
+          toast after the fact: by the time a toast is up, the spend is gone.
+          Amber and not red on purpose — nothing has been destroyed yet, and
+          red in this file already means "delete", which this is not. */}
+      {pendingImport && (
+        <div
+          role="alert"
+          className="mb-4 p-4 rounded-xl border border-amber-500/35 bg-amber-500/10 animate-fade-in"
+        >
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" aria-hidden />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-amber-100">
+                That file would give back what you've already spent.
+              </p>
+              {pendingImport.rollback.length === 1 ? (
+                <p className="mt-1.5 text-sm text-amber-200 tabular-nums">
+                  {describeRollback(pendingImport.rollback)}
+                </p>
+              ) : (
+                <ul className="mt-1.5 space-y-0.5">
+                  {pendingImport.rollback.map((e) => (
+                    <li
+                      key={e.label}
+                      className="flex items-baseline justify-between gap-3 text-sm text-amber-200"
+                    >
+                      <span className="truncate">{e.label}</span>
+                      <span className="shrink-0 tabular-nums font-medium">
+                        {e.from} → {e.to}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-2 text-xs text-amber-200/70">
+                Import it if that file is the newer one. Otherwise keep playing — nothing has
+                changed yet.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2.5 mt-4">
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => setPendingImport(null)}
+              className="flex-1"
+            >
+              Keep Session
+            </Button>
+            <Button
+              variant="ghost"
+              size="md"
+              onClick={() => {
+                const next = pendingImport
+                setPendingImport(null)
+                applyImport(next)
+              }}
+              className="flex-1 text-amber-200 hover:bg-amber-500/15 border border-amber-500/35"
+            >
+              {/* Lower-case "anyway" deliberately, to match CharacterSetup's
+                  existing thin-export gate. Two gates in one app that mean the
+                  same thing should read the same, and the harness reaches both
+                  through one helper — a second spelling here would have made
+                  this gate invisible to the check that exists to grade it. */}
+              Import anyway
+            </Button>
+          </div>
+        </div>
+      )}
+
       {importSuccess && (
         <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-verdant/10 border border-verdant/25 animate-fade-in">
           <CheckCircle2 size={16} className="text-verdant shrink-0" aria-hidden />
           <span className="text-sm text-verdant">Character imported successfully</span>
+        </div>
+      )}
+
+      {/* After the fact, and it stays. "Replaced" is the accurate verb: the
+          file did not merge with the session, it stood in for it. */}
+      {importRolledBack.length > 0 && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/25 animate-fade-in"
+        >
+          <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" aria-hidden />
+          <div className="text-sm text-amber-200">
+            <p>
+              Imported — that file replaced your session, and put back what you had already spent.
+            </p>
+            <p className="mt-1.5 tabular-nums font-medium text-amber-100">
+              {describeRollback(importRolledBack)}
+            </p>
+            <p className="mt-1.5 text-amber-200/70">
+              Spend those down again to where you were, or import the newer file if you have one.
+            </p>
+          </div>
         </div>
       )}
 

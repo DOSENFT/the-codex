@@ -64,17 +64,23 @@ const CONDITIONS: ConditionInfo[] = [
   { name: 'Unconscious', effect: 'Drop prone; Incapacitated; auto-crit in 5ft', category: 'debuff' },
 ]
 
+/* The INK is lit in both maps and the base accent is left to the border and
+   the fill. Measured off the painted pixels on 2026-08-25: «Deafened» in
+   forge-2 came in at 4.40:1 and «Frightened» in eldritch at 4.13:1, both under
+   V-2's 4.5 — and both of those are the name of a thing that is happening to
+   him right now, at 12px, in a dim room. The tint behind the word still says
+   which family the condition belongs to; the word itself is now readable. */
 const CATEGORY_COLORS: Record<ConditionInfo['category'], string> = {
   debuff: 'text-red-400 border-red-400/30 bg-red-400/10',
-  control: 'text-eldritch border-eldritch/30 bg-eldritch/10',
-  movement: 'text-ember border-ember/30 bg-ember/10',
-  sensory: 'text-forge-2 border-forge-2/30 bg-forge-2/10',
+  control: 'text-eldritch-lit border-eldritch/30 bg-eldritch/10',
+  movement: 'text-ember-lit border-ember/30 bg-ember/10',
+  sensory: 'text-forge-1 border-forge-2/30 bg-forge-2/10',
 }
 
 const CATEGORY_ACTIVE_COLORS: Record<ConditionInfo['category'], string> = {
   debuff: 'text-red-400 border-red-400/60 bg-red-400/20 shadow-[0_0_12px_-3px_rgba(248,113,113,0.3)]',
-  control: 'text-eldritch border-eldritch/60 bg-eldritch/20 shadow-[0_0_12px_-3px_rgba(139,92,246,0.3)]',
-  movement: 'text-ember border-ember/60 bg-ember/20 shadow-[0_0_12px_-3px_rgba(244,181,69,0.3)]',
+  control: 'text-eldritch-lit border-eldritch/60 bg-eldritch/20 shadow-[0_0_12px_-3px_rgba(139,92,246,0.3)]',
+  movement: 'text-ember-lit border-ember/60 bg-ember/20 shadow-[0_0_12px_-3px_rgba(244,181,69,0.3)]',
   sensory: 'text-forge-1 border-forge-2/60 bg-forge-2/20 shadow-[0_0_12px_-3px_rgba(141,152,167,0.3)]',
 }
 
@@ -490,7 +496,11 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                 type="button"
                 onClick={() => handleToggleCondition(condition.name)}
                 className={cn(
-                  'min-h-[44px] rounded-xl px-3 py-2 text-left',
+                  /* 44px → 48px. A condition is applied and cleared DURING a
+                     turn — "I'm prone", "he's frightened" — so it is a turn
+                     control, and V-5b's floor for those is 48, not the general
+                     44. These two were the last of that family still at 44. */
+                  'min-h-[48px] rounded-xl px-3 py-2 text-left',
                   'border transition-all duration-200 ease-forge',
                   'active:scale-[0.97]',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
@@ -498,7 +508,25 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                     ? CATEGORY_ACTIVE_COLORS[condition.category]
                     : cn(
                         CATEGORY_COLORS[condition.category],
-                        'opacity-50 hover:opacity-80',
+                        /* Was `opacity-50 hover:opacity-80`, and that came off
+                           rather than getting a number adjusted. It dimmed the
+                           WORD along with the chip, putting every inactive
+                           condition name at roughly half the contrast the
+                           audit believes it measured — the audit reads the
+                           span's own opacity and the 50% lives on the button
+                           above it, so this one was invisible to the
+                           instrument AND worse in the room. Same rule the turn
+                           deck already follows: dim the GROUND, keep the ink
+                           legible.
+
+                           Nothing replaces it, because the quiet state was
+                           already carried without it: /10 fill against /20,
+                           /30 border against /60, no glow against a glow, and
+                           the effect line only appears when the condition is
+                           on. That is four signals; the wash was a fifth that
+                           cost legibility to say what the other four already
+                           said. */
+                        'hover:bg-white/[0.04]',
                       ),
                 )}
                 aria-pressed={isActive}

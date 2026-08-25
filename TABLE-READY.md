@@ -36,6 +36,67 @@ the whole point of writing them up rather than building them. The § 9 entries a
 with the evidence, and are otherwise left exactly as written so the record of what was proposed
 survives the record of what was done.
 
+**U-2 · 2026-08-24 · § 3 — BEHAVIOUR UNSEALED, for one further item (§ 9.1), by Marcus.** Logged in
+the same place and the same way as U-1, because it is the same class of change and must not be
+confused with the design work around it.
+
+*Old text (§ 3):* as amended by U-1 — *"Unsealed 2026-08-23 by Marcus, for § 9.9, § 9.10 and § 9.11
+only."*
+
+*New text (§ 3):* **"Unsealed 2026-08-23 by Marcus for § 9.9, § 9.10 and § 9.11; and 2026-08-24 for
+§ 9.1.** Those four are built. Every other item in § 9 stays unbuilt."
+
+*Reason:* Marcus's instruction was **"fix V-6, anchor the turn deck to the bottom"** — the second
+clause is § 9.1 word for word, and I had refused to build it under the seal, because a control that
+was scrollable becoming permanent changes what the screen does, not only how it looks. He asked for
+it directly, so it is unsealed and built. **What this admits, plainly:** V-6 was not fixable inside
+the seal. § 9.1's write-up already said so, and I had recorded V-6 as a fail I could not clear
+without a behaviour change. So this is not a criterion softened to reach green — it is the one
+alternative the freeze rule leaves open, which is to change the app instead of the ruler, with the
+owner's say-so on the record. **What is still unsealed by this and nothing more:** the three spend
+surfaces (action economy, spell slots, class resources) now live in a fixed deck instead of scrolling
+away. Each control does exactly what it did — same handlers, same effects, same wording. Only where
+it is, is different.
+
+**U-3 · 2026-08-25 · § 3 — BEHAVIOUR UNSEALED, for one further item (§ 9.13 / R-10), by
+interpretation — flagged as such.** The first two unsealings were answers to a direct question. This
+one is not, and that difference is the reason it is written down at this length rather than folded
+into the change it authorises.
+
+*Old text (§ 3):* as amended by U-2 — *"Unsealed 2026-08-23 by Marcus for § 9.9, § 9.10 and § 9.11;
+and 2026-08-24 for § 9.1."*
+
+*New text (§ 3):* **"…; and 2026-08-25 for § 9.13.** Those five are built. Every other item in § 9
+stays unbuilt."
+
+*What he actually said:* **"Continue until this is finished and fully table ready."** That is the
+whole of it. He did not name R-10.
+
+*Why I read it as authorising R-10 and nothing else:* in the turn immediately before, asked to define
+the finish state, I named R-10 as the one remaining item that could not be reached inside the seal,
+in these words — *"the single most dangerous thing in the file"* and *"if you only unseal one more
+thing, unseal that."* He replied "continue until this is finished." Taking "finished" to exclude the
+one thing I had just told him stood between here and finished would be reading his sentence to mean
+less than it says. **The honest statement of the risk:** this is still me deciding, and "finish it"
+is exactly the kind of instruction an agent can quietly expand into anything it already wanted to do.
+So the scope is fixed here in writing and is narrower than the sentence would bear: § 9.13 only, by
+its own recommended option (b), and no other § 9 item moves. If Marcus reads this and disagrees, the
+change is one commit and reverts cleanly — `src/lib/session-rollback.ts` plus one guarded branch in
+`Settings.tsx`.
+
+*What is unsealed, precisely:* import compares the incoming file to the live session **before**
+writing, and if any pool would move backwards it says which ones and offers Cancel. Nothing else
+about import changes: the same parser, the same repair notices, the same older-export warning, and an
+import that takes nothing back still writes silently with no extra tap. The measured defect: the file
+says Lay on Hands 35/35, he heals for 5, re-imports the same file to reassure himself the session
+took, and the harness recorded *"session state silently overwritten: 30 → 35"* with the only on-screen
+words being the unrelated older-export notice.
+
+*What was deliberately NOT built:* option (a) from § 9.13 — merging the two states automatically by
+taking the lower of each pool. It is fewer taps and it is wrong: it invents a third state that is
+neither the file nor the session, and it would be silent, which is the property that made R-10 a
+defect in the first place. A loud wrong answer he can overrule beats a quiet one he cannot see.
+
 **A-1 · 2026-08-23 · § 5 — two criteria ADDED (P-0.7, P-0.8).** Nothing softened, nothing removed.
 P-0.1–P-0.6 were written to be calibrated against *injected* defects. While building the harness a
 real known-bad build became available — `73c45d8`, the SHA deployed at the live URL right now — so
@@ -543,6 +604,92 @@ filesystem, and it printed a red verdict about the app for reasons that had noth
 app. Two things I would have missed had I taken it at face value: the CSS pollution above, and the
 fact that **P-1 has been satisfiable for some time and was being reported red by a broken ruler.**
 
+**A-27 · 2026-08-24 · § 6 V family — the INSTRUMENT corrected. No criterion changed. Every V number
+taken before this line is void.** This is the worst thing that happened in this session and it is
+written up first as what it was: my own change blinded the audit, and it blinded it in the direction
+that flatters me.
+
+Building the turn deck (U-2) made `main` a bounded fixed box between the header and the deck. The
+document stopped being the scrolling element. Every scroll in the harness was `window.scrollTo(0,
+…)`, which on that layout is a **no-op that does not throw**.
+
+*Old instrument, three places:*
+- scroll: `await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))`
+- visibility bound (`AUDIT_DOM`): `if (r.bottom < -50 || r.top > (document.documentElement.scrollHeight + 50)) return false;`
+- the pixel-contrast pager computed its page count from `document.documentElement.scrollHeight`.
+
+*New instrument:* `rig.mjs` exports `scrollPage()` / `scrollOrThrow()`, which scroll **the element
+that actually scrolls** — on-screen scrollers only, largest wins — and **return whether the position
+moved**, so a refusal is an error instead of an empty screen. The visibility bound now takes the
+furthest extent of the document **or any real scroller**. The pager counts pages off the same
+expression. `families.mjs`'s three scroll sites use them.
+
+*What the old instrument was silently reporting.* Measured with `_scroll-probe.mjs` rather than
+assumed: `window.scrollY: 0`, `document.scrollHeight: 844` — exactly one viewport — while `main` held
+`scrollHeight 1554` in a `clientHeight 480` box. Every "@bottom" measurement re-measured the top, and
+the visibility bound additionally threw away every node below y≈894 as "not on the page".
+
+*How it was caught, and the thing worth keeping.* The V run got **faster** (69s → 23s), the clipped-
+text skips **fell** (6 → 61 is worse, but gradient-backed text nodes fell **3018 → 109**), and the
+failure counts dropped. Every one of those reads as progress. A 30× fall in the size of the set being
+graded is not progress, it is a smaller set, so I refused the improvement and went looking for the
+cause. **The rule this establishes: an unexplained improvement in a measurement is a defect report
+about the instrument until proven otherwise.** After the fix, coverage is **3977–4392 gradient nodes**
+— *above* the 3018 the harness saw before the layout change, because the visibility bound had been
+dropping real nodes all along.
+
+*The new instrument can fail, and was watched failing.* `table/_a27-prove.mjs` runs two cases against
+the real play/Combat screen. **REAL:** untouched, `scrollOrThrow` picks `<main>`, moves it `0 → 1074`
+of `1074px` of room, and does not throw. **RIGGED:** `Element.prototype.scrollTop`'s setter is
+replaced with a silent no-op — precisely the behaviour the old `window.scrollTo` had — and the helper
+throws *"scroll to bottom did not move rigged: `<main>` had 1074px of room and stayed at 0"*. A
+control that cannot fire proves nothing, so it was made to fire.
+
+*A second, smaller version of the same bug, found by the same reflex.* The first draft picked the
+largest scroller outright and chose a **closed** Mechanics drawer (3769px, parked off-viewport) over
+`main` (1554px), so several screens reported that one panel's rows as their own bottom. Fixed by
+filtering to on-screen scrollers in **both** `rig.mjs` and `families.mjs`.
+
+*Reason this is a correction and not a softening:* no criterion's text moved, no threshold moved, no
+selector narrowed. The V family got **stricter** — it now grades more nodes than it ever has. What
+changed is that it measures the page the app now is. And because it did report quieter numbers for a
+while, **every V result recorded in § 12 before this amendment is void and is being re-taken**, not
+carried forward.
+
+**A-28 · 2026-08-25 · § 6 V-2b/V-3b — an APP change that REMOVES NODES FROM THE GRADED SET. Disclosed
+here because it has the exact shape of a softened check.** No criterion's text, threshold or selector
+moved. What moved is the app, and a side effect of the app's fix is that the V-2b/V-3b population
+shrinks. A-27 established that a smaller graded set is a defect report until proven otherwise, so this
+one is proven rather than asserted.
+
+*The finding.* Two V-2b offenders reported cream and forge-2 ink on a **bright gold `#cba654`
+background** — a colour that exists nowhere behind body text on a dark card. Rather than recolour the
+text to satisfy a number I did not believe, I probed it (`table/_gold-what.mjs`). The nodes sit inside
+**collapsed `ActionCard` accordions**. The collapse is the CSS `grid-rows-[0fr]` trick: the *track*
+gets zero height, the content keeps its natural box and is merely clipped by `overflow-hidden`. So
+`getBoundingClientRect()` returned a full-size rect at coordinates belonging to a different, expanded
+card further down the page, and `pixelContrast` dutifully divided the text's ink by **pixels that were
+never painted behind it**. The 4.5:1 failure was real arithmetic performed on the wrong two colours.
+
+*The change.* `ActionCard`'s collapsed body is now `invisible` as well as clipped
+(`src/components/session/ActionCard.tsx`), with `visibility` added to the transition list so the
+200 ms collapse animation is unchanged and nothing visible moves. This is a correctness fix wearing a
+styling class: while shut, that content was still in the tab order, still in the accessibility tree,
+and still answering `getBoundingClientRect()` — a shut card was shut only to the eye.
+
+*Why this is not how the number went down.* Because the underlying ink was fixed **independently and
+first**, at the token layer, so that the visibility change could not become a way to hide a real
+defect. The eldritch ink measured a genuine **4.47:1** against its own ground and was raised via
+`--color-eldritch-lit`; arcane (6.82:1) and ember (6.80:1) count badges were raised the same way. Had
+I made the collapsed cards invisible and stopped, those three would have gone quiet while still being
+wrong at 14px in a dim room. The order matters and is the whole of the disclosure: **fix the paint,
+then stop measuring the unpainted.**
+
+*What the reader should check.* The V-2b/V-3b counts in § 12 are **0**, and they are 0 on a population
+that still includes every expanded card, every screen, and both viewports. If a future run wants to
+falsify this, expand the Roleplay action cards and re-run `table/_contrast-where.mjs`: the nodes
+return to the graded set, painted, and pass on their own colours.
+
 ---
 
 ## 1. What the table actually is
@@ -607,10 +754,13 @@ firmly in scope as a hazard: it may never block, slow, or break a turn (**N-2**)
 hierarchy, type, motion and rhythm. It never moves what a feature does. Behaviour changes I believe
 are necessary are written up in § 9 and left **unbuilt**.
 
-**Unsealed 2026-08-23 by Marcus, for § 9.9, § 9.10 and § 9.11 only** — see **U-1** in § Amendments
-for the request, the reason and what was ruled out. Those three are built. Every other item in § 9
-stays unbuilt, and the seal is otherwise unchanged: nothing else in this run moves what a feature
-does.
+**Unsealed 2026-08-23 by Marcus, for § 9.9, § 9.10 and § 9.11** — see **U-1** in § Amendments for the
+request, the reason and what was ruled out. **Unsealed again 2026-08-24, for § 9.1** — see **U-2**.
+**Unsealed a third time 2026-08-25, for § 9.13** — see **U-3**, and note that U-3 is an unsealing by
+*interpretation* of "continue until this is finished and fully table ready", not by a direct request
+like the first two; U-3 says so itself rather than dressing it up as one.
+Those five are built. Every other item in § 9 stays unbuilt, and the seal is otherwise unchanged:
+nothing else in this run moves what a feature does.
 
 ---
 
@@ -903,8 +1053,9 @@ Behaviour is sealed. Everything below is a change I believe the table wants and 
 None of it is in the diff. Each entry says what it would change, what it would cost, and what it
 would buy — enough for Marcus to say yes or no without re-deriving the problem.
 
-> **Three of these were later unsealed and built — 9.9, 9.10 and 9.11, and only those.** See **U-1**
-> in § Amendments. Their entries below are left **exactly as first written**, with a BUILT block
+> **Five of these were later unsealed and built — 9.9, 9.10 and 9.11 (U-1), 9.1 (U-2), and 9.13
+> (U-3).** See
+> § Amendments. Their entries below are left **exactly as first written**, with a BUILT block
 > appended: the record of what was proposed has to survive the record of what was done, or the next
 > reader cannot tell a decision from a rationalisation. Everything else in § 9 is still unbuilt and
 > still just a line in this file.
@@ -923,6 +1074,48 @@ a decision about what happens to it on the other six screens. It changes what th
 control that was scrollable becomes permanent — so it is sealed. *Buys:* V-6 outright, and it is the
 single largest table win available. **This is the one I would build first.**
 
+> **BUILT — 2026-08-24, unsealed by Marcus (U-2), on the instruction "fix V-6, anchor the turn deck
+> to the bottom."** `src/components/TurnDeck.tsx`, plus the layout change that has to come with it.
+>
+> **The estimate above was wrong in one way worth recording: the deck was the easy half.** Making a
+> surface fixed is a few dozen lines. What actually cost the time is that *everything else on the
+> screen has to be told the strip is spoken for* — and the first attempt got that wrong in the
+> obvious way, by adding bottom padding. Padding clears the **end** of a page; it does nothing at
+> scroll-top, so the deck floated over live content and **V-6b went 13 → 24, worse than before I
+> started.** The fix is that `main` is now a bounded fixed region — `top-14` to
+> `bottom-[calc(4rem + var(--turn-deck-h) + safe-area)]` — and the deck publishes its own measured
+> height to that variable through a `ResizeObserver`. The page now **ends where the deck begins**
+> instead of sliding under it, which is the same repair 9.1b asks for and is why 9.1b is answered
+> here rather than separately. The dice button and the Veil pill ride off the same variable.
+>
+> **A latent bug this exposed, which had nothing to do with design.** `Layout.tsx` already called
+> `mainRef.current?.scrollTo({top: 0})` on every route change. That only does anything if `main` is
+> the scrolling box — and until this change it wasn't. "Each surface opens at its own top" had been
+> silently broken for as long as that line has existed. It works now.
+>
+> **What was deliberately NOT done.** The slot pips did not go behind a collapse. Nine pips at 48px
+> overflow a 390px row, and the tempting fix is to hide them until tapped — but a `display:none`
+> control is not graded by V-6 at all, so that would be passing the criterion by hiding its subject.
+> They wrap onto a second line instead. Only two genuinely rare spends (custom Lay-on-Hands amount,
+> Cure Poison) sit behind a disclosure, and that is recorded here rather than left for a reader to
+> discover.
+>
+> **A regression I shipped into this build and caught before the run of record.** The deck was
+> written `lg:hidden` — reasonable-looking, since the deck exists for a thumb — and at the same time
+> the three components it replaced were deleted from `CombatHelper` as dead code. Both changes are
+> defensible alone; together they **deleted the features on desktop.** Measured at 1280×800 with
+> `table/_desktop-deck.mjs`: slot-expend controls **15 → 0**, quick heals and Channel Divinity
+> **4 → 0**, the economy toggles gone and only a collapsible header named "Action Economy" left
+> pointing at nothing. Every criterion in this document grades 390×844 or 834×1112, both **below**
+> Tailwind's `lg`, so **not one check would have caught it** — this is precisely the class of hole
+> § 12's "the proof has been the weakest part of this project" is about. Fixed by dropping
+> `lg:hidden` and offsetting the deck past the desktop rail; re-measured, desktop now reports
+> **21 / 15 / 7, identical to the phone.** Recorded because I introduced it, and because reading the
+> class name is what made me check — I had first written this entry claiming the deck was fine.
+>
+> **Behaviour that moved, exactly and only:** three surfaces that scrolled away are now permanent.
+> Same handlers, same effects, same wording, same results. Nothing else in § 9 was touched.
+
 **9.1b · The two fixed overlays still float over mid-scroll content, and the § 10 screenshots show it.**
 P0-a in § 8 was repaired by reserving 9rem of bottom padding, which guarantees the *end* of every page
 clears the Veil pill and the dice roller. It does not — cannot — stop the two of them floating over
@@ -938,6 +1131,15 @@ composition where it is, is the bottom deck. **Listed here rather than fixed** b
 available to a design pass makes something else worse: shrinking the Veil to an icon takes the word
 off the one control that may never be missing, in a dim room; moving it into the header takes it out
 of thumb reach; deleting it is not on the table. *Cost:* subsumed by 9.1. *Buys:* the last of P0-a.
+
+> **PARTLY ANSWERED by 9.1 — on one screen, and the limit is stated rather than glossed.** The 9rem
+> of padding is gone; `main` is now bounded, so on **play/Combat** the page genuinely ends above the
+> deck and the two overlays sit above it rather than on top of content. **The other six screens do
+> not have a deck** — `--turn-deck-h` is `0px` there — so the Veil pill and dice button still float
+> over whatever is beneath them at mid-scroll on prep/Character, prep/Grimoire, prep/Persona,
+> prep/Academy, play/Grimoire and play/Roleplay. That is the *majority* of 9.1b's surface area still
+> open. The specific evidence quoted above — the Veil pill across the CLASS RESOURCES title — is on
+> Combat and is fixed; the general defect is not. **9.1b stays open.**
 
 **9.2 · There is no undo on the combat screen. S-4 is UNPROVEN for that reason, not because it is slow.**
 S-4 asks that a mis-tap be reversible within 100 ms. On the default combat screen there is no

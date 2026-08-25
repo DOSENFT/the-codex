@@ -123,6 +123,53 @@ export async function goScreen(page, screen) {
   await page.waitForTimeout(340);
 }
 
+/* Scroll whatever actually scrolls, and prove it moved. — A-27
+   ---------------------------------------------------------------------------
+   Every scroll in this harness was `window.scrollTo(0, …)`. That is right only
+   while the document is the scrolling box. When the app's layout became a
+   bounded region — fixed header, fixed tab bar, fixed turn deck, and a `main`
+   that owns the space between them — the document stopped scrolling:
+   `document.scrollHeight === innerHeight === 844`, `window.scrollY` stays 0 no
+   matter what you ask for, and `main` holds 1554px of content in a 480px box.
+
+   Nothing threw. Every "@bottom" measurement silently re-measured the top, the
+   V family got quieter, and it got quieter in the direction that looks like
+   progress. That is the most dangerous failure mode this document has, so this
+   helper does two things the old line could not: it scrolls the element that
+   really scrolls, and it reports whether the position actually changed so a
+   refusal can be treated as an error instead of as an empty screen. */
+export async function scrollPage(page, where = 'top') {
+  return page.evaluate(w => {
+    /* ON SCREEN, then largest. Picking the largest scroller outright chose a
+       CLOSED Mechanics drawer — 3769px of scroll height parked off-viewport —
+       over the 1554px `main` the user is actually looking at, so every screen
+       reported the same panel's rows as its own bottom. A scroller nobody can
+       see is not the page. */
+    const onScreen = e => {
+      const s = getComputedStyle(e), r = e.getBoundingClientRect();
+      return s.display !== 'none' && s.visibility !== 'hidden' && parseFloat(s.opacity || '1') > 0.05
+        && r.width > 1 && r.height > 1 && r.bottom > 0 && r.top < window.innerHeight;
+    };
+    const boxes = [...document.querySelectorAll('*')].filter(e =>
+      e.scrollHeight > e.clientHeight + 4 && /auto|scroll/.test(getComputedStyle(e).overflowY) && onScreen(e));
+    const el = boxes.sort((a, b) => (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight))[0]
+      || document.scrollingElement || document.documentElement;
+    const before = el.scrollTop;
+    el.scrollTop = w === 'top' ? 0 : el.scrollHeight;
+    // the document may also scroll on some screens; asking both costs nothing
+    window.scrollTo(0, w === 'top' ? 0 : document.documentElement.scrollHeight);
+    return { before, after: el.scrollTop, room: el.scrollHeight - el.clientHeight, tag: el.tagName.toLowerCase() };
+  }, where);
+}
+
+/** Scroll, and fail loudly if the bottom was asked for and the page refused. */
+export async function scrollOrThrow(page, where, label = '') {
+  const m = await scrollPage(page, where);
+  if (where !== 'top' && m.room > 4 && m.after === 0 && m.before === 0)
+    throw new Error(`scroll to bottom did not move ${label}: <${m.tag}> had ${m.room}px of room and stayed at 0`);
+  return m;
+}
+
 /* Hit-testing a page that is still moving is not a measurement. During a route
    crossfade both screens are in the DOM stacked on each other, and during a
    spring the painted position is not the settled one — either will report a
@@ -286,7 +333,19 @@ export const AUDIT_DOM = () => {
     const s = getComputedStyle(el), r = el.getBoundingClientRect();
     if (s.display === 'none' || s.visibility === 'hidden' || px(s.opacity) < 0.05) return false;
     if (r.width < 1 || r.height < 1) return false;
-    if (r.bottom < -50 || r.top > (document.documentElement.scrollHeight + 50)) return false;
+    /* A-27: the lower bound is "how far the content actually extends", and on
+       a bounded layout that is NOT `document.scrollHeight` — the document is
+       exactly one viewport tall and everything below the fold lives inside an
+       inner scroller. Read off the document this line dropped every node past
+       y≈894 as "not on the page at all". Take the furthest extent of the
+       document and any real scroller. */
+    const extent = Math.max(
+      document.documentElement.scrollHeight,
+      ...[...document.querySelectorAll('*')]
+        .filter(e => e.scrollHeight > e.clientHeight + 4 && /auto|scroll/.test(getComputedStyle(e).overflowY))
+        .map(e => e.scrollHeight),
+    );
+    if (r.bottom < -50 || r.top > (extent + 50)) return false;
     return true;
   };
   // effective background behind an element: climb until something opaque paints

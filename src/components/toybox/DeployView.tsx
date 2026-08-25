@@ -107,7 +107,7 @@ export function DeployView({
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div className="min-w-0 flex-1">
-          <h2 className="font-display text-lg font-semibold text-forge-0 truncate">
+          <h2 className="font-display text-xl font-semibold text-forge-0 truncate">
             {combo.name}
           </h2>
           <p className="text-xs text-forge-2 mt-0.5">
@@ -188,7 +188,7 @@ export function DeployView({
           </span>
 
           {/* Block label */}
-          <h3 className="font-display text-lg font-semibold text-forge-0 mb-2">
+          <h3 className="font-display text-xl font-semibold text-forge-0 mb-2">
             {block.label}
           </h3>
 

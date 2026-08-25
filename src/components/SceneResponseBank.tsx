@@ -167,8 +167,16 @@ export function SceneResponseBank({ character, onUpdate }: SceneResponseBankProp
               >
                 <div className="flex flex-col items-start gap-0.5">
                   <span className="text-sm font-medium text-forge-0">{situation}</span>
+                  {/* The count is its own span because it is its own rule.
+                      `--color-forge-2`'s note says it plainly: dim is for
+                      LABELS, never for a number — forge-2 is 5.40:1 and V-3
+                      puts every counter at 7:1. Measured here at 4.74–5.40:1
+                      across the six situation tiles. The WORD stays dim; the
+                      VALUE is forge-1 at 9.75:1, which is the hierarchy this
+                      app already declares and was not following. */}
                   <span className="text-xs text-forge-2">
-                    {responses.length} response{responses.length !== 1 ? 's' : ''}
+                    <span className="text-forge-1 font-medium tabular-nums">{responses.length}</span>
+                    {' '}response{responses.length !== 1 ? 's' : ''}
                   </span>
                 </div>
                 {isExpanded ? (
@@ -278,12 +286,17 @@ export function SceneResponseBank({ character, onUpdate }: SceneResponseBankProp
                         }
                       }}
                     />
+                    {/* Same unnamed-icon-button defect as EditableList's Add,
+                        and named the same way: only one of these is open at a
+                        time, but «Add response» would still be ambiguous the
+                        moment you cannot see which tile is expanded. */}
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={() => handleAddResponse(situation)}
                       disabled={!newResponse.trim()}
                       className="shrink-0"
+                      aria-label={`Add a ${situation.toLowerCase()} response`}
                     >
                       <Plus size={16} aria-hidden />
                     </Button>

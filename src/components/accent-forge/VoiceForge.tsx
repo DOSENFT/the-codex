@@ -212,7 +212,7 @@ export function VoiceForge({ character, onGenerate, onSelectAccent }: VoiceForge
       {/* ─── Header ─── */}
       <div className="flex items-center gap-3">
         <SlidersHorizontal size={20} className="text-arcane shrink-0" aria-hidden />
-        <h2 className="font-display text-lg font-semibold text-forge-0">
+        <h2 className="font-display text-xl font-semibold text-forge-0">
           Voice Forge
         </h2>
         {activePreset && (
@@ -279,7 +279,7 @@ export function VoiceForge({ character, onGenerate, onSelectAccent }: VoiceForge
       <GlassCard className="flex flex-col gap-4">
         <div className="flex items-center gap-2 mb-1">
           <SlidersHorizontal size={16} className="text-forge-2" aria-hidden />
-          <h3 className="font-display text-sm font-semibold text-forge-0">
+          <h3 className="text-sm font-semibold text-forge-0">
             Voice Parameters
           </h3>
         </div>
@@ -384,7 +384,7 @@ export function VoiceForge({ character, onGenerate, onSelectAccent }: VoiceForge
       <GlassCard className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <BookOpen size={16} className="text-forge-2 shrink-0" aria-hidden />
-          <h3 className="font-display text-sm font-semibold text-forge-0">
+          <h3 className="text-sm font-semibold text-forge-0">
             Voice Description
           </h3>
         </div>
@@ -411,7 +411,7 @@ export function VoiceForge({ character, onGenerate, onSelectAccent }: VoiceForge
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Save size={16} className="text-forge-2 shrink-0" aria-hidden />
-            <h3 className="font-display text-sm font-semibold text-forge-0">
+            <h3 className="text-sm font-semibold text-forge-0">
               Saved Profiles
             </h3>
             <Badge variant="neutral">{savedProfiles.length}</Badge>

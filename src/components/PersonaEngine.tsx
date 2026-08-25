@@ -77,10 +77,18 @@ function EditableList({
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5',
                 'text-sm border transition-colors',
-                variant === 'arcane' && 'bg-arcane/10 border-arcane/20 text-arcane',
-                variant === 'ember' && 'bg-ember/10 border-ember/20 text-ember',
+                /* Lit ink, base-accent ground. These chips are his fears, his
+                   bonds and his flaws — «abandonment», «harming those he
+                   loves» — and in eldritch on an eldritch/10 fill they
+                   measured 3.98–4.13:1 at 14px, under V-2's floor. This is
+                   the prep screen he reads before a session to remember who
+                   he is playing; it is the last content in the app that
+                   should be a squint. Fill and border unchanged, so the
+                   colour still sorts fears from bonds at a glance. */
+                variant === 'arcane' && 'bg-arcane/10 border-arcane/20 text-arcane-lit',
+                variant === 'ember' && 'bg-ember/10 border-ember/20 text-ember-lit',
                 variant === 'verdant' && 'bg-verdant/10 border-verdant/20 text-verdant',
-                variant === 'eldritch' && 'bg-eldritch/10 border-eldritch/20 text-eldritch',
+                variant === 'eldritch' && 'bg-eldritch/10 border-eldritch/20 text-eldritch-lit',
                 variant === 'neutral' && 'bg-white/[0.06] border-white/10 text-forge-1',
               )}
             >
@@ -103,6 +111,11 @@ function EditableList({
           value={newItem}
           onChange={e => setNewItem(e.target.value)}
           placeholder={placeholder}
+          /* The <label> above is a bare <label> with no htmlFor and this input
+             has no id, so it names nothing — it is a styled word sitting near
+             a box. Naming the input directly is the smaller change and does
+             not require minting ids for a list that renders five times. */
+          aria-label={label}
           className={cn(
             'min-h-[44px] flex-1 rounded-xl',
             'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
@@ -120,12 +133,20 @@ function EditableList({
             }
           }}
         />
+        {/* The icon is aria-hidden, which was the whole name this button had.
+            Found by the occlusion probe, of all things: the audit could only
+            call it «BUTTON» because that is genuinely all it is called. Five
+            of these render on prep/Persona at once — bonds, flaws, fears,
+            ideals, traits — so «Add» alone would have named five different
+            buttons the same thing. `label` is already in scope and already
+            says which list this is. */}
         <Button
           variant="secondary"
           size="sm"
           onClick={handleAdd}
           disabled={!newItem.trim()}
           className="shrink-0"
+          aria-label={`Add to ${label}`}
         >
           <Plus size={16} aria-hidden />
         </Button>

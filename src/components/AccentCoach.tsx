@@ -293,7 +293,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
                 className="w-full text-left flex flex-col gap-2.5 min-h-[44px]"
               >
                 <div className="flex items-center justify-between w-full">
-                  <h4 className="font-display text-sm font-semibold text-forge-0">
+                  <h4 className="text-sm font-semibold text-forge-0">
                     {accent.name}
                   </h4>
                   <Badge variant="arcane">{accent.rules.length} rules</Badge>
@@ -355,7 +355,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
         >
           <div className="flex items-center gap-2.5">
             <BookOpen size={16} className="text-arcane" aria-hidden />
-            <span className="font-display text-sm font-semibold text-forge-0">
+            <span className="text-sm font-semibold text-forge-0">
               Phonetic Rules
             </span>
             <Badge variant="neutral">{selectedAccent.rules.length}</Badge>
@@ -387,7 +387,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
           <Music size={16} className="text-gold" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0 tracking-wide">
+          <span className="text-sm font-semibold text-forge-0 tracking-wide">
             Practice Phrases
           </span>
         </div>
@@ -431,7 +431,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
       <GlassCard className="border-gold/25">
         <div className="flex items-center gap-2.5 mb-3">
           <Mic size={16} className="text-gold" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0 tracking-wide">
+          <span className="text-sm font-semibold text-forge-0 tracking-wide">
             Record Yourself
           </span>
         </div>
@@ -576,7 +576,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
         >
           <div className="flex items-center gap-2.5">
             <Sparkles size={16} className="text-eldritch" aria-hidden />
-            <span className="font-display text-sm font-semibold text-forge-0">
+            <span className="text-sm font-semibold text-forge-0">
               AI Custom Phrases
             </span>
           </div>
@@ -703,7 +703,7 @@ export function AccentCoach({ character }: AccentCoachProps) {
         >
           <div className="flex items-center gap-2.5">
             <Lightbulb size={16} className="text-ember" aria-hidden />
-            <span className="font-display text-sm font-semibold text-forge-0">
+            <span className="text-sm font-semibold text-forge-0">
               Tips &amp; Rhythm
             </span>
           </div>

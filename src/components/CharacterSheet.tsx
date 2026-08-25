@@ -473,7 +473,7 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-3">
           <div>
-            <h2 className="font-display text-lg font-bold text-forge-0">{character.name}</h2>
+            <h2 className="font-display text-xl font-bold text-forge-0">{character.name}</h2>
             <p className="text-xs text-forge-2">
               {character.race} {character.class} ({character.subclass}) &middot; Lvl {character.level}
             </p>

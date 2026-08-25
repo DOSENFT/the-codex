@@ -64,7 +64,7 @@ function Section({
         )}
       >
         <Icon size={16} className="text-arcane shrink-0" />
-        <span className="font-display text-sm font-semibold text-forge-0 flex-1">{title}</span>
+        <span className="text-sm font-semibold text-forge-0 flex-1">{title}</span>
         {count !== undefined && count > 0 && (
           <Badge variant="arcane">{count}</Badge>
         )}

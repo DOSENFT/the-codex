@@ -511,7 +511,14 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                   <button
                     type="button"
                     onClick={() => handleCopy(hook.text, hook.id)}
-                    className="flex-1 min-w-0 text-left active:scale-[0.99] transition-transform"
+                    /* `self-stretch` is the whole fix for V-5 here. The row is
+                       already min-h-[48px], but the parent is `items-center`, so
+                       this button shrank to its text — 170×40, four pixels under
+                       the floor — while LOOKING like the full-width row it sits
+                       in. A tap target that is smaller than the thing it appears
+                       to be is worse than an honestly small one: he aims at the
+                       row and misses low. */
+                    className="flex-1 min-w-0 self-stretch flex items-center text-left active:scale-[0.99] transition-transform"
                   >
                     <span className="break-words">
                       {hook.text}
@@ -576,7 +583,14 @@ export function EngageCard({ character, sceneContext, expanded, onToggle, onChar
                     <button
                       type="button"
                       onClick={() => handleCopy(hook.text, hook.id)}
-                      className="flex-1 min-w-0 text-left active:scale-[0.99] transition-transform"
+                      /* `self-stretch` is the whole fix for V-5 here. The row is
+                       already min-h-[48px], but the parent is `items-center`, so
+                       this button shrank to its text — 170×40, four pixels under
+                       the floor — while LOOKING like the full-width row it sits
+                       in. A tap target that is smaller than the thing it appears
+                       to be is worse than an honestly small one: he aims at the
+                       row and misses low. */
+                    className="flex-1 min-w-0 self-stretch flex items-center text-left active:scale-[0.99] transition-transform"
                     >
                       <span className="break-words">{hook.text}</span>
                     </button>

@@ -91,7 +91,7 @@ function RapidCard({
       <div ref={cardRef} className="flex flex-col gap-2.5">
         {/* Name row + anchor vowel */}
         <div className="flex items-center justify-between gap-3">
-          <h4 className="font-display text-sm font-semibold text-forge-0 truncate">
+          <h4 className="text-sm font-semibold text-forge-0 truncate">
             {accent.name}
           </h4>
           <span className="inline-flex bg-arcane/10 text-arcane text-xs font-mono px-2 py-0.5 rounded-md shrink-0 select-none">

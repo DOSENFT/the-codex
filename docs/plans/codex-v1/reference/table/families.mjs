@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   freshCtx, goScreen, SCREENS, importFile, storedChars, storedChar, judge, audit, drain, watch,
-  deadOrigin, settle, TABLET, pixelContrast,
+  deadOrigin, settle, TABLET, pixelContrast, scrollPage, scrollOrThrow,
 } from './rig.mjs';
 
 export const THRESH = {
@@ -893,10 +893,28 @@ export async function familyV(b, R, opts) {
 
   for (const s of SCREENS) {
     await goScreen(page, s);
-    // measure the whole scroll height, not just the first fold
-    const pages = await page.evaluate(() => Math.ceil(document.documentElement.scrollHeight / window.innerHeight));
+    /* measure the whole scroll height, not just the first fold — A-27: both the
+       page COUNT and the paging must come from the element that actually
+       scrolls. Read off the document they became 844/844 = one fold, so this
+       walk measured the first screen and called it the whole surface: the count
+       of nodes graded off painted pixels fell from 3018 to 109, and every
+       V-2b/V-3b number under it got quieter for that reason and no other. */
+    /* Same rule as rig.scrollPage: ON SCREEN first, then largest — a closed
+       drawer holds more scroll height than the page and is not the page. */
+    const SCROLLER = `(() => {
+      const on = e => { const s = getComputedStyle(e), r = e.getBoundingClientRect();
+        return s.display !== 'none' && s.visibility !== 'hidden' && parseFloat(s.opacity || '1') > 0.05
+          && r.width > 1 && r.height > 1 && r.bottom > 0 && r.top < window.innerHeight; };
+      const b = [...document.querySelectorAll('*')].filter(e =>
+        e.scrollHeight > e.clientHeight + 4 && /auto|scroll/.test(getComputedStyle(e).overflowY) && on(e));
+      return b.sort((x, y) => (y.scrollHeight - y.clientHeight) - (x.scrollHeight - x.clientHeight))[0]
+        || document.scrollingElement || document.documentElement; })()`;
+    const pages = await page.evaluate(`(() => { const el = ${SCROLLER};
+      return Math.ceil(el.scrollHeight / Math.max(1, el.clientHeight)); })()`);
     for (let i = 0; i < Math.min(pages, 6); i++) {
-      await page.evaluate(n => window.scrollTo(0, n * window.innerHeight), i);
+      await page.evaluate(`(() => { const el = ${SCROLLER};
+        el.scrollTop = ${i} * el.clientHeight;
+        window.scrollTo(0, ${i} * window.innerHeight); })()`);
       await page.waitForTimeout(220);
       const a = await audit(page);
       // A-14 — the nodes bgOf() could not divide, measured from the painted
@@ -940,7 +958,7 @@ export async function familyV(b, R, opts) {
       // bottom" moves out from under you. Two rounds, then confirm the height
       // stopped changing — anything still under the bar now is under it for good.
       for (let k = 0; k < 3; k++) {
-        await page.evaluate(w => window.scrollTo(0, w === 'top' ? 0 : document.documentElement.scrollHeight), at);
+        await scrollOrThrow(page, at, `${s.id} @${at}`);
         await settle(page);
       }
       const a = await audit(page);
@@ -965,7 +983,7 @@ export async function familyV(b, R, opts) {
 
     // thumb zone: only on the default combat screen, only spend controls + tabs
     if (s.id === 'play/Combat') {
-      await page.evaluate(() => window.scrollTo(0, 0));
+      await scrollPage(page, 'top');
       await page.waitForTimeout(200);
       const a = await audit(page);
       for (const c of a.touch) {
@@ -1004,7 +1022,7 @@ export async function familyV(b, R, opts) {
     await goScreen(tab.page, s);
     for (const at of ['top', 'bottom']) {
       for (let k = 0; k < 3; k++) {
-        await tab.page.evaluate(w => window.scrollTo(0, w === 'top' ? 0 : document.documentElement.scrollHeight), at);
+        await scrollOrThrow(tab.page, at, `tablet ${s.id} @${at}`);
         await settle(tab.page);
       }
       const a = await audit(tab.page);

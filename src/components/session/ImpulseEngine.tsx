@@ -45,6 +45,11 @@ const SITUATIONS: SituationButton[] = [
   { label: 'Request!',     color: 'arcane' },
 ]
 
+/* Ink lit, ground unchanged — the same move as the condition chips and for the
+   same measurement. «Betrayal!» and «Insult!» in eldritch on eldritch/10 came
+   in at 4.48:1 and 4.47:1 at 14px, two hundredths under V-2's floor. A miss
+   that small is not a rounding error to wave through; it is the exact size of
+   miss that survives every review because it looks like a pass. */
 const SITUATION_COLOR_MAP: Record<SituationButton['color'], {
   bg: string
   border: string
@@ -54,7 +59,7 @@ const SITUATION_COLOR_MAP: Record<SituationButton['color'], {
   ember: {
     bg: 'bg-ember/10',
     border: 'border-ember/25',
-    text: 'text-ember',
+    text: 'text-ember-lit',
     hoverBg: 'hover:bg-ember/15',
   },
   verdant: {
@@ -66,13 +71,13 @@ const SITUATION_COLOR_MAP: Record<SituationButton['color'], {
   arcane: {
     bg: 'bg-arcane/10',
     border: 'border-arcane/25',
-    text: 'text-arcane',
+    text: 'text-arcane-lit',
     hoverBg: 'hover:bg-arcane/15',
   },
   eldritch: {
     bg: 'bg-eldritch/10',
     border: 'border-eldritch/25',
-    text: 'text-eldritch',
+    text: 'text-eldritch-lit',
     hoverBg: 'hover:bg-eldritch/15',
   },
 }

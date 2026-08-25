@@ -1049,12 +1049,17 @@ export function DialogueBank({ character, onUpdate }: DialogueBankProps) {
               }
             }}
           />
+          {/* Third instance of the unnamed-icon-button pattern (see
+              EditableList and SceneResponseBank). `activeContext` is what the
+              textarea beside it already promises — combat, social, discovery —
+              so the button says the same thing the placeholder does. */}
           <Button
             variant="secondary"
             size="sm"
             onClick={handleAdd}
             disabled={!newText.trim()}
             className="shrink-0"
+            aria-label={`Add a ${activeContext} line`}
           >
             <Plus size={16} aria-hidden />
           </Button>

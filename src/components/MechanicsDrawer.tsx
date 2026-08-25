@@ -48,7 +48,10 @@ function CategoryChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'shrink-0 min-h-[44px] px-3.5 rounded-xl',
+        /* 44px → 48px. The topic chips include "Action Economy", which is a
+           thing you reach for mid-turn to check a rule, so V-5b's turn floor
+           applies rather than the general 44. */
+        'shrink-0 min-h-[48px] px-3.5 rounded-xl',
         'text-xs font-medium whitespace-nowrap',
         'transition-all duration-200 ease-forge',
         'active:scale-[0.95]',

@@ -244,7 +244,7 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
             {scenario.enemies.map((enemy, i) => (
               <GlassCard key={i}>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-display text-sm font-semibold text-forge-0">{enemy.name}</h4>
+                  <h4 className="text-sm font-semibold text-forge-0">{enemy.name}</h4>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5 text-xs">
                       <Shield size={13} className="text-arcane" aria-hidden />
@@ -396,7 +396,7 @@ export function TrainingHub({ character, onCharacterUpdate }: TrainingHubProps) 
             <GlassCard className="animate-slide-up border-arcane/20">
               <div className="flex items-center gap-2.5 mb-3">
                 <Target size={18} className="text-arcane" aria-hidden />
-                <h4 className="font-display text-base font-semibold text-forge-0">Tactical Evaluation</h4>
+                <h4 className="font-display text-xl font-semibold text-forge-0">Tactical Evaluation</h4>
               </div>
               <div className="text-sm text-forge-1 leading-relaxed whitespace-pre-wrap">
                 {evaluation}

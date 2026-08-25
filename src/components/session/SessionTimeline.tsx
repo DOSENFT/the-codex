@@ -106,8 +106,11 @@ export function SessionTimeline({ moments, onEndSession }: SessionTimelineProps)
           <p className="text-sm font-semibold text-forge-0">
             Session Timeline
           </p>
+          {/* Same split as SceneResponseBank: the VALUE carries V-3's 7:1,
+              the word beside it does not. forge-2 measured 4.96–5.00:1 here. */}
           <span className="text-xs text-forge-2">
-            {moments.length} moment{moments.length !== 1 ? 's' : ''}
+            <span className="text-forge-1 font-medium tabular-nums">{moments.length}</span>
+            {' '}moment{moments.length !== 1 ? 's' : ''}
           </span>
         </div>
 
@@ -128,7 +131,8 @@ export function SessionTimeline({ moments, onEndSession }: SessionTimelineProps)
               {patternData.map(({ type, pct }) => (
                 <span key={type} className="flex items-center gap-1 text-xs text-forge-2">
                   <span className={cn('w-2 h-2 rounded-full', PATTERN_COLORS[type])} />
-                  {type} {pct}%
+                  {type}{' '}
+                  <span className="text-forge-1 font-medium tabular-nums">{pct}%</span>
                 </span>
               ))}
             </div>

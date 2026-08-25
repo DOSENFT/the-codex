@@ -630,7 +630,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2.5">
                 <Sparkles size={16} className="text-arcane" aria-hidden />
-                <span className="font-display text-sm font-semibold text-forge-0">
+                <span className="text-sm font-semibold text-forge-0">
                   Accent Translator
                 </span>
                 <Badge variant="arcane">AI</Badge>
@@ -783,7 +783,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2.5">
                 <Mic size={16} className="text-arcane" aria-hidden />
-                <span className="font-display text-sm font-semibold text-forge-0">
+                <span className="text-sm font-semibold text-forge-0">
                   Phrase Pronunciation Drill
                 </span>
                 <Badge variant="neutral">{accent.phrases.length}</Badge>
@@ -814,7 +814,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
       <GlassCard>
         <div className="flex items-center gap-2.5 mb-4">
           <Music size={16} className="text-arcane" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0">
+          <span className="text-sm font-semibold text-forge-0">
             Vocal Parameters
           </span>
         </div>
@@ -854,7 +854,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
       <ParchmentCard>
         <div className="flex items-center gap-2.5 mb-3">
           <Music size={16} className="text-ember" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0">
+          <span className="text-sm font-semibold text-forge-0">
             Rhythm &amp; Cadence
           </span>
         </div>
@@ -889,7 +889,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
           <BookOpen size={16} className="text-arcane" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0">
+          <span className="text-sm font-semibold text-forge-0">
             Practice Phrases
           </span>
           <Badge variant="neutral">{accent.phrases.length}</Badge>
@@ -917,7 +917,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
           <Users size={16} className="text-eldritch" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0">
+          <span className="text-sm font-semibold text-forge-0">
             NPC Archetypes
           </span>
         </div>
@@ -936,7 +936,7 @@ export function AccentDetailView({ accentId, onBack, character }: AccentDetailVi
       <GlassCard>
         <div className="flex items-center gap-2.5 mb-3">
           <Lightbulb size={16} className="text-ember" aria-hidden />
-          <span className="font-display text-sm font-semibold text-forge-0">Tips</span>
+          <span className="text-sm font-semibold text-forge-0">Tips</span>
         </div>
 
         <ul className="flex flex-col gap-2">

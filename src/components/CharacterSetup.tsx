@@ -1054,7 +1054,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
               <StepIcon size={20} aria-hidden />
             </div>
             <div>
-              <h2 className="font-display text-lg font-semibold text-forge-0">
+              <h2 className="font-display text-xl font-semibold text-forge-0">
                 {title}
               </h2>
               <p className="text-sm text-forge-2">{subtitle}</p>

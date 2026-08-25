@@ -149,7 +149,7 @@ export function SpellSlotSigils({
             {/* Roman numeral level label — grimoire chapter number */}
             <span
               className={cn(
-                'font-display text-xs font-bold gold-gradient-text',
+                'text-xs font-bold gold-gradient-text',
                 'tracking-[0.1em] leading-none',
                 'w-8 shrink-0 text-right pr-2',
                 'select-none',

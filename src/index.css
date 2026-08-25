@@ -17,7 +17,23 @@
      colour coding survives the legibility floor instead of losing to it.
      (--d-ember carries the same annotation for the same reason.) */
   --color-eldritch-lit: #b39cff;
+  /* Arcane and ember needed the same treatment for the same reason, and the
+     note above already predicted it. Measured on 2026-08-25 off the painted
+     pixels: the Roleplay action-card count badges print their tally in the
+     card's own accent — arcane at 6.82:1 and ember at 6.80:1 against the 10%-
+     tinted chip they sit on. Both miss V-3's 7:1 by less than a fifth of a
+     point, which is the most dangerous kind of miss: it looks fine on a desk
+     at noon and it is a squint at 60 cm in a dim room, which is the only
+     condition this app is ever used in.
+
+     These are INK ONLY. The chip fills, the borders and the 3px card rules
+     still use the base accent, so the colour coding and the temperature of
+     the app are unchanged — only the glyphs got lit. Same hue, same role,
+     above the floor: arcane-lit 9.39:1, ember-lit 9.04:1 on the grounds where
+     they were caught. */
+  --color-arcane-lit: #e8c87a;
   --color-ember: #e8924a;
+  --color-ember-lit: #f5b183;
   --color-verdant: #39d98a;
   --color-gold: #c5a55a;
   --color-bronze: #8b7355;

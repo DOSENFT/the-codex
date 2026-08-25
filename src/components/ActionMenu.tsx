@@ -445,7 +445,7 @@ export function ActionMenu({ isOpen, onClose, character, combatState, onUseActio
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-2">
-          <h2 className="font-display text-base font-semibold text-forge-0 tracking-tight">
+          <h2 className="font-display text-xl font-semibold text-forge-0 tracking-tight">
             {FILTER_HEADERS[filter]}
           </h2>
           <button

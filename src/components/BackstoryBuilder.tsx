@@ -131,7 +131,7 @@ function CollapsibleSection({
           <ChevronRight size={16} className="text-forge-2 shrink-0" aria-hidden />
         )}
         <Icon size={16} className="text-ember shrink-0" aria-hidden />
-        <span className="font-display text-sm font-semibold text-forge-0 flex-1">{title}</span>
+        <span className="text-sm font-semibold text-forge-0 flex-1">{title}</span>
         {count !== undefined && count > 0 && (
           <Badge variant="neutral">{count}</Badge>
         )}
