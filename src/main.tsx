@@ -11,7 +11,6 @@ import './index.css'
 // block has to beat any screen rule Tailwind emitted above it. Slice 14.
 import './design/print.css'
 import App from './App'
-import { Veil } from './components/safety/Veil'
 import { registerServiceWorker } from './pwa/register'
 
 createRoot(document.getElementById('root')!).render(
@@ -27,18 +26,26 @@ createRoot(document.getElementById('root')!).render(
         the same argument as the blanket CSS rule: a central switch cannot fall
         out of date, and a per-component convention already had.
 
-        It stays here rather than inside App for the same reason the Veil does
-        — App returns early three times, and a config mounted inside it would
-        be absent on exactly the screens nobody remembers to check. */}
+        It stays here rather than inside App because App returns early three
+        times, and a config mounted inside it would be absent on exactly the
+        screens nobody remembers to check. */}
     <MotionConfig reducedMotion="user">
+      {/* THE VEIL WAS MOUNTED HERE, and it is gone by Marcus's instruction of
+          2026-08-25: "remove the Veil feature/button. Don't know what it is nor
+          if I'd ever use it, and it just gets in the way." (Unsealing U-4;
+          TABLE-READY §9.16 and the criterion log at the top of that file.)
+
+          `safety/Veil.tsx` and `safety-d.css` are LEFT ON DISK, not deleted.
+          Rollup tree-shakes an unreachable module, so an unmounted component
+          costs zero bytes in the bundle — and restoring the feature is then one
+          import and one element rather than a recovery from git. The covenant
+          itself (lines and veils, in Settings) is untouched: it is a list he can
+          ignore, not a control that sits over the fight.
+
+          If you are re-adding it, it goes HERE, outside <App/>, and the reason
+          is in Veil.tsx's header: App returns early three times, so a veil
+          mounted inside App is absent on the three screens nobody checks. */}
       <App />
-      {/* Outside App on purpose, and this is the whole of Slice 12's promise.
-          App returns early three times — loading, no character yet, and the ?d=1
-          turn view — so a veil mounted inside it is missing on three screens.
-          Here it is on every screen there is, including the ones that are not
-          the app proper. Moving this line inside App or Layout breaks the one
-          thing this control exists to guarantee. */}
-      <Veil />
     </MotionConfig>
   </StrictMode>,
 )

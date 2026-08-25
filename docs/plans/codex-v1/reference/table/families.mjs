@@ -277,22 +277,38 @@ export async function familyF(b, R, opts) {
       problems.length === 0, problems.join('; ') || `\n         ${text.slice(0, 300)}`);
     await ctx.close();
   }
-  { // F-5
+  { /* F-5 — INVERTED at A-44, and the inversion is the point.
+       This row used to read "the veil is on every screen, including the three
+       early returns", and it PASSED on every run this project ever made. Marcus
+       removed the feature on 2026-08-25 (U-4), so the criterion lost its
+       subject. The freeze rule forbids deleting a criterion to make something
+       pass, and deleting this one would have been the easy move — it costs a
+       row and nobody would have missed it.
+       Instead it now grades the OPPOSITE fact with the same rigour, on the same
+       nine surfaces: the control must be absent EVERYWHERE, including the three
+       screens App returns early on, which are exactly where a half-finished
+       removal would leave it behind. A deleted row proves nothing. This row can
+       still fail, and it fails if the removal is incomplete. */
     const { ctx, page } = await freshCtx(b, opts);
     await importFile(page, realCopy('full'));
-    const missing = [];
+    const present = [];
+    /* Both the button and the raised scene, by role AND by the data attribute
+       the old control carried, so a rename cannot make this pass by accident. */
+    const anyVeil = async p =>
+      (await p.getByRole('button', { name: /Veil this scene/i }).count())
+      + (await p.locator('[data-veil-control], .veil-btn, .veil-scene').count());
     for (const s of SCREENS) {
       await goScreen(page, s);
-      if (!(await page.getByRole('button', { name: /Veil this scene/i }).count())) missing.push(s.id);
+      if (await anyVeil(page)) present.push(s.id);
     }
     // and on the screens App returns early on: welcome, and ?d=1
     const { ctx: c2, page: p2 } = await freshCtx(b, opts);
-    if (!(await p2.getByRole('button', { name: /Veil this scene/i }).count())) missing.push('welcome');
+    if (await anyVeil(p2)) present.push('welcome');
     await p2.goto(opts.base + '?d=1', { waitUntil: 'networkidle' });
     await p2.waitForTimeout(600);
-    if (!(await p2.getByRole('button', { name: /Veil this scene/i }).count())) missing.push('?d=1');
+    if (await anyVeil(p2)) present.push('?d=1');
     await c2.close();
-    R.check('F-5', 'the veil is on every screen, including the three early returns', missing.length === 0, 'missing on: ' + missing.join(', '));
+    R.check('F-5', 'the veil control is gone from every screen, including the three early returns (U-4)', present.length === 0, 'still present on: ' + present.join(', '));
     await ctx.close();
   }
   { // F-6

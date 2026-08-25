@@ -97,6 +97,76 @@ taking the lower of each pool. It is fewer taps and it is wrong: it invents a th
 neither the file nor the session, and it would be silent, which is the property that made R-10 a
 defect in the first place. A loud wrong answer he can overrule beats a quiet one he cannot see.
 
+**U-4 · 2026-08-25 · § 3 — BEHAVIOUR UNSEALED, to REMOVE a feature (the veil), by Marcus, directly.**
+The first time an unsealing takes something out rather than putting something in, and the first time
+the instrument's own subject has been deleted by the owner.
+
+*Old text (§ 3):* as amended by U-3 — *"Unsealed 2026-08-23 by Marcus for § 9.9, § 9.10 and § 9.11;
+2026-08-24 for § 9.1; and 2026-08-25 for § 9.13."*
+
+*New text (§ 3):* **"…; and 2026-08-25 for the removal of the veil control (§ 9.16, U-4).** Those six
+are built. Every other item in § 9 stays unbuilt."
+
+*What he said, in full:* **"Can you also remove the Veil feature/button. Don't know what it is nor if
+I'd ever use it, and it just gets in the way."**
+
+*What the veil was, since the instruction says he does not know:* the tabletop **lines-and-veils**
+safety convention, built as one always-present button. Pressing it blacked the screen to *"The scene
+is veiled — we move past this one"*, recorded nothing anywhere, and returned on one deliberate press.
+It was for the table, not for the sheet: a way for anyone present to move past something without
+having to say why. **He is the only user, it is his table, and it is his to remove — but he removed a
+thing he had not been told the purpose of, so the purpose is written here rather than left in a
+component header he will never open.** If that description changes his mind, restoring it is one
+import and one element in `main.tsx`, which is why the files were not deleted.
+
+*Why it was built as a permanent floating button, which is the part that annoyed him:* the whole
+design was that it could not be switched off or missed — mounted outside `<App/>` so it survived
+three early returns, taking no props and reading no settings. That is also precisely what made it a
+fixed object sitting over the fight on every screen. **The property that made it trustworthy is the
+property that made it get in the way; there was no version of it that was both.** So this is not a
+bug being fixed, it is a trade being reversed by the person entitled to reverse it.
+
+*Scope, stated narrowly because "remove the Veil feature" could be read wider:* the always-present
+**control** is unmounted. The **covenant** (the lines-and-veils list in Settings) is untouched — it is
+a page he can ignore, not a control that sits over the fight, and he did not ask for it. If he wants
+that gone too it is a separate word and a separate commit.
+
+*Nothing was deleted from disk.* `src/components/safety/Veil.tsx` and `safety-d.css` remain, unmounted.
+Rollup tree-shakes an unreachable module, so the bundle cost is zero — **verified, not assumed:**
+after the build, `Veil this scene` appears in no JS chunk and `.veil-btn` / `.veil-scene` in no CSS
+chunk. Deleting files is ASK-FIRST under Command's guardrails, and unmounting achieves the whole of
+what he asked for without spending that permission.
+
+**A-44 · 2026-08-25 · § 5 — criterion F-5 INVERTED (not deleted). The freeze rule's first real
+test, because deleting this row would have cost nothing and nobody would have noticed.**
+
+*Old text (F-5):* **"the veil is on every screen, including the three early returns."**
+
+*New text (F-5):* **"the veil control is gone from every screen, including the three early returns
+(U-4)."**
+
+*Reason:* U-4 removed the feature this row graded, so the row lost its subject. **The obvious move was
+to delete it** — it had PASSED on every run this project ever made, so deleting it could not have been
+accused of hiding a failure, and the tally would simply have gone from 60 rows to 59 with no one the
+wiser. That is exactly the move the freeze rule exists to stop, and the rule does not carve out an
+exception for deletions that happen to be innocent. **A deleted row proves nothing.**
+
+So the criterion now grades the opposite fact with the same rigour, across the same nine surfaces —
+seven screens plus `welcome` and `?d=1`, the two screens App returns early on, which are precisely
+where a half-finished removal would leave the control behind. It matches on the ARIA name, on
+`[data-veil-control]`, and on both CSS class names, so a rename cannot make it pass by accident.
+**It can still fail, and it fails if the removal is incomplete.** That is the whole difference between
+retiring a criterion and dropping one.
+
+*Not affected:* the row count stays at 60, so § 12's composite arithmetic needs no adjustment and no
+headline number moves for a reason a reader cannot see.
+
+*One casualty, named rather than quietly fixed:* `reference/prove-slice12.mjs` — the retired
+slice-level prover for the veil — now fails, because it asserts the button is visible. It is not part
+of `prove-table.mjs` and is not in any tally. It is left failing and untouched: it is the honest
+record of what Slice 12 required, and editing a superseded prover so it agrees with a later decision
+is how history gets rewritten to look inevitable.
+
 **A-1 · 2026-08-23 · § 5 — two criteria ADDED (P-0.7, P-0.8).** Nothing softened, nothing removed.
 P-0.1–P-0.6 were written to be calibrated against *injected* defects. While building the harness a
 real known-bad build became available — `73c45d8`, the SHA deployed at the live URL right now — so
