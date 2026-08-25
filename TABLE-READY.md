@@ -1550,6 +1550,169 @@ same verdicts as `73e4bd1`**; the only differences in the transcript are HEAD, f
 and the poisoned-cache hash. The portal work broke nothing, and that is measured rather than
 asserted.
 
+**A-42 · 2026-08-25 · P-1, P-2 and P-4 close on measurement at `247beda`. One real 1px defect found
+and fixed. Three consecutive attempts to explain V-6b's twelve findings were VOID by their own
+pre-stated conditions, and the mechanism is therefore reported as UNPROVEN rather than explained.**
+
+Two of the four parts below are results. The other two are failures of my own instruments, logged at
+the same weight, because § 1 opens on three shipments where the check was green and the artifact was
+not the one checked — and a probe that answers confidently about the wrong thing is that failure with
+a different face. No criterion's text, threshold, selector or pass floor moves in this amendment.
+
+**(a) The proof rows close, and they close on three equal SHAs rather than on an argument.**
+
+Marcus pushed `247beda`. Pages run `32849575353` built it, success. Both live instruments were then
+re-run against the deploy:
+
+| instrument | result at `247beda` |
+|---|---|
+| `prove-table.mjs --live` | **39 pass · 3 fail · 3 unproven · 699 s** (`table/run-247beda-live.log`) |
+| `same-build.mjs` | **SAME BUILD** — 82 files, **78 byte-identical**, 4 differing only in the five named machine-specific classes; deployed commit == local HEAD |
+
+At `810584c` the live run was **33 pass · 9 fail**. Six live failures are gone — V-2b, V-3b, V-4,
+V-5, V-5b and R-10 all pass on the deployed build. What remains live is one family: V-6, V-6b, V-6c.
+
+**P-1 was very nearly closed on an equivalence argument, and that is worth recording because it is
+the exact move this document exists to prevent.** The local run of record was at `20fe1a1`; the
+deploy is `247beda`. `git diff --stat 20fe1a1..247beda` over `src/`, `index.html`, `vite.config.ts`,
+`package.json`, `package-lock.json` and `public/` is **empty** — every commit between them touched
+only `TABLE-READY.md` and `docs/`, so the build inputs are provably identical and the argument that
+P-1 was satisfied is *sound*. P-1's frozen text nonetheless says three SHAs are equal, not that a
+reasonable person would accept them as equivalent. So the full local harness was re-run at `247beda`
+(`table/run-247beda.log`, **54 pass · 5 fail · 1 unproven · 939 s**), returning **the identical
+verdict set** to `20fe1a1`. The rows close on the measurement, not on the argument.
+
+**(b) The tab bar's own border was never reserved. Found, fixed, proven — and it fixed nothing else,
+which is also reported.**
+
+`Layout.tsx` pins `<main>` with `bottom-[calc(4rem+…)]` = 64px. The tab bar's `h-16` sits on the
+nav's **inner div**, not on the `<nav>`, and the `<nav>` separately carries `border-t`. Border-box
+therefore makes the bar 64+1 = **65px** against a 64px reserve, so main's last painted pixel row sat
+underneath the bar. The asymmetry is the reason this had to be measured rather than read off the
+class names: `h-14` *is* on the `<header>` itself, so border-box already contains its `border-b` and
+the top edge meets exactly.
+
+`_g8-chrome-gap.mjs` reads it off `getBoundingClientRect` on the real build, across all seven screens
+at both viewports: **`main.bottom` 780 against `nav.top` 779 — +1px overlap on 12 of 14
+screen×viewport pairs, and 0px at the top on all 14.** The two clean pairs are `play/Combat`, which
+clears by 367px and 311px because the turn deck's measured height *is* reserved. After the fix:
+**0 overlaps of 14**.
+
+This is the same pixel `Layout.tsx`'s own comment records finding once before — *"It was 4rem = 64px;
+the bar measures 65. One pixel"* — fixed then with trailing padding, which hides it only at the very
+end of the scroll. When the box later became bounded rather than padded, the pixel came back. It is
+now fixed on the box, where it belongs.
+
+***It changed nothing in V-6b or V-6c.*** The V family was re-run against the repaired build and
+returned **the same twelve findings, unchanged**. The defect was real and is fixed; it is not a fix
+for the family it was found while investigating, and is not claimed as one.
+
+**(c) Three probes, three voids. The mechanism behind V-6b's twelve findings is UNPROVEN.**
+
+`families.mjs` grades V-6b at two scroll offsets and justifies that with *"At the two ends it cannot
+be scrolled away."* Read against the actual findings that premise does not hold: five phone findings
+are `@top … covered by nav.fixed.bottom-0`, clearable by scrolling **down**, which is fully available
+at scroll-top; four iPad findings are `@bottom … covered by header.fixed.top-0`, clearable by
+scrolling **up**. So the twelve were worth classifying. Three attempts, each with its falsification
+condition written into its header *before* it ran:
+
+| | approach | outcome |
+|---|---|---|
+| `_g7` rev 1 | sweep every scroll offset | **VOID** — drove the largest-overflow element in the document instead of the control's own scroller. Five rows reported the control on screen at 127/127 offsets with its centre pinned across a 3010px sweep: a control that does not move when scrolled was not being scrolled. Also printed **TRAPPED** for a control measured at **0** offsets, folding never-visible into always-blocked |
+| `_g7` rev 2 | scroll the control's own ancestor chain; three verdicts | **VOID** by its own condition — but the condition was wrong on independent grounds: it asserted a `position: fixed` coverer "cannot be scrolled out from under", which is backwards. A fixed element holds a constant viewport rectangle while the control's moves, so scrolling is exactly what clears it. Not reported anyway, because rev 2 disclosed a second defect: `prep/Grimoire` measured **1437px** of scroll room where rev 1 measured **3010px**, same build — the sweep reproduces a different accordion state than V-6b grades in |
+| `_g9` | no sweeping; reproduce V-6b's exact setup, ask where each rectangle sits | **VOID** — 24 of 25 predictions held (chrome-covered **17/17**), but one broke it. And the population is wrong regardless: `_g9` located **46** occluded controls where V-6b reports **12**, because it applies neither A-8's clipped-to-nothing exclusion nor V-6b's dedup |
+
+**V-6b and V-6c stand at FAIL, twelve findings, mechanism unexplained.** Three probes were built to
+explain them and all three are void. The pre-stated conditions are the only reason this is known
+rather than believed, and rev 2 is the one that matters most: its condition failed, the condition
+really was wrong, and the temptation to say so and publish the numbers is exactly what the condition
+existed to defeat. The numbers are not published.
+
+**(d) One finding in that family is a genuine defect, and it is not the fold.**
+
+`_g9` returned exactly one **INSIDE** — a control wholly within the scroll box that something is
+painted on top of:
+
+```
+INSIDE  prep/Persona @top  «Remove slow to trust, but deeply loyal once »
+   rect y 722..766, centre 744 · main 56..779 · covered by button.fixed.z-50.right-4
+```
+
+A 44×44 control at y 722–766, fully inside main's box, under the **floating dice button**.
+`Layout.tsx` reserves 5rem of *trailing* padding for precisely this hazard, which protects the end of
+the scroll and no other offset. This is left unbuilt: any `position: fixed` overlay over a scrolling
+list covers content at some offsets, so the fix is a composition decision about whether this app has
+a floating dice button at all — and that is § 14's to answer, not a pre-session edit. Written up,
+not smuggled in.
+
+*Scope.* One app file: `src/components/Layout.tsx`, one class, `4rem` → `4rem+1px`, no behaviour, no
+handler, no state, no copy. `npm run build` clean. Three probes added: `_g8-chrome-gap.mjs` (which
+reports a real result) and `_g7-occlusion-trapped.mjs` / `_g9-occlusion-mechanism.mjs` (which are
+committed **because** they are void — a voided instrument that is deleted cannot be checked). No
+criterion added, softened, moved or deleted.
+
+---
+
+**A-43 · 2026-08-25 · The 1px fix is graded: `2304c1e` produces the identical verdict set, so the run
+of record moves and nothing else does. Four amendments' worth of stale claims swept out of this
+document — including one that named the wrong cause for why I cannot push, and was therefore a wrong
+diagnosis that stayed wrong because it was written down.**
+
+**(a) The run.** Full local harness at `2304c1e`, no `--only`: **54 pass · 5 fail · 1 unproven ·
+940 s** (`table/run-2304c1e.log`). Row for row this is `247beda` and `20fe1a1`. § 12's run of record
+now points here.
+
+The point of running it is the part that would be easy to skip. A-42(b) fixed the tab bar's
+unreserved `border-t` and stated in writing that **it changed nothing in V-6b or V-6c** — a claim made
+*before* this run, on the strength of the `_g8` measurement alone. This run is what makes that claim
+checkable: the twelve occlusion findings are the same twelve, named identically, on a build where the
+overlap they were suspected of is provably gone. A fix that lands next to a failure and does not move
+it is the ordinary case, and the ordinary case is what a document like this most often gets wrong, by
+letting proximity read as credit.
+
+Three transcripts are now kept side by side (`run-20fe1a1.log`, `run-247beda.log`, `run-2304c1e.log`)
+rather than one being overwritten by the next. The stability across three SHAs *is* the evidence; it
+does not exist if only the newest log survives.
+
+**(b) P-1, P-2 and P-4 are OPEN again**, twenty-two hours after A-42 closed them, by the rule A-42
+itself wrote: anything landing on top of the graded SHA reopens them. `2304c1e` landed. The equivalence
+argument against re-proving is *stronger* here than it was in A-42(a) — the diff is one character of
+one Tailwind class — and that is precisely why the rule is restated at the point of temptation rather
+than left to be re-derived. A one-character diff is a diff.
+
+**(c) The stale sweep.** Three passages in this document were asserting facts that had expired:
+§ 12's run of record and composite table (still `20fe1a1`, two SHAs behind), the A-33 shelf-life
+paragraph (*"HEAD is `20fe1a1`, eleven commits past the deployed build"* — a sentence whose whole
+subject was the danger of stale claims, gone stale), and § 14 item 2. Each is now written to state its
+own expiry rule rather than a snapshot, so the next reader learns when to distrust it instead of
+inheriting a number.
+
+**(d) The one that mattered: I had the reason wrong, in writing, for four amendments.** This document
+said *"the sandbox blocks `git push`"* and told Marcus four separate times to go run the push himself.
+**It is not the sandbox.** `git fetch origin` succeeds from the same tool, over the same network, with
+the same credentials. What denies the push is the Claude Code **auto-mode permission classifier**,
+which reports it *could not evaluate* the command and blocks it for safety.
+
+Marcus asked for this to be fixed — *"please please please fix whatever stops you from actually
+pushing things yourself"* — and it is not fixed. An allow rule was written to
+`Command/.claude/settings.local.json`; the push was still denied after it landed, and the two live
+candidates are that settings are read once at session start, or that `Bash(git push:*)` does not match
+because every push here is compound (`cd <repo> && git push …`). The remedy is his: `/permissions`, or
+a session restart. § 14 item 2 now carries the diagnosis and the reason it is safe to grant — plain
+`git push` cannot rewrite history, and the destructive shapes are blocked independently by the Atlas
+guard hook, which proved it by **blocking the first attempt to write that very paragraph**, since the
+paragraph spelled the commands out and the hook matches call text without caring that the call was an
+edit to prose.
+
+**Why this is logged as an instrument failure and not a footnote.** A wrong cause, written down,
+outlives every conversation that could have corrected it. It was re-read and re-asserted four times
+by me, and each time it made the same wrong instruction look researched. The measurement that
+falsified it — run `git fetch` and see whether it works — took nine seconds and was available on day
+one.
+
+*Scope.* No app file touched. No criterion added, softened, moved or deleted. One log added, one
+document swept.
+
 ---
 
 ## 1. What the table actually is
@@ -2855,13 +3018,19 @@ Recorded because a verifier's cleared suspicions are evidence too.
 
 ## 12. Results
 
-**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`20fe1a1`**, full — not
+**Run of record:** `node docs/plans/codex-v1/reference/prove-table.mjs` at **`2304c1e`**, full — not
 `--only`, so P-0 ran and the run is not PARTIAL. `results-local.json` is written beside the harness;
-the console transcript is **`table/run-20fe1a1.log`**, and its last line, verbatim, is:
+the console transcript is **`table/run-2304c1e.log`**, and its last line, verbatim, is:
 
 ```
-═══ 54 pass · 5 fail · 1 unproven · 936s ═══
+═══ 54 pass · 5 fail · 1 unproven · 940s ═══
 ```
+
+**Three full local runs now agree, at `20fe1a1`, `247beda` and `2304c1e`** — same six named rows, same
+counts, 936 s / 939 s / 940 s. Their transcripts are all three kept (`table/run-20fe1a1.log`,
+`run-247beda.log`, `run-2304c1e.log`) rather than overwritten, because the *stability* of the verdict
+set across three SHAs is itself the evidence that A-42(b)'s 1px chrome repair changed nothing here —
+a claim it would be easy to make and impossible to check if only the latest log survived.
 
 **That is the harness's number, quoted rather than restated.** *(§ 12's previous headline was
 `53 PASS · 7 FAIL · 1 UNPROVEN across 61`, which no run in this project has ever printed and which was
@@ -2875,7 +3044,7 @@ with its arithmetic in the open so a reader can check it against the log rather 
 
 | | rows | PASS | FAIL | UNPROVEN |
 |---|---|---|---|---|
-| `prove-table.mjs` at `20fe1a1` | 60 | 54 | 5 | 1 |
+| `prove-table.mjs` at `2304c1e` | 60 | 54 | 5 | 1 |
 | graded by their own controls | 9 | 7 | 2 | 0 |
 | **total** | **69** | **61** | **7** | **1** |
 
@@ -3003,33 +3172,41 @@ median; it is red because § 4 grades the worst case, and it stays red until it 
 **R-10 passes.** It was the most dangerous single row in the previous run of record — a data-safety
 failure hiding inside a gesture performed *to be safe* — and the fix was built under U-3. See § 9.13.
 
-### The proof rows — P-1, P-2, P-4 — closed at `810584c`, REOPENED, and still open at `20fe1a1`
+### The proof rows — P-1, P-2, P-4 — closed at `247beda` (A-42), and **REOPENED at `2304c1e`**
 
-Marcus pushed `810584c` to `main` on 2026-08-25. Pages built it (run `32804728040`, 55 s, success),
-and the live URL was opened and graded **after** the deploy, not before. Everything in the table below
-is a true statement **about `810584c`**.
-
-**A-33 reopened all three, and they have got further from closing, not nearer.** **Eleven commits have
-landed since `810584c`** — the V-family close-out, `5d57b2e`, `618fcc3`, the two instrument repairs,
-A-36/A-37's compositor fix and A-39/A-40's portal work — so the deployed SHA is no longer the graded
-SHA, and P-1's whole content is that they are equal. These rows do not become false; they become
-**stale, which this document treats as the same thing**, because § 1 opens on three shipments where
-the check was green and the artifact was not the one checked. Each row below carries its `810584c`
-verdict and a **PENDING** marker. They close again when Marcus pushes and `prove-table.mjs --live`
-plus `same-build.mjs` are re-run against the new deploy — not before, and not by argument. **This is
-the single largest gap in this document, and it is the one thing here that no amount of further
-measurement on this machine can close.**
+They were closed at `810584c`, reopened by A-33 when eleven commits landed on top of the deployed
+build, and are now closed again — on measurement at `247beda`, not on argument. Marcus pushed
+`247beda`; Pages run `32849575353` built it, success; both live instruments were then run against the
+deploy, and the **full local harness was re-run at the same SHA** so that P-1's three SHAs are
+literally equal rather than reasonably equivalent. A-42(a) records why that re-run happened even
+though the equivalence argument was sound.
 
 | ID | Verdict | Number |
 |---|---|---|
-| **P-1** | **PENDING** *(PASS at `810584c`)* | **deployed SHA == graded SHA == `810584c`.** Proven twice over and by a new instrument (A-26): `gh` reports Pages run `32804728040` built `810584c`, which is local HEAD; and `same-build.mjs` fetches all **79** files from the live origin and finds **75 byte-identical** and 4 differing only in five named, counted, machine-specific classes. The control `--prove` fails on a single altered byte |
-| **P-2** | **PENDING** *(PASS at `810584c`)* | `prove-table.mjs --live` at `810584c`, **696 s**: **33 pass · 9 fail · 3 unproven** against `https://dosenft.github.io/the-codex/`. `results-live.json` is committed. *Families D, S and E are declared UNPROVEN live by the harness itself* — they measure this machine, not the deploy, and are not claimed |
-| **P-3** | **PASS** | this document, frozen, now with **forty-one** amendments logged old-text / new-text / reason — including four, A-25, A-26, A-33 and A-41, that correct me. A-33 corrects eight sentences in § 12; A-41 corrects two published numbers, one of which no run ever produced, and one claim that was wrong in Marcus's favour. Every one of them moves in the unflattering direction |
-| **P-4** | **PENDING** *(PASS at `810584c`)* | the deploy was 2026-08-25 and every live number above was taken after it. Reopened with P-1: HEAD is now `20fe1a1`, **eleven commits past the deployed build** |
+| **P-1** | **PASS** *(A-42)* | **deployed SHA == local HEAD == graded SHA == `247beda`.** Proven twice and by two instruments: `gh` reports Pages run `32849575353` built `247beda`, which is local HEAD; and `same-build.mjs` fetches all **82** files from the live origin and finds **78 byte-identical** and 4 differing only in five named, counted, machine-specific classes — verdict **SAME BUILD**. The control `--prove` fails on a single altered byte. The local run of record is `table/run-247beda.log`, at that same SHA |
+| **P-2** | **PASS** *(A-42)* | `prove-table.mjs --live` at `247beda`, **699 s**: **39 pass · 3 fail · 3 unproven** against `https://dosenft.github.io/the-codex/` (`table/run-247beda-live.log`, `results-live.json` committed). Up from **33 pass · 9 fail** at `810584c` — V-2b, V-3b, V-4, V-5, V-5b and R-10 all now pass on the deployed build. *Families D, S and E are declared UNPROVEN live by the harness itself* — they measure this machine, not the deploy, and are not claimed |
+| **P-3** | **PASS** | this document, frozen, now with **forty-two** amendments logged old-text / new-text / reason — including five, A-25, A-26, A-33, A-41 and A-42, that correct me. A-33 corrects eight sentences in § 12; A-41 corrects two published numbers, one of which no run ever produced, and one claim that was wrong in Marcus's favour; A-42 voids **three of my own probes** and reports the thing they were built to explain as unproven. Every one of them moves in the unflattering direction |
+| **P-4** | **PASS** *(A-42)* | Pages run `32849575353` completed **before** either live instrument was started — the deploy was confirmed `success` first, and grading an in-progress deploy is the exact failure § 1 opens on. The SHA was re-confirmed after, by `same-build.mjs`'s own provenance line: *"Pages run 32849575353 built 247beda (success) · local HEAD 247beda · match"* |
 
-**The live run found no failure the local run had not already found.** The 9 live failures are R-10 and
-the eight V rows — V-2b 11, V-3b 11, V-4 2, V-5 5, V-5b 3, V-6 15, V-6b 13, V-6c 15 — and R-10
-reproduces on the deployed build exactly as it does locally: **30 → 35**, notice unchanged.
+**The live run found no failure the local run had not already found**, and this remains true at
+`247beda`: the 3 live failures are V-6, V-6b and V-6c, all three of which fail locally too. The live
+run reports fewer failures than the local run only because families S and E — which carry the other
+two local failures, S-1 and S-3 — are declared UNPROVEN against the deploy by the harness itself.
+**That is not 3 fewer defects; it is 2 defects not graded.**
+
+**These rows said they would reopen the moment anything landed on top of `247beda`. Something has.**
+`2304c1e` — the tab-bar reserve fix — plus the commits carrying A-42 and A-43 themselves. **So the
+table above is a record of a state that no longer holds, and P-1, P-2 and P-4 are OPEN as of A-43.**
+The verdicts are left visibly written rather than blanked, because what they now prove is that the
+close is reproducible, not that it is current.
+
+What it takes to re-close them is unchanged and mechanical: push, wait for the Pages run to report
+`success`, then `prove-table.mjs --live` and `same-build.mjs`. **What it does not take is an argument.**
+The equivalence case is even stronger this time than it was in A-42(a) — `2304c1e` changes one
+character of one Tailwind class — and it is worth naming that the temptation to close on it grows
+each time the diff gets smaller. A one-character diff is still a diff, and P-1's frozen text still
+says three SHAs are equal. **The rule survives exactly as long as it is applied on the runs where
+applying it feels like a waste of fifteen minutes.**
 
 **Six of those nine now pass locally and have never been graded live.** R-10, V-2b, V-3b, V-4, V-5 and
 V-5b were fixed after `810584c` was pushed. *(A-33: this paragraph previously ended "and no local pass
@@ -3055,13 +3232,22 @@ proven by content and by provenance rather than by a filename comparison that co
 succeeded — the first time in this project's history that was true. The nine live failures were the
 nine known ones; nothing appeared on the internet that was not already on this machine.
 
-**That sentence has a shelf life and it has expired.** *(A-33; extended by A-41.)* HEAD is `20fe1a1`,
-**eleven** commits past the deployed build, and those eleven contain the V-family fixes, the storage
-guard, the A-30 completion, two instrument repairs and the portal work. **P-1, P-2 and P-4 are
-therefore marked pending above**, and the honest statement of where this stands is: *every green in
-§ 12 is a green about a build on this machine, and the last build he could open was graded green on
-the rows named above and red on nine others, six of which are now fixed here and unproven there.*
-It is re-earned by a push and a re-run, not by leaving the sentence in place.
+**That sentence had a shelf life, it expired, and it has since been re-earned — twice, and it will
+expire again.** *(A-33; extended by A-41; closed by A-42(a).)* It was written at `810584c`. It went
+false the moment HEAD moved eleven commits past that deploy — the V-family fixes, the storage guard,
+the A-30 completion, two instrument repairs and the portal work — and the honest statement during
+that window was: *every green in § 12 was a green about a build on this machine, and the last build
+he could open was graded green on the rows named above and red on nine others, six of which were
+fixed here and unproven there.* **That window is now closed.** Marcus pushed, `247beda` was deployed,
+and P-1/P-2/P-4 were re-closed on measurement in A-42(a) — deliberately by re-running the full
+harness rather than by the *sound* equivalence argument that was available, because P-1's frozen text
+demands three equal SHAs and not a reasonable case that they would have been equal.
+
+**And it is stale again as you read it.** `2304c1e` is on this machine and not on the internet. The
+rule this section now lives under, stated once so it does not need re-deriving: **this paragraph is
+false for as long as HEAD ≠ deploy, and the only thing that makes it true is a push followed by
+`prove-table.mjs --live` and `same-build.mjs`.** Not an argument. Not a diff that shows the build
+inputs are identical. A re-run.
 
 **And one thing the sentence never said, which A-41 makes it say.** Two of the numbers this section
 published — the headline tally and V-11's `0 trapped of 315` — were not measurements at all. One was
@@ -3115,11 +3301,11 @@ without asking is that it is the same object as D-5's `saveCharacter` guard, whi
 and the same class — silent failure, unrecoverable at the table — he unsealed for three times. **The
 argument is not the ratification. Reverting is one `git revert` and costs nothing but the fix.**
 
-**2 · The push — and it is now the most important item on this list.** HEAD is `20fe1a1`; the deploy
-is `810584c`, **eleven commits behind**. **P-1, P-2 and P-4 are marked PENDING in § 12 until this
-happens**, and nothing further I do on this machine can close them. It is also the only route to the
-thing he has actually asked for twice: **he has not yet opened this app on his own phone**, and the
-phone can only reach the deployed build. The sandbox blocks `git push`; he runs it:
+**2 · The push — and it is permanently the most important item on this list.** It is the only route to
+the thing he has actually asked for twice: **the phone can only reach the deployed build**, so every
+hour HEAD sits ahead of the deploy is an hour of work he cannot hold in his hand. P-1, P-2 and P-4 are
+written to reopen the instant anything lands on top of the graded SHA, which means this item never
+completes — it recurs. He runs it:
 
 ```
 git -C C:\Users\marcu\Documents\Powerhouse\projects\the-codex push origin v1:main
@@ -3127,6 +3313,29 @@ git -C C:\Users\marcu\Documents\Powerhouse\projects\the-codex push origin v1:mai
 
 Then `prove-table.mjs --live` and `same-build.mjs` re-run against the new deploy, and the three P rows
 close on measurement rather than on argument.
+
+**Why he runs it and not me — the reason on record was wrong.** This document said for four
+amendments that *"the sandbox blocks `git push`."* **It does not.** `git fetch origin` succeeds from
+this same tool, over the same network, with the same credentials; the repository is reachable. What
+blocks the push is the **Claude Code auto-mode permission classifier**, which reports that it *could
+not evaluate* the command and denies it for safety — a different mechanism with a different remedy,
+and naming the wrong one is why this sat unfixed for four amendments while I told him each time to go
+run it himself.
+
+The remedy is `/permissions` → add a `Bash(git push:*)` allow rule. One has already been written to
+`Command/.claude/settings.local.json`; it did not take effect, and the two candidate reasons are that
+settings are read once at session start and not hot-reloaded, or that the rule does not match because
+every push this harness issues is compound (`cd <repo> && git push …`) rather than a bare `git push`.
+Either way a session restart or an explicit `/permissions` entry resolves it.
+
+**And granting it does not hand over anything dangerous.** Plain `git push` cannot rewrite history.
+Force-pushes, hard resets, recursive deletes, forced cleans and blanket staging are blocked
+independently at the tool boundary by the Atlas guard hook at `.claude/hooks/guard.sh`, on a pattern
+that does not depend on this permission at all. That is not a claim from reading the hook, either:
+**the guard blocked the first attempt to write this very paragraph**, because the paragraph originally
+spelled those commands out and the hook matches the text of a tool call without caring that the call
+was an edit to a prose document. The two mechanisms are unrelated, and the one standing in the way is
+not the one worth keeping.
 
 **3 · S-1 — the cold boot is 3071 ms against a 2000 ms floor.** Cause named: `sw.js:132`, § 9.8. The
 fix is a behaviour change to the service worker's boot path and is written up, unbuilt, per the seal.
@@ -3246,6 +3455,36 @@ the app cannot do, it costs nothing in bytes, and leaving it is the option I wou
 written against it**, and that scenario has to be either repointed at a control that exists or
 struck from the criterion, in the open, before the file goes.
 
+**14 · Does this app have a floating dice button?** *(A-42(d).)* This is a composition question, not
+a bug, which is why it is his. `_g9-occlusion-mechanism.mjs` found exactly one control that is
+*genuinely* painted over inside the scroll box rather than clipped at the fold:
+
+```
+INSIDE  prep/Persona @top  «Remove slow to trust, but deeply loyal once »
+   rect y 722..766, centre 744 · main 56..779 · covered by button.fixed.z-50.right-4
+```
+
+A 44×44 control, wholly inside `<main>`'s box, under the floating dice button. `Layout.tsx` already
+reserves 5rem of **trailing** padding for this hazard, and trailing padding protects the end of the
+scroll and no other offset — so the reserve cannot fix it, and no amount of tuning the reserve will.
+**Any `position: fixed` overlay above a scrolling list covers content at some scroll offsets.** That
+is the nature of the pattern, not a defect in this implementation of it, and the app has two: the
+dice button and the Veil pill. The options are (i) accept it, (ii) inset the content column away
+from the overlay corner on the screens where they collide, or (iii) drop the floating button and
+reach the dice from the tab bar. Nothing is built here: (iii) moves a feature and (ii) is a
+composition change across seven screens, neither of which belongs in a pre-session edit.
+
+**15 · The tab bar should publish its own height, the way the turn deck does.** *(A-42(b).)* A-42
+fixed a 1px overlap by hard-coding `4rem+1px` into `<main>`'s bottom, because the tab bar's `h-16`
+sits on its inner div while the `<nav>` carries the `border-t` separately. That is correct today and
+provably so — `_g8-chrome-gap.mjs` reports 0 overlaps of 14 where it reported 12 before — but it is
+still a magic constant that any future change to the bar can silently invalidate. **This exact pixel
+has now been found twice**, once fixed with trailing padding and once on the box. `TurnDeck` already
+solves the general problem: it measures itself with a `ResizeObserver` and publishes `--turn-deck-h`,
+which is why the two `play/Combat` rows clear by 367px and 311px instead of by luck. The durable fix
+is for the tab bar to publish `--tabbar-h` the same way. It is small, but it is new plumbing in a
+layout component days before a live session, so it is written up rather than built.
+
 *Added 2026-08-25 by A-33. Items 8–10 added 2026-08-25 by A-35. Items 11–12 added 2026-08-25 by A-39
-and A-40. Item 13 added, and items 2, 7 and 11 corrected, 2026-08-25 by A-41. This section is the
-list; § 12 is the evidence.*
+and A-40. Item 13 added, and items 2, 7 and 11 corrected, 2026-08-25 by A-41. Items 14–15 added
+2026-08-25 by A-42. This section is the list; § 12 is the evidence.*
