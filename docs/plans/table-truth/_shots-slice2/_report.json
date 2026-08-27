@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "name": "A-level8-slots-correct",
+      "stats": {
+        "Save DC": "16",
+        "AC": "19",
+        "Init": "+0",
+        "Prof": "+3",
+        "Sp Atk": "+8"
+      },
+      "flagHeader": "Your sheet and the 2024 rules disagree on 2 things",
+      "flagBody": "Your sheet and the 2024 rules disagree on 2 thingsSpell save DCYour sheet162024 rules158 + proficiency (+3) + Charisma modifier.Spell attack bonusYour sheet+82024 rules+7Proficiency (+3) + Charisma modifier.Nothing has been changed. The app does not know which of these is right for your table — that is yours and your DM's call.",
+      "tap": 48,
+      "keysWatched": 5,
+      "changed": []
+    },
+    {
+      "name": "B-level7-with-3rd-slots",
+      "stats": {
+        "Save DC": "16",
+        "AC": "19",
+        "Init": "+0",
+        "Prof": "+3",
+        "Sp Atk": "+8"
+      },
+      "flagHeader": "Your sheet and the 2024 rules disagree on 3 things",
+      "flagBody": "Your sheet and the 2024 rules disagree on 3 thingsSpell slotsYour sheet1st ×4 · 2nd ×3 · 3rd ×22024 rules1st ×4 · 2nd ×3A level 7 Paladin is a half-caster. Feats, items or your DM can legitimately change this — the app has no way to know.Spell save DCYour sheet162024 rules158 + proficiency (+3) + Charisma modifier.Spell attack bonusYour sheet+82024 rules+7Proficiency (+3) + Charisma modifier.Nothing has been changed. The app does not know which of these is right for your table — that is yours and your DM's call.",
+      "tap": 48,
+      "keysWatched": 5,
+      "changed": []
+    }
+  ],
+  "errors": []
+}

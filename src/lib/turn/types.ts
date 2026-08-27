@@ -120,6 +120,19 @@ export interface TurnOption {
    *  to prove the composer invents nothing, so anything it DOES invent has to
    *  say so out loud rather than quietly widening what that test tolerates. */
   synthetic?: boolean
+
+  /** Canon's own id for the text on this row, when canon knew the name.
+   *  Spells carry canon ids; a matched feature is keyed by its normalised
+   *  name, because canon's feature records have no ids of their own.
+   *  Table Truth slice 5. */
+  canonId?: string
+  /** Where the words on this row came from.
+   *
+   *  `'sheet'` is NOT a failure state and must never be rendered as one. It
+   *  means canon had nothing to add and Marcus's homebrew kept its own words —
+   *  which is the open-world rule working, not breaking. Absent means the row
+   *  predates the overlay (the V0.9 screen, and every existing test). */
+  provenance?: 'canon' | 'sheet'
 }
 
 /** Several options, one economy slot, pick one.

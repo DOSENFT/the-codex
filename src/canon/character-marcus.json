@@ -1,0 +1,343 @@
+{
+  "meta": {
+    "owner": "Marcus",
+    "app": "Codex",
+    "ruleset": "D&D 2024 (5.5e)",
+    "note": "This is the reference sheet for the specific character this canon was built around. Ability scores, equipment and chosen options are PLACEHOLDERS where unknown - marked with needsInput: true. Everything derived from level, class, species and background is authoritative."
+  },
+  "identity": {
+    "class": "Paladin",
+    "level": 7,
+    "subclass": "Oath of the Hearth (homebrew)",
+    "species": "Changeling (Eberron: Forge of the Artificer, 2024 rules)",
+    "background": "Wayfarer"
+  },
+  "derivedAtLevel7": {
+    "proficiencyBonus": 3,
+    "hitDie": "d10",
+    "hitDiceTotal": 7,
+    "preparedSpellsFromClassTable": 7,
+    "spellSlots": {
+      "1": 4,
+      "2": 3,
+      "3": 0,
+      "4": 0,
+      "5": 0
+    },
+    "highestSpellLevel": 2,
+    "layOnHandsPool": 35,
+    "channelDivinityUses": 2,
+    "channelDivinityRecharge": "one use on a Short Rest, all uses on a Long Rest",
+    "extraAttack": true,
+    "auraOfProtection": "10-foot Emanation, bonus to saves equal to Charisma modifier (minimum +1)",
+    "auraOfSolace": "Resistance to Fire, Cold and Psychic damage for you and allies inside the Aura of Protection",
+    "weaponMasteries": 2,
+    "fightingStyles": 1,
+    "asisTaken": 1,
+    "spellSaveDC": "8 + 3 + Charisma modifier",
+    "spellAttackModifier": "3 + Charisma modifier"
+  },
+  "abilityScores": {
+    "needsInput": true,
+    "note": "Not supplied. Wayfarer's ability increases apply to Dexterity, Wisdom, and Charisma - either +2 to one and +1 to a different one, or +1 to all three. Changeling grants NO ability score increases.",
+    "commonBuildForThisCharacter": "Strength 16, Dexterity 10, Constitution 14, Intelligence 8, Wisdom 12, Charisma 16-18. Note that Wayfarer cannot boost Strength, which is a real tension for a heavy-armour melee Paladin - a Charisma-forward build using Dexterity or a Strength-independent weapon plan fits Wayfarer better."
+  },
+  "classFeaturesActive": [
+    "Lay On Hands (level 1) - Bonus Action, 35-point pool",
+    "Spellcasting (level 1) - Charisma",
+    "Weapon Mastery (level 1) - two weapon kinds, swappable on a Long Rest",
+    "Fighting Style (level 2)",
+    "Paladin's Smite (level 2) - Divine Smite always prepared, one free cast per Long Rest with no slot",
+    "Channel Divinity (level 3) - 2 uses; Divine Sense and Hearthfire Manifest",
+    "Oath of the Hearth (level 3) - oath spells and Hearthfire Manifest",
+    "Ability Score Improvement (level 4)",
+    "Extra Attack (level 5)",
+    "Faithful Steed (level 5) - Find Steed always prepared, one free cast per Long Rest with no slot",
+    "Aura of Protection (level 6)",
+    "Aura of Solace (level 7, subclass)"
+  ],
+  "notYetAvailable": [
+    {
+      "level": 8,
+      "feature": "Ability Score Improvement"
+    },
+    {
+      "level": 9,
+      "feature": "Abjure Foes; level 3 spell slots; oath spells Fireball and Beacon of Hope; prepared spells rise to 9"
+    },
+    {
+      "level": 10,
+      "feature": "Aura of Courage"
+    },
+    {
+      "level": 11,
+      "feature": "Radiant Strikes (+1d8 Radiant on every melee hit); third Channel Divinity use"
+    },
+    {
+      "level": 13,
+      "feature": "Level 4 spell slots; oath spells Wall of Fire and Fire Shield"
+    },
+    {
+      "level": 14,
+      "feature": "Restoring Touch"
+    },
+    {
+      "level": 15,
+      "feature": "Smoldering Smite (subclass) - see errata HEARTH-01"
+    },
+    {
+      "level": 17,
+      "feature": "Level 5 spell slots; oath spells Flame Strike and Hallow"
+    },
+    {
+      "level": 18,
+      "feature": "Aura Expansion (aura becomes a 30-foot Emanation)"
+    },
+    {
+      "level": 19,
+      "feature": "Epic Boon"
+    },
+    {
+      "level": 20,
+      "feature": "Hearth Warden (subclass capstone)"
+    }
+  ],
+  "spellsAlwaysPrepared": [
+    {
+      "name": "Divine Smite",
+      "level": 1,
+      "source": "Paladin's Smite (class level 2)",
+      "freeCastsPerLongRest": 1
+    },
+    {
+      "name": "Faerie Fire",
+      "level": 1,
+      "source": "Oath of the Hearth (level 3)"
+    },
+    {
+      "name": "Burning Hands",
+      "level": 1,
+      "source": "Oath of the Hearth (level 3)"
+    },
+    {
+      "name": "Scorching Ray",
+      "level": 2,
+      "source": "Oath of the Hearth (level 5)"
+    },
+    {
+      "name": "Warding Bond",
+      "level": 2,
+      "source": "Oath of the Hearth (level 5)"
+    },
+    {
+      "name": "Find Steed",
+      "level": 2,
+      "source": "Faithful Steed (class level 5)",
+      "freeCastsPerLongRest": 1
+    }
+  ],
+  "preparedSpellBudget": {
+    "count": 7,
+    "eligibleLevels": [
+      1,
+      2
+    ],
+    "eligiblePool": "Any spell on the 2024 Paladin spell list of level 1 or 2",
+    "doNotPick": [
+      "Warding Bond - already granted by the oath, picking it wastes a slot"
+    ],
+    "changeRule": "You may replace ONE prepared spell with another Paladin spell whenever you finish a Long Rest.",
+    "recommendedCore": [
+      {
+        "name": "Bless",
+        "why": "Best non-Smite use of a level 1 slot. +1d4 to attacks and saves for the party."
+      },
+      {
+        "name": "Shield of Faith",
+        "why": "+2 AC for 10 minutes for a level 1 slot and a Bonus Action. Best mitigation per slot."
+      },
+      {
+        "name": "Compelled Duel",
+        "why": "The only real taunt in the game. Turns you from durable into an actual Defender."
+      },
+      {
+        "name": "Thunderous Smite",
+        "why": "Your control Smite. Push 10 feet plus Prone. Pairs with the Push weapon mastery."
+      },
+      {
+        "name": "Aid",
+        "why": "Cast at breakfast. 8 hours, no Concentration, +5 current and max HP to three allies. Also revives three downed allies in one Action."
+      },
+      {
+        "name": "Lesser Restoration",
+        "why": "A Bonus Action in 2024. The only answer to a Paladin's Paralyzed ally until level 14."
+      },
+      {
+        "name": "Magic Weapon OR Searing Smite",
+        "why": "Magic Weapon if your DM runs a low-magic game (it makes your weapon count as magical, bypassing a very common resistance). Searing Smite if you already have a magic weapon - it is non-Concentration, scales better than Divine Smite, and its recurring damage repeatedly breaks enemy Concentration."
+      }
+    ],
+    "swapInSituationally": [
+      {
+        "name": "Protection from Evil and Good",
+        "when": "Single-boss fight against a Fiend, Undead, Fey, Aberration, Elemental or Celestial. Costs 25 GP of holy water per cast."
+      },
+      {
+        "name": "Gentle Repose",
+        "when": "Anywhere lethal. Ritual, so free. Pauses the Raise Dead clock indefinitely on a fallen ally."
+      },
+      {
+        "name": "Protection from Poison",
+        "when": "Sewers, swamps, assassins, green dragons, snake country."
+      },
+      {
+        "name": "Zone of Truth",
+        "when": "Investigation or negotiation sessions."
+      },
+      {
+        "name": "Prayer of Healing",
+        "when": "The party needs a Short Rest and the clock is hostile. 10 minutes instead of an hour, for five people."
+      },
+      {
+        "name": "Shining Smite",
+        "when": "The party has no answer to invisible or hiding enemies."
+      },
+      {
+        "name": "Detect Magic",
+        "when": "Dungeon crawling and nobody else has it. Ritual, so free to cast."
+      }
+    ]
+  },
+  "changelingTraits": {
+    "creatureType": "Fey - NOT Humanoid. This matters: effects that target Humanoids (Hold Person, Charm Person, Dominate Person) do not affect you, while effects naming Fey (Protection from Evil and Good, Magic Circle, Hallow, Dispel Evil and Good) do.",
+    "size": "Medium or Small (chosen at creation)",
+    "speed": 30,
+    "abilityScoreIncrease": "None",
+    "changelingInstincts": {
+      "choose": 2,
+      "from": [
+        "Deception",
+        "Insight",
+        "Intimidation",
+        "Performance",
+        "Persuasion"
+      ]
+    },
+    "shapeShifter": {
+      "action": "Action",
+      "grantsAdvantageOnCharismaChecksWhileShifted": true,
+      "limits": [
+        "Cannot copy a specific individual you have never seen",
+        "Must keep the same basic limb arrangement",
+        "Clothing and equipment do not change",
+        "No game statistics change"
+      ]
+    },
+    "warnings": [
+      "The uploaded Changeling notes are legacy 2019/2022 content. See data/species.json -> changeling.outdatedClaimsToCorrect for the full correction list.",
+      "Locate Creature explicitly fails if the target has changed form. While shifted, you cannot be tracked by that spell."
+    ]
+  },
+  "wayfarerBackground": {
+    "abilityScores": [
+      "Dexterity",
+      "Wisdom",
+      "Charisma"
+    ],
+    "originFeat": "Lucky",
+    "skillProficiencies": [
+      "Insight",
+      "Stealth"
+    ],
+    "toolProficiency": "Thieves' Tools",
+    "luckyAtLevel7": "3 Luck Points per Long Rest (equal to Proficiency Bonus). Spend to give yourself Advantage on a D20 Test, or to impose Disadvantage on an attack roll against you."
+  },
+  "validationRules": [
+    {
+      "id": "VAL-01",
+      "rule": "Warding Bond must never be selectable as a prepared spell - it is already granted by the oath.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-02",
+      "rule": "Only ONE spell slot may be expended per turn. Block a second slotted cast in the same turn.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-03",
+      "rule": "A free casting (Paladin's Smite, Faithful Steed) expends no slot and does not count toward VAL-02. Track free casts separately from slots.",
+      "severity": "info"
+    },
+    {
+      "id": "VAL-04",
+      "rule": "Only ONE Bonus Action per turn. Divine Smite, Lay on Hands, Shield of Faith, Compelled Duel, Divine Sense, Lesser Restoration, Magic Weapon and Hearthfire Manifest summoning all compete for it.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-05",
+      "rule": "Only ONE Concentration spell at a time. Warn before a cast that would drop an active one, and name what is being dropped.",
+      "severity": "warning"
+    },
+    {
+      "id": "VAL-06",
+      "rule": "Gaining Temporary Hit Points from another source while the Hearthfire cloak is active will replace the pool and end the cloak. Prompt before accepting.",
+      "severity": "warning"
+    },
+    {
+      "id": "VAL-07",
+      "rule": "Skill proficiency overlap: Wayfarer grants Insight, the Paladin class skill list offers Insight, and Changeling Instincts offers Insight. Prevent duplicate selection and prompt for an alternative.",
+      "severity": "warning"
+    },
+    {
+      "id": "VAL-08",
+      "rule": "Costed and consumed material components cannot be replaced by a Holy Symbol. Block casting when the component is not in inventory: Revivify (300 GP diamond), Greater Restoration (100 GP diamond dust), Raise Dead (500 GP diamond), Magic Circle (100 GP silver), Protection from Evil and Good (25 GP holy water), Hallow (1,000 GP incense).",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-09",
+      "rule": "Warding Bond requires a pair of platinum rings worth 50+ GP each, WORN by both you and the target. Not consumed, but must be owned and worn.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-10",
+      "rule": "Smoldering Smite (level 15) does not function as written. Require a DM ruling before enabling it. See errata HEARTH-01.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-11",
+      "rule": "The Hearthfire cloak Reaction has no defined trigger. Require the player to record a DM-approved trigger. See errata HEARTH-03.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-12",
+      "rule": "Aura of Protection and Aura of Solace are both inactive while you have the Incapacitated condition.",
+      "severity": "info"
+    },
+    {
+      "id": "VAL-13",
+      "rule": "Divine Smite and every other Smite spell may only be cast immediately after a hit with a Melee weapon or an Unarmed Strike. Never offer it before an attack roll resolves, and never on a ranged weapon attack.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-14",
+      "rule": "On a critical hit, double every damage die belonging to that attack - weapon dice, Smite dice, and (from level 11) Radiant Strikes dice. Never double flat modifiers.",
+      "severity": "error"
+    },
+    {
+      "id": "VAL-15",
+      "rule": "Ritual casting is available to Paladins in 2024. Detect Magic, Detect Poison and Disease, Gentle Repose and Purify Food and Drink can be cast as Rituals for no slot if prepared.",
+      "severity": "info"
+    }
+  ],
+  "openQuestionsForTheDM": [
+    "Smoldering Smite: does it apply to any spell with 'Smite' in the name, or only Divine Smite? As written it applies to neither, because it names a Magic action that Divine Smite does not use. (HEARTH-01)",
+    "Hearthfire cloak: what is the Reaction's trigger? (HEARTH-03)",
+    "Hearthfire cloak: does gaining other Temporary Hit Points end it? (HEARTH-04)",
+    "Can a Smite spell be cast on an Opportunity Attack? Bonus Actions are defined as available 'on the same turn that you take an action', which suggests no, but there is no official ruling.",
+    "Can a Smite spell be cast on a thrown melee weapon attack (javelin, handaxe)? Genuinely disputed with no official tie-breaker.",
+    "Warding Bond: does damage transferred to you retain its original damage type? If yes, Aura of Solace halves Fire, Cold and Psychic again.",
+    "Elemental Adept (Fire): does it apply only to your spells, or also to the subclass's own Fire damage from Hearthfire Manifest and Smoldering Smite?",
+    "Is the Changeling from Eberron: Forge of the Artificer approved at this table, or is the group using an older version?",
+    "Are post-2024-PHB spells in play? Wardaway (Forgotten Realms: Heroes of Faerun) and Searing Orb (post-launch digital) appear on some Paladin lists but are not in the printed 2024 PHB."
+  ]
+}

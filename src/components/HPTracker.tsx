@@ -8,8 +8,11 @@ import {
   Check,
   Skull,
   ShieldAlert,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
+import { useCollapsible } from '../hooks/useCollapsible'
 import {
   type Character,
   applyDamage,
@@ -96,6 +99,10 @@ const QUICK_VALUES = [1, 5, 10] as const
 
 export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
   const [inputMode, setInputMode] = useState<InputMode>(null)
+  /* Per character, and through the hook that already exists — this writes into
+     the same `codex-ui-${id}` map every other fold in the app uses, so slice 4
+     adds no storage key. Nix's conditions belong to Nix. */
+  const conditionsFold = useCollapsible('hp-conditions', character.id, false)
   const [inputValue, setInputValue] = useState('')
 
   // Derived state
@@ -474,18 +481,54 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
         </div>
       )}
 
-      {/* Conditions Section */}
+      {/* Conditions Section — Table Truth slice 4.
+          Marcus: "it doesnt happen often and that portion takes up so much
+          room." It is a 16-cell grid of 48px buttons — roughly 340px of a
+          844px screen — standing permanently open for a state that is empty
+          most of the night.
+
+          THE HEADER STATES ITS OWN STATE, which is the whole reason this is
+          allowed to fold. A collapsed section that says only "Active
+          Conditions" has replaced a visible fact with a question, and at a
+          table the question gets answered by tapping. Folded, this header
+          still answers it: the condition NAMES when there are any, the word
+          "None" when there are not. Nothing is hidden except the means of
+          changing it — which is the tap he is making anyway.
+
+          Default CLOSED, and that is the one place this differs from every
+          other fold in the app. Everywhere else the content is the point;
+          here the summary genuinely carries it. */}
       <div className="space-y-3 pt-2 border-t border-bronze/15">
-        <h4 className="text-xs font-semibold text-forge-2 uppercase tracking-wider">
-          Active Conditions
-        </h4>
+        <button
+          type="button"
+          onClick={conditionsFold.toggle}
+          aria-expanded={conditionsFold.isOpen}
+          className={cn(
+            'flex w-full min-h-[48px] items-center gap-2 text-left',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+          )}
+        >
+          <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider shrink-0">
+            Active Conditions
+          </span>
+          {/* forge-1, not forge-2: folded, this span IS the readout, and V-2's
+              4.5:1 floor applies to the thing you are actually reading. */}
+          <span
+            className={cn(
+              'truncate text-xs font-semibold',
+              character.conditions.length > 0 ? 'text-red-400' : 'text-forge-1',
+            )}
+          >
+            {character.conditions.length > 0 ? character.conditions.join(', ') : 'None'}
+          </span>
+          {conditionsFold.isOpen ? (
+            <ChevronUp size={14} className="ml-auto shrink-0 text-forge-1" aria-hidden />
+          ) : (
+            <ChevronDown size={14} className="ml-auto shrink-0 text-forge-1" aria-hidden />
+          )}
+        </button>
 
-        {character.conditions.length === 0 && inputMode === null && (
-          <p className="text-xs text-forge-2 text-center py-1">
-            No active conditions
-          </p>
-        )}
-
+        {conditionsFold.isOpen && (
         <div className="grid grid-cols-2 gap-1.5">
           {CONDITIONS.map(condition => {
             const isActive = character.conditions.includes(condition.name)
@@ -544,6 +587,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
             )
           })}
         </div>
+        )}
       </div>
     </GlassCard>
   )

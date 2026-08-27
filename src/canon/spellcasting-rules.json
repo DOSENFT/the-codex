@@ -1,0 +1,61 @@
+{
+  "theOneSlotRule": {
+    "ruleText": "On a turn, you can expend only one spell slot to cast a spell.",
+    "source": "2024 Player's Handbook / official free rules, 'Casting Spells'",
+    "verified": true,
+    "consequences": [
+      "You CANNOT cast a slotted spell with your Action and another slotted spell with your Bonus Action on the same turn.",
+      "You CANNOT cast Divine Smite twice on one turn.",
+      "You CANNOT combine two Smite spells on a single hit.",
+      "You CANNOT use Action Surge (multiclass) to cast a second slotted spell.",
+      "Cantrips are unaffected - they expend no slot, so a slotted spell plus any number of cantrips is legal.",
+      "Features that let you cast a spell WITHOUT expending a slot are also unaffected."
+    ],
+    "change2014": "2014's rule was different: casting a spell with a Bonus Action limited your Action to a cantrip. 2024 removed that and replaced it with the one-slot-per-turn restriction. Apps that still encode the 2014 rule will be wrong in both directions."
+  },
+  "freeCastLoophole": {
+    "summary": "The restriction is on EXPENDING a slot, not on casting. A Paladin's free castings do not expend slots.",
+    "applies": [
+      "Paladin's Smite (level 2): one free Divine Smite per Long Rest.",
+      "Faithful Steed (level 5): one free Find Steed per Long Rest.",
+      "Magic Initiate / Fey-Touched / Shadow-Touched style feats: one free casting per Long Rest."
+    ],
+    "result": "RAW, on one turn per Long Rest you may cast a slotted spell with your Action AND free-cast Divine Smite with your Bonus Action. Flag this to the DM before relying on it, but the rules text supports it.",
+    "confidence": "High on the rules text; confirm at your table."
+  },
+  "concentration": {
+    "onePerCharacter": "You can concentrate on only one spell at a time. Casting another Concentration spell immediately ends the first.",
+    "saveOnDamage": "Constitution saving throw, DC 10 or half the damage taken, whichever is higher.",
+    "endsWhen": [
+      "You cast another Concentration spell",
+      "You fail the Constitution save after taking damage",
+      "You gain the Incapacitated condition",
+      "You die"
+    ],
+    "note2024": "The Incapacitated condition now explicitly ends Concentration. This means Stunned, Paralyzed, Petrified and Unconscious all break Concentration automatically."
+  },
+  "components": {
+    "verbal": "You must be able to speak. Being gagged, Silenced, or Incapacitated blocks it.",
+    "somatic": "You need at least one free hand to gesture. A hand holding a Spellcasting Focus counts as free for this purpose.",
+    "material": "You need a hand free to access the components. Components are not consumed unless the spell says so.",
+    "focusSubstitution": "A Spellcasting Focus (a Holy Symbol, for a Paladin) or a component pouch replaces material components ONLY IF the component has no listed gold-piece cost AND is not consumed. Costed or consumed components must be owned and expended physically.",
+    "appRule": "Track costed/consumed components as real inventory. A Paladin who cannot cast Revivify because no diamond was bought is a bug in the party's planning, and the app should catch it."
+  },
+  "ritualCasting": {
+    "rule": "A spell with the Ritual tag can be cast as a Ritual: it takes 10 minutes longer and expends no spell slot. The caster must have it prepared.",
+    "change2024": "In 2014, ritual casting required a class feature or the Ritual Caster feat. In 2024 it is a universal rule tied to the spell. PALADINS CAN NOW RITUAL-CAST.",
+    "paladinRituals": [
+      "Detect Magic",
+      "Detect Poison and Disease",
+      "Gentle Repose",
+      "Purify Food and Drink"
+    ]
+  },
+  "longCastingTimes": "For a spell with a casting time of 1 minute or more, you must take the Magic action on each of your turns and maintain Concentration throughout. If Concentration breaks, the spell fails but the slot is NOT expended.",
+  "readiedSpells": "You may Ready a spell whose casting time is an Action. The slot is spent when you Ready it, and you must concentrate on the held spell until the trigger fires.",
+  "higherLevelSlots": "Casting with a higher-level slot makes the spell that level for that casting. Effects marked 'Using a Higher-Level Spell Slot' scale accordingly.",
+  "formulas": {
+    "spellSaveDC": "8 + Proficiency Bonus + spellcasting ability modifier",
+    "spellAttackModifier": "Proficiency Bonus + spellcasting ability modifier"
+  }
+}

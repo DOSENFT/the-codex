@@ -1,0 +1,182 @@
+{
+  "cases": [
+    {
+      "name": "A-live-list-from-the-wire",
+      "picker": {
+        "buttons": [
+          {
+            "text": "AutomaticThe newest one your key can reach",
+            "selected": true,
+            "h": 44
+          },
+          {
+            "text": "Gemini 5.0 FlashFast, and the most generous free quota",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 5.0 Flash LiteLightest. Its own separate quota",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 4.9 ProStrongest, and the tightest free quota",
+            "selected": false,
+            "h": 44
+          }
+        ],
+        "note": [
+          "3 models available on this key. Each has its own free quota — switch if one is rate-limited."
+        ]
+      },
+      "verdict": null,
+      "savedModel": "(automatic)",
+      "seen": [
+        "models?pageSize=200"
+      ],
+      "changed": [
+        "codex-character-nix-fixture{updatedAt,identities,campaignId,customHooks,resourcePools,customConditions}",
+        "codex-roster",
+        "codex-campaign-b1a24896-5dc8-4c3d-8a00-633a4590e93a"
+      ],
+      "illegal": [],
+      "served404": [],
+      "keysWatched": 5
+    },
+    {
+      "name": "B-superseded-never-asked",
+      "picker": {
+        "buttons": [
+          {
+            "text": "AutomaticThe newest one your key can reach",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 5.0 FlashFast, and the most generous free quota",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 5.0 Flash LiteLightest. Its own separate quota",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 4.9 ProStrongest, and the tightest free quota",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 4.2 FlashNot available on this key any more",
+            "selected": false,
+            "h": 44
+          }
+        ],
+        "note": [
+          "3 models available on this key. Each has its own free quota — switch if one is rate-limited."
+        ]
+      },
+      "verdict": "Connection successful",
+      "savedModel": "gemini-4.2-flash",
+      "seen": [
+        "models?pageSize=200",
+        "models?pageSize=200",
+        "models/gemini-5.0-flash:generateContent"
+      ],
+      "changed": [
+        "codex-character-nix-fixture{updatedAt,identities,campaignId,customHooks,resourcePools,customConditions}",
+        "codex-ai-config{ollamaUrl,ollamaModel}",
+        "codex-roster",
+        "codex-ai-models",
+        "codex-campaign-88060edf-3383-4626-a2a3-086e0460bda9"
+      ],
+      "illegal": [],
+      "served404": [],
+      "keysWatched": 5
+    },
+    {
+      "name": "C-retirement-healed",
+      "picker": {
+        "buttons": [
+          {
+            "text": "AutomaticThe newest one your key can reach",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 5.0 FlashFast, and the most generous free quota",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 4.2 FlashFast, and the most generous free quota",
+            "selected": true,
+            "h": 44
+          },
+          {
+            "text": "Gemini 5.0 Flash LiteLightest. Its own separate quota",
+            "selected": false,
+            "h": 44
+          },
+          {
+            "text": "Gemini 4.9 ProStrongest, and the tightest free quota",
+            "selected": false,
+            "h": 44
+          }
+        ],
+        "note": [
+          "4 models available on this key. Each has its own free quota — switch if one is rate-limited."
+        ]
+      },
+      "verdict": "Connection successful",
+      "savedModel": "gemini-5.0-flash",
+      "seen": [
+        "models?pageSize=200",
+        "models?pageSize=200",
+        "models/gemini-4.2-flash:generateContent",
+        "models?pageSize=200",
+        "models/gemini-5.0-flash:generateContent"
+      ],
+      "changed": [
+        "codex-character-nix-fixture{updatedAt,identities,campaignId,customHooks,resourcePools,customConditions}",
+        "codex-ai-config{geminiModel,ollamaUrl,ollamaModel}",
+        "codex-roster",
+        "codex-campaign-7ecd5682-6e71-416a-a485-83880d9394e0",
+        "codex-ai-models"
+      ],
+      "illegal": [],
+      "served404": [
+        "models/gemini-4.2-flash:generateContent"
+      ],
+      "keysWatched": 5
+    },
+    {
+      "name": "D-no-key-contacts-nobody",
+      "picker": {
+        "buttons": [
+          {
+            "text": "AutomaticThe newest one your key can reach",
+            "selected": true,
+            "h": 44
+          }
+        ],
+        "note": [
+          "Add your key above and this list fills in from Google. Each model has its own free quota."
+        ]
+      },
+      "verdict": null,
+      "savedModel": "(automatic)",
+      "seen": [],
+      "changed": [
+        "codex-character-nix-fixture{updatedAt,identities,campaignId,customHooks,resourcePools,customConditions}",
+        "codex-roster",
+        "codex-campaign-0c694a30-eb24-4986-ad06-e856bcf486e5"
+      ],
+      "illegal": [],
+      "served404": [],
+      "keysWatched": 5
+    }
+  ],
+  "errors": []
+}

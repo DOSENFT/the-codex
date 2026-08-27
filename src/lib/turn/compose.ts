@@ -55,6 +55,7 @@ import { findContention } from './contention'
 // id the composer PRICES with. Same functions, one home — see ids.ts.
 import { slug } from './ids'
 import { categorizeTurnOptions, levelLabel, type ActionOption } from './options'
+import { overlayCanon, type EconomyFiling, type OverlaidOption } from './overlay'
 import { sortByRank, withRank, type RankContext } from './rank'
 import type {
   ComposedTurn,
@@ -96,6 +97,25 @@ const KIND: Record<ActionOption['type'], OptionKind> = {
   weapon: 'attack',
   spell: 'spell',
   feature: 'feature',
+}
+
+/** The four buckets `categorizeTurnOptions` returns, and the economy each one
+ *  means. `passives` has no economy, which is the whole reason it is a bucket
+ *  and not a slot. */
+type Bucket = 'actions' | 'bonusActions' | 'reactions' | 'passives'
+
+const BUCKET_FOR: Record<EconomyFiling, Bucket> = {
+  action: 'actions',
+  bonusAction: 'bonusActions',
+  reaction: 'reactions',
+  passive: 'passives',
+}
+
+const ECONOMY_OF_BUCKET: Record<Bucket, ActionOption['actionEconomy'] | undefined> = {
+  actions: 'action',
+  bonusActions: 'bonusAction',
+  reactions: 'reaction',
+  passives: undefined,
 }
 
 /**
@@ -149,14 +169,62 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   // composer sees and what TurnSummary sees. Everything else — every summary
   // string, every mechanics line, every pinned quirk — is identical because it
   // is literally the same call.
-  const raw = categorizeTurnOptions(character, { includeUnaffordable: true })
+  const sheet = categorizeTurnOptions(character, { includeUnaffordable: true })
 
   const weaponsByName = new Map<string, Weapon>()
   for (const weapon of character.weapons ?? []) weaponsByName.set(weapon.name, weapon)
   const featuresByName = new Map<string, ClassFeature>()
   for (const feature of character.features ?? []) featuresByName.set(feature.name, feature)
 
-  const build = (option: ActionOption, slot: EconomySlot): TurnOption => {
+  // -- the canon overlay -----------------------------------------------------
+  //
+  // Slice 5. Every option's display strings get one pass through `overlayCanon`
+  // before anything else looks at them, so `build()` and `detailOf()` below see
+  // canon's numbers where canon has them and the sheet's words where it does
+  // not. The overlay never throws and never removes an option; a miss simply
+  // marks the row `provenance: 'sheet'` and changes nothing else.
+  //
+  // IT ALSO RE-FILES — BUT ONLY WHERE THE SHEET NEVER SAID.
+  //
+  // `options.ts:365-367` files any feature whose NAME contains "aura" as a
+  // passive when the record declares no `actionType`, and a passive is never
+  // offered as something to do. Canon has three spells called "Aura of
+  // Vitality", "Aura of Life" and "Aura of Purity", all cast with an Action;
+  // put any of them on a sheet as an undeclared feature and it disappears from
+  // the turn list with no message and nothing to tap.
+  //
+  // The gate is `declaredEconomy`. A feature whose record DOES declare an
+  // actionType is Marcus stating the answer, and canon does not get to
+  // contradict him — the same precedence options.ts already applies, one layer
+  // up. A spell is never re-filed at all: its `castingTime` string is always
+  // present, so it is always a declaration. Where the sheet and canon genuinely
+  // disagree about a declared cost, that is an ERRATUM, and slice 8 is where
+  // the app shows both readings rather than silently picking one.
+  const declaredEconomy = new Set(
+    (character.features ?? []).filter(f => f.actionType !== undefined).map(f => f.name),
+  )
+  const raw: Record<Bucket, OverlaidOption[]> = {
+    actions: [],
+    bonusActions: [],
+    reactions: [],
+    passives: [],
+  }
+  for (const bucket of Object.keys(raw) as Bucket[]) {
+    for (const sheetOption of sheet[bucket]) {
+      const option = overlayCanon(sheetOption, character)
+      const refile =
+        option.canonEconomy !== undefined &&
+        option.type === 'feature' &&
+        !declaredEconomy.has(option.name)
+      const target = refile ? BUCKET_FOR[option.canonEconomy!] : bucket
+      const economy = ECONOMY_OF_BUCKET[target]
+      raw[target].push(
+        target === bucket || economy === undefined ? option : { ...option, actionEconomy: economy },
+      )
+    }
+  }
+
+  const build = (option: OverlaidOption, slot: EconomySlot): TurnOption => {
     const weapon = option.type === 'weapon' ? weaponsByName.get(option.name) : undefined
     const feature = option.type === 'feature' ? featuresByName.get(option.name) : undefined
     const cost = costOf(option, slot, feature, character)
@@ -223,6 +291,11 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       ...(option.isConcentration ? { concentration: option.name } : {}),
       ...(feature?.source ? { source: feature.source } : {}),
       ...(feature?.source?.toLowerCase().includes('homebrew') ? { homebrew: true } : {}),
+      // Slice 5. Carried, not recomputed: the row and the detail sheet must
+      // agree about which book they are quoting, and the only way to guarantee
+      // that is for both to read the same field off the same object.
+      ...(option.canonId ? { canonId: option.canonId } : {}),
+      ...(option.provenance ? { provenance: option.provenance } : {}),
     }
   }
 
@@ -236,7 +309,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
     concentratingOn: combat?.concentrating ?? null,
     yourTurn,
   }
-  const rank = (o: ActionOption, slot: EconomySlot): TurnOption => {
+  const rank = (o: OverlaidOption, slot: EconomySlot): TurnOption => {
     const built = build(o, slot)
     return withRank(built, rankCtx, {
       prose: o.summary,

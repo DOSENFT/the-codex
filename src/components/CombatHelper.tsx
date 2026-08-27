@@ -54,6 +54,10 @@ import { DamageTracker } from './DamageTracker'
 import { ConditionReminder } from './ConditionReminder'
 import { TurnSummary } from './combat/TurnSummary'
 import { QuickLookup } from './combat/QuickLookup'
+import { CanonMatchReport } from './combat/CanonMatchReport'
+import { VitalsBand } from './combat/VitalsBand'
+import { TurnOptionRow } from './combat/TurnOptionRow'
+import { CombatProvider, useCombat } from './turn/CombatProvider'
 import { useCollapsible } from '../hooks/useCollapsible'
 import { type CombatLog, type DamageEntry, createCombatLog, logDamage as logDamageEntry, endCombatLog, saveDamageLogs, loadDamageLogs } from '../lib/damage-log'
 
@@ -905,11 +909,120 @@ function CollapsibleCombatSection({
   )
 }
 
+/* ── "YOUR TURN" — the engine's first appearance on the Play tab. Slice 5. ──
+ *
+ * Everything above this line on the combat screen is either a number Marcus
+ * reads or a menu he opens. This is the first surface that answers the actual
+ * question — "it is my turn, what can I do RIGHT NOW" — and every row in it
+ * came through `composeTurn` → `overlayCanon`, which means the words are
+ * canon's where canon has them and Marcus's where it does not.
+ *
+ * It reads `useCombat()` and nothing else. No props, no state, no writes: the
+ * provider it reads from persists only inside its dispatch handler, and this
+ * component never dispatches. That is what makes it safe to mount alongside the
+ * legacy screen instead of in place of it.
+ *
+ * IT IS A SHORTLIST, AND IT SAYS SO. `turn.ranked` is the top five uncontended
+ * affordable options. Two things are deliberately NOT here yet: the contention
+ * brackets (Smite vs Lay on Hands vs Misty Step — one decision with three
+ * faces) and the "everything else" fold. Both are real parts of the turn and
+ * both arrive with slices 6 and 9; until then the footer counts them out loud
+ * rather than letting the list imply it is the whole truth. Nothing is lost in
+ * the meantime — every existing surface on this tab is still below, untouched.
+ */
+function YourTurnList() {
+  const { turn } = useCombat()
+  const elsewhere = turn.rest.length + turn.mutex.reduce((n, g) => n + g.faces.length, 0)
+
+  /* A `section` with a stable label rather than a GlassCard, and a real `ul`
+     rather than a stack of divs, because the browser prover has to be able to
+     ask the PAINTED page "which rows are these, and how many line boxes did
+     each one take" — and slice 4's finding Q is that a proof which reads the
+     model instead of the paint is a proof of the model. `glass-card` is the
+     same class GlassCard applies, so nothing about the look changes. */
+  return (
+    <section className="glass-card p-3" aria-label="Your turn options">
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-forge-0">
+          {/* The caption is the same fact the rest of the screen is composed
+              from, not a hardcoded string — off-turn a list of reactions headed
+              "Your turn" says exactly the wrong thing. */}
+          {turn.yourTurn ? 'Your turn' : 'The moment'}
+        </h3>
+        <span className="font-mono text-[11px] text-forge-2">{turn.ranked.length} ready</span>
+      </div>
+
+      {turn.ranked.length > 0 ? (
+        <ul className="mt-2 flex flex-col gap-1.5">
+          {turn.ranked.map(option => (
+            <li key={option.id}>
+              <TurnOptionRow option={option} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-xs leading-snug text-forge-1">
+          Nothing here is both affordable and yours to spend this moment. Everything you own is
+          still in the sections below.
+        </p>
+      )}
+
+      {elsewhere > 0 && (
+        <p className="mt-2 text-[11px] leading-snug text-forge-2">
+          {elsewhere} more — including anything that contends for the same slot — are in the
+          sections below.
+        </p>
+      )}
+    </section>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 
-export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }: CombatHelperProps) {
+/* THE SHELL. Table Truth slice 5.
+ *
+ * `CombatProvider` is the layer that owns the rules engine — `composeTurn`, the
+ * reducer, the undo log. Until now nothing on the Play tab mounted it, so the
+ * engine that Slices 1-4 built has never once been on screen at the table.
+ * This is the wire.
+ *
+ * IT IS MOUNTED READ-ONLY, AND THAT IS A PROPERTY OF THE PROVIDER, NOT A HOPE.
+ * `CombatProvider` persists in exactly one place — inside `commit`, which is
+ * reachable only from `dispatch` and `undoLast`. Nothing below dispatches yet.
+ * So on this slice the provider reads `codex-combat-${id}`, composes the turn
+ * from it, and writes nothing at all; `turn/storage-safety.test.tsx` proves the
+ * key is byte-identical across a full render — and that nothing so much as
+ * called `setItem` — rather than asserting it in a comment.
+ *
+ * WHY A SHELL AND NOT A HOOK CALL INSIDE THE BODY. `CombatHelperInner` still
+ * owns the legacy write path — the `useState` at the top and the `useEffect`
+ * that saves on every change, including on mount. Two writers to one key is the
+ * hazard this phase exists to retire, and the retirement happens in slice 10,
+ * deliberately, after the read path has been proven at the table. Until then
+ * the two are kept in a strict order: the provider's state initialiser runs
+ * during the SHELL's render, before the inner component renders and long before
+ * its effect fires, so the provider always sees the bytes as they were on
+ * arrival. Reversing that order is the one edit that would break this.
+ *
+ * `key={character.id}` is load-bearing: the provider binds to one character and
+ * has no effect watching the id, because the failure mode of getting that wrong
+ * is writing Nix's spent slots onto somebody else's sheet.
+ */
+export function CombatHelper(props: CombatHelperProps) {
+  return (
+    <CombatProvider
+      key={props.character.id}
+      character={props.character}
+      onCharacterUpdate={props.onCharacterUpdate}
+    >
+      <CombatHelperInner {...props} />
+    </CombatProvider>
+  )
+}
+
+function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: CombatHelperProps) {
   // ── Combat State (persisted) ──
   const [combatState, setCombatState] = useState<CombatState>(() => {
     const saved = loadCombatState(character.id)
@@ -1202,6 +1315,30 @@ export function CombatHelper({ character, onCharacterUpdate, onOpenDiceRoller }:
 
   return (
     <section className="flex flex-col gap-4" aria-label="Combat Helper">
+      {/* ── TEMPORARY — Table Truth slice 1's tracer bullet ──
+             Proves the canon corpus loaded, and says out loud what it does NOT
+             cover on this sheet. Read-only: it dispatches nothing and persists
+             nothing. Slice 9 deletes it, once the rows themselves carry canon
+             and the coverage is visible where it actually matters. */}
+      <CanonMatchReport character={character} />
+
+      {/* ── Table Truth slice 2 — the vitals band ──
+             Save DC, initiative and proficiency were absent from this surface
+             entirely; AC and spell attack existed only in the unmounted
+             combat/StatsBar.tsx. First thing on the tab because it is the set
+             of numbers a turn is made of, and because V-3 wants them read at
+             60cm rather than hunted for. Read-only: derives and renders. */}
+      <VitalsBand character={character} />
+
+      {/* ── Table Truth slice 5 — the ranked turn list ──
+             The rules engine's first appearance on this tab. Above TurnSummary
+             because it answers the question TurnSummary makes you go hunting
+             for, and because V-6 wants the thing you read first to be the thing
+             you need first. TurnSummary stays exactly where it is: slice 9 is
+             where surfaces are retired, and only after what each one uniquely
+             does has been pinned as a test. */}
+      <YourTurnList />
+
       {/* ── Always visible: TurnSummary (when in combat) ── */}
       {combatState.inCombat && (
         <TurnSummary

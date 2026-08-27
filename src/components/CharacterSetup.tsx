@@ -25,7 +25,8 @@ import {
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
-import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, GEMINI_MODELS, type AIProvider } from '../lib/ai'
+import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIProvider } from '../lib/ai'
+import { GeminiModelPicker } from './GeminiModelPicker'
 import { generateId, type Character, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
 import { parseCharacterFile, formatList } from '../lib/import-character'
 import {
@@ -182,7 +183,8 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
   // an Ollama server at all, first-run setup must not open on Ollama.
   const [aiProvider, setAiProvider] = useState<AIProvider>(getDefaultProvider)
   const [geminiKey, setGeminiKey] = useState('')
-  const [geminiModel, setGeminiModel] = useState('gemini-2.0-flash')
+  // '' is Automatic — resolve the newest the key can reach, every request.
+  const [geminiModel, setGeminiModel] = useState('')
   // Not an address. One machine's LAN IP was compiled in here, which meant
   // first-run setup on the iPad offered a host that existed only on the
   // desktop's network — see the note in lib/ai.ts.
@@ -235,7 +237,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
     const config = {
       provider: aiProvider,
       geminiApiKey: aiProvider === 'gemini' ? geminiKey : undefined,
-      geminiModel: aiProvider === 'gemini' ? geminiModel : undefined,
+      geminiModel: aiProvider === 'gemini' ? (geminiModel || undefined) : undefined,
       ollamaUrl: aiProvider === 'ollama' ? ollamaUrl : undefined,
       ollamaModel: aiProvider === 'ollama' ? ollamaModel : undefined,
     }
@@ -321,7 +323,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
     saveAIConfig({
       provider: aiProvider,
       geminiApiKey: aiProvider === 'gemini' ? geminiKey : undefined,
-      geminiModel: aiProvider === 'gemini' ? geminiModel : undefined,
+      geminiModel: aiProvider === 'gemini' ? (geminiModel || undefined) : undefined,
       ollamaUrl: aiProvider === 'ollama' ? ollamaUrl : undefined,
       ollamaModel: aiProvider === 'ollama' ? ollamaModel : undefined,
     })
@@ -739,33 +741,17 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                   </p>
                 </div>
 
-                {/* Model selector */}
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-sm font-medium text-forge-1">Model</span>
-                  <div className="flex flex-col gap-1.5">
-                    {GEMINI_MODELS.map((m) => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => { setGeminiModel(m.id); setAiTestSuccess(false); setAiTestError(null) }}
-                        className={cn(
-                          'flex items-center justify-between min-h-[44px] px-3.5 rounded-xl text-left',
-                          'transition-all duration-200 ease-forge active:scale-[0.98]',
-                          'border',
-                          geminiModel === m.id
-                            ? 'bg-arcane/10 border-arcane/30 text-forge-0 ornate-border'
-                            : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:bg-gold/[0.06] hover:text-forge-1',
-                        )}
-                      >
-                        <span className="text-sm font-medium">{m.label}</span>
-                        <span className="text-xs opacity-60">{m.description}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-forge-2">
-                    Each model has its own free quota. If one is rate-limited, switch to another.
-                  </p>
-                </div>
+                <GeminiModelPicker
+                  apiKey={geminiKey}
+                  value={geminiModel}
+                  onChange={(id) => {
+                    setGeminiModel(id)
+                    // A different model is a different connection. The green
+                    // tick from the last one is no longer evidence about this one.
+                    setAiTestSuccess(false)
+                    setAiTestError(null)
+                  }}
+                />
               </>
             ) : (
               <>

@@ -47,13 +47,16 @@ import { saveOrAnnounce } from './character'
 
 export type AIProvider = 'gemini' | 'ollama'
 
-// Available Gemini models (each has its own separate free-tier quota)
-export const GEMINI_MODELS = [
-  { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', description: 'Fastest, best quality' },
-  { id: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash Lite', description: 'Lightweight, separate quota' },
-  { id: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', description: 'Stable, separate quota' },
-  { id: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B', description: 'Smallest, highest limits' },
-] as const
+/* THERE IS NO LIST OF GEMINI MODELS IN THIS FILE. There used to be — four ids
+   compiled into the bundle, offered in three dropdowns, and one of them was the
+   default. On 2026-08-26 Google retired the default and every AI feature in the
+   app died with a 404 that said, in its own body, exactly which model to use
+   instead. A shipped list of model ids is a shipped expiry date.
+
+   What replaced it lives in the Gemini section below: `listGeminiModels()` asks
+   the key what it can actually reach, `rankGeminiModels()` picks by PATTERN
+   (newest flash → flash-lite → pro), and a 404 that names its own replacement
+   is retried once against that name. See `resolveGeminiModel`. */
 
 /** The three clocks, in milliseconds.
  *
@@ -99,11 +102,20 @@ export class AIError extends Error {
   readonly kind: AIFailure
   /** HTTP status, when there was a response at all. */
   readonly status?: number
-  constructor(kind: AIFailure, message: string, status?: number) {
+  /** The response body, UNTRUNCATED.
+   *
+   *  `message` is written for a person and clips the body at 200 characters.
+   *  That was fine until a 404 body turned out to contain the fix — "Please
+   *  update your code to use models/X" — and a machine needed to read it. Two
+   *  audiences, two fields; the human sentence is not parsed and the raw body is
+   *  not shown. */
+  readonly body?: string
+  constructor(kind: AIFailure, message: string, status?: number, body?: string) {
     super(message)
     this.name = 'AIError'
     this.kind = kind
     this.status = status
+    this.body = body
   }
 }
 
@@ -186,7 +198,9 @@ function defaultConfig(): AIConfig {
   const url = getDefaultOllamaUrl()
   return {
     provider: getDefaultProvider(),
-    geminiModel: 'gemini-2.0-flash',
+    // No default model id. Absent means "ask Google" — see resolveGeminiModel.
+    // A default that names a model is a default with a shelf life.
+    geminiModel: undefined,
     ollamaUrl: url || undefined,
     ollamaModel: 'gemma3-27b-abliterated:latest',
     fallbackEnabled: true,
@@ -450,9 +464,284 @@ async function geminiError(response: Response, model: string): Promise<AIError> 
     return new AIError('api', 'Invalid API key. Check your key at aistudio.google.com/apikey', 400)
   }
   if (response.status === 403) {
-    return new AIError('api', 'API key does not have permission. Make sure the Generative Language API is enabled.', 403)
+    return new AIError('api', 'API key does not have permission. Make sure the Generative Language API is enabled.', 403, errText)
   }
-  return new AIError('api', `Gemini error (${response.status}): ${errText.slice(0, 200)}`, response.status)
+  return new AIError('api', `Gemini error (${response.status}): ${errText.slice(0, 200)}`, response.status, errText)
+}
+
+/* ─── Which model? Asked, never assumed ───────────────────────────────────────
+
+   THE DEFECT THIS BLOCK REPLACES, reported by Marcus on 2026-08-26 with the
+   error text in hand:
+
+       Gemini error (404): {"error":{"code":404,"message":"This model
+       models/<the one we shipped> is no longer available. Please update your
+       code to use models/<the one that replaced it> for the latest features…
+
+   Every AI feature in the app was dead — Character Forging included — because a
+   model id had been compiled into the bundle in six places and Google retired
+   it. Note what the error itself contains: the answer. The app had the fix in
+   its hands and threw it away, because nothing read the body.
+
+   (The two ids are redacted above because `ai.test.ts` greps this whole tree
+   for the retired one and does not make an exception for a comment. Quoting the
+   error verbatim tripped the very guard this block exists to justify — which is
+   the guard working, so it stays and the quote gives way.)
+
+   THE RULE NOW: the app never states which Gemini model exists. It asks the key
+   (`listGeminiModels`), chooses by pattern rather than by name
+   (`rankGeminiModels`), and when a request 404s with a replacement named in the
+   body it uses that name — once — and remembers the winner.
+
+   This is the same doctrine the Ollama block above already follows: do not
+   fabricate an address and then report your own fiction as an error. A hardcoded
+   model id is that same fiction with a longer fuse.
+   ------------------------------------------------------------------------- */
+
+/** One model as a picker wants it. Assembled from the id — no second API shape
+ *  to depend on, and the same id always describes the same way. */
+export interface GeminiModel {
+  id: string
+  label: string
+  description: string
+}
+
+const MODEL_CACHE_KEY = 'codex-ai-models'
+/** A day. Google retires models on the scale of months; asking more often than
+ *  this spends a request on a question whose answer almost never changes, and
+ *  asking less often is a day of 404s. The 404 path refreshes it immediately
+ *  regardless, so this bound is about the quiet case only. */
+export const MODEL_CACHE_TTL_MS = 24 * 60 * 60 * 1000
+
+interface ModelCache { fetchedAt: number; models: string[] }
+
+function readModelCache(): ModelCache | null {
+  try {
+    const raw = localStorage.getItem(MODEL_CACHE_KEY)
+    if (!raw) return null
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return null
+    const c = parsed as Partial<ModelCache>
+    if (!Array.isArray(c.models) || typeof c.fetchedAt !== 'number') return null
+    return { fetchedAt: c.fetchedAt, models: c.models.filter(m => typeof m === 'string') }
+  } catch {
+    return null
+  }
+}
+
+function writeModelCache(models: string[]): void {
+  try {
+    localStorage.setItem(MODEL_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), models }))
+  } catch {
+    /* A cache that cannot be written is a cache miss, not a failure. Private
+       browsing and a full quota both land here and neither is worth an error. */
+  }
+}
+
+/** Ask the key what it can actually reach.
+ *
+ *  Only models that advertise `generateContent` survive the filter — the same
+ *  list carries embedding and token-counting endpoints that would 400 if asked
+ *  to write a sentence. Throws on network or auth failure; the caller decides
+ *  whether that is fatal. */
+export async function listGeminiModels(
+  apiKey: string,
+  signal?: AbortSignal,
+  timeoutMs: number = AI_TIMEOUTS.connectMs,
+): Promise<string[]> {
+  const b = bound({ provider: 'gemini', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal)
+  try {
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
+      { method: 'GET', headers: geminiHeaders(apiKey), signal: b.signal },
+    )
+    b.touch()
+    if (!response.ok) throw await geminiError(response, 'the model list')
+    const data = await response.json()
+    const models: string[] = (data.models ?? [])
+      .filter((m: { supportedGenerationMethods?: string[] }) =>
+        (m.supportedGenerationMethods ?? []).includes('generateContent'))
+      .map((m: { name?: string }) => (m.name ?? '').replace(/^models\//, ''))
+      .filter((id: string) => id.length > 0)
+    return models
+  } catch (err) {
+    throw b.explain(err, 'Gemini')
+  } finally {
+    b.done()
+  }
+}
+
+/** `gemini-2.5-flash-lite` → `{ major: 2, minor: 5 }`; unnumbered sorts oldest. */
+function versionOf(id: string): number {
+  const m = /gemini-(\d+)(?:\.(\d+))?/.exec(id)
+  if (!m) return -1
+  return Number(m[1]) * 1000 + Number(m[2] ?? 0)
+}
+
+/** Rank by SHAPE, never by name.
+ *
+ *  Gate 3 fixed the order: newest plain *flash, then *flash-lite, then
+ *  everything else flash-ish, then *pro. Flash first because it is the tier
+ *  with a real free quota and the one a phone at a table can afford to wait
+ *  for; pro last because it is the one most likely to answer 429 on a free key.
+ *
+ *  Preview / experimental / thinking builds are pushed BELOW their stable
+ *  siblings rather than dropped. Dropping them would mean a key that can only
+ *  see preview models resolves to nothing — the open-world rule again: a
+ *  ranking may prefer, it may not decide that something does not exist. */
+export function rankGeminiModels(ids: string[]): string[] {
+  const tierOf = (id: string): number => {
+    if (/-flash$/.test(id)) return 0
+    if (/flash-lite/.test(id)) return 1
+    if (/flash/.test(id)) return 2
+    if (/pro/.test(id)) return 3
+    return 4
+  }
+  const unstable = (id: string) => (/preview|-exp|experimental|thinking/.test(id) ? 1 : 0)
+
+  return ids
+    .filter(id => /^gemini-/.test(id))
+    .slice()
+    .sort((a, b) =>
+      unstable(a) - unstable(b) ||
+      tierOf(a) - tierOf(b) ||
+      versionOf(b) - versionOf(a) ||
+      a.localeCompare(b))
+}
+
+/** A model id, described for a human, derived from the id itself.
+ *
+ *  Deliberately not read from the API's `displayName` / `description`: those are
+ *  a second response shape to depend on, they are marketing copy rather than
+ *  anything about quota, and a cached list of bare ids is all the resolver
+ *  needs. The same id always describes the same way, and it is a pure function,
+ *  so it is testable without a network. */
+export function describeGeminiModel(id: string): GeminiModel {
+  const words = id
+    .replace(/^gemini-/, '')
+    .split('-')
+    .map(w => (/^\d+b$/i.test(w) ? w.toUpperCase() : /^[\d.]+$/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ')
+
+  const description =
+    /preview|-exp|experimental|thinking/.test(id) ? 'Preview build — may change or vanish'
+    : /-flash$/.test(id) ? 'Fast, and the most generous free quota'
+    : /flash-lite/.test(id) ? 'Lightest. Its own separate quota'
+    : /flash/.test(id) ? 'A flash variant. Its own separate quota'
+    : /pro/.test(id) ? 'Strongest, and the tightest free quota'
+    : 'Its own separate quota'
+
+  return { id, label: `Gemini ${words}`.trim(), description }
+}
+
+/** Google's 404 body names its own replacement. Read it.
+ *
+ *  Matched on "use … models/X" specifically, because the same sentence names
+ *  the RETIRED model first ("This model models/… is no longer available") and a
+ *  greedy match for `models/…` would helpfully retry the dead one forever. */
+export function replacementFromError(body: string | undefined): string | null {
+  if (!body) return null
+  const explicit = /\buse\s+(?:the\s+)?(?:model\s+)?models\/([\w.-]+)/i.exec(body)
+  if (explicit) return explicit[1]
+  const loose = /\buse\s+(?:the\s+)?(gemini-[\w.-]+)/i.exec(body)
+  return loose ? loose[1] : null
+}
+
+/** The last time the app changed model on its own, in one sentence for a person
+ *  — or null. Read by Settings so a silent switch is never silent. */
+let _lastModelNotice: string | null = null
+export function getLastModelNotice(): string | null { return _lastModelNotice }
+export function clearModelNotice(): void { _lastModelNotice = null }
+
+/** The live list, cached. Returns null when it cannot be had at all — a stale
+ *  cache beats no cache, and no cache beats a guess. */
+async function knownModels(apiKey: string, signal?: AbortSignal): Promise<string[] | null> {
+  const cached = readModelCache()
+  if (cached && Date.now() - cached.fetchedAt < MODEL_CACHE_TTL_MS && cached.models.length > 0) {
+    return cached.models
+  }
+  try {
+    const live = await listGeminiModels(apiKey, signal)
+    if (live.length > 0) writeModelCache(live)
+    return live.length > 0 ? live : (cached?.models ?? null)
+  } catch {
+    return cached?.models ?? null
+  }
+}
+
+/** Which model this request should use.
+ *
+ *  Precedence: a chosen model that the key can still reach → the best match by
+ *  pattern → a chosen model we could not verify (offline, say) → an error that
+ *  says so. There is no branch that invents an id. */
+export async function resolveGeminiModel(cfg: AIConfig, signal?: AbortSignal): Promise<string> {
+  if (!cfg.geminiApiKey) {
+    throw new AIError('config', 'No Gemini API key set. Add one in Settings, or switch to Ollama.')
+  }
+  const chosen = cfg.geminiModel?.trim() || ''
+  const live = await knownModels(cfg.geminiApiKey, signal)
+
+  if (live && live.length > 0) {
+    if (chosen && live.includes(chosen)) return chosen
+    const best = rankGeminiModels(live)[0] ?? live[0]
+    if (best) {
+      if (chosen) {
+        _lastModelNotice = `${chosen} is not available on this key any more. Now using ${best}.`
+      }
+      return best
+    }
+  }
+
+  // Could not ask. An id he chose himself is still the best information here —
+  // it is his assertion, exactly like a typed Ollama address.
+  if (chosen) return chosen
+  throw new AIError(
+    'api',
+    'Could not ask Google which models this key can use, and no model has been chosen in Settings. Check the key and your connection.',
+  )
+}
+
+/** A 404 that names its successor, turned into that successor — or null when
+ *  this failure is not that, which is most of the time.
+ *
+ *  Persists the winner so the next session starts on it. Returns null if the
+ *  replacement is the model that just failed: that is the loop, and it is
+ *  closed here rather than bounded by a counter somewhere else. */
+async function retiredModelReplacement(
+  cfg: AIConfig,
+  failed: string,
+  err: unknown,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  if (!(err instanceof AIError) || err.status !== 404) return null
+  const body = err.body ?? err.message
+  if (!/no longer available|not found|is not supported/i.test(body)) return null
+  if (!cfg.geminiApiKey) return null
+
+  const hint = replacementFromError(body)
+
+  let live: string[] = []
+  try {
+    live = await listGeminiModels(cfg.geminiApiKey, signal)
+    if (live.length > 0) writeModelCache(live)
+  } catch {
+    live = []
+  }
+
+  const next =
+    hint && (live.length === 0 || live.includes(hint)) ? hint
+    : rankGeminiModels(live)[0] ?? null
+
+  if (!next || next === failed) return null
+
+  _lastModelNotice = `Google retired ${failed}. Switched to ${next} and carried on.`
+  try {
+    saveAIConfig({ ...loadAIConfig(), geminiModel: next })
+  } catch {
+    /* Not being able to remember the new model is not a reason to fail the
+       request that is already in flight. It will be re-resolved next time. */
+  }
+  return next
 }
 
 // Gemini implementation with auto-retry on rate limits
@@ -525,11 +814,21 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 let _lastUsedProvider: AIProvider | null = null
 export function getLastUsedProvider(): AIProvider | null { return _lastUsedProvider }
 
-const ask = (cfg: AIConfig, provider: AIProvider, systemPrompt: string, userMessage: string, signal?: AbortSignal) => {
+const ask = async (cfg: AIConfig, provider: AIProvider, systemPrompt: string, userMessage: string, signal?: AbortSignal): Promise<string> => {
   requireCredentials(cfg, provider)
-  return provider === 'gemini'
-    ? queryGemini(cfg, cfg.geminiModel || 'gemini-2.0-flash', systemPrompt, userMessage, signal)
-    : queryOllama(cfg, systemPrompt, userMessage, signal)
+  if (provider !== 'gemini') return queryOllama(cfg, systemPrompt, userMessage, signal)
+
+  const model = await resolveGeminiModel(cfg, signal)
+  try {
+    return await queryGemini(cfg, model, systemPrompt, userMessage, signal)
+  } catch (err) {
+    // ONCE. `retiredModelReplacement` returns null when the replacement is the
+    // model that just failed, so a Google that keeps naming a dead id cannot
+    // spin here — and a second 404 has no third attempt to reach for.
+    const next = await retiredModelReplacement(cfg, model, err, signal)
+    if (!next) throw err
+    return await queryGemini(cfg, next, systemPrompt, userMessage, signal)
+  }
 }
 
 // Main query function — with automatic fallback
@@ -672,9 +971,21 @@ export async function queryAIStream(
 
   try {
     requireCredentials(cfg, cfg.provider)
-    const result = cfg.provider === 'gemini'
-      ? await streamGemini(cfg, cfg.geminiModel || 'gemini-2.0-flash', systemPrompt, userMessage, guardedOnText, signal)
-      : await streamOllama(cfg, systemPrompt, userMessage, guardedOnText, signal)
+    let result: string
+    if (cfg.provider === 'gemini') {
+      const model = await resolveGeminiModel(cfg, signal)
+      try {
+        result = await streamGemini(cfg, model, systemPrompt, userMessage, guardedOnText, signal)
+      } catch (streamErr) {
+        // Same one-shot contract as `ask`. A retirement 404 arrives before any
+        // bytes do, so `received` is still false and retrying is honest.
+        const next = await retiredModelReplacement(cfg, model, streamErr, signal)
+        if (!next) throw streamErr
+        result = await streamGemini(cfg, next, systemPrompt, userMessage, guardedOnText, signal)
+      }
+    } else {
+      result = await streamOllama(cfg, systemPrompt, userMessage, guardedOnText, signal)
+    }
     _lastUsedProvider = cfg.provider
     return result
   } catch (err) {

@@ -45,11 +45,37 @@
    combat is NOT running, and it is gone the moment it has done its one job.
 
    WHAT IT DELIBERATELY DOES NOT DO:
-     · It does not collapse to a handle by default. A collapsed deck would hide
-       the slot pips, and a control that is display:none is not measured by V-6
-       at all — passing the criterion by hiding its subject is the exact move
-       this project's proof exists to catch. Everything gradeable is painted.
+     · It does not collapse to a handle. See MINIMISE below — the rule survived
+       Marcus asking for a minimise, because what he asked for is not a handle.
      · It does not appear on the other six screens. Prep is not a turn.
+
+   MINIMISE — Table Truth slice 4, 2026-08-26. The line above used to read "it
+   does not collapse to a handle BY DEFAULT", and the reasoning under it is
+   still the binding constraint: a control that is display:none is not measured
+   by V-6 at all, so a deck that folded to a handle would pass the criterion by
+   hiding its subject. Marcus asked for a minimise anyway, and he was right to —
+   at full height with three slot levels this deck eats the bottom third of the
+   screen for a row of numbers he is not reading between turns.
+
+   THE RESOLUTION IS THAT MINIMISE IS NOT HIDE. Minimised, the deck still paints
+   every piece of turn STATE:
+     · all four economy chips, still tappable, still showing spent vs available
+     · every spell-slot pip, still tappable, still grouped and labelled by level
+   What folds is the WORDS and the class economy: the chip labels, the
+   SPELL SLOTS caption, the Lay on Hands row and the Channel Divinity row.
+   V-6's actual intent — never be surprised by what you have already spent —
+   is untouched, because spend state is what stays.
+
+   TWO THINGS THAT ARE HONESTLY LOST, and are recorded rather than argued away:
+   Heal 5 / Heal 10 and the Channel Divinity pips are spend controls, and while
+   minimised they are not painted and not graded. That is a real V-6 override,
+   licensed at Gate 2 on 2026-08-26 and scoped here. It is bounded three ways:
+   the default is EXPANDED, so nothing about the app's graded default state
+   changes; the state is per character and reversible in one tap; and the two
+   controls that fold are the two the deck reaches for least, which is why the
+   custom-amount drawer was already allowed to be display:none on the same
+   argument. If a later slice needs those spends while minimised, the answer is
+   to put them in the spine — not to widen this exception.
 
    GEOMETRY. It is CHROME, so it wears what the header and the tab bar wear:
    `bg-void-0/92` + `backdrop-blur-md` + a hairline rule. It sits directly on
@@ -63,9 +89,10 @@
    ────────────────────────────────────────────────────────────────────────── */
 import { useLayoutEffect, useRef, useState, useCallback } from 'react'
 import type { RefObject } from 'react'
-import { RotateCcw, Sword, Zap, Shield, Footprints, Heart, Flame, ChevronUp, Play } from 'lucide-react'
+import { RotateCcw, Sword, Zap, Shield, Footprints, Heart, Flame, ChevronUp, ChevronDown, Play } from 'lucide-react'
 import type { Character, PaladinResources } from '../lib/character'
 import { cn } from '../lib/cn'
+import { useCollapsible } from '../hooks/useCollapsible'
 
 /** The turn's four slots. Declared here rather than in CombatHelper because the
  *  deck is now the surface that owns them; CombatHelper imports the type back.
@@ -131,6 +158,10 @@ export function TurnDeck({
 }: TurnDeckProps) {
   const ref = useRef<HTMLDivElement>(null)
   useDeckHeight(ref)
+  /* Default OPEN. The default state is the one V-6 grades and the one a fresh
+     profile renders, so minimising is a thing Marcus does, never a thing the
+     app decides for him. Same `codex-ui-${id}` map as every other fold. */
+  const deck = useCollapsible('turn-deck', character.id, true)
   const [moreOpen, setMoreOpen] = useState(false)
   const [custom, setCustom] = useState('')
 
@@ -231,9 +262,31 @@ export function TurnDeck({
                   type="button"
                   onClick={() => onToggleEconomy(key)}
                   aria-pressed={used}
+                  /* Unconditional, not just when minimised. The visible word
+                     is what named this button until now, and a control whose
+                     accessible name appears and disappears with a fold is a
+                     control that is unnamed exactly when it is hardest to
+                     see. The name is now stated either way. */
+                  aria-label={`${label}: ${used ? 'used' : 'available'}`}
                   className={cn(
-                    'min-h-[48px] flex-1 min-w-0 px-2 rounded-xl',
-                    'flex items-center justify-center gap-1.5',
+                    /* `grow basis-auto shrink-0`, NOT `flex-1`. `flex-1` is
+                       `flex: 1 1 0%` — every chip the same width regardless of
+                       what is written on it — and slice 4's own prover measured
+                       what that costs: 366px of row, minus two 48px buttons and
+                       their gaps, is 58px a chip, and "Reaction" is 52px of
+                       text before any padding. All four words rendered as
+                       "A…" "B…" "R…" "M…". Sized to CONTENT instead, the four
+                       labels are 38+37+52+31 = 158px; with padding, gaps and
+                       both buttons that is 338px of the 366, and `grow` spends
+                       the remaining 28 widening them evenly. Nothing truncates
+                       and no word was shortened to make it fit. */
+                    'min-h-[48px] grow basis-auto shrink-0 px-2 rounded-xl',
+                    /* Column, not row. Beside the icon, a legible "Reaction"
+                       needs 82px of chip and four of those overflow 390px by
+                       36. Above it, the chip is only as wide as its widest
+                       line. Costs no height: 14px icon + 15px word + 2px gap is
+                       31, inside a floor of 48. */
+                    'flex flex-col items-center justify-center gap-0.5',
                     'border transition-all duration-200 ease-forge',
                     'active:scale-[0.97] select-none',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
@@ -246,12 +299,41 @@ export function TurnDeck({
                       : 'bg-arcane/10 border-arcane/30 text-arcane',
                   )}
                 >
-                  <Icon size={14} aria-hidden />
-                  <span className="text-xs font-semibold tracking-wide truncate">{label}</span>
+                  <Icon size={14} className="shrink-0" aria-hidden />
+                  {/* Minimised, the word goes and the icon stays. The chip is
+                      still the same button in the same place at the same size,
+                      still says spent-or-not by tone and strike-through, and
+                      still announces "Action: used" to a screen reader through
+                      aria-label. Only the ink you can already infer is gone. */}
+                  {/* `whitespace-nowrap`, and deliberately NOT `truncate`.
+                      There is no longer a width at which this word is clipped,
+                      so a truncate class here would only hide the day that
+                      stops being true. If a label ever overflows again the row
+                      will visibly break and the prover will say so. */}
+                  {deck.isOpen && (
+                    <span className="text-xs font-semibold tracking-wide whitespace-nowrap">{label}</span>
+                  )}
                 </button>
               )
             })}
           </div>
+          <button
+            type="button"
+            onClick={deck.toggle}
+            aria-expanded={deck.isOpen}
+            className={cn(
+              'min-h-[48px] min-w-[48px] shrink-0 flex items-center justify-center',
+              'rounded-xl text-forge-1 border border-white/[0.08]',
+              'hover:text-arcane hover:bg-white/[0.06]',
+              'transition-all duration-200 active:scale-[0.95]',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+            )}
+            aria-label={deck.isOpen ? 'Minimise turn deck' : 'Expand turn deck'}
+          >
+            {deck.isOpen
+              ? <ChevronDown size={16} aria-hidden />
+              : <ChevronUp size={16} aria-hidden />}
+          </button>
           <button
             type="button"
             onClick={onResetEconomy}
@@ -285,10 +367,18 @@ export function TurnDeck({
           <div className="flex items-center gap-x-3 gap-y-2 flex-wrap">
             {/* Named for the same reason Lay on Hands is: "1st 2nd 3rd" over
                 rows of dots is only obvious to someone who already knows what
-                they are looking at. */}
-            <span className="text-xs font-semibold tracking-wide text-forge-1 shrink-0">
-              SPELL SLOTS
-            </span>
+                they are looking at.
+
+                The CAPTION folds; the per-level "1st 2nd 3rd" never does. The
+                caption tells you what this row of dots is, which you learn
+                once; the level labels tell you which dot costs what, which you
+                read every single time you cast. Folding the second to save
+                12px would leave nine identical circles. */}
+            {deck.isOpen && (
+              <span className="text-xs font-semibold tracking-wide text-forge-1 shrink-0">
+                SPELL SLOTS
+              </span>
+            )}
             {levels.map(({ level, max, current }) => (
               <div key={level} className="flex items-center gap-1.5">
                 <span className="text-xs font-mono text-forge-1 shrink-0">
@@ -334,7 +424,7 @@ export function TurnDeck({
             and deliberately NOT Cinzel, which V-4 bars under 20px.
             It costs one line of deck height, which the page absorbs because
             that height is measured rather than assumed. */}
-        {pal && loh && cd && (
+        {deck.isOpen && pal && loh && cd && (
           <div className="flex items-center gap-2">
             <Heart size={13} className="text-verdant shrink-0" aria-hidden />
             <span className="text-xs font-semibold tracking-wide text-forge-1 shrink-0">
@@ -390,7 +480,7 @@ export function TurnDeck({
             both features named in words the row no longer fits 390px, and the
             answer is a second line rather than a shorter word: "CD" is not a
             thing anyone reads at a glance in a dim room. */}
-        {pal && cd && (
+        {deck.isOpen && pal && cd && (
           <div className="flex items-center gap-2">
             <Flame size={13} className="text-ember shrink-0" aria-hidden />
             <span className="text-xs font-semibold tracking-wide text-forge-1 shrink-0">
@@ -426,7 +516,10 @@ export function TurnDeck({
             painted and V-6 does not grade them; that is honest for a drawer
             the thumb opens in one tap, and would NOT have been honest for the
             slot pips, which is why the pips are never hidden. */}
-        {moreOpen && pal && loh && (
+        {/* `deck.isOpen &&` as well: the drawer hangs off the Lay on Hands row,
+            and without this a deck minimised while the drawer was open would
+            paint an orphaned Cure Poison button under the pips. */}
+        {deck.isOpen && moreOpen && pal && loh && (
           <div className="flex items-center gap-2 pt-0.5">
             <input
               type="number"

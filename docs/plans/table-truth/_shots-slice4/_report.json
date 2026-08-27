@@ -1,0 +1,395 @@
+{
+  "steps": [
+    {
+      "name": "A-default-deck-expanded",
+      "deckH": 368,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "Action",
+          "h": 48,
+          "w": 56,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "Bonus",
+          "h": 48,
+          "w": 55,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "Reaction",
+          "h": 48,
+          "w": 70,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "Move",
+          "h": 48,
+          "w": 49,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 2,
+      "layOnHands": true,
+      "channelDivinity": true,
+      "slotCaption": true,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": false,
+      "condHeaderText": "Active ConditionsNone",
+      "condHeaderH": 48,
+      "condGridPainted": 0,
+      "condSectionH": 57
+    },
+    {
+      "name": "B-deck-minimised",
+      "deckH": 252,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 0,
+      "layOnHands": false,
+      "channelDivinity": false,
+      "slotCaption": false,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": false,
+      "condHeaderText": "Active ConditionsNone",
+      "condHeaderH": 48,
+      "condGridPainted": 0,
+      "condSectionH": 57
+    },
+    {
+      "name": "C-minimised-after-reload",
+      "deckH": 252,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 0,
+      "layOnHands": false,
+      "channelDivinity": false,
+      "slotCaption": false,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": false,
+      "condHeaderText": "Active ConditionsNone",
+      "condHeaderH": 48,
+      "condGridPainted": 0,
+      "condSectionH": 57
+    },
+    {
+      "name": "C2-expanded-again",
+      "deckH": 368,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "Action",
+          "h": 48,
+          "w": 56,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "Bonus",
+          "h": 48,
+          "w": 55,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "Reaction",
+          "h": 48,
+          "w": 70,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "Move",
+          "h": 48,
+          "w": 49,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 2,
+      "layOnHands": true,
+      "channelDivinity": true,
+      "slotCaption": true,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": false,
+      "condHeaderText": "Active ConditionsNone",
+      "condHeaderH": 48,
+      "condGridPainted": 0,
+      "condSectionH": 57
+    },
+    {
+      "name": "E-drawer-not-orphaned",
+      "deckH": 252,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "",
+          "h": 48,
+          "w": 58,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 0,
+      "layOnHands": false,
+      "channelDivinity": false,
+      "slotCaption": false,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": false,
+      "condHeaderText": "Active ConditionsNone",
+      "condHeaderH": 48,
+      "condGridPainted": 0,
+      "condSectionH": 57
+    },
+    {
+      "name": "D1-conditions-folded-none",
+      "deckH": 428,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "Action",
+          "h": 48,
+          "w": 56,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "Bonus",
+          "h": 48,
+          "w": 55,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "Reaction",
+          "h": 48,
+          "w": 70,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "Move",
+          "h": 48,
+          "w": 49,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 2,
+      "layOnHands": true,
+      "channelDivinity": true,
+      "slotCaption": true,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": true,
+      "condHeaderText": "Active ConditionsNone",
+      "condHeaderH": 48,
+      "condGridPainted": 0,
+      "condSectionH": 57
+    },
+    {
+      "name": "D2-conditions-open",
+      "deckH": 428,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "Action",
+          "h": 48,
+          "w": 56,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "Bonus",
+          "h": 48,
+          "w": 55,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "Reaction",
+          "h": 48,
+          "w": 70,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "Move",
+          "h": 48,
+          "w": 49,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 2,
+      "layOnHands": true,
+      "channelDivinity": true,
+      "slotCaption": true,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": true,
+      "condHeaderText": "Active ConditionsNone",
+      "condHeaderH": 48,
+      "condGridPainted": 15,
+      "condSectionH": 495
+    },
+    {
+      "name": "D3-folded-but-names-it",
+      "deckH": 428,
+      "chips": [
+        {
+          "name": "Action: available",
+          "word": "Action",
+          "h": 48,
+          "w": 56,
+          "clipped": false
+        },
+        {
+          "name": "Bonus: available",
+          "word": "Bonus",
+          "h": 48,
+          "w": 55,
+          "clipped": false
+        },
+        {
+          "name": "Reaction: available",
+          "word": "Reaction",
+          "h": 48,
+          "w": 70,
+          "clipped": false
+        },
+        {
+          "name": "Move: available",
+          "word": "Move",
+          "h": 48,
+          "w": 49,
+          "clipped": false
+        }
+      ],
+      "slotPips": 7,
+      "cdPips": 2,
+      "layOnHands": true,
+      "channelDivinity": true,
+      "slotCaption": true,
+      "levelLabels": [
+        "1st",
+        "2nd"
+      ],
+      "curePoison": true,
+      "condHeaderText": "Active ConditionsProne",
+      "condHeaderH": 48,
+      "condGridPainted": 0,
+      "condSectionH": 57
+    }
+  ],
+  "changed": [
+    "codex-character-nix-fixture{conditions,updatedAt,identities,customHooks,resourcePools,customConditions}",
+    "codex-roster",
+    "codex-ui-nix-fixture"
+  ],
+  "illegal": [],
+  "errors": []
+}

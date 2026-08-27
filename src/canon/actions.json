@@ -1,0 +1,119 @@
+{
+  "turnStructure": {
+    "movement": "Up to your Speed, which may be split before, between, and after your action, Bonus Action, and Reaction.",
+    "action": "Exactly one Action per turn.",
+    "bonusAction": "At most ONE Bonus Action per turn, and only when a feature, spell, or effect explicitly grants one. Definition: 'a special action that you can take on the same turn that you take an action.'",
+    "reaction": "One Reaction per round, taken only in response to a defined trigger. You regain it at the START OF YOUR NEXT TURN, not at the start of the round.",
+    "freeObjectInteraction": "One free object interaction per turn, taken during your movement or your action. Any additional interaction requires the Utilize action.",
+    "drawingWeapons": "You may draw or stow one weapon for free as part of the Attack action when you attack with it."
+  },
+  "standardActions": [
+    {
+      "name": "Attack",
+      "summary": "Attack with a weapon or an Unarmed Strike. Extra Attack lets a Paladin attack twice with this action from level 5."
+    },
+    {
+      "name": "Dash",
+      "summary": "Gain extra movement equal to your Speed for the turn."
+    },
+    {
+      "name": "Disengage",
+      "summary": "Your movement does not provoke Opportunity Attacks for the rest of the turn."
+    },
+    {
+      "name": "Dodge",
+      "summary": "Attack rolls against you have Disadvantage and you make Dexterity saves with Advantage until the start of your next turn. Lost if you are Incapacitated or your Speed is 0."
+    },
+    {
+      "name": "Help",
+      "summary": "Give an ally Advantage on an ability check you can assist with, or on their next attack roll against a creature within 5 feet of you."
+    },
+    {
+      "name": "Hide",
+      "summary": "Make a DC 15 Dexterity (Stealth) check while Heavily Obscured or behind at least Three-Quarters Cover. On a success you gain the Invisible condition until you are found, make an attack roll, cast a spell with a Verbal component, or make a noise louder than a whisper."
+    },
+    {
+      "name": "Influence",
+      "summary": "Charisma (Deception, Intimidation, Performance, Persuasion) or Wisdom (Animal Handling) check to change a creature's attitude. NEW IN 2024."
+    },
+    {
+      "name": "Magic",
+      "summary": "Cast a spell with a casting time of an Action, use a magic item, or use a magical feature. RENAMED IN 2024 from 'Cast a Spell'."
+    },
+    {
+      "name": "Ready",
+      "summary": "Choose a trigger and an action or movement to take as a Reaction when it occurs. Readying a spell requires Concentration on the held spell; if that breaks, the spell and the slot are lost."
+    },
+    {
+      "name": "Search",
+      "summary": "Wisdom (Insight, Medicine, Perception, Survival) check to find something. NEW NAMED ACTION IN 2024."
+    },
+    {
+      "name": "Study",
+      "summary": "Intelligence (Arcana, History, Investigation, Nature, Religion) check to recall or deduce information. NEW IN 2024."
+    },
+    {
+      "name": "Utilize",
+      "summary": "Use a nonmagical object. NEW IN 2024 - it is the action-cost path for object interaction beyond your one free interaction."
+    }
+  ],
+  "opportunityAttacks": {
+    "trigger": "A creature YOU CAN SEE leaves your reach using its action, Bonus Action, Reaction, or one of its speeds.",
+    "cost": "Your Reaction. One melee attack.",
+    "avoidedBy": [
+      "Taking the Disengage action",
+      "Teleporting",
+      "Being moved without using its own movement, action, Bonus Action, or Reaction (forced movement)"
+    ],
+    "change2024": "2014 said 'a hostile creature'; 2024 says 'a creature you can see', so it now applies to any visible creature, hostile or not."
+  },
+  "unarmedStrike": {
+    "attackBonus": "Strength modifier + Proficiency Bonus",
+    "options": [
+      {
+        "name": "Damage",
+        "effect": "Bludgeoning damage equal to 1 + your Strength modifier."
+      },
+      {
+        "name": "Grapple",
+        "effect": "Target makes a Strength OR Dexterity saving throw (its choice) against DC 8 + your Strength modifier + your Proficiency Bonus. On a failure it has the Grappled condition. You need a free hand, and the target can be at most one size larger than you.",
+        "escape": "The grappled creature can use its action to make a Strength (Athletics) or Dexterity (Acrobatics) check against the same DC."
+      },
+      {
+        "name": "Shove",
+        "effect": "Same saving throw and DC as Grapple. On a failure you either push the target 5 feet away or give it the Prone condition."
+      }
+    ],
+    "change2024": "2014 used contested ability checks for Grapple and Shove. 2024 converted both to saving throws against a static DC and folded them into the Attack action's Unarmed Strike.",
+    "paladinNote": "Divine Smite and every other Smite spell explicitly triggers on an Unarmed Strike, so grappling and smiting in the same turn is legal."
+  },
+  "movement": {
+    "difficultTerrain": "Each foot costs 1 extra foot. Multiple sources of Difficult Terrain in one space do not stack.",
+    "standFromProne": "Costs movement equal to half your Speed, rounded down. You cannot stand if your Speed is 0.",
+    "crawling": "Each foot costs 1 extra foot while Prone.",
+    "climbSwim": "Each foot costs 1 extra foot unless you have a Climb Speed or Swim Speed.",
+    "longJump": "Horizontal feet up to your Strength SCORE with at least 10 feet of movement first; half that from a standing start.",
+    "highJump": "Vertical feet equal to 3 + your Strength MODIFIER (minimum 0) with a 10-foot run-up; half from a standing start.",
+    "note": "Jump distance is spent from your movement and cannot exceed your remaining movement."
+  },
+  "combat": {
+    "initiative": "1d20 + Dexterity modifier.",
+    "surprise": "A creature caught unawares at the start of combat has DISADVANTAGE ON ITS INITIATIVE ROLL. 2014's 'lose your first turn' rule is gone.",
+    "cover": {
+      "half": "+2 AC and +2 to Dexterity saves",
+      "threeQuarters": "+5 AC and +5 to Dexterity saves",
+      "total": "Cannot be targeted directly. Only the single best degree of cover applies."
+    },
+    "advantage": "Roll 2d20 and take the higher. Multiple sources do not stack. One instance of Advantage and one of Disadvantage cancel to a flat d20.",
+    "criticalHit": "A natural 20 on an attack roll always hits and is a Critical Hit. Roll ALL of the attack's damage dice twice and add them together. Flat modifiers are never doubled. Smite dice, Sneak Attack dice and Radiant Strikes dice are part of the attack's damage and therefore DO double.",
+    "deathSaves": "At 0 HP, roll a plain 1d20 at the start of each of your turns. 10+ is a success, 9 or lower a failure. Three successes = Stable. Three failures = dead. A natural 20 restores 1 HP and consciousness. A natural 1 counts as two failures. Taking damage at 0 HP causes one failure, or two if the hit was a Critical Hit.",
+    "instantDeath": "If damage reduces you to 0 HP and the leftover damage equals or exceeds your Hit Point maximum, you die instantly with no death saves.",
+    "stabilizing": "DC 10 Wisdom (Medicine) check, or any healing. A Stable creature stops making death saves but stays Unconscious, and regains 1 HP after 1d4 hours.",
+    "temporaryHitPoints": "Do not stack. When you gain new Temporary Hit Points you choose to keep your current ones or take the new ones - you never add them together. They are lost at the end of a Long Rest."
+  },
+  "rests": {
+    "shortRest": "At least 1 hour of light activity. You must have at least 1 HP to begin. You may spend Hit Point Dice to heal: roll the die and add your Constitution modifier per die spent.",
+    "longRest": "At least 8 hours, at least 6 of it sleeping, with no more than 2 hours of light activity. You must have at least 1 HP to begin, and 16 hours must have passed since your last Long Rest. You regain all lost Hit Points AND ALL SPENT HIT POINT DICE (2014 only refunded half), and remove 1 level of Exhaustion.",
+    "change2024": "Regaining ALL Hit Point Dice on a Long Rest is a 2024 change and materially increases how much a party can heal on Short Rests."
+  }
+}

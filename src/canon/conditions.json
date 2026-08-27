@@ -1,0 +1,156 @@
+[
+  {
+    "name": "Blinded",
+    "implies": [],
+    "effects": [
+      "You cannot see and automatically fail any ability check that requires sight.",
+      "Attack rolls against you have Advantage.",
+      "Your attack rolls have Disadvantage."
+    ]
+  },
+  {
+    "name": "Charmed",
+    "implies": [],
+    "effects": [
+      "You cannot attack the charmer or target them with damaging abilities or magical effects.",
+      "The charmer has Advantage on ability checks to interact with you socially."
+    ]
+  },
+  {
+    "name": "Deafened",
+    "implies": [],
+    "effects": [
+      "You cannot hear and automatically fail any ability check that requires hearing."
+    ]
+  },
+  {
+    "name": "Exhaustion",
+    "implies": [],
+    "effects": [
+      "Cumulative levels 1 through 6. At level 6 the creature dies.",
+      "You take a -2 penalty to every D20 Test (ability checks, attack rolls, saving throws) PER LEVEL of Exhaustion.",
+      "Your Speed is reduced by 5 feet PER LEVEL of Exhaustion.",
+      "Finishing a Long Rest removes 1 level. Greater Restoration removes 1 level."
+    ],
+    "change2024": "Completely rewritten. 2014 used a six-tier table of different escalating penalties. 2024 uses one linear formula: -2 per level to all d20 Tests and -5 ft Speed per level."
+  },
+  {
+    "name": "Frightened",
+    "implies": [],
+    "effects": [
+      "You have Disadvantage on ability checks and attack rolls while the source of your fear is within line of sight.",
+      "You cannot willingly move closer to the source of your fear."
+    ]
+  },
+  {
+    "name": "Grappled",
+    "implies": [],
+    "effects": [
+      "Your Speed is 0 and cannot increase.",
+      "You have Disadvantage on attack rolls against any target other than the grappler.",
+      "The grappler can drag or carry you, at 1 extra foot of movement cost per foot moved, unless you are Tiny or two or more sizes smaller.",
+      "The condition ends if the grappler is Incapacitated, or if an effect moves you outside the grappler's reach."
+    ]
+  },
+  {
+    "name": "Incapacitated",
+    "implies": [],
+    "effects": [
+      "You cannot take any action, Bonus Action, or Reaction.",
+      "You lose Concentration immediately. (NEW IN 2024)",
+      "You cannot speak. (NEW IN 2024)",
+      "If you are Incapacitated when you roll Initiative, you have Disadvantage on the roll. (NEW IN 2024)"
+    ],
+    "change2024": "Substantially expanded. The automatic loss of Concentration is the most tactically important addition - it means Stunning or Paralyzing an enemy caster strips their concentration spell with no damage save required."
+  },
+  {
+    "name": "Invisible",
+    "implies": [],
+    "effects": [
+      "CONCEALED: You are not affected by any effect that requires its target to be seen, unless the effect's creator can somehow see you. Anything you are wearing or carrying is also concealed.",
+      "SURPRISE: If you are Invisible when you roll Initiative, you have Advantage on the roll.",
+      "ATTACKS AFFECTED: Attack rolls against you have Disadvantage, and your attack rolls have Advantage - but only with respect to a creature that cannot see you."
+    ],
+    "change2024": "2024 routes the Hide action through this condition: a successful DC 15 Dexterity (Stealth) Hide check gives you the Invisible condition until you are found, attack, cast a spell with a Verbal component, or make noise louder than a whisper. Spells such as Faerie Fire and Shining Smite that state a target 'cannot benefit from the Invisible condition' therefore counter hiding as well as true invisibility."
+  },
+  {
+    "name": "Paralyzed",
+    "implies": [
+      "Incapacitated"
+    ],
+    "effects": [
+      "You have the Incapacitated condition.",
+      "Your Speed is 0 and cannot increase.",
+      "You automatically fail Strength and Dexterity saving throws.",
+      "Attack rolls against you have Advantage.",
+      "Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you."
+    ]
+  },
+  {
+    "name": "Petrified",
+    "implies": [
+      "Incapacitated"
+    ],
+    "effects": [
+      "You and your nonmagical possessions are transformed into a solid inanimate substance, usually stone. Your weight is multiplied by 10 and you stop aging.",
+      "You have the Incapacitated condition.",
+      "Your Speed is 0 and cannot increase.",
+      "Attack rolls against you have Advantage.",
+      "You automatically fail Strength and Dexterity saving throws.",
+      "You have Resistance to all damage.",
+      "You have Immunity to the Poisoned condition."
+    ]
+  },
+  {
+    "name": "Poisoned",
+    "implies": [],
+    "effects": [
+      "You have Disadvantage on attack rolls and ability checks."
+    ]
+  },
+  {
+    "name": "Prone",
+    "implies": [],
+    "effects": [
+      "Your only movement options are to crawl or to spend an amount of movement equal to half your Speed (rounded down) to stand up, which ends the condition. You cannot stand if your Speed is 0.",
+      "You have Disadvantage on attack rolls.",
+      "An attack roll against you has Advantage if the attacker is within 5 feet of you; otherwise it has Disadvantage."
+    ],
+    "change2024": "The attack-roll clause now keys off DISTANCE (within 5 feet) rather than melee-versus-ranged, which correctly handles reach weapons and thrown weapons."
+  },
+  {
+    "name": "Restrained",
+    "implies": [],
+    "effects": [
+      "Your Speed is 0 and cannot increase.",
+      "Attack rolls against you have Advantage, and your attack rolls have Disadvantage.",
+      "You have Disadvantage on Dexterity saving throws."
+    ]
+  },
+  {
+    "name": "Stunned",
+    "implies": [
+      "Incapacitated"
+    ],
+    "effects": [
+      "You have the Incapacitated condition.",
+      "You automatically fail Strength and Dexterity saving throws.",
+      "Attack rolls against you have Advantage."
+    ]
+  },
+  {
+    "name": "Unconscious",
+    "implies": [
+      "Incapacitated",
+      "Prone"
+    ],
+    "effects": [
+      "You have the Incapacitated and Prone conditions, and you drop whatever you are holding. The condition ends for Prone if you get up after this ends.",
+      "Your Speed is 0 and cannot increase.",
+      "Attack rolls against you have Advantage.",
+      "You automatically fail Strength and Dexterity saving throws.",
+      "Any attack roll that hits you is a Critical Hit if the attacker is within 5 feet of you.",
+      "You are unaware of your surroundings."
+    ]
+  }
+]

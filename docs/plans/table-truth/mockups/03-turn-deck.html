@@ -1,0 +1,143 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Table Truth — 03 Turn deck states</title>
+<link rel="stylesheet" href="_tokens.css">
+<style>
+  .stage { background: var(--d-bg); border:1px solid #2a2620; border-radius:14px; overflow:hidden; width:390px; }
+  .filler { height:150px; background:
+      repeating-linear-gradient(180deg, var(--d-e1) 0 1px, transparent 1px 34px);
+      display:flex; align-items:center; justify-content:center; }
+  .filler span { font-family:var(--d-font-mono); font-size:11px; color:#4d4840; }
+
+  .deck { border-top:1px solid var(--d-rule-lit); background:var(--d-e1); padding:var(--d-s2) var(--d-s3) var(--d-s3); }
+  .handle { display:flex; align-items:center; gap:var(--d-s2); min-height:34px; cursor:pointer; }
+  .handle .grip { width:34px; height:3px; border-radius:2px; background:var(--d-rule-lit); }
+  .handle .lbl { font-family:var(--d-font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--d-dim); }
+  .handle .act { margin-left:auto; color:var(--d-dim); font-size:12px; font-family:var(--d-font-mono); }
+
+  .chips { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--d-s2); margin-top:var(--d-s2); }
+  .chip { min-height:var(--d-touch-goal); border-radius:var(--d-radius); border:1px solid var(--d-rule-lit);
+          background:var(--d-e2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; }
+  .chip .k { font-family:var(--d-font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--d-tally); }
+  .chip .s { font-size:10px; color:var(--d-verdant); }
+  .chip.spent { background:var(--d-e1); }
+  .chip.spent .k { color:var(--d-dim); text-decoration:line-through; }
+  .chip.spent .s { color:var(--d-dim); }
+  .chip.live { border-color:rgba(212,167,74,.5); background:rgba(212,167,74,.07); }
+  .chip.live .k { color:var(--d-amber); }
+  .chip.open { border-color:var(--d-amber); background:rgba(212,167,74,.12); }
+
+  .slots { display:flex; align-items:center; gap:var(--d-s2); margin-top:var(--d-s3); flex-wrap:wrap; }
+  .slots .lv { font-family:var(--d-font-mono); font-size:11px; color:var(--d-dim); }
+  .pip { width:15px; height:15px; border-radius:50%; border:1px solid var(--d-gold); }
+  .pip.full { background:var(--d-gold); }
+  .pool { display:flex; align-items:center; gap:var(--d-s2); margin-top:var(--d-s2); }
+  .pool .k { font-family:var(--d-font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--d-dim); }
+  .pool .v { font-family:var(--d-font-mono); font-size:15px; color:var(--d-tally); }
+  .pool button { margin-left:auto; min-height:var(--d-touch-min); padding:0 12px; border-radius:var(--d-radius);
+                 border:1px solid var(--d-rule-lit); background:var(--d-e2); color:var(--d-cream); font-size:12px; }
+
+  /* ── MINIMISED ── */
+  .mini { display:flex; align-items:center; gap:var(--d-s3); min-height:var(--d-touch-goal); padding:0 var(--d-s3);
+          background:var(--d-e1); border-top:1px solid var(--d-rule-lit); cursor:pointer; }
+  .mini .dot { width:9px; height:9px; border-radius:50%; }
+  .mini .grp { display:flex; align-items:center; gap:5px; font-family:var(--d-font-mono); font-size:11px; color:var(--d-tally); }
+  .mini .grp.off { color:var(--d-dim); }
+  .mini .slotcount { margin-left:auto; font-family:var(--d-font-mono); font-size:12px; color:var(--d-gold); }
+  .mini .up { color:var(--d-dim); font-size:12px; font-family:var(--d-font-mono); }
+
+  /* ── REACTION DRAWER ── */
+  .drawer { margin-top:var(--d-s3); border-top:1px solid var(--d-rule); padding-top:var(--d-s3); display:flex; flex-direction:column; gap:var(--d-s2); }
+  .rrow { border:1px solid var(--d-rule); border-radius:var(--d-radius); background:var(--d-e2); padding:var(--d-s2) var(--d-s3); }
+  .rrow .t { display:flex; align-items:baseline; gap:var(--d-s2); }
+  .rrow .nm { color:var(--d-cream); font-weight:600; font-size:14px; }
+  .rrow .c { margin-left:auto; font-family:var(--d-font-mono); font-size:11px; color:var(--d-gold); }
+  .rrow .w { display:block; margin-top:4px; font-size:12.5px; color:var(--d-tally); }
+  .rrow .w b { color:var(--d-amber); font-weight:600; }
+</style>
+
+<div class="frame">
+  <h2>03a — full (default, unchanged from today plus one new chip)</h2>
+  <div class="stage">
+    <div class="filler"><span>… page scrolls behind …</span></div>
+    <div class="deck">
+      <div class="handle"><span class="grip"></span><span class="lbl">Turn Deck</span><span class="act">minimise ▾</span></div>
+      <div class="chips">
+        <div class="chip"><span class="k">Action</span><span class="s">ready</span></div>
+        <div class="chip spent"><span class="k">Bonus</span><span class="s">spent</span></div>
+        <div class="chip live"><span class="k">Reaction</span><span class="s">3 avail</span></div>
+        <div class="chip"><span class="k">Move</span><span class="s">30 ft</span></div>
+      </div>
+      <div class="slots">
+        <span class="lv">1st</span><span class="pip full"></span><span class="pip full"></span><span class="pip full"></span><span class="pip"></span>
+        <span class="lv" style="margin-left:10px">2nd</span><span class="pip full"></span><span class="pip full"></span><span class="pip full"></span>
+      </div>
+      <div class="pool"><span class="k">Lay on Hands</span><span class="v">35</span><button>Heal 1</button><button>Heal 5</button></div>
+      <div class="pool"><span class="k">Channel Divinity</span><span class="pip full"></span><span class="pip full"></span></div>
+    </div>
+  </div>
+  <p class="note">
+    Everything Marcus already likes, untouched. <span class="new">The one change is the
+    <b>Reaction chip now carries a live count</b></span> and is tappable — today it is a spend
+    toggle only and reactions are unreachable from here.
+  </p>
+</div>
+
+<div class="frame">
+  <h2>03b — minimised (his ask: give me the screen back)</h2>
+  <div class="stage">
+    <div class="filler" style="height:242px"><span>… 92px of page returned …</span></div>
+    <div class="mini">
+      <span class="grp"><span class="dot" style="background:var(--d-verdant)"></span>ACT</span>
+      <span class="grp off"><span class="dot" style="background:#3a3327"></span>BON</span>
+      <span class="grp"><span class="dot" style="background:var(--d-amber)"></span>REA</span>
+      <span class="grp"><span class="dot" style="background:var(--d-verdant)"></span>MOV</span>
+      <span class="slotcount">3 · 3</span>
+      <span class="up">▴</span>
+    </div>
+  </div>
+  <p class="note">
+    <b>Minimised is not hidden.</b> V-6 from V1.0 says turn-critical controls must stay visible, and
+    that rule is still right — so the strip keeps <b>every</b> piece of state, just as status rather
+    than as controls: four economy dots, and slots remaining per tier. One tap restores the full
+    deck. <span class="new">92px of page comes back</span> — roughly one and a half option rows on
+    an 844px phone.<br><br>
+    <b>It reopens itself</b> when something needs a decision: the start of your turn, or a reaction
+    trigger firing. He can minimise it; he cannot lose his turn to it.
+  </p>
+</div>
+
+<div class="frame">
+  <h2>03c — reaction chip tapped</h2>
+  <div class="stage">
+    <div class="filler" style="height:60px"><span>…</span></div>
+    <div class="deck">
+      <div class="handle"><span class="grip"></span><span class="lbl">Turn Deck</span><span class="act">minimise ▾</span></div>
+      <div class="chips">
+        <div class="chip"><span class="k">Action</span><span class="s">ready</span></div>
+        <div class="chip spent"><span class="k">Bonus</span><span class="s">spent</span></div>
+        <div class="chip open"><span class="k">Reaction</span><span class="s">3 avail</span></div>
+        <div class="chip"><span class="k">Move</span><span class="s">30 ft</span></div>
+      </div>
+      <div class="drawer">
+        <div class="rrow">
+          <div class="t"><span class="nm">Hearthfire Cloak</span><span class="c">1 CD · 2 left</span></div>
+          <span class="w"><b>WHEN:</b> you or a creature within 30 ft takes damage → 11 temp HP, melee attackers take 1d10 Fire</span>
+        </div>
+        <div class="rrow">
+          <div class="t"><span class="nm">Opportunity Attack</span><span class="c">free</span></div>
+          <span class="w"><b>WHEN:</b> a creature you can see leaves your reach → +7, 1d8+4 Slashing</span>
+        </div>
+        <div class="rrow">
+          <div class="t"><span class="nm">Ready an action</span><span class="c">declared on your turn</span></div>
+          <span class="w"><b>WHEN:</b> the trigger you named happens</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">
+    The deck answers "what can I do on <b>someone else's</b> turn" in place, without opening a sheet
+    and without scrolling. This is the second half of his ask about the sticky module — it is not
+    just that it should minimise, it is that it should <b>show him his reactions</b>.
+  </p>
+</div>

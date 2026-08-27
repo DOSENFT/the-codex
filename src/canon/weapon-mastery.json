@@ -1,0 +1,100 @@
+{
+  "rule": "Each weapon has exactly one mastery property. You benefit from it only if a class feature grants you mastery with that kind of weapon. A Paladin gets Weapon Mastery with TWO kinds of weapons at level 1, changeable on each Long Rest.",
+  "properties": [
+    {
+      "name": "Cleave",
+      "effect": "If you hit a creature with a melee attack using this weapon, you can make one attack roll against a SECOND creature within 5 feet of the first that is also within your reach. On a hit the second creature takes the weapon's damage but you do NOT add your ability modifier unless that modifier is negative. Once per turn.",
+      "weapons": [
+        "Greataxe",
+        "Halberd"
+      ]
+    },
+    {
+      "name": "Graze",
+      "effect": "If your attack roll with this weapon MISSES, the target still takes damage equal to the ability modifier you used for the attack roll. This damage is the weapon's damage type and is not increased by a Critical Hit.",
+      "weapons": [
+        "Glaive",
+        "Greatsword"
+      ]
+    },
+    {
+      "name": "Nick",
+      "effect": "When you make the extra attack from the Light property, you can make it as part of the Attack action instead of as a Bonus Action. You can make this extra attack only once per turn.",
+      "weapons": [
+        "Dagger",
+        "Light Hammer",
+        "Sickle",
+        "Scimitar"
+      ]
+    },
+    {
+      "name": "Push",
+      "effect": "If you hit a creature with this weapon, you can push the target up to 10 feet straight away from yourself if it is Large or smaller. No saving throw.",
+      "weapons": [
+        "Greatclub",
+        "Pike",
+        "Warhammer",
+        "Heavy Crossbow"
+      ]
+    },
+    {
+      "name": "Sap",
+      "effect": "If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn.",
+      "weapons": [
+        "Mace",
+        "Spear",
+        "Flail",
+        "Longsword",
+        "Morningstar",
+        "War Pick"
+      ]
+    },
+    {
+      "name": "Slow",
+      "effect": "If you hit a creature with this weapon and deal damage, you can reduce its Speed by 10 feet until the start of your next turn. This does not stack with itself.",
+      "weapons": [
+        "Club",
+        "Javelin",
+        "Light Crossbow",
+        "Sling",
+        "Whip",
+        "Longbow",
+        "Musket"
+      ]
+    },
+    {
+      "name": "Topple",
+      "effect": "If you hit a creature with this weapon, you can force it to make a Constitution saving throw (DC 8 + the ability modifier used for the attack + your Proficiency Bonus). On a failure it has the Prone condition.",
+      "weapons": [
+        "Quarterstaff",
+        "Battleaxe",
+        "Lance",
+        "Maul",
+        "Trident"
+      ]
+    },
+    {
+      "name": "Vex",
+      "effect": "If you hit a creature with this weapon and deal damage, you have Advantage on your next attack roll against that creature before the end of your next turn.",
+      "weapons": [
+        "Handaxe",
+        "Dart",
+        "Shortbow",
+        "Rapier",
+        "Shortsword",
+        "Blowgun",
+        "Hand Crossbow",
+        "Pistol"
+      ]
+    }
+  ],
+  "paladinGuidance": {
+    "bestPair": "Topple + Sap, or Topple + Vex.",
+    "why": "TOPPLE is the strongest mastery for a Paladin because Prone gives your whole party Advantage on melee attacks and costs the enemy half its movement to stand. It also stacks with Extra Attack: hit, Topple, then your second attack is at Advantage against a Prone target, which roughly doubles your critical-hit rate - and criticals double your Smite dice.",
+    "topplePlusSmite": "The chain is: Attack 1 with a Topple weapon, force the save, target is Prone. Attack 2 now has Advantage. Advantage nearly doubles your chance to crit (from about 5% to about 9.75%). If it crits, cast Divine Smite and the dice double. This is the highest-damage line a level 7 Paladin has.",
+    "sapNote": "SAP (Longsword, Spear, Mace, Flail, Morningstar, War Pick) imposes Disadvantage on the target's next attack. As a defender protecting allies, that is a defensive mastery on an offensive action - very Hearth.",
+    "vexNote": "VEX (Rapier, Shortsword, Handaxe) gives you Advantage on your next attack against the same target, which carries across turns. It is the most reliable way to fish for the critical hit that doubles a Smite.",
+    "pushNote": "PUSH (Warhammer, Pike, Greatclub) combos with Thunderous Smite (another 10 feet plus Prone) and with Wrathful Smite (a Frightened creature cannot move closer to you). 20 feet of forced displacement removes an enemy's turn.",
+    "throwWeapon": "Carry a Javelin (Slow) or Handaxe (Vex) for the rounds you cannot reach melee - a Paladin's structural weakness."
+  }
+}

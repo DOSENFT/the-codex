@@ -1,0 +1,163 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Table Truth — 02 Option detail</title>
+<link rel="stylesheet" href="_tokens.css">
+<style>
+  .opt { display:flex; flex-direction:column; gap:3px; padding:var(--d-s3); min-height:64px; border-bottom:1px solid var(--d-rule); }
+  .opt .l1 { display:flex; align-items:baseline; gap:var(--d-s2); }
+  .opt .nm { color:var(--d-cream); font-weight:600; font-size:15px; }
+  .opt .badge { font-family:var(--d-font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+                color:var(--d-gold); border:1px solid rgba(197,165,90,.3); border-radius:3px; padding:1px 5px; }
+  .opt .price { margin-left:auto; font-family:var(--d-font-mono); font-size:11.5px; color:var(--d-dim); }
+  .opt .sum { font-size:13.5px; color:var(--d-tally); line-height:1.3; }
+  .opt .l3 { display:flex; align-items:center; gap:var(--d-s2); font-family:var(--d-font-mono); font-size:12px; }
+  .opt .dice { color:var(--d-gold); }
+  .opt .more { margin-left:auto; color:var(--d-dim); font-size:11px; }
+
+  /* ── the opened state ─────────────────────────────────────────────────── */
+  .detail { background: var(--d-e1); }
+  .dhead { padding: var(--d-s4) var(--d-s4) var(--d-s3); border-bottom: 1px solid var(--d-rule); }
+  .dhead .title { display:flex; align-items:baseline; gap:var(--d-s2); }
+  .dhead h1 { font-family:var(--d-font-display); font-size:var(--d-fs-name); font-weight:600; color:var(--d-cream); letter-spacing:.03em; }
+  .dhead .close { margin-left:auto; color:var(--d-dim); font-family:var(--d-font-mono); font-size:12px; }
+  .dhead .sub { margin-top:4px; font-family:var(--d-font-mono); font-size:12px; color:var(--d-dim); }
+
+  /* the stat block — the thing that has no home in the app today */
+  .block { display:grid; grid-template-columns:auto 1fr; gap:2px var(--d-s3); padding:var(--d-s3) var(--d-s4); border-bottom:1px solid var(--d-rule); }
+  .block dt { font-family:var(--d-font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--d-dim); padding-top:2px; }
+  .block dd { font-size:13.5px; color:var(--d-cream); }
+  .block dd .hi { color:var(--d-gold); font-family:var(--d-font-mono); }
+
+  .band { padding: var(--d-s3) var(--d-s4); border-bottom:1px solid var(--d-rule); }
+  .band > .label { display:block; margin-bottom:6px; }
+  .band p { font-size:14px; color:var(--d-cream); line-height:1.45; }
+  .band p + p { margin-top:8px; }
+
+  /* the roll strip — already exists in the app, kept and given a fixed home */
+  .rolls { display:flex; gap:var(--d-s2); padding: var(--d-s3) var(--d-s4); border-bottom:1px solid var(--d-rule); }
+  .rolls button {
+    flex:1; min-height:var(--d-touch-goal); border-radius:var(--d-radius);
+    border:1px solid rgba(197,165,90,.4); background:rgba(197,165,90,.08);
+    color:var(--d-gold); font-family:var(--d-font-mono); font-size:13px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  }
+  .rolls button span { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--d-dim); }
+  .rolls button.spend { border-color: rgba(192,96,48,.5); background: rgba(192,96,48,.1); color: var(--d-ember); }
+
+  /* tactics — collapsed, because it is long and it is not the answer to "what does this do" */
+  .tac { padding: var(--d-s3) var(--d-s4); }
+  .tac .hd { display:flex; align-items:center; gap:var(--d-s2); min-height:var(--d-touch-min); cursor:pointer; }
+  .tac .hd .chev { margin-left:auto; color:var(--d-dim); font-size:13px; }
+  .tac ul { margin-top:var(--d-s2); display:flex; flex-direction:column; gap:9px; }
+  .tac li { list-style:none; padding-left:14px; position:relative; font-size:13.5px; color:var(--d-cream); line-height:1.4; }
+  .tac li:before { content:''; position:absolute; left:0; top:8px; width:5px; height:5px; border-radius:50%; background:var(--d-gold); }
+  .tac li b { color: var(--d-amber); font-weight:600; }
+
+  .rulebox {
+    margin: var(--d-s3) var(--d-s4); padding: var(--d-s3);
+    border:1px solid rgba(192,96,48,.35); border-left:3px solid var(--d-ember);
+    border-radius:var(--d-radius); background: rgba(192,96,48,.06);
+  }
+  .rulebox .label { color: var(--d-ember); }
+  .rulebox p { margin-top:5px; font-size:13.5px; color:var(--d-cream); line-height:1.4; }
+</style>
+
+<div class="frame">
+  <h2>02a — the row, closed (this is the list state)</h2>
+  <div class="phone phone--auto">
+    <div class="scroll">
+      <div class="card">
+        <div class="opt">
+          <div class="l1"><span class="nm">Divine Smite</span><span class="badge">Bonus</span><span class="price">1st slot · 4 left</span></div>
+          <div class="l3"><span class="dice">2d8 Radiant · +1d8 Fiend/Undead</span><span class="more">▸</span></div>
+        </div>
+      </div>
+      <p class="note" style="border:0;padding:0">
+        <b>Numbers in the row, prose in the detail.</b> Line 2 is built from canon <i>fields</i> —
+        <code>damage.dice</code>, <code>damage.type</code>, <code>higherLevel</code> — so there is no
+        sentence to cut. Today this line is <code>spell.description.slice(0, 80) + '…'</code>, which
+        is where the "…" comes from. The trade is deliberate: the row no longer answers "what does
+        this do" in English. That answer is the first band of 02b, one tap away.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="frame">
+  <h2>02b — the same option, opened (one tap)</h2>
+  <div class="phone phone--auto">
+    <div class="scroll" style="padding:0;gap:0">
+      <div class="detail">
+
+        <div class="dhead">
+          <div class="title">
+            <h1>Divine Smite</h1>
+            <span class="close">close ✕</span>
+          </div>
+          <div class="sub">Level 1 Evocation · PHB 2024 · always prepared</div>
+        </div>
+
+        <dl class="block">
+          <dt>Cast</dt><dd><span class="hi">Bonus Action</span>, immediately after you hit with a Melee weapon or an Unarmed Strike</dd>
+          <dt>Range</dt><dd>Self</dd>
+          <dt>Components</dt><dd>V</dd>
+          <dt>Duration</dt><dd>Instantaneous</dd>
+          <dt>Damage</dt><dd><span class="hi">2d8 Radiant</span> · +1d8 if the target is a Fiend or Undead</dd>
+          <dt>Higher</dt><dd>+1d8 per slot level above 1st</dd>
+        </dl>
+
+        <div class="band">
+          <span class="label">What it does</span>
+          <p>Immediately after you hit with a melee weapon or an Unarmed Strike, you spend your Bonus
+          Action to channel <b class="gold">2d8 extra Radiant damage</b> into that hit, plus another
+          1d8 if the target is a Fiend or Undead.</p>
+        </div>
+
+        <div class="rolls">
+          <button>2d8<span>roll damage</span></button>
+          <button>6d8<span>on a crit</span></button>
+          <button class="spend">Spend<span>1st slot</span></button>
+        </div>
+
+        <div class="rulebox">
+          <span class="label">⚑ One slot per turn</span>
+          <p>You have not spent a slot this turn, so this is legal. If you cast <b>Faerie Fire</b>
+          with your Action, this greys out — 2024 allows <b>one</b> slot expended per turn, total.
+          Your free Paladin's Smite (1 per long rest) expends none, so it is exempt.</p>
+        </div>
+
+        <div class="tac">
+          <div class="hd">
+            <span class="label" style="color:var(--d-gold)">How to use it</span>
+            <span class="chev">▾</span>
+          </div>
+          <ul>
+            <li><b>Smite after you see the roll, never before.</b> The casting time is "immediately
+            after hitting" — you never spend a slot on a miss.</li>
+            <li><b>With Extra Attack, sequence it.</b> Take the first swing. If it crits, Smite now.
+            If it only hits, hold and take the second swing — let the dice pick which hit carries it.</li>
+            <li><b>Smite every crit, no hesitation.</b> A crit doubles all the attack's damage dice,
+            Smite dice included. A 2nd-level Smite on a crit is 6d8.</li>
+            <li><b>Priority:</b> concentrating enemy casters first (the damage forces a save at DC 10
+            or half), then Fiends and Undead (+1d8), then anything about to drop.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    <b>Four bands, always the same four, in the same order.</b> Stat block → what it does → the rolls
+    → how to use it. That fixed order is what makes it a "quick glance" instead of a wall — the eye
+    learns where the range lives and stops reading.<br><br>
+    <span class="new"><b>Nothing here is generated at the table.</b></span> The summary, the stat
+    block and the tactics all come from the canon file, shipped with the app. It works with the AI
+    off, the wifi off, and the tunnel down.<br><br>
+    <b>The rule box is live, not decorative.</b> It reads the current turn — it says "you have not
+    spent a slot this turn" because that is true right now, and it is the single most-broken rule in
+    D&amp;D apps (<code>CORRECTIONS.md §1</code>).<br><br>
+    <b>"How to use it" is folded by default.</b> It is long, and it is not the answer to "what does
+    this do". Answering the fast question fast is the whole point.
+  </p>
+</div>

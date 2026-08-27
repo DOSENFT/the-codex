@@ -22,7 +22,8 @@ import {
   ClipboardPaste,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
-import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, GEMINI_MODELS, type AIProvider } from '../lib/ai'
+import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIProvider } from '../lib/ai'
+import { GeminiModelPicker } from './GeminiModelPicker'
 import { useAI } from '../hooks/useAI'
 import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
 import { parseCharacterFile, formatList } from '../lib/import-character'
@@ -63,7 +64,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
      what makes "no request" true from the first render rather than eventually. */
   const [provider, setProvider] = useState<AIProvider>(getDefaultProvider)
   const [geminiKey, setGeminiKey] = useState('')
-  const [geminiModel, setGeminiModel] = useState('gemini-2.0-flash')
+  // '' is Automatic — resolve the newest the key can reach, every request.
+  const [geminiModel, setGeminiModel] = useState('')
   const [ollamaUrl, setOllamaUrl] = useState(getDefaultOllamaUrl)
   const [ollamaModel, setOllamaModel] = useState('gemma3-27b-abliterated:latest')
   const [fallbackEnabled, setFallbackEnabled] = useState(true)
@@ -132,7 +134,10 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
     saveAIConfig({
       provider,
       geminiApiKey: geminiKey || undefined,
-      geminiModel: geminiModel,
+      // Absent, not empty-string: absent is what `resolveGeminiModel` reads as
+      // "ask Google", and it is also what a config that has never been touched
+      // looks like. Two spellings for one meaning is how the old default leaked.
+      geminiModel: geminiModel || undefined,
       ollamaUrl: ollamaUrl || undefined,
       ollamaModel: ollamaModel || undefined,
       fallbackEnabled,
@@ -445,33 +450,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
             </div>
           </div>
 
-          {/* Model selector */}
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-forge-1">Model</span>
-            <div className="flex flex-col gap-1.5">
-              {GEMINI_MODELS.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setGeminiModel(m.id)}
-                  className={cn(
-                    'flex items-center justify-between min-h-[44px] px-3.5 rounded-xl text-left',
-                    'transition-all duration-200 ease-forge active:scale-[0.98]',
-                    'border',
-                    geminiModel === m.id
-                      ? 'bg-arcane/10 border-arcane/30 text-forge-0 ornate-border'
-                      : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:bg-gold/[0.06] hover:text-forge-1',
-                  )}
-                >
-                  <span className="text-sm font-medium">{m.label}</span>
-                  <span className="text-xs opacity-60">{m.description}</span>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-forge-2">
-              Each model has its own free quota. Switch if one is rate-limited.
-            </p>
-          </div>
+          <GeminiModelPicker apiKey={geminiKey} value={geminiModel} onChange={setGeminiModel} />
         </div>
       )}
 
@@ -617,26 +596,12 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                 {showKey ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
               </button>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs text-forge-2">Model</span>
-              <div className="flex gap-1.5 flex-wrap">
-                {GEMINI_MODELS.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setGeminiModel(m.id)}
-                    className={cn(
-                      'min-h-[44px] px-3 rounded-lg text-xs font-medium transition-all duration-200 active:scale-[0.97] border',
-                      geminiModel === m.id
-                        ? 'bg-arcane/10 border-arcane/30 text-arcane ornate-border'
-                        : 'bg-gold/[0.03] border-bronze/20 text-forge-2 hover:text-forge-1',
-                    )}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <GeminiModelPicker
+              apiKey={geminiKey}
+              value={geminiModel}
+              onChange={setGeminiModel}
+              variant="chips"
+            />
           </div>
         </div>
       )}

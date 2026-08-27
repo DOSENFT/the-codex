@@ -21,16 +21,31 @@ import {
   AIError,
   AI_TIMEOUTS,
   canFallBack,
+  clearModelNotice,
+  describeGeminiModel,
   fetchOllamaModels,
+  getLastModelNotice,
+  listGeminiModels,
   loadAIConfig,
   queryAI,
   queryAIStream,
   queryAIStructured,
+  rankGeminiModels,
+  replacementFromError,
+  resolveGeminiModel,
   getLastUsedProvider,
   type AIConfig,
 } from './ai'
 
 /* ─── harness ────────────────────────────────────────────────────────────── */
+
+/** A model id Google has never shipped.
+ *
+ *  Every Gemini id in this file is deliberately fictional. If a test passed
+ *  because the code recognised a real model name, the code would be doing the
+ *  one thing slice 3 removed — knowing model names — and the test would be
+ *  certifying it. Nothing here may match by name. */
+const TEST_MODEL = 'gemini-4.2-flash'
 
 const OLLAMA: AIConfig = {
   provider: 'ollama',
@@ -44,7 +59,7 @@ const OLLAMA: AIConfig = {
 const GEMINI: AIConfig = {
   provider: 'gemini',
   geminiApiKey: 'test-key-abc123',
-  geminiModel: 'gemini-2.0-flash',
+  geminiModel: TEST_MODEL,
   fallbackEnabled: false,
   connectTimeoutMs: 60,
   idleTimeoutMs: 80,
@@ -96,7 +111,42 @@ function trickle(chunks: string[], gapMs: number): Response {
 
 const never = () => new Promise<Response>(() => {})
 
-beforeEach(() => { calls = [] })
+/** localStorage, in memory.
+ *
+ *  Vitest runs this suite in node, where there is none, and `ai.ts` catches
+ *  that and treats it as "nothing stored" — which was fine until slice 3, when
+ *  the module gained a model-list cache and a persisted winner. Both are
+ *  storage behaviour, and behaviour that is always swallowed is behaviour that
+ *  is never tested. */
+function memoryStorage() {
+  const map = new Map<string, string>()
+  return {
+    getItem: (k: string) => map.get(k) ?? null,
+    setItem: (k: string, v: string) => { map.set(k, String(v)) },
+    removeItem: (k: string) => { map.delete(k) },
+    clear: () => map.clear(),
+    key: (i: number) => [...map.keys()][i] ?? null,
+    get length() { return map.size },
+  }
+}
+let store: ReturnType<typeof memoryStorage>
+
+/** The model list, already answered and still fresh.
+ *
+ *  Without this, every Gemini test in this file would spend its first fetch on
+ *  `GET /v1beta/models` and every call-counting assertion below would be
+ *  counting the wrong thing. Seeding it is also the honest simulation of the
+ *  normal case: the list is asked for once a day, not once a turn. */
+function seedModelCache(models: string[] = [TEST_MODEL]) {
+  store.setItem('codex-ai-models', JSON.stringify({ fetchedAt: Date.now(), models }))
+}
+
+beforeEach(() => {
+  calls = []
+  store = memoryStorage()
+  vi.stubGlobal('localStorage', store)
+  seedModelCache()
+})
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers() })
 
 /* ─── the fallback decision ──────────────────────────────────────────────── */
@@ -369,10 +419,285 @@ describe('the 429 retry', () => {
     })
     // Timeouts are left at the real defaults here: the point is the retry
     // delay, and the 30s idle clock must not be what ends the wait.
-    const cfg: AIConfig = { provider: 'gemini', geminiApiKey: 'k', geminiModel: 'gemini-2.0-flash', fallbackEnabled: false }
+    const cfg: AIConfig = { provider: 'gemini', geminiApiKey: 'k', geminiModel: TEST_MODEL, fallbackEnabled: false }
     const pending = queryAI('sys', 'msg', cfg)
     await vi.advanceTimersByTimeAsync(AI_TIMEOUTS.retryCapMs + 50)
     expect(await pending).toBe('second time lucky')
     expect(attempt).toBe(2)
+  })
+})
+
+/* ═══ Table Truth slice 3 — the model the app must not know ═══════════════════
+
+   Marcus, 2026-08-26, with the error in hand:
+
+       "connection failed: Gemini error (404): {"error":{"code":404,
+       "message": "This model models/… is no longer available. Please update
+       your code to use models/… for the latest features and improvemen…"
+
+   Every AI feature in the app was dead, and the fix was inside the error that
+   reported the death. These tests are the contract that it never happens
+   twice: nothing below matches a real model name, and the one test that greps
+   the tree fails the moment a name is compiled back in.
+   ========================================================================== */
+
+const NEXT_MODEL = 'gemini-5.0-flash'
+
+/** Marcus's verbatim 404, with the two ids swapped for ones Google has never
+ *  shipped. The SENTENCE is what is parsed, so the sentence is what is
+ *  preserved; the ids are fictional so no test can pass by recognition. */
+const retiredBody = (dead: string, live: string) => JSON.stringify({
+  error: {
+    code: 404,
+    message: `This model models/${dead} is no longer available. Please update your code to use models/${live} for the latest features and improvements.`,
+    status: 'NOT_FOUND',
+  },
+})
+
+const modelList = (ids: string[]) => jsonResponse({
+  models: ids.map(id => ({
+    name: `models/${id}`,
+    supportedGenerationMethods: ['generateContent', 'countTokens'],
+  })),
+})
+
+const isListCall = (c: Call) => c.url.includes('/v1beta/models?')
+const isGenerateCall = (c: Call) => c.url.includes(':generateContent')
+
+describe('replacementFromError — the fix was in the error all along', () => {
+  it('reads the REPLACEMENT, not the retired model that is named first', () => {
+    // The same sentence contains both ids. A greedy match for `models/…` finds
+    // the dead one and retries it forever, which is a loop that looks like a fix.
+    expect(replacementFromError(retiredBody(TEST_MODEL, NEXT_MODEL))).toBe(NEXT_MODEL)
+  })
+
+  it('handles the wording without the models/ prefix', () => {
+    expect(replacementFromError(`use ${NEXT_MODEL} instead`)).toBe(NEXT_MODEL)
+  })
+
+  it('is null when there is nothing to read — no guess, ever', () => {
+    expect(replacementFromError(undefined)).toBeNull()
+    expect(replacementFromError('')).toBeNull()
+    expect(replacementFromError('{"error":{"code":429,"message":"Quota exceeded"}}')).toBeNull()
+    // Names a dead model and offers no replacement: still null. Retrying the id
+    // in "This model models/X is no longer available" is the loop.
+    expect(replacementFromError(`This model models/${TEST_MODEL} is no longer available.`)).toBeNull()
+  })
+})
+
+describe('rankGeminiModels — by shape, never by name', () => {
+  it('puts the newest plain flash first, then flash-lite, then pro', () => {
+    const ranked = rankGeminiModels([
+      'gemini-3.0-pro',
+      'gemini-4.2-flash-lite',
+      'gemini-4.2-flash',
+      'gemini-3.1-flash',
+    ])
+    expect(ranked).toEqual([
+      'gemini-4.2-flash',       // newest plain flash
+      'gemini-3.1-flash',       // older plain flash still beats a lite
+      'gemini-4.2-flash-lite',
+      'gemini-3.0-pro',
+    ])
+  })
+
+  it('demotes preview and experimental builds below their stable siblings', () => {
+    const ranked = rankGeminiModels(['gemini-9.9-flash-preview', 'gemini-4.2-flash'])
+    expect(ranked[0]).toBe('gemini-4.2-flash')
+    // Demoted, NOT dropped — a key that can only see preview builds must still
+    // resolve to something. A ranking may prefer; it may not decide that
+    // something does not exist.
+    expect(ranked).toContain('gemini-9.9-flash-preview')
+  })
+
+  it('drops what is not a Gemini generative model at all', () => {
+    expect(rankGeminiModels(['text-embedding-004', 'gemma-3-27b', 'gemini-4.2-flash']))
+      .toEqual(['gemini-4.2-flash'])
+  })
+
+  it('has an answer for an unnumbered id rather than crashing on it', () => {
+    expect(rankGeminiModels(['gemini-flash-latest'])).toEqual(['gemini-flash-latest'])
+  })
+})
+
+describe('describeGeminiModel — a label derived, not stored', () => {
+  it('titles an id a person can read', () => {
+    expect(describeGeminiModel('gemini-4.2-flash').label).toBe('Gemini 4.2 Flash')
+    expect(describeGeminiModel('gemini-4.2-flash-lite').label).toBe('Gemini 4.2 Flash Lite')
+    expect(describeGeminiModel('gemini-1.5-flash-8b').label).toBe('Gemini 1.5 Flash 8B')
+  })
+
+  it('describes a model it has never seen before', () => {
+    // The whole point: an id invented after this code shipped still gets a
+    // label and a quota note, because both are functions of the id.
+    const m = describeGeminiModel('gemini-11.0-flash')
+    expect(m.label).toBe('Gemini 11.0 Flash')
+    expect(m.description).toMatch(/free quota/i)
+  })
+})
+
+describe('listGeminiModels — ask the key what it can reach', () => {
+  it('keeps only what can generate content, and strips the models/ prefix', async () => {
+    stubFetch(() => jsonResponse({
+      models: [
+        { name: `models/${TEST_MODEL}`, supportedGenerationMethods: ['generateContent'] },
+        { name: 'models/text-embedding-004', supportedGenerationMethods: ['embedContent'] },
+        { name: 'models/some-counter', supportedGenerationMethods: ['countTokens'] },
+      ],
+    }))
+    expect(await listGeminiModels('key-abc')).toEqual([TEST_MODEL])
+  })
+
+  it('sends the key in a header, never in the URL', async () => {
+    stubFetch(() => modelList([TEST_MODEL]))
+    await listGeminiModels('secret-key-value')
+    expect(calls[0].url).not.toContain('secret-key-value')
+    expect((calls[0].init.headers as Record<string, string>)['x-goog-api-key']).toBe('secret-key-value')
+  })
+})
+
+describe('resolveGeminiModel — 21: never a hardcoded id when the list is available', () => {
+  it('picks the best from the LIVE list when the stored choice is gone', async () => {
+    store.clear()
+    stubFetch(() => modelList(['gemini-7.7-flash', 'gemini-7.7-pro']))
+    const chosen = await resolveGeminiModel({ ...GEMINI, geminiModel: 'gemini-0.1-retired' })
+    // It must be one the server named. Nothing in `src/` may supply an id.
+    expect(['gemini-7.7-flash', 'gemini-7.7-pro']).toContain(chosen)
+    expect(chosen).toBe('gemini-7.7-flash')
+  })
+
+  it('keeps his choice when the key can still reach it', async () => {
+    store.clear()
+    stubFetch(() => modelList([TEST_MODEL, 'gemini-9.0-flash']))
+    // A newer one exists and is NOT chosen for him. Picking by pattern is what
+    // happens when there is no answer, not an override of one he gave.
+    expect(await resolveGeminiModel({ ...GEMINI, geminiModel: TEST_MODEL })).toBe(TEST_MODEL)
+  })
+
+  it('caches the list, so a turn does not cost two requests', async () => {
+    store.clear()
+    stubFetch(() => modelList([TEST_MODEL]))
+    await resolveGeminiModel({ ...GEMINI, geminiModel: '' })
+    await resolveGeminiModel({ ...GEMINI, geminiModel: '' })
+    expect(calls.filter(isListCall)).toHaveLength(1)
+  })
+
+  it('falls back to the stored choice when Google cannot be asked at all', async () => {
+    store.clear()
+    stubFetch(() => { throw new Error('offline') })
+    // His assertion beats our silence — the same rule the Ollama URL follows.
+    expect(await resolveGeminiModel({ ...GEMINI, geminiModel: TEST_MODEL })).toBe(TEST_MODEL)
+  })
+
+  it('says so rather than inventing an id when there is nothing to go on', async () => {
+    store.clear()
+    stubFetch(() => { throw new Error('offline') })
+    await expect(resolveGeminiModel({ ...GEMINI, geminiModel: '' })).rejects.toThrow(/Could not ask Google/)
+  })
+
+  it('is a config error, not an API error, with no key', async () => {
+    await expect(resolveGeminiModel({ ...GEMINI, geminiApiKey: undefined }))
+      .rejects.toMatchObject({ kind: 'config' })
+  })
+})
+
+describe('the retirement retry — 19 and 20', () => {
+  it('19 — a 404 naming a replacement retries exactly once, with that name', async () => {
+    clearModelNotice()
+    stubFetch((url) => {
+      if (url.includes('/v1beta/models?')) return modelList([NEXT_MODEL])
+      if (url.includes(`${TEST_MODEL}:generateContent`)) {
+        return new Response(retiredBody(TEST_MODEL, NEXT_MODEL), { status: 404 })
+      }
+      return jsonResponse({ candidates: [{ content: { parts: [{ text: 'back from the dead' }] } }] })
+    })
+
+    expect(await queryAI('sys', 'msg', GEMINI)).toBe('back from the dead')
+
+    const generates = calls.filter(isGenerateCall)
+    expect(generates).toHaveLength(2)                          // once, not twice, not none
+    expect(generates[0].url).toContain(TEST_MODEL)
+    expect(generates[1].url).toContain(NEXT_MODEL)
+
+    // The winner is remembered, so tomorrow starts on it instead of rediscovering
+    // the retirement at a table.
+    expect(JSON.parse(store.getItem('codex-ai-config')!).geminiModel).toBe(NEXT_MODEL)
+    // And the switch is not silent.
+    expect(getLastModelNotice()).toContain(NEXT_MODEL)
+  })
+
+  it('20 — a second 404 surfaces the error and does not loop', async () => {
+    stubFetch((url) => {
+      if (url.includes('/v1beta/models?')) return modelList([NEXT_MODEL])
+      return new Response(retiredBody(TEST_MODEL, NEXT_MODEL), { status: 404 })
+    })
+
+    await expect(queryAI('sys', 'msg', GEMINI)).rejects.toThrow(/404/)
+    expect(calls.filter(isGenerateCall)).toHaveLength(2)   // the try and the one retry. No third.
+  })
+
+  it('20b — a replacement identical to the model that just failed is not retried', async () => {
+    // Google naming the model that just 404'd is the loop, and it is closed by
+    // the replacement being rejected rather than by a counter somewhere else.
+    stubFetch((url) => {
+      if (url.includes('/v1beta/models?')) return modelList([TEST_MODEL])
+      return new Response(retiredBody('something-else', TEST_MODEL), { status: 404 })
+    })
+    await expect(queryAI('sys', 'msg', GEMINI)).rejects.toThrow(/404/)
+    expect(calls.filter(isGenerateCall)).toHaveLength(1)
+  })
+
+  it('does not treat an ordinary server error as a retirement', async () => {
+    stubFetch(() => jsonResponse({ error: { code: 500, message: 'Internal error' } }, 500))
+    await expect(queryAI('sys', 'msg', GEMINI)).rejects.toThrow(/500/)
+    // No model-list call: a 500 is not a fact about which models exist, and
+    // spending a second request to re-ask would double the cost of every
+    // outage.
+    expect(calls.filter(isListCall)).toHaveLength(0)
+    expect(calls.filter(isGenerateCall)).toHaveLength(1)
+  })
+
+  it('self-heals a 404 that names no replacement, using the live list', async () => {
+    // Not every retirement is polite enough to name its successor. A 404 on a
+    // model id is still a fact about that model, so the list is re-asked and
+    // the ranking decides — which is the same path, without the hint.
+    stubFetch((url) => {
+      if (url.includes('/v1beta/models?')) return modelList([NEXT_MODEL])
+      if (url.includes(`${TEST_MODEL}:generateContent`)) {
+        return jsonResponse({ error: { code: 404, message: 'models/x is not supported' } }, 404)
+      }
+      return jsonResponse({ candidates: [{ content: { parts: [{ text: 'recovered' }] } }] })
+    })
+    expect(await queryAI('sys', 'msg', GEMINI)).toBe('recovered')
+    expect(calls.filter(isGenerateCall)[1].url).toContain(NEXT_MODEL)
+  })
+})
+
+describe('22 — no model id is compiled into this app', () => {
+  it('the retired id appears nowhere in src/', () => {
+    // Vite's loader rather than node:fs, same as canon's frozen-boolean guard.
+    const tree = import.meta.glob('../**/*.{ts,tsx}', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }) as Record<string, string>
+
+    // A glob that silently matched nothing would make this a no-op, which is
+    // the exact failure mode it exists to prevent.
+    expect(Object.keys(tree).length).toBeGreaterThan(20)
+
+    /* Built from parts so this test does not match its own source. The literal
+       being banned is the one Google retired on 2026-08-26 — the id that was
+       the app's default in six places and took every AI feature down with it. */
+    const banned = new RegExp(['gemini', '2', '0', 'flash'].join('[-.]'))
+
+    const offenders = Object.entries(tree)
+      .filter(([, source]) => banned.test(source))
+      .map(([path]) => path)
+
+    expect(
+      offenders,
+      `a retired Gemini model id is compiled into:\n${offenders.join('\n')}`,
+    ).toEqual([])
   })
 })

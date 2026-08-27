@@ -1,0 +1,518 @@
+{
+  "class": "Paladin",
+  "ruleset": "D&D 2024 (5.5e) Player's Handbook",
+  "hitDie": "d10",
+  "primaryAbilities": [
+    "Strength",
+    "Charisma"
+  ],
+  "savingThrowProficiencies": [
+    "Wisdom",
+    "Charisma"
+  ],
+  "skillChoices": {
+    "choose": 2,
+    "from": [
+      "Athletics",
+      "Insight",
+      "Intimidation",
+      "Medicine",
+      "Persuasion",
+      "Religion"
+    ]
+  },
+  "weaponProficiencies": [
+    "Simple weapons",
+    "Martial weapons"
+  ],
+  "armorTraining": [
+    "Light armor",
+    "Medium armor",
+    "Heavy armor",
+    "Shields"
+  ],
+  "spellcastingAbility": "Charisma",
+  "spellSaveDC": "8 + Proficiency Bonus + Charisma modifier",
+  "spellAttackModifier": "Proficiency Bonus + Charisma modifier",
+  "spellcastingFocus": "Holy Symbol",
+  "startingEquipment": {
+    "optionA": [
+      "Chain Mail",
+      "Shield",
+      "Longsword",
+      "6 Javelins",
+      "Holy Symbol",
+      "Priest's Pack",
+      "9 GP"
+    ],
+    "optionB": [
+      "150 GP"
+    ]
+  },
+  "preparedSpellRules": [
+    "You prepare a list of level 1+ Paladin spells. The number is set by the Prepared Spells column, not by your slots.",
+    "Every prepared spell must be of a level for which you have spell slots.",
+    "You may replace ONE prepared spell with another Paladin spell whenever you finish a Long Rest.",
+    "Spells granted by a Paladin feature as 'always prepared' do NOT count against the Prepared Spells number, but they do count as Paladin spells for you.",
+    "Cantrips gained from Blessed Warrior do not count against the Prepared Spells number."
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "proficiencyBonus": 2,
+      "classFeatures": [
+        "Lay On Hands",
+        "Spellcasting",
+        "Weapon Mastery"
+      ],
+      "channelDivinityUses": 0,
+      "preparedSpells": 2,
+      "spellSlots": {
+        "1": 2,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 5,
+      "highestSpellLevel": 1
+    },
+    {
+      "level": 2,
+      "proficiencyBonus": 2,
+      "classFeatures": [
+        "Fighting Style",
+        "Paladin's Smite"
+      ],
+      "channelDivinityUses": 0,
+      "preparedSpells": 3,
+      "spellSlots": {
+        "1": 2,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 10,
+      "highestSpellLevel": 1
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "classFeatures": [
+        "Channel Divinity",
+        "Paladin Subclass"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 4,
+      "spellSlots": {
+        "1": 3,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 15,
+      "highestSpellLevel": 1
+    },
+    {
+      "level": 4,
+      "proficiencyBonus": 2,
+      "classFeatures": [
+        "Ability Score Improvement"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 5,
+      "spellSlots": {
+        "1": 3,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 20,
+      "highestSpellLevel": 1
+    },
+    {
+      "level": 5,
+      "proficiencyBonus": 3,
+      "classFeatures": [
+        "Extra Attack",
+        "Faithful Steed"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 6,
+      "spellSlots": {
+        "1": 4,
+        "2": 2,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 25,
+      "highestSpellLevel": 2
+    },
+    {
+      "level": 6,
+      "proficiencyBonus": 3,
+      "classFeatures": [
+        "Aura of Protection"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 6,
+      "spellSlots": {
+        "1": 4,
+        "2": 2,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 30,
+      "highestSpellLevel": 2
+    },
+    {
+      "level": 7,
+      "proficiencyBonus": 3,
+      "classFeatures": [
+        "Subclass Feature"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 7,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 35,
+      "highestSpellLevel": 2
+    },
+    {
+      "level": 8,
+      "proficiencyBonus": 3,
+      "classFeatures": [
+        "Ability Score Improvement"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 7,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 40,
+      "highestSpellLevel": 2
+    },
+    {
+      "level": 9,
+      "proficiencyBonus": 4,
+      "classFeatures": [
+        "Abjure Foes"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 9,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 2,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 45,
+      "highestSpellLevel": 3
+    },
+    {
+      "level": 10,
+      "proficiencyBonus": 4,
+      "classFeatures": [
+        "Aura of Courage"
+      ],
+      "channelDivinityUses": 2,
+      "preparedSpells": 9,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 2,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 50,
+      "highestSpellLevel": 3
+    },
+    {
+      "level": 11,
+      "proficiencyBonus": 4,
+      "classFeatures": [
+        "Radiant Strikes"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 10,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 55,
+      "highestSpellLevel": 3
+    },
+    {
+      "level": 12,
+      "proficiencyBonus": 4,
+      "classFeatures": [
+        "Ability Score Improvement"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 10,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 0,
+        "5": 0
+      },
+      "layOnHandsPool": 60,
+      "highestSpellLevel": 3
+    },
+    {
+      "level": 13,
+      "proficiencyBonus": 5,
+      "classFeatures": [],
+      "channelDivinityUses": 3,
+      "preparedSpells": 11,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 1,
+        "5": 0
+      },
+      "layOnHandsPool": 65,
+      "highestSpellLevel": 4
+    },
+    {
+      "level": 14,
+      "proficiencyBonus": 5,
+      "classFeatures": [
+        "Restoring Touch"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 11,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 1,
+        "5": 0
+      },
+      "layOnHandsPool": 70,
+      "highestSpellLevel": 4
+    },
+    {
+      "level": 15,
+      "proficiencyBonus": 5,
+      "classFeatures": [
+        "Subclass Feature"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 12,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 2,
+        "5": 0
+      },
+      "layOnHandsPool": 75,
+      "highestSpellLevel": 4
+    },
+    {
+      "level": 16,
+      "proficiencyBonus": 5,
+      "classFeatures": [
+        "Ability Score Improvement"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 12,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 2,
+        "5": 0
+      },
+      "layOnHandsPool": 80,
+      "highestSpellLevel": 4
+    },
+    {
+      "level": 17,
+      "proficiencyBonus": 6,
+      "classFeatures": [],
+      "channelDivinityUses": 3,
+      "preparedSpells": 14,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 1
+      },
+      "layOnHandsPool": 85,
+      "highestSpellLevel": 5
+    },
+    {
+      "level": 18,
+      "proficiencyBonus": 6,
+      "classFeatures": [
+        "Aura Expansion"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 14,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 1
+      },
+      "layOnHandsPool": 90,
+      "highestSpellLevel": 5
+    },
+    {
+      "level": 19,
+      "proficiencyBonus": 6,
+      "classFeatures": [
+        "Epic Boon"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 15,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 2
+      },
+      "layOnHandsPool": 95,
+      "highestSpellLevel": 5
+    },
+    {
+      "level": 20,
+      "proficiencyBonus": 6,
+      "classFeatures": [
+        "Subclass Feature"
+      ],
+      "channelDivinityUses": 3,
+      "preparedSpells": 15,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 2
+      },
+      "layOnHandsPool": 100,
+      "highestSpellLevel": 5
+    }
+  ],
+  "classFeatureDetails": {
+    "Lay On Hands": {
+      "level": 1,
+      "action": "Bonus Action",
+      "resource": "pool of 5 x Paladin level HP, refreshes on Long Rest",
+      "text": "Touch a creature (including yourself) and restore Hit Points from the pool, up to the amount remaining. You may instead spend 5 points from the pool to remove the Poisoned condition; those points restore no HP.",
+      "notes": [
+        "Bonus Action in 2024 (it was an Action in 2014).",
+        "1 point revives a creature at 0 HP to 1 HP and consciousness - the highest-value use.",
+        "Does not work on Constructs or Undead.",
+        "At level 14 (Restoring Touch) it also removes conditions for 5 points each."
+      ]
+    },
+    "Spellcasting": {
+      "level": 1,
+      "text": "Charisma-based prepared spellcasting from the Paladin spell list."
+    },
+    "Weapon Mastery": {
+      "level": 1,
+      "text": "You can use the mastery property of two kinds of weapons you are proficient with. You may change the two kinds whenever you finish a Long Rest."
+    },
+    "Fighting Style": {
+      "level": 2,
+      "text": "Gain a Fighting Style feat, or instead choose Blessed Warrior (two Cleric cantrips, Charisma-based, one swappable per Paladin level)."
+    },
+    "Paladin's Smite": {
+      "level": 2,
+      "text": "You always have Divine Smite prepared. You can cast it once WITHOUT expending a spell slot; you must finish a Long Rest to do so again.",
+      "criticalRuling": "The free cast expends no spell slot, so it does not trip the 2024 'one spell slot per turn' rule. RAW you may cast a slotted spell and free-cast Divine Smite on the same turn."
+    },
+    "Channel Divinity": {
+      "level": 3,
+      "uses": "2 at level 3, 3 at level 11",
+      "recharge": "Regain one expended use on a Short Rest; all on a Long Rest",
+      "saveDC": "Equals your Paladin spell save DC",
+      "options": [
+        "Divine Sense (class)",
+        "Hearthfire Manifest - flaming cloak (Oath of the Hearth)"
+      ]
+    },
+    "Divine Sense": {
+      "level": 3,
+      "action": "Bonus Action",
+      "cost": "1 Channel Divinity",
+      "text": "For 10 minutes, or until you are Incapacitated, you know the location and creature type of any Celestial, Fiend, or Undead within 60 feet, and you detect any place or object consecrated or desecrated as with Hallow."
+    },
+    "Extra Attack": {
+      "level": 5,
+      "text": "Attack twice instead of once whenever you take the Attack action on your turn."
+    },
+    "Faithful Steed": {
+      "level": 5,
+      "text": "You always have Find Steed prepared, and you can cast it once without expending a spell slot, regaining that use on a Long Rest."
+    },
+    "Aura of Protection": {
+      "level": 6,
+      "shape": "10-foot Emanation from you (30 feet at level 18)",
+      "text": "You and your allies in the aura gain a bonus to saving throws equal to your Charisma modifier (minimum +1). The aura is inactive while you have the Incapacitated condition. A creature can benefit from only one Aura of Protection at a time.",
+      "notes": [
+        "An Emanation moves with you automatically; no action is needed to reposition it.",
+        "The general Emanation default is that the ORIGIN creature is excluded, but Aura of Protection explicitly says 'You and your allies in the aura', which opts you in. You DO benefit from your own aura.",
+        "A space is excluded from the area only if an obstruction gives it Total Cover from you. Nothing less blocks it.",
+        "Aura of Solace (Oath of the Hearth, level 7) rides on this same Emanation and is likewise inactive while you are Incapacitated."
+      ]
+    },
+    "Abjure Foes": {
+      "level": 9,
+      "action": "Magic action",
+      "cost": "1 Channel Divinity",
+      "text": "Target a number of creatures equal to your Charisma modifier (minimum 1) that you can see within 60 feet. Each must succeed on a Wisdom save or have the Frightened condition for 1 minute or until it takes any damage. While Frightened this way, on its turns a target can do only ONE of: move, take an action, or take a Bonus Action."
+    },
+    "Aura of Courage": {
+      "level": 10,
+      "text": "You and your allies have Immunity to the Frightened condition while in your Aura of Protection. A Frightened ally entering the aura is unaffected by that condition while there."
+    },
+    "Radiant Strikes": {
+      "level": 11,
+      "text": "When you hit a target with an attack roll using a Melee weapon or an Unarmed Strike, the target takes an extra 1d8 Radiant damage.",
+      "notes": [
+        "Applies to EVERY melee hit, including both attacks from Extra Attack and Opportunity Attacks.",
+        "The 1d8 is part of the attack's damage, so it doubles on a critical hit."
+      ]
+    },
+    "Restoring Touch": {
+      "level": 14,
+      "text": "When you use Lay On Hands, you may also remove one or more of Blinded, Charmed, Deafened, Frightened, Paralyzed, or Stunned. Each condition removed costs 5 Hit Points from the pool, and those points restore no HP."
+    },
+    "Aura Expansion": {
+      "level": 18,
+      "text": "Your Aura of Protection becomes a 30-foot Emanation."
+    },
+    "Epic Boon": {
+      "level": 19,
+      "text": "Gain an Epic Boon feat or another feat you qualify for."
+    }
+  }
+}

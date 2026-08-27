@@ -1,0 +1,207 @@
+{
+  "rules": {
+    "noAbilityScoreIncrease": "CONFIRMED: species grant NO ability score increases in 2024. All ability score increases come from your background. This is the single biggest character-creation change from 2014, and legacy species write-ups on the internet will still show the old '+2/+1' format.",
+    "grants": "Creature type, size, speed, and a set of named traits.",
+    "languages": "Handled as a separate universal step, not by species: Common plus two other languages."
+  },
+  "phb2024": [
+    {
+      "name": "Aasimar",
+      "creatureType": "Humanoid",
+      "size": "Medium or Small (choose)",
+      "speed": 30,
+      "darkvision": 60,
+      "traits": [
+        "Celestial Resistance: Resistance to Necrotic and Radiant damage.",
+        "Healing Hands: as a Magic action, touch a creature and roll a number of d4s equal to your Proficiency Bonus. It regains that many Hit Points. Once per Long Rest.",
+        "Light Bearer: you know the Light cantrip; Charisma is your spellcasting ability for it.",
+        "Celestial Revelation (character level 3+): as a Bonus Action, transform for 1 minute into Heavenly Wings (Fly Speed equal to your Speed), Inner Radiance (Bright Light 10 ft, Dim Light 10 ft more, and creatures within 10 feet take Radiant damage equal to your Proficiency Bonus at the end of each of your turns), or Necrotic Shroud (non-allies within 10 feet make a Charisma save, DC 8 + Charisma modifier + Proficiency Bonus, or are Frightened until the end of your next turn). Once per Long Rest."
+      ]
+    },
+    {
+      "name": "Dragonborn",
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "speed": 30,
+      "darkvision": 60,
+      "traits": [
+        "Draconic Ancestry: choose a dragon type, which sets your Breath Weapon damage type and your resistance. Black/Copper = Acid, Blue/Bronze = Lightning, Brass/Gold/Red = Fire, Green = Poison, Silver/White = Cold.",
+        "Breath Weapon: replace one attack when you take the Attack action. 15-foot Cone or 30-foot Line, Dexterity save (DC 8 + Constitution modifier + Proficiency Bonus), 1d10 damage of your ancestry type (2d10 at level 5, 3d10 at 11, 4d10 at 17), half on a success. Uses equal to Proficiency Bonus per Long Rest.",
+        "Damage Resistance: Resistance to your ancestry's damage type.",
+        "Draconic Flight (level 5+): Bonus Action, gain a Fly Speed equal to your Speed for 10 minutes. Once per Long Rest."
+      ]
+    },
+    {
+      "name": "Dwarf",
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "speed": 30,
+      "darkvision": 120,
+      "traits": [
+        "Dwarven Resilience: Resistance to Poison damage and Advantage on saves against being Poisoned.",
+        "Dwarven Toughness: your Hit Point maximum increases by 1, and by 1 again every level.",
+        "Stonecunning: Bonus Action to gain Tremorsense 60 feet for 10 minutes while on or touching a stone surface. Uses equal to Proficiency Bonus per Long Rest."
+      ]
+    },
+    {
+      "name": "Elf",
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "speed": "30 (35 for Wood Elf)",
+      "darkvision": 60,
+      "traits": [
+        "Fey Ancestry: Advantage on saves to avoid or end the Charmed condition.",
+        "Keen Senses: proficiency in Insight, Perception, or Survival.",
+        "Trance: you do not need to sleep and magic cannot put you to sleep. A 4-hour trance gives the benefits of a Long Rest.",
+        "Elven Lineage (choose one): DROW - Darkvision 120 ft, Dancing Lights cantrip, Faerie Fire at level 3, Darkness at level 5. HIGH ELF - Prestidigitation cantrip (swappable each Long Rest), Detect Magic at level 3, Misty Step at level 5. WOOD ELF - Speed 35 ft, Druidcraft cantrip, Longstrider at level 3, Pass without Trace at level 5. Level 3 and 5 spells are free once per Long Rest, or castable with slots."
+      ]
+    },
+    {
+      "name": "Gnome",
+      "creatureType": "Humanoid",
+      "size": "Small",
+      "speed": 30,
+      "darkvision": 60,
+      "traits": [
+        "Gnomish Cunning: Advantage on Intelligence, Wisdom, and Charisma saving throws (broader than 2014, which limited it to magic).",
+        "Gnomish Lineage (choose one): FOREST GNOME - Minor Illusion cantrip, and Speak with Animals always prepared, castable without a slot a number of times equal to your Proficiency Bonus per Long Rest. ROCK GNOME - Mending and Prestidigitation cantrips, and Artificer's Lore lets you spend 10 minutes to build a Tiny clockwork device (AC 5, 1 HP) producing a Prestidigitation effect, up to three at a time, each lasting 8 hours."
+      ]
+    },
+    {
+      "name": "Goliath",
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "speed": 35,
+      "darkvision": null,
+      "traits": [
+        "Giant Ancestry (choose one, usable a number of times equal to your Proficiency Bonus per Long Rest): CLOUD'S JAUNT - Bonus Action, teleport 30 feet. FIRE'S BURN - on a hit, extra 1d10 Fire damage. FROST'S CHILL - on a hit, extra 1d6 Cold damage and reduce Speed by 10 feet until the start of your next turn. HILL'S TUMBLE - on a hit against a Large or smaller creature, give it the Prone condition. STONE'S ENDURANCE - Reaction when you take damage, roll 1d12 + Constitution modifier and reduce the damage by that total. STORM'S THUNDER - Reaction when you take damage from a creature within 60 feet, deal 1d8 Thunder damage to it.",
+        "Large Form (level 5+): Bonus Action to become Large for 10 minutes, with Advantage on Strength checks and +10 feet of Speed. Once per Long Rest.",
+        "Powerful Build: Advantage on checks to end the Grappled condition, and you count as one size larger for carrying capacity."
+      ]
+    },
+    {
+      "name": "Halfling",
+      "creatureType": "Humanoid",
+      "size": "Small",
+      "speed": 30,
+      "darkvision": null,
+      "traits": [
+        "Brave: Advantage on saves to avoid or end the Frightened condition.",
+        "Halfling Nimbleness: you can move through the space of any creature at least one size larger than you, but cannot stop there.",
+        "Luck: when you roll a 1 on the d20 of a D20 Test, you can reroll and must use the new roll.",
+        "Naturally Stealthy: you can take the Hide action even when obscured only by a creature at least one size larger than you."
+      ]
+    },
+    {
+      "name": "Human",
+      "creatureType": "Humanoid",
+      "size": "Medium or Small (choose)",
+      "speed": 30,
+      "darkvision": null,
+      "traits": [
+        "Resourceful: you gain Heroic Inspiration whenever you finish a Long Rest.",
+        "Skillful: proficiency in one skill of your choice.",
+        "Versatile: you gain an Origin feat of your choice, in addition to the one from your background."
+      ]
+    },
+    {
+      "name": "Orc",
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "speed": 30,
+      "darkvision": 120,
+      "traits": [
+        "Adrenaline Rush: Bonus Action to take the Dash action, gaining Temporary Hit Points equal to your Proficiency Bonus. Uses equal to your Proficiency Bonus, regained on a Short or Long Rest.",
+        "Relentless Endurance: when reduced to 0 Hit Points but not killed outright, drop to 1 Hit Point instead. Once per Long Rest."
+      ]
+    },
+    {
+      "name": "Tiefling",
+      "creatureType": "Humanoid",
+      "size": "Medium or Small (choose)",
+      "speed": 30,
+      "darkvision": 60,
+      "traits": [
+        "Otherworldly Presence: you know the Thaumaturgy cantrip, using the same spellcasting ability as your Fiendish Legacy.",
+        "Fiendish Legacy (choose one): ABYSSAL - Poison resistance, Poison Spray cantrip, Ray of Sickness at level 3, Hold Person at level 5. CHTHONIC - Necrotic resistance, Chill Touch cantrip, False Life at level 3, Ray of Enfeeblement at level 5. INFERNAL - Fire resistance, Fire Bolt cantrip, Hellish Rebuke at level 3, Darkness at level 5. Level 3 and 5 spells are free once per Long Rest, or castable with slots.",
+        "Darkvision 60 feet, increasing to 120 feet at character level 5."
+      ]
+    }
+  ],
+  "changeling": {
+    "status": "NOT IN THE 2024 PLAYER'S HANDBOOK. The 2024-rules version appears in Eberron: Forge of the Artificer (2025), which updated Changeling, Kalashtar, Shifter and Warforged to 2024 rules.",
+    "confirmDMApproval": true,
+    "current2024": {
+      "source": "Eberron: Forge of the Artificer (2025)",
+      "creatureType": "Fey",
+      "size": "Medium or Small (choose when you select this species)",
+      "speed": 30,
+      "darkvision": null,
+      "abilityScoreIncrease": "None - all ability score increases come from your background.",
+      "traits": [
+        {
+          "name": "Changeling Instincts",
+          "text": "You gain proficiency in two of the following skills of your choice: Deception, Insight, Intimidation, Performance, or Persuasion."
+        },
+        {
+          "name": "Shape-Shifter",
+          "action": "Action",
+          "text": "As an Action you can alter your appearance and voice: your coloration, hair length, sex, height and weight, and your general facial and bodily features. You can also change your size between Medium and Small. You can make yourself look like a member of another playable species, but none of your game statistics change. You cannot duplicate a specific individual you have never seen, you must keep the same basic limb arrangement, and your clothing and equipment do not change with you. WHILE SHAPE-SHIFTED YOU HAVE ADVANTAGE ON CHARISMA CHECKS. The form lasts until you take an Action to revert or until you die."
+        }
+      ],
+      "keyChangeFromOlderVersions": "The Advantage on Charisma checks while shape-shifted is NEW and is the trait most legacy write-ups are missing."
+    },
+    "legacyVersions": {
+      "MPMM2022": {
+        "creatureType": "Fey",
+        "size": "Medium or Small",
+        "speed": 30,
+        "abilityScoreIncrease": "+2 to one and +1 to another, or +1 to three (transitional format, superseded by 2024)",
+        "languages": "Common plus one other",
+        "instincts": "Two of Deception, Insight, Intimidation, Performance, Persuasion",
+        "shapechanger": "Action; appearance and voice, plus size shift Medium/Small. No Charisma-check Advantage."
+      },
+      "ERLW2019": {
+        "creatureType": "Humanoid",
+        "size": "Medium only",
+        "speed": 30,
+        "abilityScoreIncrease": "Charisma +2 and +1 to one other ability (2014 format)",
+        "languages": "Common plus two others",
+        "instincts": "Two of Deception, Insight, Intimidation, Persuasion (no Performance)",
+        "shapechanger": "Action; appearance and voice only, resembling any humanoid of similar size you have seen. No size shift, no Charisma-check Advantage."
+      }
+    },
+    "outdatedClaimsToCorrect": [
+      {
+        "claim": "+2 Charisma, +1 to another ability",
+        "verdict": "OUTDATED (2019 format)",
+        "correction": "Species grant no ability score increases in 2024. Marcus's increases come from the Wayfarer background: Dexterity, Wisdom, Charisma - either +2/+1 across two of them or +1/+1/+1 across all three."
+      },
+      {
+        "claim": "Changeling Instincts: two social skill proficiencies",
+        "verdict": "CURRENT, but the list matters",
+        "correction": "The current list is Deception, Insight, Intimidation, Performance, or Persuasion. Performance was added in 2022 and is often missing from older write-ups."
+      },
+      {
+        "claim": "Shapechanger: as an action, change appearance and voice, height, weight, and size",
+        "verdict": "MOSTLY CURRENT",
+        "correction": "Still an Action in 2024 - not a Bonus Action and not the Magic action. But the trait is renamed Shape-Shifter, it is restricted to looking like another PLAYABLE SPECIES rather than any humanoid you have seen, and it now grants ADVANTAGE ON CHARISMA CHECKS while shifted, which the older text does not mention."
+      },
+      {
+        "claim": "Medium or Small, 30 ft",
+        "verdict": "CURRENT",
+        "correction": "Correct as of MPMM 2022 and unchanged in 2024. Note this was Medium-only in the 2019 version."
+      },
+      {
+        "claim": "Common plus two other languages",
+        "verdict": "OUTDATED as a species trait",
+        "correction": "Not wrong as a number, but in 2024 languages are not granted by species at all. Every character gets Common plus two chosen or rolled languages as a separate creation step."
+      },
+      {
+        "claim": "Creature type",
+        "verdict": "MISSING FROM THE OLD WRITE-UP",
+        "correction": "Changeling is FEY in 2024 (and was already Fey in MPMM 2022; it was Humanoid only in the 2019 book). This matters mechanically - spells like Protection from Evil and Good, Magic Circle, and Hallow list Fey as an affected type, and 'charm a humanoid' effects do NOT work on you."
+      }
+    ]
+  }
+}

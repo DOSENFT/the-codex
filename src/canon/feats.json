@@ -1,0 +1,930 @@
+{
+  "rules": {
+    "originFeat": "Your background grants exactly one Origin feat at level 1. Origin feats have no prerequisites.",
+    "generalFeats": "At levels 4, 8, 12, and 16 the Ability Score Improvement class feature lets you take the Ability Score Improvement feat OR any other feat you qualify for.",
+    "canTakeOriginFeatLater": "Yes. Origin feats are always eligible picks in a General-feat slot, since they have no prerequisite. This is how Magic Initiate gets taken a second time for a different spell list.",
+    "epicBoon": "At level 19, the Epic Boon class feature lets you take an Epic Boon feat (prerequisite Level 19+) or another feat you qualify for.",
+    "repeatable": "You can take a feat only once unless its description says otherwise. Repeatable feats in the PHB: Ability Score Improvement, Magic Initiate, Skilled, Elemental Adept.",
+    "humanBonus": "The Human species grants one extra Origin feat of your choice at level 1, in addition to the one from your background.",
+    "asiOnGeneralFeats": "NEW IN 2024: virtually every General feat now also grants a +1 ability score increase. In 2014 most did not. This makes taking a feat much less costly than it used to be."
+  },
+  "changesFrom2014": [
+    "Great Weapon Master: the -5 attack / +10 damage gamble is REMOVED. Replaced with flat bonus damage equal to your Proficiency Bonus on Heavy-weapon hits, plus a Bonus Action attack after a crit or a kill.",
+    "Sharpshooter: the -5/+10 gamble is REMOVED with NO replacement damage feature. Significantly weaker than its 2014 version.",
+    "Grappler: reworked. Grappling is now folded into the Unarmed Strike as an Attack-action option, and the feat lets you deal damage and grapple with the same strike, plus Advantage against grappled targets.",
+    "Dual Wielder: lost the +1 AC. Gained the ability to use non-Light melee weapons for the off-hand attack.",
+    "Mage Slayer: reworked from anti-caster opportunity attacks into Disadvantage on the enemy's Concentration save plus a once-per-rest auto-success on a mental save.",
+    "Polearm Master: now explicitly includes the Spear alongside Quarterstaff and Heavy+Reach weapons.",
+    "Fighting Styles are now FEATS, gated behind having the Fighting Style class feature, drawn from a shared pool of ten. Paladins additionally get the class-exclusive Blessed Warrior option.",
+    "Epic Boons are a new formal level 19+ feat category."
+  ],
+  "origin": [
+    {
+      "name": "Alert",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Add your Proficiency Bonus to your Initiative rolls.",
+        "Immediately after rolling Initiative you can swap your result with a willing ally's in the same combat. You cannot swap if either of you has the Incapacitated condition."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Crafter",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Proficiency with three kinds of Artisan's Tools of your choice.",
+        "You get a 20 percent discount when buying nonmagical goods.",
+        "Fast Crafting: after a Long Rest you can craft one piece of gear from a listed table using tools you are proficient with. It lasts until your next Long Rest."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Healer",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Battle Medic: as a Utilize action, expend one use of a Healer's Kit on a creature within 5 feet. It expends one of its Hit Point Dice; you roll that die and the creature regains Hit Points equal to the roll plus your Proficiency Bonus.",
+        "Whenever you roll a die to determine Hit Points restored by a spell or by Battle Medic, you can reroll a 1 once, and must use the new roll."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Lucky",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "You have a number of Luck Points equal to your Proficiency Bonus, regained on a Long Rest.",
+        "Advantage: spend 1 Luck Point after rolling a d20 for a D20 Test to give yourself Advantage on that roll.",
+        "Disadvantage: when a creature rolls a d20 for an attack roll against you, spend 1 Luck Point to impose Disadvantage on that roll."
+      ],
+      "paladinNote": "This is the Wayfarer background's Origin feat. At Proficiency Bonus +3 (levels 5-8) you get three Luck Points per Long Rest. Spend them on Concentration saves, on a Divine Smite attack roll against a boss, or to make a killing blow miss you."
+    },
+    {
+      "name": "Magic Initiate",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": true,
+      "effects": [
+        "Choose Cleric, Druid, or Wizard. Learn two cantrips of your choice from that class's spell list.",
+        "Learn one level 1 spell from that same list. You always have it prepared and can cast it once per Long Rest without a spell slot, or with a spell slot if you have them.",
+        "Choose Intelligence, Wisdom, or Charisma as the spellcasting ability for these spells.",
+        "Whenever you gain a level you can replace one of the chosen spells with another of the same level from the same list."
+      ],
+      "paladinNote": "Repeatable with a different spell list each time. Taking it with the Cleric list is the cheapest way for a Paladin to get cantrips without spending their Fighting Style on Blessed Warrior. Choose Charisma as the ability so it uses your best stat. The free level 1 casting expends no slot, so it does not trip the one-slot-per-turn rule."
+    },
+    {
+      "name": "Musician",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Proficiency with three musical instruments of your choice.",
+        "After a Short or Long Rest, you can play and grant Heroic Inspiration to a number of allies who heard the performance equal to your Proficiency Bonus."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Savage Attacker",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Once per turn when you hit with a weapon, you can roll the weapon's damage dice twice and use either total."
+      ],
+      "paladinNote": "Applies to the WEAPON's dice only, not to Divine Smite dice or Radiant Strikes. Good on a Greatsword (2d6), weak on a Longsword (1d8)."
+    },
+    {
+      "name": "Skilled",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": true,
+      "effects": [
+        "Gain proficiency in any combination of three skills or tools of your choice."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Tavern Brawler",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Your Unarmed Strike deals 1d4 + Strength modifier Bludgeoning damage instead of the default.",
+        "When you roll that damage die you can reroll a 1 once, and must use the new roll.",
+        "Proficiency with improvised weapons.",
+        "Once per turn, when you hit with an Unarmed Strike as part of the Attack action, you can push the target 5 feet."
+      ],
+      "paladinNote": "Every Smite spell explicitly works on an Unarmed Strike, so a grappling Paladin can still Smite. Combine with the Grappler feat and the Unarmed Fighting style for a full grapple build."
+    },
+    {
+      "name": "Tough",
+      "category": "Origin",
+      "prerequisite": "None",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Your Hit Point maximum increases by twice your character level when you gain this feat, and by 2 every time you gain a level thereafter."
+      ],
+      "paladinNote": null
+    }
+  ],
+  "general": [
+    {
+      "name": "Ability Score Improvement",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+2 to one ability, or +1 to two abilities (max 20)",
+      "repeatable": true,
+      "effects": [
+        "Increase ability scores as listed."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Actor",
+      "category": "General",
+      "prerequisite": "Level 4+, Charisma 13+",
+      "abilityScoreIncrease": "+1 Charisma (max 20)",
+      "repeatable": false,
+      "effects": [
+        "Advantage on Deception and Performance checks when trying to pass yourself off as a different person.",
+        "You can mimic the speech of a person or the sounds of a creature you have heard. A listener must succeed on a Wisdom (Insight) check against DC 8 + your Charisma modifier + your Proficiency Bonus to detect the fake."
+      ],
+      "paladinNote": "Extremely strong on a Changeling, which already shapeshifts appearance and gains Advantage on Charisma checks while shifted. Actor covers the VOICE half that Shape-Shifter's appearance change does not fully sell."
+    },
+    {
+      "name": "Athlete",
+      "category": "General",
+      "prerequisite": "Level 4+, Strength or Dexterity 13+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "You gain a Climb Speed equal to your Speed.",
+        "You can stand up from Prone by spending only 5 feet of movement.",
+        "You can make a running long or high jump after moving only 5 feet rather than 10."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Charger",
+      "category": "General",
+      "prerequisite": "Level 4+, Strength or Dexterity 13+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "When you take the Dash action you gain 10 extra feet of movement for that action.",
+        "Once per turn, if you move at least 10 feet in a straight line toward a target immediately before hitting it with a melee attack, choose one: the attack deals an extra 1d8 damage, or you push the target up to 10 feet (target must be no more than one size larger than you)."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Chef",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Constitution or Wisdom",
+      "repeatable": false,
+      "effects": [
+        "Proficiency with Cook's Utensils.",
+        "During a Short Rest you can cook for a number of creatures equal to 4 + your Proficiency Bonus; each that spends a Hit Point Die regains an extra 1d8 Hit Points.",
+        "During a Long Rest you can make treats equal to your Proficiency Bonus. A creature can eat one as a Bonus Action to gain Temporary Hit Points equal to your Proficiency Bonus. They last 8 hours."
+      ],
+      "paladinNote": "Thematically ideal for Oath of the Hearth. Mechanically modest but the Short Rest healing is real, and Temporary Hit Points from treats are a resource your party can carry."
+    },
+    {
+      "name": "Crossbow Expert",
+      "category": "General",
+      "prerequisite": "Level 4+, Dexterity 13+",
+      "abilityScoreIncrease": "+1 Dexterity",
+      "repeatable": false,
+      "effects": [
+        "You ignore the Loading property of Hand Crossbows, Light Crossbows, and Heavy Crossbows.",
+        "Being within 5 feet of an enemy does not impose Disadvantage on your crossbow attack rolls.",
+        "When you make the extra attack from the Light property with a Hand Crossbow, you can add your ability modifier to its damage."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Crusher",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength or Constitution",
+      "repeatable": false,
+      "effects": [
+        "Once per turn, when you hit with an attack that deals Bludgeoning damage, you can move the target 5 feet to an unoccupied space (target must be no more than one size larger than you).",
+        "When you score a Critical Hit that deals Bludgeoning damage, attack rolls against that creature have Advantage until the start of your next turn."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Defensive Duelist",
+      "category": "General",
+      "prerequisite": "Level 4+, Dexterity 13+",
+      "abilityScoreIncrease": "+1 Dexterity",
+      "repeatable": false,
+      "effects": [
+        "When you are holding a Finesse weapon you are proficient with and another creature hits you with a melee attack, you can take a Reaction to add your Proficiency Bonus to your Armor Class against that attack, possibly turning the hit into a miss."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Dual Wielder",
+      "category": "General",
+      "prerequisite": "Level 4+, Strength or Dexterity 13+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "You can make the extra attack from the Light property even if the second weapon does not have the Light property, as long as it is a Melee weapon without the Two-Handed property.",
+        "Quick Draw: you can draw or stow two weapons when you would normally draw or stow one."
+      ],
+      "paladinNote": "The 2014 version's +1 AC while dual wielding is GONE in 2024."
+    },
+    {
+      "name": "Durable",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Constitution",
+      "repeatable": false,
+      "effects": [
+        "You have Advantage on Death Saving Throws.",
+        "As a Bonus Action you can expend one Hit Point Die, roll it, and regain Hit Points equal to the roll plus your Constitution modifier."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Elemental Adept",
+      "category": "General",
+      "prerequisite": "Level 4+ and the Spellcasting or Pact Magic feature",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": true,
+      "effects": [
+        "Choose Acid, Cold, Fire, Lightning, or Thunder. Spells you cast ignore Resistance to that damage type.",
+        "When you roll damage for a spell of that type, treat any 1 on a damage die as a 2."
+      ],
+      "paladinNote": "ELEMENTAL ADEPT (FIRE) IS THE MOST IMPORTANT FEAT FOR AN OATH OF THE HEARTH PALADIN. Your entire subclass spell list is Fire, and Fire is the most commonly resisted damage type in the game. This feat makes Burning Hands, Scorching Ray, Fireball, Wall of Fire and Flame Strike ignore Resistance. It does NOT bypass Immunity. Note it applies to SPELLS you cast - ask your DM whether the subclass's own Fire damage (Hearthfire Manifest's 1d10, Smoldering Smite's 1d8) counts, since those are features rather than spells."
+    },
+    {
+      "name": "Fey-Touched",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": false,
+      "effects": [
+        "Learn Misty Step plus one level 1 Divination or Enchantment spell of your choice.",
+        "You always have both prepared, and you can cast each once per Long Rest without a spell slot. You can also cast them with spell slots you have."
+      ],
+      "paladinNote": "Misty Step is a Bonus Action teleport, which solves a Paladin's biggest positioning problem. The free castings expend no slot, so they do not trip the one-slot-per-turn rule - meaning you can Misty Step for free AND Divine Smite with a slot in the same turn, once per Long Rest. Take Charisma for the +1."
+    },
+    {
+      "name": "Grappler",
+      "category": "General",
+      "prerequisite": "Level 4+, Strength or Dexterity 13+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Once per turn, when you hit a creature with an Unarmed Strike as part of the Attack action, you can both deal damage AND apply the Grapple effect.",
+        "You have Advantage on attack rolls against a creature you are grappling.",
+        "You do not need extra movement to move a creature you are grappling that is your size or smaller."
+      ],
+      "paladinNote": "Advantage on attacks against a grappled creature roughly doubles your crit rate, and criticals double Smite dice. Grapple, then Smite the Advantage attack."
+    },
+    {
+      "name": "Great Weapon Master",
+      "category": "General",
+      "prerequisite": "Level 4+, Strength 13+",
+      "abilityScoreIncrease": "+1 Strength",
+      "repeatable": false,
+      "effects": [
+        "Heavy Weapon Mastery: when you hit with a Heavy weapon you are proficient with as part of the Attack action, you add your Proficiency Bonus to the damage.",
+        "Hew: immediately after you score a Critical Hit or reduce a creature to 0 Hit Points with a Melee weapon, you can make one attack with that weapon as a Bonus Action."
+      ],
+      "paladinNote": "THE -5/+10 MECHANIC IS GONE IN 2024. It is now flat bonus damage, which is more reliable. Warning for Paladins: Hew costs your BONUS ACTION, which is the same resource Divine Smite needs. On a critical hit you must choose between Smiting the crit (dice doubled) or taking the extra attack. Smiting the crit is almost always correct."
+    },
+    {
+      "name": "Heavily Armored",
+      "category": "General",
+      "prerequisite": "Level 4+ and Medium armor training",
+      "abilityScoreIncrease": "+1 Constitution or Strength",
+      "repeatable": false,
+      "effects": [
+        "Gain Heavy armor training."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Heavy Armor Master",
+      "category": "General",
+      "prerequisite": "Level 4+ and Heavy armor training",
+      "abilityScoreIncrease": "+1 Constitution or Strength",
+      "repeatable": false,
+      "effects": [
+        "While wearing Heavy armor, Bludgeoning, Piercing, and Slashing damage you take from attacks is reduced by an amount equal to your Proficiency Bonus."
+      ],
+      "paladinNote": "Flat damage reduction on every physical hit. At Proficiency Bonus +3 that is 3 off every attack - against a horde of small attackers this is enormous, and it stacks with Warding Bond's resistance for the person you are protecting."
+    },
+    {
+      "name": "Inspiring Leader",
+      "category": "General",
+      "prerequisite": "Level 4+, Wisdom or Charisma 13+",
+      "abilityScoreIncrease": "+1 Wisdom or Charisma",
+      "repeatable": false,
+      "effects": [
+        "After a Short or Long Rest you can speak for 10 minutes to up to six creatures (which can include you) within 30 feet. Each gains Temporary Hit Points equal to your character level plus the chosen ability modifier."
+      ],
+      "paladinNote": "At level 7 with Charisma 18 that is 11 Temporary Hit Points to six people after every rest. WARNING: Temporary Hit Points do not stack, and your Hearthfire Manifest cloak grants Temporary Hit Points and lasts 'until the Temporary HP is depleted'. Taking Inspiring Leader temp HP while cloaked will replace the cloak's pool and likely end the cloak. Your app must warn on this."
+    },
+    {
+      "name": "Keen Mind",
+      "category": "General",
+      "prerequisite": "Level 4+, Intelligence 13+",
+      "abilityScoreIncrease": "+1 Intelligence",
+      "repeatable": false,
+      "effects": [
+        "Proficiency in one of Arcana, History, Investigation, Nature, or Religion; if already proficient, Expertise instead.",
+        "You can take the Study action as a Bonus Action."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Lightly Armored",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Gain Light armor training and Shield training."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Mage Slayer",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "When you damage a creature that is concentrating on a spell, it has Disadvantage on the saving throw to maintain Concentration.",
+        "Once per Short or Long Rest, when you fail an Intelligence, Wisdom, or Charisma saving throw, you can turn it into a success."
+      ],
+      "paladinNote": "Very strong for a Smiting Paladin. Every Divine Smite already forces a Concentration save; Mage Slayer makes it at Disadvantage. Against enemy casters this roughly doubles the chance you strip their spell."
+    },
+    {
+      "name": "Martial Weapon Training",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Proficiency with all Martial weapons."
+      ],
+      "paladinNote": "Redundant - Paladins already have Martial weapon proficiency. Never take this."
+    },
+    {
+      "name": "Medium Armor Master",
+      "category": "General",
+      "prerequisite": "Level 4+ and Medium armor training",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "While wearing Medium armor you can add 3 rather than 2 to your AC if you have a Dexterity of 16 or higher."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Moderately Armored",
+      "category": "General",
+      "prerequisite": "Level 4+ and Light armor training",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Gain Medium armor training."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Mounted Combatant",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength, Dexterity, or Wisdom",
+      "repeatable": false,
+      "effects": [
+        "While mounted you have Advantage on attack rolls against any unmounted creature within 5 feet of your mount that is smaller than the mount.",
+        "If your mount is subjected to an effect that allows a Dexterity save for half damage, it instead takes no damage on a success and half on a failure.",
+        "If your mount would be hit by an attack, you can make yourself the target instead (you must not be Incapacitated)."
+      ],
+      "paladinNote": "Pairs with Faithful Steed, which gives you a free Find Steed every day. Advantage on attacks means a much higher crit rate, and crits double Smite dice."
+    },
+    {
+      "name": "Observant",
+      "category": "General",
+      "prerequisite": "Level 4+, Intelligence or Wisdom 13+",
+      "abilityScoreIncrease": "+1 Intelligence or Wisdom",
+      "repeatable": false,
+      "effects": [
+        "Proficiency in Insight, Investigation, or Perception; if already proficient, Expertise instead.",
+        "You can take the Search action as a Bonus Action."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Piercer",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Once per turn when you hit with an attack dealing Piercing damage, you can reroll one of the damage dice and must use the new roll.",
+        "When you score a Critical Hit that deals Piercing damage, roll one additional damage die."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Poisoner",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Dexterity or Intelligence",
+      "repeatable": false,
+      "effects": [
+        "Poison damage you deal ignores Resistance to Poison damage.",
+        "Proficiency with the Poisoner's Kit.",
+        "You can spend 1 hour and 50 GP to create a number of doses equal to your Proficiency Bonus. Applying one is a Bonus Action; it lasts 1 minute or until you hit. On a hit the target makes a Constitution save (DC 8 + the relevant modifier + Proficiency Bonus) or takes 2d8 Poison damage and has the Poisoned condition until the end of your next turn."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Polearm Master",
+      "category": "General",
+      "prerequisite": "Level 4+, Strength or Dexterity 13+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Bonus Attack: immediately after taking the Attack action with a Quarterstaff, Spear, or a weapon that has both the Heavy and Reach properties, you can make one Bonus Action attack with the opposite end for 1d4 Bludgeoning damage.",
+        "Reactive Strike: you can take an Opportunity Attack when a creature enters the reach you have with such a weapon."
+      ],
+      "paladinNote": "WARNING: the Bonus Attack competes directly with Divine Smite for your Bonus Action. You cannot do both. Polearm Master's real value for a Paladin is the Reactive Strike half - an extra attack whenever an enemy ENTERS your reach, which is a huge defensive tool for a Hearth Paladin holding a line."
+    },
+    {
+      "name": "Resilient",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 to the chosen ability (max 20)",
+      "repeatable": false,
+      "effects": [
+        "Choose one ability in which you lack saving throw proficiency. You gain proficiency in saving throws with that ability."
+      ],
+      "paladinNote": "RESILIENT (CONSTITUTION) IS THE SINGLE BEST DEFENSIVE FEAT FOR A CONCENTRATING PALADIN. You already have Wisdom and Charisma save proficiency from the class. Adding Constitution proficiency plus your own Aura of Protection bonus makes your Concentration saves nearly automatic - which is what keeps Bless, Compelled Duel, and Banishment alive."
+    },
+    {
+      "name": "Ritual Caster",
+      "category": "General",
+      "prerequisite": "Level 4+, Intelligence, Wisdom, or Charisma 13+",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": false,
+      "effects": [
+        "Learn a number of level 1 spells with the Ritual tag equal to your Proficiency Bonus. You always have them prepared and can cast them as Rituals or with spell slots.",
+        "You learn one more such spell each time your Proficiency Bonus increases.",
+        "Quick Ritual: once per Long Rest you can cast one of these at its normal casting time without a spell slot."
+      ],
+      "paladinNote": "Note that 2024 already lets Paladins ritual-cast Ritual-tagged spells they have prepared, so this feat's value is in expanding WHICH rituals you have access to without spending prepared-spell slots. Verify the exact spell-list restriction with your DM - sources disagree on whether the choice is unrestricted."
+    },
+    {
+      "name": "Sentinel",
+      "category": "General",
+      "prerequisite": "Level 4+, Strength or Dexterity 13+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "When a creature within 5 feet of you takes the Disengage action, you can take an Opportunity Attack against it.",
+        "When a creature within 5 feet of you attacks a target other than you, you can take a Reaction to make one melee attack against the attacker.",
+        "When you hit a creature with an Opportunity Attack, that creature's Speed becomes 0 for the rest of the turn."
+      ],
+      "paladinNote": "THE DEFENDER FEAT. Sentinel is the closest thing 5.5e has to a taunt mechanic that does not require Concentration. An enemy that swings at your Wizard eats a free melee attack from you; an enemy that tries to run past you has its Speed set to 0. For an Oath of the Hearth Paladin whose entire identity is 'nothing gets past me to the people behind me,' this is arguably the best feat in the game."
+    },
+    {
+      "name": "Shadow-Touched",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": false,
+      "effects": [
+        "Learn Invisibility plus one level 1 Illusion or Necromancy spell of your choice.",
+        "You always have both prepared and can cast each once per Long Rest without a spell slot, or with spell slots."
+      ],
+      "paladinNote": "Invisibility on a Changeling infiltrator is a natural fit. The free castings expend no slot."
+    },
+    {
+      "name": "Sharpshooter",
+      "category": "General",
+      "prerequisite": "Level 4+, Dexterity 13+",
+      "abilityScoreIncrease": "+1 Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Your ranged attacks ignore Half Cover and Three-Quarters Cover.",
+        "Being within 5 feet of an enemy does not impose Disadvantage on your ranged attack rolls.",
+        "Attacking at long range does not impose Disadvantage."
+      ],
+      "paladinNote": "THE -5/+10 MECHANIC IS GONE and unlike Great Weapon Master it got NO replacement damage feature. Sharpshooter is significantly weaker in 2024 than in 2014, and it is a poor fit for a melee Paladin regardless."
+    },
+    {
+      "name": "Shield Master",
+      "category": "General",
+      "prerequisite": "Level 4+ and Shield training",
+      "abilityScoreIncrease": "+1 Strength",
+      "repeatable": false,
+      "effects": [
+        "Once per turn, after you hit with a melee attack as part of the Attack action while holding a Shield, you can shove the target: it makes a Strength save (DC 8 + your Strength modifier + your Proficiency Bonus) or you push it 5 feet or knock it Prone.",
+        "While holding a Shield, if you succeed on a Dexterity save that would deal half damage on a success, you can take a Reaction to take no damage instead."
+      ],
+      "paladinNote": "Excellent for a sword-and-board Hearth Paladin. The shove does NOT cost your Bonus Action, so it stacks with Divine Smite in the same turn - unlike Polearm Master or Great Weapon Master's Hew. Knocking a target Prone with the shove gives your second attack Advantage, which fishes for the crit that doubles your Smite."
+    },
+    {
+      "name": "Skill Expert",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 to any ability (max 20)",
+      "repeatable": false,
+      "effects": [
+        "Gain proficiency in one skill of your choice.",
+        "Gain Expertise in one skill you are proficient in."
+      ],
+      "paladinNote": "On a Changeling Paladin, Expertise in Persuasion or Deception with your Charisma and Shape-Shifter Advantage makes you effectively unbeatable in social encounters."
+    },
+    {
+      "name": "Skulker",
+      "category": "General",
+      "prerequisite": "Level 4+, Dexterity 13+",
+      "abilityScoreIncrease": "+1 Dexterity",
+      "repeatable": false,
+      "effects": [
+        "You gain Blindsight with a range of 10 feet.",
+        "You have Advantage on Dexterity (Stealth) checks made as part of the Hide action.",
+        "Missing with a ranged attack while hidden does not reveal your position."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Slasher",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "Once per turn when you hit with an attack dealing Slashing damage, you can reduce the target's Speed by 10 feet until the start of your next turn.",
+        "When you score a Critical Hit dealing Slashing damage, the target has Disadvantage on attack rolls until the start of your next turn."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Speedy",
+      "category": "General",
+      "prerequisite": "Level 4+, Dexterity or Constitution 13+",
+      "abilityScoreIncrease": "+1 Dexterity or Constitution",
+      "repeatable": false,
+      "effects": [
+        "Your Speed increases by 10 feet.",
+        "When you take the Dash action, Difficult Terrain does not cost you extra movement for the rest of that turn.",
+        "Opportunity Attacks against you have Disadvantage."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Spell Sniper",
+      "category": "General",
+      "prerequisite": "Level 4+ and the Spellcasting or Pact Magic feature",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": false,
+      "effects": [
+        "Your attack-roll spells ignore Half Cover and Three-Quarters Cover.",
+        "Being within 5 feet of an enemy does not impose Disadvantage on your spell attack rolls.",
+        "Attack-roll spells with a range of at least 10 feet gain 60 feet of extra range."
+      ],
+      "paladinNote": "Situationally useful with Scorching Ray from your oath - it is the only attack-roll spell you get, and Spell Sniper takes it from 120 feet to 180 and lets you fire it in melee without penalty."
+    },
+    {
+      "name": "Telekinetic",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": false,
+      "effects": [
+        "Learn Mage Hand; you can cast it without Verbal or Somatic components, the hand is invisible, and its range increases by 30 feet.",
+        "As a Bonus Action, one creature you can see within 30 feet must succeed on a Strength save (DC 8 + the chosen ability modifier + your Proficiency Bonus) or you move it 5 feet toward or away from you."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Telepathic",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": false,
+      "effects": [
+        "You can speak telepathically to any creature you can see within 60 feet that knows at least one language. It cannot reply telepathically.",
+        "You always have Detect Thoughts prepared and can cast it once per Long Rest without a spell slot, or with a spell slot."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "War Caster",
+      "category": "General",
+      "prerequisite": "Level 4+ and the Spellcasting or Pact Magic feature",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma",
+      "repeatable": false,
+      "effects": [
+        "Advantage on Constitution saving throws to maintain Concentration.",
+        "You can perform the Somatic components of spells even when you have weapons or a Shield in one or both hands.",
+        "When a creature provokes an Opportunity Attack from you, you can cast a spell at it as your Reaction instead of making the attack. The spell must have a casting time of an Action and target only that creature."
+      ],
+      "paladinNote": "The other great Concentration feat alongside Resilient (Constitution). War Caster gives Advantage on the save; Resilient gives proficiency. Advantage is worth roughly +5, proficiency is +3 at your level - War Caster is slightly better for pure Concentration, Resilient is better because it also helps against every other Constitution save (poison, disease, exhaustion effects). The Somatic-components clause matters a great deal for a sword-and-board Paladin who otherwise has no free hand."
+    },
+    {
+      "name": "Weapon Master",
+      "category": "General",
+      "prerequisite": "Level 4+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity",
+      "repeatable": false,
+      "effects": [
+        "You gain the mastery property of one kind of Simple or Martial weapon you are proficient with. You can change the chosen kind whenever you finish a Long Rest."
+      ],
+      "paladinNote": "Paladins already get two weapon masteries at level 1. This adds a third - useful if you want to carry a Topple weapon, a Vex weapon, and a thrown Slow weapon simultaneously."
+    }
+  ],
+  "fightingStyle": [
+    {
+      "name": "Archery",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "+2 bonus to attack rolls with Ranged weapons."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Blind Fighting",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Blindsight with a range of 10 feet."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Defense",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "+1 bonus to Armor Class while wearing Light, Medium, or Heavy armor."
+      ],
+      "paladinNote": "The safe default. +1 AC always applies and never competes for an action or resource."
+    },
+    {
+      "name": "Dueling",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "+2 bonus to damage rolls when wielding a Melee weapon in one hand and no other weapons."
+      ],
+      "paladinNote": "The sword-and-board damage pick. +2 on every hit with Extra Attack is +4 a round, every round, forever."
+    },
+    {
+      "name": "Great Weapon Fighting",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "When you roll damage for a Melee weapon you are wielding with two hands, treat a 1 or 2 on any damage die as a 3. The weapon must have the Two-Handed or Versatile property."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Interception",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "When a creature you can see hits another creature within 5 feet of you with an attack, you can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon."
+      ],
+      "paladinNote": "THE HEARTH FIGHTING STYLE. This is 'guard the hearth' as a mechanic - you physically intercept damage aimed at someone standing next to you, every round, for free, with no Concentration and no resource cost. At Proficiency Bonus +3 that averages about 8.5 damage prevented per round. Over a long fight it outperforms any damage style."
+    },
+    {
+      "name": "Protection",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "When a creature you can see attacks a target other than you that is within 5 feet of you, you can take a Reaction to impose Disadvantage on that attack roll if you are holding a Shield. The Disadvantage also applies to further attacks against that target until the start of your next turn while you remain within 5 feet."
+      ],
+      "paladinNote": "The other Hearth-appropriate pick, and in 2024 it is significantly stronger than in 2014 because the Disadvantage now persists for the rest of the round rather than applying to a single attack. Requires a Shield."
+    },
+    {
+      "name": "Thrown Weapon Fighting",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "+2 bonus to damage rolls on ranged attacks with weapons that have the Thrown property."
+      ],
+      "paladinNote": "A serious answer to the Paladin's ranged weakness if you carry javelins. Also relevant if your DM rules that thrown melee weapons can carry a Smite."
+    },
+    {
+      "name": "Two-Weapon Fighting",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "When you make the extra attack from the Light property, you can add your ability modifier to that attack's damage if you are not already doing so."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Unarmed Fighting",
+      "category": "Fighting Style",
+      "prerequisite": "the Fighting Style feature",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "Your Unarmed Strike deals 1d6 + Strength modifier Bludgeoning damage, or 1d8 if you are not holding any weapons or a Shield.",
+        "At the start of each of your turns you can deal 1d4 Bludgeoning damage to one creature you are grappling."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Blessed Warrior",
+      "category": "Fighting Style (Paladin-only alternative)",
+      "prerequisite": "Paladin level 2",
+      "abilityScoreIncrease": null,
+      "repeatable": false,
+      "effects": [
+        "You learn two Cleric cantrips of your choice. They count as Paladin spells for you and Charisma is your spellcasting ability for them.",
+        "Whenever you gain a Paladin level you can replace one of these cantrips with another Cleric cantrip."
+      ],
+      "paladinNote": "Not one of the ten general Fighting Style feats - it is a Paladin-exclusive alternative offered by the level 2 Fighting Style feature. Recommended pair for this build: Guidance (out-of-combat Charisma engine) plus Toll the Dead (the highest-damage ranged option, in Necrotic - the damage type your Fire-and-Radiant kit is missing)."
+    }
+  ],
+  "epicBoon": [
+    {
+      "name": "Boon of Combat Prowess",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Peerless Aim: when you miss with an attack roll, you can turn the miss into a hit. Once per turn, regained at the start of your next turn."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Dimensional Travel",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Blink Steps: immediately after you take the Attack or Magic action, you can teleport up to 30 feet to an unoccupied space you can see."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Energy Resistance",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Choose two damage types from Acid, Cold, Fire, Lightning, Necrotic, Poison, Psychic, Radiant, and Thunder. You have Resistance to both. You can change the choices on each Long Rest.",
+        "Energy Redirection: when you take damage of a chosen type, you can take a Reaction to redirect it - a creature within 60 feet makes a Dexterity save (DC 8 + your Constitution modifier + your Proficiency Bonus) or takes 2d12 + your Constitution modifier damage of that type."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Fate",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Improve Fate: when you or a creature within 60 feet succeeds or fails a D20 Test, roll 2d4 and apply the total as a bonus or penalty to that roll. Once per Initiative roll, or once per Short or Long Rest."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Fortitude",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Your Hit Point maximum increases by 40.",
+        "Whenever you regain Hit Points, you can add your Constitution modifier to the amount regained. Once per turn."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Irresistible Offense",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 Strength or Dexterity (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Your Bludgeoning, Piercing, and Slashing damage ignores Resistance.",
+        "When you roll a 20 on a d20 for an attack roll, you deal extra damage equal to the score of the ability increased by this feat, of the same type as the attack's damage."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Recovery",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Last Stand: when you are reduced to 0 Hit Points, you can drop to 1 Hit Point instead and regain Hit Points equal to half your maximum. Once per Long Rest.",
+        "Recover Vitality: you have a pool of ten d10s. As a Bonus Action you can expend any number, roll them, and regain that many Hit Points. The pool refills on a Long Rest."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Skill",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "You gain proficiency in all skills, and Expertise in one skill of your choice."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Speed",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Your Speed increases by 30 feet.",
+        "You can take the Disengage action as a Bonus Action, and doing so also ends the Grappled condition on you."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Spell Recall",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 Intelligence, Wisdom, or Charisma (max 30)",
+      "repeatable": false,
+      "effects": [
+        "Free Casting: whenever you cast a spell using a level 1-4 spell slot, roll 1d4. If the number rolled equals the slot's level, the slot is not expended."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of the Night Spirit",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "While in Dim Light or Darkness you can take a Bonus Action to gain the Invisible condition and Resistance to all damage except Psychic and Radiant. The effect ends after you take an action, Bonus Action, or Reaction."
+      ],
+      "paladinNote": null
+    },
+    {
+      "name": "Boon of Truesight",
+      "category": "Epic Boon",
+      "prerequisite": "Level 19+",
+      "abilityScoreIncrease": "+1 to any ability (max 30)",
+      "repeatable": false,
+      "effects": [
+        "You have Truesight with a range of 60 feet."
+      ],
+      "paladinNote": "The class-recommended Epic Boon for a Paladin. Truesight sees through your own kind of trick, which is a fitting irony for a Changeling."
+    }
+  ]
+}

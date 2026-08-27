@@ -1,0 +1,125 @@
+/* Direction D tokens, copied verbatim from src/design/tokens.css so these
+   mockups render standalone with no build step. If the two ever disagree,
+   src/design/tokens.css wins — it is the shipped one. */
+:root {
+  --d-bg: #0a0a08;
+  --d-e1: #12110e;
+  --d-e2: #1c1a15;
+  --d-e3: #26231b;
+
+  --d-cream: #f0e6d3;
+  --d-tally: #bfb5a0;
+  --d-dim:   #8b8578;
+
+  --d-gold:  #c5a55a;
+  --d-amber: #d4a74a;
+  --d-ember: #c06030;
+  --d-verdant: #39d98a;
+
+  --d-rule:     #211e18;
+  --d-rule-lit: #3a3327;
+
+  --d-font-display: 'Cinzel', Georgia, serif;
+  --d-font-body:    'IBM Plex Sans', system-ui, sans-serif;
+  --d-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  --d-fs-display: 28px;
+  --d-fs-name:    22px;
+  --d-fs-title:   20px;
+  --d-fs-body:    15px;
+  --d-fs-mono:    13px;
+  --d-fs-label:   12px;
+
+  --d-lh-tight: 1.15;
+  --d-lh-body:  1.35;
+
+  --d-touch-goal: 48px;
+  --d-touch-min:  44px;
+  --d-s1: 4px; --d-s2: 8px; --d-s3: 11px; --d-s4: 16px; --d-s5: 22px;
+  --d-radius: 6px;
+  --d-radius-lg: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #000;
+  color: var(--d-cream);
+  font-family: var(--d-font-body);
+  font-size: var(--d-fs-body);
+  line-height: var(--d-lh-body);
+  padding: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+/* ---- mockup chrome (not part of the app) ---- */
+.frame { width: 390px; flex: 0 0 auto; }
+.frame--wide { width: 720px; }
+.frame > h2 {
+  font-family: var(--d-font-mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #6b6558;
+  margin-bottom: 8px;
+}
+.phone {
+  background: var(--d-bg);
+  border: 1px solid #2a2620;
+  border-radius: 14px;
+  overflow: hidden;
+  height: 844px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.phone--auto { height: auto; }
+.scroll { flex: 1 1 auto; overflow-y: auto; padding: var(--d-s4); display: flex; flex-direction: column; gap: var(--d-s3); }
+.scroll > * { flex: 0 0 auto; }   /* a fixed-height phone must clip, never squash */
+.note {
+  font-family: var(--d-font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: #7d7668;
+  max-width: 390px;
+  border-left: 2px solid var(--d-rule-lit);
+  padding-left: 10px;
+  margin-top: 10px;
+}
+.note b { color: var(--d-gold); font-weight: 600; }
+.note .new { color: var(--d-verdant); }
+
+/* ---- shared app primitives ---- */
+.card {
+  background: var(--d-e1);
+  border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius-lg);
+  overflow: hidden;
+}
+.label {
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--d-dim);
+}
+.tally { color: var(--d-tally); font-family: var(--d-font-mono); font-variant-numeric: tabular-nums; }
+.gold  { color: var(--d-gold); }
+.ember { color: var(--d-ember); }
+.dim   { color: var(--d-dim); }
+.mono  { font-family: var(--d-font-mono); font-size: var(--d-fs-mono); }
+.cinzel { font-family: var(--d-font-display); font-size: var(--d-fs-title); letter-spacing: .04em; }
+
+.sec-head {
+  display: flex; align-items: center; gap: var(--d-s2);
+  min-height: var(--d-touch-min);
+  padding: 0 var(--d-s3);
+  background: var(--d-e2);
+  border-bottom: 1px solid var(--d-rule);
+  cursor: pointer;
+}
+.sec-head .chev { margin-left: auto; color: var(--d-dim); font-size: 13px; }
+.sec-head .count { color: var(--d-tally); font-family: var(--d-font-mono); font-size: var(--d-fs-mono); }

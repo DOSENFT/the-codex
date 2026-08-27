@@ -1,0 +1,171 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Table Truth — 04 Errata flag</title>
+<link rel="stylesheet" href="_tokens.css">
+<style>
+  .detail { background: var(--d-e1); }
+  .dhead { padding: var(--d-s4) var(--d-s4) var(--d-s3); border-bottom:1px solid var(--d-rule); }
+  .dhead .title { display:flex; align-items:baseline; gap:var(--d-s2); }
+  .dhead h1 { font-family:var(--d-font-display); font-size:var(--d-fs-name); font-weight:600; color:var(--d-cream); letter-spacing:.03em; }
+  .dhead .close { margin-left:auto; color:var(--d-dim); font-family:var(--d-font-mono); font-size:12px; }
+  .dhead .sub { margin-top:4px; font-family:var(--d-font-mono); font-size:12px; color:var(--d-dim); }
+
+  .sev {
+    display:inline-flex; align-items:center; gap:5px; margin-top:9px;
+    font-family:var(--d-font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--d-ember); border:1px solid rgba(192,96,48,.45); border-radius:3px; padding:3px 7px;
+  }
+
+  .band { padding: var(--d-s3) var(--d-s4); border-bottom:1px solid var(--d-rule); }
+  .band > .label { display:block; margin-bottom:6px; }
+  .band p { font-size:14px; color:var(--d-cream); line-height:1.45; }
+
+  .aswritten {
+    font-family:var(--d-font-mono); font-size:12.5px; line-height:1.5;
+    color:var(--d-dim); border-left:2px solid var(--d-rule-lit); padding-left:11px;
+  }
+  .aswritten em { color: var(--d-ember); font-style:normal; background:rgba(192,96,48,.12); padding:0 3px; }
+
+  .why { border-left:3px solid var(--d-ember); background:rgba(192,96,48,.06); }
+  .why .label { color:var(--d-ember); }
+
+  /* the choice — this is the part that keeps it from being a silent change */
+  .choices { padding: var(--d-s3) var(--d-s4); border-bottom:1px solid var(--d-rule); display:flex; flex-direction:column; gap:var(--d-s2); }
+  .choice {
+    border:1px solid var(--d-rule-lit); border-radius:var(--d-radius); background:var(--d-e2);
+    padding:var(--d-s3); cursor:pointer; min-height:var(--d-touch-min);
+  }
+  .choice.on { border-color:var(--d-gold); background:rgba(197,165,90,.08); }
+  .choice .t { display:flex; align-items:center; gap:var(--d-s2); }
+  .choice .radio { width:16px; height:16px; border-radius:50%; border:1px solid var(--d-dim); flex:0 0 auto; }
+  .choice.on .radio { border-color:var(--d-gold); background:radial-gradient(circle, var(--d-gold) 45%, transparent 47%); }
+  .choice .nm { font-size:13.5px; color:var(--d-cream); font-weight:600; }
+  .choice .tag { margin-left:auto; font-family:var(--d-font-mono); font-size:10px; letter-spacing:.07em;
+                 text-transform:uppercase; color:var(--d-gold); }
+  .choice .tag.off { color:var(--d-dim); }
+  .choice .d { display:block; margin-top:5px; margin-left:24px; font-size:13px; color:var(--d-tally); line-height:1.35; }
+
+  .dm { padding: var(--d-s3) var(--d-s4); }
+  .dm .quote {
+    margin-top:var(--d-s2); padding:var(--d-s3);
+    border:1px dashed var(--d-rule-lit); border-radius:var(--d-radius);
+    font-family:var(--d-font-mono); font-size:12.5px; line-height:1.55; color:var(--d-cream);
+  }
+  .dm button {
+    margin-top:var(--d-s2); width:100%; min-height:var(--d-touch-goal); border-radius:var(--d-radius);
+    border:1px solid var(--d-rule-lit); background:var(--d-e2); color:var(--d-cream); font-size:13px; cursor:pointer;
+  }
+
+  /* the inline flag, as it appears in a list */
+  .opt { display:flex; flex-direction:column; gap:3px; padding:var(--d-s3); }
+  .opt .l1 { display:flex; align-items:baseline; gap:var(--d-s2); }
+  .opt .nm { color:var(--d-cream); font-weight:600; font-size:15px; }
+  .opt .badge { font-family:var(--d-font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+                color:var(--d-gold); border:1px solid rgba(197,165,90,.3); border-radius:3px; padding:1px 5px; }
+  .opt .price { margin-left:auto; font-family:var(--d-font-mono); font-size:11.5px; color:var(--d-dim); }
+  .opt .l3 { display:flex; align-items:center; gap:var(--d-s2); font-family:var(--d-font-mono); font-size:12px; }
+  .opt .dice { color:var(--d-gold); }
+  .opt .flag { display:flex; align-items:center; gap:6px; margin-top:4px; font-family:var(--d-font-mono); font-size:11px; color:var(--d-ember); }
+</style>
+
+<div class="frame">
+  <h2>04a — the flag as it appears inline</h2>
+  <div class="phone phone--auto">
+    <div class="scroll">
+      <div class="card">
+        <div class="opt">
+          <div class="l1"><span class="nm">Smoldering Smite</span><span class="badge">Passive</span><span class="price">level 15 · locked</span></div>
+          <div class="l3"><span class="dice">+1d8 Fire per Smite · ignores Fire Resist &amp; Immunity</span></div>
+          <div class="flag">⚑ HEARTH-01 · breaking — as written this can never trigger. Tap ▸</div>
+        </div>
+      </div>
+      <p class="note" style="border:0;padding:0">
+        One line, ember, never more. It says <b>which</b> errata, <b>how bad</b>, and <b>the
+        consequence in six words</b>. It does not explain itself in the list.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="frame">
+  <h2>04b — opened</h2>
+  <div class="phone phone--auto">
+    <div class="scroll" style="padding:0;gap:0">
+      <div class="detail">
+
+        <div class="dhead">
+          <div class="title"><h1>Smoldering Smite</h1><span class="close">close ✕</span></div>
+          <div class="sub">Oath of the Hearth · level 15 · homebrew</div>
+          <span class="sev">⚑ HEARTH-01 · breaking</span>
+        </div>
+
+        <div class="band">
+          <span class="label">As your subclass is written</span>
+          <p class="aswritten">"Whenever you use a <em>Magic action</em> to cast Divine Smite, add
+          1d8 Fire damage to each smite. This Fire damage ignores Resistance and Immunity to Fire
+          damage."</p>
+        </div>
+
+        <div class="band why">
+          <span class="label">Why it does nothing</span>
+          <p>In 2024, Divine Smite's casting time is <b class="gold">"Bonus Action, taken immediately
+          after hitting a target"</b>. It is never a Magic action. The trigger can never be
+          satisfied, so the feature has no effect at any point in the game.</p>
+          <p style="margin-top:8px;color:var(--d-tally);font-size:13px">Likely cause: written against
+          2014 rules, where Divine Smite was a class feature rather than a spell.</p>
+        </div>
+
+        <div class="choices">
+          <span class="label">What this app is doing</span>
+
+          <div class="choice on">
+            <div class="t"><span class="radio"></span><span class="nm">Any Smite spell</span><span class="tag">in use</span></div>
+            <span class="d">"Whenever you cast a spell whose name includes Smite, add 1d8 Fire
+            damage. This Fire damage ignores Resistance and Immunity to Fire damage."<br>
+            <span class="dim">Brings Searing Smite in — thematically obvious for a fire oath.</span></span>
+          </div>
+
+          <div class="choice">
+            <div class="t"><span class="radio"></span><span class="nm">Divine Smite only</span><span class="tag off">narrower</span></div>
+            <span class="d">"Whenever you cast Divine Smite, add 1d8 Fire damage."<br>
+            <span class="dim">Minimal change. Use this if your DM wants the smallest possible edit.</span></span>
+          </div>
+
+          <div class="choice">
+            <div class="t"><span class="radio"></span><span class="nm">Exactly as written</span><span class="tag off">does nothing</span></div>
+            <span class="d">Leave it broken until the DM rules. The feature will show as inert.</span>
+          </div>
+        </div>
+
+        <div class="band" style="border-bottom:1px solid var(--d-rule)">
+          <span class="label">Also worth knowing</span>
+          <p style="font-size:13.5px;color:var(--d-tally)">"Ignores Resistance <b class="gold">and
+          Immunity</b>" is stronger than any official feature — Elemental Adept, Poisoner and even
+          the level 19 Boon of Irresistible Offense ignore Resistance only. At 1d8 it is not
+          game-breaking, but your DM should know it is a deliberate step above curve. <span class="dim">(HEARTH-09)</span></p>
+        </div>
+
+        <div class="dm">
+          <span class="label">For your DM</span>
+          <div class="quote">Smoldering Smite triggers on "a Magic action to cast Divine Smite", but
+          in 2024 Divine Smite is a Bonus Action spell and never a Magic action — so the feature
+          can't fire. Can we read it as <b>"whenever you cast a spell whose name includes
+          Smite"</b>? That also pulls Searing Smite in, which fits a fire oath.</div>
+          <button>Copy for the DM</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    <b>Nothing is silently changed.</b> The app shows the printed text, names the fault, names the
+    cause, and shows exactly which reading it is running — with the other two one tap away.<br><br>
+    <b>The DM box is the point.</b> Twelve of these need a ruling, not a developer decision (the
+    canon says so in its own README). The app's job is to make the conversation take fifteen seconds,
+    not to have the conversation for him.<br><br>
+    <span class="new">The same shell serves all 12 errata</span> — 3 breaking, 9 lesser. The lesser
+    ones (Warding Bond already being on the Paladin list, the cloak's uncapped retaliation, the
+    "each smite" ambiguity) render in the identical layout at a lower severity.
+  </p>
+</div>

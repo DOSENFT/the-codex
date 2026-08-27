@@ -1,0 +1,477 @@
+{
+  "rules": {
+    "abilityScoreIncrease": "Your background lists three abilities. Increase ONE of them by 2 and a DIFFERENT one by 1, or increase all three by 1. No score can exceed 20 at character creation. You may not put all 3 points into one score.",
+    "grants": "Three ability score increases from a fixed list of three, one Origin feat, proficiency in two skills, proficiency in one tool, and a choice of an equipment package plus a small amount of gold, or a flat 50 GP.",
+    "languages": "NOT granted by background in 2024. Language selection is a separate universal character-creation step: every character knows Common plus two other languages chosen or rolled from the Standard Languages table.",
+    "customBackground": "Allowed. Choose any 2 skill proficiencies, 1 tool proficiency, an Origin feat, the three abilities for the ability score adjustment, and equipment worth 50 GP. Legacy 2014 backgrounds convert by keeping their proficiencies and adding an Origin feat and the standard ability adjustment.",
+    "changeFrom2014": "In 2014 ability score increases came from your SPECIES. In 2024 they come from your BACKGROUND. Species now grant no ability score increases at all."
+  },
+  "list": [
+    {
+      "name": "Acolyte",
+      "abilityScores": [
+        "Intelligence",
+        "Wisdom",
+        "Charisma"
+      ],
+      "originFeat": "Magic Initiate (Cleric)",
+      "skillProficiencies": [
+        "Insight",
+        "Religion"
+      ],
+      "toolProficiency": "Calligrapher's Supplies",
+      "equipmentOptionA": {
+        "items": [
+          "Calligrapher's Supplies",
+          "Book (prayers)",
+          "Holy Symbol",
+          "Parchment (10 sheets)",
+          "Robe"
+        ],
+        "gold": 8
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Artisan",
+      "abilityScores": [
+        "Strength",
+        "Dexterity",
+        "Intelligence"
+      ],
+      "originFeat": "Crafter",
+      "skillProficiencies": [
+        "Investigation",
+        "Persuasion"
+      ],
+      "toolProficiency": "One kind of Artisan's Tools",
+      "equipmentOptionA": {
+        "items": [
+          "Artisan's Tools (same as proficiency)",
+          "2 Pouches",
+          "Traveler's Clothes"
+        ],
+        "gold": 32
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Charlatan",
+      "abilityScores": [
+        "Dexterity",
+        "Constitution",
+        "Charisma"
+      ],
+      "originFeat": "Skilled",
+      "skillProficiencies": [
+        "Deception",
+        "Sleight of Hand"
+      ],
+      "toolProficiency": "Forgery Kit",
+      "equipmentOptionA": {
+        "items": [
+          "Forgery Kit",
+          "Costume",
+          "Fine Clothes"
+        ],
+        "gold": 15
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Criminal",
+      "abilityScores": [
+        "Dexterity",
+        "Constitution",
+        "Intelligence"
+      ],
+      "originFeat": "Alert",
+      "skillProficiencies": [
+        "Sleight of Hand",
+        "Stealth"
+      ],
+      "toolProficiency": "Thieves' Tools",
+      "equipmentOptionA": {
+        "items": [
+          "2 Daggers",
+          "Thieves' Tools",
+          "Crowbar",
+          "2 Pouches",
+          "Traveler's Clothes"
+        ],
+        "gold": 16
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Entertainer",
+      "abilityScores": [
+        "Strength",
+        "Dexterity",
+        "Charisma"
+      ],
+      "originFeat": "Musician",
+      "skillProficiencies": [
+        "Acrobatics",
+        "Performance"
+      ],
+      "toolProficiency": "One kind of Musical Instrument",
+      "equipmentOptionA": {
+        "items": [
+          "Musical Instrument (same as proficiency)",
+          "2 Costumes",
+          "Mirror",
+          "Perfume",
+          "Traveler's Clothes"
+        ],
+        "gold": 11
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Farmer",
+      "abilityScores": [
+        "Strength",
+        "Constitution",
+        "Wisdom"
+      ],
+      "originFeat": "Tough",
+      "skillProficiencies": [
+        "Animal Handling",
+        "Nature"
+      ],
+      "toolProficiency": "Carpenter's Tools",
+      "equipmentOptionA": {
+        "items": [
+          "Sickle",
+          "Carpenter's Tools",
+          "Healer's Kit",
+          "Iron Pot",
+          "Shovel",
+          "Traveler's Clothes"
+        ],
+        "gold": 30
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Guard",
+      "abilityScores": [
+        "Strength",
+        "Intelligence",
+        "Wisdom"
+      ],
+      "originFeat": "Alert",
+      "skillProficiencies": [
+        "Athletics",
+        "Perception"
+      ],
+      "toolProficiency": "One kind of Gaming Set",
+      "equipmentOptionA": {
+        "items": [
+          "Spear",
+          "Light Crossbow",
+          "20 Bolts",
+          "Gaming Set",
+          "Hooded Lantern",
+          "Manacles",
+          "Quiver",
+          "Traveler's Clothes"
+        ],
+        "gold": 12
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Guide",
+      "abilityScores": [
+        "Dexterity",
+        "Constitution",
+        "Wisdom"
+      ],
+      "originFeat": "Magic Initiate (Druid)",
+      "skillProficiencies": [
+        "Stealth",
+        "Survival"
+      ],
+      "toolProficiency": "Cartographer's Tools",
+      "equipmentOptionA": {
+        "items": [
+          "Shortbow",
+          "20 Arrows",
+          "Cartographer's Tools",
+          "Bedroll",
+          "Quiver",
+          "Tent",
+          "Traveler's Clothes"
+        ],
+        "gold": 3
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Hermit",
+      "abilityScores": [
+        "Constitution",
+        "Wisdom",
+        "Charisma"
+      ],
+      "originFeat": "Healer",
+      "skillProficiencies": [
+        "Medicine",
+        "Religion"
+      ],
+      "toolProficiency": "Herbalism Kit",
+      "equipmentOptionA": {
+        "items": [
+          "Quarterstaff",
+          "Herbalism Kit",
+          "Bedroll",
+          "Book (philosophy)",
+          "Lamp",
+          "3 flasks of Oil",
+          "Traveler's Clothes"
+        ],
+        "gold": 16
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Merchant",
+      "abilityScores": [
+        "Constitution",
+        "Intelligence",
+        "Charisma"
+      ],
+      "originFeat": "Lucky",
+      "skillProficiencies": [
+        "Animal Handling",
+        "Persuasion"
+      ],
+      "toolProficiency": "Navigator's Tools",
+      "equipmentOptionA": {
+        "items": [
+          "Navigator's Tools",
+          "2 Pouches",
+          "Traveler's Clothes"
+        ],
+        "gold": 22
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Noble",
+      "abilityScores": [
+        "Strength",
+        "Intelligence",
+        "Charisma"
+      ],
+      "originFeat": "Skilled",
+      "skillProficiencies": [
+        "History",
+        "Persuasion"
+      ],
+      "toolProficiency": "One kind of Gaming Set",
+      "equipmentOptionA": {
+        "items": [
+          "Gaming Set",
+          "Fine Clothes",
+          "Perfume"
+        ],
+        "gold": 29
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Sage",
+      "abilityScores": [
+        "Constitution",
+        "Intelligence",
+        "Wisdom"
+      ],
+      "originFeat": "Magic Initiate (Wizard)",
+      "skillProficiencies": [
+        "Arcana",
+        "History"
+      ],
+      "toolProficiency": "Calligrapher's Supplies",
+      "equipmentOptionA": {
+        "items": [
+          "Quarterstaff",
+          "Calligrapher's Supplies",
+          "Book (history)",
+          "Parchment (8 sheets)",
+          "Robe"
+        ],
+        "gold": 8
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Sailor",
+      "abilityScores": [
+        "Strength",
+        "Dexterity",
+        "Wisdom"
+      ],
+      "originFeat": "Tavern Brawler",
+      "skillProficiencies": [
+        "Acrobatics",
+        "Perception"
+      ],
+      "toolProficiency": "Navigator's Tools",
+      "equipmentOptionA": {
+        "items": [
+          "Dagger",
+          "Navigator's Tools",
+          "Rope",
+          "Traveler's Clothes"
+        ],
+        "gold": 20
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Scribe",
+      "abilityScores": [
+        "Dexterity",
+        "Intelligence",
+        "Wisdom"
+      ],
+      "originFeat": "Skilled",
+      "skillProficiencies": [
+        "Investigation",
+        "Perception"
+      ],
+      "toolProficiency": "Calligrapher's Supplies",
+      "equipmentOptionA": {
+        "items": [
+          "Calligrapher's Supplies",
+          "Fine Clothes",
+          "Lamp",
+          "3 flasks of Oil",
+          "Parchment (12 sheets)"
+        ],
+        "gold": 23
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Soldier",
+      "abilityScores": [
+        "Strength",
+        "Dexterity",
+        "Constitution"
+      ],
+      "originFeat": "Savage Attacker",
+      "skillProficiencies": [
+        "Athletics",
+        "Intimidation"
+      ],
+      "toolProficiency": "One kind of Gaming Set",
+      "equipmentOptionA": {
+        "items": [
+          "Spear",
+          "Shortbow",
+          "20 Arrows",
+          "Gaming Set",
+          "Healer's Kit",
+          "Quiver",
+          "Traveler's Clothes"
+        ],
+        "gold": 14
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": null
+    },
+    {
+      "name": "Wayfarer",
+      "abilityScores": [
+        "Dexterity",
+        "Wisdom",
+        "Charisma"
+      ],
+      "originFeat": "Lucky",
+      "skillProficiencies": [
+        "Insight",
+        "Stealth"
+      ],
+      "toolProficiency": "Thieves' Tools",
+      "equipmentOptionA": {
+        "items": [
+          "2 Daggers",
+          "Thieves' Tools",
+          "Gaming Set (any)",
+          "Bedroll",
+          "2 Pouches",
+          "Traveler's Clothes"
+        ],
+        "gold": 16
+      },
+      "equipmentOptionB": {
+        "items": [],
+        "gold": 50
+      },
+      "note": "MARCUS'S BACKGROUND. Flavour: raised on the street among other castoffs, surviving on odd jobs and petty theft when necessary, but never losing self-respect. For a Paladin this is a strong pick because Charisma is in the ability list and Lucky is one of the best Origin feats in the game. Note the Insight overlap: Wayfarer grants Insight, the Paladin class skill list offers Insight, and the Changeling's Changeling Instincts trait also offers Insight. Do not pick it three times - your app must detect and prevent duplicate proficiencies."
+    }
+  ]
+}

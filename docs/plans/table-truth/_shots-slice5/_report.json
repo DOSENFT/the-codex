@@ -1,0 +1,161 @@
+{
+  "A": {
+    "present": true,
+    "caption": "Your turn",
+    "count": "4 ready",
+    "footer": "10 more — including anything that contends for the same slot — are in the sections below.",
+    "sectionText": "Your turn4 readyHearthbrandAction+7 to hit · 1d8+4 Slashing · 5 ft · MagicalJavelinAction+6 to hit · 1d6+3 Piercing · Standard attackSacred FlameAction · no slot2d8 Radiant · DC 16 DEX · 60 ft · negatesHearthfire ManifestBonus action30 feet10 more — including anything that contends for the same slot — are in the sections below.",
+    "sectionTop": 526,
+    "sectionH": 330,
+    "rows": [
+      {
+        "name": "Hearthbrand",
+        "cost": "Action",
+        "detail": "+7 to hit · 1d8+4 Slashing · 5 ft · Magical",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Javelin",
+        "cost": "Action",
+        "detail": "+6 to hit · 1d6+3 Piercing · Standard attack",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Sacred Flame",
+        "cost": "Action · no slot",
+        "detail": "2d8 Radiant · DC 16 DEX · 60 ft · negates",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Hearthfire Manifest",
+        "cost": "Bonus action",
+        "detail": "30 feet",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      }
+    ],
+    "listHasLayOnHands": false,
+    "deckHasLayOnHands": true,
+    "writes": [
+      "codex-combat-nix-fixture"
+    ]
+  },
+  "E": {
+    "present": true,
+    "caption": "Your turn",
+    "count": "4 ready",
+    "footer": "10 more — including anything that contends for the same slot — are in the sections below.",
+    "sectionText": "Your turn4 readyHearthbrandAction+7 to hit · 1d8+4 Slashing · 5 ft · MagicalJavelinAction+6 to hit · 1d6+3 Piercing · Standard attackSacred FlameAction · no slot2d8 Radiant · DC 16 DEX · 60 ft · negatesHearthfire ManifestBonus action30 feet10 more — including anything that contends for the same slot — are in the sections below.",
+    "sectionTop": 526,
+    "sectionH": 330,
+    "rows": [
+      {
+        "name": "Hearthbrand",
+        "cost": "Action",
+        "detail": "+7 to hit · 1d8+4 Slashing · 5 ft · Magical",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Javelin",
+        "cost": "Action",
+        "detail": "+6 to hit · 1d6+3 Piercing · Standard attack",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Sacred Flame",
+        "cost": "Action · no slot",
+        "detail": "2d8 Radiant · DC 16 DEX · 60 ft · negates",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Hearthfire Manifest",
+        "cost": "Bonus action",
+        "detail": "30 feet",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      }
+    ],
+    "listHasLayOnHands": false,
+    "deckHasLayOnHands": true,
+    "writes": [
+      "codex-combat-nix-fixture"
+    ]
+  },
+  "F": {
+    "present": true,
+    "caption": "Your turn",
+    "count": "4 ready",
+    "footer": "10 more — including anything that contends for the same slot — are in the sections below.",
+    "sectionText": "Your turn4 readyHearthbrandAction+7 to hit · 1d8+4 Slashing · 5 ft · MagicalJavelinAction+6 to hit · 1d6+3 Piercing · Standard attackSacred FlameAction · no slot2d8 Radiant · DC 16 DEX · 60 ft · negatesHearthfire ManifestBonus action30 feet10 more — including anything that contends for the same slot — are in the sections below.",
+    "sectionTop": 526,
+    "sectionH": 330,
+    "rows": [
+      {
+        "name": "Hearthbrand",
+        "cost": "Action",
+        "detail": "+7 to hit · 1d8+4 Slashing · 5 ft · Magical",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Javelin",
+        "cost": "Action",
+        "detail": "+6 to hit · 1d6+3 Piercing · Standard attack",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Sacred Flame",
+        "cost": "Action · no slot",
+        "detail": "2d8 Radiant · DC 16 DEX · 60 ft · negates",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      },
+      {
+        "name": "Hearthfire Manifest",
+        "cost": "Bonus action",
+        "detail": "30 feet",
+        "detailLines": 1,
+        "nameLines": 1,
+        "h": 56,
+        "nameClipped": false
+      }
+    ],
+    "listHasLayOnHands": false,
+    "deckHasLayOnHands": false,
+    "writes": [
+      "codex-combat-nix-fixture"
+    ]
+  },
+  "moved": [],
+  "changedAll": [],
+  "errors": []
+}

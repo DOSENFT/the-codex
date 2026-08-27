@@ -1,0 +1,287 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Table Truth — 01 Play surface</title>
+<link rel="stylesheet" href="_tokens.css">
+<style>
+  /* ── The vitals band — the new top of the Play tab ───────────────────────
+     Today HP sits alone and the numbers a turn is made of are either on an
+     unmounted component (StatsBar) or absent from src/ entirely (initiative,
+     proficiency). This band is the fix: one card, always open, never scrolled
+     past, every numeral at --d-tally or brighter (V-3: a numeral is never dim). */
+  .vitals { padding: var(--d-s3); display: flex; flex-direction: column; gap: var(--d-s3); }
+
+  .hp-row { display: flex; align-items: baseline; gap: var(--d-s2); }
+  .hp-row .big {
+    font-family: var(--d-font-mono); font-size: var(--d-fs-display);
+    color: var(--d-cream); font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .hp-row .of { color: var(--d-dim); font-family: var(--d-font-mono); font-size: 16px; }
+  .hp-row .temp {
+    margin-left: auto; font-family: var(--d-font-mono); font-size: var(--d-fs-mono);
+    color: var(--d-verdant); border: 1px solid rgba(57,217,138,.35);
+    border-radius: 999px; padding: 3px 9px;
+  }
+  .bar { height: 6px; border-radius: 3px; background: var(--d-e3); overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 78%; background: linear-gradient(90deg, var(--d-gold), var(--d-amber)); }
+
+  /* the five numbers, in one glance */
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--d-rule); border-radius: var(--d-radius); overflow: hidden; }
+  .stat { background: var(--d-e2); padding: var(--d-s2) var(--d-s1); text-align: center; }
+  .stat .v { display: block; font-family: var(--d-font-mono); font-size: 19px; color: var(--d-tally); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .stat .k { display: block; font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--d-dim); margin-top: 3px; }
+  .stat.hero .v { color: var(--d-gold); }
+
+  .hp-btns { display: flex; gap: var(--d-s2); }
+  .hp-btns button {
+    flex: 1; min-height: var(--d-touch-min); border-radius: var(--d-radius);
+    border: 1px solid var(--d-rule-lit); background: var(--d-e2); color: var(--d-cream);
+    font-family: var(--d-font-body); font-size: 13px; cursor: pointer;
+  }
+
+  /* ── Collapsed by default: conditions ───────────────────────────────────── */
+  .sec-head.clear .count { color: var(--d-dim); }
+  .sec-head.active { border-left: 3px solid var(--d-ember); }
+
+  /* ── The option list ────────────────────────────────────────────────────── */
+  .opt {
+    display: flex; flex-direction: column; gap: 3px;
+    padding: var(--d-s3); min-height: 64px;
+    border-bottom: 1px solid var(--d-rule); cursor: pointer;
+  }
+  .opt:last-child { border-bottom: 0; }
+  .opt .l1 { display: flex; align-items: baseline; gap: var(--d-s2); }
+  .opt .nm { color: var(--d-cream); font-weight: 600; font-size: 15px; }
+  .opt .badge {
+    font-family: var(--d-font-mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--d-gold);
+    border: 1px solid rgba(197,165,90,.3); border-radius: 3px; padding: 1px 5px;
+  }
+  .opt .price { margin-left: auto; font-family: var(--d-font-mono); font-size: 11.5px; color: var(--d-dim); }
+  /* THE MECHANICS LINE — the row's second and last line. Structured facts only
+     (to-hit · dice · save · range · rider), assembled from canon fields, never
+     prose. It cannot be truncated because nothing here is a sentence. */
+  .opt .l3 { display: flex; align-items: center; gap: var(--d-s2); font-family: var(--d-font-mono); font-size: 12px; }
+  .opt .dice { color: var(--d-gold); }
+  .opt .more { margin-left: auto; color: var(--d-dim); font-size: 11px; white-space: nowrap; }
+  .opt.locked { opacity: .55; }
+  .opt.locked .reason { font-family: var(--d-font-mono); font-size: 11px; color: var(--d-ember); }
+
+  /* ── Reactions band — new. Nothing in the app lists reactions today. ─────
+     Compact by design: two lines each. The long form is one tap away, same as
+     any turn option. Sits BELOW the turn list because it answers a question
+     asked on somebody else's turn — and the deck's Reaction chip reaches it
+     without scrolling at all (see 03c). */
+  .react-body { padding: var(--d-s2) var(--d-s3) var(--d-s3); display: flex; flex-direction: column; gap: var(--d-s2); }
+  .react { border: 1px solid var(--d-rule); border-radius: var(--d-radius); background: var(--d-e2); padding: var(--d-s2) var(--d-s3); }
+  .react .top { display: flex; align-items: baseline; gap: var(--d-s2); }
+  .react .nm { color: var(--d-cream); font-weight: 600; font-size: 14px; }
+  .react .cost { margin-left: auto; font-family: var(--d-font-mono); font-size: 11.5px; color: var(--d-gold); white-space: nowrap; }
+  .react .when { display: block; margin-top: 4px; font-size: 12.5px; color: var(--d-tally); line-height: 1.35; }
+  .react .when b { color: var(--d-amber); font-weight: 600; }
+  .react .when i { color: var(--d-cream); font-style: normal; }
+  .react .flagline { display: flex; align-items: center; gap: 6px; margin-top: 5px; font-family: var(--d-font-mono); font-size: 11px; color: var(--d-ember); }
+
+  /* ── The deck (see 03 for its states) ───────────────────────────────────── */
+  .deck { border-top: 1px solid var(--d-rule-lit); background: var(--d-e1); padding: var(--d-s2) var(--d-s3); }
+  .deck .handle { display: flex; align-items: center; gap: var(--d-s2); min-height: 32px; }
+  .deck .handle .grip { width: 34px; height: 3px; border-radius: 2px; background: var(--d-rule-lit); }
+  .deck .handle .lbl { font-family: var(--d-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--d-dim); }
+  .deck .handle .min { margin-left: auto; color: var(--d-dim); font-size: 12px; font-family: var(--d-font-mono); }
+  .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--d-s2); margin-top: var(--d-s2); }
+  .chip {
+    min-height: var(--d-touch-goal); border-radius: var(--d-radius);
+    border: 1px solid var(--d-rule-lit); background: var(--d-e2);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    cursor: pointer;
+  }
+  .chip .k { font-family: var(--d-font-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--d-tally); }
+  .chip .s { font-size: 10px; color: var(--d-verdant); }
+  .chip.spent { background: var(--d-e1); }
+  .chip.spent .k { color: var(--d-dim); text-decoration: line-through; }
+  .chip.spent .s { color: var(--d-dim); }
+  .chip.react-live { border-color: rgba(212,167,74,.5); }
+  .chip.react-live .k { color: var(--d-amber); }
+  .slots { display: flex; align-items: center; gap: var(--d-s2); margin-top: var(--d-s2); }
+  .slots .lv { font-family: var(--d-font-mono); font-size: 11px; color: var(--d-dim); }
+  .pip { width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--d-gold); }
+  .pip.full { background: var(--d-gold); }
+  .tabbar { display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid var(--d-rule); background: var(--d-bg); }
+  .tabbar div { min-height: 52px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--d-dim); }
+  .tabbar div.on { color: var(--d-gold); }
+</style>
+
+<template id="surface">
+  <div class="scroll">
+
+    <!-- ══ VITALS BAND — always open, never scrolled past ══ -->
+    <div class="card">
+      <div class="vitals">
+        <div class="hp-row">
+          <span class="big">48</span><span class="of">/ 62</span>
+          <span class="label" style="margin-left:6px">HP</span>
+          <span class="temp">+11 temp</span>
+        </div>
+        <div class="bar"><i></i></div>
+        <div class="stats">
+          <div class="stat hero"><span class="v">15</span><span class="k">Save DC</span></div>
+          <div class="stat"><span class="v">19</span><span class="k">AC</span></div>
+          <div class="stat"><span class="v">+0</span><span class="k">Init</span></div>
+          <div class="stat"><span class="v">+3</span><span class="k">Prof</span></div>
+          <div class="stat"><span class="v">+7</span><span class="k">Sp Atk</span></div>
+        </div>
+        <div class="hp-btns">
+          <button>Damage</button><button>Heal</button><button>Temp HP</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CONDITIONS — now folded. 15 buttons, true twice a night. ══ -->
+    <div class="card">
+      <div class="sec-head clear">
+        <span class="label">Active Conditions</span>
+        <span class="count">none</span>
+        <span class="chev">▸</span>
+      </div>
+    </div>
+
+    <!-- ══ WHAT YOU CAN DO — one list, ranked, two lines, no prose, no ellipsis ══ -->
+    <div class="card">
+      <div class="sec-head">
+        <span class="label">Your Turn</span>
+        <span class="count">6 ready</span>
+        <span class="chev">▾</span>
+      </div>
+
+      <div class="opt">
+        <div class="l1"><span class="nm">Hearthbrand</span><span class="badge">Action</span><span class="price">×2 attacks</span></div>
+        <div class="l3"><span class="dice">+7 · 1d8+4 Slashing +1d4 Fire · Sap</span><span class="more">▸</span></div>
+      </div>
+
+      <div class="opt">
+        <div class="l1"><span class="nm">Divine Smite</span><span class="badge">Bonus</span><span class="price">1st slot · 4 left</span></div>
+        <div class="l3"><span class="dice">2d8 Radiant · +1d8 Fiend/Undead</span><span class="more">▸</span></div>
+      </div>
+
+      <div class="opt">
+        <div class="l1"><span class="nm">Faerie Fire</span><span class="badge">Action</span><span class="price">1st slot · conc.</span></div>
+        <div class="l3"><span class="dice">DC 15 DEX · 20-ft cube · 60 ft</span><span class="more">▸</span></div>
+      </div>
+
+      <div class="opt">
+        <div class="l1"><span class="nm">Scorching Ray</span><span class="badge">Action</span><span class="price">2nd slot · 3 left</span></div>
+        <div class="l3"><span class="dice">3 rays · 2d6 Fire each · 120 ft</span><span class="more">▸</span></div>
+      </div>
+
+      <div class="opt">
+        <div class="l1"><span class="nm">Lay on Hands</span><span class="badge">Bonus</span><span class="price">35 points</span></div>
+        <div class="l3"><span class="dice">1–35 HP · Touch</span><span class="more">▸</span></div>
+      </div>
+
+      <div class="opt locked">
+        <div class="l1"><span class="nm">Divine Sense</span><span class="badge">Bonus</span><span class="price">0 of 4</span></div>
+        <div class="l3"><span class="reason">No uses left until a long rest</span></div>
+      </div>
+    </div>
+
+    <!-- ══ REACTIONS — brand new. Nothing lists these today. ══ -->
+    <div class="card">
+      <div class="sec-head">
+        <span class="label" style="color:var(--d-amber)">Your Reactions</span>
+        <span class="count">3</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="react-body">
+
+        <div class="react">
+          <div class="top"><span class="nm">Hearthfire Cloak</span><span class="cost">1 CD · 2 left</span></div>
+          <span class="when"><b>WHEN</b> you or an ally within 30 ft takes damage → <i>11 temp HP; melee attackers take 1d10 Fire</i></span>
+          <div class="flagline">⚑ House ruling — printed text names no trigger. Tap ▸</div>
+        </div>
+
+        <div class="react">
+          <div class="top"><span class="nm">Opportunity Attack</span><span class="cost">free</span></div>
+          <span class="when"><b>WHEN</b> a creature you can see leaves your reach → <i>one Hearthbrand swing, +7, 1d8+4</i></span>
+        </div>
+
+        <div class="react">
+          <div class="top"><span class="nm">Warding Bond</span><span class="cost">already up</span></div>
+          <span class="when"><b>WHILE UP</b> Rysanna takes half, you take half → <i>Aura of Solace halves your share again if Fire, Cold or Psychic</i></span>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- ══ THE DECK — full state. Reaction chip now reads live. ══ -->
+  <div class="deck">
+    <div class="handle">
+      <span class="grip"></span><span class="lbl">Turn Deck</span><span class="min">minimise ▾</span>
+    </div>
+    <div class="chips">
+      <div class="chip"><span class="k">Action</span><span class="s">ready</span></div>
+      <div class="chip spent"><span class="k">Bonus</span><span class="s">spent</span></div>
+      <div class="chip react-live"><span class="k">Reaction</span><span class="s">3 avail</span></div>
+      <div class="chip"><span class="k">Move</span><span class="s">30 ft</span></div>
+    </div>
+    <div class="slots">
+      <span class="lv">1st</span>
+      <span class="pip full"></span><span class="pip full"></span><span class="pip full"></span><span class="pip"></span>
+      <span class="lv" style="margin-left:10px">2nd</span>
+      <span class="pip full"></span><span class="pip full"></span><span class="pip full"></span>
+      <span class="lv" style="margin-left:auto">CD</span>
+      <span class="pip full"></span><span class="pip full"></span>
+    </div>
+  </div>
+
+  <div class="tabbar"><div class="on">Combat</div><div>Grimoire</div><div>Roleplay</div></div>
+</template>
+
+<div class="frame">
+  <h2>01a — Play tab as the screen actually shows it · 390×844 · Nix, level 7</h2>
+  <div class="phone" data-surface></div>
+  <p class="note">
+    <b>What is above the fold, unscrolled:</b> every number a turn is made of, the conditions state,
+    and <span class="new">all six</span> things he can do — plus the deck and the tab bar, which are
+    pinned. Today the same 844px shows HP, fifteen condition buttons, and no options at all.<br><br>
+    <b>Measured, not asserted:</b> dropping prose from the row bought a whole option. With a written
+    summary line the sixth option fell below the fold; two lines per row fits the entire list in
+    662px of scroll viewport (844 − 130 deck − 52 tab bar).
+  </p>
+</div>
+
+<div class="frame">
+  <h2>01b — the same surface unrolled (what the scroll contains)</h2>
+  <div class="phone phone--auto" data-surface></div>
+
+  <p class="note">
+    <b>What moved.</b> The vitals card is one block at the top and holds all five numbers a turn is
+    made of. <span class="new">Save DC, initiative, proficiency and spell attack are new to this
+    surface</span> — initiative and proficiency are absent from <code>src/</code> entirely today.<br><br>
+    <b>Active Conditions is folded</b> and shows its own state in the header, so a folded section
+    still tells you it is clear. It springs open, with an ember edge, the moment a condition is on.<br><br>
+    <b>Every option is exactly two lines and neither is ever cut off:</b> name + economy + price,
+    then the mechanics — to-hit, dice, save, range, rider. <span class="new">No prose in the
+    row.</span> Both lines are assembled from canon <i>fields</i>, so there is no sentence to
+    truncate and nothing for a human to author. Measured: the canon's own summaries average 230
+    characters and 61 of 71 run past 140 — any prose line here would have had to be clamped
+    (today's <code>.slice(0,80) + '…'</code>) or hand-written for all 71 spells. The plain-English
+    "what does this do" moves to the detail sheet, one tap away, where it leads (02b).<br><br>
+    <b>The affordance is a chevron, not words.</b> "tap for full ▸" cost ~100px and made
+    Hearthbrand's mechanics line wrap to a third line at 390px — breaking the two-line promise on
+    the very first row. The whole row is the tap target; a chevron says so in 8px.<br><br>
+    <span class="new"><b>Your Reactions is a new band.</b></span> Every reaction states <b>WHEN</b>
+    before it states what it does, because "when may I use this" is the question. Hearthfire Cloak
+    carries its errata flag inline rather than in a footnote.<br><br>
+    <b>Reactions sit below the turn list on purpose</b> — you read them on somebody else's turn, and
+    the deck's Reaction chip opens them in place without scrolling at all (03c). Putting them above
+    the options pushed every option off the screen; I tried it, and it cost more than it bought.<br><br>
+    <b>The three competing menus collapse to one.</b> "Actions Reference" and the top "Action"
+    dropdown both disappear into this ranked list; the deck's chips remain the way to filter it.
+  </p>
+</div>
+
+<script>
+  const tpl = document.getElementById('surface')
+  document.querySelectorAll('[data-surface]').forEach((el) => el.append(tpl.content.cloneNode(true)))
+</script>

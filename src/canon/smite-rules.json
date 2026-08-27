@@ -1,0 +1,62 @@
+{
+  "divineSmiteIsASpell": "In 2024 Divine Smite is a level 1 Evocation spell, not a class feature you activate. This is the single biggest change to how a Paladin plays.",
+  "castingTimeAllSmites": "Bonus Action, taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike.",
+  "smiteSpells": [
+    "Divine Smite (1)",
+    "Searing Smite (1)",
+    "Thunderous Smite (1)",
+    "Wrathful Smite (1)",
+    "Shining Smite (2)",
+    "Blinding Smite (3)",
+    "Staggering Smite (4)",
+    "Banishing Smite (5)"
+  ],
+  "rulings": [
+    {
+      "q": "Can I Smite twice on one turn?",
+      "a": "No. Each Smite costs your one Bonus Action AND a spell slot, and 2024 allows only one slot expenditure per turn.",
+      "confidence": "Certain"
+    },
+    {
+      "q": "Can I stack two different Smite spells on one hit?",
+      "a": "No. All Smites share the same Bonus Action trigger and each costs a slot. Both limits independently forbid it. This differs from 2014, where pre-cast smite buffs could combine with the Divine Smite class feature.",
+      "confidence": "Certain"
+    },
+    {
+      "q": "Can I cast Bless and then Divine Smite in the same turn?",
+      "a": "No - both expend a spell slot. Unless the Divine Smite is your free Paladin's Smite cast for the day, in which case yes.",
+      "confidence": "High"
+    },
+    {
+      "q": "Do Smite dice double on a critical hit?",
+      "a": "Yes. The rule is 'roll all of the attack's damage dice twice'. Smite dice are part of that attack's damage. A crit with a level 2 Divine Smite is 6d8 of Smite damage plus doubled weapon dice.",
+      "confidence": "Certain"
+    },
+    {
+      "q": "Can I Smite on an Opportunity Attack?",
+      "a": "DISPUTED - ask your DM. The Bonus Action definition says it is 'a special action that you can take on the same turn that you take an action', which points to Bonus Actions being available only on your own turn. There is no explicit official ruling. Recommend a configurable toggle, defaulting to NO.",
+      "confidence": "Unresolved"
+    },
+    {
+      "q": "Can I Smite with an Unarmed Strike?",
+      "a": "Yes, explicitly named in the casting time.",
+      "confidence": "Certain"
+    },
+    {
+      "q": "Can I Smite with a bow or crossbow?",
+      "a": "No. The trigger names only Melee weapons and Unarmed Strikes.",
+      "confidence": "Certain"
+    },
+    {
+      "q": "Can I Smite with a thrown melee weapon (javelin, handaxe) at range?",
+      "a": "DISPUTED. Turns on whether 'Melee weapon' means the weapon's category (which persists when thrown) or the type of attack made. No official tie-breaker. Recommend a configurable toggle, defaulting to YES (category-based), and confirm with the DM.",
+      "confidence": "Unresolved"
+    },
+    {
+      "q": "When do I decide to Smite?",
+      "a": "AFTER the attack hits. The casting time is 'immediately after hitting'. You never pre-commit a slot to a swing that might miss - this is Divine Smite's core efficiency advantage.",
+      "confidence": "Certain"
+    }
+  ],
+  "attackOrderDoctrine": "With Extra Attack, take your first attack. If it critically hits, Smite immediately. If it only hits, hold and take the second attack; if that crits, Smite that one instead. You get only one Smite per turn regardless, so let the dice choose which hit carries it."
+}
