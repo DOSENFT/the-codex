@@ -211,3 +211,16 @@ export type ErratumReading = 'recommended' | 'narrower' | 'asWritten'
 /** Where a rendered option's text came from. The open-world rule in one field:
  *  'sheet' is not a failure, it is homebrew keeping its own words. */
 export type Provenance = 'canon' | 'sheet'
+
+/** One of canon's fifteen validation rules, VAL-01..VAL-15. Slice 10a.
+ *
+ *  `severity` is canon's own grading, and the suite ASSERTS it rather than
+ *  restating it — so a rule canon later promotes from `info` to `error` turns
+ *  a test red instead of silently changing what the app owes. Three values,
+ *  spelled as a union, so a typo in a future canon package fails `tsc` rather
+ *  than matching nothing at runtime. */
+export interface CanonValidationRule {
+  id: string
+  rule: string
+  severity: 'error' | 'warning' | 'info'
+}

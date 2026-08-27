@@ -162,6 +162,47 @@ the decision deferred from Gate 3 least-confident #1: move the combat write path
 `CombatProvider`, or ship Phase 1 read-only. Deciding it here, with nine slices of evidence,
 is cheaper than guessing it now.
 
+**SPLIT 2026-08-27 into 10a and 10b**, on the slice-8/8b precedent and for the same reason:
+the measurement came back bigger than the estimate. `_probe-val.mjs` graded all fifteen rules
+against the real functions before a line of suite was written, and found **four the app
+violates** and **five it cannot express at all**. Nine rules with something to say is a full
+reviewable diff on its own; bolting the write path onto it would produce exactly the diff the
+binding process rule exists to prevent.
+
+**10a — The rules answer.** The suite, and nothing else. Three states, never a weakened
+assertion:
+
+- `it(…)` — the app obeys. The assertion is canon's rule, green.
+- `it.fails(…)` — the app **violates**. The body asserts canon's rule *written straight*;
+  `it.fails` records that it does not hold today and goes **RED the day someone fixes the
+  app**, at which point they flip it to `it`. This is not weakening a test — a skipped test
+  is silence, and this is a pin that shouts when the bug dies. A `describe.skip` around a
+  violation would have been the weakening; this is its opposite.
+- `it.skip('VAL-XX — NOT MECHANISABLE: <reason>')` — **the id and the reason are in the test
+  name**, so `npm test` prints the gap on every run. Each skip is paired with a **gap pin**: a
+  live `it()` asserting the *absence itself* (the field does not exist, no row composes), so
+  the day the app grows the missing shape, the pin goes red and someone must revisit the skip.
+  A gap with no pin is a gap that stays.
+
+Ids are read from `CANON_CHAR.validationRules`, never hand-typed — the `OATH_ERRATA_IDS`
+lesson from 8b. A meta-test asserts the ledger covers all fifteen and that every severity
+matches canon's, so canon growing a `VAL-16` turns the suite red instead of quietly ignoring it.
+
+*What the probe measured, which is what the suite pins:*
+
+| | rules | why |
+|---|---|---|
+| **ENFORCED** (4) | VAL-02, VAL-05, VAL-11, VAL-14 | `it()`, green |
+| **VIOLATED** (4) | VAL-01, VAL-06, VAL-13, VAL-15 | `it.fails()`, pinned |
+| **PARTIAL** (2) | VAL-04, VAL-12 | the mechanisable half asserted, the rest skipped |
+| **NOT MECHANISABLE** (5) | VAL-03, VAL-07, VAL-08, VAL-09, VAL-10 | `it.skip` + a gap pin |
+
+**10b — The write path.** Gate 3 least-confident #1: move the combat write path into
+`CombatProvider`, or ship Phase 1 read-only. Carries **finding AR** (two unconditional
+localStorage writes on Play-tab mount) and the two errata deferred out of 8b for exactly this
+reason — HEARTH-04's mandatory warning and HEARTH-05's damage tally, both of which need a
+write path and would otherwise be built twice.
+
 ---
 
 ## What is deliberately NOT in Phase 1

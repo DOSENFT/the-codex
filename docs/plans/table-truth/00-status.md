@@ -20,7 +20,8 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 9 — retire the competing menus (capabilities pinned as tests FIRST) — **DONE 2026-08-27**, prover PASS; `ActionMenu`, two-thirds of "Actions Reference" and slice 1's diagnostic strip retired, Basic Actions **kept** on evidence (finding AM), the eight `turn.mutex` options given their first row ever, and **6 of 14 reachable → 14 of 14**. The deck-chip clause was **withdrawn on evidence** (see §Slice 9) — one open question for Marcus.
 - [x] 8 — errata flags, all 12, three readings, DM wording — **DONE 2026-08-27**, prover PASS on six cases; all six live faults compared **character-for-character** against canon on disk, the ruling survives a real reload, and both surfaces report it. The prover caught three defects of its own (finding AX), my own re-scope claim was **wrong and a corpus test caught it** (finding AS), and the routing gap turned out to be **four of six, not two** (finding AT) — which is the reason the band exists (see §Slice 8 below)
 - [x] 8b — the ruling reaches the point of use — **DONE 2026-08-27**, prover PASS on six cases. Marcus delegated the design call, and the answer is a law the tests now enforce both ways: **a ruling changes what the app SAYS, never what it COMPUTES** — measured as **125 numeric tokens before, 125 after, 0 drifted**. Narrowed from four errata to one on evidence (the other three are slice 10's write path, Prep-tab work, or reach no option at all). The prover caught a defect **older than this phase**: `<span>WHEN</span>you take damage` — a margin is not a space, and the unit stripper had been *inserting* the separator the DOM lacked (finding AY, the inverse of finding Q). Measuring HEARTH-08 before deferring it found the app's prepared-spell bug is **larger than canon's erratum** (finding AZ — the thing most worth a steer)
-- [ ] 10 — canon VAL-01..15 as a suite + decide the combat write path — now also owns the two unconditional mount writes (finding AR)
+- [x] 10a — canon VAL-01..15 as a named suite — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files** (was 797/34). Every one of canon's fifteen rules was graded against the **real exported functions** by `_probe-val.mjs` before a line of suite existed, and the grade is the finding: the app **obeys 4**, **violates 4**, obeys **half of 2**, and **cannot express 5**. Violations are pinned with `it.fails` asserting canon's rule *written straight* — they go RED the day the app is fixed, so a fix cannot pass unnoticed and a bug cannot come back. All 7 skips print **their id and their reason** on every `npm test`, each paired with a live gap pin. The probe itself was the slice's most dangerous artifact and produced **finding BA** (below): reading `.ranked` turned a violation into a pass, twice, in opposite directions. **VAL-01 is finding AZ**, now under canon's own `error` severity; **VAL-11 is what 8b shipped**
+- [ ] 10b — the combat write path: `CombatProvider` or ship Phase 1 read-only — carries finding AR (two unconditional mount writes) and the two errata deferred out of 8b (HEARTH-04, HEARTH-05)
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
 
@@ -1341,6 +1342,181 @@ is exactly why the wrong number survived this long with nothing going red.
 every Play-tab load — confirmed again in this prover's load log
 (`codex-action-notes-nix-fixture, codex-combat-nix-fixture`, twice: once per load, once per reload).
 8b writes on a **tap** only. Slice 10 owns the fix.
+
+## Slice 10a — closed 2026-08-27. Canon grades the app, and the app does not grade well.
+
+Canon ships fifteen rules — `VAL-01`..`VAL-15` — that say what a correct Nix-shaped app must
+never let happen. Slice 10a is those fifteen rules pointed back at the code. It is the first
+suite in the repo whose assertions were **written by someone other than us**, which is the whole
+reason it was worth building: our own tests can only catch us failing at what we already thought
+of.
+
+**Nothing on the glass changed, and that is the honest report.** 10a adds no UI, so there are no
+before/after screenshots to show — the two files it touches outside the test are a type and an
+export. The proof of this slice is the grade, below, and the mutation runs that show the grade is
+real. The build was run anyway (`✓ built in 8.96s`) to prove the typed export did not break the
+app it was added for.
+
+### The grade, measured before a line of suite was written
+
+`docs/plans/table-truth/_probe-val.mjs` called the **real exported functions** — `composeTurn`,
+`reduce`, `toggleSpellPrepared`, `setTempHP`, `demandOfSpell`, `critNotation`, `effectOf`,
+`blockedSlots` — and graded all fifteen. Kept in the repo on the slice-7 precedent: the probe that
+produced a number is part of the evidence for that number.
+
+| verdict | rules | what it means at Marcus's table |
+|---|---|---|
+| **ENFORCED** (4) | VAL-02, VAL-05, VAL-11, VAL-14 | the app already stops it |
+| **VIOLATED** (4) | VAL-01, VAL-06, VAL-13, VAL-15 | the app lets it happen today |
+| **PARTIAL** (2) | VAL-04, VAL-12 | the rule's mechanisable half holds; the rest cannot be expressed |
+| **NOT MECHANISABLE** (5) | VAL-03, VAL-07, VAL-08, VAL-09, VAL-10 | a field the rule needs does not exist anywhere in the model |
+
+The four violations, in plain terms:
+
+- **VAL-01** (canon: `error`) — Nix can un-prepare **Warding Bond**, a spell his oath *gives* him,
+  and the app believes him. Worse: he is being **charged 3 of his 8 prepared slots** for spells
+  canon marks `alwaysPrepared: false`-to-the-limit — Divine Smite, Warding Bond, Fireball. **This
+  is finding AZ**, and slice 10a is where it stops being an observation and becomes a pinned
+  failing test under canon's own `error` grading.
+- **VAL-06** (`warning`) — 11 temp HP from the Hearthfire cloak, then any 5 temp HP source, and
+  `setTempHP` returns **5**. The larger pool is discarded silently. Canon asks for a prompt; there
+  is not even a field recording that the cloak was the source, so the prompt could not name it.
+- **VAL-13** (`error`) — on a fresh turn with **nothing attacked**, Divine Smite is offered,
+  `available: true`, unblocked. Canon's words are *"Never offer it before an attack roll
+  resolves."* This is the one most likely to cost Marcus a real slot: the row is right there, and
+  taking it spends a 1st-level slot on damage that cannot legally be dealt. No field anywhere in
+  `CombatState` records an attack or its outcome — **the guard cannot be written until 10b builds
+  the write path.**
+- **VAL-15** (`info`) — `demandOfSpell` never reads `ritual`, so any levelled ritual is priced at a
+  slot. Nix carries none of canon's four rituals today, which is the only reason nothing has gone
+  wrong — and exactly why it is pinned rather than left to be found the week he learns Detect Magic.
+
+### The three states, and why none of them is a weakened test
+
+The standing rule is *never comment out, skip, or weaken a test to get to green*. A suite that
+found four violations had to obey it while still going green, and the answer is that a violation
+gets a **louder** test, not a quieter one:
+
+- `it(…)` — the app obeys. The assertion **is** canon's rule.
+- `it.fails(…)` — the app violates. **The body asserts canon's rule written straight** — no
+  softening, no inverted expectation, no "for now". `it.fails` records that it does not hold
+  *today*, and the suite goes **RED the day someone fixes the app**, at which point the fixer flips
+  it to `it` and the bug can never silently return. A `describe.skip` around a known violation
+  would have been the weakening; this is its opposite.
+- `it.skip('VAL-XX — NOT MECHANISABLE: <reason>')` — **the id and the reason are in the test name**,
+  so `npm test` prints all seven gaps on every run. Verified, not assumed:
+
+  ```
+  ↓ VAL-03 — NOT MECHANISABLE: nothing in the app or canon marks a casting as free
+  ↓ VAL-04 — PARTIAL, NOT MECHANISABLE: three named competitors are not on the sheet
+  ↓ VAL-07 — NOT MECHANISABLE: proficiencies are a flat string list with no source
+  ↓ VAL-08 — NOT MECHANISABLE: app components are a display string; inventory has no GP
+  ↓ VAL-09 — NOT MECHANISABLE: no field distinguishes carried from worn
+  ↓ VAL-10 — NOT MECHANISABLE: passive features compose no turn option to gate
+  ↓ VAL-12 — PARTIAL, NOT MECHANISABLE: the auras themselves compose no row to switch off
+  ```
+
+  Every skip is paired with a live **gap pin** — an `it()` asserting the *absence itself* (the field
+  does not exist; no row composes) — so the day the app grows the missing shape, the pin goes red
+  and somebody must come back here. A gap with no pin is a gap that stays.
+
+### Mutation-tested, in both directions, because green is not evidence
+
+This suite went green on its **first run**, which is when a test file deserves the least trust.
+Both kinds of green were attacked:
+
+**A green `it.fails` proves nothing on its own** — it passes when the body *throws*, and a typo
+throws too. All five were flipped to `it` and each failed on its **assertion**, with the measured
+value:
+
+| pin | failure |
+|---|---|
+| VAL-01 toggle | `expected false to be true` |
+| VAL-01 prepared limit | `expected [ …(3) ] to deeply equal []` |
+| VAL-06 temp HP | `expected 5 to be 11` |
+| VAL-13 smite offered | `expected { id: 'spell-divine-smite', …(10) } to be undefined` |
+| VAL-15 ritual | `expected true to be false` |
+
+**A green `it()` can be vacuous**, so four mutants were introduced into the app and all four were
+caught:
+
+| mutant | caught by |
+|---|---|
+| `spellSlotSpentThisTurn` always returns false | VAL-02 |
+| `Incapacitated.blocks` emptied | VAL-12 |
+| `critNotation` doubles the flat modifier too | VAL-14 |
+| the concentration warning stops naming the spell | VAL-05 |
+
+The last one matters most: it broke only the **"and name what is being dropped"** half of VAL-05 —
+the half a laxer assertion would have missed — and the suite caught it with
+`expected 'Would drop your concentration' to contain 'Shield of Faith'`.
+
+### Finding BA — `ComposedTurn.ranked` is not the option list, and reading it lies in both directions
+
+The probe's first run reported **4 options** where slice 9 had recorded 14. That was not an app
+regression and it was very nearly recorded as one. `ranked` **deliberately excludes everything
+filed into a `mutex` group** (`types.ts`), and every one of Nix's bonus actions is in one. The full
+set is `ranked + rest + mutex.flatMap(g => g.faces)` — 4 + 3 + 7 = 14.
+
+What makes this finding worth a letter is that the same bug bit **three times in one file, in both
+directions**:
+
+1. At VAL-13 it **hid a violation** — Divine Smite lives in the bonus-action mutex group, so it read
+   as "not offered" and graded a violated rule as obeyed. *A probe that converts a violation into a
+   pass is worse than no probe.*
+2. At VAL-05 it **invented a violation** — Shield of Faith is likewise in a mutex group, so the
+   concentration warning read as absent and would have graded an obeyed rule as violated.
+3. At VAL-10 and VAL-12 it was still present when those two verdicts were still open — the two
+   verdicts the slice had *not yet decided*. Fixing it there is what produced the real answers below.
+
+`turn/reactions.ts:75` had already solved this and `openworld.test.ts:46` warns about it in as many
+words; neither was reached by someone writing a fresh probe. The suite now carries `allOptions()`
+with the reasoning in its docstring, and a standing rule: **nothing in `validation.test.ts` may read
+`.ranked` directly.**
+
+### The two verdicts that changed once the trap was removed — and both are finding AT again
+
+**VAL-10 looked obeyed and was not.** At level 15, Smoldering Smite composes no option — which reads
+exactly like the level gate doing its job. It is not. It composes no option at **any** level,
+because it is `actionType: 'passive'` and **passives reach no row at all**. Measured: raising Nix to
+15 changes the option count **not at all** — 14 before, 14 after, *arrivals: NONE*. So there is
+nothing for a DM ruling to gate, and the rule is vacuously satisfied rather than enforced. That
+equality is now the gap pin, and it goes red the day passives start composing.
+
+**VAL-12's control case was the whole verdict.** Asking only *"are the auras inactive while
+Incapacitated?"* returns "no aura rows" — green, and meaningless, because a suite that only checked
+the Incapacitated case would pass against an app that models **no auras at all**. The control was
+measured alongside: with **no conditions**, there are also no aura rows, while Aura of Protection
+(L6) and Aura of Solace (L7) are both on the sheet and both below Nix's level. So this is **finding
+AT's routing gap**, not a VAL-12 violation.
+
+The mechanisable half of VAL-12 is genuinely good, and is asserted: all 14 options go
+`available: false` under Incapacitated, and **every one carries a reason in words** —
+`"You are Incapacitated"`. A greyed row with no explanation is, at a table, indistinguishable from a
+bug.
+
+### The ledger is read from canon, never typed here
+
+The `OATH_ERRATA_IDS` lesson from 8b, applied: `src/canon/index.ts` gained a typed
+`VALIDATION_RULES` export (and `CanonValidationRule` in `lib/canon/types.ts`) so the suite reads
+canon's list rather than a hand-typed array. Four meta-tests close it both ways — every id canon
+ships is accounted for, no id is accounted for that canon no longer ships, **every severity is
+asserted rather than restated**, and every rule carries readable text. A `VAL-16`, a deleted rule,
+or a rule canon promotes from `info` to `error` all turn this suite red the same day.
+
+### Files
+
+- `src/lib/canon/validation.test.ts` — **new**, the suite. 39 tests: 32 pass, 7 skip.
+- `src/canon/index.ts` — `VALIDATION_RULES`, typed.
+- `src/lib/canon/types.ts` — `CanonValidationRule`.
+- `docs/plans/table-truth/_probe-val.mjs` — **new**, the measurement probe, kept as evidence.
+- `docs/plans/table-truth/04-slices.md` — the 10a/10b split recorded with its reason.
+
+### What 10b inherits
+
+Three of the four violations are not fixable without it. VAL-13 needs state that records an attack
+resolved; VAL-06 needs a temp-HP source; and finding AR's two unconditional mount writes are the
+same file. Plus HEARTH-04 and HEARTH-05, deferred out of 8b for precisely this reason.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

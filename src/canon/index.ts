@@ -27,6 +27,7 @@ import type {
   CanonFeature,
   CanonClassFeatureDetail,
   CanonChannelDivinityOption,
+  CanonValidationRule,
 } from '../lib/canon/types'
 
 /* The casts are the seam between "untyped JSON on disk" and "typed corpus in
@@ -129,6 +130,16 @@ export const BACKGROUNDS = backgroundsRaw as unknown
  * canon does not know Marcus's real scores, and its spellSaveDC is the STRING
  * "8 + 3 + Charisma modifier", so save DC always comes from the character. */
 export const CHARACTER_MARCUS = characterMarcusRaw as Record<string, unknown>
+
+/** Canon's fifteen validation rules — the job the record above was kept for.
+ *
+ *  Exported as its own typed constant in slice 10a so the suite reads the LIST
+ *  rather than a hand-typed array of ids. That is the `OATH_ERRATA_IDS` lesson
+ *  from 8b in one line: a ledger typed by hand covers what the author
+ *  remembered, and a ledger read from canon covers what canon actually ships.
+ *  If canon grows a VAL-16, the coverage meta-test goes red the same day. */
+export const VALIDATION_RULES = (CHARACTER_MARCUS.validationRules ??
+  []) as readonly CanonValidationRule[]
 
 /** Build provenance, surfaced in the slice-1 match report. */
 export const CANON_BUILD = '2026-08-26'
