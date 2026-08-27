@@ -1,0 +1,164 @@
+{
+  "target": "Sacred Flame",
+  "before": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": null,
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference"
+    ],
+    "dialogsOnScreen": [],
+    "spendLabel": null,
+    "refusal": null,
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "opened": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": "Sacred Flame",
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference",
+      "Sacred Flame"
+    ],
+    "dialogsOnScreen": [
+      "Sacred Flame"
+    ],
+    "spendLabel": "SpendAction · no slot",
+    "refusal": null,
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "spent": {
+    "ready": 1,
+    "rows": [
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "used",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": null,
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference"
+    ],
+    "dialogsOnScreen": [],
+    "spendLabel": null,
+    "refusal": null,
+    "stored": {
+      "action": true,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "reloaded": {
+    "ready": 1,
+    "rows": [
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "used",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": null,
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference"
+    ],
+    "dialogsOnScreen": [],
+    "spendLabel": null,
+    "refusal": null,
+    "stored": {
+      "action": true,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "results": [
+    {
+      "name": "A · nothing is spent, and all three witnesses say so",
+      "pass": true,
+      "detail": "4 ready · deck Action=available · stored action=false"
+    },
+    {
+      "name": "B · the sheet opened on the option that was tapped",
+      "pass": true,
+      "detail": "dialog aria-label=\"Sacred Flame\", tapped \"Sacred Flame\""
+    },
+    {
+      "name": "B · exactly one dialog is on the glass — and see finding BC for the rest",
+      "pass": true,
+      "detail": "on screen: Sacred Flame · in the DOM: Dice Roller, Mechanics Reference, Sacred Flame — the extras are DiceRoller and MechanicsDrawer, mounted always, aria-modal=\"true\" always, parked off the bottom edge"
+    },
+    {
+      "name": "B · it offers a Spend, and names the cost  <-- THIS IS THE SLICE",
+      "pass": true,
+      "detail": "button reads \"SpendAction · no slot\""
+    },
+    {
+      "name": "C · the sheet closed — the option has been taken, not merely read",
+      "pass": true,
+      "detail": "dialog gone"
+    },
+    {
+      "name": "C · the deck went dark and the disk agrees",
+      "pass": true,
+      "detail": "deck Action=used · stored action=true"
+    },
+    {
+      "name": "C · the list re-ranked off the same spend — one model, still",
+      "pass": true,
+      "detail": "4 → 1 ready; dropped: Hearthbrand | Javelin | Sacred Flame"
+    },
+    {
+      "name": "D · the spend survived the reload and the reload taught the list nothing",
+      "pass": true,
+      "detail": "4 on arrival → 1 after the Spend → 1 after a reload. The reload is a no-op, which is 10b's guarantee holding through a write path 10b did not have."
+    },
+    {
+      "name": "E · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

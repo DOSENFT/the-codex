@@ -231,7 +231,86 @@ case E records `Storage.prototype.setItem` and counts **0 writes on load** (pre-
 **Deferred out of 10b, deliberately.** HEARTH-04's mandatory warning, HEARTH-05's damage tally,
 and wiring the ranked rows to `take()` are all *new spend paths*. 10b removes a divergence and
 adds no way to spend, so the fix is provable by the numbers above and nothing else. Those three
-are **slice 10c**.
+were assigned to **slice 10c**; 10c shipped the first and **split the other two into 10d** —
+see below, and note that the split is a decision, not an omission.
+
+**10c — The rows become takeable. DONE 2026-08-27.** 10b gave the Play tab one honest model of
+the turn. 10c gives it a way to *change* that model through the rules, which until this slice it
+did not have anywhere Marcus could reach.
+
+**What was actually wrong is smaller and worse than "a button is missing".** `CombatApi.take` —
+the rules-checked spend, which refuses an illegal one and can put it back — was written in slice
+5, tested since, and reachable **only** from `TurnScreenD` behind the `D_PREVIEW` flag. On the
+real Play tab it was dead code. `OptionDetailBody` already had an `onSpend` prop and already
+rendered a Spend button gated on `detail.spend && onSpend` — and **both halves of that gate were
+shut**: `OptionDetailSheetLive` never passed `onSpend`, and `spendFor` returned null unless the
+option burned a slot or a pool. So at a table Marcus read the option on the sheet and then went
+and darkened the deck chip by hand, through `updateCombat`, which applies no rules at all.
+
+Three changes, in weight order:
+
+1. **`spendFor` widened.** It returned a label only for a slot or a pool, on the reading that an
+   Action is not "spent". At a table the Action is the scarcest thing you own and the entire deck
+   exists to track it. Under the old rule Sacred Flame and Javelin — two of the four rows Nix sees
+   on a fresh turn — got no Spend button, so the one path built to take an option could not take
+   most options. It now returns `cost.label` for any **available** option, and null for an
+   unavailable one: the row already carries `blockedReason`, and a Spend control that cannot spend
+   is a lie. The label is `cost.label` because that string is always populated by whoever declared
+   the option, so a homebrew cost the engine cannot parse still names itself on the button.
+2. **`CombatApi.take` returns a boolean.** The smallest load-bearing part of the slice. The sheet
+   has to close on a spend and stay open on a refusal, and the only other way to know which
+   happened is to watch `refusal` change on a later render — which cannot tell "refused now" from
+   "was already refused", nor a refusal from a spend that legitimately changed nothing. The
+   reducer already knows, synchronously; `dispatch` just stops throwing the answer away. Every
+   pre-10c caller ignores the value and still may.
+3. **The refusal is painted under the button that produced it**, in band ③, `role="alert"` so it
+   is announced rather than merely drawn — the button does not visibly change on a refusal, and a
+   screen that looks identical after a press is the exact failure the sentence prevents. The
+   refusal is read from the **provider**, not a local `useState`: a second model of one fact is
+   finding BB, one slice old. Safe here because this component is the tab's sole caller of `take`,
+   and `close` clears it, so a refusal can never outlive the sheet that produced it.
+
+**The refusal band is a guard, not a workflow — and that is stated rather than papered over.**
+Because `spendFor` gates on availability, a refusal is *not reachable by tapping*, which
+`detail.test.ts` now pins by running the real reducer over every option the real composer offers,
+across three sessions (out of combat, in combat with nothing spent, in combat with the Action
+already gone) and asserting the affordance and the reducer never disagree. So the band is proved
+by render test, not by the browser prover. A prover that faked one would be grading itself.
+
+**Finding BC, established here and not fixed here.** The prover's first run reported "no Spend
+button" on a sheet that had one, because `querySelector('[role="dialog"]')` returned the *Dice
+Roller*. `DiceRoller` and `MechanicsDrawer` are hand-rolled overlays — they do not use `Sheet`,
+which unmounts when closed — so they sit in the DOM permanently, each declaring `role="dialog"
+aria-modal="true"`, parked at `y=844` on an 844-tall viewport with `pointer-events: none`.
+`checkVisibility({checkOpacity:true, checkVisibilityCSS:true})` returns **TRUE** for both: only a
+transform keeps them off the glass. To a screen reader this app has two open modal dialogs at all
+times. Pre-existing, older than this phase, and out of 10c's scope; the prover works around it by
+deciding which dialog is open **geometrically** (top edge above the fold), which is the
+finding-Q standard set in slice 4.
+
+*Measured in Chrome, `prove-slice10c.mjs`, 9/9 — and the prover was proved first by running it
+against the stashed source, where it went **5/9**, red on exactly the four spend claims and
+nothing else:*
+
+| | |
+|---|---|
+| A · arrival | 4 ready — Hearthbrand, Javelin, Sacred Flame, Hearthfire Manifest; deck and disk both say nothing spent |
+| B · tap Sacred Flame | the sheet opens on the tapped option, one dialog on the glass, **and it offers a Spend reading `Action · no slot`** ← the slice |
+| C · press it | sheet closed · deck Action=used · disk `action:true` · list re-ranked 4 → 1 |
+| D · reload | 1 — the reload is a no-op, 10b's guarantee holding through a write path 10b did not have |
+| E | clean console |
+
+**10d — HEARTH-04's mandatory warning and HEARTH-05's damage tally.** *(split out of 10c
+2026-08-27, on the 8→8b and 10→10a/10b precedent, and for the same reason: 10c came back bigger
+than the estimate once `take` turned out to be unreachable rather than merely unwired.)* Both need
+the write path 10c has now built, and both are **arithmetic on a spend**, not an affordance —
+which is a different kind of risk and belongs in its own reviewable diff.
+
+- **HEARTH-04** — the mandatory replacement warning: *"Accepting these Temporary Hit Points will
+  replace your Hearthfire cloak pool and end the cloak. Continue?"* This is the same underlying
+  gap as **VAL-06**, pinned `it.fails` in 10a, where `setTempHP(11 → 5)` yields 5. Canon requires
+  the warning; the app currently overwrites silently.
+- **HEARTH-05** — display total retaliation damage per encounter.
 
 ---
 

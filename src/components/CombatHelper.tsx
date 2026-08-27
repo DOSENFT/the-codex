@@ -879,7 +879,21 @@ function ErrataBandLive({
  * makes the one-slot-per-turn box live rather than a general note: the box says
  * "you have already spent your slot" only when this turn's economy says so.
  * Reading a different source here than the row read would let the sheet and the
- * row that opened it disagree about the same turn. */
+ * row that opened it disagree about the same turn.
+ *
+ * IT IS ALSO THE ONLY PLACE ON THE PLAY TAB THAT SPENDS THROUGH THE RULES —
+ * slice 10c. Until this slice `CombatApi.take` was finished, tested, and
+ * reachable only from `TurnScreenD` behind the `D_PREVIEW` flag, so at a real
+ * table Marcus read the option here and then went and darkened the deck chip by
+ * hand. Every other writer on this tab goes through `updateCombat`, which is
+ * the manual override and applies no rules at all; `take` routes through
+ * `reduce`, which refuses an illegal spend and can put it back.
+ *
+ * WHY THE REFUSAL IS THE PROVIDER'S AND NOT A `useState` HERE. That would be a
+ * second model of one fact, which is exactly finding BB, one slice old. It is
+ * safe to read the shared one because on this tab nothing else dispatches —
+ * this component is the sole caller of `take` — and `close` clears it, so a
+ * refusal can never outlive the sheet that produced it. */
 function OptionDetailSheetLive({
   option,
   character,
@@ -895,14 +909,32 @@ function OptionDetailSheetLive({
    *  there is the ruling this sheet reports. */
   rulings: ErratumRulings
 }) {
-  const { turn } = useCombat()
+  const { turn, take, refusal, dismissRefusal } = useCombat()
+
+  /* Clearing on close is what keeps one shared refusal honest: whichever way
+     the sheet goes away — the ✕, the backdrop, Escape — the next option opens
+     with nothing carried over from the last one. */
+  const close = () => {
+    dismissRefusal()
+    onClose()
+  }
+
   if (!option) return null
+
   return (
     <OptionDetailSheet
       isOpen
       detail={optionDetail(option, character, turn.economy)}
-      onClose={onClose}
+      onClose={close}
       onRoll={onRollDice}
+      /* CLOSES ON A SPEND, STAYS OPEN ON A REFUSAL. On success the option in
+         hand has become a description of something already done, and leaving it
+         up invites a second tap on a slot that is gone; on refusal the reason
+         has to land on the surface the tap happened on, or it lands nowhere. */
+      onSpend={() => {
+        if (take(option)) close()
+      }}
+      refusal={refusal}
       rulings={rulings}
     />
   )

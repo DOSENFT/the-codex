@@ -22,7 +22,8 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 8b — the ruling reaches the point of use — **DONE 2026-08-27**, prover PASS on six cases. Marcus delegated the design call, and the answer is a law the tests now enforce both ways: **a ruling changes what the app SAYS, never what it COMPUTES** — measured as **125 numeric tokens before, 125 after, 0 drifted**. Narrowed from four errata to one on evidence (the other three are slice 10's write path, Prep-tab work, or reach no option at all). The prover caught a defect **older than this phase**: `<span>WHEN</span>you take damage` — a margin is not a space, and the unit stripper had been *inserting* the separator the DOM lacked (finding AY, the inverse of finding Q). Measuring HEARTH-08 before deferring it found the app's prepared-spell bug is **larger than canon's erratum** (finding AZ — the thing most worth a steer)
 - [x] 10a — canon VAL-01..15 as a named suite — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files** (was 797/34). Every one of canon's fifteen rules was graded against the **real exported functions** by `_probe-val.mjs` before a line of suite existed, and the grade is the finding: the app **obeys 4**, **violates 4**, obeys **half of 2**, and **cannot express 5**. Violations are pinned with `it.fails` asserting canon's rule *written straight* — they go RED the day the app is fixed, so a fix cannot pass unnoticed and a bug cannot come back. All 7 skips print **their id and their reason** on every `npm test`, each paired with a live gap pin. The probe itself was the slice's most dangerous artifact and produced **finding BA** (below): reading `.ranked` turned a violation into a pass, twice, in opposite directions. **VAL-01 is finding AZ**, now under canon's own `error` severity; **VAL-11 is what 8b shipped**
 - [x] 10b — the combat write path — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files**, build ✓, `prove-slice10b.mjs` **7/7 in Chrome**. Gate 3's oldest open question is answered *with a measurement*: read-only was **not** a safe resting place, because the read-only mount was already showing Marcus options he had paid for. Two components held two models of one turn — **finding BB** — and the list read `4 → 4 (spend, no change) → 1 (reload)`. Fixed by **deleting** the second model: `CombatHelperInner`'s private `useState<CombatState>` and its saving `useEffect` are gone and its eleven writers now go through `CombatProvider.updateCombat` / `forgetCombat`. Post-fix **4 → 1 → 1**, reload a no-op. **Finding AR is closed, both halves** — `setItem` recorded across a cold load: **0 writes**, where the old build named `codex-combat-*` *and* `codex-action-notes-*`. The prover was run against the stashed pre-change build and went **red on exactly those three claims**, so it is a test that can fail
-- [ ] 10c — the new spend paths, deferred out of 10b on purpose: wire the ranked rows to `take()`, HEARTH-04's mandatory warning, HEARTH-05's damage tally
+- [x] 10c — the ranked rows become takeable — **DONE 2026-08-27**, gate green: tsc clean, **841 passed + 7 skipped across 35 files** (was 829/35), build ✓, `prove-slice10c.mjs` **9/9 in Chrome**. The finding that set the scope: `CombatApi.take` — the rules-checked spend, written in slice 5 and tested ever since — was reachable **only** from `TurnScreenD` behind `D_PREVIEW`, so on the real Play tab it was **dead code**, and Marcus read the option on the sheet and then darkened the deck chip by hand through the ruleless manual path. `OptionDetailBody` already had the button; **both halves of its gate were shut**. Fixed by widening `spendFor` to offer a Spend for any *available* option (not just slot/pool spends — under the old rule 2 of the 4 rows Nix sees got no button), making `take` **return whether it happened** so the sheet can close on a spend and stay open on a refusal, and painting the reducer's refusal `role="alert"` under the button that produced it, read from the **provider** so 10b's finding BB is not re-committed one slice later. Measured `4 → 1 → 1` with deck and disk agreeing at every step. The prover was run against the stashed pre-change build and went **5/9 — red on exactly the four spend claims and nothing else**. It also produced **finding BC**, a defect older than this phase: two hand-rolled overlays sit in the DOM permanently declaring `role="dialog" aria-modal="true"`, and `checkVisibility()` says TRUE for both (see §Slice 10c below). **HEARTH-04 and HEARTH-05 split out to 10d** — a decision, recorded, not an omission
+- [ ] 10d — HEARTH-04's mandatory temp-HP replacement warning (= VAL-06, pinned `it.fails` in 10a) + HEARTH-05's per-encounter retaliation damage tally — split out of 10c 2026-08-27; both are arithmetic on a spend rather than an affordance, and both need the write path 10c has now built
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
 
@@ -1671,6 +1672,172 @@ divergence and adds no way to spend, so its claim is provable by six numbers and
 10c owns wiring the ranked rows to `take()` (the provider's `take`/`endTurn`/`undoLast` are still
 unreached by any tap), HEARTH-04's mandatory warning, HEARTH-05's damage tally, and VAL-13/VAL-06,
 which need state that records an attack resolving and a temp-HP source respectively.
+
+## Slice 10c — closed 2026-08-27. The finished spend was unreachable, so nobody could take a turn.
+
+**Gate:** tsc exit 0 · **841 passed + 7 skipped across 35 files** (was 829/35 — 12 new tests) ·
+`npm run build` ✓ · `prove-slice10c.mjs` **9/9 in Chrome**, and **5/9** against the stashed
+pre-change build.
+
+### The finding that set the scope, and it is not the one the slice plan assumed
+
+04-slices assigned 10c *"wire the ranked rows to `take()`"*, which sounds like a UI build. Reading
+the code before writing any found something smaller and worse:
+
+- `CombatApi.take` — the **rules-checked** spend, which refuses an illegal one and can put it back
+  — was written in slice 5, has been under test ever since, and was reachable from exactly one
+  component: `TurnScreenD`, behind the `D_PREVIEW` flag. On the Play tab that loads at the table it
+  was **dead code**.
+- `OptionDetailBody` **already had** an `onSpend?: () => void` prop and **already rendered** a Spend
+  button, gated on `detail.spend && onSpend`.
+- **Both halves of that gate were shut.** `OptionDetailSheetLive` never passed `onSpend`, and
+  `spendFor` returned `null` unless the option burned a spell slot or a resource pool.
+
+So the app had a finished rules engine, a finished button, and no wire between them. At a table
+Marcus read the option on the sheet and then went and darkened the deck chip **by hand**, through
+`updateCombat` — the manual override, which applies no rules at all. 10c is therefore a wiring job
+plus one widening plus a refusal surface, not a UI build.
+
+### The three changes, in weight order
+
+**1. `spendFor` widened — `src/lib/turn/detail.ts`.** It offered a label only for a slot or a pool,
+on the reading that an Action is not "spent". At a table the Action is the scarcest resource you
+own and the entire turn deck exists to track it. Under the old rule **Sacred Flame and Javelin —
+two of the four rows Nix sees on a fresh turn — got no Spend button**, so the one path built to
+take an option could not take most options. Half a spend path reads as a broken one.
+
+It now returns `cost.label` for any option where `available` is true, and `null` where it is false.
+The null branch is the same law the `onSpend` prop states: the row already carries `blockedReason`,
+and a Spend control that cannot spend is purely a lie. **The reducer still refuses independently**
+— this is the affordance, not the guard, and the guard was not moved here. The label is `cost.label`
+because that string is always populated and is authored by whoever declared the option, which means
+a homebrew cost the engine cannot parse still names itself on the button.
+
+**2. `take` returns a boolean — `src/components/turn/CombatProvider.tsx`.** The smallest
+load-bearing part of the slice. The sheet has to close on a spend and stay open on a refusal, and
+the only other way to know which happened is to watch `refusal` change on a later render — which
+**cannot distinguish "refused now" from "was already refused"**, and cannot tell a refusal apart
+from a spend that legitimately changed nothing. The reducer already knows, synchronously;
+`dispatch` just stops throwing the answer away. `endTurn`/`beginTurn`/`startEncounter`/
+`endEncounter` stay typed `() => void` and every pre-10c caller ignores the value.
+
+**3. The refusal reaches the glass — `src/components/combat/OptionDetailSheet.tsx`.** The rules
+engine refuses; nothing painted the reason anywhere Marcus could see it. It belongs in band ③,
+directly under the button that was pressed — a refusal shown anywhere else is a message about a tap
+the player has already stopped thinking about. `role="alert"`, so it is **announced rather than
+merely drawn**: the button does not visibly change on a refusal, and a screen that looks identical
+after a press is exactly the failure this sentence exists to prevent.
+
+**Why the refusal is read from the provider and not a local `useState`.** That would be a second
+model of one fact, which is **finding BB, one slice old**. It is safe to share here because on this
+tab nothing else dispatches — `OptionDetailSheetLive` is the sole caller of `take` — and `close`
+clears it whichever way the sheet goes away (the ✕, the backdrop, Escape), so a refusal can never
+outlive the sheet that produced it.
+
+### Decision: the refusal band is a guard, not a workflow — and it is proved as one
+
+Because `spendFor` gates on availability, **a refusal is not reachable by tapping**. That is not an
+assumption; `detail.test.ts` now pins it by running the **real reducer** over every option the
+**real composer** offers, across three sessions — out of combat, in combat with nothing spent, and
+in combat with the Action already gone — asserting that wherever the sheet offers a Spend, the
+reducer accepts it. The affordance and the engine are held to agreeing.
+
+So the band is proved by render test, not by the browser prover, and the prover's header says so in
+as many words rather than papering over it: **a prover that faked a refusal would be grading
+itself.** If a future slice adds a cost the composer cannot see coming, that pin goes red — which is
+the point.
+
+*A latent gap found while writing that fixture and recorded rather than fixed:* `reduce`'s
+`takeOption` reads `combat.round` unconditionally, so handing it a **null** combat throws rather
+than refusing. Unreachable on the live path — `CombatProvider`'s initialiser always yields a state,
+which is why the fixture uses `createCombatState(NIX)` and says why. Fixing it is not 10c's job;
+knowing it is.
+
+### Finding BC — the app has two open modal dialogs at all times, and always has
+
+The prover's first run reported **"no Spend button"** on a sheet that visibly had one.
+`querySelector('[role="dialog"]')` was returning the **Dice Roller**.
+
+`DiceRoller` and `MechanicsDrawer` are hand-rolled overlays — they do **not** use `Sheet`, which
+unmounts when closed — so they sit in the DOM permanently, each declaring
+`role="dialog" aria-modal="true"`, parked at `y=844` on an 844-tall viewport with
+`pointer-events: none` and `transform: matrix(1,0,0,1,0,729)` / `(…,759.594)`.
+
+**`checkVisibility({checkOpacity: true, checkVisibilityCSS: true})` returns TRUE for both.** Only
+the transform keeps them off the glass. To a screen reader, this app has two open modal dialogs
+from load until close.
+
+Pre-existing, older than this phase, and **not fixed in 10c** — it is an accessibility fix with its
+own blast radius and does not belong bolted to a spend path. What 10c did is stop *its own proof*
+being fooled by it: the prover decides which dialog is open **geometrically** (top edge above the
+fold), which is the finding-Q standard set in slice 4 — a claim about the paint, not about the
+model. `B · exactly one dialog is on the glass` is now a standing assertion, so if a third permanent
+overlay appears the prover says so.
+
+### The prover was proved
+
+The four changed source files were backed up, `git stash`-ed, the app rebuilt from the pre-change
+source, and the prover run again:
+
+```
+FAILED 5/9
+FAIL  B · it offers a Spend, and names the cost
+FAIL  C · the sheet closed
+FAIL  C · the deck went dark and the disk agrees
+FAIL  C · the list re-ranked off the same spend
+FAIL  D · the spend survived the reload
+```
+
+**Exactly the four spend claims and no others** — A, B-sheet-opened, B-one-dialog and E passed on
+both sides, which is what makes the red meaningful. Shots kept in `_shots-slice10c/before/`. The
+files were then restored and verified **byte-identical** against the pre-stash copies (all four).
+
+The unit tests were proved able to fail the same way: with `detail.ts` stashed, `detail.test.ts`
+went **2 failed / 15 passed**; with `detail.ts` + `OptionDetailSheet.tsx` stashed,
+`OptionDetailSheet.test.tsx` went **3 failed / 23 passed**.
+
+### Measured in Chrome, post-change
+
+| case | |
+|---|---|
+| **A** arrival | 4 ready — Hearthbrand · Javelin · Sacred Flame · Hearthfire Manifest. Deck `{Action: available, …}`, disk `action: false`. All three witnesses agree nothing is spent. |
+| **B** tap "Sacred Flame" | dialog `aria-label="Sacred Flame"` · on screen: Sacred Flame · in the DOM: Dice Roller, Mechanics Reference, Sacred Flame · **button reads `Spend / Action · no slot`** ← the slice |
+| **C** press it | dialog gone · deck `Action=used` · disk `action: true` · **4 → 1 ready**, dropped: Hearthbrand, Javelin, Sacred Flame |
+| **D** reload | 4 on arrival → 1 after the Spend → **1 after a reload**. The reload is a no-op — 10b's guarantee holding through a write path 10b did not have. |
+| **E** | no console errors throughout |
+
+### What changed on the glass
+
+One button appeared, and it is the difference between reading the app and playing from it. Before
+10c the detail sheet could tell Marcus everything about Sacred Flame and could roll its dice, but
+taking it was something he did to the deck by hand, outside the rules. Now the sheet takes it: the
+Action goes dark, the options that needed it leave the list, and the disk agrees before the screen
+does. The manual deck path is untouched and still there — it is the override, and 10b's ruling that
+it is honest about being one still stands.
+
+### Files
+
+- `src/lib/turn/detail.ts` — `spendFor` widened to any available option; the doc comment carries the why.
+- `src/components/turn/CombatProvider.tsx` — `dispatch` and `CombatApi.take` return `boolean`.
+- `src/components/combat/OptionDetailSheet.tsx` — new `refusal` prop, painted `role="alert"` in band ③.
+- `src/components/CombatHelper.tsx` — `OptionDetailSheetLive` passes `onSpend`, closes on success, clears the refusal on close.
+- `src/lib/turn/detail.test.ts` — +6, including the affordance-vs-reducer agreement pin across three sessions.
+- `src/components/combat/OptionDetailSheet.test.tsx` — +5 render tests for the button and the refusal band.
+- `docs/plans/table-truth/prove-slice10c.mjs` — **new**, kept as the evidence and the regression guard.
+- `docs/plans/table-truth/_shots-slice10c/` — A–D screenshots, `_results.json`, and `before/` from the stashed build.
+
+### What 10d inherits
+
+**HEARTH-04** — the mandatory warning before temp HP replaces the Hearthfire cloak pool
+(*"Accepting these Temporary Hit Points will replace your Hearthfire cloak pool and end the cloak.
+Continue?"*). This is the same underlying gap as **VAL-06**, pinned `it.fails` in 10a, where
+`setTempHP(11 → 5)` yields 5 — the app overwrites silently and canon requires it not to.
+**HEARTH-05** — display total retaliation damage per encounter.
+
+Both are **arithmetic on a spend** rather than an affordance, which is a different class of risk
+from 10c and belongs in its own reviewable diff. Split recorded in `04-slices.md`; the 8→8b and
+10→10a/10b precedent applies. Still not in Phase 1 at all: **VAL-13**, which needs state recording
+an attack resolving, and **finding AZ / HEARTH-08**, which is Prep-tab work.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

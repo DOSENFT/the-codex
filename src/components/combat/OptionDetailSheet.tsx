@@ -55,6 +55,13 @@ export interface OptionDetailBodyProps {
   /** Spends the cost. Absent → the button is not painted at all: unlike a
    *  notation, a "Spend" control that cannot spend is purely a lie. */
   onSpend?: () => void
+  /** Why the last spend was refused, or null. Slice 10c.
+   *
+   *  The rules engine refuses; nothing painted the reason anywhere the player
+   *  could see it. It belongs HERE, directly under the button that was pressed
+   *  — a refusal shown anywhere else is a message about a tap the player has
+   *  already stopped thinking about. */
+  refusal?: string | null
   /** Band 4 starts open only in tests that need to read it. */
   tacticsOpen?: boolean
   /** How the table ruled on each erratum — slice 8. Defaults to none recorded,
@@ -118,6 +125,7 @@ export function OptionDetailBody({
   onClose,
   onRoll,
   onSpend,
+  refusal = null,
   tacticsOpen = false,
   rulings = {},
 }: OptionDetailBodyProps) {
@@ -190,6 +198,21 @@ export function OptionDetailBody({
               </button>
             )}
           </div>
+          {/* THE REFUSAL — slice 10c. Inside band ③, under the button, because
+              this sentence is the reducer answering the tap that produced it.
+              `role="alert"` so it is announced rather than merely drawn: the
+              button does not visibly change on a refusal, and a screen that
+              looks identical after a press is the failure this sentence is
+              here to prevent. */}
+          {refusal && (
+            <p
+              role="alert"
+              className="mt-2 border-l-2 border-l-ember bg-ember/5 py-1.5 pl-2 text-xs leading-relaxed text-forge-0"
+            >
+              <span className={`${LABEL} text-ember`}>⚑ Not spent</span>
+              {refusal}
+            </p>
+          )}
         </div>
       )}
 

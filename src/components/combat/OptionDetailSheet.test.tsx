@@ -308,3 +308,75 @@ describe('the errata band', () => {
     expect(text(paint(HFM()))).toContain('Canon lists 4 errata on this feature')
   })
 })
+
+describe('band ③ — the spend path reaches the glass (slice 10c)', () => {
+  /* Slice 7 built the Spend button and slice 10b made the state it would spend
+     single-owned. Neither wired the two together: `OptionDetailSheetLive` never
+     passed `onSpend`, so on the real Play tab the button was never painted at
+     all. These are the model-side half of that wiring; `prove-slice10c.mjs`
+     makes the claim about the running app. */
+
+  const withRefusal = (option: TurnOption, refusal: string | null) =>
+    renderToStaticMarkup(
+      <OptionDetailBody
+        detail={optionDetail(option, NIX, FRESH)}
+        onClose={() => {}}
+        onRoll={() => {}}
+        onSpend={() => {}}
+        refusal={refusal}
+      />
+    )
+
+  it('paints a Spend button on a cantrip, whose only cost is the Action', () => {
+    // Fails on every build before 10c: `spendFor` returned null for anything
+    // that burned neither a slot nor a pool, so `detail.spend && onSpend` was
+    // false and the button was skipped.
+    const html = paint(byName('Sacred Flame'))
+    expect(text(html)).toContain('Spend')
+    expect(text(html)).toContain(byName('Sacred Flame').cost.label)
+  })
+
+  it('paints NO Spend button when the caller cannot spend', () => {
+    /* The prop's own law, held: a caller with no `onSpend` — the reactions
+       band's read-only preview, any test — gets a sheet with no button rather
+       than a dead one. A roll notation degrades to an inert fact because the
+       NOTATION is useful; a Spend control does not, because it is not. */
+    const html = renderToStaticMarkup(
+      <OptionDetailBody detail={optionDetail(byName('Sacred Flame'), NIX, FRESH)} onClose={() => {}} />
+    )
+    expect(text(html)).not.toContain('Spend')
+  })
+
+  it('paints the reducer’s refusal, in the reducer’s own words, under the button', () => {
+    const html = withRefusal(byName('Sacred Flame'), 'You have already taken your Action.')
+    expect(text(html)).toContain('Not spent')
+    expect(text(html)).toContain('You have already taken your Action.')
+    // Announced, not merely drawn: the button does not change on a refusal, so
+    // a screen that looks identical after a press is the failure mode here.
+    expect(html).toContain('role="alert"')
+  })
+
+  it('says nothing at all when nothing was refused', () => {
+    /* The counterweight. A band that is always present is a band that is never
+       read, and "Not spent" sitting under an unpressed button would be the app
+       reporting a refusal that never happened. */
+    const html = withRefusal(byName('Sacred Flame'), null)
+    expect(text(html)).not.toContain('Not spent')
+    expect(html).not.toContain('role="alert"')
+  })
+
+  it('keeps the refusal inside band ③, beside the button that caused it', () => {
+    /* Position is the claim, not decoration: the sentence answers a specific
+       tap. Asserted by ordering — the refusal must fall after "Roll from here"
+       and before the bands that follow it. */
+    const html = withRefusal(byName('Sacred Flame'), 'Nope.')
+    const t = text(html)
+    const rolls = t.indexOf('Roll from here')
+    const refused = t.indexOf('Nope.')
+    const nextBand = t.indexOf('How to use it')
+    expect(rolls).toBeGreaterThan(-1)
+    expect(nextBand).toBeGreaterThan(-1)
+    expect(refused).toBeGreaterThan(rolls)
+    expect(refused).toBeLessThan(nextBand)
+  })
+})

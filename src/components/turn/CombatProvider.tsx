@@ -89,7 +89,16 @@ export interface CombatApi {
    *  wrote the bytes and deleted them in the same breath, and under the effect
    *  it replaced, deleted them and then wrote them BACK. */
   forgetCombat: (next: CombatState) => void
-  take: (option: TurnOption) => void
+  /** Spend an option through the rules engine.
+   *
+   *  RETURNS WHETHER IT HAPPENED — added in slice 10c, and the return value is
+   *  the slice's smallest load-bearing part. The detail sheet has to close on a
+   *  spend and stay open on a refusal, and the only other way to know which
+   *  occurred is to watch `refusal` change on a later render — which cannot
+   *  distinguish "refused now" from "was already refused", and cannot tell a
+   *  refusal apart from a spend that legitimately changed nothing. The reducer
+   *  already knows, synchronously; this just stops throwing the answer away. */
+  take: (option: TurnOption) => boolean
   endTurn: () => void
   /** Your turn comes round again — and with it, your Reaction.  Slice 7.
    *
@@ -199,15 +208,19 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
     [character, combat, log, onCharacterUpdate],
   )
 
+  /** True if the event was applied, false if the reducer refused it. Slice 10c
+   *  started returning this; every caller before 10c ignored the value and
+   *  still may. */
   const dispatch = useCallback(
     (event: CombatEvent) => {
       const applied = reduce({ character, combat }, event, log)
       if (applied.refused) {
         setRefusal(applied.refused)
-        return
+        return false
       }
       setRefusal(null)
       commit(applied.state, applied.entry ? append(log, applied.entry) : log)
+      return true
     },
     [character, combat, log, commit],
   )

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { composeTurn } from './compose'
 import { NIX } from './fixtures/nix'
 import { optionDetail } from './detail'
+import { reduce, takenFrom } from './reduce'
+import { createCombatState, type CombatState } from '../combat-state'
 import type { EconomyState, TurnOption } from './types'
 
 /* ============================================================================
@@ -202,4 +204,123 @@ describe('optionDetail — bands 1 and 4 from canon', () => {
     const b = optionDetail(byName('Sacred Flame'), NIX, FRESH)
     expect(a).toEqual(b)
   })
+})
+
+describe('optionDetail — the spend affordance, widened in slice 10c', () => {
+  /* Slices 7-10b built a Spend button, a `detail.spend` to feed it and a
+     reducer to honour it, and then offered it on 2 of the 14 options Nix owns,
+     because `spendFor` only recognised a spell slot or a resource pool as a
+     cost. At a table the Action IS the cost. These tests fix the widened rule
+     in place; the first of them fails against every build before 10c. */
+
+  it('offers a spend on an option whose only cost is the Action', () => {
+    // Sacred Flame is a cantrip: no slot, no pool, and taking it still ends
+    // your Action. Before 10c this was `null` and the button was not painted,
+    // so the most-used row on the screen had no way to be spent.
+    const d = optionDetail(byName('Sacred Flame'), NIX, FRESH)
+    expect(d.spend).not.toBeNull()
+    expect(d.spend!.label).toBe(byName('Sacred Flame').cost.label)
+  })
+
+  it('offers a spend on EVERY available option, and names each cost in its own words', () => {
+    /* The general form of the claim above. `cost.label` is the string whoever
+       declared the option wrote, so a homebrew cost the engine cannot parse
+       still names itself on the button rather than falling back to "Spend". */
+    for (const option of everyOption.filter(o => o.available)) {
+      const spend = optionDetail(option, NIX, FRESH).spend
+      expect(spend, `${option.name} offers no way to spend it`).not.toBeNull()
+      expect(spend!.label).toBe(option.cost.label)
+    }
+  })
+
+  it('offers NO spend on a blocked option — the button would only ever refuse', () => {
+    /* The counterweight, and the reason this is not simply "always non-null".
+       `OptionDetailBodyProps.onSpend` states the law: a Spend control that
+       cannot spend is purely a lie. The row already carries `blockedReason`. */
+    const blocked: TurnOption = { ...byName('Sacred Flame'), available: false, blockedReason: 'no' }
+    expect(optionDetail(blocked, NIX, FRESH).spend).toBeNull()
+  })
+
+  it('still names a slot or a pool exactly as it did before the widening', () => {
+    // The pre-10c behaviour is a subset of the new one, not a casualty of it.
+    const levelled = everyOption.find(o => (o.cost.spellSlotLevel ?? 0) >= 1 && o.available)
+    if (levelled) expect(optionDetail(levelled, NIX, FRESH).spend).toEqual({ label: levelled.cost.label })
+    const pooled = everyOption.find(o => o.cost.resourcePoolId && o.available)
+    if (pooled) expect(optionDetail(pooled, NIX, FRESH).spend).toEqual({ label: pooled.cost.label })
+    expect(levelled || pooled, 'fixture has neither a slot nor a pool option').toBeTruthy()
+  })
+})
+
+describe('the Spend button never lies — the affordance and the reducer agree', () => {
+  /* THE CLAIM THAT MAKES 10c SAFE, and the reason the refusal band below it is
+     a guard rather than a workflow.
+
+     Two independent implementations of the same rules decide whether an option
+     can be taken: `composeTurn` sets `available`, which is what `spendFor` now
+     keys the button off; and `reduce` refuses at the moment of the tap. They
+     were written slices apart and nothing has ever compared them. If they ever
+     disagree, the app paints a button that produces only an error message —
+     which is exactly what `OptionDetailBodyProps.onSpend` calls a lie.
+
+     This runs the real reducer over every option the real composer offers. It
+     is cheap, it is exhaustive over the fixture, and it is the assertion that
+     goes red the day someone tightens one rule engine and not the other. */
+
+  /* The out-of-combat session is `createCombatState`, NOT null. That is what
+     `CombatProvider` actually holds when nobody has pressed Start Combat — and
+     it matters: `reduce` reads `combat.round` unconditionally, so handing it a
+     null combat throws rather than refusing. The live path can never do that
+     (the provider's initialiser always produces a state), and stating the real
+     shape here keeps this test a test of the app instead of a test of a
+     situation the app cannot be in. */
+  const sessions: { what: string; combat: CombatState }[] = [
+    { what: 'out of combat', combat: createCombatState(NIX) },
+    {
+      what: 'in combat, your turn, nothing spent',
+      combat: {
+        inCombat: true,
+        round: 3,
+        yourTurn: true,
+        turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
+        spellSlots: { 1: { used: 0, max: 4 }, 2: { used: 0, max: 3 } },
+        concentrating: null,
+      } as CombatState,
+    },
+    {
+      what: 'in combat, the Action already spent',
+      combat: {
+        inCombat: true,
+        round: 3,
+        yourTurn: true,
+        turnActions: { action: true, bonusAction: false, reaction: false, movement: false },
+        spellSlots: { 1: { used: 0, max: 4 }, 2: { used: 0, max: 3 } },
+        concentrating: null,
+      } as CombatState,
+    },
+  ]
+
+  for (const { what, combat } of sessions) {
+    it(`offers no spend the reducer would refuse — ${what}`, () => {
+      const composed = composeTurn({ character: NIX, combat })
+      const all = [...composed.ranked, ...composed.rest, ...composed.mutex.flatMap(g => g.faces)]
+      expect(all.length, 'nothing composed, so nothing was graded').toBeGreaterThan(0)
+
+      let offered = 0
+      for (const option of all) {
+        if (optionDetail(option, NIX, composed.economy).spend === null) continue
+        offered++
+        const applied = reduce(
+          { character: NIX, combat },
+          { type: 'takeOption', option: takenFrom(option) },
+          []
+        )
+        expect(
+          applied.refused,
+          `the sheet offers "Spend ${option.cost.label}" on ${option.name}, and the reducer ` +
+            `refuses it: ${applied.refused}`
+        ).toBeFalsy()
+      }
+      expect(offered, 'no option offered a spend at all, so nothing was graded').toBeGreaterThan(0)
+    })
+  }
 })

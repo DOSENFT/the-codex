@@ -1,0 +1,173 @@
+{
+  "target": "Sacred Flame",
+  "before": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": null,
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference"
+    ],
+    "dialogsOnScreen": [],
+    "spendLabel": null,
+    "refusal": null,
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "opened": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": "Sacred Flame",
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference",
+      "Sacred Flame"
+    ],
+    "dialogsOnScreen": [
+      "Sacred Flame"
+    ],
+    "spendLabel": null,
+    "refusal": null,
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "spent": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": "Sacred Flame",
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference",
+      "Sacred Flame"
+    ],
+    "dialogsOnScreen": [
+      "Sacred Flame"
+    ],
+    "spendLabel": null,
+    "refusal": null,
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "reloaded": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "sheet": null,
+    "dialogsInDom": [
+      "Dice Roller",
+      "Mechanics Reference"
+    ],
+    "dialogsOnScreen": [],
+    "spendLabel": null,
+    "refusal": null,
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "results": [
+    {
+      "name": "A · nothing is spent, and all three witnesses say so",
+      "pass": true,
+      "detail": "4 ready · deck Action=available · stored action=false"
+    },
+    {
+      "name": "B · the sheet opened on the option that was tapped",
+      "pass": true,
+      "detail": "dialog aria-label=\"Sacred Flame\", tapped \"Sacred Flame\""
+    },
+    {
+      "name": "B · exactly one dialog is on the glass — and see finding BC for the rest",
+      "pass": true,
+      "detail": "on screen: Sacred Flame · in the DOM: Dice Roller, Mechanics Reference, Sacred Flame — the extras are DiceRoller and MechanicsDrawer, mounted always, aria-modal=\"true\" always, parked off the bottom edge"
+    },
+    {
+      "name": "B · it offers a Spend, and names the cost  <-- THIS IS THE SLICE",
+      "pass": false,
+      "detail": "NO Spend button. The sheet describes the option perfectly and gives Marcus no way to take it — he has to close this and darken the deck chip by hand, which is the whole of what slice 10c exists to end."
+    },
+    {
+      "name": "C · the sheet closed — the option has been taken, not merely read",
+      "pass": false,
+      "detail": "dialog still up on \"Sacred Flame\""
+    },
+    {
+      "name": "C · the deck went dark and the disk agrees",
+      "pass": false,
+      "detail": "deck Action=available · stored action=false"
+    },
+    {
+      "name": "C · the list re-ranked off the same spend — one model, still",
+      "pass": false,
+      "detail": "the list did not move: still 4 ready, same rows, while the deck says the Action is gone. Two models of one turn are back."
+    },
+    {
+      "name": "D · the spend survived the reload and the reload taught the list nothing",
+      "pass": false,
+      "detail": "survived=false (deck available, disk false) · unchanged=true (4 live vs 4 reloaded)"
+    },
+    {
+      "name": "E · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

@@ -69,7 +69,8 @@ export interface OptionDetail {
   whatItDoes: string
   /** Band 3. */
   rolls: RollOffer[]
-  /** Band 3, the spend affordance. Null when nothing is spent. */
+  /** Band 3, the spend affordance. Null when there is nothing this sheet can
+   *  legally spend — see `spendFor`, which slice 10c widened. */
   spend: { label: string } | null
   /** Band 3, the live rule. Null when no rule applies to this option now. */
   ruleBox: RuleBox | null
@@ -175,11 +176,28 @@ function withSaveDC(facts: DetailFact[], character: Character): DetailFact[] {
   )
 }
 
+/* WHAT THE SPEND BUTTON IS FOR — widened in slice 10c.
+ *
+ * Until 10c this returned a label only when the option burned a spell slot or a
+ * resource pool, on the reading that an Action is not "spent". At a table it is
+ * the only thing that is: your Action is the scarcest resource you own, and the
+ * whole of the turn deck exists to track it. Under the old rule Sacred Flame
+ * and Javelin — two of the four rows Nix actually sees on a fresh turn — got no
+ * Spend button, so the one path built to take an option could not take most
+ * options. Half a spend path reads as a broken one.
+ *
+ * NULL WHEN THE OPTION IS NOT AVAILABLE, and that is the same law the `onSpend`
+ * prop states: a Spend control that cannot spend is purely a lie. The row
+ * already carries `blockedReason`; the sheet does not need a button that only
+ * ever produces a refusal. The reducer still refuses independently — this is
+ * the affordance, not the guard, and the guard is not moved here.
+ *
+ * The label is `cost.label` because that string is ALWAYS populated and is
+ * authored by whoever declared the option, which means a homebrew cost the
+ * engine cannot parse still names itself on the button. */
 function spendFor(option: TurnOption): { label: string } | null {
-  if (option.cost.spellSlotLevel || option.cost.resourcePoolId) {
-    return { label: option.cost.label }
-  }
-  return null
+  if (!option.available) return null
+  return { label: option.cost.label }
 }
 
 /** Everything the detail sheet paints, assembled once. Pure: no hooks, no
