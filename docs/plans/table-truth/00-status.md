@@ -18,7 +18,8 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 6 — "Your Reactions" band — **DONE 2026-08-27**, proved against the running app on four cases; the prover caught Gate 3 specifying a filter that is empty on your own turn, a line-measurement technique that was wrong, and the WHEN label saying its own word twice (see §Slice 6 below)
 - [x] 7 — the option detail sheet (this is where the "…" dies) — **DONE 2026-08-27**, proved against the running app on six cases; every reachable sheet measured clip-free *on the glass*, and the prover caught its own band-4 case grading nothing, a splitter that kept every character while dropping 10 headings, and the fact that **0 of the 7 slot-spending options can reach the sheet at all** (see §Slice 7, finding AB — the one thing needing a steer)
 - [x] 9 — retire the competing menus (capabilities pinned as tests FIRST) — **DONE 2026-08-27**, prover PASS; `ActionMenu`, two-thirds of "Actions Reference" and slice 1's diagnostic strip retired, Basic Actions **kept** on evidence (finding AM), the eight `turn.mutex` options given their first row ever, and **6 of 14 reachable → 14 of 14**. The deck-chip clause was **withdrawn on evidence** (see §Slice 9) — one open question for Marcus.
-- [ ] 8 — errata flags, all 12, three readings, DM wording — **NEXT**, but **needs re-scoping before it starts** (finding AA)
+- [x] 8 — errata flags, all 12, three readings, DM wording — **DONE 2026-08-27**, prover PASS on six cases; all six live faults compared **character-for-character** against canon on disk, the ruling survives a real reload, and both surfaces report it. The prover caught three defects of its own (finding AX), my own re-scope claim was **wrong and a corpus test caught it** (finding AS), and the routing gap turned out to be **four of six, not two** (finding AT) — which is the reason the band exists (see §Slice 8 below)
+- [ ] 8b — should a recorded ruling *change* anything? — **NEXT**. Slice 8 records rulings and enforces nothing, by canon's own instruction (HEARTH-01: *"Do not silently implement either version"*). Marcus chose "show all 12 well; behaviour next"
 - [ ] 10 — canon VAL-01..15 as a suite + decide the combat write path — now also owns the two unconditional mount writes (finding AR)
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
@@ -1085,6 +1086,127 @@ second meaning for an existing button. **Open question for him at the slice boun
 - **`ActionMenu.tsx` (697 lines) and `CanonMatchReport.tsx` are left on disk**, unmounted. Deleting
   files is ASK-FIRST.
 - **`_probe-pp.mjs` is kept**, per the slice-7 precedent — it is the working that produced AQ.
+
+## Slice 8 — closed 2026-08-27. What it built, and what it found.
+
+**What is on the tab now.** A folded band, *Rules flags*, sitting after "Basic actions — the rules"
+and before "Rest Management" — the reference zone, which keeps slice 9's priority order (what to do
+now → what to watch for → everything else → reference) intact. Closed it costs one line and that
+line states the outstanding work: **`6 · 6 unanswered`**, not a bare count. Open it gives each of the
+six live errata a card carrying the fault **whole**, the feature name, the severity, the erratum id,
+where its level came from — and, without any further tap, a three-way ruling control: *Not asked yet*
+· *Canon's fix* · *My DM ruled*. Canon's fix, its reasoning and the app's own note sit behind one tap
+**on the card itself** (no new chevron — Marcus's complaint was button clutter). Rulings persist to
+`codex-errata-<characterId>` and are read back by the option detail sheet, so both surfaces report
+the same answer about the same rule.
+
+**Files.** New: `src/lib/errata-rulings.ts`, `src/lib/errata-rulings.test.ts` (27),
+`src/components/combat/ErrataBand.tsx`, `src/components/combat/ErrataBand.test.tsx` (23),
+`docs/plans/table-truth/prove-slice8.mjs`, `_probe-len.mjs` (kept, per the slice-7 precedent).
+Changed: `OptionDetailSheet.tsx` (+7 tests), `CombatHelper.tsx` (state, `handleRule`, mount point).
+Gate: `tsc --noEmit` clean · **758/758** unit tests · `prove-slice8.mjs` **PASS** on six cases.
+
+**Measured on the glass** (`_shots-slice8/`, iPhone-class viewport, `_report.json`):
+
+| claim | measurement |
+| --- | --- |
+| the faults arrive whole | all six compared **character-for-character** to `oath-of-the-hearth.json` on disk: 273/407/218/346/261/207ch canon → identical painted |
+| nothing is clamped | 148 elements swept in the open band: **0** line-clamps, **0** cutting ellipses, **0** boxes smaller than their text |
+| the fix is one tap, the answer is none | HEARTH-03 headings before the tap `[none]`, after `[Canon's recommended fix · What this app does about it · Also worth knowing]`; ruling control present on **6 of 6** rows unexpanded |
+| worst first | severities as painted: `high, high, medium, medium, medium, low` |
+| the answer survives a reload | tap → `6 · 5 unanswered`, `codex-errata-nix-fixture` written, real bytes on disk, **reload**, control reads back *Canon's fix* |
+| the two surfaces agree | the Hearthfire Manifest sheet reports `{followsCanon: true, unanswered: 3, erratumCount: 4}` |
+| reading still changes nothing | keys written by **taps**: `codex-errata-*`, `codex-ui-*` — nothing else. Stored values that moved: **none** |
+
+### Finding AS — my re-scope claim was wrong, and a corpus test caught it
+
+Finding AA re-scoped this slice on my assertion that all three readings exist on all twelve errata.
+They do not. **HEARTH-11 has no `recommendedFix`** — canon judged Swift Flame "strong but
+defensible" and declined to prescribe one. Measured coverage across the twelve: `problem` 12/12,
+`appAction` 12/12, `recommendedFix` **11/12**, `assessment` 4, and `cause` · `narrowerAlternative` ·
+`comparison` · `mitigatingFactor` · `note` 1 each. This is why `erratumBlocks()` drops absent and
+whitespace-only blocks rather than rendering an empty heading: nine block kinds, and only two of them
+are guaranteed. The lesson is the older one wearing a new hat — a claim about the corpus is worth
+nothing until a test reads the corpus.
+
+### Finding AT — only ONE of the fourteen turn options reaches any erratum
+
+`04-slices.md` said *"two of the six live errata reach no turn option."* Measured, it is **four**.
+Of the fourteen options `composeTurn` builds for Nix, exactly one — **Hearthfire Manifest** — reaches
+any erratum at all, and it reaches four (HEARTH-03/04/05/06). **Not** Flaming Cloak, the Channel
+Divinity option slice 6 taught the lookup to resolve; **not** Aura of Solace, which composes no
+option whatsoever. So HEARTH-07 (Aura of Solace) and HEARTH-08 (Oath Spells) have *no route through
+the detail sheet* — nor do the two things they concern.
+
+This is the load-bearing justification for the band existing at all: **the band is the home, the
+sheet is the shortcut.** Had the errata been shown only where an option happened to reach them, a
+third of the live flags would have been invisible. Pinned by a test in `OptionDetailSheet.test.tsx`
+that asserts the reaching set is exactly `['Hearthfire Manifest']`, so this number cannot drift
+silently. `04-slices.md` has been corrected.
+
+### Finding AU — the open-world rule, applied to errata
+
+Canon names a level in prose (`"Hearthfire Manifest (level 3)"`); the sheet knows its own levels; the
+two can disagree. `scopeErrata` resolves **sheet first, canon as fallback** — and when *neither*
+knows, the erratum is **LIVE**, not hidden. That is the same asymmetry as `lookup.ts`: a canon lookup
+is a text lookup, never a capability gate, and an unknown must never make something disappear. The
+band paints which source answered (`level 3 · your sheet` / `level 5 · canon`), because a player
+about to argue a rule at the table is entitled to know which one the app believed.
+
+**A consequence worth recording:** the six live errata are **identical at level 7 and at level 8**
+(measured). The unresolved Nix 7-vs-8 question (§Notes) therefore does not touch this slice — but it
+still needs answering, and `lookup.ts:125-130` still notes three disagreeing level numbers.
+
+### Finding AV — 4,557 characters is a design constraint, not a detail
+
+Before designing the layout I measured the corpus rather than guessing at it (`_probe-len.mjs`): the
+six live errata carry **4,557 characters** across 22 blocks. Rendered flat that is roughly five
+screens of prose with the only *actionable* thing — how your table rules it — buried at the bottom of
+each. That number, not taste, produced the three-way split: the **fault** always visible and whole
+(it is the sentence everything else is about), **canon's fix** behind one tap, the **ruling control**
+behind none. A layout argued from adjectives would have gone the other way.
+
+### Finding AW — canon writes ellipses too, and the invariant had to be sharpened
+
+The browser prover flagged a literal `...` in the band and **was wrong to**. It is canon's own:
+HEARTH-03's `recommendedFix` quotes a suggested rules sentence and elides its tail — *"...expend one
+use of your Channel Divinity..."*. Painting that faithfully is correct; deleting it would falsify the
+source. So the standing rule of this phase is not *"no ellipsis on the glass"*, it is **"no ellipsis
+the app introduced"** — and the two are told apart by whether the painted string is
+character-identical to a string canon wrote (a clamp leaves a prefix; canon's text does not).
+
+The sweep now classifies rather than counts, and grades **both ways**: an app-introduced ellipsis
+fails, *and so does canon's ellipsis going missing* — because that would mean the app started editing
+canon's prose, or the sweep had gone blind. `ErrataBand.test.tsx` pins the same distinction, and
+first asserts canon still contains the ellipsis, so the test cannot quietly become a tautology.
+
+### Finding AX — a toggle is not an "open", and a reload re-arms the mount effects
+
+The prover's first run failed three cases, all three the **prover's** fault, all three worth keeping:
+
+1. After the reload it clicked "Rules flags" to re-open the band — but the band was **already open**,
+   because `useCollapsible` had remembered the open from an earlier case in `codex-ui-*`. The click
+   *closed* it. The later fold then read `«»` and the clip sweep measured **5 elements and passed by
+   measuring nothing**. Fixed by `setBandOpen(page, want)`, which reads `aria-expanded` and clicks
+   only on disagreement. **A blind toggle is not a state — and a sweep of a folded band is finding Q
+   in prover's clothing.** Case Q now fails outright if fewer than 40 elements were measured.
+2. The write log was drained after the first load but not after the **reload**, so finding AR's two
+   pre-existing mount effects fired again and landed in the interaction window — grading slice 8 for
+   a write it did not make. Now drained into its own bucket and reported separately.
+3. The ellipsis classifier — finding AW above.
+
+Finding AR remains open and untouched: `CombatHelper`'s `saveCombatState` and `TurnSummary`'s
+`saveActionNotes` still write on every Play-tab load. **Slice 8 deliberately did not add a third** —
+`handleRule` writes on a tap only, and the DM-wording textarea commits `onBlur`, not per keystroke
+(a one-sentence ruling would otherwise be forty writes to disk).
+
+### What slice 8 deliberately does NOT do
+
+**Nothing is enforced.** No erratum changes a number, a die, or an option anywhere in the app — and
+that is canon's own instruction, not a shortcut. HEARTH-01's `appAction` reads: *"Do not silently
+implement either version. Present the conflict to the player."* A ruling control that defaulted to
+*Canon's fix* would be implementing it silently, so all three chips start unpressed and the honest
+default is **"Not asked yet"**. Behaviour is slice 8b's question, and Marcus chose that order.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

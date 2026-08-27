@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Sheet } from '../ui/Sheet'
 import type { OptionDetail } from '../../lib/turn/detail'
 import type { RollOffer } from '../../lib/turn/rolls'
+import { rulingFor, type ErratumRulings } from '../../lib/errata-rulings'
 
 /* ============================================================================
    THE OPTION DETAIL SHEET — Table Truth slice 7. This is where the "…" dies.
@@ -56,6 +57,10 @@ export interface OptionDetailBodyProps {
   onSpend?: () => void
   /** Band 4 starts open only in tests that need to read it. */
   tacticsOpen?: boolean
+  /** How the table ruled on each erratum — slice 8. Defaults to none recorded,
+   *  which is also what every caller passed before this prop existed, so the
+   *  band degrades to exactly its slice-7 reading plus "not ruled on yet". */
+  rulings?: ErratumRulings
 }
 
 const BAND = 'border-b border-bronze/20 px-4 py-3'
@@ -114,6 +119,7 @@ export function OptionDetailBody({
   onRoll,
   onSpend,
   tacticsOpen = false,
+  rulings = {},
 }: OptionDetailBodyProps) {
   const [showTactics, setShowTactics] = useState(tacticsOpen)
 
@@ -201,19 +207,57 @@ export function OptionDetailBody({
         </div>
       )}
 
-      {/* ── ③c What canon says is wrong with this ───────────────────────── */}
+      {/* ── ③c What canon says is wrong with this, and how you ruled it ───
+             Slice 8 upgraded this band from `id + problem`. What it adds is
+             not more canon — the full record lives in the Rules flags band,
+             which is its home, and repeating 800 characters of it here would
+             bury the rolls. What it adds is the OPERATIVE rule: if the table
+             has ruled, that ruling governs, and mid-combat it is the only part
+             of the record that changes what Marcus does next.
+
+             So: the fault, whole, as before; then one line saying how it was
+             answered. Unanswered says so, because "we never asked" is a fact
+             worth having at the moment the feature comes up. */}
       {detail.errata.length > 0 && (
         <div className={BAND}>
           <span className={`${LABEL} text-ember`}>
             ⚑ Canon lists {detail.errata.length} errat
             {detail.errata.length === 1 ? 'um' : 'a'} on this feature
           </span>
-          <ul className="mt-1.5 flex flex-col gap-1">
-            {detail.errata.map(e => (
-              <li key={e.id} className="text-xs leading-relaxed text-forge-1">
-                <span className="font-mono text-[10px] text-forge-2">{e.id}</span> {e.problem}
-              </li>
-            ))}
+          <ul className="mt-1.5 flex flex-col gap-2">
+            {detail.errata.map(e => {
+              const ruling = rulingFor(rulings, e.id)
+              return (
+                <li key={e.id} className="text-xs leading-relaxed text-forge-1">
+                  <span className="font-mono text-[10px] text-forge-2">{e.id}</span> {e.problem}
+                  {ruling.status === 'unasked' && (
+                    <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-wider text-forge-2">
+                      not ruled on yet
+                    </span>
+                  )}
+                  {ruling.status === 'canon' && (
+                    <span className="mt-1 block text-[11px] leading-relaxed text-gold">
+                      <b className="font-mono text-[10px] font-bold uppercase tracking-wider">
+                        Your table follows canon's fix
+                      </b>
+                      {e.recommendedFix ? ` — ${e.recommendedFix}` : ''}
+                    </span>
+                  )}
+                  {ruling.status === 'dm' && (
+                    <span className="mt-1 block text-[11px] leading-relaxed text-arcane">
+                      <b className="font-mono text-[10px] font-bold uppercase tracking-wider">
+                        Your DM ruled
+                      </b>
+                      {/* No wording is still a ruling — it means the table
+                          settled it and nobody wrote down how. Saying "ruled,
+                          wording not recorded" beats printing a bare heading
+                          over nothing. */}
+                      {ruling.dmWording ? ` — ${ruling.dmWording}` : ' — wording not recorded'}
+                    </span>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}

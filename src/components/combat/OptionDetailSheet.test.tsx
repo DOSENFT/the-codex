@@ -5,6 +5,7 @@ import { optionDetail } from '../../lib/turn/detail'
 import { composeTurn } from '../../lib/turn/compose'
 import { NIX } from '../../lib/turn/fixtures/nix'
 import type { EconomyState, TurnOption } from '../../lib/turn/types'
+import { setRuling, type ErratumRulings } from '../../lib/errata-rulings'
 
 /* ============================================================================
    THE SHEET, PAINTED — Table Truth slice 7.
@@ -226,5 +227,84 @@ describe('OptionDetailBody — homebrew is a first-class citizen', () => {
        entitled to know which he is about to quote at a DM. */
     expect(text(paint(HOMEBREW))).toContain('your own')
     expect(text(paint(byName('Sacred Flame')))).not.toContain('your own')
+  })
+})
+
+/* ============================================================================
+   THE ERRATA BAND, AND WHAT THE TABLE DECIDED — Table Truth slice 8.
+
+   Before this slice the band read `id + problem` and stopped. The upgrade is
+   deliberately NOT more canon: the full record lives in the Rules flags band,
+   which is its home. What arrives here is the operative rule — how the table
+   answered — because mid-combat that is the only part of the record that
+   changes what happens next.
+
+   MEASURED WHILE WRITING THESE: of the fourteen options `composeTurn` builds
+   for Nix, exactly ONE reaches any erratum — Hearthfire Manifest, which reaches
+   four. Not Flaming Cloak, which is the Channel Divinity option slice 6 taught
+   the lookup to resolve, and not Aura of Solace, which composes no option at
+   all. Two of the six live errata therefore have no route through this sheet
+   whatsoever. That is the whole argument for the band being the home and this
+   being the shortcut, and it is measured here rather than assumed.
+   ========================================================================= */
+describe('the errata band', () => {
+  const HFM = () => byName('Hearthfire Manifest')
+
+  const withRulings = (rulings: ErratumRulings) =>
+    renderToStaticMarkup(
+      <OptionDetailBody
+        detail={optionDetail(HFM(), NIX, FRESH)}
+        onClose={() => {}}
+        rulings={rulings}
+      />
+    )
+
+  it('is reached by exactly one of Nix’s options, which is why the band exists', () => {
+    const reaching = everyOption.filter(o => optionDetail(o, NIX, FRESH).errata.length > 0)
+    expect(reaching.map(o => o.name)).toEqual(['Hearthfire Manifest'])
+  })
+
+  it('prints all four faults whole', () => {
+    const seen = text(paint(HFM()))
+    for (const e of optionDetail(HFM(), NIX, FRESH).errata) {
+      expect(seen, e.id).toContain(e.problem.replace(/\s+/g, ' ').trim())
+    }
+  })
+
+  it('says an unanswered flag is unanswered, rather than staying quiet about it', () => {
+    /* "We never asked" is a fact worth having at the moment the feature comes
+       up — it is the difference between a settled rule and an argument waiting
+       to happen. */
+    const seen = text(withRulings({}))
+    expect(seen.match(/not ruled on yet/g)).toHaveLength(4)
+  })
+
+  it('reports canon’s fix as the rule once the table has taken it', () => {
+    const rulings = setRuling({}, 'HEARTH-04', 'canon', undefined, new Date('2026-08-27'))
+    const seen = text(withRulings(rulings))
+    expect(seen).toContain("Your table follows canon's fix")
+    const h04 = optionDetail(HFM(), NIX, FRESH).errata.find(e => e.id === 'HEARTH-04')!
+    expect(seen).toContain(h04.recommendedFix!.replace(/\s+/g, ' ').trim())
+    expect(seen.match(/not ruled on yet/g)).toHaveLength(3)   // the other three
+  })
+
+  it('quotes the DM, because the DM’s words outrank canon at this table', () => {
+    const rulings = setRuling({}, 'HEARTH-03', 'dm', 'the cloak fires once per round', new Date('2026-08-27'))
+    const seen = text(withRulings(rulings))
+    expect(seen).toContain('Your DM ruled — the cloak fires once per round')
+  })
+
+  it('says a ruling exists even when nobody wrote down its wording', () => {
+    /* `setRuling` refuses to store an empty string as a ruling, so this state
+       is reachable: tapped "My DM ruled", typed nothing. A bare heading over
+       nothing would read as a rendering bug. */
+    const rulings = setRuling({}, 'HEARTH-03', 'dm', '', new Date('2026-08-27'))
+    expect(text(withRulings(rulings))).toContain('Your DM ruled — wording not recorded')
+  })
+
+  it('still renders exactly as it did in slice 7 for a caller with no rulings', () => {
+    /* `rulings` is optional, so every pre-slice-8 call site keeps working. The
+       only difference is the honest "not ruled on yet". */
+    expect(text(paint(HFM()))).toContain('Canon lists 4 errata on this feature')
   })
 })

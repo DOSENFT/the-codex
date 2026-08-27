@@ -71,10 +71,50 @@ the rolls → how to use it. Full canon text, the live one-slot-per-turn rule bo
 actual turn, tactics folded by default. `ActionMenu`'s roll-from-the-sheet moves here — it
 is a capability, not a duplicate. Works with the AI off and the wifi off.
 
-**8 — Errata: show both, default to the fix.**
-All 12 `HEARTH-##` flags inline and expanded, each with the as-written text, the fault, the
-cause, the three readings, and one-tap DM wording. Stored per character in
-`codex-errata-${id}`. Nothing silently changed.
+**8 — Errata: readable, level-aware, and answerable.**
+*Re-scoped 2026-08-27 with Marcus, after finding AA. The original text is quoted below rather
+than quietly overwritten.*
+
+All 12 `HEARTH-##` errata become readable, and each one becomes a question you can answer.
+
+- **The shape is fault → canon's recommended fix → what the app is doing about it.** `problem`
+  and `appAction` are on all twelve; `recommendedFix` is on eleven. *(Corrected 2026-08-27 during
+  the build — the first draft of this line claimed all three were universal and `errata.test.ts`
+  went red on it. **HEARTH-11 has no recommended fix because canon judged Swift Flame "strong but
+  defensible" and wants nothing changed**, offering `mitigatingFactor` and `assessment` instead.
+  That is canon saying so, not a data gap, so nothing may assume a fix block exists.)*
+  HEARTH-01's `narrowerAlternative` shows **because it is there**, not because the layout reserved
+  a hole for it. Canon's reasoning fields (`cause` 1, `note` 1, `comparison` 1, `assessment` 4,
+  `mitigatingFactor` 1) render when present. This replaces Gate 1 decision 3's "three readings",
+  which eleven of the twelve cannot supply.
+- **Live vs later is computed, never hardcoded.** An erratum is live when the feature it names is
+  on the sheet at a level the character has reached — `feature.level <= character.level`, read
+  from the sheet's own field. At level 8 Nix gets six: four on Hearthfire Manifest, one on Aura
+  of Solace, one on Oath Spells. The other six (Smoldering Smite L15, Hearth Warden L20) sit
+  behind a fold and arrive on their own when he levels.
+- **Each erratum stores how the table ruled it**, in `codex-errata-${characterId}`: not asked yet
+  / following canon's recommended fix / your DM ruled otherwise, in your own words. That is the
+  artifact — a flag you cannot answer is a flag you re-read every session.
+- **~~Two~~ FOUR of the six live errata reach no turn option** — corrected 2026-08-27 from the
+  measurement, see finding AT. Of the fourteen options `composeTurn` builds for Nix, exactly **one**
+  (Hearthfire Manifest) reaches any erratum at all; it reaches four. Aura of Solace composes no
+  option and "Oath Spells" is not a feature name any row carries, so HEARTH-07 and HEARTH-08 have no
+  route through the sheet — and neither do the two features they concern. This is finding AB's shape
+  again, worse than estimated, and it is designed for up front: the band is the home, the sheet is
+  the shortcut. Pinned by a test so the number cannot drift silently.
+- **Nothing is silently changed and nothing is enforced.** See 8b.
+
+**8b — The four errata that ask the app to ACT.** *(new, split out of 8)*
+Canon's `appAction` on four records asks for behaviour, not text: HEARTH-04's mandatory temp-HP
+warning, HEARTH-03's record-and-enforce trigger, HEARTH-08's Warding Bond de-duplication,
+HEARTH-07's Incapacitated inheritance on Aura of Solace. Two touch the combat write path, which
+slice 10 owns. **Scoped after Marcus has read the twelve in slice 8 and recorded his DM's
+rulings** — the app must not enforce a house rule before the house has ruled.
+
+> *Original slice 8 text, superseded 2026-08-27:* "Errata: show both, default to the fix. All 12
+> `HEARTH-##` flags inline and expanded, each with the as-written text, the fault, the cause, the
+> three readings, and one-tap DM wording. Stored per character in `codex-errata-${id}`. Nothing
+> silently changed."
 
 **9 — Retire the competing menus.**
 Only now, and only after each one's unique capabilities are enumerated and **pinned as

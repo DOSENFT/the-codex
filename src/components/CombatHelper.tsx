@@ -60,6 +60,12 @@ import { optionDetail } from '../lib/turn/detail'
 import type { TurnOption } from '../lib/turn/types'
 import { ReactionsBand } from './combat/ReactionsBand'
 import { ContentionBand } from './combat/ContentionBand'
+import { ErrataBand } from './combat/ErrataBand'
+import { liveErrata, laterErrata } from '../lib/canon/errata'
+import {
+  loadRulings, saveRulings, setRuling,
+  type ErratumRulings, type RulingStatus,
+} from '../lib/errata-rulings'
 import { CombatProvider, useCombat } from './turn/CombatProvider'
 import { useCollapsible } from '../hooks/useCollapsible'
 import { type CombatLog, type DamageEntry, createCombatLog, logDamage as logDamageEntry, endCombatLog, saveDamageLogs, loadDamageLogs } from '../lib/damage-log'
@@ -819,6 +825,40 @@ function ContentionBandLive({
   )
 }
 
+/* The collapse hook for the errata band. Slice 8.
+ *
+ * Thinner than the two wrappers above because this band reads no combat
+ * context at all — errata are a fact about the SHEET, not about the turn, and
+ * they say the same thing whether or not a fight is running. So the scoping is
+ * computed here from `character.features` and `character.level` and handed down
+ * as plain arrays, keeping the band renderable under `renderToStaticMarkup`.
+ *
+ * DEFAULT CLOSED, for the same reason `ContentionBandLive` is: Marcus's opening
+ * ask was for less on screen. Closed it is one line that states the outstanding
+ * work — "Rules flags · 6 · 6 unanswered" — and that line is the whole of its
+ * cost until he taps it. */
+function ErrataBandLive({
+  character,
+  rulings,
+  onRule,
+}: {
+  character: Character
+  rulings: ErratumRulings
+  onRule: (erratumId: string, status: RulingStatus, dmWording?: string) => void
+}) {
+  const section = useCollapsible('combat-errata', character.id, false)
+  return (
+    <ErrataBand
+      live={liveErrata(character.features, character.level)}
+      later={laterErrata(character.features, character.level)}
+      rulings={rulings}
+      isOpen={section.isOpen}
+      onToggle={section.toggle}
+      onRule={onRule}
+    />
+  )
+}
+
 /* THE DETAIL SHEET, LIVE — Table Truth slice 7.
  *
  * A hooks wrapper for the same reason `ReactionsBandLive` is one: the sheet
@@ -836,11 +876,15 @@ function OptionDetailSheetLive({
   character,
   onClose,
   onRollDice,
+  rulings,
 }: {
   option: TurnOption | null
   character: Character
   onClose: () => void
   onRollDice?: (prefill: { notation: string; label: string }) => void
+  /** Slice 8. The same map the Rules flags band writes, so a ruling recorded
+   *  there is the ruling this sheet reports. */
+  rulings: ErratumRulings
 }) {
   const { turn } = useCombat()
   if (!option) return null
@@ -850,6 +894,7 @@ function OptionDetailSheetLive({
       detail={optionDetail(option, character, turn.economy)}
       onClose={onClose}
       onRoll={onRollDice}
+      rulings={rulings}
     />
   )
 }
@@ -919,6 +964,33 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
 
   // Quick lookup panel
   const [lookupOpen, setLookupOpen] = useState(false)
+
+  /* How the table ruled on each of canon's errata. Slice 8.
+     Held here rather than inside the band because TWO surfaces read it — the
+     Rules flags band and the option detail sheet — and a ruling recorded in one
+     that did not appear in the other would be the app disagreeing with itself
+     about the same rule, on the same screen.
+
+     READ ON MOUNT, WRITTEN ONLY ON A TAP. The lazy initialiser reads once;
+     nothing here writes until `handleRule` fires. That is deliberate and it is
+     finding AR's lesson: this tab already writes `codex-combat-*` and
+     `codex-character-*` on load, for no reason a player asked for, and slice 10
+     owns fixing it. Slice 8 does not add a third. */
+  const [rulings, setRulings] = useState<ErratumRulings>(() => loadRulings(character.id))
+  useEffect(() => { setRulings(loadRulings(character.id)) }, [character.id])
+
+  const handleRule = useCallback(
+    (erratumId: string, status: RulingStatus, dmWording?: string) => {
+      /* `next` is computed OUTSIDE the state updater so the write happens once.
+         An updater is a function React is entitled to call twice, and a double
+         call here would be a double write of the same bytes — harmless today,
+         and exactly the shape of the bug that is not harmless later. */
+      const next = setRuling(rulings, erratumId, status, dmWording, new Date())
+      setRulings(next)
+      saveRulings(character.id, next)
+    },
+    [rulings, character.id]
+  )
 
   // Collapsible section hooks.
   // Action economy, spell slots and class resources no longer have one: those
@@ -1275,6 +1347,23 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
         <BasicActionsReference onSelectAction={handleQuickAction} loading={loading} />
       </CollapsibleCombatSection>
 
+      {/* ── Table Truth slice 8 — the rules flags ──
+             HERE, and not up with the turn list, on purpose. Slice 9 set the
+             order of this tab as a priority order — what to do now, then what
+             to watch for, then everything else, then reference — and this is
+             reference. Canon's errata are read between sessions and quoted at a
+             DM; nothing in them changes what Marcus taps in the next fifteen
+             seconds. The two of them that DO bear on a live option (the four on
+             Hearthfire Manifest) already reach him through the detail sheet,
+             which is where he will be looking at the moment they matter.
+
+             It sits directly after the basic-actions reference because the two
+             answer the same kind of question — "what is the actual rule here" —
+             and before Rest Management, which is a control rather than a text.
+
+             It writes `codex-errata-${character.id}` and only on a tap. */}
+      <ErrataBandLive character={character} rulings={rulings} onRule={handleRule} />
+
       {/* ── Collapsible: Rest Management ── */}
       <CollapsibleCombatSection
         title="Rest Management"
@@ -1337,6 +1426,7 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
         character={character}
         onClose={() => setOpenOption(null)}
         onRollDice={onOpenDiceRoller}
+        rulings={rulings}
       />
 
       <TurnDeck

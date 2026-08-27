@@ -1,0 +1,738 @@
+{
+  "closed": {
+    "present": true,
+    "caption": "Rules flags6 · 6 unanswered",
+    "open": "false",
+    "rows": [],
+    "laterFold": ""
+  },
+  "open": {
+    "present": true,
+    "caption": "Rules flags6 · 6 unanswered",
+    "open": "true",
+    "rows": [
+      {
+        "id": "HEARTH-03",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-03",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-04",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak lasts 'until the Temporary Hit Points are depleted'. In 2024 Temporary Hit Points DO NOT STACK - when you gain new Temporary Hit Points you choose to keep the old pool or take the new one. Taking any other source of Temporary Hit Points (Heroism, Inspiring Leader, Orc Adrenaline Rush, a Chef treat, Aid does not apply) REPLACES the cloak's pool, which by the feature's own wording ends the cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-04",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-05",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The retaliation clause has no limit on frequency. 'When you are hit by a melee attack, the creature takes 1d10 Fire damage' triggers on every melee hit, with no once-per-turn or once-per-round cap and no Reaction cost.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-05",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-06",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "Unclear whether the manifestation must be summoned before the cloak can be used, and whether summoning it costs a separate Bonus Action from the Reaction that activates the cloak. Also undefined: how the manifestation moves, whether it occupies a space, whether it can be attacked or targeted, and whether it provides light while worn as a cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-06",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-07",
+        "severity": "medium",
+        "levelNote": "level 7 · your sheet",
+        "boxes": [
+          {
+            "text": "The text says 'You and your allies have Resistance to Fire, Cold, and Psychic damage while in your Aura of Protection'. It does not state that the aura is inactive while you are Incapacitated, but Aura of Protection itself is. It should inherit that limitation.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-07",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-08",
+        "severity": "low",
+        "levelNote": "level 5 · canon",
+        "boxes": [
+          {
+            "text": "Warding Bond is granted as an oath spell at Paladin level 5, but it is ALSO on the standard 2024 Paladin spell list. Half of that tier's grant is therefore wasted - the player could already have prepared it.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-08",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      }
+    ],
+    "laterFold": "6 more arrive as you level"
+  },
+  "faults": [
+    {
+      "id": "HEARTH-03",
+      "found": true,
+      "canonChars": 273,
+      "paintedChars": 273,
+      "exact": true,
+      "clamped": false,
+      "overflowing": false
+    },
+    {
+      "id": "HEARTH-04",
+      "found": true,
+      "canonChars": 407,
+      "paintedChars": 407,
+      "exact": true,
+      "clamped": false,
+      "overflowing": false
+    },
+    {
+      "id": "HEARTH-05",
+      "found": true,
+      "canonChars": 218,
+      "paintedChars": 218,
+      "exact": true,
+      "clamped": false,
+      "overflowing": false
+    },
+    {
+      "id": "HEARTH-06",
+      "found": true,
+      "canonChars": 346,
+      "paintedChars": 346,
+      "exact": true,
+      "clamped": false,
+      "overflowing": false
+    },
+    {
+      "id": "HEARTH-07",
+      "found": true,
+      "canonChars": 261,
+      "paintedChars": 261,
+      "exact": true,
+      "clamped": false,
+      "overflowing": false
+    },
+    {
+      "id": "HEARTH-08",
+      "found": true,
+      "canonChars": 207,
+      "paintedChars": 207,
+      "exact": true,
+      "clamped": false,
+      "overflowing": false
+    }
+  ],
+  "beforeTap": {
+    "id": "HEARTH-03",
+    "severity": "high",
+    "levelNote": "level 3 · your sheet",
+    "boxes": [
+      {
+        "text": "The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used.",
+        "painted": true,
+        "clamped": false,
+        "overflowing": false
+      }
+    ],
+    "rulingGroup": "Ruling for HEARTH-03",
+    "pressed": "Not asked yet",
+    "headings": [],
+    "expanded": "false"
+  },
+  "afterTap": {
+    "id": "HEARTH-03",
+    "severity": "high",
+    "levelNote": "level 3 · your sheet",
+    "boxes": [
+      {
+        "text": "The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used.",
+        "painted": true,
+        "clamped": false,
+        "overflowing": false
+      },
+      {
+        "text": "Define the trigger explicitly. Suggested: 'As a Reaction, which you take when you or a creature you can see within 30 feet takes damage, you can expend one use of your Channel Divinity...' Alternatively convert to a Bonus Action to match official Channel Divinity options.",
+        "painted": true,
+        "clamped": false,
+        "overflowing": false
+      },
+      {
+        "text": "Require the player to record a chosen trigger with DM approval, then enforce it. Default suggestion: 'when you take damage'.",
+        "painted": true,
+        "clamped": false,
+        "overflowing": false
+      },
+      {
+        "text": "No official Paladin Channel Divinity option uses a Reaction; they use a Bonus Action or the Magic action. This is a genuine departure.",
+        "painted": true,
+        "clamped": false,
+        "overflowing": false
+      }
+    ],
+    "rulingGroup": "Ruling for HEARTH-03",
+    "pressed": "Not asked yet",
+    "headings": [
+      "Canon's recommended fix",
+      "What this app does about it",
+      "Also worth knowing"
+    ],
+    "expanded": "true"
+  },
+  "expanded": [
+    "The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used.",
+    "Define the trigger explicitly. Suggested: 'As a Reaction, which you take when you or a creature you can see within 30 feet takes damage, you can expend one use of your Channel Divinity...' Alternatively convert to a Bonus Action to match official Channel Divinity options.",
+    "Require the player to record a chosen trigger with DM approval, then enforce it. Default suggestion: 'when you take damage'.",
+    "No official Paladin Channel Divinity option uses a Reaction; they use a Bonus Action or the Magic action. This is a genuine departure."
+  ],
+  "afterRuling": {
+    "present": true,
+    "caption": "Rules flags6 · 5 unanswered",
+    "open": "true",
+    "rows": [
+      {
+        "id": "HEARTH-03",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          },
+          {
+            "text": "Define the trigger explicitly. Suggested: 'As a Reaction, which you take when you or a creature you can see within 30 feet takes damage, you can expend one use of your Channel Divinity...' Alternatively convert to a Bonus Action to match official Channel Divinity options.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          },
+          {
+            "text": "Require the player to record a chosen trigger with DM approval, then enforce it. Default suggestion: 'when you take damage'.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          },
+          {
+            "text": "No official Paladin Channel Divinity option uses a Reaction; they use a Bonus Action or the Magic action. This is a genuine departure.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-03",
+        "pressed": "Canon's fix",
+        "headings": [
+          "Canon's recommended fix",
+          "What this app does about it",
+          "Also worth knowing"
+        ],
+        "expanded": "true"
+      },
+      {
+        "id": "HEARTH-04",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak lasts 'until the Temporary Hit Points are depleted'. In 2024 Temporary Hit Points DO NOT STACK - when you gain new Temporary Hit Points you choose to keep the old pool or take the new one. Taking any other source of Temporary Hit Points (Heroism, Inspiring Leader, Orc Adrenaline Rush, a Chef treat, Aid does not apply) REPLACES the cloak's pool, which by the feature's own wording ends the cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-04",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-05",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The retaliation clause has no limit on frequency. 'When you are hit by a melee attack, the creature takes 1d10 Fire damage' triggers on every melee hit, with no once-per-turn or once-per-round cap and no Reaction cost.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-05",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-06",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "Unclear whether the manifestation must be summoned before the cloak can be used, and whether summoning it costs a separate Bonus Action from the Reaction that activates the cloak. Also undefined: how the manifestation moves, whether it occupies a space, whether it can be attacked or targeted, and whether it provides light while worn as a cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-06",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-07",
+        "severity": "medium",
+        "levelNote": "level 7 · your sheet",
+        "boxes": [
+          {
+            "text": "The text says 'You and your allies have Resistance to Fire, Cold, and Psychic damage while in your Aura of Protection'. It does not state that the aura is inactive while you are Incapacitated, but Aura of Protection itself is. It should inherit that limitation.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-07",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-08",
+        "severity": "low",
+        "levelNote": "level 5 · canon",
+        "boxes": [
+          {
+            "text": "Warding Bond is granted as an oath spell at Paladin level 5, but it is ALSO on the standard 2024 Paladin spell list. Half of that tier's grant is therefore wasted - the player could already have prepared it.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-08",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      }
+    ],
+    "laterFold": "6 more arrive as you level"
+  },
+  "storedRuling": "{\"HEARTH-03\":{\"status\":\"canon\",\"decidedAt\":\"2026-08-27T17:18:47.499Z\"}}",
+  "afterReload": {
+    "present": true,
+    "caption": "Rules flags6 · 5 unanswered",
+    "open": "true",
+    "rows": [
+      {
+        "id": "HEARTH-03",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-03",
+        "pressed": "Canon's fix",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-04",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak lasts 'until the Temporary Hit Points are depleted'. In 2024 Temporary Hit Points DO NOT STACK - when you gain new Temporary Hit Points you choose to keep the old pool or take the new one. Taking any other source of Temporary Hit Points (Heroism, Inspiring Leader, Orc Adrenaline Rush, a Chef treat, Aid does not apply) REPLACES the cloak's pool, which by the feature's own wording ends the cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-04",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-05",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The retaliation clause has no limit on frequency. 'When you are hit by a melee attack, the creature takes 1d10 Fire damage' triggers on every melee hit, with no once-per-turn or once-per-round cap and no Reaction cost.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-05",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-06",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "Unclear whether the manifestation must be summoned before the cloak can be used, and whether summoning it costs a separate Bonus Action from the Reaction that activates the cloak. Also undefined: how the manifestation moves, whether it occupies a space, whether it can be attacked or targeted, and whether it provides light while worn as a cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-06",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-07",
+        "severity": "medium",
+        "levelNote": "level 7 · your sheet",
+        "boxes": [
+          {
+            "text": "The text says 'You and your allies have Resistance to Fire, Cold, and Psychic damage while in your Aura of Protection'. It does not state that the aura is inactive while you are Incapacitated, but Aura of Protection itself is. It should inherit that limitation.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-07",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-08",
+        "severity": "low",
+        "levelNote": "level 5 · canon",
+        "boxes": [
+          {
+            "text": "Warding Bond is granted as an oath spell at Paladin level 5, but it is ALSO on the standard 2024 Paladin spell list. Half of that tier's grant is therefore wasted - the player could already have prepared it.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-08",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      }
+    ],
+    "laterFold": "6 more arrive as you level"
+  },
+  "sheet": {
+    "followsCanon": true,
+    "unanswered": 3,
+    "erratumCount": 4
+  },
+  "withLater": {
+    "present": true,
+    "caption": "Rules flags6 · 5 unanswered",
+    "open": "true",
+    "rows": [
+      {
+        "id": "HEARTH-03",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          },
+          {
+            "text": "Define the trigger explicitly. Suggested: 'As a Reaction, which you take when you or a creature you can see within 30 feet takes damage, you can expend one use of your Channel Divinity...' Alternatively convert to a Bonus Action to match official Channel Divinity options.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          },
+          {
+            "text": "Require the player to record a chosen trigger with DM approval, then enforce it. Default suggestion: 'when you take damage'.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          },
+          {
+            "text": "No official Paladin Channel Divinity option uses a Reaction; they use a Bonus Action or the Magic action. This is a genuine departure.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-03",
+        "pressed": "Canon's fix",
+        "headings": [
+          "Canon's recommended fix",
+          "What this app does about it",
+          "Also worth knowing"
+        ],
+        "expanded": "true"
+      },
+      {
+        "id": "HEARTH-04",
+        "severity": "high",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The cloak lasts 'until the Temporary Hit Points are depleted'. In 2024 Temporary Hit Points DO NOT STACK - when you gain new Temporary Hit Points you choose to keep the old pool or take the new one. Taking any other source of Temporary Hit Points (Heroism, Inspiring Leader, Orc Adrenaline Rush, a Chef treat, Aid does not apply) REPLACES the cloak's pool, which by the feature's own wording ends the cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-04",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-05",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "The retaliation clause has no limit on frequency. 'When you are hit by a melee attack, the creature takes 1d10 Fire damage' triggers on every melee hit, with no once-per-turn or once-per-round cap and no Reaction cost.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-05",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-06",
+        "severity": "medium",
+        "levelNote": "level 3 · your sheet",
+        "boxes": [
+          {
+            "text": "Unclear whether the manifestation must be summoned before the cloak can be used, and whether summoning it costs a separate Bonus Action from the Reaction that activates the cloak. Also undefined: how the manifestation moves, whether it occupies a space, whether it can be attacked or targeted, and whether it provides light while worn as a cloak.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-06",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-07",
+        "severity": "medium",
+        "levelNote": "level 7 · your sheet",
+        "boxes": [
+          {
+            "text": "The text says 'You and your allies have Resistance to Fire, Cold, and Psychic damage while in your Aura of Protection'. It does not state that the aura is inactive while you are Incapacitated, but Aura of Protection itself is. It should inherit that limitation.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-07",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": "HEARTH-08",
+        "severity": "low",
+        "levelNote": "level 5 · canon",
+        "boxes": [
+          {
+            "text": "Warding Bond is granted as an oath spell at Paladin level 5, but it is ALSO on the standard 2024 Paladin spell list. Half of that tier's grant is therefore wasted - the player could already have prepared it.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": "Ruling for HEARTH-08",
+        "pressed": "Not asked yet",
+        "headings": [],
+        "expanded": "false"
+      },
+      {
+        "id": null,
+        "severity": null,
+        "levelNote": "level 15 · your sheet",
+        "boxes": [
+          {
+            "text": "The text says 'Whenever you use a Magic action to cast Divine Smite'. In 2024, Divine Smite's casting time is 'Bonus Action, taken immediately after hitting a target with a Melee weapon or an Unarmed Strike'. It is NEVER a Magic action. As written, the trigger condition can never be satisfied and the feature does nothing.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": null,
+        "pressed": null,
+        "headings": [],
+        "expanded": null
+      },
+      {
+        "id": null,
+        "severity": null,
+        "levelNote": "level 15 · your sheet",
+        "boxes": [
+          {
+            "text": "'add 1d8 Fire damage to each smite' - 'each smite' is undefined. If the trigger is a single casting of Divine Smite, there is only one smite, so 'each' is meaningless. It may be intended to mean every Smite spell, or every attack in the turn.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": null,
+        "pressed": null,
+        "headings": [],
+        "expanded": null
+      },
+      {
+        "id": null,
+        "severity": null,
+        "levelNote": "level 15 · your sheet",
+        "boxes": [
+          {
+            "text": "'This Fire damage ignores resistance and immunity to Fire damage.' Ignoring IMMUNITY is stronger than any official feat or feature in the 2024 rules. Elemental Adept and the Poisoner feat ignore Resistance only. Boon of Irresistible Offense (a level 19+ Epic Boon) ignores Resistance only.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": null,
+        "pressed": null,
+        "headings": [],
+        "expanded": null
+      },
+      {
+        "id": null,
+        "severity": null,
+        "levelNote": "level 20 · your sheet",
+        "boxes": [
+          {
+            "text": "'Any creature you choose within your aura may add Fire damage to their weapon attacks in an amount equal to your Charisma modifier.' Ambiguous scope: is this one creature, or all of them? Also undefined: once per turn per creature, or on every attack?",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": null,
+        "pressed": null,
+        "headings": [],
+        "expanded": null
+      },
+      {
+        "id": null,
+        "severity": null,
+        "levelNote": "level 20 · your sheet",
+        "boxes": [
+          {
+            "text": "'Whenever you cast a spell that has a casting time of an action, you can cast it using a Bonus Action instead.' This is very powerful - it lets you cast Flame Strike or Destructive Wave as a Bonus Action and still take the Attack action.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": null,
+        "pressed": null,
+        "headings": [],
+        "expanded": null
+      },
+      {
+        "id": null,
+        "severity": null,
+        "levelNote": "level 20 · your sheet",
+        "boxes": [
+          {
+            "text": "'Once per turn, you may choose one creature within your Aura, including yourself, to regain 10 HP.' Does not state what action, if any, this costs.",
+            "painted": true,
+            "clamped": false,
+            "overflowing": false
+          }
+        ],
+        "rulingGroup": null,
+        "pressed": null,
+        "headings": [],
+        "expanded": null
+      }
+    ],
+    "laterFold": "6 more arrive as you level"
+  },
+  "CLIP": {
+    "clipped": [],
+    "clamps": [],
+    "ellipses": [],
+    "canonEllipses": [
+      "p «Define the trigger explicitly. Suggested: 'As a Reaction, wh»"
+    ],
+    "swept": 148
+  },
+  "loadWrites": [
+    "codex-action-notes-nix-fixture",
+    "codex-combat-nix-fixture"
+  ],
+  "writes": [
+    "codex-errata-nix-fixture",
+    "codex-ui-nix-fixture"
+  ],
+  "changedValues": [],
+  "errors": []
+}
