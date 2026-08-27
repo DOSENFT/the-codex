@@ -1,0 +1,499 @@
+{
+  "AFF": {
+    "turn": [
+      "Hearthbrand — details",
+      "Javelin — details",
+      "Sacred Flame — details",
+      "Hearthfire Manifest — details"
+    ],
+    "reactions": [
+      "Opportunity Attack — Hearthbrand — details",
+      "Flaming Cloak — details"
+    ],
+    "rankedRows": 4,
+    "reactionRows": 2,
+    "elsewhere": 8,
+    "total": 14,
+    "chevrons": 6
+  },
+  "A": {
+    "open": true,
+    "title": "Hearthbrand",
+    "label": "Hearthbrand",
+    "z": "61",
+    "all": "Hearthbrandyour ownclose ✕ActionCostAction+7 to hit (STR +3 + prof +1 magic)1d8+4 Slashing5 ftMagicalMastery: SapVersatile (1d10)What it does+7 to hit (STR +3 + prof +1 magic) · 1d8+4 Slashing · 5 ft · Magical · Mastery: Sap · Versatile (1d10)Roll from here1d20+7to hit1d8+4roll Slashing2d8+4on a crit",
+    "facts": [
+      {
+        "label": "Cost",
+        "value": "Action"
+      },
+      {
+        "label": "",
+        "value": "+7 to hit (STR +3 + prof +1 magic)"
+      },
+      {
+        "label": "",
+        "value": "1d8+4 Slashing"
+      },
+      {
+        "label": "",
+        "value": "5 ft"
+      },
+      {
+        "label": "",
+        "value": "Magical"
+      },
+      {
+        "label": "",
+        "value": "Mastery: Sap"
+      },
+      {
+        "label": "",
+        "value": "Versatile (1d10)"
+      }
+    ],
+    "what": "+7 to hit (STR +3 + prof +1 magic) · 1d8+4 Slashing · 5 ft · Magical · Mastery: Sap · Versatile (1d10)",
+    "whatLen": 102,
+    "rolls": [
+      {
+        "notation": "1d20+7",
+        "label": "to hit",
+        "tappable": true
+      },
+      {
+        "notation": "1d8+4",
+        "label": "roll Slashing",
+        "tappable": true
+      },
+      {
+        "notation": "2d8+4",
+        "label": "on a crit",
+        "tappable": true
+      }
+    ],
+    "ruleBox": null,
+    "ruleText": null,
+    "tacticsPresent": false,
+    "tacticsExpanded": null,
+    "tactics": [],
+    "clipped": [],
+    "clamps": [],
+    "top": 364,
+    "height": 481
+  },
+  "tacticsRow": "Sacred Flame — details",
+  "T": {
+    "open": true,
+    "title": "Sacred Flame",
+    "label": "Sacred Flame",
+    "z": "61",
+    "all": "Sacred Flameclose ✕Action · no slotLevelEvocation cantripCasting TimeActionRange60 feetComponentsV, SDurationInstantaneousDamage1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) RadiantSaveDexterity — negatesGranted byOptional pick: Blessed Warrior Fighting Style (Paladin level 2) grants any TWO Cleric cantrips; Charisma is the spellcasting abilitySourcePHB 2024What it doesFlame-like radiance descends on a creature you can see within range. It must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Cover for this save. The damage increases at character levels 5, 11 and 17.Roll from here2d8roll RadiantHow to use it▸",
+    "facts": [
+      {
+        "label": "Level",
+        "value": "Evocation cantrip"
+      },
+      {
+        "label": "Casting Time",
+        "value": "Action"
+      },
+      {
+        "label": "Range",
+        "value": "60 feet"
+      },
+      {
+        "label": "Components",
+        "value": "V, S"
+      },
+      {
+        "label": "Duration",
+        "value": "Instantaneous"
+      },
+      {
+        "label": "Damage",
+        "value": "1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) Radiant"
+      },
+      {
+        "label": "Save",
+        "value": "Dexterity — negates"
+      },
+      {
+        "label": "Granted by",
+        "value": "Optional pick: Blessed Warrior Fighting Style (Paladin level 2) grants any TWO Cleric cantrips; Charisma is the spellcasting ability"
+      },
+      {
+        "label": "Source",
+        "value": "PHB 2024"
+      }
+    ],
+    "what": "Flame-like radiance descends on a creature you can see within range. It must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Cover for this save. The damage increases at character levels 5, 11 and 17.",
+    "whatLen": 249,
+    "rolls": [
+      {
+        "notation": "2d8",
+        "label": "roll Radiant",
+        "tappable": true
+      }
+    ],
+    "ruleBox": null,
+    "ruleText": null,
+    "tacticsPresent": true,
+    "tacticsExpanded": "false",
+    "tactics": [],
+    "clipped": [],
+    "clamps": [],
+    "top": 142,
+    "height": 702
+  },
+  "T_OPEN": {
+    "open": true,
+    "title": "Sacred Flame",
+    "label": "Sacred Flame",
+    "z": "61",
+    "all": "Sacred Flameclose ✕Action · no slotLevelEvocation cantripCasting TimeActionRange60 feetComponentsV, SDurationInstantaneousDamage1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) RadiantSaveDexterity — negatesGranted byOptional pick: Blessed Warrior Fighting Style (Paladin level 2) grants any TWO Cleric cantrips; Charisma is the spellcasting abilitySourcePHB 2024What it doesFlame-like radiance descends on a creature you can see within range. It must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Cover for this save. The damage increases at character levels 5, 11 and 17.Roll from here2d8roll RadiantHow to use it▾The standard ranged answer for a Blessed Warrior Paladin, and the choice between this and Toll the Dead is the real decision.IT IGNORES COVER— that is Sacred Flame's unique selling point and it is genuinely valuable. An archer behind a wall, an enemy in a murder hole, a caster peeking around a corner: cover normally gives +2 or +5 to Dexterity saves and AC. Sacred Flame ignores it entirely. Against a fortified position this is the only ranged option in your kit that works. IT USES A SAVE, NOT AN ATTACK ROLL, so a high-AC target does not blunt it — but a high-Dexterity target does. It is the mirror image of Scorching Ray: use Sacred Flame against armored, low-Dexterity enemies and Scorching Ray against agile, low-AC ones.RADIANT IS EXCELLENT: rarely resisted, and it is the same type as your Divine Smite and your level 11 Radiant Strikes, which keeps your damage profile consistent.SACRED FLAME VS TOLL THE DEAD: Toll the Dead does more damage (1d12 against a wounded target versus 1d8) and Necrotic is resisted about as rarely as Radiant. Sacred Flame ignores cover; Toll the Dead uses a Wisdom save. Take Sacred Flame if your campaign has fortifications and undead; take Toll the Dead if you want raw numbers. Do not take both — they overlap almost completely and you only get two cantrips.THE HONEST CAVEAT: at level 5+ with Extra Attack, two weapon swings almost always beat one cantrip. This is your answer for the rounds you CANNOT reach melee, not your default action.",
+    "facts": [
+      {
+        "label": "Level",
+        "value": "Evocation cantrip"
+      },
+      {
+        "label": "Casting Time",
+        "value": "Action"
+      },
+      {
+        "label": "Range",
+        "value": "60 feet"
+      },
+      {
+        "label": "Components",
+        "value": "V, S"
+      },
+      {
+        "label": "Duration",
+        "value": "Instantaneous"
+      },
+      {
+        "label": "Damage",
+        "value": "1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) Radiant"
+      },
+      {
+        "label": "Save",
+        "value": "Dexterity — negates"
+      },
+      {
+        "label": "Granted by",
+        "value": "Optional pick: Blessed Warrior Fighting Style (Paladin level 2) grants any TWO Cleric cantrips; Charisma is the spellcasting ability"
+      },
+      {
+        "label": "Source",
+        "value": "PHB 2024"
+      }
+    ],
+    "what": "Flame-like radiance descends on a creature you can see within range. It must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Cover for this save. The damage increases at character levels 5, 11 and 17.",
+    "whatLen": 249,
+    "rolls": [
+      {
+        "notation": "2d8",
+        "label": "roll Radiant",
+        "tappable": true
+      }
+    ],
+    "ruleBox": null,
+    "ruleText": null,
+    "tacticsPresent": true,
+    "tacticsExpanded": "true",
+    "tactics": [
+      {
+        "lead": "",
+        "text": "The standard ranged answer for a Blessed Warrior Paladin, and the choice between this and Toll the Dead is the real decision.",
+        "lines": 3
+      },
+      {
+        "lead": "IT IGNORES COVER",
+        "text": "IT IGNORES COVER— that is Sacred Flame's unique selling point and it is genuinely valuable. An archer behind a wall, an enemy in a murder hole, a caster peeking around a corner: cover normally gives +2 or +5 to Dexterity saves and AC. Sacred Flame ignores it entirely. Against a fortified position this is the only ranged option in your kit that works. IT USES A SAVE, NOT AN ATTACK ROLL, so a high-AC target does not blunt it — but a high-Dexterity target does. It is the mirror image of Scorching Ray: use Sacred Flame against armored, low-Dexterity enemies and Scorching Ray against agile, low-AC ones.",
+        "lines": 11
+      },
+      {
+        "lead": "RADIANT IS EXCELLENT",
+        "text": "RADIANT IS EXCELLENT: rarely resisted, and it is the same type as your Divine Smite and your level 11 Radiant Strikes, which keeps your damage profile consistent.",
+        "lines": 3
+      },
+      {
+        "lead": "SACRED FLAME VS TOLL THE DEAD",
+        "text": "SACRED FLAME VS TOLL THE DEAD: Toll the Dead does more damage (1d12 against a wounded target versus 1d8) and Necrotic is resisted about as rarely as Radiant. Sacred Flame ignores cover; Toll the Dead uses a Wisdom save. Take Sacred Flame if your campaign has fortifications and undead; take Toll the Dead if you want raw numbers. Do not take both — they overlap almost completely and you only get two cantrips.",
+        "lines": 8
+      },
+      {
+        "lead": "THE HONEST CAVEAT",
+        "text": "THE HONEST CAVEAT: at level 5+ with Extra Attack, two weapon swings almost always beat one cantrip. This is your answer for the rounds you CANNOT reach melee, not your default action.",
+        "lines": 4
+      }
+    ],
+    "clipped": [],
+    "clamps": [],
+    "top": 68,
+    "height": 776
+  },
+  "A_OPEN": {
+    "open": true,
+    "title": "Sacred Flame",
+    "label": "Sacred Flame",
+    "z": "61",
+    "all": "Sacred Flameclose ✕Action · no slotLevelEvocation cantripCasting TimeActionRange60 feetComponentsV, SDurationInstantaneousDamage1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) RadiantSaveDexterity — negatesGranted byOptional pick: Blessed Warrior Fighting Style (Paladin level 2) grants any TWO Cleric cantrips; Charisma is the spellcasting abilitySourcePHB 2024What it doesFlame-like radiance descends on a creature you can see within range. It must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Cover for this save. The damage increases at character levels 5, 11 and 17.Roll from here2d8roll RadiantHow to use it▾The standard ranged answer for a Blessed Warrior Paladin, and the choice between this and Toll the Dead is the real decision.IT IGNORES COVER— that is Sacred Flame's unique selling point and it is genuinely valuable. An archer behind a wall, an enemy in a murder hole, a caster peeking around a corner: cover normally gives +2 or +5 to Dexterity saves and AC. Sacred Flame ignores it entirely. Against a fortified position this is the only ranged option in your kit that works. IT USES A SAVE, NOT AN ATTACK ROLL, so a high-AC target does not blunt it — but a high-Dexterity target does. It is the mirror image of Scorching Ray: use Sacred Flame against armored, low-Dexterity enemies and Scorching Ray against agile, low-AC ones.RADIANT IS EXCELLENT: rarely resisted, and it is the same type as your Divine Smite and your level 11 Radiant Strikes, which keeps your damage profile consistent.SACRED FLAME VS TOLL THE DEAD: Toll the Dead does more damage (1d12 against a wounded target versus 1d8) and Necrotic is resisted about as rarely as Radiant. Sacred Flame ignores cover; Toll the Dead uses a Wisdom save. Take Sacred Flame if your campaign has fortifications and undead; take Toll the Dead if you want raw numbers. Do not take both — they overlap almost completely and you only get two cantrips.THE HONEST CAVEAT: at level 5+ with Extra Attack, two weapon swings almost always beat one cantrip. This is your answer for the rounds you CANNOT reach melee, not your default action.",
+    "facts": [
+      {
+        "label": "Level",
+        "value": "Evocation cantrip"
+      },
+      {
+        "label": "Casting Time",
+        "value": "Action"
+      },
+      {
+        "label": "Range",
+        "value": "60 feet"
+      },
+      {
+        "label": "Components",
+        "value": "V, S"
+      },
+      {
+        "label": "Duration",
+        "value": "Instantaneous"
+      },
+      {
+        "label": "Damage",
+        "value": "1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) Radiant"
+      },
+      {
+        "label": "Save",
+        "value": "Dexterity — negates"
+      },
+      {
+        "label": "Granted by",
+        "value": "Optional pick: Blessed Warrior Fighting Style (Paladin level 2) grants any TWO Cleric cantrips; Charisma is the spellcasting ability"
+      },
+      {
+        "label": "Source",
+        "value": "PHB 2024"
+      }
+    ],
+    "what": "Flame-like radiance descends on a creature you can see within range. It must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Cover for this save. The damage increases at character levels 5, 11 and 17.",
+    "whatLen": 249,
+    "rolls": [
+      {
+        "notation": "2d8",
+        "label": "roll Radiant",
+        "tappable": true
+      }
+    ],
+    "ruleBox": null,
+    "ruleText": null,
+    "tacticsPresent": true,
+    "tacticsExpanded": "true",
+    "tactics": [
+      {
+        "lead": "",
+        "text": "The standard ranged answer for a Blessed Warrior Paladin, and the choice between this and Toll the Dead is the real decision.",
+        "lines": 3
+      },
+      {
+        "lead": "IT IGNORES COVER",
+        "text": "IT IGNORES COVER— that is Sacred Flame's unique selling point and it is genuinely valuable. An archer behind a wall, an enemy in a murder hole, a caster peeking around a corner: cover normally gives +2 or +5 to Dexterity saves and AC. Sacred Flame ignores it entirely. Against a fortified position this is the only ranged option in your kit that works. IT USES A SAVE, NOT AN ATTACK ROLL, so a high-AC target does not blunt it — but a high-Dexterity target does. It is the mirror image of Scorching Ray: use Sacred Flame against armored, low-Dexterity enemies and Scorching Ray against agile, low-AC ones.",
+        "lines": 11
+      },
+      {
+        "lead": "RADIANT IS EXCELLENT",
+        "text": "RADIANT IS EXCELLENT: rarely resisted, and it is the same type as your Divine Smite and your level 11 Radiant Strikes, which keeps your damage profile consistent.",
+        "lines": 3
+      },
+      {
+        "lead": "SACRED FLAME VS TOLL THE DEAD",
+        "text": "SACRED FLAME VS TOLL THE DEAD: Toll the Dead does more damage (1d12 against a wounded target versus 1d8) and Necrotic is resisted about as rarely as Radiant. Sacred Flame ignores cover; Toll the Dead uses a Wisdom save. Take Sacred Flame if your campaign has fortifications and undead; take Toll the Dead if you want raw numbers. Do not take both — they overlap almost completely and you only get two cantrips.",
+        "lines": 8
+      },
+      {
+        "lead": "THE HONEST CAVEAT",
+        "text": "THE HONEST CAVEAT: at level 5+ with Extra Attack, two weapon swings almost always beat one cantrip. This is your answer for the rounds you CANNOT reach melee, not your default action.",
+        "lines": 4
+      }
+    ],
+    "clipped": [],
+    "clamps": [],
+    "top": 68,
+    "height": 776
+  },
+  "B": {
+    "open": true,
+    "title": "Flaming Cloak",
+    "label": "Flaming Cloak",
+    "z": "61",
+    "all": "Flaming Cloakclose ✕Reaction · 1/2 uses · Homebrewmanifest summon dismissBonus ActionlightBright Light 10 ft, Dim Light 10 ft beyondleashExtinguished if it goes more than 30 feet from youcloak actionReactioncloak cost1 Channel Divinity usetemp HP12 temp HP (Paladin level + Charisma modifier)retaliation1d10 Fire retaliationdurationUntil the Temporary Hit Points are depletedWhat it doesYou bear the manifestation of the Hearthfire both within and without. This manifestation appears in a form you choose, such as a small floating ember, a dancing flame, or a spirit. The manifestation sheds Bright Light for 10 feet and Dim Light for 10 additional feet. If this manifestation goes beyond 30 feet from you, it is extinguished. It can be summoned or dismissed as a Bonus Action. As a Reaction, you can expend one use of your Channel Divinity and issue a command word, causing the Essence of the Hearth to transform into a flaming cloak. The cloak immediately grants you Temporary Hit Points equal to your Paladin level plus your spellcasting ability modifier. When you are hit by a melee attack, the creature takes 1d10 Fire damage in retaliation. This effect lasts until the Temporary Hit Points are depleted.Roll from here1d10roll Fire",
+    "facts": [
+      {
+        "label": "manifest summon dismiss",
+        "value": "Bonus Action"
+      },
+      {
+        "label": "light",
+        "value": "Bright Light 10 ft, Dim Light 10 ft beyond"
+      },
+      {
+        "label": "leash",
+        "value": "Extinguished if it goes more than 30 feet from you"
+      },
+      {
+        "label": "cloak action",
+        "value": "Reaction"
+      },
+      {
+        "label": "cloak cost",
+        "value": "1 Channel Divinity use"
+      },
+      {
+        "label": "temp HP",
+        "value": "12 temp HP (Paladin level + Charisma modifier)"
+      },
+      {
+        "label": "retaliation",
+        "value": "1d10 Fire retaliation"
+      },
+      {
+        "label": "duration",
+        "value": "Until the Temporary Hit Points are depleted"
+      }
+    ],
+    "what": "You bear the manifestation of the Hearthfire both within and without. This manifestation appears in a form you choose, such as a small floating ember, a dancing flame, or a spirit. The manifestation sheds Bright Light for 10 feet and Dim Light for 10 additional feet. If this manifestation goes beyond 30 feet from you, it is extinguished. It can be summoned or dismissed as a Bonus Action. As a Reaction, you can expend one use of your Channel Divinity and issue a command word, causing the Essence of the Hearth to transform into a flaming cloak. The cloak immediately grants you Temporary Hit Points equal to your Paladin level plus your spellcasting ability modifier. When you are hit by a melee attack, the creature takes 1d10 Fire damage in retaliation. This effect lasts until the Temporary Hit Points are depleted.",
+    "whatLen": 822,
+    "rolls": [
+      {
+        "notation": "1d10",
+        "label": "roll Fire",
+        "tappable": true
+      }
+    ],
+    "ruleBox": null,
+    "ruleText": null,
+    "tacticsPresent": false,
+    "tacticsExpanded": null,
+    "tactics": [],
+    "clipped": [],
+    "clamps": [],
+    "top": 68,
+    "height": 776
+  },
+  "AFF_F": {
+    "turn": [
+      "Hearthbrand — details",
+      "Javelin — details",
+      "Sacred Flame — details",
+      "Hearthfire Manifest — details"
+    ],
+    "reactions": [
+      "Opportunity Attack — Hearthbrand — details",
+      "Flaming Cloak — details"
+    ],
+    "rankedRows": 4,
+    "reactionRows": 2,
+    "elsewhere": 8,
+    "total": 14,
+    "chevrons": 6
+  },
+  "spentSheets": [
+    {
+      "title": "Hearthbrand",
+      "ruleBox": null
+    },
+    {
+      "title": "Javelin",
+      "ruleBox": null
+    },
+    {
+      "title": "Sacred Flame",
+      "ruleBox": null
+    },
+    {
+      "title": "Hearthfire Manifest",
+      "ruleBox": null
+    },
+    {
+      "title": "Opportunity Attack — Hearthbrand",
+      "ruleBox": null
+    },
+    {
+      "title": "Flaming Cloak",
+      "ruleBox": null
+    }
+  ],
+  "swept": [
+    {
+      "label": "Hearthbrand — details",
+      "title": "Hearthbrand",
+      "whatLen": 102,
+      "facts": 7,
+      "rolls": 3,
+      "ruleBox": null,
+      "clipped": [],
+      "clamps": [],
+      "ellipsis": null
+    },
+    {
+      "label": "Javelin — details",
+      "title": "Javelin",
+      "whatLen": 60,
+      "facts": 4,
+      "rolls": 3,
+      "ruleBox": null,
+      "clipped": [],
+      "clamps": [],
+      "ellipsis": null
+    },
+    {
+      "label": "Sacred Flame — details",
+      "title": "Sacred Flame",
+      "whatLen": 249,
+      "facts": 9,
+      "rolls": 1,
+      "ruleBox": null,
+      "clipped": [],
+      "clamps": [],
+      "ellipsis": null
+    },
+    {
+      "label": "Hearthfire Manifest — details",
+      "title": "Hearthfire Manifest",
+      "whatLen": 822,
+      "facts": 8,
+      "rolls": 1,
+      "ruleBox": null,
+      "clipped": [],
+      "clamps": [],
+      "ellipsis": null
+    },
+    {
+      "label": "Opportunity Attack — Hearthbrand — details",
+      "title": "Opportunity Attack — Hearthbrand",
+      "whatLen": 150,
+      "facts": 8,
+      "rolls": 3,
+      "ruleBox": null,
+      "clipped": [],
+      "clamps": [],
+      "ellipsis": null
+    },
+    {
+      "label": "Flaming Cloak — details",
+      "title": "Flaming Cloak",
+      "whatLen": 822,
+      "facts": 8,
+      "rolls": 1,
+      "ruleBox": null,
+      "clipped": [],
+      "clamps": [],
+      "ellipsis": null
+    }
+  ],
+  "moved": [],
+  "writesWhileOpen": [],
+  "errors": []
+}

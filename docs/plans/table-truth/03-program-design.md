@@ -304,17 +304,39 @@ App.tsx (tab 'combat')
 ### Row tap
 
 ```
-TurnOptionRow.onOpen(option)
- └ OptionDetailSheet
-    ├ spellByName / featureByName → statBlock()       band 1  stat block
-    ├ canon.summary                                   band 2  what it does  ← the prose
-    ├ option.rollNotation → existing dice roller      band 3  roll strip
-    ├ turn.economy.spellSlotUsedThisTurn              band 3b live rule box
-    ├ errataFor(name) → readingFor() → dmWording()    band 3c errata flag
-    └ canon.tactics                                   band 4  how to use it — FOLDED
+TurnOptionRow.onOpen(option) · ReactionRow.onOpen(row.option)
+ └ optionDetail(option, character, economy)   ← lib/turn/detail.ts, pure
+    └ OptionDetailSheet                        ← pure-prop, portals via Sheet z=60
+       ├ spellByName / featureByName → statBlock()    band 1  stat block
+       ├ canon.summary                                band 2  what it does  ← the prose
+       ├ rollsFor(option, character) → RollSource[]   band 3  roll strip
+       ├ economy.spellSlotUsedThisTurn                band 3b live rule box
+       └ splitTactics(canon.tactics)                  band 4  how to use it — FOLDED
 ```
 
 Bands 1, 2 and 4 come from a file shipped in the bundle. **No model call, no network.**
+
+> **Corrected 2026-08-27, during slice 7** (call-stack detail only; the design above it stands).
+> Three lines as approved did not survive contact:
+>
+> 1. **`option.rollNotation → existing dice roller`** was wrong twice over. There is no single
+>    notation: band 3 is a *list* of `RollSource`s (`lib/turn/rolls.ts`), because an attack is
+>    d20 **and** damage **and** a crit. And `option.dice` cannot be the source — it carries two
+>    meanings, so reading it as an attack hands Shield of Faith, Misty Step and Warding Bond a
+>    `1d20+8` attack roll none of them has (**finding AD**), and a crit line is only legal beside
+>    an attack roll (**finding AF**). A canon feature also has no weapon-style `damage` field at
+>    all, so `RollSource.segments` exists to stop a canon match *removing* a roll button that
+>    homebrew would have had (**finding AE**).
+> 2. **`errataFor(name) → readingFor() → dmWording()`** is **slice 8**, not a band of slice 7, and
+>    it needs re-scoping before it starts — only 1 of the 12 errata carries `cause` /
+>    `narrowerAlternative`, so "three readings" is not something canon can supply for eleven of
+>    them (**finding AA**).
+> 3. **`turn.economy.spellSlotUsedThisTurn`** is right, but note *where it comes from*: it is
+>    derived per round from the combat **log** (`compose.ts:164`), not stored on `CombatState`
+>    (**finding AG**).
+>
+> Also inserted: `optionDetail()` between the tap and the component, so the assembly is testable
+> in node without a DOM and the component stays pure-prop.
 
 ### Gemini 404
 

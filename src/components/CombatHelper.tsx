@@ -57,6 +57,9 @@ import { QuickLookup } from './combat/QuickLookup'
 import { CanonMatchReport } from './combat/CanonMatchReport'
 import { VitalsBand } from './combat/VitalsBand'
 import { TurnOptionRow } from './combat/TurnOptionRow'
+import { OptionDetailSheet } from './combat/OptionDetailSheet'
+import { optionDetail } from '../lib/turn/detail'
+import type { TurnOption } from '../lib/turn/types'
 import { ReactionsBand } from './combat/ReactionsBand'
 import { CombatProvider, useCombat } from './turn/CombatProvider'
 import { useCollapsible } from '../hooks/useCollapsible'
@@ -931,7 +934,7 @@ function CollapsibleCombatSection({
  * rather than letting the list imply it is the whole truth. Nothing is lost in
  * the meantime — every existing surface on this tab is still below, untouched.
  */
-function YourTurnList() {
+function YourTurnList({ onOpen }: { onOpen?: (option: TurnOption) => void }) {
   const { turn } = useCombat()
 
   /* REACTIONS ARE NOT LISTED HERE ANY MORE — slice 6.
@@ -968,7 +971,7 @@ function YourTurnList() {
         <ul className="mt-2 flex flex-col gap-1.5">
           {ranked.map(option => (
             <li key={option.id}>
-              <TurnOptionRow option={option} />
+              <TurnOptionRow option={option} onOpen={onOpen} />
             </li>
           ))}
         </ul>
@@ -1003,7 +1006,13 @@ function YourTurnList() {
  * (`codex-ui-${characterId}`). No new storage key: Marcus asked for fewer things
  * on screen, not for more places a preference can go missing. Default OPEN,
  * because this band is the thing he told us was absent. */
-function ReactionsBandLive({ character }: { character: Character }) {
+function ReactionsBandLive({
+  character,
+  onOpen,
+}: {
+  character: Character
+  onOpen?: (option: TurnOption) => void
+}) {
   const { turn } = useCombat()
   const section = useCollapsible('combat-reactions', character.id, true)
   return (
@@ -1012,6 +1021,42 @@ function ReactionsBandLive({ character }: { character: Character }) {
       character={character}
       isOpen={section.isOpen}
       onToggle={section.toggle}
+      onOpen={onOpen}
+    />
+  )
+}
+
+/* THE DETAIL SHEET, LIVE — Table Truth slice 7.
+ *
+ * A hooks wrapper for the same reason `ReactionsBandLive` is one: the sheet
+ * body is a pure function of its props so it can be rendered — and asserted on
+ * — in the node test environment, which has no DOM. The `useCombat()` call
+ * lives here instead.
+ *
+ * IT READS THE SAME COMPOSED TURN THE ROW CAME FROM. `turn.economy` is what
+ * makes the one-slot-per-turn box live rather than a general note: the box says
+ * "you have already spent your slot" only when this turn's economy says so.
+ * Reading a different source here than the row read would let the sheet and the
+ * row that opened it disagree about the same turn. */
+function OptionDetailSheetLive({
+  option,
+  character,
+  onClose,
+  onRollDice,
+}: {
+  option: TurnOption | null
+  character: Character
+  onClose: () => void
+  onRollDice?: (prefill: { notation: string; label: string }) => void
+}) {
+  const { turn } = useCombat()
+  if (!option) return null
+  return (
+    <OptionDetailSheet
+      isOpen
+      detail={optionDetail(option, character, turn.economy)}
+      onClose={onClose}
+      onRoll={onRollDice}
     />
   )
 }
@@ -1067,6 +1112,12 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
     const saved = loadCombatState(character.id)
     return saved ?? createCombatState(character)
   })
+
+  /* The option whose detail sheet is open, or null. Slice 7.
+     The OPTION itself, not its id: the row already holds the composed option,
+     and looking it up again by id would be a second way for one tap to resolve
+     to the wrong thing. */
+  const [openOption, setOpenOption] = useState<TurnOption | null>(null)
 
   // Action menu slide-up panel
   const [actionMenuOpen, setActionMenuOpen] = useState(false)
@@ -1376,7 +1427,7 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
              you need first. TurnSummary stays exactly where it is: slice 9 is
              where surfaces are retired, and only after what each one uniquely
              does has been pinned as a test. */}
-      <YourTurnList />
+      <YourTurnList onOpen={setOpenOption} />
 
       {/* ── Table Truth slice 6 — the reactions band ──
              Marcus: the combat tab doesn't show "my reactions (like hearth fire
@@ -1385,7 +1436,7 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
              and a player scanning off-turn should hit this second, not tenth.
              Read-only, like everything else on this tab so far: it derives from
              the same composed turn and writes only its own collapse flag. */}
-      <ReactionsBandLive character={character} />
+      <ReactionsBandLive character={character} onOpen={setOpenOption} />
 
       {/* ── Always visible: TurnSummary (when in combat) ── */}
       {combatState.inCombat && (
@@ -1564,6 +1615,18 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
              Rendered last so it is the last thing in the stacking context that
              is not an overlay; positioned by `position: fixed`, so where it
              appears in this tree does not affect where it appears on screen. */}
+      {/* ── Table Truth slice 7 — the option detail sheet ──
+             Mounted once, here, rather than per row: it is one surface that
+             shows whichever option was tapped. Rendered before TurnDeck so the
+             deck stays the last non-overlay node; the sheet portals to <body>
+             regardless, so tree position does not decide what paints on top. */}
+      <OptionDetailSheetLive
+        option={openOption}
+        character={character}
+        onClose={() => setOpenOption(null)}
+        onRollDice={onOpenDiceRoller}
+      />
+
       <TurnDeck
         character={character}
         inCombat={combatState.inCombat}

@@ -16,7 +16,7 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 4 — Active Conditions folds · TurnDeck minimises (V-6 scoped) — **DONE 2026-08-26**, proved against the running app on eight measured states; the prover also caught a live regression in the chip labels and one defect older than this phase (see §Slice 4 below)
 - [x] 5 — CombatProvider mounted READ-ONLY + one ranked "Your Turn" list — **DONE 2026-08-26**, storage proved byte-identical across a real reload, every row measured at exactly two lines; the prover caught the two-line promise being broken by rows nothing had ever budgeted (see §Slice 5 below)
 - [x] 6 — "Your Reactions" band — **DONE 2026-08-27**, proved against the running app on four cases; the prover caught Gate 3 specifying a filter that is empty on your own turn, a line-measurement technique that was wrong, and the WHEN label saying its own word twice (see §Slice 6 below)
-- [ ] 7 — the option detail sheet (this is where the "…" dies)
+- [x] 7 — the option detail sheet (this is where the "…" dies) — **DONE 2026-08-27**, proved against the running app on six cases; every reachable sheet measured clip-free *on the glass*, and the prover caught its own band-4 case grading nothing, a splitter that kept every character while dropping 10 headings, and the fact that **0 of the 7 slot-spending options can reach the sheet at all** (see §Slice 7, finding AB — the one thing needing a steer)
 - [ ] 8 — errata flags, all 12, three readings, DM wording
 - [ ] 9 — retire the competing menus (capabilities pinned as tests FIRST)
 - [ ] 10 — canon VAL-01..15 as a suite + decide the combat write path
@@ -729,6 +729,192 @@ he had to scroll to it.
 He pasted his Oath of the Hearth text with this slice. It **corroborates canon exactly** — the
 Oath spell table matches level for level, and the Hearthfire Manifest paragraph differs by one
 phrase only ("Temporary HP" vs "Temporary Hit Points"). No correction needed anywhere.
+
+## Slice 7 — closed 2026-08-27. What it built, and what it found.
+
+Marcus's ask, verbatim: definitions *"trail off with '…' and there is no quick summary for fast
+paste table use, nor is there an option for me to see the full definition, dice rolls, details."*
+This slice is the second half of that sentence. The row is the quick summary (slices 5–6); the
+**sheet** is the full definition, and the "…" dies here because nothing in the sheet is allowed to
+cut anything.
+
+**Four bands, always the same four, always in this order.** Stat block → what it does → the rolls →
+how to use it. Same order on a weapon, a cantrip, a homebrew reaction and a levelled spell, so at
+the table Marcus's eye learns one shape and never re-learns it.
+
+**Shipped**
+
+- `src/lib/turn/detail.ts` — **new.** `optionDetail(option, character, economy)` assembles the four
+  bands from one option. Nothing in it truncates; there is no `slice()` and no `…` in the file.
+- `src/lib/turn/rolls.ts` — **new.** `RollSource` and the roll list for band 3. `segments` is the
+  part that matters: a canon feature's dice used to be **unrollable** because canon files them as
+  prose mechanics rather than as a weapon's `damage` field, so a *known* option was worse than an
+  unknown one (Finding AE). Segments fixed that without touching the open-world rule.
+- `src/lib/canon/tactics.ts` — **new.** Splits canon's long tactical entry into headed bullets.
+- `src/components/combat/OptionDetailSheet.tsx` — **new**, pure-prop, portals through the existing
+  `Sheet` at `z=60`/`side="bottom"`, `aria-label` = the option's own name.
+- `src/lib/canon/format.ts` — `scaleDice` **extracted** from `renderDice`. The row and the sheet's
+  roll buttons now do the cantrip-scaling arithmetic **once**; two computations that must agree are
+  a bug waiting for a level-up. Format output verified byte-identical, 26/26.
+- `src/components/combat/TurnOptionRow.tsx`, `ReactionRow.tsx`, `ReactionsBand.tsx` — the chevron
+  and its destination arrived **in the same change**, which is what slices 5 and 6 were waiting for.
+  `onOpen` is optional on all three: a caller with nowhere to send the tap renders the slice-5/6
+  row exactly, so the "no control that opens nothing" rule is now enforced by the **type**, not by
+  a comment.
+- `src/lib/turn/reactions.ts` — `ReactionRow.option` carries the whole `TurnOption` the row was
+  built from, so the tap opens **the object the row is made of** instead of looking its id up a
+  second time. Two ways to resolve one tap is one way too many.
+- `src/components/CombatHelper.tsx` — `OptionDetailSheetLive` mounted once, above the deck; both
+  lists forward `onOpen`.
+- Tests: `detail.test.ts`, `rolls.test.ts`, `tactics.test.ts`, `OptionDetailSheet.test.tsx`,
+  +`reactions.test.ts` — **71 tests across the five files**, 651/651 for the suite.
+- `docs/plans/table-truth/prove-slice7.mjs` — **new**, six cases in a real browser.
+
+**Measured**
+
+```
+npx tsc --noEmit        EXIT=0
+npx vitest run          29 files · 651/651   (was 597/25; +54)
+bundle                  canon 53.3/70 KB · JS 647.8/700 KB · CSS 25.4/40 KB   (JS +2.8)
+prove-slice7.mjs        PASS · 0 console errors
+
+sheet, from a turn row  «Hearthbrand» · z=61 · top y=364 · 481px tall
+   band 1  7 facts      Cost Action · +7 to hit (STR +3 + prof +1 magic) · 1d8+4 Slashing
+                        · 5 ft · Magical · Mastery: Sap · Versatile (1d10)
+   band 2  102 chars, painted whole
+   band 3  3 rolls      [1d20+7 to hit | 1d8+4 Slashing | 2d8+4 on a crit]
+   band 4  absent — canon files no tactics for a weapon
+
+band 4, graded on «Sacred Flame» (3 sheets away — see finding AB)
+   folded on open: true → unfolded after one tap: true
+   5 bullets, 4 with a heading, longest 11 painted lines, none clipped
+
+every reachable sheet, swept for a clip ON THE GLASS (finding Q)
+   102ch  7 facts  3 rolls  Hearthbrand                        no clip, no clamp, no ellipsis
+    60ch  4 facts  3 rolls  Javelin                            "
+   249ch  9 facts  1 roll   Sacred Flame                       "
+   822ch  8 facts  1 roll   Hearthfire Manifest                "
+   150ch  8 facts  3 rolls  Opportunity Attack — Hearthbrand   "
+   822ch  8 facts  1 roll   Flaming Cloak                      "
+
+census        ranked 4 + reactions 2 + "8 more in the sections below" = 14 options
+              reachable: 6 of 14 · sheets showing a slot rule box: 0
+              with the levelled slot already spent: 6 of 14, still 0 rule boxes
+storage       keys written while the sheet was open: [none] · guarded keys moved: [none]
+```
+
+**822 characters, painted whole.** That is Hearthfire Manifest — the feature Marcus named in his
+own complaint. Before this slice its longest reachable rendering was `ActionMenu`'s
+`.slice(0, 80) + '…'`. It is now on screen in full, in a scrollable sheet, with eight facts above
+it and a roll button beside it.
+
+### Finding AB — the route, not the sheet, is slice 7's real gap
+
+**6 of the 14 options can open a sheet. 0 of the 7 that spend a spell slot can.**
+
+Every levelled option — Divine Smite, Shield of Faith, Misty Step, Cure Wounds, Warding Bond — plus
+Lay on Hands and Sacred Weapon lands in `turn.mutex`, and **nothing on the Play tab renders
+`turn.mutex`**. So the live one-slot-per-turn rule box is built, unit-tested, and **unrouted**: the
+prover opened all six reachable sheets in a turn with a 1st-level slot already spent and measured
+zero rule boxes, because no option that could show one is reachable.
+
+Four of the five options that carry canon **tactics** are in the same bucket, which is why band 4
+had to search three sheets to find a subject.
+
+**Not fixed here, on purpose.** A flat list of mutex faces would paint options that contend for one
+slot as if they did not — shipping a *wrong rule* to fix a missing screen, which is the exact reason
+slice 4 deferred contention brackets. **Slice 9 already owns the route** ("retire the competing
+menus, redesign the deck chips as the filter"). What slice 7 does instead is **pin the number**:
+`prove-slice7.mjs` fails if reachability drops below 6 or the census below 14, so it can only go up
+and can never shrink silently. **This is the thing most worth Marcus's steer at this boundary.**
+
+### Finding AC — under-structuring: a new bug class that loss-based tests cannot see
+
+`isHeading` required two capitalised words. Ten of canon's genuine headings are single words, so
+the splitter **silently swallowed all ten** — and Bless and Command rendered as undifferentiated
+walls of text. Every character survived, so the no-loss invariant passed the whole time.
+
+The corpus measurement is what found it: **71 records, 70 with at least one heading** (Mending is
+the sole real exception), **249 headings, 10 distinct single-word leads**. A splitter can preserve
+every character while dropping every heading, and only counting output against the corpus catches
+that. Loss tests answer "did we cut anything"; they cannot answer "did we keep the shape".
+
+### Finding AD — `option.dice` carries two meanings, and one of them is a lie
+
+The same field holds "the damage this deals" and "the dice this rolls". Read as an attack, it hands
+**Shield of Faith, Misty Step and Warding Bond a `1d20+8` attack roll none of them has.** Band 3
+now derives attack rolls from the option's attack shape, never from the presence of dice.
+
+### Finding AE — being *known* to canon made an option worse
+
+Canon features file their numbers as prose mechanics, not as a weapon-style `damage` field, so the
+sheet could not offer a roll button for Hearthfire Manifest — while the *homebrew* version, which
+kept the sheet's own words, could. That inverts the open-world rule: a canon match is a **text**
+lookup and must never subtract a capability. `RollSource.segments` closed it.
+
+### Finding AF — crit is only legal beside an attack roll
+
+`2d8+4 on a crit` is correct next to `1d20+7 to hit` and meaningless next to a saving throw. Band 3
+paints the crit line only where an attack roll exists.
+
+### Finding AG — `spellSlotUsedThisTurn` is derived from the LOG, not stored on `CombatState`
+
+`compose.ts:164 spellSlotSpentThisTurn(log, round)` → `compose.ts:467`. The first draft of the
+prover seeded a `spellSlotUsedThisTurn: true` into the combat bytes, which is **not a field**: it
+seeded something nothing reads and would have "passed" nothing. The real seed is a `LogEntry` in
+`codex-combat-log-${characterId}` carrying `round` · `label` · `event` · `restore.combat`, or
+`looksLikeEntry` discards it. **Recorded because any future prover touching the economy will hit
+this**, and the failure mode is a green run that proved nothing.
+
+### Finding AH — a turn-dependent field inside a carried payload breaks whole-object equality
+
+`reactions.test.ts` asserted "a reaction says the same thing on your turn and off it" by comparing
+rows whole. Slice 7's new `option` carries rank.ts's `score`/`why`, and rank.ts is turn-dependent
+**by design** (−40 on your turn, +40 off it) — the very fact the first test in that file exists to
+pin. So the test went red on a field that is *supposed* to differ.
+
+Deleting the field would have deleted the tap target; loosening to names would have stopped testing
+anything. The claim was re-expressed instead: every *stated* field compared whole, the option
+compared on everything the sheet reads, **and an explicit assertion that the scores DO differ**, so
+the scoping cannot rot into a comparison of two identical things.
+
+### Finding AI — `ActionMenu` tells assistive tech the rest of the Play tab is inert
+
+It is **permanently mounted** with `role="dialog" aria-modal="true"`, parked off-screen at y=844,
+title «Choose Action». It broke prover run 2 by being found instead of the sheet — nine failures,
+all measuring the wrong element — which is why every selector in `prove-slice7.mjs` now resolves the
+panel by `aria-label`. An always-mounted `aria-modal` dialog is a real accessibility defect, not
+just a test hazard. Its `text-overflow: ellipsis` spans are the last of the "…", and they are on
+**slice 9's** list along with `ActionMenu.tsx:527/569/607` (model-side) and the three CSS
+`line-clamp-2` sites (`ActionMenu.tsx:161`, `CombatHelper.tsx:501`, `CombatHelper.tsx:677`).
+
+### Finding AJ — a guard that skips when its subject is absent is a test that cannot fail
+
+Prover run 3 printed **PASS** while grading band 4 against Hearthbrand, a weapon canon files no
+tactics for. `if (A.open && A.tacticsPresent)` fell through and four assertions about this slice's
+own promise graded nothing. The prover now **searches** for a sheet that has the band, grades that
+one, and **fails if no reachable sheet has one at all** — plus a new assertion that the fold
+actually hides bullets rather than decorating them. This is the standing "real tests only" rule
+appearing in a prover instead of a unit test, and it is easier to miss here because the run is long
+and the report is a wall of numbers.
+
+### Deliberate omissions
+
+- **No contention UI.** See finding AB — slice 9.
+- **The rule box is unproved on the glass**, and the report says so out loud rather than quietly
+  omitting the line. It is proved in `detail.test.ts`; it cannot be proved in a browser until
+  something routes a slot-spender to the sheet.
+- **`ActionMenu` still stands.** Slice 7's brief says its roll-from-the-sheet capability **moves**
+  here; the menu itself is retired in slice 9, after its capabilities are pinned as tests first.
+- **The `_probe-*` files are kept and committed**, per the V1 precedent: they are the working that
+  produced findings AB and AC, and deleting files is ASK-FIRST.
+
+### Placement — the same honest number as slices 5 and 6
+
+The sheet opens at **y=364 on an 844px phone and stands 481px tall**, which is fine. Getting to it
+is not: the turn list starts at y=526 and the reactions band at y=872, so Marcus still scrolls
+before he can tap anything. Nothing above them has retired yet. Slice 9 is where the vertical
+comes back.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

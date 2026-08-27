@@ -26,16 +26,24 @@ import { splitTriggerLead } from '../../lib/turn/trigger'
    holds on the feature. Recording HIS chosen trigger is slice 8, and when it
    exists this line reads it instead.
 
-   NO CHEVRON, NO TAP. Same reason as TurnOptionRow: the detail sheet is slice 7,
-   and an affordance that opens nothing is a half-built feature running as if
-   done. The row is inert and readable.
+   THE CHEVRON ARRIVED WITH ITS DESTINATION — slice 7. Slice 6 left this row
+   inert because the detail sheet did not exist yet and an affordance that opens
+   nothing is a half-built feature running as if done. It exists now, so the tap
+   is wired in the same change. `onOpen` is optional and the row without it is
+   byte-for-byte the slice 6 row.
+
+   The sheet opens on `row.option` — the option this row was BUILT from, carried
+   on the model — rather than on `row.id` looked up again. Two ways to resolve
+   the same tap is one way too many.
    ========================================================================= */
 
 export interface ReactionRowProps {
   row: ReactionRowModel
+  /** Opens the option detail sheet. Omitted → the row is inert, as in slice 6. */
+  onOpen?: (option: ReactionRowModel['option']) => void
 }
 
-export function ReactionRow({ row }: ReactionRowProps) {
+export function ReactionRow({ row, onOpen }: ReactionRowProps) {
   const blocked = !row.available
   const unstated = row.when === null
   /* The label is the clause's own lead word, not a fixed "WHEN" bolted on in
@@ -43,12 +51,12 @@ export function ReactionRow({ row }: ReactionRowProps) {
      see leaves your reach» — see splitTriggerLead. */
   const trigger = unstated ? null : splitTriggerLead(row.when!)
 
-  return (
-    <div
-      className={`rounded-lg border border-bronze/20 border-l-2 bg-void-2/50 px-3 py-2 ${
-        blocked ? 'border-l-bronze opacity-60' : unstated ? 'border-l-ember' : 'border-l-gold'
-      }`}
-    >
+  const skin = `rounded-lg border border-bronze/20 border-l-2 bg-void-2/50 px-3 py-2 ${
+    blocked ? 'border-l-bronze opacity-60' : unstated ? 'border-l-ember' : 'border-l-gold'
+  }`
+
+  const body = (
+    <>
       <div className="flex items-baseline justify-between gap-3">
         <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-forge-0">
           {row.name}
@@ -86,6 +94,20 @@ export function ReactionRow({ row }: ReactionRowProps) {
       {blocked && row.blockedReason && (
         <p className="mt-1 text-xs leading-snug text-ember">{row.blockedReason}</p>
       )}
-    </div>
+    </>
+  )
+
+  if (!onOpen) return <div className={skin}>{body}</div>
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(row.option)}
+      aria-label={`${row.name} — details`}
+      className={`${skin} w-full text-left transition-colors hover:border-gold/40`}
+    >
+      {body}
+      <span className="mt-1 block text-right font-mono text-xs text-forge-2">▸</span>
+    </button>
   )
 }

@@ -152,29 +152,54 @@ interface DiceParts {
  *  rolls both ("5d6+5d6"), anything else linking two expressions means a
  *  choice between them ("2d8/2d12"). That is read off the string, not decided
  *  here — which is the difference between structure and authoring. */
-function renderDice(damageDice: string, isCantrip: boolean, characterLevel: number): DiceParts {
+export interface ScaledDice {
+  /** Each die expression with cantrip scaling already applied. Empty when canon
+   *  put prose here instead of dice. */
+  expressions: string[]
+  /** '+' means canon said "plus" and the caster rolls BOTH. '/' means the
+   *  expressions are alternatives and the caster rolls ONE. Read off canon's own
+   *  connective, never decided here. */
+  joiner: '+' | '/'
+  /** Canon carried a qualifier this cannot represent as dice. */
+  qualified: boolean
+}
+
+/** The scaling arithmetic, extracted at slice 7 so the list row and the detail
+ *  sheet's roll buttons cannot drift apart about what a cantrip does at level 7.
+ *  One computation with two readers beats two computations that must agree. */
+export function scaleDice(
+  damageDice: string,
+  isCantrip: boolean,
+  characterLevel: number
+): ScaledDice {
   const stripped = stripScalingParentheticals(damageDice)
   const tier = isCantrip ? cantripTier(characterLevel) : 1
 
   const expressions: string[] = []
-  let residue = stripped
   for (const m of stripped.matchAll(DIE)) {
     expressions.push(`${Number(m[1]) * tier}d${m[2]}`)
   }
-  residue = stripped.replace(DIE, '').trim()
+  const residue = stripped.replace(DIE, '').trim()
 
   // No die expression at all — canon put something else entirely here. Hand the
   // whole thing to the detail sheet rather than inventing a number.
-  if (expressions.length === 0) return { text: '', qualified: true }
-
-  const joiner = /\bplus\b/i.test(residue) ? '+' : '/'
-  const text = expressions.join(joiner)
+  if (expressions.length === 0) return { expressions, joiner: '/', qualified: true }
 
   // Anything left over besides the connective words is a qualifier the row is
   // deliberately not rendering: "per ray, 3 rays", "if the target is missing
   // any Hit Points", "or Necrotic (your choice)".
   const leftover = residue.replace(/\b(plus|or|and|,)\b/gi, '').replace(/[,\s]+/g, '')
-  return { text, qualified: leftover.length > 0 }
+  return {
+    expressions,
+    joiner: /\bplus\b/i.test(residue) ? '+' : '/',
+    qualified: leftover.length > 0,
+  }
+}
+
+function renderDice(damageDice: string, isCantrip: boolean, characterLevel: number): DiceParts {
+  const scaled = scaleDice(damageDice, isCantrip, characterLevel)
+  if (scaled.expressions.length === 0) return { text: '', qualified: true }
+  return { text: scaled.expressions.join(scaled.joiner), qualified: scaled.qualified }
 }
 
 /** Canon's one `damage.bonus`: "+1d8 if the target is a Fiend or Undead".

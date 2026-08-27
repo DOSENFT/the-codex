@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { Character } from '../../lib/character'
-import type { ComposedTurn } from '../../lib/turn/types'
+import type { ComposedTurn, TurnOption } from '../../lib/turn/types'
 import { reactionRows } from '../../lib/turn/reactions'
 import { ReactionRow } from './ReactionRow'
 
@@ -40,9 +40,13 @@ export interface ReactionsBandProps {
   character: Character
   isOpen: boolean
   onToggle: () => void
+  /** Opens the option detail sheet — Table Truth slice 7. Optional, so the band
+   *  renders exactly as it did in slice 6 for any caller with nowhere to send
+   *  the tap. */
+  onOpen?: (option: TurnOption) => void
 }
 
-export function ReactionsBand({ turn, character, isOpen, onToggle }: ReactionsBandProps) {
+export function ReactionsBand({ turn, character, isOpen, onToggle, onOpen }: ReactionsBandProps) {
   const rows = reactionRows(turn, character)
 
   return (
@@ -71,7 +75,7 @@ export function ReactionsBand({ turn, character, isOpen, onToggle }: ReactionsBa
           <ul className="mt-2 flex flex-col gap-1.5">
             {rows.map(row => (
               <li key={row.id}>
-                <ReactionRow row={row} />
+                <ReactionRow row={row} onOpen={onOpen} />
               </li>
             ))}
           </ul>

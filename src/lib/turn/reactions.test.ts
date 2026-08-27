@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { composeTurn } from './compose'
-import { reactionRows } from './reactions'
+import { reactionRows, type ReactionRow } from './reactions'
 import { NIX } from './fixtures/nix'
 import { DETAIL_BUDGET_CHARS } from './overlay'
 
@@ -49,7 +49,34 @@ describe('reactionRows — the bug Gate 3 was about to ship', () => {
   })
 
   it('says the same thing in both states — a reaction does not change mid-round', () => {
-    expect(rowsOff()).toEqual(rowsOn())
+    /* SCOPED TO WHAT THE ROW SAYS, and the scoping is the interesting part.
+
+       Slice 7 added `option`: the whole TurnOption the row was built from, so
+       the detail sheet opens on the same object the row was made of rather
+       than looking the id up a second time. That option carries rank.ts's
+       verdict — `score` and `why` — and rank.ts is turn-dependent BY DESIGN: a
+       reaction scores −40 on your turn and +40 off it, which is the very fact
+       the first test in this file exists to pin.
+
+       So comparing the rows whole now fails on the one field that is SUPPOSED
+       to differ. Dropping `option` to get back to green would delete the tap
+       target; loosening the assertion to the names would stop testing
+       anything. Instead: every STATED field is still compared whole, the
+       option is compared on everything the sheet reads, and the turn-dependent
+       pair is then asserted to be the only difference — so a body, a trigger
+       or an availability that started varying with the turn still fails. */
+    const stated = ({ option: _option, ...row }: ReactionRow) => row
+    expect(rowsOff().map(stated)).toEqual(rowsOn().map(stated))
+
+    const identity = (row: ReactionRow) => {
+      const { score: _score, why: _why, ...rest } = row.option
+      return rest
+    }
+    expect(rowsOff().map(identity)).toEqual(rowsOn().map(identity))
+
+    // The premise of the scoping above, stated so it cannot rot into a
+    // comparison of two identical things.
+    expect(rowsOff().map(r => r.option.score)).not.toEqual(rowsOn().map(r => r.option.score))
   })
 
   it('lists nothing twice, whichever bucket the engine used', () => {

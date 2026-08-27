@@ -51,6 +51,14 @@ export interface ReactionRow {
   /** Canon's errata ids for the feature this row matched. Empty when canon has
    *  no match or no errata. Slice 8 renders them; slice 6 only counts them. */
   errataIds: string[]
+  /** The option this row was built from, carried whole — Table Truth slice 7.
+   *
+   *  The detail sheet takes a `TurnOption`, and a reaction row must be able to
+   *  open it just as a turn row does. The alternative was a second lookup: hand
+   *  the sheet this row's `id` and have it search the composed turn again. That
+   *  is a second way for the same tap to resolve to the wrong thing, and the
+   *  first way is already the one that works. One path, one shape. */
+  option: TurnOption
 }
 
 /** Every option the engine produced, in a stable order, deduped by id.
@@ -98,6 +106,7 @@ export function reactionRows(turn: ComposedTurn, character: Character): Reaction
         provenance: feature ? 'canon' : (option.provenance ?? 'sheet'),
         homebrew: option.homebrew === true,
         errataIds: feature ? errataForFeature(feature.name).map(e => e.id) : [],
+        option,
       }
     })
 }
