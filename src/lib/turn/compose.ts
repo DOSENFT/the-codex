@@ -55,7 +55,9 @@ import { findContention } from './contention'
 // id the composer PRICES with. Same functions, one home — see ids.ts.
 import { slug } from './ids'
 import { categorizeTurnOptions, levelLabel, type ActionOption } from './options'
-import { overlayCanon, type EconomyFiling, type OverlaidOption } from './overlay'
+import { featureContextOf, overlayCanon, type EconomyFiling, type OverlaidOption } from './overlay'
+import { featureFacts } from '../canon/feature'
+import { featureByName } from '../canon/lookup'
 import { sortByRank, withRank, type RankContext } from './rank'
 import type {
   ComposedTurn,
@@ -116,6 +118,54 @@ const ECONOMY_OF_BUCKET: Record<Bucket, ActionOption['actionEconomy'] | undefine
   bonusActions: 'bonusAction',
   reactions: 'reaction',
   passives: undefined,
+}
+
+/** The temporary hit points taking this option would grant, or undefined.
+ *
+ *  ── Why the composer, and why a number ───────────────────────────────────────
+ *  Canon states the cloak's pool as the FORMULA "Paladin level + Charisma
+ *  modifier", and `featureFacts` already resolves it against this character in
+ *  order to print "11 temp HP" on the detail sheet. Up to slice 10d that was the
+ *  end of it: the app showed Marcus the number and then made him type it into
+ *  the HP tracker by hand, which is a computed fact reduced to a suggestion.
+ *  Resolving it here — once, in the same pass that prices the option — is what
+ *  lets the reducer grant it, and keeps slice 8b's law: the app COMPUTES the
+ *  scaling, it never reads a level off a table of names.
+ *
+ *  ── Why `cost.resourcePoolId` is the gate ────────────────────────────────────
+ *  Hearthfire Manifest composes as TWO options that share one canon feature, and
+ *  only one of them grants. The free Bonus Action summons the flame; the
+ *  Reaction "Flaming Cloak" spends a Channel Divinity use and is the one canon
+ *  prices at `cloakCost: "1 Channel Divinity use"` and the one whose temp HP
+ *  pool the feature describes. Attaching the grant to both would double it —
+ *  summon, then cloak, and the app hands out 22.
+ *
+ *  Gating on "this option pays a resource pool" rather than on the name
+ *  "Flaming Cloak" is the open-world rule doing its job: SHAPE, NEVER A NAME. A
+ *  homebrew feature with a temp-HP formula and a declared cost behaves exactly
+ *  like the cloak without anybody teaching the engine it exists, and a free face
+ *  of a costed feature stays free. `compose.temphp.test.ts` pins both sides,
+ *  because getting this backwards is a bug that would ship looking like a
+ *  feature. Table Truth slice 10d. */
+function tempHPGrantOf(
+  option: OverlaidOption,
+  cost: OptionCost,
+  character: Character,
+): number | undefined {
+  if (option.type !== 'feature') return undefined
+  if (cost.resourcePoolId === undefined) return undefined
+
+  const fact = featureFacts(featureByName(option.name), featureContextOf(character)).find(
+    f => f.key === 'tempHP' && f.shape === 'computed',
+  )
+  if (!fact) return undefined
+
+  // `value` is the rendered "11 temp HP"; the number is the leading integer.
+  // Anything else — a formula that stayed a formula, a shape that resolved to
+  // prose — is deliberately dropped rather than guessed at, which is the same
+  // choice `resolveFormula` makes when a term is unprovable.
+  const amount = Number.parseInt(fact.value, 10)
+  return Number.isFinite(amount) && amount > 0 ? amount : undefined
 }
 
 /**
@@ -267,6 +317,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
     }
 
     const rider = weapon ? riderOf(weapon) : undefined
+    const grantsTempHP = tempHPGrantOf(option, cost, character)
 
     return {
       id: `${option.type}-${slug(option.name)}`,
@@ -296,6 +347,10 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       // that is for both to read the same field off the same object.
       ...(option.canonId ? { canonId: option.canonId } : {}),
       ...(option.provenance ? { provenance: option.provenance } : {}),
+      // Slice 10d. Carried on the option for the same reason `concentration` is:
+      // by the time the reducer runs, the row is a flat record and the character
+      // it was computed against may have levelled.
+      ...(grantsTempHP !== undefined ? { grantsTempHP } : {}),
     }
   }
 

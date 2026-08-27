@@ -23,6 +23,7 @@ import {
   addDeathSaveFailure,
   resetDeathSaves,
 } from '../lib/character'
+import { tempHPReplacement, replacementWarning } from '../lib/rules-2024/temp-hp'
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
@@ -104,6 +105,13 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
      adds no storage key. Nix's conditions belong to Nix. */
   const conditionsFold = useCollapsible('hp-conditions', character.id, false)
   const [inputValue, setInputValue] = useState('')
+  /* Slice 10d. Has the player been shown what accepting would destroy, and
+     pressed anyway? Reset by `beginInput` on every mode change and by
+     `setAmount` on every keystroke: a NEW number is a NEW decision, so arming on
+     "5" must not survive into "50". This is the whole of canon HEARTH-04's
+     "must prompt" — the warning is read before the press that acts on it, not
+     after. */
+  const [armed, setArmed] = useState(false)
 
   // Derived state
   const currentHP = character.hitPoints.current
@@ -133,11 +141,33 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
   // Handlers
   // -------------------------------------------
 
+  /* What typing this number into the Temp HP field would DESTROY, or null when
+     it destroys nothing — which is the ordinary case and draws no attention.
+     Computed live rather than on press, so the sentence is on screen before the
+     finger moves. `rules-2024/temp-hp.ts` owns the decision; this component owns
+     only the asking. */
+  const replacement = useMemo(() => {
+    if (inputMode !== 'temp') return null
+    const amount = parseInt(inputValue, 10)
+    if (isNaN(amount)) return null
+    return tempHPReplacement(character, amount)
+  }, [inputMode, inputValue, character])
+
   const handleApply = useCallback(() => {
     const amount = parseInt(inputValue, 10)
     if (isNaN(amount) || amount <= 0) {
       setInputMode(null)
       setInputValue('')
+      setArmed(false)
+      return
+    }
+
+    // Canon HEARTH-04, MANDATORY WARNING: the first press on a replacement does
+    // not apply it. It arms the button, whose verb changes from "Apply" to
+    // "Replace" — so the second press is a press on a control that says what it
+    // is about to do. Nothing is destroyed by a fast Enter.
+    if (replacement && !armed) {
+      setArmed(true)
       return
     }
 
@@ -150,6 +180,9 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
         updated = applyHealing(character, amount)
         break
       case 'temp':
+        // No source: a number typed by hand came from somewhere the app cannot
+        // see, and naming the wrong feature is worse than naming none. The
+        // reducer's grant path is the one that knows, and it says so there.
         updated = setTempHP(character, amount)
         break
       default:
@@ -159,15 +192,33 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
     onCharacterUpdate(updated)
     setInputMode(null)
     setInputValue('')
-  }, [inputValue, inputMode, character, onCharacterUpdate])
+    setArmed(false)
+  }, [inputValue, inputMode, character, onCharacterUpdate, replacement, armed])
 
-  const handleQuickValue = useCallback((value: number) => {
-    setInputValue(String(value))
+  /* One writer for the amount, so arming can be cleared in one place. A changed
+     number is a changed decision and must be re-read before it is acted on. */
+  const setAmount = useCallback((value: string) => {
+    setInputValue(value)
+    setArmed(false)
+  }, [])
+
+  const handleQuickValue = useCallback(
+    (value: number) => {
+      setAmount(String(value))
+    },
+    [setAmount],
+  )
+
+  const beginInput = useCallback((mode: InputMode) => {
+    setInputMode(mode)
+    setInputValue('')
+    setArmed(false)
   }, [])
 
   const handleCancel = useCallback(() => {
     setInputMode(null)
     setInputValue('')
+    setArmed(false)
   }, [])
 
   const handleToggleCondition = useCallback(
@@ -267,7 +318,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
             variant="secondary"
             size="sm"
             className="text-red-400 border-red-400/20 hover:bg-red-400/10 hover:border-red-400/30"
-            onClick={() => setInputMode('damage')}
+            onClick={() => beginInput('damage')}
             aria-label="Apply damage"
           >
             <Swords size={16} aria-hidden />
@@ -278,7 +329,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
             variant="secondary"
             size="sm"
             className="text-verdant border-verdant/20 hover:bg-verdant/10 hover:border-verdant/30"
-            onClick={() => setInputMode('heal')}
+            onClick={() => beginInput('heal')}
             aria-label="Apply healing"
           >
             <HeartPulse size={16} aria-hidden />
@@ -289,7 +340,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
             variant="secondary"
             size="sm"
             className="text-arcane border-arcane/20 hover:bg-arcane/10 hover:border-arcane/30"
-            onClick={() => setInputMode('temp')}
+            onClick={() => beginInput('temp')}
             aria-label="Set temporary hit points"
           >
             <ShieldPlus size={16} aria-hidden />
@@ -317,7 +368,7 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
               type="number"
               min={0}
               value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
+              onChange={e => setAmount(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') handleApply()
                 if (e.key === 'Escape') handleCancel()
@@ -358,6 +409,27 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
             ))}
           </div>
 
+          {/* Canon HEARTH-04's mandatory warning. Rendered live — it is on the
+              glass before the first press, and the first press only arms the
+              button. `role="status"` rather than `alert`: it appears while the
+              player is still typing, and an assertive announcement per keystroke
+              would talk over him. Slice 10d. */}
+          {replacement && (
+            <div
+              role="status"
+              className={cn(
+                'flex items-start gap-2 rounded-xl px-3 py-2',
+                'border text-xs leading-relaxed',
+                armed
+                  ? 'border-ember/60 bg-ember/15 text-ember-lit'
+                  : 'border-ember/30 bg-ember/10 text-forge-1',
+              )}
+            >
+              <ShieldAlert size={14} className="mt-0.5 shrink-0 text-ember" aria-hidden />
+              <span>{replacementWarning(replacement)}</span>
+            </div>
+          )}
+
           <div className="flex gap-2">
             <Button
               variant="primary"
@@ -370,12 +442,18 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
                   'from-verdant to-emerald-500 shadow-[0_0_16px_-4px_rgba(57,217,138,0.35)]',
                 inputMode === 'temp' &&
                   'from-arcane to-gold shadow-[0_0_16px_-4px_rgba(197,165,90,0.3)]',
+                armed && 'from-ember to-red-500 shadow-[0_0_16px_-4px_rgba(244,181,69,0.45)]',
               )}
               onClick={handleApply}
               disabled={!inputValue || parseInt(inputValue, 10) <= 0}
             >
               <Check size={16} aria-hidden />
-              Apply
+              {/* The verb names the consequence once the warning has been shown.
+                  A button that says "Apply" while it is about to destroy an
+                  11-point pool is the bug HEARTH-04 describes. */}
+              {armed && replacement
+                ? `Replace ${replacement.losing} with ${replacement.incoming}`
+                : 'Apply'}
             </Button>
 
             <Button variant="ghost" size="sm" onClick={handleCancel} aria-label="Cancel">

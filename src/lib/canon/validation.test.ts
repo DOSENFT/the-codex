@@ -56,6 +56,8 @@ import { reduce, type SessionState } from '../turn/reduce'
 import { createCombatState } from '../combat-state'
 import { critNotation } from '../turn/rolls'
 import { toggleSpellPrepared, setTempHP } from '../character'
+import { replacementWarning, tempHPReplacement } from '../rules-2024/temp-hp'
+import { optionDetail } from '../turn/detail'
 import { demandOfSpell } from '../rules-2024/economy'
 import { effectOf, blockedSlots } from '../rules-2024/conditions'
 import type { ComposedTurn, TurnOption } from '../turn/types'
@@ -95,7 +97,7 @@ const ACCOUNTED: Record<string, 'enforced' | 'violated' | 'partial' | 'not-mecha
   'VAL-03': 'not-mechanisable',
   'VAL-04': 'partial',
   'VAL-05': 'enforced',
-  'VAL-06': 'violated',
+  'VAL-06': 'enforced',
   'VAL-07': 'not-mechanisable',
   'VAL-08': 'not-mechanisable',
   'VAL-09': 'not-mechanisable',
@@ -271,22 +273,57 @@ describe('VAL-05 — one Concentration spell; warn before the cast and NAME what
 
 // ---------------------------------------------------------------------------
 describe('VAL-06 — temp HP from another source replaces the cloak pool; prompt first', () => {
-  it.fails('VIOLATED: a smaller temp HP pool must not silently replace a larger one', () => {
-    // Canon's rule written straight. 2024 temp HP does not stack, and canon
-    // agrees — the rule is not "add them", it is "PROMPT before accepting".
-    // `setTempHP` is a blind assignment: 11 from the cloak becomes 5, the
-    // cloak ends, and nothing anywhere said a word.
-    const cloaked = { ...NIX, tempHP: 11 }
-    const after = setTempHP(cloaked, 5)
-    expect(after.tempHP).toBe(11)
+  /* CLOSED BY SLICE 10d, and note what "closed" means here. The rule was never
+     "refuse the replacement" — 2024 lets the player keep either pool, and
+     choosing the smaller one for a longer duration is a legal play. The rule is
+     PROMPT FIRST. So the enforcement is not a guard inside `setTempHP`, which is
+     still the blind setter it always was; it is that no surface can reach that
+     setter without the sentence having been on the glass first.
+
+     The `it.fails` this replaces asserted `setTempHP(11 → 5) === 11`, which was
+     canon's rule mis-written as "refuse". The GAP PIN beside it recorded that
+     nothing in the model knew where a pool came from, and scoped the fix as a
+     model change rather than a one-liner. `Character.tempHPSource` is that model
+     change, and the pin below is its inverse: it now proves the field exists and
+     is written, so it goes red if a later slice quietly drops it. */
+
+  it('a replacement of a live pool is announced BEFORE it can happen', () => {
+    const cloaked = { ...NIX, tempHP: 11, tempHPSource: 'Flaming Cloak' }
+    const r = tempHPReplacement(cloaked, 5, 'Heroism')
+    expect(r).not.toBeNull()
+    expect(replacementWarning(r!)).toContain('your Flaming Cloak pool (11)')
+    expect(replacementWarning(r!)).toContain('do not stack')
   })
 
-  it('GAP PIN: nothing in the model records that the cloak is the source', () => {
-    // Even a correct prompt needs to know WHICH pool is being replaced. There
-    // is no field, so the prompt cannot name the cloak — which is exactly what
-    // VAL-06 asks for. Recorded here so the fix is scoped honestly: this is a
-    // model change, not a one-line guard in `setTempHP`.
-    expect(Object.keys(NIX).filter(k => /cloak|hearthfire|tempHPSource/i.test(k))).toEqual([])
+  it('the model now records WHICH pool is about to be destroyed', () => {
+    // The old GAP PIN, inverted. It asserted this field's absence; it now
+    // asserts that the one writer sets it and clears it at 0, which is what
+    // lets the prompt name the cloak instead of saying "some pool".
+    const granted = setTempHP(NIX, 11, 'Flaming Cloak')
+    expect(granted.tempHPSource).toBe('Flaming Cloak')
+    expect(setTempHP(granted, 0).tempHPSource).toBeNull()
+  })
+
+  it('the surface that grants the pool warns above the button that would grant it', () => {
+    // The detail sheet's Spend is the other way Nix's pool can be replaced, and
+    // a rule enforced on one surface only is not enforced.
+    const heroic = { ...NIX, tempHP: 5, tempHPSource: 'Heroism' }
+    const cloak = byName(composeTurn({ character: heroic, combat: null }), /flaming cloak/i)!
+    const detail = optionDetail(cloak, heroic, {
+      action: true,
+      bonusAction: true,
+      reaction: true,
+      movement: true,
+      spellSlotUsedThisTurn: false,
+    })
+    expect(detail.spendWarning).toContain('your Heroism pool (5)')
+  })
+
+  it('and stays quiet when there is nothing to lose', () => {
+    // The counterweight. A prompt that fires on every grant is a prompt nobody
+    // reads, and the ordinary case — no pool, then a pool — is not a decision.
+    expect(NIX.tempHP).toBe(0)
+    expect(tempHPReplacement(NIX, 11, 'Flaming Cloak')).toBeNull()
   })
 })
 

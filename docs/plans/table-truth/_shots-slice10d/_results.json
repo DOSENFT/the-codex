@@ -1,0 +1,227 @@
+{
+  "arrival": {
+    "badge": null,
+    "stored": {
+      "tempHP": 0,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "typed5": {
+    "badge": null,
+    "stored": {
+      "tempHP": 0,
+      "tempHPSource": null
+    },
+    "applyLabel": "Apply",
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "applied5": {
+    "badge": "+5 temp",
+    "stored": {
+      "tempHP": 5,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "warned": {
+    "badge": "+5 temp",
+    "stored": {
+      "tempHP": 5,
+      "tempHPSource": null
+    },
+    "applyLabel": "Apply",
+    "trackerWarning": "Accepting 3 replaces the 5 temporary hit points you already have — you would end up with fewer. Temporary hit points do not stack in 2024: you keep one pool or the other, never both.",
+    "trackerWarningOnGlass": true,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "armed": {
+    "badge": "+5 temp",
+    "stored": {
+      "tempHP": 5,
+      "tempHPSource": null
+    },
+    "applyLabel": "Replace 5 with 3",
+    "trackerWarning": "Accepting 3 replaces the 5 temporary hit points you already have — you would end up with fewer. Temporary hit points do not stack in 2024: you keep one pool or the other, never both.",
+    "trackerWarningOnGlass": true,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "replaced": {
+    "badge": "+3 temp",
+    "stored": {
+      "tempHP": 3,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "sheet": {
+    "badge": "+3 temp",
+    "stored": {
+      "tempHP": 3,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": "Flaming Cloak",
+    "sheetWarning": "⚑ ReplacesAccepting 11 replaces the 3 temporary hit points you already have. Temporary hit points do not stack in 2024: you keep one pool or the other, never both.",
+    "sheetWarningOnGlass": true,
+    "spendOnGlass": true,
+    "warningBeforeSpend": true,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "granted": {
+    "badge": "+11 temp",
+    "stored": {
+      "tempHP": 11,
+      "tempHPSource": "Flaming Cloak"
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "results": [
+    {
+      "name": "A · no temporary hit points, and no warning anywhere",
+      "pass": true,
+      "detail": "disk tempHP=0 · badge=none · warning=none"
+    },
+    {
+      "name": "B · granting a pool where there was none prompts nobody",
+      "pass": true,
+      "detail": "warning=none · button reads \"Apply\""
+    },
+    {
+      "name": "B · one press was enough, and the app admits it does not know the source",
+      "pass": true,
+      "detail": "disk {\"tempHP\":5,\"tempHPSource\":null} · badge=+5 temp"
+    },
+    {
+      "name": "C · the warning is ON THE GLASS before any press  <-- THIS IS THE SLICE",
+      "pass": true,
+      "detail": "painted, with a box inside the viewport: \"Accepting 3 replaces the 5 temporary hit points you already have — you would end up with fewer. Temporary hit points do not stack in 2024: you keep one pool or the other, never both.\""
+    },
+    {
+      "name": "C · it says what would be lost, and that the two pools cannot both be kept",
+      "pass": true,
+      "detail": "\"Accepting 3 replaces the 5 temporary hit points you already have — you would end up with fewer. Temporary hit points do not stack in 2024: you keep one pool or the other, never both.\""
+    },
+    {
+      "name": "C · the FIRST press destroyed nothing",
+      "pass": true,
+      "detail": "disk tempHP=5 · badge=+5 temp — still the pool he had"
+    },
+    {
+      "name": "C · and the button now names what the next press will do",
+      "pass": true,
+      "detail": "button reads \"Replace 5 with 3\" — a control that says \"Apply\" while it is about to end a cloak is the bug HEARTH-04 describes"
+    },
+    {
+      "name": "C · the second press is obeyed — the player chooses, the app does not veto",
+      "pass": true,
+      "detail": "disk tempHP=3 · 2024 lets him keep either pool, and a smaller one with a better duration is a real play"
+    },
+    {
+      "name": "D · the sheet opened on the cloak and warns about the pool already up",
+      "pass": true,
+      "detail": "sheet=\"Flaming Cloak\" · warning=\"⚑ ReplacesAccepting 11 replaces the 3 temporary hit points you already have. Temporary hit points do not stack in 2024: you keep one pool or the other, never both.\""
+    },
+    {
+      "name": "D · warning and button are painted in the SAME frame  <-- he cannot press blind",
+      "pass": true,
+      "detail": "warning on glass=true · Spend on glass=true — the sheet scrolls, so the test that matters is what is in front of him where his thumb is"
+    },
+    {
+      "name": "D · the warning sits ABOVE the button, not under it",
+      "pass": true,
+      "detail": "warningBeforeSpend=true — underneath it would be indistinguishable from the refusal band, which reports on a press that already happened"
+    },
+    {
+      "name": "E · the pool is canon’s computed number, not a number he typed  <-- THE GRANT",
+      "pass": true,
+      "detail": "3 → 11. Level 7 + Charisma modifier 4, resolved from canon's formula — and canon's own worked example says 11 at level 7 with Charisma 18. Before this slice the reducer spent the Channel Divinity use and left tempHP at 3."
+    },
+    {
+      "name": "E · and the app now knows WHAT granted it",
+      "pass": true,
+      "detail": "tempHPSource=\"Flaming Cloak\" — this is the field VAL-06's gap pin said had to exist before any prompt could name the pool it was ending"
+    },
+    {
+      "name": "F · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

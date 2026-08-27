@@ -181,6 +181,20 @@ export function OptionDetailBody({
       {(detail.rolls.length > 0 || detail.spend) && (
         <div className={BAND}>
           <span className={`${LABEL} text-forge-2`}>Roll from here</span>
+          {/* Canon HEARTH-04 — slice 10d. ABOVE the button, not below it: the
+              refusal underneath answers a press that already happened, and this
+              one has to be read before the press that would destroy a pool.
+              `role="status"`, because it is drawn the moment the sheet opens and
+              is not a response to anything the player just did. */}
+          {detail.spendWarning && (
+            <p
+              role="status"
+              className="mt-2 border-l-2 border-l-ember bg-ember/5 py-1.5 pl-2 text-xs leading-relaxed text-forge-0"
+            >
+              <span className={`${LABEL} text-ember`}>⚑ Replaces</span>
+              {detail.spendWarning}
+            </p>
+          )}
           <div className="mt-2 flex flex-wrap gap-2">
             {detail.rolls.map(offer => (
               <RollButton key={offer.key} offer={offer} onRoll={onRoll} />

@@ -30,7 +30,7 @@
 // the four ways a tap can quietly corrupt the sheet, and they are the four
 // things worth a second lock.
 
-import type { Character, ClassFeature, SpellSlots } from '../character'
+import { setTempHP, type Character, type ClassFeature, type SpellSlots } from '../character'
 import type { CombatState } from '../combat-state'
 import { spellSlotSpentThisTurn } from '../rules-2024/economy'
 import { findPool, setPoolCurrent, spendable } from '../rules-2024/resources'
@@ -291,6 +291,31 @@ function takeOption(
     nextCharacter = setPoolCurrent(nextCharacter, site.id, site.current - amount)
   }
 
+  // -- 4. the grant ----------------------------------------------------------
+  //
+  // THE FIRST THING THIS REDUCER EVER GAVE. Every other line above spends: a
+  // slot closes, a pool goes down, a spell slot is expended. Slice 10d adds the
+  // one arrow that points the other way, because a feature that grants 11
+  // temporary hit points and then makes you type "11" into a different screen is
+  // a computed fact demoted to a suggestion — and canon's HEARTH-04 rates the
+  // resulting confusion HIGH.
+  //
+  // Snapshot BEFORE the write, and both halves together, for exactly the reason
+  // stated on `restore.pools` above: `setTempHP` clamps at 0 and clears the
+  // label at 0, so the prior state is unrecoverable the instant it runs. Note
+  // that `{ amount: 0, source: null }` is the ordinary case — you usually had no
+  // pool at all — which is why this cannot be conditional on there being one.
+  //
+  // NO PROMPT HERE, and that is deliberate. `rules-2024/temp-hp.ts` decides
+  // whether accepting would destroy a live pool, and the two surfaces that can
+  // ask a human do the asking before they dispatch. A reducer that silently
+  // refused would leave the UI unable to tell "refused" from "applied", and a
+  // reducer that prompted would not be a pure function.
+  if (option.grantsTempHP !== undefined && option.grantsTempHP > 0) {
+    restore.tempHP = { amount: nextCharacter.tempHP ?? 0, source: nextCharacter.tempHPSource ?? null }
+    nextCharacter = setTempHP(nextCharacter, option.grantsTempHP, option.name)
+  }
+
   const closesSlot =
     slot === 'action' || slot === 'bonusAction' || slot === 'reaction' || slot === 'movement'
   const turnActions = closesSlot ? { ...combat.turnActions, [slot]: true } : combat.turnActions
@@ -486,6 +511,17 @@ export function revert(state: SessionState, entry: LogEntry): SessionState {
       character = setPoolCurrent(character, poolId, prior)
     }
   }
+  if (restore.tempHP !== undefined) {
+    // Un-granting, which is the one direction Undo did not have to reverse
+    // before slice 10d. Absolute, like everything else here — it puts back the
+    // pool that was standing when the option was taken, whether that was 0 (the
+    // usual case) or another feature's 11 that the grant had replaced.
+    //
+    // Damage taken since is deliberately NOT compensated for. Undo restores what
+    // one entry did; it is not a rewind of the encounter, and pretending
+    // otherwise would hand back hit points the ogre already ate.
+    character = setTempHP(character, restore.tempHP.amount, restore.tempHP.source)
+  }
 
   // The combat snapshot is absolute and always present, so no mirror pass is
   // needed: it was taken while character and combat agreed, and both halves
@@ -518,6 +554,7 @@ export function takenFrom(option: TurnOption): TakenOption {
         }
       : {}),
     ...(option.concentration !== undefined ? { concentration: option.concentration } : {}),
+    ...(option.grantsTempHP !== undefined ? { grantsTempHP: option.grantsTempHP } : {}),
   }
 }
 

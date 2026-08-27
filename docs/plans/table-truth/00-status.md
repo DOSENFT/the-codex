@@ -23,7 +23,8 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 10a — canon VAL-01..15 as a named suite — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files** (was 797/34). Every one of canon's fifteen rules was graded against the **real exported functions** by `_probe-val.mjs` before a line of suite existed, and the grade is the finding: the app **obeys 4**, **violates 4**, obeys **half of 2**, and **cannot express 5**. Violations are pinned with `it.fails` asserting canon's rule *written straight* — they go RED the day the app is fixed, so a fix cannot pass unnoticed and a bug cannot come back. All 7 skips print **their id and their reason** on every `npm test`, each paired with a live gap pin. The probe itself was the slice's most dangerous artifact and produced **finding BA** (below): reading `.ranked` turned a violation into a pass, twice, in opposite directions. **VAL-01 is finding AZ**, now under canon's own `error` severity; **VAL-11 is what 8b shipped**
 - [x] 10b — the combat write path — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files**, build ✓, `prove-slice10b.mjs` **7/7 in Chrome**. Gate 3's oldest open question is answered *with a measurement*: read-only was **not** a safe resting place, because the read-only mount was already showing Marcus options he had paid for. Two components held two models of one turn — **finding BB** — and the list read `4 → 4 (spend, no change) → 1 (reload)`. Fixed by **deleting** the second model: `CombatHelperInner`'s private `useState<CombatState>` and its saving `useEffect` are gone and its eleven writers now go through `CombatProvider.updateCombat` / `forgetCombat`. Post-fix **4 → 1 → 1**, reload a no-op. **Finding AR is closed, both halves** — `setItem` recorded across a cold load: **0 writes**, where the old build named `codex-combat-*` *and* `codex-action-notes-*`. The prover was run against the stashed pre-change build and went **red on exactly those three claims**, so it is a test that can fail
 - [x] 10c — the ranked rows become takeable — **DONE 2026-08-27**, gate green: tsc clean, **841 passed + 7 skipped across 35 files** (was 829/35), build ✓, `prove-slice10c.mjs` **9/9 in Chrome**. The finding that set the scope: `CombatApi.take` — the rules-checked spend, written in slice 5 and tested ever since — was reachable **only** from `TurnScreenD` behind `D_PREVIEW`, so on the real Play tab it was **dead code**, and Marcus read the option on the sheet and then darkened the deck chip by hand through the ruleless manual path. `OptionDetailBody` already had the button; **both halves of its gate were shut**. Fixed by widening `spendFor` to offer a Spend for any *available* option (not just slot/pool spends — under the old rule 2 of the 4 rows Nix sees got no button), making `take` **return whether it happened** so the sheet can close on a spend and stay open on a refusal, and painting the reducer's refusal `role="alert"` under the button that produced it, read from the **provider** so 10b's finding BB is not re-committed one slice later. Measured `4 → 1 → 1` with deck and disk agreeing at every step. The prover was run against the stashed pre-change build and went **5/9 — red on exactly the four spend claims and nothing else**. It also produced **finding BC**, a defect older than this phase: two hand-rolled overlays sit in the DOM permanently declaring `role="dialog" aria-modal="true"`, and `checkVisibility()` says TRUE for both (see §Slice 10c below). **HEARTH-04 and HEARTH-05 split out to 10d** — a decision, recorded, not an omission
-- [ ] 10d — HEARTH-04's mandatory temp-HP replacement warning (= VAL-06, pinned `it.fails` in 10a) + HEARTH-05's per-encounter retaliation damage tally — split out of 10c 2026-08-27; both are arithmetic on a spend rather than an affordance, and both need the write path 10c has now built
+- [x] 10d — HEARTH-04: the grant, and the warning before it destroys a pool — **DONE 2026-08-27**, gate green: tsc clean, **876 passed + 7 skipped across 37 files** (was 841/35), build ✓, `prove-slice10d.mjs` **14/14 in Chrome**. Two faults, one cause. Canon requires a prompt before a new temp-HP pool replaces a live one; `setTempHP` was a blind assignment, which is **VAL-06**, pinned `it.fails` in 10a. But the probe found the larger half first: taking Flaming Cloak granted **nothing** — `tempHP` 0 before, 0 after — while the sheet displayed the pool computed from canon's own formula, so the app did the arithmetic and made Marcus type the answer into a different screen. A warning about replacing a pool the app never grants is a warning about nothing, so both shipped together. **One decision, two askers**: `tempHPReplacement` decides and never applies; `HPTracker` asks by arming ("Apply" → **"Replace 5 with 3"**), `OptionDetailSheet` asks with a sentence painted above Spend. Neither surface can reach `setTempHP` without the sentence having been on the glass — enforced *without* making the setter refuse, because 2024 lets the player keep either pool. The grant is **computed, never read**: 11 at level 7 with Charisma 18, matching canon's own worked example, 24 at level 20. **The double-grant bug was designed out and pinned**: Hearthfire Manifest composes as two options sharing one `canonId`, and the grant hangs off `cost.resourcePoolId` — SHAPE, never a name — so the free Bonus Action face grants nothing and Nix cannot stand in 24 temp HP the rules never gave him. **VAL-06 flipped `violated` → `enforced`** and its gap pin was *inverted*, not deleted. The prover was run against the stashed pre-change build and went **5/14 — red on all nine HEARTH-04 and grant claims, green on exactly the four controls**; the new unit tests could not even compile against 10c's types (**24 `error TS`**). **HEARTH-05 split out to 10e** — it needs roll-result capture, which does not exist
+- [ ] 10e — HEARTH-05: total retaliation damage per encounter. Deferred out of 10d 2026-08-27 after measuring what it actually needs: the app has **no memory of what a die came up as** (`DiceRoller` throws a number and forgets it), and the obvious shortcut of summing the session log is **silently wrong** — `LOG_DEPTH = 25`, so past 25 entries the earliest retaliations fall off the end and the total quietly shrinks. A wrong total that looks right is worse at the table than no total
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
 
@@ -1838,6 +1839,163 @@ Both are **arithmetic on a spend** rather than an affordance, which is a differe
 from 10c and belongs in its own reviewable diff. Split recorded in `04-slices.md`; the 8→8b and
 10→10a/10b precedent applies. Still not in Phase 1 at all: **VAL-13**, which needs state recording
 an attack resolving, and **finding AZ / HEARTH-08**, which is Prep-tab work.
+
+## Slice 10d — closed 2026-08-27. The app computed the pool, then made him type it in.
+
+**Gate green.** `npx tsc --noEmit` clean · **876 passed + 7 skipped across 37 files** (was 841/35 —
+**35 net-new tests**, no test weakened, none skipped) · `npm run build` ✓ ·
+`prove-slice10d.mjs` **14/14 in Chrome at 390×844**.
+
+### The two faults, which turned out to be one
+
+Canon's **HEARTH-04** is one sentence: if the cloak is up and the player gains Temporary Hit Points
+from another source, the app **must prompt**. Measured against 10c's code the app did the opposite,
+twice over:
+
+1. `setTempHP` was a blind assignment. 11 from the cloak became 5 from anywhere, the cloak ended by
+   its own wording, and nothing said a word. That is **VAL-06**, pinned `it.fails` in slice 10a.
+2. **The larger half, which was not written down anywhere.** `_probe10d.mjs` ran the real reducer:
+   taking Flaming Cloak left `tempHP` at **0 → 0**, while the detail sheet on screen displayed the
+   pool computed from canon's own formula. The app did the arithmetic and then made Marcus type the
+   answer into a different screen by hand.
+
+The second is why they shipped together: **a warning about replacing a pool the app never grants is
+a warning about nothing.**
+
+### One decision, two askers
+
+`src/lib/rules-2024/temp-hp.ts` is new, and **the law of that file is that it decides and never
+applies**. `tempHPReplacement(character, incoming, source)` returns what would be lost, what would
+replace it, and whether the trade is strictly smaller — or `null` when a prompt would be noise (no
+live pool; a non-grant; the same known source re-applying the same number, which is the cloak
+refreshing the cloak, not a decision). `replacementWarning` turns that into the sentence.
+
+Two surfaces ask, in the idiom each one already had:
+
+- **`HPTracker`** arms rather than confirms. The first press paints the sentence and changes
+  nothing; the button re-reads **"Replace 5 with 3"**; the second press is obeyed. Typing anything
+  disarms it, so an armed button can never be pressed against a number he has since changed.
+- **`OptionDetailSheet`** paints the sentence in band ③, above the Spend button and after "Roll
+  from here" — measured by `compareDocumentPosition`, because a warning *under* the button is
+  indistinguishable from 10c's refusal band, which reports on a press that already happened.
+
+**Neither surface can reach `setTempHP` without the sentence having been on the glass first** —
+which is how canon's "must prompt" is enforced without making the setter refuse. It deliberately
+still obeys: 2024 gives the player the choice on purpose, and a smaller pool with a better duration
+is a real play. A setter that silently refused would leave every caller unable to tell "refused"
+from "applied".
+
+### The grant is computed, never read
+
+`TurnOption.grantsTempHP` is a resolved **number**, not a formula, set in the composer by reading
+canon's `tempHP` fact and parsing it. 11 at level 7 with Charisma 18 — which is exactly canon's own
+worked example, `atLevel7.tempHPWithCha18: 11`, cross-checked in a test so that if the app's
+arithmetic and canon's example ever disagree it surfaces here and not at the table. 12 at level 8
+(the unit fixture), 24 at level 20.
+
+**The double-grant bug was designed out, and both sides pinned.** Hearthfire Manifest composes as
+*two* options sharing one `canonId`: a free Bonus Action that summons the flame, and the Reaction
+"Flaming Cloak" that spends a Channel Divinity use. Only the second grants. The gate is
+`cost.resourcePoolId !== undefined` — **SHAPE, never a name**. Attach it by name, or to both faces,
+and Nix ends up standing in 24 temp HP the rules never gave him: summon, then cloak. A test asserts
+`['Flaming Cloak']` is the *complete* list of granting options across the whole turn.
+
+The grant is also the reducer's **first forward-pointing arrow** — every other line in `takeOption`
+spends; this one gives. `Restore.tempHP` snapshots the old pool *and its label* before the write,
+for the same reason `restore.pools` does: `setTempHP` clamps and clears at 0, destroying the number
+an inverse would need. Undo a cloak taken over a live Heroism 5 and Heroism's 5 comes back, label
+and all.
+
+### VAL-06 flipped, and its gap pin inverted rather than deleted
+
+The 10a ledger entry moved `'VAL-06': 'violated'` → `'enforced'`, and the `it.fails` block became
+four green assertions — prefaced with a comment recording that **"closed" here means PROMPT FIRST,
+not "refuse"**. The old GAP PIN, which asserted `tempHPSource` did *not* exist, was **inverted**: it
+now proves the field exists and is cleared at 0. A deleted pin proves nothing; an inverted one
+proves the gap closed.
+
+### Measured in Chrome, post-change — `prove-slice10d.mjs`, 14/14
+
+One continuous session, every number read off the painted page or off the disk, never recomputed by
+the prover (finding Q).
+
+| case | measured |
+|---|---|
+| A · arrival | disk `tempHP:0` · no badge · no warning |
+| B · type 5 over nothing | no warning, button reads `Apply`; **one** press → disk `{tempHP:5, tempHPSource:null}`, badge `+5 temp` |
+| C · type 3 over that 5 | warning painted **with a box inside the viewport**; first press → disk still `5`, badge still `+5 temp`; button now reads **`Replace 5 with 3`**; second press → `3` |
+| D · open Flaming Cloak | sheet warns *"Accepting 11 replaces the 3 temporary hit points you already have"*, on the glass **in the same frame as the Spend button**, and ordered before it |
+| E · press Spend | **3 → 11**, `tempHPSource: "Flaming Cloak"`, badge `+11 temp` |
+| F | clean console |
+
+**B is the regression guard, not decoration.** A prompt that fires on the ordinary case is a prompt
+nobody reads. **C uses a smaller number and D a larger one** on purpose: 3-over-5 is the trade the
+old code silently made worse, and 11-over-3 is a replacement that is *not* worse and must still
+warn, because the cloak "lasts until the Temporary Hit Points are depleted" and any other pool ends
+it. A naive "only warn if it is worse" guard passes C and fails D.
+
+### The prover was proved
+
+Ran against the stashed pre-10d build (the eight changed sources reverted to HEAD, `temp-hp.ts`
+moved aside): **5/14 — FAILED 9**. Red on all four C claims, all three D claims and both E claims;
+green on **exactly** the four controls — A arrival, both B claims, C's "the second press is obeyed",
+and F. That is the shape that makes the red meaningful. All eleven files were then restored and
+verified **byte-identical** (`cmp`) against the pre-stash copies.
+
+The unit tests were proved able to fail more bluntly still: against 10c's types they do not
+**compile** — `npm run build` reported **24 `error TS`**, `Property 'tempHPSource' does not exist on
+type 'Character'` among them.
+
+### What changed on the glass
+
+He types a number into Temp HP over a pool he is already standing in, and the app now tells him what
+that costs him *before* the press that costs it — and the button stops saying "Apply" while it is
+about to end his cloak. And on the other side: pressing Spend on Flaming Cloak now actually hands
+him the 11 temporary hit points, labelled with what granted them, instead of showing him the number
+and expecting him to copy it across two screens mid-combat.
+
+### Files
+
+- `src/lib/rules-2024/temp-hp.ts` — **new**. Decides; never applies.
+- `src/lib/character.ts` — `setTempHP` takes a source and is the one writer of number + label; `applyDamage` clears the label at 0.
+- `src/lib/turn/types.ts` · `events.ts` — `grantsTempHP` on the option and the taken option; `Restore.tempHP`.
+- `src/lib/turn/compose.ts` — `tempHPGrantOf`, gated on `cost.resourcePoolId`, not on a name.
+- `src/lib/turn/reduce.ts` — the grant, snapshotted before the write; `revert` restores pool and label.
+- `src/lib/turn/detail.ts` — `OptionDetail.spendWarning`.
+- `src/components/HPTracker.tsx` — the armed two-press replace.
+- `src/components/combat/OptionDetailSheet.tsx` — the warning band in ③, above Spend.
+- `src/lib/rules-2024/temp-hp.test.ts` — **new**, 16.
+- `src/lib/turn/compose.temphp.test.ts` — **new**, 11, including the canon cross-check and both sides of the double-grant bug.
+- `src/components/combat/OptionDetailSheet.test.tsx` — +6, including the DOM-order pin.
+- `src/lib/canon/validation.test.ts` — VAL-06 `violated` → `enforced`; gap pin inverted.
+- `docs/plans/table-truth/prove-slice10d.mjs` — **new**, kept as evidence and regression guard.
+- `docs/plans/table-truth/_probe10d.mjs` — kept, per the slice-7 precedent: the probe that produced the 0 → 0 number is part of the evidence.
+- `docs/plans/table-truth/_shots-slice10d/` — A–F screenshots, `_results.json`, and `before/` from the stashed build.
+
+### One prover claim was corrected mid-run, and how
+
+D first failed on `sheetWarningOnGlass === false` while the warning was demonstrably present and
+correct. The screenshot settled it: **the sheet scrolls**, and the warning sits near the bottom with
+the Spend button, below the fold on open. The original claim — "visible the instant the sheet opens"
+— was the wrong claim for a scrolling surface. It was replaced with a **stronger** one: scroll to
+the button he is about to press, and assert the warning and the button are painted in the **same
+frame**. He cannot reach the control without the sentence in front of him. Still falsifiable — it
+went red on the pre-change build, where there is no warning at all.
+
+### What 10e inherits
+
+**HEARTH-05** — total retaliation damage per encounter — and the reason it is alone in its own
+slice. Every number the app shows today is *computed* from the sheet. This is the first that must be
+**captured**: `DiceRoller` throws a number and forgets it, so nothing can be summed. And the obvious
+shortcut is a trap: summing retaliations out of the session log is **silently wrong**, because
+`LOG_DEPTH = 25` — past 25 entries the earliest retaliations fall off the end and the total quietly
+shrinks. A wrong total that looks right is worse at the table than no total. 10e therefore needs
+roll-result capture plus a per-encounter accumulator that is **not** the undo log.
+
+Still not in Phase 1 at all: **VAL-13**, which needs state recording an attack resolving; **finding
+AZ / HEARTH-08**, Prep-tab work; and **finding AT**, passive features reaching no turn option.
+**Finding BC** remains open and unfixed — two hand-rolled overlays permanently in the DOM claiming
+`role="dialog" aria-modal="true"`, which is why every dialog claim in this prover is geometric.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

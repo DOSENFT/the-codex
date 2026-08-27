@@ -300,17 +300,47 @@ nothing else:*
 | D · reload | 1 — the reload is a no-op, 10b's guarantee holding through a write path 10b did not have |
 | E | clean console |
 
-**10d — HEARTH-04's mandatory warning and HEARTH-05's damage tally.** *(split out of 10c
-2026-08-27, on the 8→8b and 10→10a/10b precedent, and for the same reason: 10c came back bigger
-than the estimate once `take` turned out to be unreachable rather than merely unwired.)* Both need
-the write path 10c has now built, and both are **arithmetic on a spend**, not an affordance —
-which is a different kind of risk and belongs in its own reviewable diff.
+**10d — HEARTH-04: the grant, and the warning before it destroys a pool. DONE 2026-08-27.**
+*(Split out of 10c 2026-08-27, on the 8→8b and 10→10a/10b precedent, and for the same reason: 10c
+came back bigger than the estimate once `take` turned out to be unreachable rather than merely
+unwired.)* It needs the write path 10c built, and it is **arithmetic on a spend**, not an
+affordance — a different kind of risk, in its own reviewable diff.
 
 - **HEARTH-04** — the mandatory replacement warning: *"Accepting these Temporary Hit Points will
   replace your Hearthfire cloak pool and end the cloak. Continue?"* This is the same underlying
   gap as **VAL-06**, pinned `it.fails` in 10a, where `setTempHP(11 → 5)` yields 5. Canon requires
-  the warning; the app currently overwrites silently.
-- **HEARTH-05** — display total retaliation damage per encounter.
+  the warning; the app overwrote silently.
+- **And the half nobody had written down:** taking the cloak granted *nothing*. `_probe10d.mjs`
+  ran the real reducer — `tempHP` 0 before, 0 after — while the detail sheet displayed the number
+  computed from canon's own formula. The app did the arithmetic and then made Marcus type the
+  answer into a different screen by hand. A warning about replacing a pool the app never grants
+  is a warning about nothing, so the grant shipped in the same slice.
+
+| case (measured, `prove-slice10d.mjs`, 14/14) | what the app did |
+|---|---|
+| A · arrival | tempHP 0, no badge, no warning — the quiet state |
+| B · type 5 over nothing | **one** press, no prompt, disk `{tempHP:5, tempHPSource:null}` — the app says it does not know the source rather than guessing |
+| C · type 3 over that 5 | the warning is painted **and has a box inside the viewport**; first press changes nothing; the button re-reads **"Replace 5 with 3"**; second press is obeyed ← the slice |
+| D · open Flaming Cloak | the sheet carries the same sentence, naming "the 3 temporary hit points you already have", painted in the **same frame** as the Spend button and ordered before it |
+| E · press Spend | 3 → **11**, `tempHPSource: "Flaming Cloak"` — canon's formula at level 7 with Charisma 18, which is canon's own worked example |
+| F | clean console |
+
+**Split again, at the end of 10d.** The heading above originally read "HEARTH-04's mandatory
+warning **and HEARTH-05's damage tally**". HEARTH-05 was moved out on 2026-08-27, for a reason
+only visible from inside 10d: it needs a mechanism that does not exist.
+
+**10e — HEARTH-05: total retaliation damage per encounter.** The cloak deals 1d10 Fire to whoever
+hits Nix in melee, and canon asks the app to total it for the encounter. Every number the app
+shows today is *computed* from the sheet; this is the first that must be **captured** — the app
+has no memory of what a die actually came up as. Two things must exist before the display is even
+meaningful:
+
+1. **Roll-result capture.** `DiceRoller` throws a number and forgets it. Nothing persists a
+   result, so nothing can be summed.
+2. **A per-encounter accumulator that is not the undo log.** The obvious shortcut — summing
+   retaliations out of the session log — is **silently wrong**: `LOG_DEPTH = 25`. Past 25 entries
+   the earliest retaliations fall off the end and the total quietly shrinks. A wrong total that
+   looks right is worse at the table than no total, so the tally gets its own store.
 
 ---
 

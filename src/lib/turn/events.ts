@@ -45,6 +45,12 @@ export interface TakenOption {
   resourceAmount?: number
   /** The spell name to hold concentration on, when taking this starts it. */
   concentration?: string
+  /** Temporary hit points taking this grants, already resolved for the
+   *  character who took it. Copied off the option at take-time for the same
+   *  reason every other field here is: the log outlives the option list, and by
+   *  the time Marcus presses Undo his level — and so the size of the pool — may
+   *  have changed. Table Truth slice 10d. */
+  grantsTempHP?: number
 }
 
 export type CombatEvent =
@@ -100,6 +106,21 @@ export interface Restore {
    *  restore. This field carried `| null` for that case until the tests showed
    *  the case cannot arise — an untestable safety net is not a safety net. */
   pools?: Record<string, number>
+
+  /** The temp HP pool as it stood BEFORE the event granted one, present only on
+   *  events that granted.
+   *
+   *  Both halves, always together. Restoring the amount without the label would
+   *  leave an 11-point pool named after the feature that just got undone, which
+   *  is exactly the drift that keeping the label beside the number was meant to
+   *  prevent — and `{ amount: 0, source: null }` is a real, common value here
+   *  (you usually had no pool at all), so this cannot be optional-per-half.
+   *
+   *  Note the asymmetry with `pools`: that one restores something the event
+   *  SPENT, this one un-grants something the event GAVE. Undo has to reverse
+   *  both directions, and slice 10d is the first event in the app's history that
+   *  moves a character stat forwards rather than only paying for it. */
+  tempHP?: { amount: number; source: string | null }
 }
 
 /** One entry in the log.

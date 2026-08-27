@@ -1,0 +1,227 @@
+{
+  "arrival": {
+    "badge": null,
+    "stored": {
+      "tempHP": 0,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "typed5": {
+    "badge": null,
+    "stored": {
+      "tempHP": 0,
+      "tempHPSource": null
+    },
+    "applyLabel": "Apply",
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "applied5": {
+    "badge": "+5 temp",
+    "stored": {
+      "tempHP": 5,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "warned": {
+    "badge": "+5 temp",
+    "stored": {
+      "tempHP": 5,
+      "tempHPSource": null
+    },
+    "applyLabel": "Apply",
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "armed": {
+    "badge": "+3 temp",
+    "stored": {
+      "tempHP": 3,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "replaced": {
+    "badge": "+3 temp",
+    "stored": {
+      "tempHP": 3,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "sheet": {
+    "badge": "+3 temp",
+    "stored": {
+      "tempHP": 3,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": "Flaming Cloak",
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": true,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "granted": {
+    "badge": "+3 temp",
+    "stored": {
+      "tempHP": 3,
+      "tempHPSource": null
+    },
+    "applyLabel": null,
+    "trackerWarning": null,
+    "trackerWarningOnGlass": false,
+    "sheet": null,
+    "sheetWarning": null,
+    "sheetWarningOnGlass": false,
+    "spendOnGlass": false,
+    "warningBeforeSpend": null,
+    "reactionRows": [
+      "Opportunity Attack — Hearthbrand",
+      "Flaming Cloak"
+    ]
+  },
+  "results": [
+    {
+      "name": "A · no temporary hit points, and no warning anywhere",
+      "pass": true,
+      "detail": "disk tempHP=0 · badge=none · warning=none"
+    },
+    {
+      "name": "B · granting a pool where there was none prompts nobody",
+      "pass": true,
+      "detail": "warning=none · button reads \"Apply\""
+    },
+    {
+      "name": "B · one press was enough, and the app admits it does not know the source",
+      "pass": true,
+      "detail": "disk {\"tempHP\":5,\"tempHPSource\":null} · badge=+5 temp"
+    },
+    {
+      "name": "C · the warning is ON THE GLASS before any press  <-- THIS IS THE SLICE",
+      "pass": false,
+      "detail": "NOTHING. He types 3 over an 11-point cloak and the app takes it silently — which is VAL-06 as measured, and what canon rates HIGH."
+    },
+    {
+      "name": "C · it says what would be lost, and that the two pools cannot both be kept",
+      "pass": false,
+      "detail": "null"
+    },
+    {
+      "name": "C · the FIRST press destroyed nothing",
+      "pass": false,
+      "detail": "disk tempHP=3 · badge=+3 temp — still the pool he had"
+    },
+    {
+      "name": "C · and the button now names what the next press will do",
+      "pass": false,
+      "detail": "button reads null — a control that says \"Apply\" while it is about to end a cloak is the bug HEARTH-04 describes"
+    },
+    {
+      "name": "C · the second press is obeyed — the player chooses, the app does not veto",
+      "pass": true,
+      "detail": "disk tempHP=3 · 2024 lets him keep either pool, and a smaller one with a better duration is a real play"
+    },
+    {
+      "name": "D · the sheet opened on the cloak and warns about the pool already up",
+      "pass": false,
+      "detail": "sheet=\"Flaming Cloak\" · warning=null"
+    },
+    {
+      "name": "D · warning and button are painted in the SAME frame  <-- he cannot press blind",
+      "pass": false,
+      "detail": "warning on glass=false · Spend on glass=true — the sheet scrolls, so the test that matters is what is in front of him where his thumb is"
+    },
+    {
+      "name": "D · the warning sits ABOVE the button, not under it",
+      "pass": false,
+      "detail": "warningBeforeSpend=null — underneath it would be indistinguishable from the refusal band, which reports on a press that already happened"
+    },
+    {
+      "name": "E · the pool is canon’s computed number, not a number he typed  <-- THE GRANT",
+      "pass": false,
+      "detail": "tempHP is 3. The cloak was spent and granted nothing, which is the measured pre-10d behaviour."
+    },
+    {
+      "name": "E · and the app now knows WHAT granted it",
+      "pass": false,
+      "detail": "tempHPSource=null — this is the field VAL-06's gap pin said had to exist before any prompt could name the pool it was ending"
+    },
+    {
+      "name": "F · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

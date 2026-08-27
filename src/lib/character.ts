@@ -244,6 +244,31 @@ export interface Character {
   conditions: string[] // Active condition names
   deathSaves: { successes: number; failures: number } // Track death saves
   tempHP: number // Temporary hit points
+  /** What granted the CURRENT temp HP pool, or null/absent when it was typed in
+   *  by hand and the app does not know.  Table Truth slice 10d.
+   *
+   *  WHY A FIELD AND NOT A DERIVATION. Slice 10a pinned canon's VAL-06 as
+   *  violated and recorded the reason the fix could not be a guard inside
+   *  `setTempHP`: 2024 says temp HP does not stack and the player CHOOSES which
+   *  pool to keep, and a prompt offering that choice has to be able to name what
+   *  it is about to destroy. Nothing recorded where a pool came from, so the
+   *  prompt could not be written. This is that missing field, and it is the
+   *  whole of the model change 10a said would be needed.
+   *
+   *  IT IS ONE MODEL, NOT TWO. The amount lives on `tempHP` and the label lives
+   *  here, and they are written by the same function in the same call —
+   *  `setTempHP` sets both, and clears this one whenever the pool reaches 0.
+   *  There is deliberately no separate "is the cloak up" flag to drift out of
+   *  step with the number: the cloak is up exactly while `tempHP > 0` and this
+   *  names it, which is finding BB's lesson applied before the bug rather than
+   *  after it.
+   *
+   *  OPTIONAL because it is persisted. Every character saved before 10d has no
+   *  such key, `applyDamage` has never written one, and a pool with no recorded
+   *  source is a real and permanent state — it is what typing a number into the
+   *  HP tracker produces. Absent and null mean the same thing: the app does not
+   *  know, and must say so rather than guess. */
+  tempHPSource?: string | null
 
   // Spell management
   spells: Spell[]
@@ -1279,6 +1304,12 @@ export function applyDamage(character: Character, amount: number): Character {
   return {
     ...character,
     tempHP,
+    // A depleted pool must stop naming its source. Nix's cloak "lasts until the
+    // Temporary Hit Points are depleted" — so the moment damage eats the last
+    // point, the cloak is over and the label is a lie. Clearing it here rather
+    // than tracking a separate "cloak active" flag is the whole reason the label
+    // lives beside the number: one write, one truth. Slice 10d.
+    ...(tempHP === 0 && { tempHPSource: null }),
     hitPoints: { ...character.hitPoints, current: newCurrent },
   }
 }
@@ -1297,9 +1328,31 @@ export function applyHealing(character: Character, amount: number): Character {
   }
 }
 
-/** Set temp HP (replaces, doesn't stack per 2024 rules). */
-export function setTempHP(character: Character, amount: number): Character {
-  return { ...character, tempHP: Math.max(0, amount) }
+/** Set temp HP, recording WHAT granted it.
+ *
+ *  The old doc on this function read "replaces, doesn't stack per 2024 rules",
+ *  which was half right and the wrong half: 2024 temp HP does not stack, but
+ *  the rule is that the PLAYER chooses which pool to keep, not that the newest
+ *  one wins. This function is still the blind setter — deliberately. The choice
+ *  belongs to whoever can ask a human, and `rules-2024/temp-hp.ts` decides
+ *  whether there is anything worth asking about. A setter that silently refused
+ *  would be worse than one that silently accepts, because the caller would have
+ *  no way to tell the difference.
+ *
+ *  What IS new is `source`. Amount and label are written by this one function in
+ *  this one call so they cannot drift apart, and the label is cleared whenever
+ *  the pool reaches 0 — a dead pool must not keep naming the feature that
+ *  granted it. Passing no source means "the app does not know", which is the
+ *  honest state after a hand-typed number and is not the same as guessing.
+ *
+ *  Table Truth slice 10d. */
+export function setTempHP(
+  character: Character,
+  amount: number,
+  source: string | null = null,
+): Character {
+  const tempHP = Math.max(0, amount)
+  return { ...character, tempHP, tempHPSource: tempHP > 0 ? source : null }
 }
 
 // ---------------------------------------------------------------------------

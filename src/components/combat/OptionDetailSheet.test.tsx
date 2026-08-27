@@ -380,3 +380,82 @@ describe('band ③ — the spend path reaches the glass (slice 10c)', () => {
     expect(refused).toBeLessThan(nextBand)
   })
 })
+
+/* ============================================================================
+   BAND ③ — CANON HEARTH-04'S MANDATORY WARNING. Table Truth slice 10d.
+
+   The erratum's exact words: "If the cloak is active and the player gains
+   Temporary Hit Points from another source, the app must prompt." The detail
+   sheet is one of the two surfaces that can gain him a pool, so it is one of the
+   two that must ask. It asks with a sentence ABOVE the button — the refusal
+   below answers a press that already happened; this one has to be read before
+   the press that would destroy a pool.
+
+   None of these can pass against slice 10c: `OptionDetail.spendWarning` did not
+   exist, and neither did the grant it is computed from.
+   ========================================================================= */
+describe('OptionDetailBody — what spending would destroy', () => {
+  const cloakedIn = (amount: number, source: string | null) => ({
+    ...NIX,
+    tempHP: amount,
+    tempHPSource: source,
+  })
+
+  /** Composed against the SAME character the sheet is painted for, because the
+   *  grant is computed per character and a sheet quoting another sheet's numbers
+   *  is the bug this project keeps finding. */
+  const paintFor = (character: typeof NIX, name: string) => {
+    const t = composeTurn({ character, combat: null })
+    const option = [...t.ranked, ...t.rest, ...t.mutex.flatMap(g => g.faces)].find(
+      o => o.name === name
+    )!
+    return renderToStaticMarkup(
+      <OptionDetailBody
+        detail={optionDetail(option, character, FRESH)}
+        onClose={() => {}}
+        onRoll={() => {}}
+        onSpend={() => {}}
+      />
+    )
+  }
+
+  it('warns, and names the pool, when a live pool would be replaced', () => {
+    const html = paintFor(cloakedIn(5, 'Heroism'), 'Flaming Cloak')
+    const t = text(html)
+    expect(t).toContain('Replaces')
+    expect(t).toContain('your Heroism pool (5)')
+    expect(t).toContain('do not stack')
+  })
+
+  it('says the honest thing about a pool the app cannot account for', () => {
+    const html = paintFor(cloakedIn(5, null), 'Flaming Cloak')
+    expect(text(html)).toContain('the 5 temporary hit points you already have')
+  })
+
+  it('says nothing when there is no pool to lose — the ordinary case', () => {
+    expect(NIX.tempHP).toBe(0)
+    expect(text(paintFor(NIX, 'Flaming Cloak'))).not.toContain('Replaces')
+  })
+
+  it('says nothing when the cloak would merely refresh itself', () => {
+    /* Re-taking the thing that granted the pool you are standing in is not a
+       decision between two pools, and a warning there would be the app crying
+       wolf about itself. Level 8 + Charisma 18 is 12. */
+    expect(text(paintFor(cloakedIn(12, 'Flaming Cloak'), 'Flaming Cloak'))).not.toContain('Replaces')
+  })
+
+  it('says nothing on an option that grants nothing, whatever the pool', () => {
+    expect(text(paintFor(cloakedIn(11, 'Flaming Cloak'), 'Sacred Flame'))).not.toContain('Replaces')
+  })
+
+  it('puts the warning ABOVE the button, not below it', () => {
+    /* Position is the whole claim. Underneath, it would be indistinguishable
+       from the refusal — a report on a press that has already destroyed the
+       pool. */
+    const t = text(paintFor(cloakedIn(5, 'Heroism'), 'Flaming Cloak'))
+    const warning = t.indexOf('Replaces')
+    const button = t.indexOf('Spend')
+    expect(warning).toBeGreaterThan(t.indexOf('Roll from here'))
+    expect(button).toBeGreaterThan(warning)
+  })
+})

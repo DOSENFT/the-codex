@@ -38,6 +38,7 @@ import { statBlock } from '../canon/format'
 import { featureFacts, type FeatureFact } from '../canon/feature'
 import { splitTactics, type TacticsBullet } from '../canon/tactics'
 import { rollOffers, type RollOffer } from './rolls'
+import { replacementWarning, tempHPReplacement } from '../rules-2024/temp-hp'
 import { casterContextOf, featureContextOf } from './overlay'
 
 export interface DetailFact {
@@ -72,6 +73,15 @@ export interface OptionDetail {
   /** Band 3, the spend affordance. Null when there is nothing this sheet can
    *  legally spend — see `spendFor`, which slice 10c widened. */
   spend: { label: string } | null
+  /** Band 3, above the Spend button: what spending this would DESTROY.
+   *
+   *  Null in the ordinary case, which is nearly always. Non-null only when the
+   *  option grants temporary hit points and the player is already standing in a
+   *  pool — canon HEARTH-04's mandatory warning, arriving on the surface that
+   *  can actually spend the thing. The sentence itself is `replacementWarning`,
+   *  the same function the HP tracker calls, because one rule worded two ways is
+   *  two rules as far as the player is concerned. Table Truth slice 10d. */
+  spendWarning: string | null
   /** Band 3, the live rule. Null when no rule applies to this option now. */
   ruleBox: RuleBox | null
   /** Band 3, canon's own recorded problems with this feature. */
@@ -200,6 +210,20 @@ function spendFor(option: TurnOption): { label: string } | null {
   return { label: option.cost.label }
 }
 
+/** Canon HEARTH-04 on the surface that can spend.
+ *
+ *  The HP tracker asks this question about a number Marcus typed; this asks it
+ *  about a number the app computed. Same decision function, same sentence — and
+ *  no button state here, because the detail sheet's Spend has always been a
+ *  single press and the warning sits above it in the same band. What the two
+ *  surfaces share is the RULE; what they are allowed to differ on is the verb.
+ *  Slice 10d. */
+function tempHPWarningFor(option: TurnOption, character: Character): string | null {
+  if (option.grantsTempHP === undefined) return null
+  const replacement = tempHPReplacement(character, option.grantsTempHP, option.name)
+  return replacement ? replacementWarning(replacement) : null
+}
+
 /** Everything the detail sheet paints, assembled once. Pure: no hooks, no
  *  fetch, no clock. It renders identically with the AI off and the wifi off,
  *  which is the requirement this whole slice was scoped around. */
@@ -244,6 +268,10 @@ export function optionDetail(
       ctx: casterContextOf(character),
     }),
     spend: spendFor(option),
+    // Slice 10d. The option's own name is passed as the incoming source, which
+    // is what makes re-taking the cloak you are already wearing NOT raise a
+    // warning about itself.
+    spendWarning: tempHPWarningFor(option, character),
     ruleBox: ruleBoxFor(option, economy),
     errata: errataForFeature(option.name) as CanonErratum[],
     tactics: spell ? splitTactics(spell.tactics) : [],

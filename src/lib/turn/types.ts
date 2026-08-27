@@ -133,6 +133,23 @@ export interface TurnOption {
    *  which is the open-world rule working, not breaking. Absent means the row
    *  predates the overlay (the V0.9 screen, and every existing test). */
   provenance?: 'canon' | 'sheet'
+
+  /** Temporary hit points this option GRANTS when taken, already computed for
+   *  this character at this level. Absent on every option that grants none,
+   *  which is nearly all of them.
+   *
+   *  A NUMBER, NOT A FORMULA. The composer already resolves "Paladin level +
+   *  Charisma modifier" into 11 in order to display it (`featureFacts`), and up
+   *  to slice 10d the app showed Marcus that 11 and then made him type it into
+   *  the HP tracker by hand. Carrying the resolved number here is what lets the
+   *  reducer apply the grant, and it stays consistent with slice 8b's law: the
+   *  scaling is COMPUTED, never read off a table of names.
+   *
+   *  Set only when the option is the one that actually pays for the grant. Nix's
+   *  Hearthfire Manifest has two faces — a free Bonus Action summon and a
+   *  Reaction "Flaming Cloak" that costs a Channel Divinity use — and only the
+   *  cloak grants the pool. See `compose.ts`. Table Truth slice 10d. */
+  grantsTempHP?: number
 }
 
 /** Several options, one economy slot, pick one.
