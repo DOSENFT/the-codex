@@ -1,0 +1,107 @@
+{
+  "before": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "elsewhere": 8,
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "after": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "elsewhere": 8,
+    "deck": {
+      "Action": "used",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "stored": {
+      "action": true,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "reloaded": {
+    "ready": 1,
+    "rows": [
+      "Hearthfire Manifest"
+    ],
+    "elsewhere": 11,
+    "deck": {
+      "Action": "used",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "stored": {
+      "action": true,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "mountWrites": [
+    "codex-action-notes-nix-fixture",
+    "codex-combat-nix-fixture"
+  ],
+  "results": [
+    {
+      "name": "A · nothing is spent, and both models say so",
+      "pass": true,
+      "detail": "4 ready · deck Action=available · stored action=false"
+    },
+    {
+      "name": "B · the deck recorded the spend, and persisted it",
+      "pass": true,
+      "detail": "deck Action=used · stored action=true"
+    },
+    {
+      "name": "B · the ranked list noticed  <-- THIS IS THE DECISION",
+      "pass": false,
+      "detail": "list did NOT move: still 4 ready, same rows. The deck says the Action is spent and the disk agrees, but the list is still composed from the snapshot read at mount. Rows still offered: Hearthbrand | Javelin | Sacred Flame | Hearthfire Manifest"
+    },
+    {
+      "name": "C · the spend is still on disk after a reload",
+      "pass": true,
+      "detail": "deck Action=used · stored action=true"
+    },
+    {
+      "name": "C · the reload changes nothing — the live list was already right",
+      "pass": false,
+      "detail": "STALE. 4 → 4 (spend) → 1 (reload). The list is right only after a reload, so something is composing from a snapshot again. Rows still offered after the spend: Hearthbrand | Javelin | Sacred Flame | Hearthfire Manifest"
+    },
+    {
+      "name": "E · nothing writes the encounter or the notes on mount — finding AR",
+      "pass": false,
+      "detail": "wrote codex-action-notes-nix-fixture, codex-combat-nix-fixture with no input from the player"
+    },
+    {
+      "name": "D · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

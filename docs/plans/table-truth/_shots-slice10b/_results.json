@@ -1,0 +1,101 @@
+{
+  "before": {
+    "ready": 4,
+    "rows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "elsewhere": 8,
+    "deck": {
+      "Action": "available",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "stored": {
+      "action": false,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "after": {
+    "ready": 1,
+    "rows": [
+      "Hearthfire Manifest"
+    ],
+    "elsewhere": 11,
+    "deck": {
+      "Action": "used",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "stored": {
+      "action": true,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "reloaded": {
+    "ready": 1,
+    "rows": [
+      "Hearthfire Manifest"
+    ],
+    "elsewhere": 11,
+    "deck": {
+      "Action": "used",
+      "Bonus": "available",
+      "Reaction": "available",
+      "Move": "available"
+    },
+    "stored": {
+      "action": true,
+      "bonusAction": false,
+      "reaction": false,
+      "movement": false
+    }
+  },
+  "mountWrites": [],
+  "results": [
+    {
+      "name": "A · nothing is spent, and both models say so",
+      "pass": true,
+      "detail": "4 ready · deck Action=available · stored action=false"
+    },
+    {
+      "name": "B · the deck recorded the spend, and persisted it",
+      "pass": true,
+      "detail": "deck Action=used · stored action=true"
+    },
+    {
+      "name": "B · the ranked list noticed  <-- THIS IS THE DECISION",
+      "pass": true,
+      "detail": "list moved 4 → 1 ready"
+    },
+    {
+      "name": "C · the spend is still on disk after a reload",
+      "pass": true,
+      "detail": "deck Action=used · stored action=true"
+    },
+    {
+      "name": "C · the reload changes nothing — the live list was already right",
+      "pass": true,
+      "detail": "4 on arrival → 1 after the spend → 1 after a reload. The reload is a no-op, which is the whole claim: one owner of the state, and every surface on the tab composing from it."
+    },
+    {
+      "name": "E · nothing writes the encounter or the notes on mount — finding AR",
+      "pass": true,
+      "detail": "0 write(s) on load, none of them codex-combat-* or codex-action-notes-*"
+    },
+    {
+      "name": "D · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

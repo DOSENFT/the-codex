@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import type { Character } from '../../lib/character'
 import {
+  clearCombatState,
   createCombatState,
   loadCombatState,
   saveCombatState,
@@ -43,12 +44,51 @@ import type { ComposedTurn, TurnOption } from '../../lib/turn/types'
        character's own encounter. There is deliberately no effect that watches
        the id, because the failure mode of getting that wrong is writing Nix's
        spent slots onto somebody else's sheet.
+
+   4.  IT IS THE ONLY OWNER OF `codex-combat-${id}` — added in slice 10b, and
+       the reason the slice exists. Until 10b, `CombatHelperInner` kept a SECOND
+       `useState<CombatState>` initialised from the same key, and the fixed turn
+       deck spent through that one. The two copies agreed exactly once, at
+       mount, and diverged on the first tap: the deck greyed the Action, wrote
+       `action: true` to disk from an effect, and the ranked list — composed
+       from this provider's snapshot, which nothing re-read — went on offering
+       Marcus every option he had just paid for until he reloaded the tab.
+
+       Measured in a browser before the fix, by `prove-slice10b.mjs`:
+       4 options ready on arrival → 4 after spending the Action → 1 after a
+       reload. Source alone could not have settled it; nothing was thrown and
+       nothing was logged. The app was simply, silently, one turn behind.
+
+       So the legacy setter moved HERE rather than being deleted or duplicated.
+       `updateCombat` is that setter, and it is deliberately NOT the reducer:
+       `take`/`endTurn` route through `reduce`, which refuses illegal spends,
+       while `updateCombat` is the manual override the deck has always been —
+       Marcus tapping a chip because the table said so. Both now write the same
+       object, so `composeTurn` sees every spend the moment it happens.
    ========================================================================== */
 
 export interface CombatApi {
   /** The whole screen, recomputed from (character, combat, log). */
   turn: ComposedTurn
+  /** The state `turn` was composed from. Exposed in slice 10b so the surfaces
+   *  that used to keep their own copy — the turn deck, the round counter, the
+   *  concentration band — read the SAME object the engine read. */
+  combat: CombatState
   inCombat: boolean
+  /** The manual override: set the combat state directly, no rules applied.
+   *
+   *  This is the turn deck's write path, and the deck is honest about what it
+   *  is — a tally Marcus keeps by hand. It does not consult `reduce`, so it
+   *  cannot refuse; that is the point of a manual tally. What it DOES do is
+   *  persist before it renders, so a tap that is on screen is a tap that is on
+   *  disk. Accepts an updater for the call sites that need `prev`. */
+  updateCombat: (next: CombatState | ((prev: CombatState) => CombatState)) => void
+  /** The encounter is over: forget the stored turn, keep the fresh one.
+   *
+   *  Separate from `updateCombat` because the old pairing — set, then clear —
+   *  wrote the bytes and deleted them in the same breath, and under the effect
+   *  it replaced, deleted them and then wrote them BACK. */
+  forgetCombat: (next: CombatState) => void
   take: (option: TurnOption) => void
   endTurn: () => void
   /** Your turn comes round again — and with it, your Reaction.  Slice 7.
@@ -172,6 +212,36 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
     [character, combat, log, commit],
   )
 
+  /* The manual path. Note 4.
+     `next` is resolved against THIS render's `combat` rather than inside
+     `setCombat`'s updater, and that is not laziness — the write has to happen
+     exactly once, and it has to happen before the render. React is entitled to
+     call an updater twice, which would be two identical writes today and two
+     different ones the moment anything in the chain stops being pure. The cost
+     is that two calls in a single tick would collapse into one; verified at
+     the eleven call sites that moved in 10b that none fires twice in a tick,
+     because every one of them is a tap.
+
+     The identity guard is load-bearing too: `toggleEconomy` and friends are
+     free to return `prev` unchanged, and a no-op tap must not touch the disk. */
+  const updateCombat = useCallback(
+    (next: CombatState | ((prev: CombatState) => CombatState)) => {
+      const resolved = typeof next === 'function' ? next(combat) : next
+      if (resolved === combat) return
+      saveCombatState(character.id, resolved)
+      setCombat(resolved)
+    },
+    [character.id, combat],
+  )
+
+  const forgetCombat = useCallback(
+    (next: CombatState) => {
+      clearCombatState(character.id)
+      setCombat(next)
+    },
+    [character.id],
+  )
+
   const take = useCallback(
     (option: TurnOption) => dispatch({ type: 'takeOption', option: takenFrom(option) }),
     [dispatch],
@@ -196,7 +266,10 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
   const value = useMemo<CombatApi>(
     () => ({
       turn,
+      combat,
       inCombat: combat.inCombat,
+      updateCombat,
+      forgetCombat,
       take,
       endTurn,
       beginTurn,
@@ -207,7 +280,7 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
       refusal,
       dismissRefusal: () => setRefusal(null),
     }),
-    [turn, combat.inCombat, take, endTurn, beginTurn, startEncounter, endEncounter, undoLast, log, refusal],
+    [turn, combat, updateCombat, forgetCombat, take, endTurn, beginTurn, startEncounter, endEncounter, undoLast, log, refusal],
   )
 
   return <CombatContext.Provider value={value}>{children}</CombatContext.Provider>

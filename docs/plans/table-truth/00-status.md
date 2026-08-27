@@ -21,7 +21,8 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 8 — errata flags, all 12, three readings, DM wording — **DONE 2026-08-27**, prover PASS on six cases; all six live faults compared **character-for-character** against canon on disk, the ruling survives a real reload, and both surfaces report it. The prover caught three defects of its own (finding AX), my own re-scope claim was **wrong and a corpus test caught it** (finding AS), and the routing gap turned out to be **four of six, not two** (finding AT) — which is the reason the band exists (see §Slice 8 below)
 - [x] 8b — the ruling reaches the point of use — **DONE 2026-08-27**, prover PASS on six cases. Marcus delegated the design call, and the answer is a law the tests now enforce both ways: **a ruling changes what the app SAYS, never what it COMPUTES** — measured as **125 numeric tokens before, 125 after, 0 drifted**. Narrowed from four errata to one on evidence (the other three are slice 10's write path, Prep-tab work, or reach no option at all). The prover caught a defect **older than this phase**: `<span>WHEN</span>you take damage` — a margin is not a space, and the unit stripper had been *inserting* the separator the DOM lacked (finding AY, the inverse of finding Q). Measuring HEARTH-08 before deferring it found the app's prepared-spell bug is **larger than canon's erratum** (finding AZ — the thing most worth a steer)
 - [x] 10a — canon VAL-01..15 as a named suite — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files** (was 797/34). Every one of canon's fifteen rules was graded against the **real exported functions** by `_probe-val.mjs` before a line of suite existed, and the grade is the finding: the app **obeys 4**, **violates 4**, obeys **half of 2**, and **cannot express 5**. Violations are pinned with `it.fails` asserting canon's rule *written straight* — they go RED the day the app is fixed, so a fix cannot pass unnoticed and a bug cannot come back. All 7 skips print **their id and their reason** on every `npm test`, each paired with a live gap pin. The probe itself was the slice's most dangerous artifact and produced **finding BA** (below): reading `.ranked` turned a violation into a pass, twice, in opposite directions. **VAL-01 is finding AZ**, now under canon's own `error` severity; **VAL-11 is what 8b shipped**
-- [ ] 10b — the combat write path: `CombatProvider` or ship Phase 1 read-only — carries finding AR (two unconditional mount writes) and the two errata deferred out of 8b (HEARTH-04, HEARTH-05)
+- [x] 10b — the combat write path — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files**, build ✓, `prove-slice10b.mjs` **7/7 in Chrome**. Gate 3's oldest open question is answered *with a measurement*: read-only was **not** a safe resting place, because the read-only mount was already showing Marcus options he had paid for. Two components held two models of one turn — **finding BB** — and the list read `4 → 4 (spend, no change) → 1 (reload)`. Fixed by **deleting** the second model: `CombatHelperInner`'s private `useState<CombatState>` and its saving `useEffect` are gone and its eleven writers now go through `CombatProvider.updateCombat` / `forgetCombat`. Post-fix **4 → 1 → 1**, reload a no-op. **Finding AR is closed, both halves** — `setItem` recorded across a cold load: **0 writes**, where the old build named `codex-combat-*` *and* `codex-action-notes-*`. The prover was run against the stashed pre-change build and went **red on exactly those three claims**, so it is a test that can fail
+- [ ] 10c — the new spend paths, deferred out of 10b on purpose: wire the ranked rows to `take()`, HEARTH-04's mandatory warning, HEARTH-05's damage tally
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
 
@@ -1517,6 +1518,159 @@ or a rule canon promotes from `info` to `error` all turn this suite red the same
 Three of the four violations are not fixable without it. VAL-13 needs state that records an attack
 resolved; VAL-06 needs a temp-HP source; and finding AR's two unconditional mount writes are the
 same file. Plus HEARTH-04 and HEARTH-05, deferred out of 8b for precisely this reason.
+
+## Slice 10b — closed 2026-08-27. Two models of one turn, and the app believed the wrong one.
+
+Gate 3's least-confident decision #1 has been carried since before this phase had a line of code:
+*should the combat write path move into `CombatProvider` in Phase 1, or should Phase 1 ship
+read-only and leave `CombatHelper` as the writer?* The mitigation written at the time was "mount
+the provider **read-only** and prove it writes nothing" — and slice 5 did prove exactly that,
+twice, in a unit test and in a browser.
+
+**The mitigation was sound and the conclusion drawn from it was wrong.** Read-only is safe for the
+*disk*. It is not safe for the *screen*.
+
+### What was actually happening at the table
+
+Two components on the Play tab held two separate `CombatState` objects, both initialised from
+`codex-combat-${id}`:
+
+- `CombatHelperInner` owned a `useState<CombatState>` and persisted it from an effect. **The turn
+  deck — the sticky Action/Bonus/Reaction/Move chips Marcus taps — spent through this one.**
+- `CombatProvider` read the same key once, in a state initialiser, with **zero effects in the
+  file**. `composeTurn` gates every option's availability on `combat.turnActions`
+  (`compose.ts:161-162`), so **the ranked list composed from that snapshot.**
+
+They agreed exactly once — at mount. From the first tap they diverged, and nothing in the app
+could tell. No throw, no console error, no visual glitch. Just a list quietly one turn behind.
+
+### The measurement, in Chrome, before the fix
+
+`docs/plans/table-truth/prove-slice10b.mjs`, phone viewport, Nix at level 7, seeded mid-encounter
+with nothing spent. One tap on the deck's Action chip and nothing else:
+
+```
+A  on arrival   list: 4 ready — Hearthbrand | Javelin | Sacred Flame | Hearthfire Manifest
+                deck: Action available          disk: action=false
+B  after tap    list: 4 ready — IDENTICAL ROWS          <-- the bug
+                deck: Action used                disk: action=true
+C  after reload list: 1 ready — Hearthfire Manifest
+                deck: Action used                disk: action=true
+```
+
+**Three of the four rows the app went on offering cost the Action he had just spent.** Hearthfire
+Manifest is the only one that does not, which is why it is the one survivor after the reload — the
+engine was right all along, it was simply reading a stale object.
+
+The numbers came off the **painted page**, not from recomputation: `ready` is the list's own
+"N ready" header, `deck` is the chips' own `aria-label`s, `stored` is the bytes on disk. Three
+independent readings of the same fact, produced by two components that disagreed. Recomputing any
+of them here would have graded the prover's arithmetic instead of the app's — slice 7's lesson and
+finding Q's.
+
+### Finding BB — two components held two models of one turn, and diverged on the first tap
+
+The general shape, stated so it is recognisable the next time rather than only this time: **a
+component that reads persisted state in a `useState` initialiser and has no effect to re-read it
+is a snapshot, and a snapshot beside a live writer is a lie with a timestamp.** It is invisible to
+every cheap check. Storage is byte-correct — the writer wrote it. The reducer is correct — it was
+never asked. `tsc` is clean, 829 tests are green, the console is silent, and a screenshot of any
+single moment looks right. It is visible only by reading *two* surfaces of the same fact at the
+*same* instant and comparing them, which is the whole design of `prove-slice10b.mjs`.
+
+The corollary is the one that cost this phase nine slices: **"it writes nothing" is not "it is
+safe".** Slice 5's read-only mount was correct about the disk and silent about the screen, and the
+mitigation in Gate 3 leaned on it as though the two were the same claim. They are not. A read-only
+component still tells the player something, and a read-only component reading a stale object tells
+the player something false.
+
+### The fix is a deletion
+
+`CombatProvider` was already the right owner. Its three documented commitments — one write path,
+persist imperatively inside the handler, bound to one character by `key` — are precisely what the
+legacy writer lacked. So the legacy writer moved into it rather than being reimplemented:
+
+- `CombatHelperInner`'s `useState<CombatState>` — **deleted**. It now reads `combat` from context.
+- Its `useEffect(() => saveCombatState(...))` — **deleted**.
+- `CombatApi` gains `combat`, `updateCombat(next | updater)` and `forgetCombat(next)`.
+- All eleven former `setCombatState` call sites route through those two.
+- `saveCombatState` / `loadCombatState` / `clearCombatState` are **no longer imported** by
+  `CombatHelper.tsx` at all. That absence is the slice: a future edit that reaches for one of them
+  in that file has to add the import back, and the import is the review flag.
+
+`updateCombat` is deliberately **not** the reducer. `take`/`endTurn` route through `reduce`, which
+refuses illegal spends; `updateCombat` is the manual override the deck has always been — Marcus
+keeping a tally by hand because the table said so. Both now write the same object, so
+`composeTurn` sees every spend the instant it happens.
+
+Two subtleties, both recorded in the code rather than in anyone's head:
+
+1. **`next` is resolved against the render's `combat`, not inside `setCombat`'s updater.** React is
+   entitled to call an updater twice; that would be two writes. The cost is that two calls in one
+   tick would collapse — verified at all eleven sites that every one of them is a tap.
+2. **`forgetCombat` replaced "set, then clear".** Under the old effect the clear ran *first* and the
+   effect wrote the bytes straight back, so **ending an encounter did not actually end it on disk.**
+   Found by reading the ordering while moving the call, not by a failing test.
+
+### Finding AR, closed — both halves, and measured
+
+Case E installs a `Storage.prototype.setItem` recorder as a **second** init script, so the prover's
+own seeding is already done and cannot be counted as an app write. Then it opens the tab and
+leaves it alone. No tap, no scroll.
+
+| | keys written on a cold load |
+|---|---|
+| before | `codex-action-notes-nix-fixture`, `codex-combat-nix-fixture` |
+| after | **(none)** |
+
+`TurnSummary`'s half was the same shape and got the same treatment: the `saveActionNotes` effect is
+gone and the write moved into `updateActionNote`, computed outside the updater so it happens once
+and *before* the render. Recording the pen rather than diffing the bytes is
+`storage-safety.test.tsx`'s rule — a write that happens to put back an identical string passes a
+byte comparison, and that is luck, not safety.
+
+### The prover was proved
+
+A prover that only ever passes is a description, not a test. So the three changed files were
+`git stash`-ed, the app rebuilt from the pre-change source, and the prover run again:
+
+```
+FAILED 3/7
+FAIL  B · the ranked list noticed
+FAIL  C · the reload changes nothing — the live list was already right
+FAIL  E · nothing writes the encounter or the notes on mount — finding AR
+```
+
+Exactly the three claims the slice makes, and no others. The files were then restored and verified
+byte-identical against a copy taken before the stash.
+
+Case C had to be **rewritten** to survive the fix. As written during diagnosis it asserted "the
+list is right only after a reload" — true of the bug, meaningless once fixed. It now asserts the
+inverse: the reload changes nothing, *because the live value was already right*. That fails on the
+old code (4 ≠ 1) and will fail again the day a second copy of the state comes back.
+
+### What changed on the glass
+
+Nothing was added, moved or restyled. **What changed is that the Play tab stopped lying.** Spend
+the Action and the options that need it leave the list, on the tap, at the table. Before this slice
+that only happened if Marcus reloaded the app mid-combat — which nobody does, which is why the bug
+survived nine slices of looking straight at it.
+
+### Files
+
+- `src/components/turn/CombatProvider.tsx` — `combat`, `updateCombat`, `forgetCombat`; commitment 4.
+- `src/components/CombatHelper.tsx` — the second model and its effect deleted; eleven writers rerouted.
+- `src/components/combat/TurnSummary.tsx` — the notes effect deleted; write moved into the handler.
+- `docs/plans/table-truth/prove-slice10b.mjs` — **new**, kept as the evidence and the regression guard.
+- `docs/plans/table-truth/_shots-slice10b/` — A/B/C screenshots and `_results.json`.
+
+### What 10c inherits
+
+Every remaining item is a **new spend path**, which is why none of them are here: 10b removes a
+divergence and adds no way to spend, so its claim is provable by six numbers and nothing else.
+10c owns wiring the ranked rows to `take()` (the provider's `take`/`endTurn`/`undoLast` are still
+unreached by any tap), HEARTH-04's mandatory warning, HEARTH-05's damage tally, and VAL-13/VAL-06,
+which need state that records an attack resolving and a temp-HP source respectively.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

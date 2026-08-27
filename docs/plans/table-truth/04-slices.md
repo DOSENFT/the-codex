@@ -197,11 +197,41 @@ matches canon's, so canon growing a `VAL-16` turns the suite red instead of quie
 | **PARTIAL** (2) | VAL-04, VAL-12 | the mechanisable half asserted, the rest skipped |
 | **NOT MECHANISABLE** (5) | VAL-03, VAL-07, VAL-08, VAL-09, VAL-10 | `it.skip` + a gap pin |
 
-**10b — The write path.** Gate 3 least-confident #1: move the combat write path into
-`CombatProvider`, or ship Phase 1 read-only. Carries **finding AR** (two unconditional
-localStorage writes on Play-tab mount) and the two errata deferred out of 8b for exactly this
-reason — HEARTH-04's mandatory warning and HEARTH-05's damage tally, both of which need a
-write path and would otherwise be built twice.
+**10b — The write path. DONE 2026-08-27.** Gate 3 least-confident #1 — *should the write path
+move at all in Phase 1, or should Phase 1 ship read-only?* — carried unanswered since before a
+line of this phase existed, on the grounds that nine slices of evidence would beat a guess.
+
+**Answered, and not the way the mitigation assumed: read-only was never a safe resting place,
+because the read-only mount was already putting wrong information on the glass.**
+`prove-slice10b.mjs` measured it in Chrome:
+
+| | options the list offers |
+|---|---|
+| on arrival | **4** — Hearthbrand, Javelin, Sacred Flame, Hearthfire Manifest |
+| after spending the Action on the deck | **4** — *identical rows* |
+| after a reload, nothing else changed | **1** — Hearthfire Manifest |
+
+Three of those four cost the Action Marcus had just spent. Nothing threw, nothing logged; the
+app was simply one turn behind, silently, until the tab was reloaded — which at a table nobody
+does. That is **finding BB**: two components held two models of the same turn and diverged on
+the first tap.
+
+**The fix is a deletion, not an addition.** `CombatProvider` was already the right owner —
+persist-inside-the-handler, no effects, bound to one character by `key`. `CombatHelperInner`'s
+parallel `useState<CombatState>` and its saving `useEffect` were removed and the eleven writers
+routed through the provider's own `updateCombat` / `forgetCombat`. One owner, one engine
+reading it. Post-fix: **4 → 1 → 1**, and the reload is a no-op.
+
+**Finding AR closed with it, both halves.** The two unconditional mount writes are gone —
+`CombatHelper`'s `saveCombatState` effect with the state it owned, and `TurnSummary`'s
+`saveActionNotes` effect by moving the write into `updateActionNote`. Measured, not asserted:
+case E records `Storage.prototype.setItem` and counts **0 writes on load** (pre-fix it named
+`codex-combat-nix-fixture` and `codex-action-notes-nix-fixture`).
+
+**Deferred out of 10b, deliberately.** HEARTH-04's mandatory warning, HEARTH-05's damage tally,
+and wiring the ranked rows to `take()` are all *new spend paths*. 10b removes a divergence and
+adds no way to spend, so the fix is provable by the numbers above and nothing else. Those three
+are **slice 10c**.
 
 ---
 

@@ -25,16 +25,17 @@ import {
   shortRest,
   longRest,
 } from '../lib/character'
+/* `saveCombatState`, `loadCombatState` and `clearCombatState` are no longer
+   imported here, and the absence is the slice: this file has stopped being a
+   writer of `codex-combat-${id}`. `CombatProvider` owns all three now. If a
+   future edit reaches for one of them in this file, the import it has to add
+   back is the review flag. */
 import {
-  type CombatState,
   createCombatState,
   startCombat,
   endCombat,
   nextTurn,
   setConcentration as setCombatConcentration,
-  saveCombatState,
-  loadCombatState,
-  clearCombatState,
 } from '../lib/combat-state'
 import { TurnDeck, type ActionEconomy } from './TurnDeck'
 /* PALADIN_ACTIONS is no longer imported here — slice 9. Its three hardcoded
@@ -953,11 +954,20 @@ export function CombatHelper(props: CombatHelperProps) {
 }
 
 function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: CombatHelperProps) {
-  // ── Combat State (persisted) ──
-  const [combatState, setCombatState] = useState<CombatState>(() => {
-    const saved = loadCombatState(character.id)
-    return saved ?? createCombatState(character)
-  })
+  /* ── Combat State — the provider's, not ours. Slice 10b. ──
+     This was a `useState<CombatState>` initialised from `loadCombatState`, plus
+     an effect that saved it on every change. It was the SECOND copy of a state
+     `CombatProvider` was already holding, and having two was not a redundancy:
+     the deck spent through this one and the ranked list composed from that one,
+     so from the first tap onwards the two halves of the same screen disagreed
+     about whether Marcus still had his Action. `prove-slice10b.mjs` caught it
+     at 4 options ready → 4 after the spend → 1 after a reload.
+
+     `combatState` is kept as the local name because eleven call sites read it
+     and the rename would have buried the change that matters in churn. The
+     thing that matters is that it is no longer ours: it arrives from context,
+     and every writer on this tab now writes the object the engine reads. */
+  const { combat: combatState, updateCombat, forgetCombat } = useCombat()
 
   /* The option whose detail sheet is open, or null. Slice 7.
      The OPTION itself, not its id: the row already holds the composed option,
@@ -1020,18 +1030,19 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
   // AI hook
   const { response, loading, error, queryStream, cancel, clearResponse } = useAI()
 
-  // Persist combat state whenever it changes
-  useEffect(() => {
-    saveCombatState(character.id, combatState)
-  }, [character.id, combatState])
+  /* The `useEffect` that saved `combatState` on every change was here, and its
+     removal is half of finding AR. It fired on MOUNT, before Marcus had touched
+     anything, so simply opening the Play tab rewrote his encounter — and it
+     fired AFTER the render, so on a suspended tab a tap could be on screen and
+     absent from disk. Both are gone: `updateCombat` writes inside the handler,
+     before the render, and only when something actually changed. */
 
   // --- Combat lifecycle handlers ---
 
   const handleStartCombat = useCallback(() => {
-    const newState = startCombat(character)
-    setCombatState(newState)
+    updateCombat(startCombat(character))
     setCurrentDamageLog(createCombatLog())
-  }, [character])
+  }, [character, updateCombat])
 
   const handleEndCombat = useCallback(() => {
     // Save damage log to history
@@ -1041,30 +1052,35 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
       saveDamageLogs(character.id, [...history, finished])
     }
     setCurrentDamageLog(null)
-    const newState = endCombat(character)
-    setCombatState(newState)
-    clearCombatState(character.id)
-  }, [character, currentDamageLog])
+    /* `forgetCombat`, not "set then clear". The old pair wrote the ended state
+       and then removed the key — and because the write was an effect scheduled
+       after the render, the removal happened FIRST and the effect put the bytes
+       straight back. Ending an encounter did not actually end it on disk. */
+    forgetCombat(endCombat(character))
+  }, [character, currentDamageLog, forgetCombat])
 
   const handleNextTurn = useCallback(() => {
-    setCombatState((prev) => nextTurn(prev))
-  }, [])
+    updateCombat((prev) => nextTurn(prev))
+  }, [updateCombat])
 
   // --- Action Economy handlers ---
 
-  const toggleEconomy = useCallback((key: keyof ActionEconomy) => {
-    setCombatState((prev) => ({
-      ...prev,
-      turnActions: { ...prev.turnActions, [key]: !prev.turnActions[key] },
-    }))
-  }, [])
+  const toggleEconomy = useCallback(
+    (key: keyof ActionEconomy) => {
+      updateCombat((prev) => ({
+        ...prev,
+        turnActions: { ...prev.turnActions, [key]: !prev.turnActions[key] },
+      }))
+    },
+    [updateCombat],
+  )
 
   const resetEconomy = useCallback(() => {
-    setCombatState((prev) => ({
+    updateCombat((prev) => ({
       ...prev,
       turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
     }))
-  }, [])
+  }, [updateCombat])
 
   /* `applyAction`, `handleUseAction` and the two concentration-switch handlers
      were here. All four took an `ActionChoice`, a type only `ActionMenu`
@@ -1123,13 +1139,16 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
 
   // --- Concentration handlers ---
 
-  const handleSetConcentration = useCallback((spellName: string) => {
-    setCombatState((prev) => setCombatConcentration(prev, spellName))
-  }, [])
+  const handleSetConcentration = useCallback(
+    (spellName: string) => {
+      updateCombat((prev) => setCombatConcentration(prev, spellName))
+    },
+    [updateCombat],
+  )
 
   const handleDropConcentration = useCallback(() => {
-    setCombatState((prev) => setCombatConcentration(prev, null))
-  }, [])
+    updateCombat((prev) => setCombatConcentration(prev, null))
+  }, [updateCombat])
 
   // --- AI handlers ---
 
@@ -1166,20 +1185,18 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
   const handleShortRest = useCallback(() => {
     const updated = shortRest(character)
     onCharacterUpdate(updated)
-    setCombatState((prev) => ({
+    updateCombat((prev) => ({
       ...prev,
       turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
     }))
-  }, [character, onCharacterUpdate])
+  }, [character, onCharacterUpdate, updateCombat])
 
   const handleLongRest = useCallback(() => {
     const updated = longRest(character)
     onCharacterUpdate(updated)
-    const newState = createCombatState(updated)
-    setCombatState(newState)
-    clearCombatState(character.id)
+    forgetCombat(createCombatState(updated))
     clearResponse()
-  }, [character, onCharacterUpdate, clearResponse])
+  }, [character, onCharacterUpdate, forgetCombat, clearResponse])
 
   /* `actionMenuCounts` and `openActionMenu` were here, and both went with the
      panel in slice 9. `openActionMenu` was the ONLY caller of
@@ -1247,7 +1264,7 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
           onEndCombat={handleEndCombat}
           onOpenDiceRoller={onOpenDiceRoller}
           onOpenLookup={() => setLookupOpen(true)}
-          onCombatStateChange={setCombatState}
+          onCombatStateChange={updateCombat}
           onCharacterUpdate={onCharacterUpdate}
         />
       )}

@@ -121,12 +121,10 @@ export function TurnSummary({
   onCharacterUpdate,
 }: TurnSummaryProps) {
   const [expandedAction, setExpandedAction] = useState<string | null>(null)
+  /* READ ON MOUNT, WRITTEN ONLY ON AN EDIT. The `useEffect` that used to sit
+     here saved on every change *including the first*, which meant a mount
+     write — see `updateActionNote` below. */
   const [actionNotes, setActionNotes] = useState<ActionNotesData>(() => loadActionNotes(character.id))
-
-  // Persist action notes when they change
-  useEffect(() => {
-    saveActionNotes(character.id, actionNotes)
-  }, [character.id, actionNotes])
 
   // Categorize available options by action type.  The body of this memo was
   // lifted verbatim to categorizeTurnOptions() above so Phase-0 behaviour can
@@ -193,13 +191,17 @@ export function TurnSummary({
     onCharacterUpdate(updated)
   }, [character, onCharacterUpdate])
 
-  // Action notes CRUD
+  /* Action notes CRUD — write inside the handler, slice 10b.
+     The effect this replaces fired on mount, so opening the Play tab rewrote
+     Marcus's notes before he had typed anything: the other half of finding AR.
+     `next` is computed outside the updater so the save happens exactly once and
+     BEFORE the render, which is the same rule `CombatProvider.updateCombat`
+     follows — a note that is on screen is a note that is on disk. */
   const updateActionNote = useCallback((actionName: string, customTip: string | undefined, notes: ActionNote[]) => {
-    setActionNotes(prev => ({
-      ...prev,
-      [actionName]: { customTip, notes },
-    }))
-  }, [])
+    const next = { ...actionNotes, [actionName]: { customTip, notes } }
+    saveActionNotes(character.id, next)
+    setActionNotes(next)
+  }, [actionNotes, character.id])
 
   const MAX_SHOW = 4
 
