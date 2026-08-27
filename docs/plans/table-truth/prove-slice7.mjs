@@ -323,6 +323,18 @@ async function closeSheet(page, rowLabel) {
 // ── A — the affordances, and the census ─────────────────────────────────────
 const { ctx, page } = await openApp();
 const AFF = await census(page);
+/* Shot A must show the thing its filename claims. At scroll 0 the turn list is
+ * below the fold and behind the sticky deck (the placement problem slice 9
+ * owns), so a viewport shot of the top of the tab shows none of the rows this
+ * slice made tappable. Scroll to them first — and take the un-scrolled shot too,
+ * because "you have to scroll to reach it" is itself a measurement Marcus is
+ * owed rather than one to hide behind a nicer screenshot. */
+await page.screenshot({ path: `${OUT}/A0-play-tab-as-it-opens.png` });
+await page.evaluate(() => {
+  document.querySelector('section[aria-label="Your turn options"]')
+    ?.scrollIntoView({ block: 'start' });
+});
+await page.waitForTimeout(400);
 await page.screenshot({ path: `${OUT}/A-play-tab-rows-now-tappable.png` });
 const storageBefore = await readStorage(page);
 await page.evaluate(() => { window.__writes = []; });

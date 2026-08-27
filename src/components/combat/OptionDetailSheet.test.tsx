@@ -167,6 +167,30 @@ describe('OptionDetailBody — band 4 is folded by default', () => {
     expect(text(open)).toContain('SMITE AFTER YOU SEE THE ROLL')
   })
 
+  it('does not glue a dash separator onto the heading', () => {
+    /* MEASURED OFF THE SCREENSHOT, not off the model. Canon writes
+       «IT IGNORES COVER — that is Sacred Flame's unique selling point».
+       `splitTactics` gives the separator to the body and trims its leading
+       whitespace, which is correct for a colon (it attaches to the word before
+       it) and wrong for a dash (it does not) — so band 4 painted
+       «IT IGNORES COVER— that is».
+
+       ASSERTED ON THE RAW MARKUP ON PURPOSE. The `text()` helper replaces every
+       tag with a space, so it manufactures the very gap this test is about and
+       would pass against the glued render. Adjacency of two elements is a claim
+       about the markup, so it is read there. */
+    const html = paint(byName('Sacred Flame'), FRESH, true)
+    expect(html).toContain('IT IGNORES COVER')
+    expect(html).not.toMatch(/<\/b>[—–]/)
+    expect(html).toMatch(/<\/b>\s[—–]/)
+  })
+
+  it('keeps a colon separator tight against the heading', () => {
+    // The other half of the rule, so a fix that adds a space everywhere fails.
+    const html = paint(byName('Sacred Flame'), FRESH, true)
+    expect(html).toMatch(/RADIANT IS EXCELLENT<\/b>:/)
+  })
+
   it('keeps canon’s capitals — the headings are not retitled', () => {
     /* The capitals are canon's own emphasis. Sentence-casing them would be the
        app editing the book to suit its typography. */

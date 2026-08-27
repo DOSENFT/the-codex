@@ -767,14 +767,14 @@ the table Marcus's eye learns one shape and never re-learns it.
 - `src/components/CombatHelper.tsx` — `OptionDetailSheetLive` mounted once, above the deck; both
   lists forward `onOpen`.
 - Tests: `detail.test.ts`, `rolls.test.ts`, `tactics.test.ts`, `OptionDetailSheet.test.tsx`,
-  +`reactions.test.ts` — **71 tests across the five files**, 651/651 for the suite.
+  +`reactions.test.ts` — **73 tests across the five files**, 653/653 for the suite.
 - `docs/plans/table-truth/prove-slice7.mjs` — **new**, six cases in a real browser.
 
 **Measured**
 
 ```
 npx tsc --noEmit        EXIT=0
-npx vitest run          29 files · 651/651   (was 597/25; +54)
+npx vitest run          29 files · 653/653   (was 597/25; +56)
 bundle                  canon 53.3/70 KB · JS 647.8/700 KB · CSS 25.4/40 KB   (JS +2.8)
 prove-slice7.mjs        PASS · 0 console errors
 
@@ -898,6 +898,25 @@ actually hides bullets rather than decorating them. This is the standing "real t
 appearing in a prover instead of a unit test, and it is easier to miss here because the run is long
 and the report is a wall of numbers.
 
+### Finding AK — a defect only the screenshot could find, and only the markup could test
+
+Band 4 painted **«IT IGNORES COVER— that is …»**: an em-dash glued to the heading. `splitTactics`
+hands the separator to the body and trims its leading whitespace, which is **right for a colon**
+(`RADIANT IS EXCELLENT: rarely resisted` — a colon attaches to the word before it) and **wrong for
+a dash** (it does not).
+
+Two things about it are worth keeping:
+
+1. **The fix belongs in the renderer, not the model.** The model must keep canon's characters
+   exactly; the space is a fact about two rendered elements sitting next to each other, which only
+   the renderer knows. Fixing it in `splitTactics` would have meant editing canon's text and would
+   have broken the invariant that bodies start with their separator.
+2. **The obvious test could not have caught it.** `OptionDetailSheet.test.tsx`'s `text()` helper
+   replaces every tag with a space — it *manufactures* the exact gap in question and passes against
+   the glued render. The assertion therefore reads the **raw markup** (`</b>—` vs `</b> —`), and a
+   second test pins the colon staying tight so an over-broad "add a space" fix fails too. Verified
+   red against the pre-change component before being accepted green.
+
 ### Deliberate omissions
 
 - **No contention UI.** See finding AB — slice 9.
@@ -915,6 +934,12 @@ The sheet opens at **y=364 on an 844px phone and stands 481px tall**, which is f
 is not: the turn list starts at y=526 and the reactions band at y=872, so Marcus still scrolls
 before he can tap anything. Nothing above them has retired yet. Slice 9 is where the vertical
 comes back.
+
+Said with two screenshots rather than one: **`A0-play-tab-as-it-opens.png`** is the tab as it
+actually opens — canon strip, vitals, the spell-slot disagreement panel, the sticky deck — with not
+one tappable row in sight. **`A-play-tab-rows-now-tappable.png`** is the same tab scrolled to them.
+A prover that only shot the second would have been telling the truth about the rows and lying about
+the screen.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

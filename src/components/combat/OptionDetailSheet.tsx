@@ -240,6 +240,16 @@ export function OptionDetailBody({
                   className="relative pl-3.5 text-[13px] leading-relaxed text-forge-0 before:absolute before:left-0 before:top-2 before:h-1 before:w-1 before:rounded-full before:bg-gold"
                 >
                   {bullet.lead && <b className="font-semibold text-arcane">{bullet.lead}</b>}
+                  {/* A colon attaches to the word before it; a dash does not.
+                      Canon writes both, and `splitTactics` hands the separator
+                      to the body with its leading whitespace trimmed — so
+                      «IT IGNORES COVER — that is» arrived on screen as
+                      «IT IGNORES COVER— that is». Put the space back for
+                      dashes only. This is TYPOGRAPHY AND IT LIVES HERE: the
+                      model must keep canon's characters exactly, and the space
+                      is a fact about two rendered elements sitting next to each
+                      other, which only the renderer knows about. */}
+                  {bullet.lead && /^[—–-]/.test(bullet.body) ? ' ' : ''}
                   {bullet.body}
                 </li>
               ))}
