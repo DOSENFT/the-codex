@@ -149,6 +149,32 @@ function ruleBoxFor(option: TurnOption, economy: EconomyState): RuleBox | null {
       }
 }
 
+/** Join the caster's save DC onto canon's Save row. Slice 9.
+ *
+ *  `statBlock` is pure over the spell and has no character, so it can only say
+ *  WHICH save — "Dexterity — negates". The number is the half you say out loud
+ *  to a DM, and the retired "Actions Reference" panel had it: it reached for
+ *  `character.spellSaveDC` itself and painted «DC 16 Dexterity». Retiring that
+ *  panel without this join would have cost Marcus a fact, which the prime law
+ *  forbids, so the fact moves here first.
+ *
+ *  THE JOIN LIVES HERE, NOT IN `format.ts`. That file is the pure canon
+ *  formatter; handing it a character would make every one of its callers need
+ *  one, which is how a formatter turns into a view model. Here the character is
+ *  already in hand.
+ *
+ *  It is a PREFIX, not a replacement: canon's effect ("negates", "half on a
+ *  success") is the other half of the ruling and is never dropped. */
+function withSaveDC(facts: DetailFact[], character: Character): DetailFact[] {
+  const dc = character.spellSaveDC
+  if (!dc) return facts
+  return facts.map(fact =>
+    fact.label === 'Save' && !/\bDC\b/.test(fact.value)
+      ? { ...fact, value: `DC ${dc} ${fact.value}` }
+      : fact
+  )
+}
+
 function spendFor(option: TurnOption): { label: string } | null {
   if (option.cost.spellSlotLevel || option.cost.resourcePoolId) {
     return { label: option.cost.label }
@@ -170,7 +196,10 @@ export function optionDetail(
   const canonFacts = feature ? featureFacts(feature, featureContextOf(character)) : []
 
   const facts: DetailFact[] = spell
-    ? statBlock(spell).map(f => ({ label: f.label, value: f.value }))
+    ? withSaveDC(
+        statBlock(spell).map(f => ({ label: f.label, value: f.value })),
+        character
+      )
     : feature
       ? factsFromFeature(canonFacts)
       : factsFromSheet(option)

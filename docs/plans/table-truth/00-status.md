@@ -17,9 +17,9 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 5 — CombatProvider mounted READ-ONLY + one ranked "Your Turn" list — **DONE 2026-08-26**, storage proved byte-identical across a real reload, every row measured at exactly two lines; the prover caught the two-line promise being broken by rows nothing had ever budgeted (see §Slice 5 below)
 - [x] 6 — "Your Reactions" band — **DONE 2026-08-27**, proved against the running app on four cases; the prover caught Gate 3 specifying a filter that is empty on your own turn, a line-measurement technique that was wrong, and the WHEN label saying its own word twice (see §Slice 6 below)
 - [x] 7 — the option detail sheet (this is where the "…" dies) — **DONE 2026-08-27**, proved against the running app on six cases; every reachable sheet measured clip-free *on the glass*, and the prover caught its own band-4 case grading nothing, a splitter that kept every character while dropping 10 headings, and the fact that **0 of the 7 slot-spending options can reach the sheet at all** (see §Slice 7, finding AB — the one thing needing a steer)
-- [ ] 9 — retire the competing menus (capabilities pinned as tests FIRST) — **NEXT**, swapped ahead of 8 by Marcus 2026-08-27
-- [ ] 8 — errata flags, all 12, three readings, DM wording — **needs re-scoping before it starts** (finding AA) and now runs after 9
-- [ ] 10 — canon VAL-01..15 as a suite + decide the combat write path
+- [x] 9 — retire the competing menus (capabilities pinned as tests FIRST) — **DONE 2026-08-27**, prover PASS; `ActionMenu`, two-thirds of "Actions Reference" and slice 1's diagnostic strip retired, Basic Actions **kept** on evidence (finding AM), the eight `turn.mutex` options given their first row ever, and **6 of 14 reachable → 14 of 14**. The deck-chip clause was **withdrawn on evidence** (see §Slice 9) — one open question for Marcus.
+- [ ] 8 — errata flags, all 12, three readings, DM wording — **NEXT**, but **needs re-scoping before it starts** (finding AA)
+- [ ] 10 — canon VAL-01..15 as a suite + decide the combat write path — now also owns the two unconditional mount writes (finding AR)
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
 
@@ -965,6 +965,126 @@ actually opens — canon strip, vitals, the spell-slot disagreement panel, the s
 one tappable row in sight. **`A-play-tab-rows-now-tappable.png`** is the same tab scrolled to them.
 A prover that only shot the second would have been telling the truth about the rows and lying about
 the screen.
+
+## Slice 9 — closed 2026-08-27. What it built, and what it found.
+
+Marcus's ask, verbatim: *"there is also so many buttons like a drop down 'Actions Reference' tab as
+well as 'action' at the very top."* This slice removes both. The brief's guard — *"anything that
+turns out not to be subsumed **stays**"* — is what shaped the result: one of the three sections
+survived on evidence, and the deck-chip clause was withdrawn on evidence.
+
+**Retired**
+
+- **The top «Action» slide-up (`ActionMenu`).** Unmounted from `CombatHelper`, along with the
+  `actionMenuOpen` / `actionMenuFilter` / `concWarning` state, `actionMenuCounts`, `openActionMenu`,
+  `applyAction`, `handleUseAction` and both concentration handlers.
+- **«Actions Reference» → «Basic actions — the rules».** Its Class Actions and Prepared Spells
+  sections are gone; its 14 Basic Actions stayed (see AM).
+- **Slice 1's canon diagnostic strip** and the `CanonMatchReport` mount, as the brief specified.
+
+**Built**
+
+- `src/components/combat/ContentionBand.tsx` — **new.** «Everything else you could do»: the eight
+  options that lived in `turn.mutex` and were painted **nowhere**, grouped by what they contend for,
+  each group headed with the rule in a sentence. Collapsed by default.
+- `src/lib/turn/detail.ts` — `withSaveDC`. The one genuine capability the retired panel had and the
+  sheet did not: a save DC as a **number**. Added to the joining layer, leaving `format.ts` a pure
+  canon formatter. The browser now paints `Save: DC 16 Dexterity — negates`.
+- `src/lib/turn/retire.test.ts` (12 tests) and `ContentionBand.test.tsx` (9) — the brief's
+  *"pinned as tests first"* clause. `retire.test.ts` asserts the engine composes **no** basic
+  actions, so it goes RED the day a later slice makes that section redundant.
+- Three CSS truncations killed: `QuickLookup.tsx`'s `.slice(0, 60) + '...'` — the **last literal
+  ellipsis painted anywhere in the app** — and two `truncate` classes in `TurnSummary.tsx`, one of
+  them on the line carrying the dice and the save, which is exactly the surface Marcus described as
+  *"i can click on the drop downs and see some of the spell details, but not all as it trails."*
+
+**Measured** (`prove-slice9.mjs`, PASS, 390×844, 0 console errors)
+
+- **6 of 14 options had a row before this slice. Now 14** — 4 turn + 2 reaction + 8 in the band.
+  The fold says "8", the turn list says "8 more", and both match the 8 behind it.
+- **Five sheets now show `[⚑ One slot per turn]`** — the rule box slice 7 built and proved
+  unroutable (finding AB) is finally reachable. That gap is closed.
+- 104 enabled controls clicked on a fresh Play tab; **no action-menu dialog appeared**, which is the
+  retirement's safety claim tested rather than asserted.
+- 14 basic actions, 38–101 chars, **0 clipped**. Whole-tab finding-Q sweep: **0 line-clamps, 0 boxes
+  smaller than their text, 0 literal ellipses.**
+- Storage, in two windows: two keys written on load by mount effects that predate this slice (AR),
+  and from the first tap onward only `codex-ui-`. **No stored value moved** — reading the tab spends
+  nothing.
+
+### Finding AL — `ActionMenu` was already unreachable, and the compiler was configured not to say so
+
+`openActionMenu` was **defined and never called** (`CombatHelper.tsx:1401` before this slice);
+`setActionMenuOpen(true)` appears only inside it. 697 lines of component and its entire filter
+were dead on the running app. `tsconfig.json` sets `"noUnusedLocals": false` and
+`"noUnusedParameters": false`, which is precisely why nothing ever raised a warning. The two flags
+are worth revisiting as their own change — this slice did not touch them.
+
+### Finding AM — the engine composes no basic actions, which is why that section stayed
+
+`composeTurn` builds strictly from the character sheet. Dash, Dodge, Disengage, Help, Hide and Ready
+are on **no** sheet, so they were never subsumed by the turn list and deleting the section would
+have deleted the only place they exist. It stayed, was rebuilt one-column (the old `grid-cols-2`
+gave each description ~20 characters a line, which is why "Dodge" read as a fragment), and lost its
+`line-clamp`. `retire.test.ts` pins the reason, not the outcome.
+
+### Finding AN — "Actions Reference" spent nothing; every button asked the AI
+
+Worth stating because it is why retiring two-thirds of it was safe: not one control in that panel
+mutated a resource. They were all prompts.
+
+### Finding AO — the save DC gap, found before the deletion rather than after
+
+The retired panel stated a spell save DC as a number. The sheet stated `Save: Dexterity — negates`.
+Enumerating capabilities **first** is what caught it; the fix (`withSaveDC`) shipped in the same
+slice, so the capability never lapsed for a single commit.
+
+### Finding AP — a default parameter turned a test into a tautology
+
+In `ContentionBand.test.tsx` an assertion passed a fixture through a helper whose default argument
+supplied the very field under test. It could not fail. Rewritten to construct the negative case
+explicitly and verified red first.
+
+### Finding AQ — finding Q wearing another hat: the prover's own substring match
+
+`A: the panel's Prepared Spells section is still painted` was a **false failure**. The check was
+`/Prepared Spells/i.test(document.body.textContent)`, and the two hits were a 0×0 print-stylesheet
+heading and a Mechanics Reference FAQ entry. A substring search over the whole document is the same
+mistake as reading `textContent` to prove a paint — it measures something *adjacent* to the claim.
+The check now matches painted leaf elements (non-zero rect, no children) on exact equality.
+
+### Finding AR — two mount effects write to localStorage on every Play-tab load
+
+`CombatHelper`'s `saveCombatState` effect and `TurnSummary.tsx:127-128`'s unconditional
+`saveActionNotes` both fire with no interaction at all. Neither is a defect this slice introduced or
+is scoped to fix, but the prover cannot grade from zero while they exist: a slice that *did* start
+writing would hide inside that noise. `prove-slice9.mjs` therefore snapshots and resets the write
+log after load and reports the two windows separately. A candidate for slice 10.
+
+### The one clause of the brief that was withdrawn, and why — the deck chips
+
+The brief said *"the deck's chips stay and become the filter."* The chips stay. They did **not**
+become the filter, and this is a withdrawal on evidence rather than an omission:
+
+1. The filter they were to inherit was `actionMenuFilter`, which finding AL shows was **unreachable**.
+   Retiring an unreachable filter removes no capability, so the prime law is not engaged.
+2. A deck chip's tap is already committed to a **spend** — marking your action used — and that is a
+   V-6-critical control. Overloading one 48px target with "spend" and "filter" would have made the
+   most time-critical button in the app ambiguous to serve a feature nothing was asking for.
+
+If Marcus wants filtering as a real feature it should be designed as one, not smuggled in as a
+second meaning for an existing button. **Open question for him at the slice boundary.**
+
+### Deliberate omissions
+
+- **The explicit Drop Concentration confirm dialog is not rebuilt.** It was reachable only through
+  `handleUseAction` → `ActionMenu`. Before removing it the substance was verified to live elsewhere:
+  `rank.ts:104` scores `concentrationClash: -45` and paints `Would drop <spell>` **on the row**, which
+  is a warning *before* the tap rather than after it, and `reduce.ts:307-316` performs the swap. What
+  is genuinely gone is the confirm **step**. Recorded here rather than argued away.
+- **`ActionMenu.tsx` (697 lines) and `CanonMatchReport.tsx` are left on disk**, unmounted. Deleting
+  files is ASK-FIRST.
+- **`_probe-pp.mjs` is kept**, per the slice-7 precedent — it is the working that produced AQ.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

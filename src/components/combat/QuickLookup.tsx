@@ -20,6 +20,19 @@ type LookupItem =
   | { type: 'spell'; data: Spell }
   | { type: 'feature'; data: ClassFeature }
 
+/** The one-line preview for a search result. Slice 9.
+ *
+ *  Returns the FIRST SENTENCE, whole, or the whole string when it has no
+ *  sentence break. It never cuts inside a word and it never appends an
+ *  ellipsis, because those are the two things that made the old preview
+ *  unreadable rather than merely short. A row that ends up long simply wraps —
+ *  this is a list you scan and tap, not a fixed-height grid. */
+function previewSentence(description: string): string {
+  const trimmed = description.trim()
+  const [first] = trimmed.split(/(?<=\.)\s/)
+  return first || trimmed
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -181,13 +194,24 @@ export function QuickLookup({ isOpen, onClose, character, onRollDice }: QuickLoo
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-forge-0 truncate">{item.data.name}</span>
+                        {/* NOT `truncate`. A name is the one string that must
+                            never be cut: "Channel Divinity: Sacred Weap…" is
+                            the row failing at the only job it has. */}
+                        <span className="text-sm font-medium text-forge-0">{item.data.name}</span>
                         <Badge variant={item.type === 'spell' ? 'arcane' : 'eldritch'}>
                           {item.type === 'spell' ? 'Spell' : 'Feature'}
                         </Badge>
                       </div>
-                      <p className="text-xs text-forge-2 truncate mt-0.5">
-                        {item.data.description.slice(0, 60)}{item.data.description.length > 60 ? '...' : ''}
+                      {/* A WHOLE SENTENCE, not sixty characters — slice 9.
+                          This row read `.slice(0, 60) + '...'` inside a
+                          `truncate`, which is two truncations stacked: the
+                          model cut mid-word and CSS then cut the cut. It was
+                          the last literal `'...'` painted anywhere in the app.
+                          A preview in a search list is legitimate; cutting a
+                          word in half is not. The house rule is drop whole
+                          segments, never characters, and never an ellipsis. */}
+                      <p className="text-xs text-forge-2 mt-0.5 leading-snug">
+                        {previewSentence(item.data.description)}
                       </p>
                     </div>
                   </button>

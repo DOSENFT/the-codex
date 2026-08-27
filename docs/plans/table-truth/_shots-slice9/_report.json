@@ -1,0 +1,665 @@
+{
+  "beforeOpen": {
+    "turn": [
+      "Hearthbrand — details",
+      "Javelin — details",
+      "Sacred Flame — details",
+      "Hearthfire Manifest — details"
+    ],
+    "reactions": [
+      "Opportunity Attack — Hearthbrand — details",
+      "Flaming Cloak — details"
+    ],
+    "contention": [],
+    "elsewhere": 8,
+    "bandPresent": true,
+    "bandOpen": "false",
+    "bandCount": 8,
+    "brackets": [],
+    "pickOne": 0
+  },
+  "AFF": {
+    "turn": [
+      "Hearthbrand — details",
+      "Javelin — details",
+      "Sacred Flame — details",
+      "Hearthfire Manifest — details"
+    ],
+    "reactions": [
+      "Opportunity Attack — Hearthbrand — details",
+      "Flaming Cloak — details"
+    ],
+    "contention": [
+      "Lay on Hands — details",
+      "Channel Divinity: Sacred Weapon — details",
+      "Divine Smite — details",
+      "Shield of Faith — details",
+      "Misty Step — details",
+      "Cure Wounds — details",
+      "Warding Bond — details",
+      "Divine Sense — details"
+    ],
+    "elsewhere": 8,
+    "bandPresent": true,
+    "bandOpen": "true",
+    "bandCount": 8,
+    "brackets": [
+      "One of these — your bonus action",
+      "One of these — your action"
+    ],
+    "pickOne": 2
+  },
+  "retired": {
+    "canonStrip": false,
+    "actionsReferenceTitle": false,
+    "classActionsSection": false,
+    "preparedSpellsSection": false,
+    "chooseActionDialog": [
+      "Dice Roller",
+      "Mechanics Reference"
+    ]
+  },
+  "clickReport": {
+    "clicked": 104,
+    "skipped": [
+      "Next Turn",
+      "Reset action economy",
+      "1st slot 4: restore",
+      "2nd slot 3: restore",
+      "Apply damage",
+      "Apply healing",
+      "Damage Log",
+      "Rest Management",
+      "Reset action economy",
+      "Restore 1st level spell slot",
+      "Restore 2nd level spell slot",
+      "Heal 5",
+      "Heal 10",
+      "Open dice roller",
+      "Close dice roller",
+      "Quick roll d20",
+      "Quick roll d20+mod",
+      "Quick roll 2d6",
+      "Damage",
+      "Roll 2d100",
+      "Damage",
+      "Expand: How do I make an attack roll?",
+      "Expand: How does healing work?"
+    ],
+    "dialogs": [
+      "Dice Roller",
+      "Mechanics Reference",
+      "The Toybox",
+      "Settings",
+      "Character sheet"
+    ]
+  },
+  "swept": [
+    {
+      "label": "Hearthbrand — details",
+      "title": "Hearthbrand",
+      "facts": [
+        {
+          "label": "Cost",
+          "value": "Action"
+        },
+        {
+          "label": "",
+          "value": "+7 to hit (STR +3 + prof +1 magic)"
+        },
+        {
+          "label": "",
+          "value": "1d8+4 Slashing"
+        },
+        {
+          "label": "",
+          "value": "5 ft"
+        },
+        {
+          "label": "",
+          "value": "Magical"
+        },
+        {
+          "label": "",
+          "value": "Mastery: Sap"
+        },
+        {
+          "label": "",
+          "value": "Versatile (1d10)"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Javelin — details",
+      "title": "Javelin",
+      "facts": [
+        {
+          "label": "Cost",
+          "value": "Action"
+        },
+        {
+          "label": "",
+          "value": "+6 to hit (STR +3 + prof)"
+        },
+        {
+          "label": "",
+          "value": "1d6+3 Piercing"
+        },
+        {
+          "label": "",
+          "value": "Standard attack"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Sacred Flame — details",
+      "title": "Sacred Flame",
+      "facts": [
+        {
+          "label": "Level",
+          "value": "Evocation cantrip"
+        },
+        {
+          "label": "Casting Time",
+          "value": "Action"
+        },
+        {
+          "label": "Range",
+          "value": "60 feet"
+        },
+        {
+          "label": "Components",
+          "value": "V, S"
+        },
+        {
+          "label": "Duration",
+          "value": "Instantaneous"
+        },
+        {
+          "label": "Damage",
+          "value": "1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) Radiant"
+        },
+        {
+          "label": "Save",
+          "value": "DC 16 Dexterity — negates"
+        },
+        {
+          "label": "Granted by",
+          "value": "Optional pick: Blessed Warrior Fighting Style (Paladin level 2) grants any TWO Cleric cantrips; Charisma is the spellcasting ability"
+        },
+        {
+          "label": "Source",
+          "value": "PHB 2024"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Hearthfire Manifest — details",
+      "title": "Hearthfire Manifest",
+      "facts": [
+        {
+          "label": "manifest summon dismiss",
+          "value": "Bonus Action"
+        },
+        {
+          "label": "light",
+          "value": "Bright Light 10 ft, Dim Light 10 ft beyond"
+        },
+        {
+          "label": "leash",
+          "value": "Extinguished if it goes more than 30 feet from you"
+        },
+        {
+          "label": "cloak action",
+          "value": "Reaction"
+        },
+        {
+          "label": "cloak cost",
+          "value": "1 Channel Divinity use"
+        },
+        {
+          "label": "temp HP",
+          "value": "12 temp HP (Paladin level + Charisma modifier)"
+        },
+        {
+          "label": "retaliation",
+          "value": "1d10 Fire retaliation"
+        },
+        {
+          "label": "duration",
+          "value": "Until the Temporary Hit Points are depleted"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Opportunity Attack — Hearthbrand — details",
+      "title": "Opportunity Attack — Hearthbrand",
+      "facts": [
+        {
+          "label": "Cost",
+          "value": "Reaction"
+        },
+        {
+          "label": "",
+          "value": "When a creature you can see leaves your reach"
+        },
+        {
+          "label": "",
+          "value": "+7 to hit (STR +3 + prof +1 magic)"
+        },
+        {
+          "label": "",
+          "value": "1d8+4 Slashing"
+        },
+        {
+          "label": "",
+          "value": "5 ft"
+        },
+        {
+          "label": "",
+          "value": "Magical"
+        },
+        {
+          "label": "",
+          "value": "Mastery: Sap"
+        },
+        {
+          "label": "",
+          "value": "Versatile (1d10)"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Flaming Cloak — details",
+      "title": "Flaming Cloak",
+      "facts": [
+        {
+          "label": "manifest summon dismiss",
+          "value": "Bonus Action"
+        },
+        {
+          "label": "light",
+          "value": "Bright Light 10 ft, Dim Light 10 ft beyond"
+        },
+        {
+          "label": "leash",
+          "value": "Extinguished if it goes more than 30 feet from you"
+        },
+        {
+          "label": "cloak action",
+          "value": "Reaction"
+        },
+        {
+          "label": "cloak cost",
+          "value": "1 Channel Divinity use"
+        },
+        {
+          "label": "temp HP",
+          "value": "12 temp HP (Paladin level + Charisma modifier)"
+        },
+        {
+          "label": "retaliation",
+          "value": "1d10 Fire retaliation"
+        },
+        {
+          "label": "duration",
+          "value": "Until the Temporary Hit Points are depleted"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Lay on Hands — details",
+      "title": "Lay on Hands",
+      "facts": [
+        {
+          "label": "Cost",
+          "value": "Bonus action · 40/40 points"
+        },
+        {
+          "label": "",
+          "value": "Touch"
+        },
+        {
+          "label": "",
+          "value": "15/40 points"
+        },
+        {
+          "label": "",
+          "value": "recharges on long rest"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Channel Divinity: Sacred Weapon — details",
+      "title": "Channel Divinity: Sacred Weapon",
+      "facts": [
+        {
+          "label": "Cost",
+          "value": "Bonus action · 2/2 uses"
+        },
+        {
+          "label": "",
+          "value": "See description"
+        },
+        {
+          "label": "",
+          "value": "1 minute"
+        },
+        {
+          "label": "",
+          "value": "1/2 uses"
+        },
+        {
+          "label": "",
+          "value": "recharges on short rest"
+        }
+      ],
+      "ruleBox": null
+    },
+    {
+      "label": "Divine Smite — details",
+      "title": "Divine Smite",
+      "facts": [
+        {
+          "label": "Level",
+          "value": "Level 1 Evocation"
+        },
+        {
+          "label": "Casting Time",
+          "value": "Bonus Action, taken immediately after hitting a target with a Melee weapon or an Unarmed Strike"
+        },
+        {
+          "label": "Range",
+          "value": "Self"
+        },
+        {
+          "label": "Components",
+          "value": "V"
+        },
+        {
+          "label": "Duration",
+          "value": "Instantaneous"
+        },
+        {
+          "label": "Trigger",
+          "value": "melee_hit"
+        },
+        {
+          "label": "Damage",
+          "value": "2d8 Radiant (+1d8 if the target is a Fiend or Undead)"
+        },
+        {
+          "label": "Higher Level",
+          "value": "+1d8 per slot level above 1."
+        },
+        {
+          "label": "Granted by",
+          "value": "Paladin level 2 (Paladin's Smite) - always prepared; one free cast per Long Rest with no slot"
+        },
+        {
+          "label": "Source",
+          "value": "PHB 2024"
+        }
+      ],
+      "ruleBox": "⚑ One slot per turn"
+    },
+    {
+      "label": "Shield of Faith — details",
+      "title": "Shield of Faith",
+      "facts": [
+        {
+          "label": "Level",
+          "value": "Level 1 Abjuration"
+        },
+        {
+          "label": "Casting Time",
+          "value": "Bonus Action"
+        },
+        {
+          "label": "Range",
+          "value": "60 feet"
+        },
+        {
+          "label": "Components",
+          "value": "V, S, M (a prayer scroll)"
+        },
+        {
+          "label": "Duration",
+          "value": "Concentration, up to 10 minutes"
+        },
+        {
+          "label": "Concentration",
+          "value": "Yes — one at a time"
+        },
+        {
+          "label": "Source",
+          "value": "PHB 2024"
+        }
+      ],
+      "ruleBox": "⚑ One slot per turn"
+    },
+    {
+      "label": "Misty Step — details",
+      "title": "Misty Step",
+      "facts": [
+        {
+          "label": "Cost",
+          "value": "Bonus action · 2nd-level slot"
+        },
+        {
+          "label": "",
+          "value": "2nd-level"
+        },
+        {
+          "label": "",
+          "value": "Instant"
+        },
+        {
+          "label": "",
+          "value": "V"
+        }
+      ],
+      "ruleBox": "⚑ One slot per turn"
+    },
+    {
+      "label": "Cure Wounds — details",
+      "title": "Cure Wounds",
+      "facts": [
+        {
+          "label": "Level",
+          "value": "Level 1 Abjuration"
+        },
+        {
+          "label": "Casting Time",
+          "value": "Action"
+        },
+        {
+          "label": "Range",
+          "value": "Touch"
+        },
+        {
+          "label": "Components",
+          "value": "V, S"
+        },
+        {
+          "label": "Duration",
+          "value": "Instantaneous"
+        },
+        {
+          "label": "Healing",
+          "value": "2d8 + spellcasting ability modifier"
+        },
+        {
+          "label": "Higher Level",
+          "value": "+2d8 healing per slot level above 1."
+        },
+        {
+          "label": "Source",
+          "value": "PHB 2024"
+        }
+      ],
+      "ruleBox": "⚑ One slot per turn"
+    },
+    {
+      "label": "Warding Bond — details",
+      "title": "Warding Bond",
+      "facts": [
+        {
+          "label": "Level",
+          "value": "Level 2 Abjuration"
+        },
+        {
+          "label": "Casting Time",
+          "value": "Action"
+        },
+        {
+          "label": "Range",
+          "value": "Touch"
+        },
+        {
+          "label": "Components",
+          "value": "V, S, M (a pair of platinum rings worth 50+ GP each, which you and the target must wear)"
+        },
+        {
+          "label": "Duration",
+          "value": "1 hour"
+        },
+        {
+          "label": "Granted by",
+          "value": "Oath of the Hearth, Paladin level 5 - always prepared"
+        },
+        {
+          "label": "Source",
+          "value": "PHB 2024"
+        }
+      ],
+      "ruleBox": "⚑ One slot per turn"
+    },
+    {
+      "label": "Divine Sense — details",
+      "title": "Divine Sense",
+      "facts": [
+        {
+          "label": "Cost",
+          "value": "Bonus action · 0/4 uses"
+        },
+        {
+          "label": "",
+          "value": "See description"
+        },
+        {
+          "label": "",
+          "value": "recharges on long rest"
+        }
+      ],
+      "ruleBox": null
+    }
+  ],
+  "basics": [
+    {
+      "name": "Attack",
+      "chars": 60,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Cast a Spell",
+      "chars": 45,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Dash",
+      "chars": 41,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Disengage",
+      "chars": 75,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Dodge",
+      "chars": 101,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Help",
+      "chars": 101,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Hide",
+      "chars": 38,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Influence",
+      "chars": 57,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Magic",
+      "chars": 51,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Ready",
+      "chars": 74,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Search",
+      "chars": 59,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Study",
+      "chars": 46,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Utilize",
+      "chars": 58,
+      "clamped": false,
+      "clipped": false
+    },
+    {
+      "name": "Opportunity Attack",
+      "chars": 69,
+      "clamped": false,
+      "clipped": false
+    }
+  ],
+  "CLIP": {
+    "clipped": [],
+    "clamps": [],
+    "ellipses": []
+  },
+  "loadWrites": [
+    "codex-action-notes-nix-fixture",
+    "codex-combat-nix-fixture"
+  ],
+  "writes": [
+    "codex-ui-nix-fixture"
+  ],
+  "changedValues": [],
+  "errors": []
+}

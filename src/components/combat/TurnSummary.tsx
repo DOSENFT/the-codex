@@ -590,7 +590,9 @@ function ActionSection({
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-forge-0 truncate">{opt.name}</span>
+                      {/* `truncate` removed in slice 9 — a name is the one
+                          string that may never be cut. */}
+                      <span className="text-xs font-semibold text-forge-0">{opt.name}</span>
                       {opt.type === 'spell' && (
                         <Badge variant={opt.spellLevel === 0 ? 'neutral' : 'arcane'} className="text-xs px-1.5 py-0">
                           {opt.spellLevel === 0 ? 'Cantrip' : levelLabel(opt.spellLevel!)}
@@ -608,9 +610,14 @@ function ActionSection({
                         <Pencil size={9} className="text-forge-2/40 shrink-0" aria-label="Has custom notes" />
                       )}
                     </div>
-                    {/* Quick mechanics preview when collapsed */}
+                    {/* Quick mechanics preview when collapsed.
+                        `truncate` removed in slice 9. This is the surface
+                        Marcus described as "i can click on the drop downs and
+                        see some of the spell details, but not all as it
+                        trails" — and the trailing was here, in CSS, on the
+                        line that carries the dice and the save. It wraps now. */}
                     {!isExpanded && (
-                      <p className="text-xs text-forge-2 mt-0.5 truncate">
+                      <p className="text-xs text-forge-2 mt-0.5 leading-snug">
                         {opt.mechanicsLine}
                       </p>
                     )}

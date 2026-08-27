@@ -27,21 +27,21 @@ import {
 } from '../lib/character'
 import {
   type CombatState,
-  type ActionEconomyType,
   createCombatState,
   startCombat,
   endCombat,
   nextTurn,
-  useAction,
   setConcentration as setCombatConcentration,
   saveCombatState,
   loadCombatState,
   clearCombatState,
-  spellActionType,
-  featureActionType,
 } from '../lib/combat-state'
 import { TurnDeck, type ActionEconomy } from './TurnDeck'
-import { BASIC_ACTIONS, PALADIN_ACTIONS } from '../lib/dnd-data'
+/* PALADIN_ACTIONS is no longer imported here — slice 9. Its three hardcoded
+   names were the Class Actions section, and `composeTurn` prices those same
+   three off the sheet with live counts. BASIC_ACTIONS stays: the engine
+   composes none of the fourteen, which is why that section survived. */
+import { BASIC_ACTIONS } from '../lib/dnd-data'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
 import { useAI } from '../hooks/useAI'
 import { Button } from './ui/Button'
@@ -49,18 +49,17 @@ import { GlassCard } from './ui/GlassCard'
 import { Badge } from './ui/Badge'
 import { Input } from './ui/Input'
 import { HPTracker } from './HPTracker'
-import { ActionMenu, type ActionChoice } from './ActionMenu'
 import { DamageTracker } from './DamageTracker'
 import { ConditionReminder } from './ConditionReminder'
 import { TurnSummary } from './combat/TurnSummary'
 import { QuickLookup } from './combat/QuickLookup'
-import { CanonMatchReport } from './combat/CanonMatchReport'
 import { VitalsBand } from './combat/VitalsBand'
 import { TurnOptionRow } from './combat/TurnOptionRow'
 import { OptionDetailSheet } from './combat/OptionDetailSheet'
 import { optionDetail } from '../lib/turn/detail'
 import type { TurnOption } from '../lib/turn/types'
 import { ReactionsBand } from './combat/ReactionsBand'
+import { ContentionBand } from './combat/ContentionBand'
 import { CombatProvider, useCombat } from './turn/CombatProvider'
 import { useCollapsible } from '../hooks/useCollapsible'
 import { type CombatLog, type DamageEntry, createCombatLog, logDamage as logDamageEntry, endCombatLog, saveDamageLogs, loadDamageLogs } from '../lib/damage-log'
@@ -127,10 +126,9 @@ function formatAIResponse(text: string): JSX.Element[] {
   })
 }
 
-/** Count total available spell slots across all levels */
-function countAvailableSlots(spellSlots: Character['spellSlots']): number {
-  return Object.values(spellSlots).reduce((sum, slot) => sum + slot.current, 0)
-}
+/* `countAvailableSlots` was here. Its only caller was the Class Actions
+   section's "3 slots" badge, retired in slice 9 — the same fact now arrives on
+   the row as «1st-level slot» straight off the composed option. */
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -365,332 +363,91 @@ function AICombatAdvisor({
   )
 }
 
-/** 5. Smart Actions Panel (replaces QuickActionsGrid) */
-function SmartActionsPanel({
-  character,
-  concentrationSpell,
+/* ============================================================================
+   WHAT SURVIVED «ACTIONS REFERENCE» — Table Truth slice 9.
+
+   The panel had three sections. Two of them are retired here because the row
+   and the detail sheet say the same things and say them better; the third is
+   NOT subsumed, and under the prime law that means it stays.
+
+     Class Actions — RETIRED. It hardcoded three Paladin names and read three
+       pools by `if`, so it knew nothing about a fifth class. `composeTurn`
+       prices every option off the sheet: `retire.test.ts` pins «15/40 points»,
+       «1/2 uses» and «1st-level slot» arriving on the row itself.
+
+     Prepared Spells — RETIRED. Level, range, concentration, damage dice and
+       type, casting time and the save DC all reach the detail sheet, each
+       pinned by a test in `retire.test.ts`. Exactly one fact was missing — the
+       save DC as a NUMBER, which this panel had and the sheet did not — and
+       that test went red first and was fixed in `detail.ts` before a line of
+       this panel was touched. Also gone with it: a 2px unlabelled dot with a
+       `title` for concentration, which on a touch screen is nothing at all.
+
+     Basic Actions — STAYS, and this is the slice's "anything not subsumed
+       stays" clause doing real work. Dash, Dodge, Disengage, Help, Hide and
+       Ready are on nobody's character sheet — they are rules of the game, and
+       `composeTurn` builds the turn out of the sheet, so the engine has no
+       source for them. `retire.test.ts` asserts the engine composes none of
+       them; when that test goes red this section should go with it.
+
+   TWO THINGS ARE FIXED WHILE IT IS OPEN. The descriptions were `line-clamp-2`
+   — CSS truncation, which is finding Q's trap: the text was all there in the
+   DOM and unreadable on the glass. They are whole now. And the section says
+   out loud that tapping asks the ADVISOR, because every button in this panel
+   always did and none of them ever spent anything; with the AI off, a control
+   that looks like "do this" and does nothing is the worst thing on the tab.
+   ========================================================================= */
+function BasicActionsReference({
   onSelectAction,
   loading,
 }: {
-  character: Character
-  concentrationSpell: string | null
   onSelectAction: (actionName: string, description: string) => void
   loading: boolean
 }) {
-  const [classActionsOpen, setClassActionsOpen] = useState(true)
-  const [spellsOpen, setSpellsOpen] = useState(true)
-  const [basicActionsOpen, setBasicActionsOpen] = useState(false)
-
-  const isPaladin = character.class === 'Paladin'
-  const availableSlots = countAvailableSlots(character.spellSlots)
-
-  // Group prepared spells by casting time
-  const spellGroups = useMemo(() => {
-    const prepared = character.spells.filter((s) => s.prepared && s.level > 0)
-    const groups: Record<string, typeof prepared> = {
-      Action: [],
-      'Bonus Action': [],
-      Reaction: [],
-    }
-
-    for (const spell of prepared) {
-      const time = spell.castingTime
-      if (time.toLowerCase().includes('bonus')) {
-        groups['Bonus Action'].push(spell)
-      } else if (time.toLowerCase().includes('reaction')) {
-        groups['Reaction'].push(spell)
-      } else {
-        groups['Action'].push(spell)
-      }
-    }
-
-    return groups
-  }, [character.spells])
-
-  const hasAnySpells = Object.values(spellGroups).some((g) => g.length > 0)
-
-  /** Resource info string for a paladin action */
-  const getResourceInfo = useCallback(
-    (action: (typeof PALADIN_ACTIONS)[number]): string => {
-      if (action.name === 'Divine Smite') {
-        return `${availableSlots} slot${availableSlots !== 1 ? 's' : ''}`
-      }
-      if (action.name === 'Lay on Hands' && character.paladinResources) {
-        return `${character.paladinResources.layOnHands.current} HP`
-      }
-      if (action.name === 'Channel Divinity' && character.paladinResources) {
-        return `${character.paladinResources.channelDivinity.current}/${character.paladinResources.channelDivinity.max}`
-      }
-      return ''
-    },
-    [availableSlots, character.paladinResources],
-  )
-
-  const isResourceEmpty = useCallback(
-    (action: (typeof PALADIN_ACTIONS)[number]): boolean => {
-      if (action.name === 'Divine Smite') return availableSlots <= 0
-      if (action.name === 'Lay on Hands' && character.paladinResources) {
-        return character.paladinResources.layOnHands.current <= 0
-      }
-      if (action.name === 'Channel Divinity' && character.paladinResources) {
-        return character.paladinResources.channelDivinity.current <= 0
-      }
-      return false
-    },
-    [availableSlots, character.paladinResources],
-  )
-
   return (
     <GlassCard className="p-4">
-      <h3 className="text-sm font-semibold text-forge-0 tracking-wide uppercase mb-3">
-        Actions
-      </h3>
+      <p className="text-xs leading-snug text-forge-2 mb-3">
+        The rules-of-the-game actions anyone can take — they are on no character
+        sheet, so they are not in your turn list. Tap one to ask the advisor about it.
+      </p>
 
-      {/* Section 1: Class Actions (Paladin only) */}
-      {isPaladin && (
-        <div className="mb-3">
-          <button
-            onClick={() => setClassActionsOpen(!classActionsOpen)}
-            className={cn(
-              'w-full min-h-[44px] flex items-center justify-between px-1 py-2',
-              'text-xs font-semibold text-forge-1 uppercase tracking-wide',
-              'transition-all duration-200 active:scale-[0.97]',
-            )}
-          >
-            <span className="flex items-center gap-2">
-              <Flame size={14} className="text-ember" aria-hidden />
-              Class Actions
-            </span>
-            {classActionsOpen ? (
-              <ChevronUp size={14} className="text-forge-2" aria-hidden />
-            ) : (
-              <ChevronDown size={14} className="text-forge-2" aria-hidden />
-            )}
-          </button>
-
-          {classActionsOpen && (
-            <div className="flex flex-col gap-2 mt-1">
-              {PALADIN_ACTIONS.map((action) => {
-                const info = getResourceInfo(action)
-                const empty = isResourceEmpty(action)
-                return (
-                  <button
-                    key={action.name}
-                    onClick={() => onSelectAction(action.name, action.description)}
-                    disabled={loading || empty}
-                    className={cn(
-                      'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
-                      'bg-white/[0.03] border border-white/8',
-                      'enabled:hover:bg-ember/8 enabled:hover:border-ember/20',
-                      'transition-all duration-200 enabled:active:scale-[0.97]',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                      'disabled:opacity-40 disabled:cursor-not-allowed',
-                      'group',
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-forge-0 group-hover:text-ember transition-colors">
-                        {action.name}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {info && (
-                          <span className="text-xs font-mono text-forge-2">
-                            {info}
-                          </span>
-                        )}
-                        <Badge variant="ember">{action.resourceCost}</Badge>
-                      </div>
-                    </div>
-                    <div className="text-xs text-forge-2 mt-0.5 leading-snug line-clamp-2">
-                      {action.description}
-                    </div>
-                    {action.dice && (
-                      <Badge variant="neutral" className="mt-1.5">
-                        {action.dice}
-                      </Badge>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Section 2: Prepared Spell Quick-Cast */}
-      {hasAnySpells && (
-        <div className="mb-3">
-          <button
-            onClick={() => setSpellsOpen(!spellsOpen)}
-            className={cn(
-              'w-full min-h-[44px] flex items-center justify-between px-1 py-2',
-              'text-xs font-semibold text-forge-1 uppercase tracking-wide',
-              'transition-all duration-200 active:scale-[0.97]',
-            )}
-          >
-            <span className="flex items-center gap-2">
-              <Sparkles size={14} className="text-eldritch" aria-hidden />
-              Prepared Spells
-            </span>
-            {spellsOpen ? (
-              <ChevronUp size={14} className="text-forge-2" aria-hidden />
-            ) : (
-              <ChevronDown size={14} className="text-forge-2" aria-hidden />
-            )}
-          </button>
-
-          {spellsOpen && (
-            <div className="flex flex-col gap-3 mt-1">
-              {(
-                Object.entries(spellGroups) as [string, typeof character.spells][]
-              ).map(([groupLabel, spells]) => {
-                if (spells.length === 0) return null
-                return (
-                  <div key={groupLabel}>
-                    <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-1.5 block px-1">
-                      {groupLabel}
-                    </span>
-                    <div className="flex flex-col gap-1.5">
-                      {spells.map((spell) => {
-                        const isNonConcentration = !spell.concentration
-                        const highlightNonConc =
-                          concentrationSpell !== null && isNonConcentration
-                        return (
-                          <button
-                            key={spell.name}
-                            onClick={() =>
-                              onSelectAction(
-                                spell.name,
-                                `${spell.description}${spell.tacticalNote ? ' Tactical note: ' + spell.tacticalNote : ''}`,
-                              )
-                            }
-                            disabled={loading}
-                            className={cn(
-                              'min-h-[44px] px-3 py-2 rounded-lg text-left',
-                              'bg-white/[0.03] border border-white/8',
-                              'enabled:hover:bg-eldritch/8 enabled:hover:border-eldritch/20',
-                              'transition-all duration-200 enabled:active:scale-[0.97]',
-                              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                              'disabled:opacity-40 disabled:cursor-not-allowed',
-                              'group',
-                              highlightNonConc && 'border-arcane/20',
-                            )}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <span className="text-xs font-semibold text-forge-0 group-hover:text-eldritch transition-colors truncate">
-                                  {spell.name}
-                                </span>
-                                <Badge
-                                  variant={
-                                    spell.level === 0 ? 'neutral' : 'eldritch'
-                                  }
-                                >
-                                  {spell.level === 0
-                                    ? 'Cantrip'
-                                    : `Lvl ${spell.level}`}
-                                </Badge>
-                                {spell.concentration && (
-                                  <span
-                                    className="w-2 h-2 rounded-full bg-ember shrink-0"
-                                    title="Concentration"
-                                  />
-                                )}
-                              </div>
-                              <span className="text-xs font-mono text-forge-2 shrink-0 whitespace-nowrap">
-                                {spell.range}
-                              </span>
-                            </div>
-                            {/* Mechanics row */}
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              {spell.saveType ? (
-                                <span className="text-xs font-mono text-arcane">
-                                  DC {character.spellSaveDC} {spell.saveType}
-                                </span>
-                              ) : spell.level > 0 ? (
-                                <span className="text-xs font-mono text-arcane">
-                                  +{character.spellAttackBonus} hit
-                                </span>
-                              ) : null}
-                              {spell.damageDice && (
-                                <span className="text-xs font-mono text-ember font-medium">
-                                  {spell.damageDice}{spell.damageType ? ` ${spell.damageType}` : ''}
-                                </span>
-                              )}
-                              {spell.castingTime.toLowerCase().includes('bonus') && (
-                                <Badge variant="ember" className="text-xs px-1.5 py-0">BA</Badge>
-                              )}
-                              {spell.castingTime.toLowerCase().includes('reaction') && (
-                                <Badge variant="ember" className="text-xs px-1.5 py-0">Rx</Badge>
-                              )}
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Section 3: Basic Actions (collapsed by default) */}
-      <div>
-        <button
-          onClick={() => setBasicActionsOpen(!basicActionsOpen)}
-          className={cn(
-            'w-full min-h-[44px] flex items-center justify-between px-1 py-2',
-            'text-xs font-semibold text-forge-1 uppercase tracking-wide',
-            'transition-all duration-200 active:scale-[0.97]',
-          )}
-        >
-          <span className="flex items-center gap-2">
-            <Sword size={14} className="text-forge-2" aria-hidden />
-            Basic Actions
-          </span>
-          {basicActionsOpen ? (
-            <ChevronUp size={14} className="text-forge-2" aria-hidden />
-          ) : (
-            <ChevronDown size={14} className="text-forge-2" aria-hidden />
-          )}
-        </button>
-
-        {basicActionsOpen && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
-            {BASIC_ACTIONS.map((action) => (
-              <button
-                key={action.name}
-                onClick={() => onSelectAction(action.name, action.description)}
-                disabled={loading}
-                className={cn(
-                  'min-h-[44px] px-3 py-2.5 rounded-xl text-left',
-                  'bg-white/[0.03] border border-white/8',
-                  'enabled:hover:bg-arcane/8 enabled:hover:border-arcane/20',
-                  'transition-all duration-200 enabled:active:scale-[0.97]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
-                  'disabled:opacity-40 disabled:cursor-not-allowed',
-                  'group',
-                )}
-              >
-                <div className="text-xs font-semibold text-forge-0 group-hover:text-arcane transition-colors">
+      {/* ONE COLUMN, NOT TWO. The old grid was `grid-cols-2` and the
+          descriptions were clamped to two lines inside it — at 390px that is
+          about twenty characters a line, which is why "Dodge" read as a
+          fragment. A full sentence needs the width, and fourteen of them in a
+          collapsed section cost nothing until it is opened. */}
+      <ul className="flex flex-col gap-2">
+        {BASIC_ACTIONS.map((action) => (
+          <li key={action.name}>
+            <button
+              onClick={() => onSelectAction(action.name, action.description)}
+              disabled={loading}
+              aria-label={`${action.name} — ask the advisor`}
+              className={cn(
+                'w-full min-h-[44px] px-3 py-2.5 rounded-xl text-left',
+                'bg-white/[0.03] border border-white/8',
+                'enabled:hover:bg-arcane/8 enabled:hover:border-arcane/20',
+                'transition-all duration-200 enabled:active:scale-[0.97]',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+                'disabled:opacity-40 disabled:cursor-not-allowed',
+                'group',
+              )}
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs font-semibold text-forge-0 group-hover:text-arcane transition-colors">
                   {action.name}
-                </div>
-                <div className="text-xs text-forge-2 mt-0.5 leading-snug line-clamp-2">
-                  {action.description}
-                </div>
-                <Badge
-                  variant={action.type === 'Reaction' ? 'ember' : 'neutral'}
-                  className="mt-1.5"
-                >
+                </span>
+                <Badge variant={action.type === 'Reaction' ? 'ember' : 'neutral'}>
                   {action.type}
                 </Badge>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+              </div>
+              {/* NO `line-clamp`. This is the whole rule, and the whole rule is
+                  the only reason this section survived the slice. */}
+              <p className="text-xs text-forge-2 mt-1 leading-snug">{action.description}</p>
+            </button>
+          </li>
+        ))}
+      </ul>
     </GlassCard>
   )
 }
@@ -927,12 +684,11 @@ function CollapsibleCombatSection({
  * legacy screen instead of in place of it.
  *
  * IT IS A SHORTLIST, AND IT SAYS SO. `turn.ranked` is the top five uncontended
- * affordable options. Two things are deliberately NOT here yet: the contention
- * brackets (Smite vs Lay on Hands vs Misty Step — one decision with three
- * faces) and the "everything else" fold. Both are real parts of the turn and
- * both arrive with slices 6 and 9; until then the footer counts them out loud
- * rather than letting the list imply it is the whole truth. Nothing is lost in
- * the meantime — every existing surface on this tab is still below, untouched.
+ * affordable options. The rest of the turn is not here on purpose: reactions
+ * are in the band below (slice 6), and the contention brackets — Smite vs Lay
+ * on Hands vs Misty Step, one decision with three faces — plus the leftovers
+ * are in «Everything else» (slice 9). The footer counts them and now names the
+ * band that holds them, so the shortlist never implies it is the whole truth.
  */
 function YourTurnList({ onOpen }: { onOpen?: (option: TurnOption) => void }) {
   const { turn } = useCombat()
@@ -987,9 +743,15 @@ function YourTurnList({ onOpen }: { onOpen?: (option: TurnOption) => void }) {
       )}
 
       {elsewhere > 0 && (
+        /* NAMES THE BAND, as of slice 9. Until this slice the sentence read
+           "…are in the sections below", and that was not true: `turn.mutex`
+           was counted here and painted nowhere, so the count sent Marcus
+           looking for rows that did not exist. Now there is one band holding
+           exactly these {elsewhere} options and the sentence points at it by
+           its own caption, so the pointer can be followed. */
         <p className="mt-2 text-[11px] leading-snug text-forge-2">
-          {elsewhere} more — including anything that contends for the same slot — are in the
-          sections below.
+          {elsewhere} more — including anything that contends for the same slot — are under
+          «Everything else» below.
         </p>
       )}
     </section>
@@ -1019,6 +781,37 @@ function ReactionsBandLive({
     <ReactionsBand
       turn={turn}
       character={character}
+      isOpen={section.isOpen}
+      onToggle={section.toggle}
+      onOpen={onOpen}
+    />
+  )
+}
+
+/* The context read for the contention band. Slice 9.
+ *
+ * Same shape and the same reasoning as `ReactionsBandLive` above: the band
+ * itself takes plain props so it renders under `renderToStaticMarkup`, and the
+ * two hooks live in this wrapper.
+ *
+ * DEFAULT CLOSED, and that is the one difference from the reactions band. This
+ * band is eight rows deep — every levelled spell Nix owns plus both brackets —
+ * and Marcus's opening ask was for LESS on screen, not more. Closed it is one
+ * line reading "Everything else · 8"; open it is the half of his character that
+ * had no row at all before this slice. The collapse joins the same
+ * `codex-ui-${characterId}` map every other section on this tab uses. */
+function ContentionBandLive({
+  character,
+  onOpen,
+}: {
+  character: Character
+  onOpen?: (option: TurnOption) => void
+}) {
+  const { turn } = useCombat()
+  const section = useCollapsible('combat-contention', character.id, false)
+  return (
+    <ContentionBand
+      turn={turn}
       isOpen={section.isOpen}
       onToggle={section.toggle}
       onOpen={onOpen}
@@ -1119,13 +912,6 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
      to the wrong thing. */
   const [openOption, setOpenOption] = useState<TurnOption | null>(null)
 
-  // Action menu slide-up panel
-  const [actionMenuOpen, setActionMenuOpen] = useState(false)
-  const [actionMenuFilter, setActionMenuFilter] = useState<ActionEconomyType>('action')
-
-  // Concentration warning dialog
-  const [concWarning, setConcWarning] = useState<{ newSpell: string; action: ActionChoice } | null>(null)
-
   // Damage tracking
   const [currentDamageLog, setCurrentDamageLog] = useState<CombatLog | null>(
     combatState.inCombat ? createCombatLog() : null
@@ -1200,65 +986,11 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
     }))
   }, [])
 
-  // --- Action Menu handler ---
-
-  const applyAction = useCallback(
-    (action: ActionChoice) => {
-      let newState = useAction(combatState, action.type)
-
-      // Use spell slot if applicable
-      if (action.slotLevel) {
-        const updated = expendSpellSlot(character, action.slotLevel)
-        onCharacterUpdate(updated)
-      }
-
-      // Set concentration if the spell is concentration
-      if (action.category === 'Spell' || action.category === 'Cantrip') {
-        const spell = character.spells.find((s) => s.name === action.name)
-        if (spell?.concentration) {
-          newState = setCombatConcentration(newState, action.name)
-        }
-      }
-
-      setCombatState(newState)
-
-      // Open dice roller with prefill if there's a roll notation
-      if (action.rollNotation && action.rollLabel && onOpenDiceRoller) {
-        onOpenDiceRoller({ notation: action.rollNotation, label: action.rollLabel })
-      }
-    },
-    [combatState, character, onCharacterUpdate, onOpenDiceRoller],
-  )
-
-  const handleUseAction = useCallback(
-    (action: ActionChoice) => {
-      // Check concentration conflict
-      if (
-        action.category === 'Spell' &&
-        action.slotLevel &&
-        character.spells.find((s) => s.name === action.name)?.concentration &&
-        combatState.concentrating
-      ) {
-        setConcWarning({ newSpell: action.name, action })
-        setActionMenuOpen(false)
-        return
-      }
-
-      applyAction(action)
-      setActionMenuOpen(false)
-    },
-    [combatState.concentrating, character.spells, applyAction],
-  )
-
-  const handleConfirmConcentrationSwitch = useCallback(() => {
-    if (!concWarning) return
-    applyAction(concWarning.action)
-    setConcWarning(null)
-  }, [concWarning, applyAction])
-
-  const handleCancelConcentrationSwitch = useCallback(() => {
-    setConcWarning(null)
-  }, [])
+  /* `applyAction`, `handleUseAction` and the two concentration-switch handlers
+     were here. All four took an `ActionChoice`, a type only `ActionMenu`
+     produced, and `ActionMenu` could not be opened — so this was the write path
+     of a surface no tap could reach. Retired with it in slice 9; the note at
+     the mount site says what happened to the concentration warning. */
 
   // --- Spell Slot handlers ---
 
@@ -1369,48 +1101,23 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
     clearResponse()
   }, [character, onCharacterUpdate, clearResponse])
 
-  // ── Count available options per action economy type (for badges) ──
-  const actionMenuCounts = useMemo(() => {
-    const counts: Record<ActionEconomyType, number> = { action: 0, bonusAction: 0, reaction: 0 }
-
-    // Weapons = action only
-    counts.action += character.weapons.length
-
-    // Spells (cantrips + leveled, filtered by casting time)
-    for (const spell of character.spells) {
-      if (!spell.prepared) continue
-      const type = spellActionType(spell.castingTime)
-      counts[type]++
-    }
-
-    // Class features
-    for (const feature of character.features) {
-      if (feature.level > character.level) continue
-      const type = featureActionType(feature)
-      counts[type]++
-    }
-
-    // Other universal actions: 6 standard actions + bonus actions + reactions
-    counts.action += 6 // Dash, Dodge, Disengage, Help, Hide, Ready
-    counts.bonusAction += 1 // Two-Weapon Attack
-    counts.reaction += 2 // Opportunity Attack, Readied Action
-
-    return counts
-  }, [character.weapons, character.spells, character.features, character.level])
-
-  const openActionMenu = useCallback((filter: ActionEconomyType) => {
-    setActionMenuFilter(filter)
-    setActionMenuOpen(true)
-  }, [])
+  /* `actionMenuCounts` and `openActionMenu` were here, and both went with the
+     panel in slice 9. `openActionMenu` was the ONLY caller of
+     `setActionMenuOpen(true)` and had itself no caller, which is the whole of
+     why the panel was unreachable. `actionMenuCounts` fed badges on that
+     panel's tabs and additionally counted by hand — `+= 6 // Dash, Dodge,
+     Disengage…` — options the engine does not compose, so it could not have
+     been reused as-is. */
 
   return (
     <section className="flex flex-col gap-4" aria-label="Combat Helper">
-      {/* ── TEMPORARY — Table Truth slice 1's tracer bullet ──
-             Proves the canon corpus loaded, and says out loud what it does NOT
-             cover on this sheet. Read-only: it dispatches nothing and persists
-             nothing. Slice 9 deletes it, once the rows themselves carry canon
-             and the coverage is visible where it actually matters. */}
-      <CanonMatchReport character={character} />
+      {/* ── Slice 1's tracer bullet is gone, as slice 1 said it would be ──
+             `CanonMatchReport` was a diagnostic strip proving the canon corpus
+             had loaded and naming what it did not cover. It has done its job:
+             canon now reaches the rows and the detail sheet, so coverage is
+             visible where it matters instead of as a banner at the top of the
+             tab Marcus opens mid-combat. The component file stays on disk —
+             it is a useful thing to mount while working on the corpus. */}
 
       {/* ── Table Truth slice 2 — the vitals band ──
              Save DC, initiative and proficiency were absent from this surface
@@ -1437,6 +1144,19 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
              Read-only, like everything else on this tab so far: it derives from
              the same composed turn and writes only its own collapse flag. */}
       <ReactionsBandLive character={character} onOpen={setOpenOption} />
+
+      {/* ── Table Truth slice 9 — the contention band ──
+             The half of the turn that had no row at all. `YourTurnList` paints
+             the top five and the band above paints the reactions; everything
+             that spends a slot or a pool lived in `turn.mutex`, which this tab
+             read in exactly one place — a footer that COUNTED it. Every
+             levelled spell Nix owns was in that count and on no row.
+
+             Third rather than second because the order is a priority order:
+             what to do now, then what to watch for, then everything else. It
+             is collapsed by default, so the cost of it being here is one line
+             until Marcus asks for the rest. */}
+      <ContentionBandLive character={character} onOpen={setOpenOption} />
 
       {/* ── Always visible: TurnSummary (when in combat) ── */}
       {combatState.inCombat && (
@@ -1466,31 +1186,8 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
         <ConditionReminder character={character} onOpenDiceRoller={onOpenDiceRoller} />
       )}
 
-      {/* Concentration Warning Dialog */}
-      {concWarning && (
-        <GlassCard className="p-4 ring-2 ring-ember/40 animate-fade-in">
-          <div className="flex items-start gap-2 mb-3">
-            <AlertTriangle size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
-            <div>
-              <p className="text-sm font-semibold text-forge-0">
-                Drop Concentration?
-              </p>
-              <p className="text-xs text-forge-2 mt-1">
-                You are concentrating on <strong className="text-ember">{combatState.concentrating}</strong>.
-                Casting <strong className="text-eldritch">{concWarning.newSpell}</strong> will end that concentration.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="primary" size="sm" onClick={handleConfirmConcentrationSwitch} className="flex-1">
-              Switch Concentration
-            </Button>
-            <Button variant="secondary" size="sm" onClick={handleCancelConcentrationSwitch} className="flex-1">
-              Cancel
-            </Button>
-          </div>
-        </GlassCard>
-      )}
+      {/* The Drop Concentration dialog was here. It is retired with the panel
+          that was its only trigger — see the note further down. */}
 
       {/* ── The turn deck ───────────────────────────────────────────────────
            These three surfaces — the economy, the slots, the class resources —
@@ -1565,19 +1262,17 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
         />
       </CollapsibleCombatSection>
 
-      {/* ── Collapsible: Actions Reference ── */}
+      {/* ── Collapsible: the basic actions ──
+             Retitled from "Actions Reference", which named a panel that held
+             three different things and is now one. The title says what is
+             inside it, so it can be skipped without being opened. */}
       <CollapsibleCombatSection
-        title="Actions Reference"
+        title="Basic actions — the rules"
         icon={Sword}
         isOpen={actionsRefSection.isOpen}
         onToggle={actionsRefSection.toggle}
       >
-        <SmartActionsPanel
-          character={character}
-          concentrationSpell={concentrationSpell}
-          onSelectAction={handleQuickAction}
-          loading={loading}
-        />
+        <BasicActionsReference onSelectAction={handleQuickAction} loading={loading} />
       </CollapsibleCombatSection>
 
       {/* ── Collapsible: Rest Management ── */}
@@ -1593,17 +1288,34 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
       {/* 8. Persona Card (conditional) */}
       {character.persona && <PersonaCard persona={character.persona} />}
 
-      {/* 9. Action Menu (slide-up panel) */}
-      <ActionMenu
-        isOpen={actionMenuOpen}
-        onClose={() => setActionMenuOpen(false)}
-        character={character}
-        combatState={combatState}
-        onUseAction={handleUseAction}
-        filter={actionMenuFilter}
-      />
+      {/* ── The «Action» slide-up is gone — Table Truth slice 9 ──
+             `ActionMenu` was mounted here for as long as this file has existed,
+             and could not be opened for very nearly as long. `setActionMenuOpen(true)`
+             occurred in exactly one function, `openActionMenu`, which had no
+             caller anywhere in `src`; its only would-be caller, `SmartActionsGrid`,
+             is exported and mounted nowhere. `noUnusedLocals: false` in
+             tsconfig is why 697 lines of unreachable panel never raised so much
+             as a warning.
 
-      {/* 10. Quick Lookup (slide-up panel) */}
+             So this retirement removes no capability, because there was none to
+             remove — the browser prover for this slice clicks every control on a
+             fresh Play tab and asserts no «Choose Action» dialog can be made to
+             appear. What Marcus described as "action at the very top … drop
+             downs … trails off" is TurnSummary, which is still here and is
+             slice 10's problem.
+
+             The file itself is not deleted. That is an ask-first call and it is
+             asked at this slice's close-out.
+
+             GOING WITH IT: `applyAction`, `handleUseAction` and the Drop
+             Concentration dialog, which existed only to serve it. The dialog's
+             substance is not lost — `rank.ts` scores a concentration clash −45
+             and states "Would drop <spell>" on the row itself, which is the
+             warning arriving BEFORE the tap rather than after it. The explicit
+             confirm step is not rebuilt here; it is recorded in 00-status.md as
+             a capability the app has never actually delivered. */}
+
+      {/* Quick Lookup (slide-up panel) */}
       <QuickLookup
         isOpen={lookupOpen}
         onClose={() => setLookupOpen(false)}
