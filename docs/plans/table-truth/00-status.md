@@ -17,8 +17,8 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 5 — CombatProvider mounted READ-ONLY + one ranked "Your Turn" list — **DONE 2026-08-26**, storage proved byte-identical across a real reload, every row measured at exactly two lines; the prover caught the two-line promise being broken by rows nothing had ever budgeted (see §Slice 5 below)
 - [x] 6 — "Your Reactions" band — **DONE 2026-08-27**, proved against the running app on four cases; the prover caught Gate 3 specifying a filter that is empty on your own turn, a line-measurement technique that was wrong, and the WHEN label saying its own word twice (see §Slice 6 below)
 - [x] 7 — the option detail sheet (this is where the "…" dies) — **DONE 2026-08-27**, proved against the running app on six cases; every reachable sheet measured clip-free *on the glass*, and the prover caught its own band-4 case grading nothing, a splitter that kept every character while dropping 10 headings, and the fact that **0 of the 7 slot-spending options can reach the sheet at all** (see §Slice 7, finding AB — the one thing needing a steer)
-- [ ] 8 — errata flags, all 12, three readings, DM wording
-- [ ] 9 — retire the competing menus (capabilities pinned as tests FIRST)
+- [ ] 9 — retire the competing menus (capabilities pinned as tests FIRST) — **NEXT**, swapped ahead of 8 by Marcus 2026-08-27
+- [ ] 8 — errata flags, all 12, three readings, DM wording — **needs re-scoping before it starts** (finding AA) and now runs after 9
 - [ ] 10 — canon VAL-01..15 as a suite + decide the combat write path
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
@@ -730,6 +730,21 @@ He pasted his Oath of the Hearth text with this slice. It **corroborates canon e
 Oath spell table matches level for level, and the Hearthfire Manifest paragraph differs by one
 phrase only ("Temporary HP" vs "Temporary Hit Points"). No correction needed anywhere.
 
+## Slice order changed 2026-08-27 — 9 before 8, decided by Marcus
+
+Asked at the slice 7 boundary which he wanted next. **Slice 9 first.** Three reasons, his call
+made on all three:
+
+1. **Seven of his options cannot be opened at all** (finding AB). Divine Smite untappable at a
+   real table beats errata flags, which are notes.
+2. **Slice 8 is not a "go build it" slice anymore** — only 1 of the 12 errata carries the fields
+   its three-readings design assumed (finding AA), so it needs a conversation before it needs code.
+3. **The flags live inside the detail sheet.** Run 8 first and they land on 6 options; run 9 first
+   and they land on all 14. Same work, twice the reach.
+
+Nothing in slice 8's brief is dropped — it moves, and it gets re-cut against what canon actually
+holds before it starts.
+
 ## Slice 7 — closed 2026-08-27. What it built, and what it found.
 
 Marcus's ask, verbatim: definitions *"trail off with '…' and there is no quick summary for fast
@@ -878,15 +893,25 @@ anything. The claim was re-expressed instead: every *stated* field compared whol
 compared on everything the sheet reads, **and an explicit assertion that the scores DO differ**, so
 the scoping cannot rot into a comparison of two identical things.
 
-### Finding AI — `ActionMenu` tells assistive tech the rest of the Play tab is inert
+### Finding AI — `ActionMenu` is permanently mounted, and it broke the prover
 
-It is **permanently mounted** with `role="dialog" aria-modal="true"`, parked off-screen at y=844,
-title «Choose Action». It broke prover run 2 by being found instead of the sheet — nine failures,
-all measuring the wrong element — which is why every selector in `prove-slice7.mjs` now resolves the
-panel by `aria-label`. An always-mounted `aria-modal` dialog is a real accessibility defect, not
-just a test hazard. Its `text-overflow: ellipsis` spans are the last of the "…", and they are on
-**slice 9's** list along with `ActionMenu.tsx:527/569/607` (model-side) and the three CSS
-`line-clamp-2` sites (`ActionMenu.tsx:161`, `CombatHelper.tsx:501`, `CombatHelper.tsx:677`).
+It is **always in the DOM** with `role="dialog" aria-modal="true"`, parked off-screen at y=844,
+title «Choose Action». `prove-slice7.mjs` run 2 selected on role alone, found **it** instead of the
+option sheet, and produced nine failures that were all measuring the wrong element. Every selector
+in the prover now resolves the panel by `aria-label`. Its `text-overflow: ellipsis` spans are the
+last of the "…" and are on **slice 9's** list, with `ActionMenu.tsx:527/569/607` (model-side) and
+the three CSS `line-clamp-2` sites (`ActionMenu.tsx:161`, `CombatHelper.tsx:501`,
+`CombatHelper.tsx:677`).
+
+> **Corrected 2026-08-27, at the start of slice 9.** As first written this finding also claimed the
+> mounted dialog "tells assistive tech the rest of the Play tab is inert". **That was wrong, and it
+> was wrong because I inferred it from a querySelector hit instead of reading the component.**
+> `ActionMenu.tsx:426-432` already applies `inert` and `aria-hidden` while closed, with a comment
+> explaining that a translated-off-screen sheet keeps its controls in the a11y tree and the focus
+> order unless `inert` removes them. So the closed menu is correctly hidden from screen readers and
+> from Tab, and there is no accessibility defect here — only a **test hazard**, which is what the
+> aria-label selectors fix. The lesson is the same one as finding Q: a fact about the a11y tree is
+> not established by an element existing in the DOM.
 
 ### Finding AJ — a guard that skips when its subject is absent is a test that cannot fail
 
