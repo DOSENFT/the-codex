@@ -3,6 +3,7 @@ import { composeTurn } from './compose'
 import { reactionRows, type ReactionRow } from './reactions'
 import { NIX } from './fixtures/nix'
 import { DETAIL_BUDGET_CHARS } from './overlay'
+import { setRuling } from '../errata-rulings'
 
 /* ============================================================================
    SLICE 6 — the reaction band's data.
@@ -174,5 +175,137 @@ describe('reactionRows — the open-world rule', () => {
 
   it('is deterministic — the same turn produces the same rows', () => {
     expect(reactionRows(turnWith(true), NIX)).toEqual(reactionRows(turnWith(true), NIX))
+  })
+})
+
+/* ============================================================================
+   SLICE 8b — the ruling reaches the row.
+
+   The law, and every test below is one half of it:
+
+       A RULING CHANGES WHAT THE APP SAYS. IT NEVER CHANGES WHAT THE APP
+       COMPUTES.
+
+   So: the WHEN line moves and names its source (the "says" half), and the temp
+   HP, the retaliation die, the cost line, the uses and the availability are
+   asserted BYTE-IDENTICAL either side of the ruling (the "computes" half). The
+   second half is the one worth having — an app that quietly recomputes a number
+   because a flag got answered is the failure mode canon's HEARTH-01 names in as
+   many words.
+   ========================================================================= */
+
+const AT = new Date('2026-08-27T12:00:00.000Z')
+const cloakOf = (rows: ReactionRow[]) => rows.find(r => r.name === 'Flaming Cloak')!
+const oaOf = (rows: ReactionRow[]) => rows.find(r => r.name.startsWith('Opportunity'))!
+
+describe('reactionRows — a recorded ruling answers "when can I use it?"', () => {
+  it('omitting the rulings reproduces the slice 6 row exactly', () => {
+    /* The compatibility claim the optional third parameter rests on. Every
+       caller written before 8b — and `ReactionsBand` without the prop — must
+       still get the row that says nobody stated a trigger. */
+    expect(reactionRows(turnWith(true), NIX, {})).toEqual(reactionRows(turnWith(true), NIX))
+    expect(cloakOf(reactionRows(turnWith(true), NIX, {})).when).toBeNull()
+  })
+
+  it('canon’s printed fix, once chosen, becomes the cloak’s trigger', () => {
+    const rulings = setRuling({}, 'HEARTH-03', 'canon', undefined, AT)
+    const row = cloakOf(reactionRows(turnWith(true), NIX, rulings))
+    expect(row.when).toBe('when you take damage')
+    expect(row.whenSource).toBe('ruled')
+    expect(row.whenRuling).toEqual({
+      when: 'when you take damage',
+      erratumId: 'HEARTH-03',
+      via: 'canon',
+    })
+  })
+
+  it('the DM’s own words outrank canon’s, and arrive verbatim', () => {
+    const wording = 'When you or an ally within 30 feet takes Fire damage'
+    const rulings = setRuling({}, 'HEARTH-03', 'dm', wording, AT)
+    const row = cloakOf(reactionRows(turnWith(true), NIX, rulings))
+    expect(row.when).toBe(wording)
+    expect(row.whenRuling?.via).toBe('dm')
+  })
+
+  it('NEVER arrives without saying whose ruling it is', () => {
+    /* An unattributed clause on this row is indistinguishable from the invented
+       trigger slice 6 refused to ship. If `when` moved off `unstated`, the
+       attribution is mandatory. */
+    for (const rulings of [
+      setRuling({}, 'HEARTH-03', 'canon', undefined, AT),
+      setRuling({}, 'HEARTH-03', 'dm', 'When you take damage', AT),
+    ]) {
+      const row = cloakOf(reactionRows(turnWith(true), NIX, rulings))
+      expect(row.whenSource).toBe('ruled')
+      expect(row.whenRuling?.erratumId).toBe('HEARTH-03')
+    }
+  })
+
+  it('leaves the row alone for a ruling that is not a trigger', () => {
+    /* HEARTH-04 is about temp HP stacking. Answering it is a real decision and
+       slice 8's band goes on showing it — but it is not an answer to "when", and
+       putting it on the WHEN line would be the app putting words in the DM's
+       mouth. */
+    const rulings = setRuling({}, 'HEARTH-04', 'dm', 'temp HP does not stack, my call', AT)
+    expect(cloakOf(reactionRows(turnWith(true), NIX, rulings)))
+      .toEqual(cloakOf(reactionRows(turnWith(true), NIX)))
+  })
+
+  it('an unanswered flag is not quietly an answer', () => {
+    const rulings = setRuling({}, 'HEARTH-03', 'unasked', undefined, AT)
+    expect(cloakOf(reactionRows(turnWith(true), NIX, rulings)).when).toBeNull()
+  })
+
+  it('does not reach a row canon holds no errata on', () => {
+    /* Opportunity Attack is the sheet's, not canon's. A ruling recorded against
+       a Hearthfire erratum must not leak onto it — the errata are fetched PER
+       ROW, from the feature that row matched. */
+    const rulings = setRuling({}, 'HEARTH-03', 'canon', undefined, AT)
+    const row = oaOf(reactionRows(turnWith(true), NIX, rulings))
+    expect(row.errataIds).toEqual([])
+    expect(row.whenSource).toBe('declared')
+    expect(row).toEqual(oaOf(reactionRows(turnWith(true), NIX)))
+  })
+})
+
+describe('reactionRows — a ruling changes what it SAYS, never what it COMPUTES', () => {
+  const before = cloakOf(reactionRows(turnWith(true), NIX))
+  const after = cloakOf(
+    reactionRows(turnWith(true), NIX, setRuling({}, 'HEARTH-03', 'canon', undefined, AT))
+  )
+
+  it('moves the WHEN line, and only the WHEN line', () => {
+    const said = ({ when: _w, whenSource: _s, whenRuling: _r, ...rest }: ReactionRow) => rest
+    expect(said(after)).toEqual(said(before))
+  })
+
+  it('does not touch a single number: temp HP, die, cost, uses', () => {
+    expect(after.body).toBe('12 temp HP · 1d10 Fire retaliation')
+    expect(after.body).toBe(before.body)
+    expect(after.cost).toBe('Reaction · 1/2 uses')
+    expect(after.cost).toBe(before.cost)
+  })
+
+  it('does not unblock or block anything', () => {
+    expect(after.available).toBe(before.available)
+    expect(after.blockedReason).toBe(before.blockedReason)
+  })
+
+  it('does not change what canon is flagged as holding', () => {
+    /* Answering one of the four errata does not make it stop existing. The
+       ⚑ count is what canon HOLDS, not what is outstanding — the outstanding
+       count is the Rules-flags band's job, and it is a different number. */
+    expect(after.errataIds).toEqual(before.errataIds)
+    expect(after.errataIds.length).toBe(4)
+  })
+
+  it('does not alter the option the detail sheet opens on', () => {
+    expect(after.option).toEqual(before.option)
+  })
+
+  it('is still ellipsis-free and still inside the row budget', () => {
+    expect(after.body.length).toBeLessThanOrEqual(DETAIL_BUDGET_CHARS)
+    expect(after.when!.length).toBeGreaterThan(0)
+    expect(`${after.when} ${after.body}`).not.toMatch(/…|\.\.\./)
   })
 })

@@ -89,8 +89,11 @@ All 12 `HEARTH-##` errata become readable, and each one becomes a question you c
   which eleven of the twelve cannot supply.
 - **Live vs later is computed, never hardcoded.** An erratum is live when the feature it names is
   on the sheet at a level the character has reached — `feature.level <= character.level`, read
-  from the sheet's own field. At level 8 Nix gets six: four on Hearthfire Manifest, one on Aura
-  of Solace, one on Oath Spells. The other six (Smoldering Smite L15, Hearth Warden L20) sit
+  from the sheet's own field. **Nix is level 7** *(confirmed by Marcus 2026-08-27; this line read
+  "level 8" until then — the number came from the test fixture, not from him)*, and at level 7 he
+  gets six: four on Hearthfire Manifest (L3), one on Aura of Solace (L7), one on Oath Spells (L5).
+  The count is unchanged by the correction — Aura of Solace lands exactly on 7 — which is precisely
+  why the wrong level survived this long with nothing going red. The other six (Smoldering Smite L15, Hearth Warden L20) sit
   behind a fold and arrive on their own when he levels.
 - **Each erratum stores how the table ruled it**, in `codex-errata-${characterId}`: not asked yet
   / following canon's recommended fix / your DM ruled otherwise, in your own words. That is the
@@ -104,12 +107,41 @@ All 12 `HEARTH-##` errata become readable, and each one becomes a question you c
   the shortcut. Pinned by a test so the number cannot drift silently.
 - **Nothing is silently changed and nothing is enforced.** See 8b.
 
-**8b — The four errata that ask the app to ACT.** *(new, split out of 8)*
-Canon's `appAction` on four records asks for behaviour, not text: HEARTH-04's mandatory temp-HP
-warning, HEARTH-03's record-and-enforce trigger, HEARTH-08's Warding Bond de-duplication,
-HEARTH-07's Incapacitated inheritance on Aura of Solace. Two touch the combat write path, which
-slice 10 owns. **Scoped after Marcus has read the twelve in slice 8 and recorded his DM's
-rulings** — the app must not enforce a house rule before the house has ruled.
+**8b — The ruling reaches the point of use.** *(new, split out of 8)*
+**NARROWED 2026-08-27, from four errata to one claim.** Marcus delegated the design decision
+("idk, whatever you think is absolutely best"), so no re-approval was needed — but the narrowing
+has to be visible, and so does the law it settled on:
+
+> **A ruling changes what the app SAYS. It never changes what the app COMPUTES.**
+
+That is the answer to "should a recorded ruling *change* anything?". Canon's HEARTH-01 forbids the
+silent version in as many words — *"Do not silently implement either version. Present the conflict
+to the player"* — and the operative word is **silently**. A clause that is attributed, reversible
+and visible **is** the conflict being presented. So a ruling may put words on the screen; it may
+never move a number.
+
+**What 8b ships:** the cloak's WHEN line. Recorded → the reaction row reads the ruled trigger and
+names its source (`your DM's ruling · HEARTH-03` / `canon's suggested fix · HEARTH-03`). Not
+recorded → the row goes on admitting the gap, and now says *where* to close it.
+
+*Why this one and not the other three, in order of weight:*
+1. It is literally Marcus's original ask — "my reactions (like hearth fire manifest and what it
+   does or **when i can use it**)". The other three are canon's asks.
+2. Slice 6 pre-wrote the hook in both `trigger.ts` and `ReactionRow.tsx` and said so in the code.
+3. It is **text**, not arithmetic — zero risk of silently changing a number, which is the law above.
+4. HEARTH-04's mandatory warning and HEARTH-05's damage tally both need the **combat write path**,
+   which slice 10 owns. Building them now means building them twice. **Deferred to 10, explicitly.**
+5. HEARTH-08's de-duplication is a **Prep/Grimoire-tab** concern, not a Play-tab one — and the
+   measurement (finding AZ) found the app's bug is *larger* than canon's erratum, which makes it
+   its own piece of work rather than a rider on this one. **Deferred, with the measurement recorded.**
+6. HEARTH-07 reaches no turn option at all (finding AT), so there is no point of use to reach.
+
+*How a trigger is chosen: by **shape**, never by id.* An erratum contributes a trigger only when
+the operative text reads as one (`/^(?:when|if)\b/i`). So a DM ruling on HEARTH-04 — "temp HP does
+not stack, my call" — correctly contributes nothing. Measured across the whole corpus by
+`_probe-trigger.mjs`: of the quoted spans in the twelve records, exactly **one** is trigger-shaped.
+`if (id === 'HEARTH-03')` would have worked today and been wrong the moment canon grew a
+thirteenth record; a test guards against anyone reintroducing it.
 
 > *Original slice 8 text, superseded 2026-08-27:* "Errata: show both, default to the fix. All 12
 > `HEARTH-##` flags inline and expanded, each with the as-written text, the fault, the cause, the

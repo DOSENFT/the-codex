@@ -19,7 +19,7 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 7 — the option detail sheet (this is where the "…" dies) — **DONE 2026-08-27**, proved against the running app on six cases; every reachable sheet measured clip-free *on the glass*, and the prover caught its own band-4 case grading nothing, a splitter that kept every character while dropping 10 headings, and the fact that **0 of the 7 slot-spending options can reach the sheet at all** (see §Slice 7, finding AB — the one thing needing a steer)
 - [x] 9 — retire the competing menus (capabilities pinned as tests FIRST) — **DONE 2026-08-27**, prover PASS; `ActionMenu`, two-thirds of "Actions Reference" and slice 1's diagnostic strip retired, Basic Actions **kept** on evidence (finding AM), the eight `turn.mutex` options given their first row ever, and **6 of 14 reachable → 14 of 14**. The deck-chip clause was **withdrawn on evidence** (see §Slice 9) — one open question for Marcus.
 - [x] 8 — errata flags, all 12, three readings, DM wording — **DONE 2026-08-27**, prover PASS on six cases; all six live faults compared **character-for-character** against canon on disk, the ruling survives a real reload, and both surfaces report it. The prover caught three defects of its own (finding AX), my own re-scope claim was **wrong and a corpus test caught it** (finding AS), and the routing gap turned out to be **four of six, not two** (finding AT) — which is the reason the band exists (see §Slice 8 below)
-- [ ] 8b — should a recorded ruling *change* anything? — **NEXT**. Slice 8 records rulings and enforces nothing, by canon's own instruction (HEARTH-01: *"Do not silently implement either version"*). Marcus chose "show all 12 well; behaviour next"
+- [x] 8b — the ruling reaches the point of use — **DONE 2026-08-27**, prover PASS on six cases. Marcus delegated the design call, and the answer is a law the tests now enforce both ways: **a ruling changes what the app SAYS, never what it COMPUTES** — measured as **125 numeric tokens before, 125 after, 0 drifted**. Narrowed from four errata to one on evidence (the other three are slice 10's write path, Prep-tab work, or reach no option at all). The prover caught a defect **older than this phase**: `<span>WHEN</span>you take damage` — a margin is not a space, and the unit stripper had been *inserting* the separator the DOM lacked (finding AY, the inverse of finding Q). Measuring HEARTH-08 before deferring it found the app's prepared-spell bug is **larger than canon's erratum** (finding AZ — the thing most worth a steer)
 - [ ] 10 — canon VAL-01..15 as a suite + decide the combat write path — now also owns the two unconditional mount writes (finding AR)
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
@@ -1154,8 +1154,10 @@ band paints which source answered (`level 3 · your sheet` / `level 5 · canon`)
 about to argue a rule at the table is entitled to know which one the app believed.
 
 **A consequence worth recording:** the six live errata are **identical at level 7 and at level 8**
-(measured). The unresolved Nix 7-vs-8 question (§Notes) therefore does not touch this slice — but it
-still needs answering, and `lookup.ts:125-130` still notes three disagreeing level numbers.
+(measured). The unresolved Nix 7-vs-8 question therefore did not touch this slice — **and it is now
+answered: Marcus confirmed 2026-08-27 that Nix is level 7** (see §Slice 8b). The identical-at-both
+result above is exactly why the wrong number could sit in the docs this long without a test going
+red, so it is worth reading as a warning rather than as reassurance.
 
 ### Finding AV — 4,557 characters is a design constraint, not a detail
 
@@ -1207,6 +1209,138 @@ that is canon's own instruction, not a shortcut. HEARTH-01's `appAction` reads: 
 implement either version. Present the conflict to the player."* A ruling control that defaulted to
 *Canon's fix* would be implementing it silently, so all three chips start unpressed and the honest
 default is **"Not asked yet"**. Behaviour is slice 8b's question, and Marcus chose that order.
+
+## Slice 8b — closed 2026-08-27. What it built, and what it found.
+
+**The question, and the answer.** Slice 8 recorded rulings and enforced nothing. 8b asked *should a
+recorded ruling change anything?* Marcus delegated the call — *"idk, whatever you think is absolutely
+best"* — so the answer is mine, and it is one sentence:
+
+> **A ruling changes what the app SAYS. It never changes what the app COMPUTES.**
+
+Canon forbids the silent version in as many words (HEARTH-01 `appAction`: *"Do not silently implement
+either version. Present the conflict to the player."*) — and the operative word is **silently**. A
+clause that is attributed, reversible and visible **is** the conflict being presented. So a ruling
+may put words on the screen; it may never move a number. Both halves are enforced by tests, and both
+halves were mutation-tested (below).
+
+**What is on the tab now.** The Flaming Cloak row's WHEN line. Before, it read
+*«when · not stated — record one in Rules flags»* — slice 6's honest admission, now pointing at the
+place slice 8 built. Record a ruling in *Rules flags* and the same line reads the trigger and names
+whose it is: *«WHEN you take damage»* + *«canon's suggested fix · HEARTH-03»*, or the DM's own words
++ *«your DM's ruling · HEARTH-03»*. Set it back to *Not asked yet* and the row returns to admitting
+the gap. Nothing else on the row changes, ever.
+
+**The narrowing.** 8b was scoped as *four* errata that ask the app to act; it ships **one**. The
+reasoning is written out in `04-slices.md` under 8b rather than only here — briefly: HEARTH-04 and
+HEARTH-05 need the combat **write path**, which slice 10 owns, and building them now means building
+them twice; HEARTH-08 is Prep/Grimoire work and turned out bigger than canon's erratum (finding AZ);
+HEARTH-07 reaches no turn option at all (finding AT), so there is no point of use to reach. The one
+that shipped is the one Marcus actually asked for — *"my reactions … and **when i can use it**"*.
+
+**Files.** New: `docs/plans/table-truth/prove-slice8b.mjs`, `_probe-trigger.mjs`, `_probe-wb.mjs`
+(kept, per the slice-7 precedent). Changed: `src/lib/turn/trigger.ts` (+`canonSuggestedTrigger`,
+`ruledTrigger`, `TriggerSource`, `RuledTrigger`), `reactions.ts` (`whenSource`/`whenRuling` on the
+row), `ReactionRow.tsx` (the attribution line, and finding AY), `ReactionsBand.tsx` +
+`CombatHelper.tsx` (rulings threaded to the band). Tests: `trigger.test.ts` **32**,
+`reactions.test.ts` **30**, `ReactionsBand.test.tsx` **24**.
+Gate: `tsc --noEmit` **clean** · **797/797** unit tests across **34 files** (758 before) ·
+`prove-slice8b.mjs` **PASS** · `prove-slice8.mjs` **still PASS**, no regression.
+
+**Measured on the glass** (`_shots-slice8b/`, iPhone-class viewport, `_report.json`, **seeded at
+level 7**):
+
+| claim | measurement |
+| --- | --- |
+| unstated says where the answer goes | `«when not stated — record one in Rules flags»`, attribution `null` |
+| canon's fix arrives verbatim | canon clause extracted from `oath-of-the-hearth.json` at runtime = `"when you take damage"`; painted `«WHEN you take damage»` |
+| the source is always named | `«canon's suggested fix · HEARTH-03»` / `«your DM's ruling · HEARTH-03»`; **never** painted without a ruling behind it |
+| the DM outranks canon | DM path paints `«WHEN you or an ally within 30 feet takes Fire damage»` — his words, not canon's |
+| **no number moves** | numeric tokens on the whole Play tab: **125 before, 125 after, 0 drifted** |
+| it survives a reload | stored `{"HEARTH-03":{"status":"canon","decidedAt":"…"}}`; after reload the row reads identically |
+| it is reversible | set back to *Not asked yet* → row is character-identical to the very first capture, **0** numbers moved |
+| nothing is clamped | **26** elements swept: 0 line-clamps, 0 clips, 0 ellipses |
+| reading still changes nothing | keys written by **taps**: `codex-errata-nix-fixture`, `codex-ui-nix-fixture` only. Stored values that moved: **none**. Console errors: **0** |
+| level 7 is real, not asserted | the row paints **11 temp HP** — the level-7 value. The unit fixture (level 8) gives 12. The scaling is computed, not read |
+
+### Finding AY — the inverse of finding Q: a margin is not a space
+
+The browser prover reported `WHEN: —` on every case. The prover was **right and the app was wrong**.
+The markup was `<span …>WHEN</span>you take damage`: `mr-1.5` puts a gap on the *screen* and nothing
+in the *text*. The DOM read `«WHENyou take damage»` — which is what a screen reader says aloud, and
+what Marcus gets if he long-presses and copies the line at a table. **It had been wrong since slice
+6** and the unit suite could not see it, because its tag-stripper substituted a **space** for each
+removed tag and so *inserted the separator the DOM was missing*.
+
+That is finding Q from the other end. Q: a proof that reads `textContent` is a proof of the model,
+not of the paint — CSS-clipped text still reports in full. AY: a stripper that is *more generous*
+than the DOM hides a real defect. **A test harness must be neither blinder nor kinder than a
+browser.** Three instances found and fixed (`WHEN…`, `Flaming Cloak…Reaction`, `Hearthbrand…Reaction`),
+all `flex`/`gap` boundaries. The band's test now has a `blocks()` helper that strips tags to
+**nothing**, splits on block-level elements only, and fails on `wordWord` glue *within* a block —
+so the general class is pinned, not just the three. (First version of that check flagged four
+false positives across genuine block boundaries; scoping it to within-a-block removed all four and
+kept both real ones.)
+
+One layout detail worth recording: the space could **not** go between the two spans. A bare text
+node in a `justify-between` flex row becomes a **third flex item** and gets pushed into the middle
+of the row. It goes *inside* the name span, where trailing whitespace collapses visually and nothing
+moves.
+
+### Finding AZ — the app's prepared-spell bug is bigger than canon's erratum
+
+HEARTH-08 asks the app to de-duplicate Warding Bond against the prepared count. Measuring before
+deferring it found something larger. Canon's `spells.json` carries **both** `alwaysPrepared` and
+`countsAgainstPreparedLimit` on all 71 spells; 12 are always-prepared, 3 of those also
+`onPaladinList` (Divine Smite, Find Steed, Warding Bond). The app's own `Spell` interface
+(`src/lib/character.ts:106-126`) carries **neither flag**. `CharacterSetup.tsx:369` reads
+`alwaysPrepared` **once**, at import, to set `prepared: true` — then discards it. The count at
+`LoadoutPanel.tsx:162-165` and `SessionReadyCard.tsx:67-68` is
+`spells.filter(s => s.prepared && s.level > 0).length`, with no de-duplication at all.
+
+On Nix's sheet: `maxPreparedSpells: 8`, 6 charged — and **3 of the 6** (Divine Smite, Warding Bond,
+Fireball) are `alwaysPrepared` in canon and should cost him nothing. **Verdict: the bug is PRESENT
+and it is larger than the erratum.** Canon flags one spell as a design inefficiency; the app never
+reads `countsAgainstPreparedLimit` for *any* spell. That is Prep/Grimoire-tab work, deliberately not
+done here, and it is the thing most worth Marcus re-steering onto.
+
+### Mutation-tested, because green is not evidence
+
+Two deliberate breakages, to check the tests can actually fail:
+
+1. **Drop the attribution line** from `ReactionRow.tsx` → **2 tests fail**. So "never paint a clause
+   without saying whose it is" is really guarded.
+2. **Make a recorded ruling suppress the `⚑ Canon lists 4 errata` flag** — a plausible-looking
+   "tidy-up" that would be the app quietly deciding a ruling settles the record → **3 tests fail**.
+   So the *computes* half bites too.
+
+Both reverted from backups. A suite that cannot fail is a suite that tests nothing.
+
+### Chosen by SHAPE, never by id
+
+An erratum contributes a trigger only when its operative text *reads* as one (`/^(?:when|if)\b/i`).
+Measured across the whole corpus by `_probe-trigger.mjs`: of every quoted span in the twelve records,
+exactly **one** is trigger-shaped. So `if (id === 'HEARTH-03')` would have worked today and been
+wrong the day canon grows a thirteenth record — and a test asserts the other eleven contribute
+nothing, reading their ids **from `OATH.errata`** rather than from a hand-typed list that would go
+stale in the same way.
+
+### Nix is level 7 — recorded, and the three numbers resolved
+
+Marcus confirmed it. `lookup.ts:125-130` noted "three numbers, one of them wrong" without saying
+which; now it does. Canon's frozen `castableAtLevel7` booleans happen to be right **today** (and are
+still not read — he levels, they do not). The fixture's `level: 8` is a deliberate branch-coverage
+artifact and its header now says so in the file, with a warning not to "fix" it to 7. The stored
+sheet's **level-9 spell slots are the one that is wrong** — surfaced in slice 2, his to decide, never
+auto-applied. The six live errata are identical at 7 and 8 (Aura of Solace lands exactly on 7), which
+is exactly why the wrong number survived this long with nothing going red.
+
+### Finding AR is still open, and 8b still did not add to it
+
+`CombatHelper`'s `saveCombatState` and `TurnSummary.tsx:127-128`'s `saveActionNotes` still write on
+every Play-tab load — confirmed again in this prover's load log
+(`codex-action-notes-nix-fixture, codex-combat-nix-fixture`, twice: once per load, once per reload).
+8b writes on a **tap** only. Slice 10 owns the fix.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { Character } from '../../lib/character'
 import type { ComposedTurn, TurnOption } from '../../lib/turn/types'
 import { reactionRows } from '../../lib/turn/reactions'
+import type { ErratumRulings } from '../../lib/errata-rulings'
 import { ReactionRow } from './ReactionRow'
 
 /* ============================================================================
@@ -44,10 +45,21 @@ export interface ReactionsBandProps {
    *  renders exactly as it did in slice 6 for any caller with nowhere to send
    *  the tap. */
   onOpen?: (option: TurnOption) => void
+  /** What Marcus has settled with his DM — Table Truth slice 8b. Passed in for
+   *  the same reason `turn` is: the band stays renderable without a DOM. Omitted
+   *  → nothing recorded, which is the slice 6 band exactly. */
+  rulings?: ErratumRulings
 }
 
-export function ReactionsBand({ turn, character, isOpen, onToggle, onOpen }: ReactionsBandProps) {
-  const rows = reactionRows(turn, character)
+export function ReactionsBand({
+  turn,
+  character,
+  isOpen,
+  onToggle,
+  onOpen,
+  rulings = {},
+}: ReactionsBandProps) {
+  const rows = reactionRows(turn, character, rulings)
 
   return (
     <section className="glass-card p-3" aria-label="Your reactions">

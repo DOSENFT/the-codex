@@ -125,9 +125,14 @@ export function featureByName(name: string): CanonFeature | undefined {
  *  Recomputed from `unlocksAtPaladinLevel` — the rule — every time. Canon also
  *  ships `castableAtLevel7` and `lockedForMarcus`, which are that rule already
  *  answered for a level-7 character. Reading those would bake a level into the
- *  app; Nix is level 7 today, the test fixtures say 8, and his stored sheet is
- *  carrying level-9 spell slots. Three numbers, one of them wrong, and none of
- *  them worth trusting a frozen boolean about. */
+ *  app. Three numbers were in play — the sheet, the fixture, and canon's frozen
+ *  booleans — and slice 8b settled which is which. **Marcus confirmed 2026-08-27
+ *  that Nix is level 7**, so canon's booleans happen to be right TODAY; the
+ *  fixture's `level: 8` is a deliberate branch-coverage artifact, not a claim
+ *  about his character; and the stored sheet's level-9 spell slots are the one
+ *  that is simply wrong (surfaced in slice 2, his to decide, never auto-applied).
+ *  "Right today" is still not worth trusting a frozen boolean about — he levels,
+ *  and the boolean does not. So: compute. */
 export function isUnlocked(spell: CanonSpell, characterLevel: number): boolean {
   return spell.unlocksAtPaladinLevel <= characterLevel
 }

@@ -7,6 +7,17 @@
 // in dnd-data.ts:182-206 — not invented demo data.  Homebrew is the main case
 // here, not an edge case, so the fixture carries it from the very first test.
 //
+// THE `level: 8` BELOW IS NOT A CLAIM ABOUT MARCUS'S CHARACTER.  **Nix is level
+// 7** (confirmed by Marcus 2026-08-27, slice 8b).  The fixture sits one level
+// above him on purpose, because level 8 is the lowest level that reaches every
+// branch listed below — notably "written down but not yet castable" (Fireball
+// unlocks at 9) alongside a full 2nd-tier slot table.  If you change this number
+// to 7 to "make it match", several branches below stop being exercised and the
+// characterization suite silently gets weaker.  Change the number only together
+// with the branches, and never because it looked wrong next to his sheet.
+// Anything that must be true of MARCUS at the table is proved in the browser
+// provers (`docs/plans/table-truth/prove-slice*.mjs`), which seed level 7.
+//
 // It is typed as `Character`, which means `tsc` checks it against the real
 // interface.  That is deliberate: the Slice 1 screenshot run died because a
 // hand-rolled seed used `currentHP` instead of `hitPoints.current`, and an

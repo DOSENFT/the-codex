@@ -29,9 +29,10 @@ import type { Character } from '../character'
 import { featureByName, spellByName, errataForFeature } from '../canon/lookup'
 import { featureFacts, factsLine } from '../canon/feature'
 import { fitRowDetail, featureContextOf } from './overlay'
-import { triggerFor, type TriggerSource } from './trigger'
+import { triggerFor, ruledTrigger, type RuledTrigger, type TriggerSource } from './trigger'
 import type { ComposedTurn, TurnOption } from './types'
 import type { Provenance } from '../canon/types'
+import type { ErratumRulings } from '../errata-rulings'
 
 export interface ReactionRow {
   id: string
@@ -44,6 +45,11 @@ export interface ReactionRow {
    *  required to show that rather than hide it; see `trigger.ts`. */
   when: string | null
   whenSource: TriggerSource
+  /** Present only when `whenSource === 'ruled'` — which erratum Marcus answered
+   *  and whose words the clause is. The row must print it: a trigger that
+   *  appeared with no attribution is an invented rule, which is the thing slice
+   *  6 refused to ship. Slice 8b. */
+  whenRuling?: RuledTrigger
   /** What it does, already fitted to the row budget. Never ellipsised. */
   body: string
   provenance: Provenance
@@ -77,7 +83,13 @@ function allOptions(turn: ComposedTurn): TurnOption[] {
   return out
 }
 
-export function reactionRows(turn: ComposedTurn, character: Character): ReactionRow[] {
+export function reactionRows(
+  turn: ComposedTurn,
+  character: Character,
+  /** What Marcus has settled with his DM. Defaulting to "nothing recorded"
+   *  keeps every slice 6 and 7 caller producing the slice 6 row exactly. */
+  rulings: ErratumRulings = {}
+): ReactionRow[] {
   const ctx = featureContextOf(character)
 
   return allOptions(turn)
@@ -85,7 +97,11 @@ export function reactionRows(turn: ComposedTurn, character: Character): Reaction
     .map(option => {
       const feature = featureByName(option.name)
       const spell = spellByName(option.name)
-      const reading = triggerFor(option, { feature, spell })
+      /* The errata are fetched once and used twice — for the ruled trigger and
+         for the flag count — so the row cannot end up counting a set of errata
+         it did not read the rulings of. */
+      const errata = feature ? errataForFeature(feature.name) : []
+      const reading = triggerFor(option, { feature, spell }, ruledTrigger(errata, rulings))
 
       /* Canon's structured mechanics beat the sheet's summary line when they
        * resolve to anything at all — that is the whole point of reaching the
@@ -102,10 +118,11 @@ export function reactionRows(turn: ComposedTurn, character: Character): Reaction
         blockedReason: option.blockedReason,
         when: reading.when,
         whenSource: reading.source,
+        whenRuling: reading.ruling,
         body: fitRowDetail(body),
         provenance: feature ? 'canon' : (option.provenance ?? 'sheet'),
         homebrew: option.homebrew === true,
-        errataIds: feature ? errataForFeature(feature.name).map(e => e.id) : [],
+        errataIds: errata.map(e => e.id),
         option,
       }
     })

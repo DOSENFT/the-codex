@@ -777,9 +777,16 @@ function YourTurnList({ onOpen }: { onOpen?: (option: TurnOption) => void }) {
 function ReactionsBandLive({
   character,
   onOpen,
+  rulings,
 }: {
   character: Character
   onOpen?: (option: TurnOption) => void
+  /* Slice 8b. Held by `CombatHelperInner` because THREE surfaces now read it —
+     the errata band, the detail sheet, and this row's WHEN line — and a ruling
+     recorded in one must be the ruling the other two report in the same paint.
+     A second `loadRulings` here would be a second source of truth for the same
+     answer, and they would disagree the moment one of them re-rendered. */
+  rulings: ErratumRulings
 }) {
   const { turn } = useCombat()
   const section = useCollapsible('combat-reactions', character.id, true)
@@ -790,6 +797,7 @@ function ReactionsBandLive({
       isOpen={section.isOpen}
       onToggle={section.toggle}
       onOpen={onOpen}
+      rulings={rulings}
     />
   )
 }
@@ -1215,7 +1223,7 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
              and a player scanning off-turn should hit this second, not tenth.
              Read-only, like everything else on this tab so far: it derives from
              the same composed turn and writes only its own collapse flag. */}
-      <ReactionsBandLive character={character} onOpen={setOpenOption} />
+      <ReactionsBandLive character={character} onOpen={setOpenOption} rulings={rulings} />
 
       {/* ── Table Truth slice 9 — the contention band ──
              The half of the turn that had no row at all. `YourTurnList` paints
