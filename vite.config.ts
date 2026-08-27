@@ -88,12 +88,24 @@ export default defineConfig(({ command }) => ({
     __CODEX_PROD__: JSON.stringify(command === 'build'),
   },
   build: {
+    /* NOTE: chunkSizeWarningLimit is deliberately left at Vite's default. It was
+       briefly raised to 700 in Table Truth slice 1 and reverted the same hour —
+       the two chunks that trip it (index and DiceStage) already tripped it
+       before canon existed, so raising the limit would have hidden a
+       pre-existing signal while pretending to add a new one. The real budget is
+       an assertion with numbers in it: `npm run budget`. */
     rollupOptions: {
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
           motion: ['motion'],
           icons: ['lucide-react'],
+          /* Canon is its own chunk so the rules corpus is separately visible in
+             the build output and separately content-hashed — replace the canon
+             package and only this hash moves. Deliberately NOT lazy: the service
+             worker precaches all of dist/assets either way, so a lazy split
+             would defer parse and save zero bytes over the wire. */
+          canon: ['./src/canon/index.ts'],
         },
       },
     },

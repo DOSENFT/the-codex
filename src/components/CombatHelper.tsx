@@ -57,6 +57,7 @@ import { QuickLookup } from './combat/QuickLookup'
 import { CanonMatchReport } from './combat/CanonMatchReport'
 import { VitalsBand } from './combat/VitalsBand'
 import { TurnOptionRow } from './combat/TurnOptionRow'
+import { ReactionsBand } from './combat/ReactionsBand'
 import { CombatProvider, useCombat } from './turn/CombatProvider'
 import { useCollapsible } from '../hooks/useCollapsible'
 import { type CombatLog, type DamageEntry, createCombatLog, logDamage as logDamageEntry, endCombatLog, saveDamageLogs, loadDamageLogs } from '../lib/damage-log'
@@ -932,7 +933,18 @@ function CollapsibleCombatSection({
  */
 function YourTurnList() {
   const { turn } = useCombat()
-  const elsewhere = turn.rest.length + turn.mutex.reduce((n, g) => n + g.faces.length, 0)
+
+  /* REACTIONS ARE NOT LISTED HERE ANY MORE — slice 6.
+   *
+   * Off your turn `rank.ts` scores a reaction +40 and both of Nix's land at the
+   * top of `ranked`. They are now also the whole content of the reactions band
+   * directly below, and painting the same two rows twice on one screen is worse
+   * than painting them nowhere: it makes a player count two Reactions. The band
+   * is the one place they live; this list is everything that costs a turn. */
+  const ranked = turn.ranked.filter(option => option.cost.slot !== 'reaction')
+  const elsewhere =
+    turn.rest.filter(o => o.cost.slot !== 'reaction').length +
+    turn.mutex.reduce((n, g) => n + g.faces.filter(f => f.cost.slot !== 'reaction').length, 0)
 
   /* A `section` with a stable label rather than a GlassCard, and a real `ul`
      rather than a stack of divs, because the browser prover has to be able to
@@ -949,21 +961,25 @@ function YourTurnList() {
               "Your turn" says exactly the wrong thing. */}
           {turn.yourTurn ? 'Your turn' : 'The moment'}
         </h3>
-        <span className="font-mono text-[11px] text-forge-2">{turn.ranked.length} ready</span>
+        <span className="font-mono text-[11px] text-forge-2">{ranked.length} ready</span>
       </div>
 
-      {turn.ranked.length > 0 ? (
+      {ranked.length > 0 ? (
         <ul className="mt-2 flex flex-col gap-1.5">
-          {turn.ranked.map(option => (
+          {ranked.map(option => (
             <li key={option.id}>
               <TurnOptionRow option={option} />
             </li>
           ))}
         </ul>
       ) : (
+        /* Off-turn this is the usual state, and it is not a failure — it is the
+           rule. Saying so, and pointing at the band that DOES have something in
+           it, is the difference between an empty list and a wrong one. */
         <p className="mt-2 text-xs leading-snug text-forge-1">
-          Nothing here is both affordable and yours to spend this moment. Everything you own is
-          still in the sections below.
+          {turn.yourTurn
+            ? 'Nothing here is both affordable and yours to spend this moment. Everything you own is still in the sections below.'
+            : 'It is not your turn — a Reaction is the only thing you can spend. Your reactions are listed just below.'}
         </p>
       )}
 
@@ -974,6 +990,29 @@ function YourTurnList() {
         </p>
       )}
     </section>
+  )
+}
+
+/* The context read for the reactions band. Slice 6.
+ *
+ * `ReactionsBand` itself takes plain props — no `useCombat`, no `useCollapsible`
+ * — so it renders identically under `renderToStaticMarkup` and can be tested
+ * without a DOM. This eight-line wrapper is where the hooks live instead.
+ *
+ * The collapse key joins the map every other section on this tab already uses
+ * (`codex-ui-${characterId}`). No new storage key: Marcus asked for fewer things
+ * on screen, not for more places a preference can go missing. Default OPEN,
+ * because this band is the thing he told us was absent. */
+function ReactionsBandLive({ character }: { character: Character }) {
+  const { turn } = useCombat()
+  const section = useCollapsible('combat-reactions', character.id, true)
+  return (
+    <ReactionsBand
+      turn={turn}
+      character={character}
+      isOpen={section.isOpen}
+      onToggle={section.toggle}
+    />
   )
 }
 
@@ -1338,6 +1377,15 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
              where surfaces are retired, and only after what each one uniquely
              does has been pinned as a test. */}
       <YourTurnList />
+
+      {/* ── Table Truth slice 6 — the reactions band ──
+             Marcus: the combat tab doesn't show "my reactions (like hearth fire
+             manifest and what it does or when i can use it)". Directly below
+             the turn list because the two answer opposite halves of the round,
+             and a player scanning off-turn should hit this second, not tenth.
+             Read-only, like everything else on this tab so far: it derives from
+             the same composed turn and writes only its own collapse flag. */}
+      <ReactionsBandLive character={character} />
 
       {/* ── Always visible: TurnSummary (when in combat) ── */}
       {combatState.inCombat && (

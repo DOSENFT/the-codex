@@ -136,10 +136,50 @@ export interface CanonErratum {
   /** e.g. "Smoldering Smite (level 15)" — carries the level in the string. */
   feature: string
   problem: string
-  cause: string
   recommendedFix: string
-  narrowerAlternative: string
   appAction: string
+
+  /** OPTIONAL, and the count is the point: **1 of the 12 errata carries these**
+   *  — HEARTH-01 alone. They were declared required here in slice 1 and never
+   *  checked, because `index.ts` asserts the corpus rather than validating it,
+   *  so TypeScript had nothing to disagree with.
+   *
+   *  This matters beyond tidiness. Gate 1 decision 3 promises the player THREE
+   *  readings of every erratum — as written, narrower, recommended — and eleven
+   *  of the twelve have no narrower reading to show. Slice 8 must render the
+   *  readings canon actually supplies and say so, not paint `undefined` into a
+   *  band that claims to offer a choice. Measured 2026-08-26, slice 6. */
+  cause?: string
+  narrowerAlternative?: string
+
+  /** Free-form fields a minority of records carry: `note` (1), `comparison` (1),
+   *  `assessment` (4), `mitigatingFactor` (1). Enumerated rather than dropped,
+   *  because they are canon's own reasoning and the detail sheet shows it. */
+  note?: string
+  comparison?: string
+  assessment?: string
+  mitigatingFactor?: string
+}
+
+/** One entry from `Channel Divinity`'s `options[]` list, parsed.
+ *
+ *  Channel Divinity is a MENU, not a paragraph: canon stores it as
+ *  `["Divine Sense (class)", "Hearthfire Manifest - flaming cloak (Oath of the
+ *  Hearth)"]`. A sheet names what the player picked ("Flaming Cloak"); canon
+ *  names the feature that grants it ("Hearthfire Manifest"). Slice 1's Finding D
+ *  is exactly that mismatch, and this shape is how it is closed. */
+export interface CanonChannelDivinityOption {
+  /** The name canon files the full text under — always resolvable in the
+   *  feature index, asserted by `lookup.test.ts`. */
+  parent: string
+  /** The name a SHEET is likely to use, when canon gave one. Null when the
+   *  option is filed under its own name and needs no alias. */
+  alias: string | null
+  /** Canon's own parenthetical, verbatim: "class", "Oath of the Hearth". */
+  source: string
+  /** The option string exactly as canon wrote it, kept so a parse that goes
+   *  wrong is diagnosable against the original rather than against a guess. */
+  raw: string
 }
 
 export interface CanonCombo {

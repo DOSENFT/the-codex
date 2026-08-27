@@ -41,6 +41,7 @@ import type { ActionEconomyType } from '../combat-state'
 import { poolsOf, type ResourceUnit } from '../rules-2024/resources'
 import { normalizeName, spellByName, featureByName } from '../canon/lookup'
 import { mechanicsLine, ROW_BUDGET_CHARS, type CasterContext } from '../canon/format'
+import type { FeatureContext } from '../canon/feature'
 import type { CanonFeature, CanonSpell, Provenance } from '../canon/types'
 import type { ActionOption } from './options'
 
@@ -98,6 +99,46 @@ export function casterContextOf(character: Character): CasterContext {
     // CHARACTER level, which is what 2024 cantrip scaling keys off.
     characterLevel: character.level,
     abilityMod: spellcastingModifier(character),
+  }
+}
+
+/* The full ability names, because canon's formulas use them: "Paladin level
+ * plus your spellcasting ability modifier", "Charisma modifier". The sheet
+ * stores abbreviations. This is the one place the two vocabularies meet. */
+const ABILITY_FULL_NAME: Record<AbilityAbbrev, string> = {
+  STR: 'strength',
+  DEX: 'dexterity',
+  CON: 'constitution',
+  INT: 'intelligence',
+  WIS: 'wisdom',
+  CHA: 'charisma',
+}
+
+/** The character's numbers in the shape canon's feature formulas ask for.
+ *
+ *  Built here rather than in lib/canon/ for the same reason `casterContextOf`
+ *  is: canon knows no characters, and the moment it did there would be two
+ *  answers to "what is his Charisma modifier" instead of one. */
+export function featureContextOf(character: Character): FeatureContext {
+  const abilityMod: Record<string, number> = {}
+  for (const key of ABILITY_KEYS) {
+    const score = character.abilityScores?.[key]
+    if (typeof score === 'number') abilityMod[ABILITY_FULL_NAME[key]] = Math.floor((score - 10) / 2)
+  }
+
+  /* The spellcasting ability is written last and wins. `spellcastingModifier`
+   * prefers the same score this loop just read, so on a filled-in sheet these
+   * agree; on a sheet whose ability scores were never entered it falls back to
+   * arithmetic on the printed attack bonus, and the cloak still states a number
+   * instead of going quiet. */
+  const spellcastingAbility = (character.spellcastingAbility ?? '').toLowerCase()
+  if (spellcastingAbility) abilityMod[spellcastingAbility] = spellcastingModifier(character)
+
+  return {
+    className: character.class,
+    characterLevel: character.level,
+    abilityMod,
+    spellcastingAbility,
   }
 }
 

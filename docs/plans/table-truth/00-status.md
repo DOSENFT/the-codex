@@ -15,7 +15,7 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 3 — Gemini self-healing model resolution — **DONE 2026-08-26**, proved against the running app on four cases, one of which replays Marcus's own 404 (see §Slice 3 below)
 - [x] 4 — Active Conditions folds · TurnDeck minimises (V-6 scoped) — **DONE 2026-08-26**, proved against the running app on eight measured states; the prover also caught a live regression in the chip labels and one defect older than this phase (see §Slice 4 below)
 - [x] 5 — CombatProvider mounted READ-ONLY + one ranked "Your Turn" list — **DONE 2026-08-26**, storage proved byte-identical across a real reload, every row measured at exactly two lines; the prover caught the two-line promise being broken by rows nothing had ever budgeted (see §Slice 5 below)
-- [ ] 6 — "Your Reactions" band
+- [x] 6 — "Your Reactions" band — **DONE 2026-08-27**, proved against the running app on four cases; the prover caught Gate 3 specifying a filter that is empty on your own turn, a line-measurement technique that was wrong, and the WHEN label saying its own word twice (see §Slice 6 below)
 - [ ] 7 — the option detail sheet (this is where the "…" dies)
 - [ ] 8 — errata flags, all 12, three readings, DM wording
 - [ ] 9 — retire the competing menus (capabilities pinned as tests FIRST)
@@ -595,6 +595,140 @@ The list paints at **y=526 on an 844px phone** — below the fold, under the vit
 card. The Gate 1 mockup put all six options above the fold; it gets there in slice 9, when the
 competing menus retire and the vertical they occupy comes back. Until then this is the honest
 number and it is worth him knowing before he looks at the screenshot.
+
+## Slice 6 — closed 2026-08-27. What it built, and what it found.
+
+Marcus's ask, verbatim: the combat tab doesn't show *"my reactions (like hearth fire manifest and
+what it does **or when i can use it**)"*. Two questions in one sentence, so the row answers two
+questions, and **"when" is painted above "what"** — off your turn a reaction is the whole of what
+you own, and a row that leads with damage makes you read the damage to find out you can't use it.
+
+**Shipped**
+
+- `src/lib/canon/lookup.ts` — an **alias layer** for `featureByName`. Canon files Flaming Cloak as
+  a Channel Divinity *option* of Hearthfire Manifest; the sheet calls it by the option's name, so
+  the lookup used to miss and the row fell back to the sheet's words. **Finding D closed.** Two
+  invariants are enforced by test: an alias may never shadow a real name, and *a miss is still a
+  miss* (`Sacred Weapon`, a 2014 leftover on the sheet, still misses and still keeps its own text).
+- `src/lib/canon/feature.ts` — **new.** Turns a feature's `mechanics` into displayable facts by
+  classifying **the shape of canon's value, never the key's name**: `computed` (a formula it can
+  resolve), `dice`, `duration`, `economy`, `measure`, `prose`. `resolveFormula` is all-or-nothing —
+  if any term is unprovable it returns `null` rather than printing a half-computed number.
+- `src/lib/turn/trigger.ts` — **new.** Finds a trigger in three places, in order: the sheet's own
+  declared `When …` clause, a *structured* canon field, or nowhere. Plus `splitTriggerLead`.
+- `src/lib/turn/reactions.ts` — **new.** `reactionRows(turn, character)`.
+- `src/components/combat/ReactionRow.tsx`, `ReactionsBand.tsx` — **new**, both pure-prop so they
+  render in node exactly as in Chrome. The hooks live in `ReactionsBandLive` in `CombatHelper`.
+- `src/components/CombatHelper.tsx` — the band mounts under `YourTurnList`, and the turn list now
+  **filters reactions out** so nothing is painted twice.
+- Tests: `feature.test.ts` (21), `trigger.test.ts` (17), `reactions.test.ts` (17),
+  `ReactionsBand.test.tsx` (13), +10 in `lookup.test.ts`.
+- `docs/plans/table-truth/prove-slice6.mjs` — **new**, four cases in a real browser.
+
+**Measured**
+
+```
+npx tsc --noEmit        EXIT=0
+npx vitest run          25 files · 597/597   (was 519/21; +78)
+npm run build           8.84s
+bundle                  canon 53.3/70 KB · JS 645.0/700 KB · CSS 25.3/40 KB   (JS +2.1)
+prove-slice6.mjs        PASS · 0 console errors
+
+«Your reactions» · 2 rows · y=872 · 228px tall
+   76px  Opportunity Attack — Hearthbrand   Reaction
+         WHEN  a creature you can see leaves your reach
+               +7 to hit · 1d8+4 Slashing · 5 ft · Magical
+   95px  Flaming Cloak                      Reaction · 1/2 uses
+         WHEN  not stated — agree a trigger with your DM
+               12 temp HP · 1d10 Fire retaliation
+               ⚑ Canon lists 4 errata on this feature
+
+no double paint   on-turn  «Your turn»: [Hearthbrand | Javelin | Sacred Flame | Hearthfire Manifest]
+                  off-turn «The moment»: []      band: [Opportunity Attack | Flaming Cloak]
+                  names in BOTH lists: [none]
+collapse          aria-expanded true→false · rows 2→0 · header still reads «Your reactions 2»
+                  keys written by the tap: [codex-ui-nix-fixture]
+storage           boot+render wrote: [codex-combat-nix-fixture] · guarded keys moved: [none]
+```
+
+**The cloak's line was wrong before, and it is right now.** It read
+`1d10 Fire · recharges on short rest` — the retaliation only, which reads as though the cloak
+*deals* 1d10 when you use it, with the temporary HP that are the entire point of taking it absent.
+It now reads `12 temp HP · 1d10 Fire retaliation`, **computed** from Paladin 8 + CHA +4 — never
+read from canon's frozen `atLevel7.tempHPWithCha18: 11`, which is a different character's number.
+At level 9 the same code says 13; at level 20 with CHA 20 it says 25.
+
+### The risk this slice retired — Gate 3 had a bug, and it would have shipped blank
+
+`03-program-design.md:286` specified the band as `turn.ranked.filter(o => o.cost.slot ===
+'reaction')`. Measured, **that array is empty on your own turn** — `rank.ts` scores `reaction: -40`
+on your turn and `reactionNow: +40` off it, deliberately. The band would have been empty for half
+of every combat. `reactionRows()` reads `ranked`, `rest`, and every mutex face, dedupes by id, and
+filters on cost. `reactions.test.ts` pins the emptiness of `ranked` as its **stated premise**, so a
+future change to `rank.ts` announces itself instead of passing silently. Gate 3 has been corrected
+in place with the backtrack logged there.
+
+### Finding W — the app will not invent a trigger, and says so on screen
+
+HEARTH-03 (HIGH) says the cloak is written *"As a Reaction"* with **no trigger at all**, which 2024
+requires. Canon's own `appAction` suggests defaulting to *"when you take damage."* That is a
+suggestion **to a DM**, not a rule, and an app that quietly adopts it puts words in the book's
+mouth — Marcus would arrive at a table believing a rule nobody wrote. The row says
+`not stated — agree a trigger with your DM` in ember, and `trigger.ts` explicitly refuses to scrape
+`rawText`, whose *"When you are hit by a melee attack…"* is the trigger for the **retaliation**, not
+for the cloak. **This deviates from mockup 01a**, which showed the default adopted behind a flag.
+Slice 8 records Marcus's chosen trigger and this line then reads it.
+
+### Finding X — `Range.getClientRects().length` over-counts wrapped lines
+
+The first browser run failed with *"wrapped its WHEN to 3 lines"* against a line that was visibly
+one. `getClientRects()` returns one rect per inline **fragment**, so a `<p>` holding a `<span>`
+label plus text counts ≥2 before any wrapping happens. The correct measure is the number of
+**distinct rounded `top` values**. `prove-slice6.mjs` now does that. This corrects the technique
+used in `prove-slice5.mjs` — harmless there, because those rows are single text nodes, but the
+method was wrong and slice 7's richer rows would have tripped over it.
+
+### Finding Y — the WHEN chip was saying the word twice
+
+The same run measured `whenWhen a creature you can see leaves your reach`: a fixed "WHEN" label
+bolted in front of a clause that already began "When". `splitTriggerLead` makes the label the
+clause's **own** lead word and gives the clause the remainder — no words added, none dropped. It
+uppercases `WHEN` or `IF` **as written**: silently relabelling an "if" as a "when" would be the app
+editing a rule to fit its own layout, and they are different conditions.
+
+### Finding Z — the sheet gives Marcus twice the Channel Divinity he owns
+
+Canon: `cloakCost: "1 Channel Divinity use"`. The sheet gives Flaming Cloak its **own** 2-use pool
+(`flaming-cloak`) *alongside* `channel-divinity` — 4 spendable uses of a 2-use resource. Per the
+`vitals.ts` law this is **reported, never corrected**; the band shows what the sheet says (`1/2
+uses`). Worth Marcus's eye because it is a real table advantage he does not have.
+
+### Finding AA — slice 8 must be re-scoped before it starts
+
+Only **1 of the 12** `HEARTH-##` errata carries `cause` / `narrowerAlternative`. Slice 8's promise
+of "three readings" is not something canon can supply for eleven of them; the slice needs re-cutting
+against what is actually in the file.
+
+### Deliberate omissions
+
+- **The errata flag names a count, not a door.** No "tap for more" — the detail sheet is slice 7,
+  and a control that opens nothing is the half-built feature the guardrails forbid.
+- **No chevron on the row** for the same reason. `ReactionRow` gains `onOpen` in slice 7.
+- **The deck's Reaction chip is not yet linked to the band.** It is already a *spend* control;
+  making it the band's filter is slice 9's job, with the deck's other chips.
+
+### Placement — the same honest number as slice 5
+
+The band paints at **y=872 on an 844px phone**: below the fold, under the vitals band, the HP card
+and the turn list (itself at y=526). Nothing above it has retired yet. Slice 9 is where the
+competing menus go and the vertical comes back. Said plainly so Marcus reads the screenshot knowing
+he had to scroll to it.
+
+### One thing checked against Marcus's own paste
+
+He pasted his Oath of the Hearth text with this slice. It **corroborates canon exactly** — the
+Oath spell table matches level for level, and the Hearthfire Manifest paragraph differs by one
+phrase only ("Temporary HP" vs "Temporary Hit Points"). No correction needed anywhere.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

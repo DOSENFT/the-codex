@@ -26,6 +26,7 @@ import type {
   CanonOath,
   CanonFeature,
   CanonClassFeatureDetail,
+  CanonChannelDivinityOption,
 } from '../lib/canon/types'
 
 /* The casts are the seam between "untyped JSON on disk" and "typed corpus in
@@ -74,6 +75,49 @@ export const CLASS_FEATURES: readonly CanonFeature[] = Object.entries(
   // would look like coverage and read like nothing.
   rawText: detail.text ?? (detail.options ?? []).join('; '),
 }))
+/* ── Channel Divinity's menu, parsed ────────────────────────────────────────
+ *
+ * Slice 1's Finding D, closed. Canon files the cloak's full text — and four of
+ * the twelve errata — under "Hearthfire Manifest"; Nix's sheet calls it "Flaming
+ * Cloak". The bridge between the two names is sitting in plain sight inside
+ * Channel Divinity's `options[]`, and until now nothing read it, so the app
+ * showed Marcus his own thin wording for the exact feature he asked about.
+ *
+ * The grammar, read off the two records rather than assumed:
+ *
+ *     "Divine Sense (class)"
+ *     "Hearthfire Manifest - flaming cloak (Oath of the Hearth)"
+ *      └── parent ───────┘   └── alias ──┘  └──── source ─────┘
+ *
+ * Parsed by SHAPE — a trailing parenthetical, then an optional dash — and never
+ * by recognising either name. An option that does not fit the shape keeps its
+ * whole string as the parent and contributes no alias: it degrades to what the
+ * app already did, which is the only safe direction for a parser to fail in. */
+const CD_TRAILING_SOURCE = /^(.*?)\s*\(([^()]*)\)\s*$/
+const CD_ALIAS_DASH = /\s+[-–—]\s+/
+
+function parseChannelDivinityOption(raw: string): CanonChannelDivinityOption {
+  const sourced = CD_TRAILING_SOURCE.exec(raw)
+  const head = (sourced ? sourced[1] : raw).trim()
+  const source = (sourced ? sourced[2] : '').trim()
+
+  const dash = CD_ALIAS_DASH.exec(head)
+  if (!dash) return { parent: head, alias: null, source, raw }
+
+  const parent = head.slice(0, dash.index).trim()
+  const alias = head.slice(dash.index + dash[0].length).trim()
+  // A dash with nothing usable on one side of it is not an alias; better to
+  // file the whole head as the parent than to mint an empty match key.
+  if (!parent || !alias) return { parent: head, alias: null, source, raw }
+  return { parent, alias, source, raw }
+}
+
+export const CHANNEL_DIVINITY_OPTIONS: readonly CanonChannelDivinityOption[] = (
+  (paladinProgressionRaw as unknown as {
+    classFeatureDetails?: Record<string, CanonClassFeatureDetail>
+  }).classFeatureDetails?.['Channel Divinity']?.options ?? []
+).map(parseChannelDivinityOption)
+
 export const SPECIES = speciesRaw as Record<string, unknown>
 export const FEATS = featsRaw as unknown
 export const BACKGROUNDS = backgroundsRaw as unknown

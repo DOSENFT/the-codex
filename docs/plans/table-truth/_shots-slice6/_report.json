@@ -1,0 +1,156 @@
+{
+  "A": {
+    "present": true,
+    "header": "Your reactions",
+    "headerButton": "Your reactions2",
+    "expanded": "true",
+    "bandText": "Your reactions2Opportunity Attack — HearthbrandReactionWHENa creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft · MagicalFlaming CloakReaction · 1/2 useswhennot stated — agree a trigger with your DM12 temp HP · 1d10 Fire retaliation⚑ Canon lists 4 errata on this feature",
+    "bandTop": 872,
+    "bandH": 228,
+    "rows": [
+      {
+        "name": "Opportunity Attack — Hearthbrand",
+        "cost": "Reaction",
+        "when": "WHENa creature you can see leaves your reach",
+        "whenLines": 2,
+        "body": "+7 to hit · 1d8+4 Slashing · 5 ft · Magical",
+        "bodyLines": 1,
+        "flag": "",
+        "h": 76,
+        "nameClipped": false
+      },
+      {
+        "name": "Flaming Cloak",
+        "cost": "Reaction · 1/2 uses",
+        "when": "whennot stated — agree a trigger with your DM",
+        "whenLines": 2,
+        "body": "12 temp HP · 1d10 Fire retaliation",
+        "bodyLines": 1,
+        "flag": "⚑ Canon lists 4 errata on this feature",
+        "h": 95,
+        "nameClipped": false
+      }
+    ],
+    "turnListCaption": "Your turn",
+    "turnRows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "duplicated": [],
+    "writes": [
+      "codex-combat-nix-fixture"
+    ]
+  },
+  "B": {
+    "present": true,
+    "header": "Your reactions",
+    "headerButton": "Your reactions2",
+    "expanded": "false",
+    "bandText": "Your reactions2",
+    "bandTop": 120,
+    "bandH": 43,
+    "rows": [],
+    "turnListCaption": "Your turn",
+    "turnRows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "duplicated": [],
+    "writes": [
+      "codex-ui-nix-fixture"
+    ]
+  },
+  "C": {
+    "present": true,
+    "header": "Your reactions",
+    "headerButton": "Your reactions2",
+    "expanded": "true",
+    "bandText": "Your reactions2Opportunity Attack — HearthbrandReactionWHENa creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft · MagicalFlaming CloakReaction · 1/2 useswhennot stated — agree a trigger with your DM12 temp HP · 1d10 Fire retaliation⚑ Canon lists 4 errata on this feature",
+    "bandTop": 664,
+    "bandH": 228,
+    "rows": [
+      {
+        "name": "Opportunity Attack — Hearthbrand",
+        "cost": "Reaction",
+        "when": "WHENa creature you can see leaves your reach",
+        "whenLines": 2,
+        "body": "+7 to hit · 1d8+4 Slashing · 5 ft · Magical",
+        "bodyLines": 1,
+        "flag": "",
+        "h": 76,
+        "nameClipped": false
+      },
+      {
+        "name": "Flaming Cloak",
+        "cost": "Reaction · 1/2 uses",
+        "when": "whennot stated — agree a trigger with your DM",
+        "whenLines": 2,
+        "body": "12 temp HP · 1d10 Fire retaliation",
+        "bodyLines": 1,
+        "flag": "⚑ Canon lists 4 errata on this feature",
+        "h": 95,
+        "nameClipped": false
+      }
+    ],
+    "turnListCaption": "The moment",
+    "turnRows": [],
+    "duplicated": [],
+    "writes": [
+      "codex-action-notes-nix-fixture",
+      "codex-combat-nix-fixture"
+    ]
+  },
+  "D": {
+    "present": true,
+    "header": "Your reactions",
+    "headerButton": "Your reactions2",
+    "expanded": "true",
+    "bandText": "Your reactions2Opportunity Attack — HearthbrandReactionWHENa creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft · MagicalFlaming CloakReaction · 1/2 useswhennot stated — agree a trigger with your DM12 temp HP · 1d10 Fire retaliation⚑ Canon lists 4 errata on this feature",
+    "bandTop": 872,
+    "bandH": 228,
+    "rows": [
+      {
+        "name": "Opportunity Attack — Hearthbrand",
+        "cost": "Reaction",
+        "when": "WHENa creature you can see leaves your reach",
+        "whenLines": 2,
+        "body": "+7 to hit · 1d8+4 Slashing · 5 ft · Magical",
+        "bodyLines": 1,
+        "flag": "",
+        "h": 76,
+        "nameClipped": false
+      },
+      {
+        "name": "Flaming Cloak",
+        "cost": "Reaction · 1/2 uses",
+        "when": "whennot stated — agree a trigger with your DM",
+        "whenLines": 2,
+        "body": "12 temp HP · 1d10 Fire retaliation",
+        "bodyLines": 1,
+        "flag": "⚑ Canon lists 4 errata on this feature",
+        "h": 95,
+        "nameClipped": false
+      }
+    ],
+    "turnListCaption": "Your turn",
+    "turnRows": [
+      "Hearthbrand",
+      "Javelin",
+      "Sacred Flame",
+      "Hearthfire Manifest"
+    ],
+    "duplicated": [],
+    "writes": [
+      "codex-combat-nix-fixture"
+    ]
+  },
+  "moved": [],
+  "writesOnToggle": [
+    "codex-ui-nix-fixture"
+  ],
+  "errors": []
+}

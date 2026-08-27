@@ -283,9 +283,23 @@ App.tsx (tab 'combat')
        ├ <VitalsBand vitals={turn.vitals} />
        ├ <HPTracker />                       conditions now collapsible
        ├ Your Turn       turn.ranked.filter(o => o.cost.slot !== 'reaction')
-       ├ Your Reactions  turn.ranked.filter(o => o.cost.slot === 'reaction')
+       ├ Your Reactions  reactionRows(turn, character)   [CORRECTED at slice 6 — see below]
        └ <TurnDeck />                        minimisable
 ```
+
+> **Correction — Gate 3 backtrack, logged 2026-08-27 (slice 6).**
+> The line above originally read `turn.ranked.filter(o => o.cost.slot === 'reaction')`.
+> Measured against the real fixture, **that array is always empty on your own
+> turn**: `rank.ts` scores `reaction: -40` on your turn and `reactionNow: +40`
+> off it, so reactions are deliberately kept out of `ranked` while it is your
+> go. Shipping the design as written would have painted an empty Reactions band
+> for half of every combat — the exact half where a reaction is the only thing
+> Marcus can spend is the *other* half.
+> `reactionRows()` therefore reads **every** bucket — `ranked`, `rest`, and each
+> mutex group's faces — dedupes by id, and filters on `cost.slot === 'reaction'`.
+> `reactions.test.ts` pins the emptiness of `ranked` as its stated premise, so
+> if `rank.ts` ever changes the test says so out loud instead of silently
+> passing.
 
 ### Row tap
 

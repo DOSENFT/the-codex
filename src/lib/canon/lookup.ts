@@ -15,7 +15,7 @@
  *
  * Table Truth slice 1. */
 
-import { SPELLS, CONDITIONS, OATH, CLASS_FEATURES } from '../../canon'
+import { SPELLS, CONDITIONS, OATH, CLASS_FEATURES, CHANNEL_DIVINITY_OPTIONS } from '../../canon'
 import type { CanonSpell, CanonCondition, CanonFeature, CanonErratum } from './types'
 
 /** Fold a display name to a match key.
@@ -59,8 +59,65 @@ export function conditionByName(name: string): CanonCondition | undefined {
   return CONDITION_INDEX.get(normalizeName(name))
 }
 
+/* ── The alias layer: the names a SHEET uses ────────────────────────────────
+ *
+ * Slice 1's Finding D, closed. Canon files the cloak's full text — and four of
+ * the twelve errata — under "Hearthfire Manifest". Nix's sheet calls it
+ * "Flaming Cloak". Nothing bridged the two names, so the app showed Marcus his
+ * own thin wording for the exact feature he asked about while canon held the
+ * paragraph.
+ *
+ * Two rules this layer must never break:
+ *
+ *  1. AN ALIAS MAY NEVER SHADOW A REAL NAME. Built after FEATURE_INDEX and
+ *     skipping any key that index already holds. If a future canon package
+ *     names a feature "Flaming Cloak" outright, the feature wins and this map
+ *     goes quiet — which is the only direction a nickname should ever lose in.
+ *  2. A MISS IS STILL A MISS. This widens what canon can answer for; it does
+ *     not invent answers. "Sacred Weapon" is not in canon's option list (it is
+ *     a 2014 leftover on Nix's sheet), so it misses here as it did before, and
+ *     the caller keeps the sheet's own words. The open-world rule at the top of
+ *     this file is not relaxed by one line. */
+const FEATURE_ALIAS_INDEX: Map<string, CanonFeature> = (() => {
+  const map = new Map<string, CanonFeature>()
+  for (const option of CHANNEL_DIVINITY_OPTIONS) {
+    if (!option.alias) continue
+    const key = normalizeName(option.alias)
+    if (!key || FEATURE_INDEX.has(key) || map.has(key)) continue
+    // The alias is only worth an entry if the PARENT resolves — an alias that
+    // points at nothing is worse than no alias, because it turns a clean miss
+    // into an undefined the caller has to defend against.
+    const parent = FEATURE_INDEX.get(normalizeName(option.parent))
+    if (parent) map.set(key, parent)
+  }
+  return map
+})()
+
+/* "Channel Divinity: Sacred Weapon" is how a sheet writes a menu pick: the menu
+ * name, a separator, the option. Stripping the prefix and retrying is what lets
+ * a sheet that spells the whole path out reach the same record as one that
+ * names the option alone. Recognised by SHAPE — a known menu name followed by a
+ * separator — never by recognising the option that follows it. */
+const MENU_PREFIX = /^(?:channel\s+divinity)\s*[:\-–—]\s*(.+)$/i
+
 export function featureByName(name: string): CanonFeature | undefined {
-  return FEATURE_INDEX.get(normalizeName(name))
+  const key = normalizeName(name)
+  const exact = FEATURE_INDEX.get(key)
+  if (exact) return exact
+
+  const alias = FEATURE_ALIAS_INDEX.get(key)
+  if (alias) return alias
+
+  const menu = MENU_PREFIX.exec(name.trim())
+  if (menu) {
+    const tail = normalizeName(menu[1])
+    // Only the option's own name is retried, NOT the menu's. Falling back to
+    // "Channel Divinity" here would answer every unknown pick with the menu's
+    // text, which reads as coverage and is worth nothing at a table.
+    return FEATURE_INDEX.get(tail) ?? FEATURE_ALIAS_INDEX.get(tail)
+  }
+
+  return undefined
 }
 
 /** Is this spell available to a Paladin of this level?
@@ -94,12 +151,17 @@ export const CANON_COUNTS = {
   /** Oath features plus base class features — the number the index can answer
    *  for, not the number in any one file. */
   features: FEATURE_INDEX.size,
+  /** Sheet-side nicknames that now reach a feature record. Counted separately
+   *  from `features` because they are not new text — they are new ways in. */
+  featureAliases: FEATURE_ALIAS_INDEX.size,
   errata: OATH.errata.length,
   combos: OATH.combos.length,
 } as const
 
-/** Everything canon knows a name for. Used to report coverage, never to gate. */
+/** Everything canon knows a name for. Used to report coverage, never to gate.
+ *  Goes through `featureByName` rather than the raw index so the match report
+ *  counts what the app can actually resolve, aliases included. */
 export function knowsName(name: string): boolean {
   const key = normalizeName(name)
-  return SPELL_INDEX.has(key) || FEATURE_INDEX.has(key) || CONDITION_INDEX.has(key)
+  return SPELL_INDEX.has(key) || CONDITION_INDEX.has(key) || featureByName(name) !== undefined
 }

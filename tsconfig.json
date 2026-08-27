@@ -7,6 +7,9 @@
     "skipLibCheck": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    /* Table Truth slice 1: the canon package ships as JSON and is imported
+       verbatim from src/canon/. Nothing else in src/ imports a .json path. */
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
