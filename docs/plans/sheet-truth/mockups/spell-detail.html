@@ -1,0 +1,84 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Spell advice — before / after</title>
+<style>
+  :root{--void:#0d0c0f;--void2:#17151a;--forge0:#f2ede6;--forge1:#a49c93;--forge2:#7d766f;
+        --bronze:#8a6a3b;--arcane:#8fd3ff;--ember-lit:#ff9d5c}
+  body{background:var(--void);color:var(--forge0);font:15px/1.5 -apple-system,Segoe UI,sans-serif;margin:0;padding:28px}
+  h1{font-size:19px;margin:0 0 4px} p.lede{color:var(--forge1);margin:0 0 26px;max-width:64ch}
+  .cols{display:flex;gap:26px;flex-wrap:wrap} .col{width:390px}
+  .col > h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--forge2);margin:0 0 8px}
+  .card{background:rgba(23,21,26,.7);border:1px solid rgba(138,106,59,.25);border-radius:14px;padding:13px;margin-bottom:14px}
+  .name{font-weight:600;font-size:15px;margin:0}
+  .meta{color:var(--forge2);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin:2px 0 9px}
+  .tactic{font-size:13px;color:var(--forge1);margin:0}
+  .tactic .num{color:var(--forge0);font-weight:600}
+  .wrong{color:var(--ember-lit);font-weight:600;text-decoration:underline wavy rgba(255,157,92,.55)}
+  .right{color:var(--arcane);font-weight:600}
+  .note{font-size:13px;color:var(--forge1);max-width:390px} .note b{color:var(--forge0)}
+</style>
+
+<h1>Spell advice — the sentences that quote a number</h1>
+<p class="lede">Charisma&nbsp;16 (+3), level&nbsp;7, proficiency&nbsp;+3. Three of his spells
+currently hand him advice computed for a Charisma he does not have.</p>
+
+<div class="cols">
+
+<div class="col">
+  <h2>Before</h2>
+
+  <div class="card">
+    <p class="name">Bless</p>
+    <p class="meta">1st level · Concentration · Action</p>
+    <p class="tactic">At level 7 with <span class="wrong">Charisma 18</span> that is
+      +1d4 and <span class="wrong">+4</span> to every save.</p>
+  </div>
+
+  <div class="card">
+    <p class="name">Command</p>
+    <p class="meta">1st level · Action · WIS save</p>
+    <p class="tactic">At level 7 with <span class="wrong">Charisma 18</span> your DC is
+      <span class="wrong">15</span>.</p>
+  </div>
+
+  <div class="card">
+    <p class="name">Heroism</p>
+    <p class="meta">1st level · Concentration · Action</p>
+    <p class="tactic">At <span class="wrong">Charisma 18</span> that is
+      <span class="wrong">4</span> temp HP refreshed every single turn.</p>
+  </div>
+
+  <p class="note">Command's line is the dangerous one: he reads DC&nbsp;15, tells the DM
+    DC&nbsp;15, and the target saves at the wrong number. He has no way to know which
+    spells this has happened on.</p>
+</div>
+
+<div class="col">
+  <h2>After</h2>
+
+  <div class="card">
+    <p class="name">Bless</p>
+    <p class="meta">1st level · Concentration · Action</p>
+    <p class="tactic">At level 7 with <span class="right">Charisma 16</span> that is
+      +1d4 and <span class="right">+3</span> to every save.</p>
+  </div>
+
+  <div class="card">
+    <p class="name">Command</p>
+    <p class="meta">1st level · Action · WIS save</p>
+    <p class="tactic">At level 7 with <span class="right">Charisma 16</span> your DC is
+      <span class="right">14</span>.</p>
+  </div>
+
+  <div class="card">
+    <p class="name">Heroism</p>
+    <p class="meta">1st level · Concentration · Action</p>
+    <p class="tactic">At <span class="right">Charisma 16</span> that is
+      <span class="right">3</span> temp HP refreshed every single turn.</p>
+  </div>
+
+  <p class="note">The advice is still canon's advice, word for word. Only the numbers
+    are his. <b>Change Charisma again and these sentences change with it.</b></p>
+</div>
+
+</div>

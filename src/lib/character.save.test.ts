@@ -47,7 +47,7 @@ describe('saveCharacter on a device that will not store', () => {
   })
 
   it('reports ok when the bytes land', () => {
-    expect(saveCharacter(nix())).toEqual({ ok: true })
+    expect(saveCharacter(nix())).toEqual({ ok: true, character: expect.any(Object) })
   })
 
   it('does not throw when the quota is full — a spend must not unwind the tree', () => {
@@ -195,27 +195,27 @@ describe('saveCharacter when another window has written since', () => {
   it('allows the write when nothing has moved — the common case is untouched', () => {
     const c = fresh()
     saveCharacter(c)
-    expect(saveCharacter({ ...c, name: 'same tab, next spend' })).toEqual({ ok: true })
+    expect(saveCharacter({ ...c, name: 'same tab, next spend' })).toEqual({ ok: true, character: expect.any(Object) })
   })
 
   it('never refuses a record this tab has never seen', () => {
     const c = fresh()
     store[key(c)] = JSON.stringify({ ...c, updatedAt: '2099-01-01T00:00:00.000Z' })
-    expect(saveCharacter(c)).toEqual({ ok: true })
+    expect(saveCharacter(c)).toEqual({ ok: true, character: expect.any(Object) })
   })
 
   it('never refuses on an unreadable stored record — a guard must not be the outage', () => {
     const c = fresh()
     saveCharacter(c)
     store[key(c)] = '{ not json'
-    expect(saveCharacter({ ...c, name: 'next spend' })).toEqual({ ok: true })
+    expect(saveCharacter({ ...c, name: 'next spend' })).toEqual({ ok: true, character: expect.any(Object) })
   })
 
   it('replacing: true overwrites a moved record, for a caller that means to', () => {
     const c = fresh()
     saveCharacter(c)
     otherWindowWrites(c, 'the other window wrote this')
-    expect(saveCharacter({ ...c, name: 'deliberate replace' }, { replacing: true })).toEqual({ ok: true })
+    expect(saveCharacter({ ...c, name: 'deliberate replace' }, { replacing: true })).toEqual({ ok: true, character: expect.any(Object) })
     expect(store[key(c)]).toContain('deliberate replace')
   })
 
@@ -231,7 +231,7 @@ describe('saveCharacter when another window has written since', () => {
     saveCharacter(c)
     saveCharacter({ ...c, campaignName: 'auto-created on mount' } as Character)
     const spend = saveCharacter({ ...c, name: 'the spend right after' })
-    expect(spend).toEqual({ ok: true })
+    expect(spend).toEqual({ ok: true, character: expect.any(Object) })
     expect(store[key(c)]).toContain('the spend right after')
   })
 
@@ -252,7 +252,7 @@ describe('saveCharacter when another window has written since', () => {
     otherWindowWrites(c, 'the other window wrote this')
     expect(saveCharacter({ ...c, name: 'refused' }).ok).toBe(false)
     const reloaded = loadCharacter(c.id)!          // what the notice asks him to do
-    expect(saveCharacter({ ...reloaded, name: 'do it again here' })).toEqual({ ok: true })
+    expect(saveCharacter({ ...reloaded, name: 'do it again here' })).toEqual({ ok: true, character: expect.any(Object) })
     expect(store[key(c)]).toContain('do it again here')
   })
 
@@ -261,15 +261,32 @@ describe('saveCharacter when another window has written since', () => {
     saveCharacter(c)
     deleteCharacter(c.id)
     store[key(c)] = JSON.stringify({ ...c, updatedAt: '2099-01-01T00:00:00.000Z' })
-    expect(saveCharacter({ ...c, name: 'a new sheet on the same id' })).toEqual({ ok: true })
+    expect(saveCharacter({ ...c, name: 'a new sheet on the same id' })).toEqual({ ok: true, character: expect.any(Object) })
   })
 
   it('characterStamp reads back what landed, not what the caller passed in', () => {
     const c = fresh()
     c.updatedAt = '1999-01-01T00:00:00.000Z'
-    saveCharacter(c)
-    expect(characterStamp(c.id)).toBe(c.updatedAt)     // saveCharacter restamped it
+    const outcome = saveCharacter(c)
+    // SHEET TRUTH slice 2. This line used to read `c.updatedAt`, which worked
+    // only because `saveCharacter` restamped the caller's object in place. It
+    // no longer does — it resolves into a new object — so the fresh stamp now
+    // arrives on the RETURN. Asserted through the return rather than the
+    // argument, which is a stricter claim, not a looser one: the two lines
+    // below still fail if the stamp on disk is the caller's stale one.
+    if (!outcome.ok) throw new Error('expected the write to land')
+    expect(characterStamp(c.id)).toBe(outcome.character.updatedAt)
     expect(characterStamp(c.id)).not.toBe('1999-01-01T00:00:00.000Z')
     expect(characterStamp('no-such-id')).toBeNull()
+  })
+
+  it('does NOT mutate the character it was handed', () => {
+    // The behaviour the test above used to depend on, now pinned as the rule.
+    // A function that silently rewrites its argument is how a caller ends up
+    // holding a value nobody chose to give it — the A-19 failure shape.
+    const c = fresh()
+    c.updatedAt = '1999-01-01T00:00:00.000Z'
+    saveCharacter(c)
+    expect(c.updatedAt).toBe('1999-01-01T00:00:00.000Z')
   })
 })

@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Play tab vitals — before / after</title>
+<style>
+  :root{--void:#0d0c0f;--void2:#17151a;--forge0:#f2ede6;--forge1:#a49c93;--forge2:#7d766f;
+        --bronze:#8a6a3b;--arcane:#8fd3ff;--ember:#e0713a;--ember-lit:#ff9d5c}
+  body{background:var(--void);color:var(--forge0);font:15px/1.5 -apple-system,Segoe UI,sans-serif;
+       margin:0;padding:28px}
+  h1{font-size:19px;margin:0 0 4px} p.lede{color:var(--forge1);margin:0 0 26px;max-width:62ch}
+  .cols{display:flex;gap:26px;flex-wrap:wrap}
+  .col{width:390px}
+  .col > h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--forge2);margin:0 0 8px}
+  .card{background:rgba(23,21,26,.7);border:1px solid rgba(138,106,59,.25);border-radius:14px;padding:12px}
+  .row{display:flex;gap:6px}
+  .stat{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+        border:1px solid rgba(138,106,59,.2);background:rgba(23,21,26,.5);border-radius:8px;padding:6px 4px}
+  .val{font:600 18px/1 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+  .hero{color:var(--arcane)} .lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--forge2)}
+  .warn{margin-top:12px;border-top:1px solid rgba(224,113,58,.25);padding-top:8px}
+  .warn b{color:var(--ember-lit);font-size:12px;display:flex;gap:7px;align-items:center}
+  .warn dl{margin:8px 0 0;font-size:12px} .warn .t{color:var(--forge0);font-weight:600;font-size:12px}
+  .kv{display:flex;gap:8px;align-items:baseline;margin-top:2px}
+  .kv dt{width:78px;flex:none;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--forge2)}
+  .kv dd{margin:0;font:12px ui-monospace,Menlo,monospace}
+  .kv dd.rule{color:var(--ember-lit)}
+  .why{color:var(--forge2);font-size:12px;margin:5px 0 0}
+  .bad{outline:2px solid var(--ember);outline-offset:3px;border-radius:9px}
+  .note{margin-top:14px;font-size:13px;color:var(--forge1);max-width:390px}
+  .note b{color:var(--forge0)}
+  .tick{color:#7fd48a}
+</style>
+
+<h1>Play tab — the vitals row</h1>
+<p class="lede">Same character both sides: Charisma&nbsp;16, level&nbsp;7, proficiency&nbsp;+3.
+The true answers are Save&nbsp;DC&nbsp;14 and Sp&nbsp;Atk&nbsp;+6.</p>
+
+<div class="cols">
+
+<div class="col">
+  <h2>Before — what he sees today</h2>
+  <div class="card">
+    <div class="row">
+      <div class="stat bad"><span class="val hero">15</span><span class="lbl">Save DC</span></div>
+      <div class="stat"><span class="val">18</span><span class="lbl">AC</span></div>
+      <div class="stat"><span class="val">+1</span><span class="lbl">Init</span></div>
+      <div class="stat"><span class="val">+3</span><span class="lbl">Prof</span></div>
+      <div class="stat bad"><span class="val">+7</span><span class="lbl">Sp Atk</span></div>
+    </div>
+    <div class="warn">
+      <b>⚠ Your sheet and the 2024 rules disagree on 2 things</b>
+      <dl>
+        <p class="t" style="margin:9px 0 0">Spell save DC</p>
+        <div class="kv"><dt>Your sheet</dt><dd>15</dd></div>
+        <div class="kv"><dt>2024 rules</dt><dd class="rule">14</dd></div>
+        <p class="why">8 + proficiency (+3) + Charisma modifier.</p>
+        <p class="t" style="margin:9px 0 0">Spell attack bonus</p>
+        <div class="kv"><dt>Your sheet</dt><dd>+7</dd></div>
+        <div class="kv"><dt>2024 rules</dt><dd class="rule">+6</dd></div>
+        <p class="why">Proficiency (+3) + Charisma modifier.</p>
+        <p class="why">Nothing has been changed. The app does not know which of these
+          is right for your table — that is yours and your DM's call.</p>
+      </dl>
+    </div>
+  </div>
+  <p class="note">It <b>told him</b> the number was wrong, then printed the wrong one
+    in the biggest type on the screen. Mid-turn he has to decide which of his app's two
+    answers to trust.</p>
+</div>
+
+<div class="col">
+  <h2>After</h2>
+  <div class="card">
+    <div class="row">
+      <div class="stat"><span class="val hero">14</span><span class="lbl">Save DC</span></div>
+      <div class="stat"><span class="val">18</span><span class="lbl">AC</span></div>
+      <div class="stat"><span class="val">+1</span><span class="lbl">Init</span></div>
+      <div class="stat"><span class="val">+3</span><span class="lbl">Prof</span></div>
+      <div class="stat"><span class="val">+6</span><span class="lbl">Sp Atk</span></div>
+    </div>
+  </div>
+  <p class="note"><span class="tick">No banner.</span> Not hidden — <b>impossible</b>.
+    The DC is worked out from his Charisma as the screen draws, so there is no second
+    copy left for it to disagree with.</p>
+  <p class="note">The banner itself stays in the app. It will still appear for spell
+    slots, where the disagreement is real and the app has no right to settle it.</p>
+</div>
+
+</div>

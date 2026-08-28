@@ -70,16 +70,37 @@ export function useCharacter() {
       return
     }
     setActiveId(char.id)
-    setCharacterState(char)
+    /* SHEET TRUTH slice 2 — the propagation fix, and it is this one line.
+     *
+     * This used to be `setCharacterState(char)`: it put back exactly what the
+     * component handed in. `CharacterPage.handleScoreConfirm` builds
+     * `{ ...character, abilityScores }`, and that spread carries the OLD
+     * spellSaveDC, spellAttackBonus and proficiencyBonus along with it. So
+     * changing Charisma in Prep wrote the new score to disk and then re-seated
+     * the stale derived numbers in React state, where every combat surface read
+     * them until the next reload. That is precisely what Marcus reported: "the
+     * prep tab seems to not be at all connected with the combat module".
+     *
+     * `saveCharacter` has already resolved and already written. Taking its
+     * return means the screen shows what disk holds, and a stale spread cannot
+     * survive even one render.
+     *
+     * A non-stale failure (quota) keeps `char` on screen, exactly as before:
+     * that path deliberately leaves the change visible after announcing that it
+     * was not written, and slice 2 is not the place to revisit that call. */
+    setCharacterState(outcome.ok ? outcome.character : char)
     // Refresh roster to reflect any name/level/class changes
     setRoster(loadRoster())
   }, [])
 
   // Create a new character and make it active
   const createCharacter = useCallback((char: Character) => {
-    saveCharacter(char)
+    const outcome = saveCharacter(char)
     setActiveId(char.id)
-    setCharacterState(char)
+    // Same reason as `update` above. A character arriving from setup or an
+    // import can carry derived numbers that were typed in or came from an AI
+    // response; the resolved one is what was actually persisted.
+    setCharacterState(outcome.ok ? outcome.character : char)
     setRoster(loadRoster())
   }, [])
 

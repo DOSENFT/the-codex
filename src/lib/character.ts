@@ -1,4 +1,5 @@
 import { type AbilityKey, type SkillName, SKILL_ABILITIES, CASTING_ABILITY } from './dnd-rules'
+import { resolveCharacter } from './rules-2024/derive'
 // Slice 6b. `resources.ts` imports Character back, but only as a TYPE, so the
 // cycle is erased at compile time and there is no runtime edge in that
 // direction. Kept that way on purpose: character.ts is the module every screen
@@ -440,6 +441,25 @@ const CHAR_PREFIX = 'codex-character-'
 
 export type SaveOutcome = { ok: true } | { ok: false; reason: string; stale?: true }
 
+/** What `saveCharacter` returns, and ONLY `saveCharacter`.
+ *
+ *  SHEET TRUTH slice 2. Gate 3 planned to add `character` to `SaveOutcome`
+ *  itself. Reading the code says no: `SaveOutcome` is also what `put`,
+ *  `saveOrAnnounce`, `setActiveId` and `updateRosterEntry` return, and none of
+ *  those has a character to hand back. Widening the shared type would have made
+ *  three storage primitives carry a field they cannot fill.
+ *
+ *  WHY IT CARRIES THE CHARACTER AT ALL. This is the whole propagation fix. A
+ *  component builds `{ ...character, abilityScores }` — a spread that copies the
+ *  stale derived numbers along with everything else — and hands it here.
+ *  Handing back the RESOLVED character, and making the caller set state from the
+ *  return, means a stale spread cannot survive even one render. The alternative
+ *  (each caller remembering to resolve) is the arrangement AMENDMENT A-19 was
+ *  written about: it works until a call site forgets. */
+export type CharacterSaveOutcome =
+  | { ok: true; character: Character }
+  | { ok: false; reason: string; stale?: true }
+
 type SaveFailureListener = (reason: string) => void
 const saveFailureListeners = new Set<SaveFailureListener>()
 
@@ -618,14 +638,21 @@ const STALE_REASON =
  * say so in the source rather than by omitting an argument.
  */
 export function saveCharacter(
-  character: Character,
+  incoming: Character,
   opts: { replacing?: boolean } = {},
-): SaveOutcome {
+): CharacterSaveOutcome {
+  // SHEET TRUTH slice 2. Resolve FIRST, before the staleness check and before
+  // the stamp, so that everything downstream — the bytes on disk, the roster
+  // entry, the value returned to the caller — is the same corrected character.
+  // Resolving after the write would put one thing on disk and another on screen,
+  // which is the exact shape of the bug this phase exists to kill.
+  const character = resolveCharacter(incoming)
+
   const seen = seenOnDisk[character.id]
   if (!opts.replacing && seen) {
     const on = storedStamp(character.id)
     if (on && on !== seen) {
-      const refused: SaveOutcome = { ok: false, reason: STALE_REASON, stale: true }
+      const refused: CharacterSaveOutcome = { ok: false, reason: STALE_REASON, stale: true }
       announceFailure(STALE_REASON)
       return refused
     }
@@ -642,8 +669,14 @@ export function saveCharacter(
   // The roster is an index, not the character. If it cannot be updated the
   // character itself is still safely on disk, so this is reported, not fatal.
   const indexed = updateRosterEntry(character)
-  if (!indexed.ok) announceFailure(indexed.reason)
-  return indexed
+  if (!indexed.ok) {
+    announceFailure(indexed.reason)
+    return indexed
+  }
+  // A roster failure returns above rather than falling through, because a
+  // caller that sets its state from `character` on a reported failure would be
+  // showing a sheet the index does not list.
+  return { ok: true, character }
 }
 
 /**
@@ -979,7 +1012,13 @@ export function loadCharacter(id: string): Character | null {
   const saved = localStorage.getItem(CHAR_PREFIX + id)
   if (!saved) return null
   try {
-    const character = normalizeCharacter(JSON.parse(saved) as Partial<Character>, id)
+    // SHEET TRUTH slice 1. Every number the rules can work out is worked out
+    // here, on the way off the disk, so no screen can be handed a stale one.
+    // The stored copies are still WRITTEN at this slice — slice 3 stops that —
+    // but nothing reads them any more, because this overwrites them first.
+    const character = resolveCharacter(
+      normalizeCharacter(JSON.parse(saved) as Partial<Character>, id),
+    )
     // Reading IS seeing. This is what makes a refusal recoverable: the caller
     // reloads from disk, and the next attempt is measured against what it just
     // read rather than against the state it was holding when it lost.

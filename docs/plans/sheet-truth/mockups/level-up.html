@@ -1,0 +1,78 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Level Up — before / after</title>
+<style>
+  :root{--void:#0d0c0f;--forge0:#f2ede6;--forge1:#a49c93;--forge2:#7d766f;
+        --arcane:#8fd3ff;--ember-lit:#ff9d5c;--good:#7fd48a}
+  body{background:var(--void);color:var(--forge0);font:15px/1.5 -apple-system,Segoe UI,sans-serif;margin:0;padding:28px}
+  h1{font-size:19px;margin:0 0 4px} p.lede{color:var(--forge1);margin:0 0 26px;max-width:66ch}
+  .cols{display:flex;gap:26px;flex-wrap:wrap} .col{width:390px}
+  .col > h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--forge2);margin:0 0 8px}
+  .card{background:rgba(23,21,26,.7);border:1px solid rgba(138,106,59,.25);border-radius:14px;padding:13px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  td{padding:5px 0;border-bottom:1px solid rgba(138,106,59,.14);vertical-align:baseline}
+  td.k{color:var(--forge1)} td.v{text-align:right;font:13px ui-monospace,Menlo,monospace}
+  td.v small{font-family:-apple-system,Segoe UI,sans-serif;color:var(--forge2)}
+  .stale{color:var(--ember-lit)} .fresh{color:var(--arcane)} .same{color:var(--forge1)}
+  .toast{margin-top:13px;font-size:13px;border-radius:10px;padding:9px 11px;
+         background:rgba(143,211,255,.08);border:1px solid rgba(143,211,255,.28);color:var(--forge0)}
+  .toast.old{background:rgba(255,157,92,.07);border-color:rgba(255,157,92,.28)}
+  .note{font-size:13px;color:var(--forge1);max-width:390px} .note b{color:var(--forge0)}
+</style>
+
+<h1>Tapping “Level Up” — 8 → 9</h1>
+<p class="lede">Nix at Charisma&nbsp;16 (+3). Level&nbsp;9 is the next boundary where
+proficiency moves (+3&nbsp;→&nbsp;+4), so it’s the clearest look at what the button does
+and doesn’t do. Values that should have moved and didn’t are
+<span class="stale">orange</span>.</p>
+
+<div class="cols">
+
+<div class="col">
+  <h2>Before — 4 numbers silently left at level 8</h2>
+  <div class="card">
+    <table>
+      <tr><td class="k">Level</td><td class="v fresh">9</td></tr>
+      <tr><td class="k">Proficiency bonus</td><td class="v fresh">+4</td></tr>
+      <tr><td class="k">Spell save DC</td><td class="v stale">14 <small>should be 15</small></td></tr>
+      <tr><td class="k">Spell attack</td><td class="v stale">+6 <small>should be +7</small></td></tr>
+      <tr><td class="k">Prepared spells</td><td class="v stale">7 <small>should be 9</small></td></tr>
+      <tr><td class="k">Lay on Hands</td><td class="v stale">40 <small>should be 45</small></td></tr>
+      <tr><td class="k">Channel Divinity</td><td class="v same">2 <small>unchanged at 9</small></td></tr>
+      <tr><td class="k">Aura range</td><td class="v same">10 ft <small>unchanged until 18</small></td></tr>
+      <tr><td class="k">Spell slots</td><td class="v stale">1st ×4 · 2nd ×3 <small>3rd-level slots not added</small></td></tr>
+    </table>
+    <p class="toast old">Leveled up to 9! Update your spells and features as needed.</p>
+  </div>
+  <p class="note">“Update your spells and features as needed” is the app asking
+    <b>him</b> to do arithmetic it already has the table for — and not telling him
+    which four numbers are now wrong. His save DC stays a point low until he notices.</p>
+</div>
+
+<div class="col">
+  <h2>After</h2>
+  <div class="card">
+    <table>
+      <tr><td class="k">Level</td><td class="v fresh">9</td></tr>
+      <tr><td class="k">Proficiency bonus</td><td class="v fresh">+4</td></tr>
+      <tr><td class="k">Spell save DC</td><td class="v fresh">15</td></tr>
+      <tr><td class="k">Spell attack</td><td class="v fresh">+7</td></tr>
+      <tr><td class="k">Prepared spells</td><td class="v fresh">9</td></tr>
+      <tr><td class="k">Lay on Hands</td><td class="v fresh">45</td></tr>
+      <tr><td class="k">Channel Divinity</td><td class="v fresh">2</td></tr>
+      <tr><td class="k">Aura range</td><td class="v fresh">10 ft</td></tr>
+      <tr><td class="k">Spell slots</td><td class="v same">1st ×4 · 2nd ×3 <small>yours — flagged, not changed</small></td></tr>
+    </table>
+    <p class="toast"><b>Level 9.</b> Proficiency +3 → +4, so your save DC is now 15 and
+      your spell attack +7. Lay on Hands 40 → 45. You can prepare 9 spells, up from 7.
+      Your max HP, AC and spell slots are yours to set.</p>
+  </div>
+  <p class="note">Save DC and spell attack aren’t “updated” — <b>there is nothing to
+    update.</b> They’re worked out from Charisma and level whenever they’re shown, so
+    they were never anything else.</p>
+  <p class="note">Spell slots deliberately stay his. The rules would add 3rd-level
+    slots here, but his sheet already disagrees with the table at level 7, and that may
+    be his DM or an item. The app flags it and leaves it alone.</p>
+</div>
+
+</div>

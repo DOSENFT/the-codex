@@ -29,6 +29,7 @@ import type {
   CanonChannelDivinityOption,
   CanonValidationRule,
   CanonFeat,
+  CanonProgressionLevel,
 } from '../lib/canon/types'
 
 /* The casts are the seam between "untyped JSON on disk" and "typed corpus in
@@ -51,6 +52,23 @@ export const SPELLCASTING_RULES = spellcastingRulesRaw as Record<string, unknown
 export const SMITE_RULES = smiteRulesRaw as Record<string, unknown>
 export const WEAPON_MASTERY = weaponMasteryRaw as Record<string, unknown>
 export const PALADIN_PROGRESSION = paladinProgressionRaw as Record<string, unknown>
+
+/* Canon's per-level table, keyed by class name so the open-world rule has
+ * somewhere to fail: a class canon has no table for is `undefined` here, and
+ * `derive.ts` then adds nothing rather than inventing a row.
+ *
+ * SHEET TRUTH slice 1. `PALADIN_PROGRESSION` above already exposed this file,
+ * but as `Record<string, unknown>` — which is to say, not usably. Normalised
+ * HERE for the same reason `CLASS_FEATURES` is: this is the one module allowed
+ * to touch a .json path, so it is the one place a future canon package has to
+ * be re-read. */
+export const PROGRESSION_BY_CLASS: Readonly<
+  Record<string, readonly CanonProgressionLevel[]>
+> = {
+  Paladin:
+    (paladinProgressionRaw as unknown as { levels?: CanonProgressionLevel[] })
+      .levels ?? [],
+}
 
 /* The 16 BASE Paladin features — Lay On Hands, Divine Sense, Aura of Protection
  * and the rest. They live in paladin-progression.json as an object keyed by

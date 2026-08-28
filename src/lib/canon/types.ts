@@ -243,3 +243,26 @@ export interface CanonValidationRule {
   rule: string
   severity: 'error' | 'warning' | 'info'
 }
+
+/** One row of `paladin-progression.json`'s `levels[]` — canon's own per-level
+ *  table, ruleset "D&D 2024 (5.5e) Player's Handbook".
+ *
+ *  SHEET TRUTH slice 1. This array has been sitting in the bundle since the
+ *  canon package landed and nothing read it: `canon/index.ts` took only
+ *  `classFeatureDetails` out of the same file. So the app shipped the right
+ *  answers and read a stale copy typed in by hand. `rules-2024/derive.ts` now
+ *  reads these rows.
+ *
+ *  `spellSlots` is keyed by spell level as a STRING because that is how JSON
+ *  keys arrive. Read, but deliberately never applied — slots stay Marcus's,
+ *  reported and never corrected. */
+export interface CanonProgressionLevel {
+  level: number
+  proficiencyBonus: number
+  classFeatures: string[]
+  channelDivinityUses: number
+  preparedSpells: number
+  spellSlots: Record<string, number>
+  layOnHandsPool: number
+  highestSpellLevel: number
+}

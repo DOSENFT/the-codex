@@ -11,3 +11,5 @@ tsconfig.tsbuildinfo
 
 # table-night tunnel binary — 30MB, downloaded not authored
 cloudflared.exe
+dist-before
+dist-slice1
