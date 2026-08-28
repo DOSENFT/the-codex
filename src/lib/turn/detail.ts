@@ -37,6 +37,7 @@ import { errataForFeature, featureByName, spellByName } from '../canon/lookup'
 import { statBlock } from '../canon/format'
 import { featureFacts, type FeatureFact } from '../canon/feature'
 import { splitTactics, type TacticsBullet } from '../canon/tactics'
+import { personaliseBullets } from '../canon/personalise'
 import { rollOffers, type RollOffer } from './rolls'
 import { replacementWarning, tempHPReplacement } from '../rules-2024/temp-hp'
 import { casterContextOf, featureContextOf } from './overlay'
@@ -281,6 +282,9 @@ export function optionDetail(
     spendWarning: tempHPWarningFor(option, character),
     ruleBox: ruleBoxFor(option, economy),
     errata: errataForFeature(option.name) as CanonErratum[],
-    tactics: spell ? splitTactics(spell.tactics) : [],
+    // SHEET TRUTH slice 5 — the one prose seam. `splitTactics` runs on canon
+    // UNMODIFIED so its heading detection still sees the text its author wrote;
+    // the substitution happens to the bullets that come out of it.
+    tactics: spell ? personaliseBullets(splitTactics(spell.tactics), character) : [],
   }
 }

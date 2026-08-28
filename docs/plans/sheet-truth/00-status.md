@@ -184,8 +184,80 @@ _Full detail and per-slice proof in `04-slices.md`._
       declared in `pools.ts`, but the *levels* are read from canon's `classFeatures`
       lists, which are structured. A test asserts canon's prose still contains both
       numbers, so a canon package that reworks the aura is a red test the day it lands.
-- [ ] Slice 5 — `personalise.ts` wired at `detail.ts:284`, proved on one string (Bless).
-- [ ] Slice 6 — the remaining 7 canon strings, hand-edited and classified.
+- [x] **Slice 5 — the prose seam, proved on one string.** Done 2026-08-28.
+
+   New `src/lib/canon/personalise.ts` + `personalise.test.ts` (29 tests), wired at
+   `detail.ts:288` — **after** `splitTactics`, so canon's headings are still found in
+   the text its author wrote. Exactly one canon string templated: **Bless**.
+
+   **What moved, in app behaviour.** Bless's "How to use it" band used to tell Marcus:
+   *"At level 7 with Charisma 18 that is +1d4 and +4 to every save inside 10 feet of
+   you."* His Charisma is 16. It now reads *"At level 7 with Charisma 16 that is +1d4
+   and +3"*, and the closing line reads *"a level 7 Paladin"* at level 7 and *"a level
+   9 Paladin"* at level 9. Nothing else in canon changed.
+
+   **Measured on the real app** (`_probe-tactics.mjs`, Chrome 390×844, two seeded
+   characters, each claim a Range around the substring with `getClientRects` + an
+   `elementFromPoint` occlusion check — never `textContent`):
+
+   | | before (slice 4, :4221) | after (slice 5, :4222) |
+   |---|---|---|
+   | claims satisfied | **14 of 24** | **24 of 24** |
+   | «Charisma 18» painted at CHA 16 | yes | no |
+   | «+1d4 and +4» painted at CHA 16 | yes | no |
+   | «At level 9» painted at level 9 | no | yes |
+   | placeholders leaked to the screen | — | none, anywhere in the document |
+   | canon's 4 headings survive | yes | yes |
+
+   Shots: `shots/slice5-bless-tactics-before-slice4.png` · `…-after-slice5.png`.
+
+   **Micro-reverts — 7 guards put back, each verified to have landed before the result
+   was believed** (the CRLF lesson from slice 4; `detail.ts` is CRLF, the other two LF):
+
+   | line put back | tests red |
+   |---|---|
+   | the seam unplugged from `detail.ts` | **3** ← see below |
+   | unresolvable segments printed rather than dropped | 6 |
+   | canon's Bless string untemplated | 5 |
+   | `saveDC` / `spellAttack` not gated on being a caster | 5 |
+   | the decimal guard removed from `segmentsOf` | 1 |
+   | a negative modifier printed under canon's "+" | 1 |
+   | an emptied bullet rendered as a bare heading | 1 |
+
+   All three files restored byte-identically, verified with `diff`. Suite **1083 passed
+   / 47 files / 7 skipped**, up from 1054 / 46. Typecheck clean.
+
+   **New findings:**
+   1. **FINDING BM — the micro-revert found nothing, and that was the finding.** With
+      all 26 tests written, deleting `personaliseBullets` from `detail.ts` — unplugging
+      the entire slice from the app — left the suite **green**. Every test was aimed at
+      the FUNCTION and none at the WIRE. That is finding BI in a new coat: a correct
+      module the app does not call is a half-built feature running as if done, and only
+      the browser probe would have caught it. Section 6 of the test file now pins the
+      seam at `optionDetail`, through the same path the Play tab takes. **The reverts
+      are not a formality; this one changed the slice.**
+   2. **FINDING BN — canon's aura radius is a seventh derived number, and it is still
+      baked.** Bless's sentence ends "…to every save inside **10 feet** of you". That
+      is right at level 7 and wrong at level 18, where Aura Expansion makes it 30 —
+      `pools.ts:auraRangeFor` already computes it. It is NOT templated, because the
+      approved vocabulary is six placeholders and widening it is a Gate 3 decision, not
+      a regex edit. **Raise at slice 6.**
+   3. **One canon number was removed rather than parameterised, and it is the only one.**
+      The same sentence ended "…is passing roughly 35%% more saves than one that is
+      not." That figure is `(2.5 + CHAmod) / 20` — 32.5% at Charisma 18, 27.5% at 16 —
+      so it is a consequence of a placeholder, and the six-word vocabulary cannot do
+      arithmetic. Rather than leave a number that silently assumes Charisma 18, the
+      clause now reads "…is passing saves it would otherwise fail, all fight long."
+      Canon's claim is kept; canon's stale arithmetic is not.
+   4. **The ledger, not a skip.** `personalise.test.ts` asserts the EXACT list of advice
+      strings still carrying a baked `Charisma <digits>`: seven that slice 6 owns, plus
+      **Circle of Power**, which is permanent. Circle of Power says "At level 17 with
+      Charisma 20…" — a projection of a Paladin Marcus is ten levels from being, written
+      to show what the spell becomes. Substituting his numbers would not correct it, it
+      would destroy its point. The list can only shrink; a new baked number anywhere in
+      canon fails on the day it lands.
+- [ ] Slice 6 — the remaining 7 canon strings, hand-edited and classified. **Also decide
+      finding BN: does the vocabulary grow a seventh placeholder for the aura radius?**
 - [ ] Slice 7 — discrepancy cases kept but asserted unreachable; phase close.
 
 ### Two Gate 3 questions, answered in `04-slices.md`
