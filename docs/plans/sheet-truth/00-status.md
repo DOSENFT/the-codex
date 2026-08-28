@@ -256,8 +256,99 @@ _Full detail and per-slice proof in `04-slices.md`._
       to show what the spell becomes. Substituting his numbers would not correct it, it
       would destroy its point. The list can only shrink; a new baked number anywhere in
       canon fails on the day it lands.
-- [ ] Slice 6 — the remaining 7 canon strings, hand-edited and classified. **Also decide
-      finding BN: does the vocabulary grow a seventh placeholder for the aura radius?**
+- [x] **Slice 6 — the remaining seven canon strings, hand-edited and classified.** Done 2026-08-28.
+
+   **What moved, and why.** Slice 5 built the mechanism and proved it on Bless. Slice 6
+   is the mechanism applied: six more pieces of advice that were each telling Marcus a
+   false number about his own character every time he opened them, plus a seventh that
+   was fixed a different way for a reason worth writing down.
+
+   | string | canon said, to a Charisma 18 Paladin | Marcus now reads |
+   |---|---|---|
+   | Command | "At level 7 with Charisma 18 your DC is 15" | **"At level 7 with Charisma 16 your DC is 14"** |
+   | Scorching Ray | "At level 7 with Charisma 18 that is +7." | **"…Charisma 16 that is +6."** |
+   | Resistance | "+4 at Charisma 18, permanently" | **"+3 at Charisma 16, permanently"** |
+   | Heroism | "At Charisma 18 that is 4 temp HP … up to 40 points" | **"At Charisma 16 that is 3 temp HP …"** |
+   | Dispel Magic | "at Charisma 18 you have +4 … you succeed 50%% of the time" | **"at Charisma 16 you have +3 …"** |
+   | Aura of Purity | "at level 7+ … Advantage plus +4 … 85%% instead of 45%%" | **"…Advantage plus +3 …"** |
+   | Inspiring Leader (feat) | "At level 7 with Charisma 18 that is 11 Temporary Hit Points" | **"…equal to your level plus your Charisma modifier"** |
+
+   **The measurement** (`_probe-slice6.mjs`, real Chrome 390×844, geometry not `textContent`).
+   Two cases: level 7 — his real sheet — and level 13, where every number moves and the
+   two high-tier spells become castable at all.
+
+   | | before (slice 5, :4222) | after (slice 6, :4223) |
+   |---|---|---|
+   | claims satisfied | **35 of 66** | **66 of 66** |
+   | «Charisma 18» painted anywhere | 6 sheets | none |
+   | numbers move from level 7 → 13 | no | yes (DC 14→16, atk +6→+8) |
+   | placeholders leaked to the screen | — | none, in any sheet or the document |
+   | ellipsis / clipping | none | none |
+
+   Suite **1095 passed / 47 files / 7 skipped** (up from 1083). Typecheck exit 0.
+   Screenshots: `shots/slice6-command-{before-slice5,after-slice6}.png` — the WEAKNESS
+   bullet, "your DC is 15" → "your DC is 14", on his real level 7 sheet.
+
+   **Seven micro-reverts, each verified to have landed before its result was believed**
+   (the slice-5 lesson: a perl pattern that silently matches nothing reports all-green):
+
+   | broken on purpose | tests that went red |
+   |---|---|
+   | Command untemplated | 3 |
+   | Inspiring Leader's note re-baked | 2 |
+   | a placeholder put in an unreadable field | 2 |
+   | Aura of Purity's "at level 7+" restored | 1 |
+   | the 85%%/45%% consequence restored | 1 |
+   | Scorching Ray's attack frozen at his level-7 value | 1 |
+   | a fifth aura-radius sentence added | 1 |
+
+   **Four things this slice decided, not just did:**
+
+   1. **FINDING BO — canon contradicted itself, and the table won.** Aura of Purity's
+      advice said "at level 7+ your Aura of Protection already gives…". Canon's own
+      progression table lists Aura of Protection at **level 6**, and
+      `pools.levelOfClassFeature` — which the app's aura maths actually runs on — reads
+      that table. The clause is **gone** rather than corrected to 6: "already" was always
+      doing the work, since Aura of Purity is a level 4 spell and any Paladin who can cast
+      it has had the aura for years. A level qualifier there could only ever be a second
+      place to get the number wrong.
+
+   2. **FINDING BP — a placeholder may only live in a field that has a reader.**
+      `personalise` has exactly one call site: `detail.ts:284`, on a spell's `tactics`.
+      **Nothing in the app reads `paladinNote`** — outside canon the only mention in all
+      of `src/` is the optional field declaration in `canon/types.ts`. So Inspiring
+      Leader's false "11 Temporary Hit Points" was **removed, not templated**: a `{CHA}`
+      there would never be resolved by anyone, and would sit in the data looking finished
+      until the day someone rendered that field and printed a literal brace on his screen.
+      It now states the formula in words, which is true for every character at every level
+      and needs no reader to make it true. A test pins the rule.
+
+   3. **FINDING BN, decided: the vocabulary stays six words.** Canon states the aura
+      radius as prose ("within 10 feet") in **eight places across five strings**, and
+      `pools.auraRangeFor` returns 30 at level 18 — so those sentences do go wrong, at
+      level 18. They are not wrong for Marcus, and this slice's mandate is strings that
+      lie to him *today*. Growing the vocabulary is a Gate 3 decision, not a regex widened
+      mid-slice. The eight are pinned by name in a test, so a ninth is a deliberate edit
+      and the day he reaches 18 that test is the worklist. **This is the open fork for
+      Marcus: leave them, or take it back to Gate 3 and add `{auraRange}`.**
+
+   4. **Three stale consequences removed rather than recomputed** — 40 = 4 temp HP × 10
+      rounds, 50%% = a +4 check against DC 15, 85%%/45%% = Advantage plus +4. Each was
+      arithmetic *downstream* of a placeholder, which the six-word vocabulary cannot do
+      and must not learn to. The numbers went; the claim each supported was kept in words.
+      Same ruling as Bless's "roughly 35%% more saves" in slice 5.
+
+   **The ledger is now empty.** `SLICE_6_OWNS` is `[]` and the test stays — an empty list
+   that must stay empty is a stronger statement than a deleted check. **Circle of Power**
+   remains in `PROJECTIONS`, permanently and by decision.
+
+   **One thing the probe found that was not slice 6's fault.** `options.ts:253` drops a
+   prepared spell whose tier is absent from `character.spellSlots`. The seed fixture ships
+   a level 8 Nix whose stored map holds tiers 1 and 2 only, and that map survives raising
+   `level` — so the first run reported no row for Dispel Magic (3) or Aura of Purity (4)
+   even at level 13. That looked like a failure and was really the seed telling the truth
+   about a level 8 character. The probe now takes its slot tiers from canon's progression
+   table for the case's level.
 - [ ] Slice 7 — discrepancy cases kept but asserted unreachable; phase close.
 
 ### Two Gate 3 questions, answered in `04-slices.md`

@@ -345,7 +345,7 @@
       "effects": [
         "After a Short or Long Rest you can speak for 10 minutes to up to six creatures (which can include you) within 30 feet. Each gains Temporary Hit Points equal to your character level plus the chosen ability modifier."
       ],
-      "paladinNote": "At level 7 with Charisma 18 that is 11 Temporary Hit Points to six people after every rest. WARNING: Temporary Hit Points do not stack, and your Hearthfire Manifest cloak grants Temporary Hit Points and lasts 'until the Temporary HP is depleted'. Taking Inspiring Leader temp HP while cloaked will replace the cloak's pool and likely end the cloak. Your app must warn on this."
+      "paladinNote": "That is Temporary Hit Points equal to your level plus your Charisma modifier, to six people, after every rest. WARNING: Temporary Hit Points do not stack, and your Hearthfire Manifest cloak grants Temporary Hit Points and lasts 'until the Temporary HP is depleted'. Taking Inspiring Leader temp HP while cloaked will replace the cloak's pool and likely end the cloak. Your app must warn on this."
     },
     {
       "name": "Keen Mind",
