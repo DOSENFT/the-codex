@@ -1,0 +1,442 @@
+{
+  "results": [
+    {
+      "name": "1a · no painted text on the Play tab trails off",
+      "pass": true,
+      "detail": "229 painted text leaves scanned across the turn options, the reactions band, the deck and every mounted dialog — none ends in an ellipsis"
+    },
+    {
+      "name": "1b · and nothing is cutting itself off in CSS either  <-- finding Q",
+      "pass": true,
+      "detail": "no painted leaf overflows its own box with text-overflow:ellipsis or a line-clamp. This is the half textContent cannot see: CSS-clipped text reports in FULL to a string renderer, so every node-side \"no ellipsis\" test in this repo is blind to it"
+    },
+    {
+      "name": "2a · every option row is the same height, and none is clipped",
+      "pass": true,
+      "detail": "3 rows, height 56px, 3/3 fit their own box. A uniform row is what makes the list scannable mid-turn; \"fits\" is the half that distinguishes a two-line row from a three-line row with the third line cut off"
+    },
+    {
+      "name": "2b · one tap opens the full definition, and it is long-form prose",
+      "pass": true,
+      "detail": "«Longsword — details» → a painted dialog 390×760 carrying 3759 characters, no trailing ellipsis. The row is the glance; this is the route the phase was opened to build"
+    },
+    {
+      "name": "2c · and nothing inside the opened sheet trails off either",
+      "pass": true,
+      "detail": "the surface that carries the LONGEST text in the app is the one most likely to cut it, and it cuts nothing"
+    },
+    {
+      "name": "3 · all four are painted and inside the unscrolled window",
+      "pass": true,
+      "detail": "Save DC=\"14Save DC\"  AC=\"18AC\"  Init=\"+1Init\"  Prof=\"+3Prof\"  — main is the bounded scroll region y=56..477, and every cell sits inside it at scrollY=0. \"Without scrolling\" is a claim about the WINDOW, not about the document, which is why it is measured against main and not against innerHeight"
+    },
+    {
+      "name": "3b · and they are the numbers off his sheet, not placeholders",
+      "pass": true,
+      "detail": "DC 14 (8+3+3 with CHA 16), AC 18, Init +1 (DEX 12), Prof +3 (level 7) — computed from the seeded sheet, and every one of them matches what Marcus reported on 2026-08-27"
+    },
+    {
+      "name": "4a · the list exists and carries more than one reaction",
+      "pass": true,
+      "detail": "5 rows: Sentinel | Sentinel | Interception | Opportunity Attack — Longsword | Flaming Cloak"
+    },
+    {
+      "name": "4b · every row states WHEN before it states the dice",
+      "pass": true,
+      "detail": "Sentinel: when@17 dice@-1 | Sentinel: when@17 dice@-1 | Interception: when@21 dice@155 | Opportunity Attack — Longsword: when@39 dice@96 | Flaming Cloak: when@33 dice@89  — a reaction you cannot use is a number; the trigger is the whole of what makes it a choice"
+    },
+    {
+      "name": "4c · and the cloak's retaliation says it is FREE  <-- his own misreading, corrected",
+      "pass": true,
+      "detail": "«10 temp HP · 1d10 Fire retaliation (free)» — Marcus believed the 1d10 costs his Reaction. Canon prices the ACTIVATION (Reaction · 1 Channel Divinity use) and leaves the retaliation free, automatic and uncapped. Both facts are on this one row"
+    },
+    {
+      "name": "4a2 · rows sharing a heading are told apart by text he can actually SEE",
+      "pass": true,
+      "detail": "«Sentinel» ×2: [Sentinel ⏐ Reaction ⏐ WHEN ⏐ you can take an Opportunity Attac] vs [Sentinel ⏐ Reaction ⏐ WHEN ⏐ you can take a Reaction to make o]  — every distinguishing line is painted and clips nothing, so the two rows read as two different reactions on screen even though the feat name is the same"
+    },
+    {
+      "name": "4a2n · FINDING BJ (open, cosmetic, not a blocker): one feat wearing one name over two triggers",
+      "pass": null,
+      "detail": "1 heading(s) appear twice: Sentinel. The rows are not duplicates and this is not a data bug — Sentinel genuinely has two reaction clauses, and splitting them is what lets Marcus recognise each trigger on its own. But at a glance the band reads as if the app stuttered. The fix is for the row to carry the clause and not just the feat, and it wants a slice of its own because naming a clause from arbitrary canon prose is exactly the kind of thing that goes wrong quietly. Tracked here so a later slice cannot lose it."
+    },
+    {
+      "name": "4d · reachable from the deck — the deck names Reaction as a thing you spend",
+      "pass": true,
+      "detail": "the fixed deck (390×302 at y=478) carries a painted Reaction pip, and the band sits in the same scroll region above it"
+    },
+    {
+      "name": "5a · the deck folds, and gets smaller doing it",
+      "pass": true,
+      "detail": "deck 302px → 186px, and the control now reads \"Expand turn deck\". The height is the claim: aria-expanded=\"false\" over an unchanged box is a lie a screen reader believes and Marcus does not"
+    },
+    {
+      "name": "5b · and the spend state survives the fold  <-- the whole point of folding it",
+      "pass": true,
+      "detail": "7 painted spend pips with the deck folded: Action, Bonus, Move, Action, Bonus, Reaction, Move. A deck that hides whether you have used your Action is a deck you have to unfold every round, which is not a minimise"
+    },
+    {
+      "name": "5c · Active Conditions opens and closes, and the box moves with it",
+      "pass": true,
+      "detail": "aria-expanded false → true, container 57px → 495px. Marcus asked for this one by name: \"it doesnt happen often and that portion takes up so much room\""
+    },
+    {
+      "name": "6a · the SHIPPED bundle names no Gemini model at all",
+      "pass": true,
+      "detail": "zero model ids in dist/. The 404 Marcus hit was models/gemini-2.0-flash, hardcoded in six places; the model is now resolved by asking Google's own /models endpoint and ranking the answer by SHAPE (newest flash > flash-lite > pro). Google can retire anything and the app follows without a deploy — which is the actual requirement, not \"it worked once\""
+    },
+    {
+      "name": "6b · the settings screen offers a key, a test, and an AUTOMATIC model",
+      "pass": true,
+      "detail": "key field true, Test Connection true, \"Automatic\" offered true. Automatic is the default because a default that names a model is a default with a shelf life"
+    },
+    {
+      "name": "6c · UNVERIFIED: that Gemini actually connects with Marcus's key",
+      "pass": null,
+      "detail": "This needs his private API key and a live round trip to Google, which is 🟡 ASK-FIRST (spend money / exceed an API cap) and is not something a prover may do unasked. What IS proved: 49 unit tests in ai.test.ts cover the resolve-rank-retry path including a simulated retirement, and the shipped bundle names no model. What is NOT proved: that his key is valid and his quota is live. He settles that in ten seconds by tapping Test Connection."
+    },
+    {
+      "name": "7 · tests, types and build — measured by npx vitest run, not by this prover",
+      "pass": null,
+      "detail": "Must read: 968 passed + 7 skipped across 41 files, tsc --noEmit clean, npm run build ✓. Includes storage-safety.test.tsx tests 25 and 26 (both storage keys byte-identical across a full render, and nothing reached for the pen), format.test.ts test 7 (no row line contains an ellipsis in any form, across all 71 canon spells) and test 8 (no line exceeds the 46-char two-line budget), and tactics.test.ts (rejoining every bullet of all 71 records returns the input character for character). Those four are where \"all 71\" is actually asserted — a browser can only ever see the spells one character happens to know."
+    },
+    {
+      "name": "8a · reading the tab — a definition, a fold, a retaliation — never touches the sheet",
+      "pass": true,
+      "detail": "6753 bytes in, 6753 bytes out, identical to the seed. Recording a retaliation is the one worth naming: it is this phase's newest write, and it landed entirely on codex-combat-nix-fixture, which is the only key this tab owns"
+    },
+    {
+      "name": "8b · and the interactions really happened, so 8a is not passing by doing nothing",
+      "pass": true,
+      "detail": "codex-combat-nix-fixture changed while the sheet did not — the two-writer bug class this phase opened against, measured at the end of it. Without this line 8a would read just as green against a tab where every button was dead"
+    },
+    {
+      "name": "8c · spending a slot changes the slot he spent, and nothing else on his sheet",
+      "pass": true,
+      "detail": "6 paths moved and every one is accounted for: spellSlots.1.current, updatedAt, identities, customHooks, resourcePools, customConditions. The slot went 3→2, which is the tap. 4 of the rest are the loader adding empty optional arrays — additive, lossless, and present on any save from any tab. NOTHING was removed and no other value moved, which is the actual content of \"except for anything Marcus himself chose to change\""
+    },
+    {
+      "name": "9 · clean console across the whole run",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "vitals": [
+    {
+      "want": "Save DC",
+      "text": "14Save DC",
+      "box": {
+        "x": 29,
+        "y": 85,
+        "w": 62,
+        "h": 49
+      },
+      "inView": true
+    },
+    {
+      "want": "AC",
+      "text": "18AC",
+      "box": {
+        "x": 97,
+        "y": 85,
+        "w": 62,
+        "h": 49
+      },
+      "inView": true
+    },
+    {
+      "want": "Init",
+      "text": "+1Init",
+      "box": {
+        "x": 164,
+        "y": 85,
+        "w": 62,
+        "h": 49
+      },
+      "inView": true
+    },
+    {
+      "want": "Prof",
+      "text": "+3Prof",
+      "box": {
+        "x": 232,
+        "y": 85,
+        "w": 62,
+        "h": 49
+      },
+      "inView": true
+    }
+  ],
+  "options": [
+    {
+      "text": "LongswordAction+7 to hit · 1d8+4 Slashing · 5 ft▸",
+      "box": {
+        "x": 29,
+        "y": 201,
+        "w": 332,
+        "h": 56
+      },
+      "fits": true,
+      "detail": "Longsword — details"
+    },
+    {
+      "text": "Sacred FlameAction · no slot2d8 Radiant · DC 14 DEX · 60 ft · negates▸",
+      "box": {
+        "x": 29,
+        "y": 262,
+        "w": 332,
+        "h": 56
+      },
+      "fits": true,
+      "detail": "Sacred Flame — details"
+    },
+    {
+      "text": "Hearthfire ManifestBonus action30 feet▸",
+      "box": {
+        "x": 29,
+        "y": 324,
+        "w": 332,
+        "h": 56
+      },
+      "fits": true,
+      "detail": "Hearthfire Manifest — details"
+    }
+  ],
+  "reactions": [
+    {
+      "text": "Sentinel ReactionWHEN a creature within 5 feet of you takes the Disengage actionyou can take an Opportunity Attack against it.▸",
+      "box": {
+        "x": 29,
+        "y": 485,
+        "w": 332,
+        "h": 115
+      },
+      "lines": [
+        "Sentinel",
+        "Reaction",
+        "WHEN",
+        "you can take an Opportunity Attack against it.",
+        "▸"
+      ],
+      "cells": [
+        {
+          "text": "Sentinel",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "Reaction",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "WHEN",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "you can take an Opportunity Attack against it.",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "▸",
+          "painted": true,
+          "clips": false
+        }
+      ]
+    },
+    {
+      "text": "Sentinel ReactionWHEN a creature within 5 feet of you attacks a target other than youyou can take a Reaction to make one melee attack against the attacker.▸",
+      "box": {
+        "x": 29,
+        "y": 605,
+        "w": 332,
+        "h": 131
+      },
+      "lines": [
+        "Sentinel",
+        "Reaction",
+        "WHEN",
+        "you can take a Reaction to make one melee attack against the attacker.",
+        "▸"
+      ],
+      "cells": [
+        {
+          "text": "Sentinel",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "Reaction",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "WHEN",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "you can take a Reaction to make one melee attack against the attacker.",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "▸",
+          "painted": true,
+          "clips": false
+        }
+      ]
+    },
+    {
+      "text": "Interception ReactionWHEN a creature you can see hits another creature within 5 feet of you with an attackyou can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.▸",
+      "box": {
+        "x": 29,
+        "y": 743,
+        "w": 332,
+        "h": 148
+      },
+      "lines": [
+        "Interception",
+        "Reaction",
+        "WHEN",
+        "you can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.",
+        "▸"
+      ],
+      "cells": [
+        {
+          "text": "Interception",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "Reaction",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "WHEN",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "you can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "▸",
+          "painted": true,
+          "clips": false
+        }
+      ]
+    },
+    {
+      "text": "Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸",
+      "box": {
+        "x": 29,
+        "y": 896,
+        "w": 332,
+        "h": 98
+      },
+      "lines": [
+        "Opportunity Attack — Longsword",
+        "Reaction",
+        "WHEN",
+        "+7 to hit · 1d8+4 Slashing · 5 ft",
+        "▸"
+      ],
+      "cells": [
+        {
+          "text": "Opportunity Attack — Longsword",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "Reaction",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "WHEN",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "+7 to hit · 1d8+4 Slashing · 5 ft",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "▸",
+          "painted": true,
+          "clips": false
+        }
+      ]
+    },
+    {
+      "text": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationnone yet",
+      "box": {
+        "x": 29,
+        "y": 1001,
+        "w": 332,
+        "h": 174
+      },
+      "lines": [
+        "Flaming Cloak",
+        "Reaction · 1/2 uses",
+        "when",
+        "not stated — record one in Rules flags",
+        "10 temp HP · 1d10 Fire retaliation (free)",
+        "⚑ Canon lists 4 errata on this feature",
+        "▸",
+        "none yet"
+      ],
+      "cells": [
+        {
+          "text": "Flaming Cloak",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "Reaction · 1/2 uses",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "when",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "not stated — record one in Rules flags",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "10 temp HP · 1d10 Fire retaliation (free)",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "⚑ Canon lists 4 errata on this feature",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "▸",
+          "painted": true,
+          "clips": false
+        },
+        {
+          "text": "none yet",
+          "painted": true,
+          "clips": false
+        }
+      ]
+    }
+  ],
+  "compiled": [],
+  "errors": []
+}

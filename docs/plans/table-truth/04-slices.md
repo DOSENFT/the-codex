@@ -464,3 +464,22 @@ model that thinks the retaliation costs a Reaction would count at most one per r
 7. `npm test` green, including the storage-safety tests proving no stored key changed shape.
 8. Nix's `codex-character-${id}` is byte-identical to what it was before Phase 1 started,
    except for anything Marcus himself chose to change.
+
+**ALL EIGHT MET — PHASE CLOSED 2026-08-27.** Not by collecting eleven historical green runs, but by
+re-measuring all eight **together, at HEAD**, in one Chrome session at 390×844 against the real
+production build: `node docs/plans/table-truth/prove-phase1.mjs` → **21 proved · 0 failed · 3
+reported unproved**, exit 0. Gate green the same day: **968 passed + 7 skipped across 41 files**,
+`tsc --noEmit` clean, `npm run build` ✓.
+
+The three unproved are stated rather than buried: **6c** — that Gemini connects with Marcus's own
+key needs his private key and a live call to Google, which is 🟡 ASK-FIRST (the *structural* half,
+that no model id ships in `dist/`, is proved); **7** — the node gate is restated from `vitest`, not
+re-run by the prover; **4a2n** — finding **BJ**, recorded not fixed.
+
+Item 6 was found **already done** by the audit. Item 8's check failed first and the failure was
+mine, not the app's — it split into 8a/8b/8c and got strictly harder. Check 4a2 was rewritten
+mid-close after I noticed its standard appeared in no requirement, and the rewrite was proved able
+to fail by `_falsify-4a2.mjs` (green untouched, red under a clamped band). Full write-up, the two
+corrections, findings **BJ** and **BH**, and the deploy posture: `00-status.md` §PHASE CLOSE.
+
+Nothing has been deployed. Everything is on `v1`; `main` is the live site and is ASK-FIRST.

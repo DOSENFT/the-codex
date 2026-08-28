@@ -2289,6 +2289,160 @@ added until he reports back*, because an invented clause is a rule he never agre
 though the book said it. **Finding BC**, **finding AZ / HEARTH-08**, **VAL-13**, and the
 Gemini/Ollama AI fault, which is a later phase.
 
+## PHASE CLOSE — 2026-08-27. All eight, measured together, at the commit that would deploy.
+
+**Verdict: 21 proved · 0 failed · 3 reported unproved.** `node docs/plans/table-truth/prove-phase1.mjs`,
+exit 0, Chrome at 390×844 against the real production build. Shots and the raw numbers are in
+`_shots-phase1/`.
+
+### Why a new prover instead of re-reading eleven green runs
+
+Every one of the eight points was proved once, by the slice that built it, **against the build that
+existed that afternoon**. Ten more slices then landed on top of it. A phase close that lists eleven
+historical greens is a claim that nothing regressed, not a measurement that nothing regressed — and
+the whole reason this phase exists is that V0.9 was full of things that were true once. So the eight
+points were re-measured **together, now**, in one browser session, on the artifact in `dist/`.
+
+That framing changed two answers. Item 6 turned out to be **already done** — Gemini was fixed as
+part of the AI work and nobody had gone back to mark it. And item 8's wording turned out to be
+sharper than the check I first wrote for it. Both are below.
+
+### What each of the eight now measures
+
+**1 — no definition ends in "…".** Two checks, because the fault has two bodies. `1a` scans **229
+painted text leaves** across the turn options, the reactions band, the deck and every mounted
+dialog: none ends in an ellipsis. `1b` is finding Q's half — a CSS-clipped string reports in FULL to
+`textContent`, so every node-side ellipsis test in this repo is blind to it. `1b` walks the same
+leaves geometrically and asserts none is overflowing its own box under `text-overflow: ellipsis` or
+a `-webkit-line-clamp`. Zero. Canon's own quoted ellipses are deliberately not counted as guilt
+(`ErrataBand.test.tsx` was right about that): a leaf is guilty only if it *ends* in one, which is
+what a truncator does and a quotation does not.
+
+**"All 71 spells" is asserted at the node level, and that is not a dodge.** A browser can only ever
+render the spells one character happens to know. The 71-wide claim lives in `format.test.ts` test 7
+(no row line contains an ellipsis in any form, across every canon spell), test 8 (no line exceeds
+the 46-character two-line budget) and `tactics.test.ts` (rejoining every bullet of all 71 records
+returns the input character for character). The prover cites those rather than pretending a phone
+screen covered them.
+
+**2 — two lines, full text one tap away.** 3 option rows, **all 56px**, and 3/3 fit their own box —
+"fits" is the half that tells a two-line row apart from a three-line row with the third line cut
+off. `Longsword — details` opens a painted dialog **390×760 carrying 3,759 characters**, and nothing
+inside it trails off. That surface holds the longest text in the app, so it is the one most likely
+to cut it.
+
+**3 — vitals without scrolling.** Save DC **14**, AC **18**, Init **+1**, Prof **+3**, all painted
+inside `main`, which is the bounded scroll region y=56..477, at scrollY=0. Measured against `main`
+and not against `innerHeight` on purpose: "without scrolling" is a claim about the window, not the
+document. And they are his numbers, not placeholders — DC 14 is 8+3+3 with CHA **16**, Init +1 is
+DEX 12, Prof +3 is level 7. Every one matches the sheet he photographed.
+
+**4 — the reaction list.** 5 rows: Sentinel · Sentinel · Interception · Opportunity Attack —
+Longsword · Flaming Cloak. Every row states WHEN **before** it states the dice, measured as position
+within the row rather than presence anywhere in it. The cloak row reads *"10 temp HP · 1d10 Fire
+retaliation (free)"* — which is the correction to his own reading; canon prices the **activation**
+(Reaction · 1 Channel Divinity use) and leaves the 1d10 free, automatic and uncapped, and both facts
+sit on that one row.
+
+**5 — both minimise.** Deck **302px → 186px** and the control relabels to "Expand turn deck"; the
+height is the claim, because `aria-expanded="false"` over an unchanged box is a lie a screen reader
+believes and Marcus does not. **7 painted spend pips survive the fold**, which is the entire point —
+a deck that hides whether you have spent your Action is one you unfold every round. Active
+Conditions toggles `false → true` and its container moves **57px → 495px**, the thing he asked for
+by name.
+
+**6 — Gemini survives a retirement, and it was already fixed.** The 404 he hit was
+`models/gemini-2.0-flash`, hardcoded in six places, removed in `f4b134e`. `defaultConfig()` now
+ships `geminiModel: undefined` — *"a default that names a model is a default with a shelf life"* —
+and `resolveGeminiModel()` asks Google's own `/v1beta/models` endpoint and ranks the answer by
+**shape** (newest flash > flash-lite > pro). `ai.test.ts` greps `src/` and fails if the literal
+returns. The prover strengthens that by grepping **`dist/`** instead: **zero Gemini model ids in the
+shipped bundle**, because a source-clean id that got inlined by the bundler would still 404 at his
+table. Settings offers a key field, Test Connection, and "Automatic".
+
+**7 — the node gate.** 968 passed + 7 skipped across 41 files, `tsc --noEmit` clean, `npm run build`
+✓. Reported as a NOTE, not a PASS, because the prover did not run it — restating another tool's
+result as your own finding is how a green board stops meaning anything.
+
+**8 — Nix's sheet is byte-identical except where he chose otherwise.** This is the one that failed
+first, and the failure was **mine**.
+
+### The correction that was worth more than the check it replaced
+
+Check 8 originally drove everything in one breath — slot pip, detail sheet, deck fold, retaliation
+record — and then demanded the stored sheet not move. It failed: **6753 → 6827 bytes**. A probe that
+monkey-patched `Storage.prototype.setItem` and captured a stack trace on every write to
+`codex-character-*` found **exactly one write**, from the spell-slot pip: `spellSlots.1.current`
+3→2, `updatedAt` bumped, and four empty optional arrays added by the loader (`identities`,
+`customHooks`, `resourcePools`, `customConditions`).
+
+Spending a slot **is** a change Marcus chose. Item 8's wording is *"except for anything Marcus
+himself chose to change"*, and a check that ignores the exception is not measuring the requirement.
+So it split into three, and the split is strictly harder to satisfy than what it replaced:
+
+- **8a** — the read-only path (open a definition, fold the deck, record a retaliation) must not touch
+  the sheet **at all**: 6753 in, 6753 out, identical to the seed. The retaliation is the one worth
+  naming — it is this phase's newest write, and it landed entirely on `codex-combat-nix-fixture`.
+- **8b** — the guard that makes 8a mean something: `codex-combat-*` really did change. Without this,
+  8a reads just as green against a tab where every button is dead.
+- **8c** — the slot spend may move `spellSlots.1.current` and the four additive arrays, **and
+  nothing else**. Any stowaway path fails it. 6 paths moved, all 6 accounted for, nothing removed.
+
+### FINDING BJ, and a check I had to rewrite honestly
+
+`4a` passed and its own printed data read `Sentinel | Sentinel`. Both rows are real: Sentinel has
+two distinct reaction clauses (a creature within 5 feet Disengages; a creature within 5 feet attacks
+someone other than you), and splitting them is correct — collapsing them would answer "when can I
+use it" wrongly, and dropping one would lose a reaction he owns.
+
+I wrote a check demanding every row be *told apart by its heading alone*. It failed. Then I noticed
+that **standard appears in no requirement** — I invented it mid-run. Item 4 asks for a list that
+states its trigger first, and a row is its heading **and** its trigger, both painted. Worse, the
+heading-only rule would have **passed** a row whose distinguishing text was clipped behind an
+ellipsis, because a clipped heading is still a distinct heading — it was pointing away from the very
+fault this phase exists to kill.
+
+So `4a2` now measures what actually decides whether he can tell two rows apart: for every group of
+rows sharing a heading, the text he can **see** — painted, and not cutting itself off — must differ.
+It passes: the two Sentinel rows are distinguished by fully-painted, unclipped effect lines.
+
+**That rewrite was checked for the obvious dishonesty** — a test loosened until it goes green.
+`_falsify-4a2.mjs` runs the identical grouping logic twice against the live app: **untouched → PASS**,
+and then with a stylesheet clamping every line in the band to one ellipsised line, **→ FAIL**. Green
+on the real build, red the moment the distinction hides. It can fail, and it fails for the right
+reason.
+
+**FINDING BJ stays open** as a NOTE in the prover and here: one feat wearing one name over two
+triggers reads, at a glance, as the app stuttering. The fix is for the row to carry the *clause* and
+not just the feat, and it wants its own slice, because naming a clause out of arbitrary canon prose
+is exactly the kind of thing that goes wrong quietly.
+
+### The three unproved, stated plainly
+
+- **6c — that Gemini actually connects with his key.** Needs his private API key and a live round
+  trip to Google, which is 🟡 ASK-FIRST. What *is* proved: the resolve-rank-retry path including a
+  simulated retirement, and zero model ids in the shipped bundle. What is *not*: that his key is
+  valid and his quota is live. He settles it in ten seconds by tapping Test Connection.
+- **7 — the node gate**, restated rather than re-run (above).
+- **4a2n — finding BJ**, recorded rather than fixed (above).
+
+### Still open, tracked, not in this phase
+
+**BH** — there is no way to **end an encounter** from the Play tab. `CombatHelper.tsx:1303` passes
+`onEndCombat={handleEndCombat}` to `TurnSummary`, which declares it at line 91, destructures it at
+line 117 and **never uses it**; `TurnDeck.tsx:250` has a Start Combat button with no counterpart.
+Wants its own slice. **BJ** (above). **BC** — two `role="dialog" aria-modal="true"` overlays
+permanently mounted below the fold. **AZ / HEARTH-08** — the prepared-spell bug on the Prep tab.
+**VAL-13**. **AT** — passive features that reach no turn option. The **cloak-teleport clause**, open
+pending his DM, with *nothing added until he reports back*. The wording ambiguity of "Reaction · 1/2
+uses" on the cloak row.
+
+### Deploy posture at close
+
+**Nothing has been deployed at any point in this phase.** All eleven slices and this close sit on
+branch `v1`. Pushing to `main` is a live public deploy to https://dosenft.github.io/the-codex/ and
+is 🟡 ASK-FIRST — asked at close, not assumed.
+
 ## Slice 10f — closed 2026-08-27. The first number the app cannot compute.
 
 Canon's `appAction` for HEARTH-05, verbatim: *"Implement as written but display the total retaliation
