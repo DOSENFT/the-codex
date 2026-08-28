@@ -1,0 +1,129 @@
+{
+  "label": "after",
+  "playExpanded": {
+    "deckH": "302px",
+    "deckPresent": true,
+    "mainH": 421,
+    "mainTop": 56,
+    "mainBottom": 477,
+    "diceCount": 1,
+    "diceInDeck": [
+      true
+    ],
+    "diceFixed": [
+      false
+    ],
+    "diceBox": [
+      {
+        "x": 330,
+        "y": 604,
+        "w": 48,
+        "h": 48
+      }
+    ],
+    "rowsFit": 2,
+    "rowsTotal": 5,
+    "covered": [],
+    "coveredAt": [
+      {
+        "scrollTop": 0,
+        "count": 0
+      },
+      {
+        "scrollTop": 1184,
+        "count": 0
+      },
+      {
+        "scrollTop": 2368,
+        "count": 0
+      }
+    ],
+    "scrollRange": 2368,
+    "intrusions": []
+  },
+  "minimisedVia": "Minimise turn deck",
+  "playMinimised": {
+    "deckH": "186px",
+    "deckPresent": true,
+    "mainH": 537,
+    "mainTop": 56,
+    "mainBottom": 593,
+    "diceCount": 1,
+    "diceInDeck": [
+      true
+    ],
+    "diceFixed": [
+      false
+    ],
+    "diceBox": [
+      {
+        "x": 330,
+        "y": 720,
+        "w": 48,
+        "h": 48
+      }
+    ],
+    "rowsFit": 3,
+    "rowsTotal": 5,
+    "covered": [],
+    "coveredAt": [
+      {
+        "scrollTop": 0,
+        "count": 0
+      },
+      {
+        "scrollTop": 1126,
+        "count": 0
+      },
+      {
+        "scrollTop": 2252,
+        "count": 0
+      }
+    ],
+    "scrollRange": 2252,
+    "intrusions": []
+  },
+  "decklessTab": "Grimoire",
+  "deckless": {
+    "deckH": "0px",
+    "deckPresent": false,
+    "mainH": 652,
+    "mainTop": 56,
+    "mainBottom": 708,
+    "diceCount": 1,
+    "diceInDeck": [
+      false
+    ],
+    "diceFixed": [
+      true
+    ],
+    "diceBox": [
+      {
+        "x": 318,
+        "y": 708,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "rowsFit": null,
+    "rowsTotal": null,
+    "covered": [],
+    "coveredAt": [
+      {
+        "scrollTop": 0,
+        "count": 0
+      },
+      {
+        "scrollTop": 751,
+        "count": 0
+      },
+      {
+        "scrollTop": 1502,
+        "count": 0
+      }
+    ],
+    "scrollRange": 1502,
+    "intrusions": []
+  },
+  "consoleErrors": []
+}

@@ -89,10 +89,11 @@
    ────────────────────────────────────────────────────────────────────────── */
 import { useLayoutEffect, useRef, useState, useCallback } from 'react'
 import type { RefObject } from 'react'
-import { RotateCcw, Sword, Zap, Shield, Footprints, Heart, Flame, ChevronUp, ChevronDown, Play } from 'lucide-react'
+import { RotateCcw, Sword, Zap, Shield, Footprints, Heart, Flame, ChevronUp, ChevronDown, Play, Dices } from 'lucide-react'
 import type { Character, PaladinResources } from '../lib/character'
 import { cn } from '../lib/cn'
 import { useCollapsible } from '../hooks/useCollapsible'
+import { useDiceDock } from './DiceControl'
 
 /** The turn's four slots. Declared here rather than in CombatHelper because the
  *  deck is now the surface that owns them; CombatHelper imports the type back.
@@ -188,6 +189,18 @@ export function TurnDeck({
   const pal: PaladinResources | undefined = character.paladinResources
   const loh = pal?.layOnHands
   const cd = pal?.channelDivinity
+
+  /* ─── the deck adopts the dice button — FINDING BF ───
+     The header of this file already names the offender: the deck "cannot
+     silently bury the last row of the page (V-6b) *the way the dice button
+     did*". It still did. Measured at 390×844 in combat, the floating button
+     overhangs `<main>` by 71px and covers the Interception row's rules text —
+     and by the same 71px minimised, because its position is expressed in terms
+     of `--turn-deck-h` and it travels with this deck.
+     The page is already bounded against the deck, so a control INSIDE the deck
+     covers nothing by construction. `null` when there is no provider (a bare
+     unit render), and then no button is painted rather than a broken one. */
+  const openDice = useDiceDock()
 
   return (
     /* <section>, not <div>: an aria-label on a plain div is ignored, so the
@@ -363,7 +376,13 @@ export function TurnDeck({
             deck exists precisely so nothing you spend is somewhere else.
             Wrapping costs one more line of deck height, which the page absorbs
             automatically because that height is measured, not assumed. */}
-        {levels.length > 0 && (
+        {/* `|| openDice` — the row is also the dice button's home, so it renders
+            for a character with no slots at all (a Fighter) rather than leaving
+            that control nowhere to live. Empty of pips it is just the button,
+            right-aligned, and the deck is one 48px line taller than it would
+            otherwise be — which the page absorbs automatically, because the
+            height is measured. */}
+        {(levels.length > 0 || openDice) && (
           <div className="flex items-center gap-x-3 gap-y-2 flex-wrap">
             {/* Named for the same reason Lay on Hands is: "1st 2nd 3rd" over
                 rows of dots is only obvious to someone who already knows what
@@ -408,6 +427,35 @@ export function TurnDeck({
                 </div>
               </div>
             ))}
+            {/* THE DICE BUTTON, DOCKED.
+                `ml-auto` and not a new row: measured, the pips end at x≈225 of
+                390 in both deck states, so there are 165px of dead width here
+                already and this costs the deck ZERO extra height. The economy
+                row above was the other candidate and is full — its own comment
+                records the 366px budget being spent down to 28px of slack, and
+                a third 48px chrome button there would have truncated the four
+                words that comment exists to protect.
+
+                Same 48px floor, same border and hover language as the minimise
+                and reset buttons two rows up, because that is what it is now:
+                deck chrome, not a floating action. It keeps its old accessible
+                name so nothing that looked for it has to learn a new one. */}
+            {openDice && (
+              <button
+                type="button"
+                onClick={openDice}
+                className={cn(
+                  'ml-auto min-h-[48px] min-w-[48px] shrink-0 flex items-center justify-center',
+                  'rounded-xl text-gold border border-gold/25',
+                  'hover:text-gold hover:bg-white/[0.06] hover:border-gold/60',
+                  'transition-all duration-200 active:scale-[0.95]',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                )}
+                aria-label="Open dice roller"
+              >
+                <Dices size={18} aria-hidden />
+              </button>
+            )}
           </div>
         )}
 

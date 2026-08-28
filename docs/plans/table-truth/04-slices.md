@@ -392,6 +392,28 @@ reactions.
 - **And the cloak row must say the retaliation is free.** The one-line correction that changes how
   he plays every round.
 
+**10f-a — finding BF: the dice control gets a home that is not on top of the page. DONE
+2026-08-27.** *(Inserted ahead of 10f on Marcus's instruction, 2026-08-27: "fix it first." The
+reason it could not wait is that 10f adds a sixth row to the same band — building more content
+under a button that covers content is building the complaint.)*
+
+Gate green: tsc clean, **922 passed + 7 skipped across 39 files**, build ✓, `prove-slice10f-a.mjs`
+all claims hold at 390×844 on three surfaces, run against the stashed pre-change build first for
+the baseline. Full numbers, the corrected finding, and **finding BG** are in `00-status.md`
+§Slice 10f-a. Two things worth carrying forward from it:
+
+- **Half of finding BF was wrong.** The deck was never covering anything — `<main>` already ends
+  1px above it, and rows 4–5 were scrolled out of their own container, not hidden. A finding
+  recorded from a screenshot is a hypothesis; this one named the wrong culprit and the measurement
+  cleared it. The dice FAB was the defect, in **both** deck states, because its `bottom` is
+  written in terms of `--turn-deck-h` and it travels with the deck.
+- **The fix was already in the codebase as a sentence.** `Layout.tsx` states "the scroll region is
+  BOUNDED, not padded" and then applies it to one of the two fixed overlays in that corner. No new
+  principle was needed — a surface with its own fixed bottom chrome adopts the control (`TurnDeck`
+  does, onto 165px of dead width on the slot-pip row, costing zero deck height); everywhere else
+  the button floats and `<main>` is finally bounded against it, at the 71px the header comment had
+  already budgeted.
+
 **10f — HEARTH-05: total retaliation damage per encounter.** *(Was 10e; deferred twice, both times
 for a measured reason.)* The cloak deals 1d10 Fire to whoever hits Nix in melee, and canon's
 `appAction` asks for it verbatim: *"Implement as written but display the total retaliation damage

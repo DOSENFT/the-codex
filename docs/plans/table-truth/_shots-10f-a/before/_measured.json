@@ -1,0 +1,157 @@
+{
+  "label": "before",
+  "playExpanded": {
+    "deckH": "302px",
+    "deckPresent": true,
+    "mainH": 421,
+    "mainTop": 56,
+    "mainBottom": 477,
+    "diceCount": 1,
+    "diceInDeck": [
+      false
+    ],
+    "diceFixed": [
+      true
+    ],
+    "diceBox": [
+      {
+        "x": 318,
+        "y": 406,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "rowsFit": 2,
+    "rowsTotal": 5,
+    "covered": [
+      {
+        "text": "▸",
+        "by": "Open dice roller"
+      }
+    ],
+    "coveredAt": [
+      {
+        "scrollTop": 0,
+        "count": 1
+      },
+      {
+        "scrollTop": 1184,
+        "count": 0
+      },
+      {
+        "scrollTop": 2368,
+        "count": 0
+      }
+    ],
+    "scrollRange": 2368,
+    "intrusions": [
+      {
+        "what": "Open dice roller",
+        "overlapPx": 56,
+        "widthPx": 56
+      }
+    ]
+  },
+  "minimisedVia": "Minimise turn deck",
+  "playMinimised": {
+    "deckH": "186px",
+    "deckPresent": true,
+    "mainH": 537,
+    "mainTop": 56,
+    "mainBottom": 593,
+    "diceCount": 1,
+    "diceInDeck": [
+      false
+    ],
+    "diceFixed": [
+      true
+    ],
+    "diceBox": [
+      {
+        "x": 318,
+        "y": 522,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "rowsFit": 3,
+    "rowsTotal": 5,
+    "covered": [
+      {
+        "text": "▸",
+        "by": "Open dice roller"
+      }
+    ],
+    "coveredAt": [
+      {
+        "scrollTop": 0,
+        "count": 1
+      },
+      {
+        "scrollTop": 1126,
+        "count": 0
+      },
+      {
+        "scrollTop": 2252,
+        "count": 0
+      }
+    ],
+    "scrollRange": 2252,
+    "intrusions": [
+      {
+        "what": "Open dice roller",
+        "overlapPx": 56,
+        "widthPx": 56
+      }
+    ]
+  },
+  "decklessTab": "Grimoire",
+  "deckless": {
+    "deckH": "0px",
+    "deckPresent": false,
+    "mainH": 723,
+    "mainTop": 56,
+    "mainBottom": 779,
+    "diceCount": 1,
+    "diceInDeck": [
+      false
+    ],
+    "diceFixed": [
+      true
+    ],
+    "diceBox": [
+      {
+        "x": 318,
+        "y": 708,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "rowsFit": null,
+    "rowsTotal": null,
+    "covered": [],
+    "coveredAt": [
+      {
+        "scrollTop": 0,
+        "count": 0
+      },
+      {
+        "scrollTop": 716,
+        "count": 0
+      },
+      {
+        "scrollTop": 1431,
+        "count": 0
+      }
+    ],
+    "scrollRange": 1431,
+    "intrusions": [
+      {
+        "what": "Open dice roller",
+        "overlapPx": 56,
+        "widthPx": 56
+      }
+    ]
+  },
+  "consoleErrors": []
+}

@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useEffect, useRef } from 'react'
+import { type ReactNode, useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Swords, BookOpen, Theater, GraduationCap, Settings as SettingsIcon, Dices, ChevronDown, Users, HelpCircle, Puzzle, User, Flame, Compass } from 'lucide-react'
 import { cn } from '../lib/cn'
@@ -11,6 +11,7 @@ import { CharacterSheet } from './CharacterSheet'
 import { MechanicsDrawer } from './MechanicsDrawer'
 import { ToyboxPanel } from './ToyboxPanel'
 import { Settings } from './Settings'
+import { DiceControlContext } from './DiceControl'
 
 export type AppMode = 'session' | 'prep'
 export type TabId = 'combat' | 'grimoire' | 'roleplay' | 'character' | 'persona' | 'academy'
@@ -67,6 +68,27 @@ export function Layout({
   const [toyboxOpen, setToyboxOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
 
+  /* ─── who is painting the dice control — FINDING BF ───
+     A COUNT, not a boolean. Two surfaces could adopt the control across a tab
+     change, and React unmounts the outgoing one *after* the incoming one has
+     mounted. A boolean would go true → false on that unmount and the floating
+     button would flash back in over a screen that already has one. Counting
+     survives the overlap; the number is only ever 0 or 1 today, and that is the
+     point of not encoding today's number in the type. */
+  const [dockCount, setDockCount] = useState(0)
+  const diceDocked = dockCount > 0
+  const setDocked = useCallback((docked: boolean) => {
+    setDockCount(n => Math.max(0, n + (docked ? 1 : -1)))
+  }, [])
+  const openDice = useCallback(() => setDiceOpen(true), [])
+  /* Stable, because `useDiceDock` has `setDocked` in its effect's dependency
+     list. A value rebuilt every render would unregister and re-register the
+     dock on every render of the whole app. */
+  const diceControl = useMemo(
+    () => ({ open: openDice, setDocked }),
+    [openDice, setDocked],
+  )
+
   // Auto-open dice roller when a prefill is provided
   useEffect(() => {
     if (dicePrefill) {
@@ -90,6 +112,7 @@ export function Layout({
   const tabs = appMode === 'session' ? SESSION_TABS : PREP_TABS
 
   return (
+    <DiceControlContext.Provider value={diceControl}>
     <div className="flex flex-col h-full min-h-[100dvh] bg-void-0">
       {/* ─── Fixed Header ─── */}
       <header className="fixed top-0 inset-x-0 z-40 h-14 flex items-center justify-between px-3 bg-void-0/90 backdrop-blur-md border-b border-white/[0.06]">
@@ -358,7 +381,34 @@ export function Layout({
           // future change to the bar can re-open it. That is a bigger change than
           // this one and is written up in TABLE-READY § 14 rather than smuggled
           // in here before a table session.
-          'bottom-[calc(4rem+1px+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]',
+          // FINDING BF — the same "bounded, not padded" law, finally applied to
+          // the OTHER fixed thing in this corner.
+          //
+          // The `pb-[5rem]` below reserves for the dice button and the Veil pill
+          // at the END of the scroll, and the comment two blocks up already says
+          // why that is not enough: at any other scroll position, whatever is at
+          // the foot of the viewport is still underneath. Measured at 390×844 in
+          // combat, the dice button's box overhangs this one by **71px** and
+          // covers the Interception row's rules text — and it overhangs by the
+          // same 71px with the deck minimised, because its `bottom` is expressed
+          // in terms of `--turn-deck-h` and it moves with the deck.
+          //
+          // So when the button is floating, the box ends at the button's own top
+          // edge — which is its `bottom` offset (5rem + the deck) plus its 3.5rem
+          // of height, written the same way the button writes it so the two
+          // cannot drift apart. That is 136px + the deck, which is already well
+          // clear of the 4rem+1px tab bar, so the tab-bar term is subsumed rather
+          // than added: adding both would reserve 65px twice.
+          //
+          // When a surface has ADOPTED the button into its own bottom chrome (the
+          // turn deck does — see DiceControl.tsx), there is nothing floating to
+          // clear and the box keeps every pixel. That asymmetry is deliberate and
+          // is the whole reason docking exists: paying 71px here on the Play tab
+          // would take the readable page from 421px to 350px, on the one screen
+          // already down to 2 of its 5 reaction rows.
+          diceDocked
+            ? 'bottom-[calc(4rem+1px+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]'
+            : 'bottom-[calc(5rem+3.5rem+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]',
           'pb-[5rem]',
           'lg:left-52 lg:bottom-[var(--turn-deck-h,0px)] lg:pb-8',
         )}
@@ -390,8 +440,14 @@ export function Layout({
            `rounded-xl` to rhyme with the cards; the drop shadow is neutral and
            deep instead of a coloured halo, so it reads as lift rather than glow.
            Size, position, icon and behaviour are untouched. */}
+      {/* FINDING BF — painted only while nothing has adopted it.
+          On the Play tab the turn deck takes this control into its own chrome
+          (DiceControl.tsx), so on that screen there is no floating button at all
+          and nothing fixed sits over the page. Everywhere else it floats exactly
+          where it always did, and `<main>` above is now bounded against it. */}
+      {!diceDocked && (
       <button
-        onClick={() => setDiceOpen(true)}
+        onClick={openDice}
         className={cn(
           /* Rides above the turn deck. Without the variable this button sat at
              80px from the bottom, which is inside the deck — it would have
@@ -412,6 +468,7 @@ export function Layout({
       >
         <Dices size={24} aria-hidden />
       </button>
+      )}
 
       {/* ─── Dice Roller Panel ─── */}
       <DiceRoller
@@ -521,5 +578,6 @@ export function Layout({
         </div>
       </nav>
     </div>
+    </DiceControlContext.Provider>
   )
 }

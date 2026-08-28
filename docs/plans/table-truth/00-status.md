@@ -25,6 +25,7 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 10c — the ranked rows become takeable — **DONE 2026-08-27**, gate green: tsc clean, **841 passed + 7 skipped across 35 files** (was 829/35), build ✓, `prove-slice10c.mjs` **9/9 in Chrome**. The finding that set the scope: `CombatApi.take` — the rules-checked spend, written in slice 5 and tested ever since — was reachable **only** from `TurnScreenD` behind `D_PREVIEW`, so on the real Play tab it was **dead code**, and Marcus read the option on the sheet and then darkened the deck chip by hand through the ruleless manual path. `OptionDetailBody` already had the button; **both halves of its gate were shut**. Fixed by widening `spendFor` to offer a Spend for any *available* option (not just slot/pool spends — under the old rule 2 of the 4 rows Nix sees got no button), making `take` **return whether it happened** so the sheet can close on a spend and stay open on a refusal, and painting the reducer's refusal `role="alert"` under the button that produced it, read from the **provider** so 10b's finding BB is not re-committed one slice later. Measured `4 → 1 → 1` with deck and disk agreeing at every step. The prover was run against the stashed pre-change build and went **5/9 — red on exactly the four spend claims and nothing else**. It also produced **finding BC**, a defect older than this phase: two hand-rolled overlays sit in the DOM permanently declaring `role="dialog" aria-modal="true"`, and `checkVisibility()` says TRUE for both (see §Slice 10c below). **HEARTH-04 and HEARTH-05 split out to 10d** — a decision, recorded, not an omission
 - [x] 10d — HEARTH-04: the grant, and the warning before it destroys a pool — **DONE 2026-08-27**, gate green: tsc clean, **876 passed + 7 skipped across 37 files** (was 841/35), build ✓, `prove-slice10d.mjs` **14/14 in Chrome**. Two faults, one cause. Canon requires a prompt before a new temp-HP pool replaces a live one; `setTempHP` was a blind assignment, which is **VAL-06**, pinned `it.fails` in 10a. But the probe found the larger half first: taking Flaming Cloak granted **nothing** — `tempHP` 0 before, 0 after — while the sheet displayed the pool computed from canon's own formula, so the app did the arithmetic and made Marcus type the answer into a different screen. A warning about replacing a pool the app never grants is a warning about nothing, so both shipped together. **One decision, two askers**: `tempHPReplacement` decides and never applies; `HPTracker` asks by arming ("Apply" → **"Replace 5 with 3"**), `OptionDetailSheet` asks with a sentence painted above Spend. Neither surface can reach `setTempHP` without the sentence having been on the glass — enforced *without* making the setter refuse, because 2024 lets the player keep either pool. The grant is **computed, never read**: 11 at level 7 with Charisma 18, matching canon's own worked example, 24 at level 20. **The double-grant bug was designed out and pinned**: Hearthfire Manifest composes as two options sharing one `canonId`, and the grant hangs off `cost.resourcePoolId` — SHAPE, never a name — so the free Bonus Action face grants nothing and Nix cannot stand in 24 temp HP the rules never gave him. **VAL-06 flipped `violated` → `enforced`** and its gap pin was *inverted*, not deleted. The prover was run against the stashed pre-change build and went **5/14 — red on all nine HEARTH-04 and grant claims, green on exactly the four controls**; the new unit tests could not even compile against 10c's types (**24 `error TS`**). **HEARTH-05 split out to 10e** — it needs roll-result capture, which does not exist
 - [x] 10e — reactions truth: every reaction he owns, with its trigger and its price — **DONE 2026-08-27**, gate green: tsc clean, **914 passed + 7 skipped across 38 files** (was 876/37), build ✓, `prove-slice10e.mjs` **18/18 in Chrome at 390×844**. **Re-scoped by Marcus on 2026-08-27**, off his own sheet: *"I have Sentinel and interception"* — the app showed neither. Measured, the cause was **finding AT** with a second name on it: `character.feats` was read by **NOTHING**, zero references across `src/lib/turn/` and `src/lib/canon/`, so a feat could not become a turn option however his sheet was filled in. Fixed by `feats.ts`, which recognises a reaction by its **cost phrase** — *takes/uses/spends a Reaction* — and never by a feat name, with a veto for the inverse shape so a feat that *denies* reactions is not offered as one. **One row per effect, not per feat**: Sentinel is one feat with two different triggers and gets two rows; its Speed-0 rider gets none, because it costs nothing. It plugs into **`compose.ts`, not `options.ts`** — `options.ts` is pinned byte-identical to `main` by `overlay.test.ts` case 15 (**finding BD**), and slice 6 had already ruled at `compose.ts:389` that the composer is the layer that gets to know about reactions. Wiring it exposed **finding BE**: option ids were **never unique** — minted from type+name and deduped by id — so one feat with two reactions silently collapsed to one row, latent since slice 1 and invisible until a feat like Sentinel arrived. Also settled the cloak's price: Marcus believed the 1d10 retaliation *costs* a Reaction; canon makes the **activation** the Reaction and the retaliation free, automatic and uncapped, and the row's blank price is what taught him otherwise. `isFreeRider` derives this from the **shape** of canon's own sentence — a die with a trigger of its own and no named price — so Smoldering Smite's `1d8 Fire` is correctly left alone. Prover run against the stashed pre-change build went **8/18 — red on all ten feat-and-price claims, green on exactly the eight controls**. Produced **finding BF**: at five rows the band now runs under the dice FAB and the sticky deck (see §Slice 10e). **HEARTH-05 moved to 10f**
+- [x] 10f-a — finding BF: the dice control gets a home that is not on top of the page — **DONE 2026-08-27**, gate green: tsc clean, **922 passed + 7 skipped across 39 files** (was 914/38), build ✓, `prove-slice10f-a.mjs` all claims hold in Chrome at 390×844 across three surfaces. Inserted **ahead of** 10f at Marcus's instruction ("fix it first"), because 10f adds a *sixth* row to the very band the button was sitting on. **Half of finding BF as carried out of 10e was wrong, and measuring it corrected the record**: "the deck covers rows 4 and 5" was never occlusion — `<main>` is itself `position: fixed` and already ends 1px above the deck's top edge, so those rows were merely scrolled below their own container, and one thumb-flick recovers them. The naive overlap check reports **21 covered runs** pre-change and **19 of them are that artefact**; clipping each text run to `<main>`'s box before testing it is what separates real occlusion from scroll-recoverable, and it is the same distinction finding Q drew between the model and the glass. What survived the clip is the other half, **real and permanent**: the dice FAB is `fixed z-50` and sits *wholly inside* `<main>`, and because its `bottom` is expressed in terms of `--turn-deck-h` it **travels with the deck** — minimising does not uncover the text, it changes which text is covered (expanded, the Interception row's rules text; minimised, the Opportunity Attack row's `Reaction` label). Fixed by applying the law this app **already wrote down and then applied to only one of its two overlays** — `Layout.tsx`: *"the scroll region is BOUNDED, not padded."* New seam `DiceControl.tsx`: a surface that already owns fixed bottom chrome **adopts** the control into it; everywhere else the button floats and `<main>` is finally bounded against it. The deck adopts it onto the **slot-pip row**, into 165px of dead width it was already paying for — explicitly *not* the economy row, whose own comment records its 366px budget spent down to 28px of slack. Measured: Play `<main>` **421px → 421px** expanded and **537px → 537px** minimised — **not one pixel lost** — with the band still fitting the same 2 of 5 and 3 of 5 rows, which is the honesty check a "fix" that cleared the overlap by shrinking the porthole would have failed. Grimoire pays the 71px as budgeted (**723 → 652**, 9.8%) and gets the bound it never had. The docking flag is a **count, not a boolean**: a tab change mounts the incoming surface before unmounting the outgoing one, and a boolean would flash the floating button back in over a screen that already has one. Prover run against the stashed pre-change build first, as the baseline; the 8 new unit tests run against pre-change `TurnDeck` went **6 red / 2 green — red on every docking claim, green on exactly the two regression guards**. Produced **finding BG**: "zero text runs covered" is a claim that can pass by luck (see §Slice 10f-a below)
 - [ ] 10f — HEARTH-05: total retaliation damage per encounter. Deferred out of 10d 2026-08-27 and again out of 10e, after measuring what it actually needs: the app has **no memory of what a die came up as** (`DiceRoller` throws a number and forgets it), and the obvious shortcut of summing the session log is **silently wrong** — `LOG_DEPTH = 25`, so past 25 entries the earliest retaliations fall off the end and the total quietly shrinks. A wrong total that looks right is worse at the table than no total. Carries **finding BF** with it
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
@@ -2000,6 +2001,78 @@ AZ / HEARTH-08**, Prep-tab work; and **finding AT**, passive features reaching n
 
 *(10e did not build HEARTH-05. Marcus re-scoped the slice — see below. HEARTH-05 is now 10f and
 everything in this section still describes what it needs.)*
+
+## Slice 10f-a — closed 2026-08-27. The button was the defect, and half the finding was wrong.
+
+**Shipped:** `src/components/DiceControl.tsx` (new seam — context + `useDiceControl` +
+`useDiceDock`), `Layout.tsx` (docking count, conditional `<main>` bound, the floating button
+gated), `TurnDeck.tsx` (adopts the control onto the slot-pip row),
+`TurnDeck.dice.test.tsx` (**the first test file `TurnDeck` has ever had**, 8 cases),
+`prove-slice10f-a.mjs` (geometric, before/after, three surfaces).
+
+**The measurement, `390×844`, Marcus's real sheet, in combat:**
+
+| | BEFORE | AFTER |
+|---|---|---|
+| Play, deck expanded | `<main>` 421px · 56px of dice button inside it · 1 covered run | `<main>` **421px** · **no fixed chrome inside it at all** · 0 |
+| Play, deck minimised | `<main>` 537px · same 56px · 1 covered run | `<main>` **537px** · same · 0 |
+| Grimoire (no deck) | `<main>` 723px · same 56px · 0 covered runs | `<main>` **652px** · same · 0 |
+| band rows on one screen | 2/5 expanded · 3/5 minimised | **2/5 · 3/5 — unchanged** |
+| deck height | 302px · 186px | **302px · 186px — unchanged** |
+
+Read the Play rows first, because they are the ones that could have gone wrong. `<main>` did not
+lose a pixel and the band still fits the same number of rows. The control moved into width the
+deck was already paying for. **A fix that cleared the overlap by shrinking the page would have
+made his actual complaint worse**, and those two equalities are what would have caught it.
+
+Grimoire is where the 71px is spent — and note **71, not 56**: bounding costs the button's height
+*plus* the 15px it floats above the old boundary, because the page must clear its top edge, not
+its footprint. Both numbers are correct and they measure different things.
+
+### Finding BF, corrected — the artefact and the defect
+
+Carried out of 10e as two claims. Only one was true.
+
+- *"The sticky deck covers rows 4 and 5."* **Artefact.** `<main>` is `position: fixed` and already
+  ends 1px above the deck. Those rows were scrolled below their own container, not hidden under
+  anything. This is what "BOUNDED, not padded" already bought, working correctly.
+- *"The dice FAB covers the Interception row."* **Defect, permanent, and worse than described.**
+  Not "a row" — whatever is under it, at whatever scroll position, forever. And minimising the
+  deck was never a workaround: the button's `bottom` is written in terms of `--turn-deck-h`, so
+  it moves with the deck and merely picks a new victim.
+
+The correction matters more than the fix. **A finding recorded from a screenshot is a hypothesis.**
+The screenshot showed text ending abruptly near the deck and the deck got the blame; the
+measurement says the deck is the one piece of chrome in that corner that was already behaving.
+
+### Finding BG — "zero text runs covered" is a claim that can pass by luck
+
+The pre-change Grimoire tab reported **0 covered text runs** while a 56×56 fixed button sat
+inside its scroll region. Not because it was safe — because no word happened to land in that
+corner on that sheet at those three scroll positions. Sample a different character, or scroll one
+row further, and the same build covers text.
+
+So the prover asserts the claim that **cannot** get lucky: *no fixed element intersects `<main>`'s
+box at all.* Zero intrusion makes "nothing is covered" true at every scroll position on every
+sheet, rather than at the three that were sampled. The covered-run count is kept as the
+human-readable half — it is what names the specific words Marcus could not read — but it is not
+what the slice is graded on.
+
+This generalises past this slice: **a proof of absence is only as strong as the search that
+failed to find anything.** Prefer a structural claim that forbids the fault to a sampled claim
+that failed to observe it. Finding Q said browser claims must be geometric; BG adds that the
+geometry must be of the *constraint*, not of the *symptom*.
+
+### What is still open after 10f-a
+
+**Finding BC** — untouched, and now the only fixed-position work left in the phase: `DiceRoller`
+and `MechanicsDrawer` are permanently in the DOM at y=844 with `pointer-events: none`, both
+declaring `role="dialog" aria-modal="true"`, both reported visible by `checkVisibility()`. They do
+not intrude on `<main>` (the prover's filter excludes `pointer-events: none`, which is exactly
+why they are invisible to it), so this slice neither fixed nor worsened them.
+
+10f still needs everything §Slice 10e recorded about HEARTH-05 — the roll-result capture that
+does not exist, and the reason `LOG_DEPTH = 25` cannot be the accumulator.
 
 ## Slice 10e — closed 2026-08-27. Two of his reactions could not appear on any screen.
 
