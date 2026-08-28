@@ -1301,7 +1301,6 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
           character={character}
           combatState={combatState}
           onNextTurn={handleNextTurn}
-          onEndCombat={handleEndCombat}
           onOpenDiceRoller={onOpenDiceRoller}
           onOpenLookup={() => setLookupOpen(true)}
           onCombatStateChange={updateCombat}
@@ -1504,6 +1503,7 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
         character={character}
         inCombat={combatState.inCombat}
         onStartCombat={handleStartCombat}
+        onEndCombat={handleEndCombat}
         economy={economy}
         onToggleEconomy={toggleEconomy}
         onResetEconomy={resetEconomy}

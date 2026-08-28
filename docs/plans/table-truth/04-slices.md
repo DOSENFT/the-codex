@@ -482,4 +482,26 @@ mid-close after I noticed its standard appeared in no requirement, and the rewri
 to fail by `_falsify-4a2.mjs` (green untouched, red under a clamped band). Full write-up, the two
 corrections, findings **BJ** and **BH**, and the deploy posture: `00-status.md` §PHASE CLOSE.
 
-Nothing has been deployed. Everything is on `v1`; `main` is the live site and is ASK-FIRST.
+## POST-CLOSE — BH and BJ closed, and the phase deployed. 2026-08-27
+
+Marcus: *"Fix the two things left open and then deploy."* Both were the two the close listed as
+wanting their own slice; they got one together, because they share a surface.
+
+- **BJ** — the two Sentinel rows now wear their own headings, the suffix **computed** out of each
+  row's own trigger rather than written down. Fixed at `reactionRows()`, never at the option, because
+  canon is matched by `option.name`. Three `feats.test.ts` tests were re-anchored on that invariant —
+  one of them had gone silently *vacuous*, and now carries a length assertion so it cannot again.
+  `prove-phase1.mjs` check **4a2** was itself passing vacuously after the fix and was **inverted** to
+  a structural claim; **4a2n is gone.**
+- **BH** — «End Combat» now lives in the fixed deck, in «Start Combat»'s exact slot, behind a
+  two-tap confirm that names what it clears. It is **not** in `TurnSummary`'s header: measured, that
+  header paints at y=1297 in an 844px viewport that does not scroll. All BH code was removed from
+  `TurnSummary` — one door, not two. Honest cost: the deck grows **302→368px** mid-combat, so the
+  option list loses **66px**; exclusivity means it grows once.
+
+Gate: `tsc` clean, **990 passed + 7 skipped across 42 files**, `npm run build` ✓,
+`prove-bh-bj.mjs` **15 proved · 0 failed · FALSIFIABLE: YES**, `prove-phase1.mjs` **21 · 0 · 2
+unproved**. Full write-up: `00-status.md` §POST-CLOSE.
+
+**Deployed** — `v1` → `main`, live at https://dosenft.github.io/the-codex/, authorised in the same
+sentence that asked for the fixes. The first deploy of the phase.

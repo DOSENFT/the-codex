@@ -79,6 +79,90 @@ export interface ReactionRow {
   option: TurnOption
 }
 
+/* ── FINDING BJ: one feat, one name, two triggers ───────────────────────────
+   Found at Phase 1's close by reading a passing check's own printout: the band
+   rendered «Sentinel | Sentinel». Neither row is a duplicate — Sentinel has two
+   separate reaction clauses (a creature within 5 feet Disengages; a creature
+   within 5 feet attacks someone other than you) and `feats.ts` is right to
+   split them, because collapsing them answers "when can I use it" wrongly and
+   dropping one loses a reaction he owns. But two rows under one heading read,
+   at a glance, as the app stuttering. It was also an accessibility fault nobody
+   had noticed: both detail buttons were named «Sentinel — details», so a screen
+   reader offered the same door twice.
+
+   THE SUFFIX IS COMPUTED, NEVER WRITTEN. The tempting fix is a label —
+   "Sentinel (Disengage)" — and it is the open-world rule's exact trap: it works
+   for the one feat I can see and invents a name for every feat I cannot. So the
+   disambiguator is lifted VERBATIM out of each row's own trigger, at the word
+   where the triggers stop agreeing. For Marcus that yields «takes the Disengage
+   action» and «attacks a target other than you» — his book's words, not mine.
+
+   IT REFUSES RATHER THAN GUESSES. If any row in a colliding group has no stated
+   trigger, if one trigger is a prefix of another, or if the divergent tails are
+   not themselves distinct, nothing is renamed. A heading collision is a fault
+   worth naming; a heading collision plus an invented distinction is worse than
+   the collision.
+
+   Cut at a comma, never mid-word, and never with an ellipsis — the same rule
+   the rest of this phase runs on. Table Truth, phase-1 close-out. */
+const wordsOf = (s: string) => s.trim().split(/\s+/).filter(Boolean)
+
+/** The leading SEGMENT of a phrase. Whole clauses are dropped; characters never
+ *  are, so nothing this returns can end mid-word or need an ellipsis. */
+function firstSegment(words: string[]): string {
+  const joined = words.join(' ')
+  const comma = joined.indexOf(', ')
+  return comma > 0 ? joined.slice(0, comma) : joined
+}
+
+/** How many leading words every one of these lists shares. */
+function commonPrefixLength(lists: string[][]): number {
+  const shortest = Math.min(...lists.map(l => l.length))
+  let n = 0
+  while (n < shortest && lists.every(l => l[n] === lists[0][n])) n++
+  return n
+}
+
+/** Give rows that share a heading their own heading, out of their own triggers.
+ *
+ *  Mutates the freshly-built row objects rather than rebuilding them: they were
+ *  created one statement ago in `reactionRows` and are visible to nobody else.
+ *  `option.name` is deliberately NOT touched — canon is matched by it two lines
+ *  earlier, and a renamed option is an option canon can no longer find. */
+export function disambiguateHeadings(rows: ReactionRow[]): ReactionRow[] {
+  const groups = new Map<string, ReactionRow[]>()
+  for (const row of rows) {
+    const group = groups.get(row.name)
+    if (group) group.push(row)
+    else groups.set(row.name, [row])
+  }
+
+  for (const group of groups.values()) {
+    if (group.length < 2) continue
+    const triggers = group.map(r => r.when)
+    if (triggers.some(t => !t || !t.trim())) continue
+
+    const lists = triggers.map(t => wordsOf(t as string))
+    const shared = commonPrefixLength(lists)
+    const tails = lists.map(l => firstSegment(l.slice(shared)))
+
+    /* A tail that is empty distinguishes nothing — that is one trigger being a
+       prefix of another, or the two being identical. Leave the rows alone. */
+    if (tails.some(t => t.length === 0)) continue
+    /* The second line is a POSTCONDITION, not an expected case, and the tests
+       say so. Because the shared prefix is maximal, two tails always differ at
+       their first word; the only way to collide is for the triggers to be
+       equal, which the line above already caught. It stays because it is free
+       and it is the invariant the whole rename rests on: never turn one
+       collision into a longer one. */
+    if (new Set(tails).size !== tails.length) continue
+
+    group.forEach((row, i) => { row.name = `${row.name} · ${tails[i]}` })
+  }
+
+  return rows
+}
+
 /** Every option the engine produced, in a stable order, deduped by id.
  *
  *  `ranked` first, then `rest`, then the faces of each mutex group — which is
@@ -104,7 +188,7 @@ export function reactionRows(
 ): ReactionRow[] {
   const ctx = featureContextOf(character)
 
-  return allOptions(turn)
+  return disambiguateHeadings(allOptions(turn)
     .filter(option => option.cost.slot === 'reaction')
     .map(option => {
       const feature = featureByName(option.name)
@@ -140,5 +224,5 @@ export function reactionRows(
         retaliation: retaliationOf(feature, ctx),
         option,
       }
-    })
+    }))
 }

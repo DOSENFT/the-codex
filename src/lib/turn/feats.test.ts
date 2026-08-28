@@ -253,16 +253,43 @@ describe('the whole way through — Marcus\'s two feats reach the reactions band
   const turn = composeTurn({ character: marcus, combat: null })
   const rows = reactionRows(turn, marcus)
 
+  /* Rows are selected by `option.name` throughout this block, not by the
+     displayed `name`. Finding BJ's fix renames the HEADING of rows that would
+     otherwise collide — «Sentinel · takes the Disengage action» — while leaving
+     `option.name` untouched, because canon is matched by it. Selecting on the
+     display name made these tests silently stop finding Sentinel at all: one
+     went red, and the `when` test below went GREEN by checking nothing but
+     Interception. Selecting on the invariant is what these tests actually
+     meant, and it cannot rot the next time a heading is rewritten. */
+  const named = (n: string) => rows.filter(r => r.option.name === n)
+
   it('shows Opportunity Attack, Flaming Cloak, AND the feats — nothing displaced', () => {
     const names = rows.map(r => r.name)
     expect(names).toContain('Opportunity Attack — Hearthbrand')
     expect(names).toContain('Flaming Cloak')
-    expect(names.filter(n => n === 'Sentinel').length).toBe(2)
-    expect(names.filter(n => n === 'Interception').length).toBe(1)
+    expect(named('Sentinel').length).toBe(2)
+    expect(named('Interception').length).toBe(1)
+  })
+
+  it('heads the two Sentinel rows differently, out of Sentinel\'s own trigger words', () => {
+    /* Finding BJ: two rows both headed «Sentinel» read, at a glance, as the app
+       stuttering, and named the same door twice to a screen reader. */
+    const headings = named('Sentinel').map(r => r.name)
+    expect(new Set(headings).size).toBe(2)
+    for (const [i, h] of headings.entries()) {
+      expect(h).toMatch(/^Sentinel · /)
+      /* The suffix is lifted from the row's OWN trigger, never written down
+         here — a hand-made label would fail this line. */
+      expect(named('Sentinel')[i].when).toContain(h.replace('Sentinel · ', ''))
+      expect(h).not.toContain('…')
+      expect(h).not.toContain('...')
+    }
   })
 
   it('gives every feat row a DECLARED when — canon states it, so the app does not guess', () => {
-    for (const row of rows.filter(r => r.name === 'Sentinel' || r.name === 'Interception')) {
+    const feats = [...named('Sentinel'), ...named('Interception')]
+    expect(feats.length).toBe(3)
+    for (const row of feats) {
       expect(row.whenSource, row.name).toBe('declared')
       expect(row.when, row.name).toBeTruthy()
       expect(row.when!, row.name).toMatch(/^When /)
@@ -274,7 +301,7 @@ describe('the whole way through — Marcus\'s two feats reach the reactions band
        slice 10e taught compose.ts to break a collision, the second Sentinel was
        swallowed whole by the first and Marcus lost a reaction to a clash he could
        not see. */
-    const sentinels = rows.filter(r => r.name === 'Sentinel')
+    const sentinels = named('Sentinel')
     expect(new Set(sentinels.map(r => r.id)).size).toBe(2)
     expect(sentinels[0].when).not.toBe(sentinels[1].when)
   })

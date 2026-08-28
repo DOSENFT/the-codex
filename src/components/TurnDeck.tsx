@@ -89,9 +89,10 @@
    ────────────────────────────────────────────────────────────────────────── */
 import { useLayoutEffect, useRef, useState, useCallback } from 'react'
 import type { RefObject } from 'react'
-import { RotateCcw, Sword, Zap, Shield, Footprints, Heart, Flame, ChevronUp, ChevronDown, Play, Dices } from 'lucide-react'
+import { RotateCcw, Sword, Zap, Shield, Footprints, Heart, Flame, ChevronUp, ChevronDown, Play, Square, Dices } from 'lucide-react'
 import type { Character, PaladinResources } from '../lib/character'
 import { cn } from '../lib/cn'
+import { EndCombatConfirm } from './combat/EndCombatConfirm'
 import { useCollapsible } from '../hooks/useCollapsible'
 import { useDiceDock } from './DiceControl'
 
@@ -111,10 +112,15 @@ const LEVEL_LABELS: Record<number, string> = {
 
 interface TurnDeckProps {
   character: Character
-  /** Whether a combat is running. Read ONLY to decide whether to offer
-   *  «Start Combat» — the deck does not otherwise change shape mid-fight. */
+  /** Whether a combat is running. Read ONLY to decide which of «Start Combat»
+   *  and «End Combat» to offer — they share one slot and the deck does not
+   *  otherwise change shape mid-fight. */
   inCombat: boolean
   onStartCombat: () => void
+  /** Finding BH. Ends the encounter: finalises the damage log and clears the
+   *  round, the concentration and the spent economy. Never called on the first
+   *  tap — see `EndCombatConfirm`. */
+  onEndCombat: () => void
   economy: ActionEconomy
   onToggleEconomy: (key: keyof ActionEconomy) => void
   onResetEconomy: () => void
@@ -148,6 +154,7 @@ export function TurnDeck({
   character,
   inCombat,
   onStartCombat,
+  onEndCombat,
   economy,
   onToggleEconomy,
   onResetEconomy,
@@ -163,6 +170,10 @@ export function TurnDeck({
      profile renders, so minimising is a thing Marcus does, never a thing the
      app decides for him. Same `codex-ui-${id}` map as every other fold. */
   const deck = useCollapsible('turn-deck', character.id, true)
+  /* Finding BH: the first tap only ARMS. Deliberately NOT persisted and
+     deliberately not reset by anything but its own two buttons — an armed state
+     that survived a reload would be a loaded gun in the deck. */
+  const [endArmed, setEndArmed] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [custom, setCustom] = useState('')
 
@@ -262,6 +273,58 @@ export function TurnDeck({
                 is a label, not a title. */}
             <span className="text-sm font-semibold tracking-wide">Start Combat</span>
           </button>
+        )}
+
+        {/* ── and the way out of it — FINDING BH ──
+            `onEndCombat` had been a prop of `TurnSummary` since that component
+            was written, wired to a complete handler, destructured, and never
+            called: combat could be started and never finished, so the round
+            counter climbed, concentration never cleared, and the damage-log
+            save that writes the encounter into history never ran.
+
+            IT IS HERE AND NOT IN THE SUMMARY HEADER, and that was settled by
+            measurement rather than taste. The first attempt put it in
+            `TurnSummary`'s header, which reads as the natural home because that
+            header already says what combat IS — «Round 3 · Your Turn». The
+            browser disagreed: at 390×844 that header paints at y=1297 inside a
+            scroller whose visible window ends at 478, so the control sat some
+            800px below anything Marcus can see. «Start Combat» is one thumb-fall
+            away in this fixed deck; ending it was an 800px scroll. That
+            asymmetry was the real fault, and it is what this slot fixes.
+
+            WHAT IT COSTS, STATED HONESTLY, because the first draft of this
+            comment claimed it was free and the browser said otherwise. This is
+            the same slot «Start Combat» occupies and the two are exclusive, so
+            the deck is never taller in combat than it already is out of it —
+            that much is measured (prove-bh-bj BH9, Δh=0). But the slot used to
+            be EMPTY during a fight, and it no longer is: the deck goes 302px →
+            368px mid-combat, so the scrolling option list above it loses 66px
+            for the duration. That is a real cost and it is the price of the
+            control being reachable at all; the alternative measured at an 800px
+            scroll. The armed state REPLACES the button rather than opening
+            beneath it, so confirming costs no further height. */}
+        {inCombat && (
+          endArmed ? (
+            <EndCombatConfirm onKeepGoing={() => setEndArmed(false)} onConfirm={onEndCombat} />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEndArmed(true)}
+              aria-expanded={false}
+              className={cn(
+                'w-full min-h-[56px] rounded-xl',
+                'flex items-center justify-center gap-2',
+                'bg-white/[0.03] border border-white/10 text-forge-2',
+                'hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-300',
+                'transition-all duration-200 ease-forge active:scale-[0.98]',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arcane',
+              )}
+              aria-label="End combat"
+            >
+              <Square size={15} aria-hidden />
+              <span className="text-sm font-semibold tracking-wide">End Combat</span>
+            </button>
+          )
         )}
 
         {/* ── the economy — what the turn itself costs ── */}

@@ -480,28 +480,38 @@ const groups = repeated.map((h) => {
   );
   return { h, seen, distinct: new Set(seen).size === seen.length };
 });
+/* ── AND THEN FINDING BJ WAS FIXED, WHICH BROKE THIS CHECK BY SATISFYING IT ──
+   With the headings now disambiguated, `groups` is EMPTY and the version above
+   passed while observing nothing — it printed the word "vacuous" and scored
+   itself green. That is finding BG exactly: a sampled claim that FAILED TO
+   OBSERVE the fault, dressed as a claim that the fault is absent. BG's own
+   ruling is to prefer a structural claim that FORBIDS it.
+
+   So the claim is inverted. It no longer asks "where headings collide, is the
+   distinction visible" — it asks the stronger question the band can always
+   answer: is every heading distinct from every other, AND painted, AND not
+   cutting itself off. That can never be vacuous, because there is always at
+   least one row to read; it subsumes the old check, because a collision now
+   fails outright rather than being excused by a visible second line; and it
+   still forbids the ellipsis dodge, because a heading made distinct only by
+   text hidden behind a clamp fails the second half. */
+const visibleHeads = rows.map((r) => r.cells[0] ?? { text: r.lines[0], painted: false, clips: true });
+const stillRepeated = [...new Set(headings.filter((h, i) => headings.indexOf(h) !== i))];
+const hiddenHeads = visibleHeads.filter((c) => !c.painted || c.clips);
 check(
-  '4a2 · rows sharing a heading are told apart by text he can actually SEE',
-  groups.every((g) => g.distinct),
-  groups.length === 0
-    ? 'vacuous — no heading is shared by two rows, so this check observed nothing (finding BG)'
-    : groups
-        .map((g) => `«${g.h}» ×${g.seen.length}: ` + g.seen.map((s) => `[${s.slice(0, 62)}]`).join(' vs '))
-        .join(' | ') +
-      `  — every distinguishing line is painted and clips nothing, so the two rows read as two ` +
-      `different reactions on screen even though the feat name is the same`,
+  '4a2 · every reaction row wears its own heading, and every heading is readable',
+  rows.length > 0 && stillRepeated.length === 0 && hiddenHeads.length === 0,
+  rows.length === 0
+    ? 'no reaction rows at all — nothing to read'
+    : `${rows.length} rows, ${new Set(headings).size} distinct headings, ${hiddenHeads.length} unreadable: ` +
+      headings.map((h) => `«${h}»`).join(' ') +
+      (stillRepeated.length ? `  — REPEATED: ${stillRepeated.join(', ')}` : '') +
+      (hiddenHeads.length ? `  — HIDDEN: ${hiddenHeads.map((c) => c.text).join(', ')}` : '') +
+      `  — finding BJ: one feat with two reaction clauses now heads each row with its own trigger ` +
+      `words, lifted verbatim from canon at the point the two triggers stop agreeing, so «Sentinel» ` +
+      `twice became «Sentinel · takes the Disengage action» and «Sentinel · attacks a target other ` +
+      `than you». Both rows survive — nothing was collapsed to make this pass`,
 );
-if (repeated.length) {
-  note(
-    '4a2n · FINDING BJ (open, cosmetic, not a blocker): one feat wearing one name over two triggers',
-    `${repeated.length} heading(s) appear twice: ${repeated.join(', ')}. The rows are not duplicates ` +
-      `and this is not a data bug — Sentinel genuinely has two reaction clauses, and splitting them ` +
-      `is what lets Marcus recognise each trigger on its own. But at a glance the band reads as if ` +
-      `the app stuttered. The fix is for the row to carry the clause and not just the feat, and it ` +
-      `wants a slice of its own because naming a clause from arbitrary canon prose is exactly the ` +
-      `kind of thing that goes wrong quietly. Tracked here so a later slice cannot lose it.`,
-  );
-}
 
 const deckHasReaction = R.pips.some((p) => /^Reaction: /.test(p.label) && p.painted);
 check(

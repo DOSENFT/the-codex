@@ -88,7 +88,6 @@ interface TurnSummaryProps {
   character: Character
   combatState: CombatState
   onNextTurn: () => void
-  onEndCombat: () => void
   onOpenDiceRoller?: (prefill: { notation: string; label: string }) => void
   onOpenLookup: () => void
   onCombatStateChange: (state: CombatState) => void
@@ -114,7 +113,6 @@ export function TurnSummary({
   character,
   combatState,
   onNextTurn,
-  onEndCombat,
   onOpenDiceRoller,
   onOpenLookup,
   onCombatStateChange,
@@ -237,6 +235,7 @@ export function TurnSummary({
           </Button>
         </div>
       </div>
+
 
       {/* ── Action Economy Strip ── */}
       <div className="px-4 py-2.5 border-b border-white/5">

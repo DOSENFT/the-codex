@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { composeTurn } from './compose'
-import { reactionRows, type ReactionRow } from './reactions'
+import { reactionRows, disambiguateHeadings, type ReactionRow } from './reactions'
 import { NIX } from './fixtures/nix'
 import { DETAIL_BUDGET_CHARS } from './overlay'
 import { setRuling } from '../errata-rulings'
+import { featByName } from '../canon/lookup'
+import type { Character } from '../character'
 
 /* ============================================================================
    SLICE 6 — the reaction band's data.
@@ -320,5 +322,166 @@ describe('reactionRows — a ruling changes what it SAYS, never what it COMPUTES
     expect(after.body.length).toBeLessThanOrEqual(DETAIL_BUDGET_CHARS)
     expect(after.when!.length).toBeGreaterThan(0)
     expect(`${after.when} ${after.body}`).not.toMatch(/…|\.\.\./)
+  })
+})
+
+/* ============================================================================
+   FINDING BJ — one feat, one name, two triggers.
+
+   Found at Phase 1's close, in the printout of a check that PASSED: the band
+   rendered «Sentinel | Sentinel». Both rows are real, and splitting them is
+   right. Sharing a heading is not.
+
+   These tests are about the SUFFIX BEING COMPUTED. The fix that would have been
+   four lines long — a lookup table mapping "Sentinel" to two hand-written
+   labels — passes any test that only checks the two rows differ. So the tests
+   below check where the words CAME FROM, and check the three cases where the
+   right answer is to refuse and leave the collision standing.
+   ========================================================================= */
+describe('finding BJ — rows that share a heading get their own', () => {
+  const SENTINEL = featByName('Sentinel')!
+  const nixWithFeats: Character = {
+    ...NIX,
+    feats: [
+      { name: 'Sentinel', description: '', isHomebrew: false, effects: [] },
+      { name: 'Interception', description: '', isHomebrew: false, effects: [] },
+    ],
+  }
+  const rows = reactionRows(
+    composeTurn({
+      character: nixWithFeats,
+      combat: {
+        inCombat: true, round: 3, yourTurn: true,
+        turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
+        spellSlots: { 1: { used: 0, max: 4 }, 2: { used: 0, max: 3 } },
+        concentrating: null, conditions: [],
+      } as never,
+    }),
+    nixWithFeats,
+  )
+  const sentinels = rows.filter(r => r.name.startsWith('Sentinel'))
+
+  it('the premise: Sentinel still produces two rows, because it has two triggers', () => {
+    expect(sentinels.length).toBe(2)
+    expect(new Set(sentinels.map(r => r.when)).size).toBe(2)
+  })
+
+  it('no two rows in the band share a heading any more', () => {
+    const names = rows.map(r => r.name)
+    expect(new Set(names).size, `headings: ${names.join(' | ')}`).toBe(names.length)
+  })
+
+  it('and therefore no two DETAIL BUTTONS share an accessible name either', () => {
+    /* ReactionRow labels its door `${row.name} — details`. Two doors with one
+       name is the same bug wearing an accessibility hat, and it is the half
+       that would never have shown up in a screenshot. */
+    const labels = rows.map(r => `${r.name} — details`)
+    expect(new Set(labels).size).toBe(labels.length)
+  })
+
+  it('every suffix is canon\'s own words, lifted out of that row\'s own trigger', () => {
+    for (const row of sentinels) {
+      const suffix = row.name.slice('Sentinel · '.length)
+      expect(suffix.length).toBeGreaterThan(0)
+      /* THE ANTI-LOOKUP-TABLE CHECK. The suffix must appear verbatim inside the
+         trigger the row is already displaying — so a hand-written label, however
+         apt, fails here. */
+      expect(row.when, `«${suffix}» must come out of «${row.when}»`).toContain(suffix)
+      // ...and verbatim inside canon's own sentence for the feat.
+      expect(SENTINEL.effects!.join(' ')).toContain(suffix)
+    }
+  })
+
+  it('the suffix starts exactly where the two triggers stop agreeing', () => {
+    const [a, b] = sentinels
+    const wa = a.when!.split(/\s+/)
+    const wb = b.when!.split(/\s+/)
+    let i = 0
+    while (i < Math.min(wa.length, wb.length) && wa[i] === wb[i]) i++
+    expect(a.name.endsWith(wa.slice(i).join(' ').split(', ')[0])).toBe(true)
+    expect(b.name.endsWith(wb.slice(i).join(' ').split(', ')[0])).toBe(true)
+    // The shared half is NOT repeated in the heading — that is the whole point.
+    expect(a.name).not.toContain(wa.slice(0, i).join(' '))
+  })
+
+  it('adds no ellipsis and cuts no word in half', () => {
+    for (const row of rows) {
+      expect(row.name).not.toMatch(/…|\.\.\./)
+      // Every word of the heading is a whole word of the trigger or the feat name.
+      const suffix = row.name.includes(' · ') ? row.name.split(' · ')[1] : ''
+      if (suffix) expect(row.when!.split(/\s+/)).toEqual(expect.arrayContaining(suffix.split(/\s+/)))
+    }
+  })
+
+  it('leaves a lone row alone — Flaming Cloak keeps its bare name', () => {
+    expect(rows.map(r => r.name)).toContain('Flaming Cloak')
+  })
+
+  it('does NOT rename the underlying option, which is how canon is found', () => {
+    /* `featureByName(option.name)` runs two lines before the rename. An option
+       renamed in place is an option canon can no longer match, and the row would
+       silently lose its errata, its facts line and its retaliation die. */
+    for (const row of sentinels) {
+      expect(row.option.name).toBe('Sentinel')
+      expect(row.name).not.toBe(row.option.name)
+    }
+  })
+})
+
+describe('finding BJ — the three cases where refusing is the right answer', () => {
+  const row = (name: string, when: string | null): ReactionRow =>
+    ({ name, when, id: name + when, cost: 'Reaction', available: true, whenSource: 'declared',
+       body: '', provenance: 'sheet', homebrew: false, errataIds: [], retaliation: null,
+       option: {} as never })
+
+  it('refuses when a colliding row has no stated trigger — nothing to lift', () => {
+    const out = disambiguateHeadings([row('Feat', 'When A happens'), row('Feat', null)])
+    expect(out.map(r => r.name)).toEqual(['Feat', 'Feat'])
+  })
+
+  it('refuses when one trigger is a prefix of the other — the tail is empty', () => {
+    const out = disambiguateHeadings([
+      row('Feat', 'When a creature moves'),
+      row('Feat', 'When a creature moves past you'),
+    ])
+    expect(out.map(r => r.name)).toEqual(['Feat', 'Feat'])
+  })
+
+  /* THE THIRD GUARD IS A POSTCONDITION, NOT A CASE, and saying so is the honest
+     version. I wrote a test for "the tails collide" and could not construct one:
+     because the shared prefix is MAXIMAL, two tails always differ at their very
+     first word, and the only way to make them equal is to make the triggers
+     equal — which the empty-tail guard has already caught. So the guard is
+     unreachable today. It stays, because it is free and it is the invariant the
+     whole fix rests on, and it is tested as an invariant rather than as a
+     branch: over a spread of shapes, every group comes out either wholly
+     untouched or wholly distinct. Never half-renamed, never re-collided. */
+  it('never half-renames: a group comes out untouched or distinct, over every shape', () => {
+    const shapes: [string | null, string | null][] = [
+      ['When a creature Disengages', 'When a creature attacks an ally'],
+      ['When a creature moves', 'When a creature moves past you'],       // prefix
+      ['When a goblin acts, you may respond', 'When an orc acts, you may respond'],
+      ['When X happens', null],                                          // no trigger
+      ['When X happens', 'When X happens'],                              // identical
+      ['Totally different opening', 'When a creature attacks'],           // no shared word
+      ['   ', 'When a creature attacks'],                                 // blank
+    ]
+    for (const [a, b] of shapes) {
+      const out = disambiguateHeadings([row('Feat', a), row('Feat', b)])
+      const names = out.map(r => r.name)
+      const untouched = names.every(n => n === 'Feat')
+      const distinct = new Set(names).size === names.length
+      expect(untouched || distinct, `«${a}» vs «${b}» → ${names.join(' | ')}`).toBe(true)
+      // and if it did rename, it renamed BOTH — a half-renamed group still stutters
+      if (!untouched) expect(names.every(n => n !== 'Feat')).toBe(true)
+    }
+  })
+
+  it('cuts at a comma rather than running the whole clause into the heading', () => {
+    const out = disambiguateHeadings([
+      row('Feat', 'When a creature attacks you, and you can see it, you may act'),
+      row('Feat', 'When a creature heals you, and you can see it, you may act'),
+    ])
+    expect(out.map(r => r.name)).toEqual(['Feat · attacks you', 'Feat · heals you'])
   })
 })

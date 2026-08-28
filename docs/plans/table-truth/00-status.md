@@ -2424,14 +2424,14 @@ is exactly the kind of thing that goes wrong quietly.
   simulated retirement, and zero model ids in the shipped bundle. What is *not*: that his key is
   valid and his quota is live. He settles it in ten seconds by tapping Test Connection.
 - **7 — the node gate**, restated rather than re-run (above).
-- **4a2n — finding BJ**, recorded rather than fixed (above).
+- **4a2n — finding BJ**, recorded rather than fixed (above). **CLOSED 2026-08-27** — see the
+  post-close section below; `4a2n` no longer exists, and `4a2` itself was inverted because after the
+  fix it was passing *vacuously*.
 
 ### Still open, tracked, not in this phase
 
-**BH** — there is no way to **end an encounter** from the Play tab. `CombatHelper.tsx:1303` passes
-`onEndCombat={handleEndCombat}` to `TurnSummary`, which declares it at line 91, destructures it at
-line 117 and **never uses it**; `TurnDeck.tsx:250` has a Start Combat button with no counterpart.
-Wants its own slice. **BJ** (above). **BC** — two `role="dialog" aria-modal="true"` overlays
+~~**BH**~~ and ~~**BJ**~~ — **both CLOSED 2026-08-27, after close, on Marcus's instruction "fix the
+two things left open and then deploy."** See the post-close section at the end of this file. **BC** — two `role="dialog" aria-modal="true"` overlays
 permanently mounted below the fold. **AZ / HEARTH-08** — the prepared-spell bug on the Prep tab.
 **VAL-13**. **AT** — passive features that reach no turn option. The **cloak-teleport clause**, open
 pending his DM, with *nothing added until he reports back*. The wording ambiguity of "Reaction · 1/2
@@ -2778,3 +2778,90 @@ which the `tactics` prose is 89,584 chars — **49%**. `spells.json` without `ta
 render in the app, `:254-279`), `combat/Block1Empty.tsx`, `combat/Block1Skeleton.tsx`, and
 `InitiativeTracker.tsx` (332 finished lines, never rendered). Deleting files is ASK-FIRST; none
 have been deleted.
+
+## POST-CLOSE — findings BH and BJ, closed 2026-08-27
+
+Marcus, at close: *"Fix the two things left open and then deploy."* Both were the two named in the
+"still open" list above as wanting their own slice. They got one, together, because they share a
+surface and a proof harness. Prover: `docs/plans/table-truth/prove-bh-bj.mjs`, 390×844, seeded with
+his real sheet — the `feats` array is load-bearing there, because without Sentinel there is no
+heading collision and BJ measures nothing.
+
+### BJ — one feat, one name, two rows
+
+Sentinel has two distinct reaction clauses and both are real rows. The heading said `Sentinel`
+twice, which at a glance reads as the app stuttering. Fixed in `reactions.ts` at
+**`reactionRows()`**, not at `featReactionOptions()`, and that placement is the whole decision:
+canon is matched by `featureByName(option.name)` two lines earlier, so renaming the *option* would
+have silently cost the row its errata, its facts line and its retaliation die. The display name is
+renamed; `option.name` is untouched.
+
+The suffix is **computed, never written down** — lifted verbatim out of each row's own trigger, at
+the word where the triggers stop agreeing, cut at the first comma. A hand-made lookup table of
+pretty labels would have been easier and would fail the test that guards it, which asserts the
+suffix is `includes()`d by the row's own `when` text. Result on glass:
+
+    Sentinel · takes the Disengage action
+    Sentinel · attacks a target other than you
+
+`feats.test.ts` had to be repaired, and the repair is the interesting part: two of its tests went
+red and a **third went silently vacuous**, because all three selected rows by the *display* name.
+The vacuous one was passing while checking nothing but Interception. All three are now anchored on
+`option.name` — the invariant the fix provably never touches — and the vacuous one carries
+`expect(feats.length).toBe(3)` so it can never go quiet again.
+
+**`prove-phase1.mjs` check 4a2 was passing VACUOUSLY after the fix** — printing *"vacuous — no
+heading is shared by two rows, so this check observed nothing"* and scoring green. That is finding
+BG's failure mode exactly. Inverted to a structural claim that *forbids* the fault: every reaction
+row wears its own heading **and** every heading is painted and unclipped. PASS on the after build,
+FAIL on the before build.
+
+### BH — the encounter you could start and never finish
+
+`onEndCombat` had been a prop of `TurnSummary` since it was written, wired to a complete handler,
+destructured, and never called. Combat could be started and never ended: the round counter climbed,
+concentration never cleared, and the damage-log save that writes the encounter into history never
+ran.
+
+**The door is in the deck, and it took a measurement to get there.** The first attempt put it in
+`TurnSummary`'s header, which reads as the natural home. The browser refuted it: at 390×844 that
+header paints at **y=1297** inside a scroller whose visible window ends at **478** — the document
+does not scroll, so the control sat some **800px** below anything he can see, while «Start Combat»
+was one thumb-fall away in the fixed deck. The deck's own doc-comment already held the deciding
+rule: *"the deck holds what the turn is pressed WITH."* End Combat now occupies Start Combat's
+exact slot, exclusively — never both at once.
+
+**Two taps, not one.** `handleEndCombat` finalises the damage log and calls `forgetCombat`, which
+removes `codex-combat-${id}` from disk. A single mis-tap mid-fight would take the round, the spent
+economy and the concentration with it. The confirm strip names the consequences in the words of
+what actually happens, and puts the way **out** first. It is its own exported component
+(`combat/EndCombatConfirm.tsx`) so the node suite can render it — a strip that only exists after a
+tap is invisible to a suite with no jsdom, and it is the half that holds the irreversible button.
+The armed state is deliberately **not** persisted: an armed state surviving a reload is a loaded
+gun in the deck.
+
+**All BH code was REMOVED from `TurnSummary.tsx`** — 5092 bytes, `grep -c` returns 0. Marcus's
+complaint about button clutter is standing: one door, not two.
+
+**What it costs, stated honestly, because my first draft of this said "free" and my own
+measurement contradicted it.** The deck is never taller in combat than it already is out of it
+(BH9, Δh=0). But that slot used to be *empty* during a fight and no longer is: the deck goes
+**302px → 368px** mid-combat, so the scrolling option list above it loses **66px** for the
+duration. What exclusivity buys is that it grows **once** and no further. The overstatement was
+corrected in three places — `TurnDeck.tsx`'s comment, `EndCombat.test.tsx`'s test name, and the
+prover's check name.
+
+### The numbers
+
+`tsc --noEmit` clean · `vitest run` **990 passed | 7 skipped | 42 files** · `npm run build` ✓ ·
+`prove-bh-bj.mjs` **15 proved · 0 failed · FALSIFIABLE: YES** (the before build fails BJ1, BJ3,
+BH1) · `prove-phase1.mjs` **21 proved · 0 failed · 2 reported unproved**, 4a2 no longer vacuous.
+Shots in `_shots-bh-bj/`.
+
+Falsifiability was *proved*, not assumed: the BH node tests were run against a neutered door (2
+failed) and neutered copy (1 failed) before being restored.
+
+### Deploy
+
+Authorised in the same sentence that asked for the fixes. Pushed `v1` → `main`, live at
+https://dosenft.github.io/the-codex/. This is the **first** deploy of this entire phase.

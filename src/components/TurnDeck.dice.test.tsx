@@ -48,6 +48,7 @@ const deck = (character: Character) => (
     character={character}
     inCombat
     onStartCombat={() => {}}
+    onEndCombat={() => {}}
     economy={ECONOMY}
     onToggleEconomy={() => {}}
     onResetEconomy={() => {}}
