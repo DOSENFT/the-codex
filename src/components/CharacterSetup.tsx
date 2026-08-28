@@ -27,7 +27,8 @@ import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
 import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIProvider } from '../lib/ai'
 import { GeminiModelPicker } from './GeminiModelPicker'
-import { generateId, type Character, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
+import { generateId, type Character, type CharacterBase, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
+import { resolveCharacter } from '../lib/rules-2024/derive'
 import { parseCharacterFile, formatList } from '../lib/import-character'
 import {
   CLASSES,
@@ -382,7 +383,22 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
       }))
 
       const now = new Date().toISOString()
-      const character: Character = {
+      /* SHEET TRUTH slice 3. This built a `Character` with four worked-out numbers
+         typed straight into it — including the fifth copy of the proficiency
+         formula, `Math.ceil(level / 4) + 1`, which the Gate 2 audit missed. It now
+         builds the half that is typed in, and `resolveCharacter` supplies the rest.
+
+         The DC and attack bonus this wizard asks for on step 6 become OVERRIDES,
+         which means they are honoured for a class the app has no casting rule for
+         and ignored for one it does. That is not new behaviour introduced here:
+         slices 1 and 2 already resolved on every load and every save, so a typed
+         DC has been overwritten since slice 1. What is new is that it is now
+         visible in the type instead of happening silently.
+         Wart, logged not fixed: step 6 still asks a Paladin for a number it will
+         ignore, and the wizard sets every ability score to 10, so the computed DC
+         is a placeholder until he edits his scores in Prep. Fixing the wizard is
+         not in this phase. */
+      const base: CharacterBase = {
         id: generateId(),
         name: name.trim(),
         class: charClass,
@@ -390,9 +406,8 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         race,
         level,
         spellcastingAbility: result.spellcastingAbility || SPELLCASTING_ABILITY[charClass] || '',
-        spellSaveDC,
-        spellAttackBonus,
-        proficiencyBonus: result.proficiencyBonus || Math.ceil(level / 4) + 1,
+        spellSaveDCOverride: spellSaveDC,
+        spellAttackBonusOverride: spellAttackBonus,
         armorClass,
         hitPoints: { max: hitPointsMax, current: hitPointsMax },
         conditions: [],
@@ -401,7 +416,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         spells,
         spellSlots,
         canPrepareSpells: result.canPrepareSpells ?? PREPARES_SPELLS[charClass] ?? false,
-        maxPreparedSpells: result.maxPreparedSpells ?? 0,
+        maxPreparedSpellsOverride: result.maxPreparedSpells ?? 0,
         features,
         homebrewNotes: resolvedHomebrew || undefined,
         abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
@@ -418,7 +433,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
         updatedAt: now,
       }
 
-      onComplete(character)
+      onComplete(resolveCharacter(base))
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to forge character. Try again.'
       setForgeError(msg)

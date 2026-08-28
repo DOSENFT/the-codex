@@ -37,16 +37,40 @@ import type { CanonProgressionLevel } from '../canon/types'
 // Type-only, so the cycle with character.ts is erased at compile time and there
 // is no runtime edge — the same arrangement `resources.ts` uses, and for the
 // same reason.
-import type { Character } from '../character'
+import type { Character, CharacterBase } from '../character'
 
 /** The four numbers that stop being stored. Named as a group because slice 3
- *  subtracts exactly this set from what reaches disk. */
+ *  subtracts exactly this set from what reaches disk: `Character` is
+ *  `CharacterBase & DerivedNumbers`, and `storableOf` is the subtraction. */
 export interface DerivedNumbers {
   proficiencyBonus: number
   spellSaveDC: number
   spellAttackBonus: number
   maxPreparedSpells: number
 }
+
+/** The keys of `DerivedNumbers`, as values.
+ *
+ *  Written out rather than derived from the interface because TypeScript erases
+ *  types and `storableOf` needs them at RUNTIME. A hand-maintained list the
+ *  compiler does not check is exactly how five copies of the proficiency formula
+ *  came to exist, so this one is checked in BOTH directions — see below. */
+export const DERIVED_KEYS = [
+  'proficiencyBonus',
+  'spellSaveDC',
+  'spellAttackBonus',
+  'maxPreparedSpells',
+] as const satisfies readonly (keyof DerivedNumbers)[]
+
+/* SOUNDNESS (`satisfies`, above): nothing in the list is a key that does not
+   exist. COMPLETENESS (here): no key of `DerivedNumbers` is missing from the
+   list. `satisfies` alone gives only the first, and the dangerous direction is
+   the second — a fifth derived number added to the interface and forgotten here
+   would silently keep being written to disk, which is the entire fault this
+   slice exists to make impossible. This line makes that a compile error. */
+type MissingFromDerivedKeys = Exclude<keyof DerivedNumbers, (typeof DERIVED_KEYS)[number]>
+const _everyDerivedKeyIsListed: MissingFromDerivedKeys extends never ? true : never = true
+void _everyDerivedKeyIsListed
 
 /** 2024 PHB, universal across every class: +2 at level 1, +1 every four levels.
  *
@@ -97,28 +121,52 @@ function modifierOf(score: number): number {
  *  Slice 1 derives the four numbers in `DerivedNumbers`. The paladin pools
  *  (Lay on Hands, Channel Divinity, aura range) join them in slice 4, where the
  *  clamp rule they need is built. */
-export function resolveCharacter(char: Character): Character {
-  const level = char.level
+export function resolveCharacter(base: CharacterBase): Character {
+  const level = base.level
   const proficiencyBonus = proficiencyFor(level)
-  const row = progressionRow(char.class, level)
-  const casting = castingAbilityOf(char)
+  const row = progressionRow(base.class, level)
+  const casting = castingAbilityOf(base)
 
-  // A class that does not cast keeps whatever is on its sheet. There is no
-  // rule to apply, so applying one would be making something up.
-  const mod = casting ? modifierOf(char.abilityScores[casting]) : null
+  // A class that does not cast has no rule to apply, so applying one would be
+  // making something up. `mod === null` is the open-world branch throughout.
+  const mod = casting ? modifierOf(base.abilityScores[casting]) : null
 
   return {
-    ...char,
+    ...base,
     proficiencyBonus,
-    spellSaveDC: mod === null ? char.spellSaveDC : 8 + proficiencyBonus + mod,
-    spellAttackBonus: mod === null ? char.spellAttackBonus : proficiencyBonus + mod,
-    // Canon's table or nothing. `?? char.maxPreparedSpells` is the open-world
-    // fallback, not a default: it means "canon has no table for your class, so
-    // your number stands".
-    maxPreparedSpells: row?.preparedSpells ?? char.maxPreparedSpells,
+    /* THE OVERRIDE IS NOT A SECOND OPINION — it is the answer for a character
+       the app has no rule for. When `mod` is null the app cannot compute a save
+       DC at all, and before slice 3 that gap was filled by the stored field.
+       The stored field is gone, so the gap needs somewhere to live, and it is
+       named `…Override` so that no future reader mistakes it for the number.
+       When the app CAN compute, the override is ignored outright rather than
+       preferred — otherwise it is just the old stale copy under a new name, and
+       Marcus's Charisma-18 bug walks straight back in. */
+    spellSaveDC: mod === null ? (base.spellSaveDCOverride ?? 10) : 8 + proficiencyBonus + mod,
+    spellAttackBonus: mod === null ? (base.spellAttackBonusOverride ?? 0) : proficiencyBonus + mod,
+    // Canon's table or the override. `??` here is the open-world fallback, not a
+    // default: it means "canon has no table for your class, so your number
+    // stands". Paladin has a table; Cleric and Wizard do not, yet.
+    maxPreparedSpells: row?.preparedSpells ?? base.maxPreparedSpellsOverride ?? 0,
     // Spell slots are deliberately NOT touched, at any level. Marcus's sheet
     // carries slots his level does not grant; that may be his DM or an item,
     // and deleting a resource he is playing with would be the app overruling
     // his table. `discrepancies()` keeps reporting them, forever, by design.
   }
+}
+
+/** The inverse of `resolveCharacter`: what actually goes to disk.
+ *
+ *  SLICE 3, and the whole of it. Slices 1 and 2 made the numbers right by
+ *  overwriting the stored ones on the way in and on the way out. This makes them
+ *  unable to go wrong, because after this there is no stored one to be stale —
+ *  a saved sheet has no `spellSaveDC` key at all.
+ *
+ *  Deliberately key-driven rather than a destructuring rest, so that the set it
+ *  removes is `DERIVED_KEYS` — the same list the compiler checks for
+ *  completeness above — instead of four names repeated in a second place. */
+export function storableOf(char: Character): CharacterBase {
+  const base = { ...char } as Character & Partial<DerivedNumbers>
+  for (const key of DERIVED_KEYS) delete base[key]
+  return base as CharacterBase
 }

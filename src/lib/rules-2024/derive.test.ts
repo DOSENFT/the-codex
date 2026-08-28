@@ -5,7 +5,7 @@ import {
   castingAbilityOf,
   resolveCharacter,
 } from './derive'
-import { abilityModifier, type Character } from '../character'
+import { abilityModifier, normalizeCharacter, type Character } from '../character'
 import { PROGRESSION_BY_CLASS } from '../../canon'
 
 /* A level-7 Oath of the Hearth Paladin at Charisma 16 — Marcus's real sheet,
@@ -149,8 +149,15 @@ describe('resolveCharacter — Nix at Charisma 16', () => {
 })
 
 describe('resolveCharacter — the open world', () => {
+  /* SLICE 3 CHANGED WHERE THESE READ FROM, and these two tests are how it was
+     noticed rather than assumed. They used to pass `spellSaveDC: 12` — the
+     STORED field — and assert it survived. That field no longer exists on the
+     thing being passed in; the escape hatch is `spellSaveDCOverride`, which is
+     the same value under a name that cannot be mistaken for the answer. The
+     behaviour under test is unchanged: for a class the app has no rule for, the
+     number on the sheet stands. */
   it('invents nothing for a class that does not cast', () => {
-    const fighter = nix({ class: 'Fighter', spellSaveDC: 12, spellAttackBonus: 4 })
+    const fighter = nix({ class: 'Fighter', spellSaveDCOverride: 12, spellAttackBonusOverride: 4 })
     const r = resolveCharacter(fighter)
     expect(r.spellSaveDC).toBe(12)
     expect(r.spellAttackBonus).toBe(4)
@@ -158,8 +165,44 @@ describe('resolveCharacter — the open world', () => {
     expect(r.proficiencyBonus).toBe(3)
   })
 
+  it('ignores the override outright for a class it CAN compute', () => {
+    /* The trap this slice had to avoid. An override that is merely *preferred*
+       over the computed number is the old stale copy wearing a new name, and
+       Marcus's Charisma-18 bug walks straight back in through it. 15 is exactly
+       the wrong number he reported; the assertion is that it is not honoured. */
+    const r = resolveCharacter(nix({ spellSaveDCOverride: 15, spellAttackBonusOverride: 7 }))
+    expect(r.spellSaveDC).toBe(14)
+    expect(r.spellAttackBonus).toBe(6)
+  })
+
   it('keeps the stored prepared count for a class canon has no table for', () => {
-    expect(resolveCharacter(nix({ class: 'Cleric' })).maxPreparedSpells).toBe(5)
+    expect(resolveCharacter(nix({ class: 'Cleric', maxPreparedSpellsOverride: 5 })).maxPreparedSpells).toBe(5)
+  })
+
+  it('a Cleric saved before slice 3 does not lose their prepared count', () => {
+    /* The migration, end to end, and the reason a THIRD override exists at all —
+       Gate 3 named only two. Canon ships a levels table for Paladin and for
+       nothing else, so retiring the stored `maxPreparedSpells` without demoting
+       it would silently zero every Cleric, Druid and Wizard. What is on disk is
+       the old key; what comes back is the count. */
+    const fromDisk = normalizeCharacter({ name: 'A Cleric', class: 'Cleric', level: 7, maxPreparedSpells: 9 })
+    expect(resolveCharacter(fromDisk).maxPreparedSpells).toBe(9)
+  })
+
+  it('tells the player, in words, which numbers it stopped believing', () => {
+    /* Gate 3's answer to "how does Marcus find out his 15 became a 14?": a line
+       in the repair log that already exists, not a modal. Asserted on the
+       SUBSTANCE — that it names the old number and the ability it now comes
+       from — rather than on the exact sentence, which is copy and may be
+       reworded without this going red. */
+    const repairs: string[] = []
+    normalizeCharacter({ name: 'Nix', class: 'Paladin', level: 7, spellSaveDC: 15 }, undefined, repairs)
+    expect(repairs.join(' ')).toMatch(/15/)
+    expect(repairs.join(' ')).toMatch(/Charisma/i)
+    // And silence for a class it has no rule for — nothing was replaced.
+    const none: string[] = []
+    normalizeCharacter({ name: 'A Fighter', class: 'Fighter', level: 7, spellSaveDC: 12 }, undefined, none)
+    expect(none).toEqual([])
   })
 
   it('still derives the DC for a caster canon has no LEVEL table for', () => {

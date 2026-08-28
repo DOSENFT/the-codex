@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
   saveCharacter, onCharacterSaveFailure, normalizeCharacter, characterStamp,
-  loadCharacter, deleteCharacter, type Character,
+  loadCharacter, deleteCharacter, type CharacterBase,
 } from './character'
 
 /* ============================================================================
@@ -153,10 +153,14 @@ describe('saveCharacter when another window has written since', () => {
      tests would make them order-dependent. */
   let n = 0
   const fresh = () => normalizeCharacter({ name: 'Nix', level: 7 }, `d4-${++n}`)
-  const key = (c: Character) => 'codex-character-' + c.id
+  /* `CharacterBase` since slice 3, following `saveCharacter`'s own signature.
+     These helpers only ever touch `id` and `name`, neither of which is derived —
+     asking them for a spell save DC they will not look at would be requiring the
+     test to know a rule the code under test is the one that knows. */
+  const key = (c: CharacterBase) => 'codex-character-' + c.id
 
   /** The other window: a write this tab cannot see happen. */
-  const otherWindowWrites = (c: Character, name: string) => {
+  const otherWindowWrites = (c: CharacterBase, name: string) => {
     store[key(c)] = JSON.stringify({ ...c, name, updatedAt: '2099-01-01T00:00:00.000Z' })
   }
 
@@ -229,7 +233,7 @@ describe('saveCharacter when another window has written since', () => {
        a Lay on Hands charge every time he opened Settings. */
     const c = fresh()
     saveCharacter(c)
-    saveCharacter({ ...c, campaignName: 'auto-created on mount' } as Character)
+    saveCharacter({ ...c, campaignName: 'auto-created on mount' } as CharacterBase)
     const spend = saveCharacter({ ...c, name: 'the spend right after' })
     expect(spend).toEqual({ ok: true, character: expect.any(Object) })
     expect(store[key(c)]).toContain('the spend right after')
@@ -240,7 +244,7 @@ describe('saveCharacter when another window has written since', () => {
     const off = onCharacterSaveFailure(r => heard.push(r))
     const c = fresh()
     saveCharacter(c)
-    saveCharacter({ ...c, campaignName: 'auto-created on mount' } as Character)
+    saveCharacter({ ...c, campaignName: 'auto-created on mount' } as CharacterBase)
     saveCharacter({ ...c, name: 'the spend right after' })
     off()
     expect(heard).toEqual([])

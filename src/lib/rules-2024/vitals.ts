@@ -30,6 +30,7 @@ import {
   type Character,
 } from '../character'
 import { FULL_CASTER_SLOTS, HALF_CASTER_SLOTS } from '../dnd-data'
+import { proficiencyFor } from './derive'
 
 /** The five numbers Marcus asked for by name, plus AC, which was already on the
  *  sheet but not on the Play tab. Every one of them is READ or DERIVED — none
@@ -80,9 +81,24 @@ export interface Discrepancy {
   why: string
 }
 
-/** 2024 PHB: +2 at level 1, and +1 at each of 5, 9, 13, 17. */
+/** 2024 PHB: +2 at level 1, and +1 at each of 5, 9, 13, 17.
+ *
+ *  SHEET TRUTH slice 3, and a correction to slice 1. `derive.ts` claims in its
+ *  own comments to hold "THE ONLY COPY" of this formula, and names this function
+ *  as one of the five it replaced. It did not replace it — this body was still
+ *  here, and it was found by the source scan in `storable.test.ts`, not by
+ *  reading. A comment asserting an invariant is not the invariant; the scan is.
+ *
+ *  The two copies had already drifted. This one clamped the bottom (`Math.max(1,
+ *  level)`) and not the top; `proficiencyFor` clamps both. A level-24 character —
+ *  which nothing prevents, since `level` is a free number on the sheet — got +7
+ *  from this function and +6 from the other, so the discrepancy reporter would
+ *  have accused the sheet of being wrong using a number the app itself no longer
+ *  agreed with. Kept as a named export rather than deleted because it is what
+ *  this module means by the rule, and `vitals.test.ts` pins it at all twenty
+ *  levels; it simply no longer knows how to work it out. */
 export function proficiencyForLevel(level: number): number {
-  return 2 + Math.floor((Math.max(1, level) - 1) / 4)
+  return proficiencyFor(level)
 }
 
 /* Which slot table a class uses.

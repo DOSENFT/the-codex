@@ -1,5 +1,5 @@
-import { type AbilityKey, type SkillName, SKILL_ABILITIES, CASTING_ABILITY } from './dnd-rules'
-import { resolveCharacter } from './rules-2024/derive'
+import { type AbilityKey, type SkillName, SKILL_ABILITIES, CASTING_ABILITY, ABILITY_NAMES } from './dnd-rules'
+import { resolveCharacter, storableOf, type DerivedNumbers } from './rules-2024/derive'
 // Slice 6b. `resources.ts` imports Character back, but only as a TYPE, so the
 // cycle is erased at compile time and there is no runtime edge in that
 // direction. Kept that way on purpose: character.ts is the module every screen
@@ -227,7 +227,16 @@ export interface CharacterFeat {
   tacticalNote?: string       // How to USE this feat
 }
 
-export interface Character {
+/** Everything about a character that is TYPED IN, and nothing that is worked out.
+ *
+ *  SHEET TRUTH slice 3. This is the half that goes to disk. `Character` — what
+ *  every screen actually holds — is this plus `DerivedNumbers`, and the join
+ *  happens in exactly one function, `resolveCharacter`. The point is not tidiness:
+ *  a field that does not exist in this interface cannot be written to storage,
+ *  cannot be spread out of an older copy, and therefore cannot go stale. Marcus's
+ *  bug was a stored `spellSaveDC` of 15 outliving the Charisma 18 that produced
+ *  it. After this there is no stored `spellSaveDC` to outlive anything. */
+export interface CharacterBase {
   id: string // Unique identifier (crypto.randomUUID)
   name: string
   class: string
@@ -235,9 +244,20 @@ export interface Character {
   race: string
   level: number
   spellcastingAbility: string // "Charisma", "Wisdom", "Intelligence"
-  spellSaveDC: number
-  spellAttackBonus: number
-  proficiencyBonus: number
+  /** The save DC for a character the app has NO CASTING RULE FOR — nothing else.
+   *
+   *  `CASTING_ABILITY` knows which ability a class casts with; when it knows,
+   *  the DC is arithmetic and this field is ignored outright. It exists for the
+   *  open world: a homebrew class, or a Fighter whose DM gave them a spell, where
+   *  refusing to show any number at all would be the app overruling his table.
+   *
+   *  Named `…Override` and not `spellSaveDC` on purpose. Nothing may read this
+   *  directly — `resolveCharacter` is the only reader — because a second reader
+   *  is how the stale copy comes back wearing a different name. */
+  spellSaveDCOverride?: number
+  /** The spell attack bonus for a class the app has no casting rule for.
+   *  Same contract as `spellSaveDCOverride`; read only by `resolveCharacter`. */
+  spellAttackBonusOverride?: number
   armorClass: number
   hitPoints: { max: number; current: number }
 
@@ -275,7 +295,16 @@ export interface Character {
   spells: Spell[]
   spellSlots: SpellSlots
   canPrepareSpells: boolean // true for Paladin, Cleric, Druid, Wizard
-  maxPreparedSpells: number // e.g. CHA mod + Paladin level / 2
+  /** The prepared-spell count for a class canon has NO PROGRESSION TABLE for.
+   *
+   *  A DEVIATION FROM GATE 3, recorded rather than slipped in. Gate 3 named two
+   *  escape hatches, for the save DC and the spell attack. A third is needed for
+   *  the same reason and by the same argument: canon ships a levels table for
+   *  Paladin and for nothing else, so retiring the stored `maxPreparedSpells`
+   *  without this would silently zero the prepared count of every Cleric, Druid
+   *  and Wizard the app has never had a rule for. Read only by
+   *  `resolveCharacter`, and only when canon has no row. */
+  maxPreparedSpellsOverride?: number
 
   // Class features
   features: ClassFeature[]
@@ -333,6 +362,21 @@ export interface Character {
   updatedAt: string
 }
 
+/** A character as every screen sees it: what was typed in, plus what the rules
+ *  work out from it.
+ *
+ *  THE NAME DOES NOT CHANGE, and that is the whole trick of this slice. ~200
+ *  existing reads of `character.spellSaveDC` keep compiling and simply start
+ *  being right, including `turn/options.ts`, which prints `DC ${…}` directly and
+ *  is pinned byte-identical to main by `overlay.test.ts` case 15. The fields stay
+ *  plain non-nullable `number`s for the same reason: a nullable derived field
+ *  would render "DC null" through a file nothing is allowed to edit.
+ *
+ *  The only thing that moved is WHO MAY PRODUCE ONE. `resolveCharacter` is the
+ *  sole way to turn a `CharacterBase` into a `Character`, and `storableOf` is the
+ *  sole way back. Everything in between reads. */
+export type Character = CharacterBase & DerivedNumbers
+
 // ---------------------------------------------------------------------------
 // Ability Score Calculations
 // ---------------------------------------------------------------------------
@@ -373,18 +417,31 @@ export function attackBonus(char: Character, weapon: Weapon): number {
   return mod + prof + magic
 }
 
-/** Compute spell save DC from ability scores */
+/* SHEET TRUTH slice 3. These two held the SECOND copy of the save-DC and
+   spell-attack formulas — `8 + char.proficiencyBonus + abilityModifier(...)`,
+   written out again here. They agreed with `derive.ts`, and nothing whatsoever
+   made them agree, which is the precise condition that produced five copies of
+   the proficiency formula in four spellings.
+
+   They now delegate, so there is one copy. The bodies are gone, not the
+   functions: `vitals.ts` calls them to work out what the rules SAY so it can
+   compare that against what the sheet CLAIMS, and hollowing that comparison out
+   is slice 7's job, done deliberately and with its own proof, not a side effect
+   of tidying arithmetic here.
+
+   Allocating a whole resolved character to read one number off it is wasteful
+   and is meant to look it. Four call sites, all in render paths that already do
+   far more work than this; the day that stops being true, the answer is to read
+   `character.spellSaveDC` directly, which is now correct by construction. */
+
+/** The 2024 spell save DC for this character. One copy, in `derive.ts`. */
 export function computeSpellSaveDC(char: Character): number {
-  const castingAbility = CASTING_ABILITY[char.class]
-  if (!castingAbility) return char.spellSaveDC
-  return 8 + char.proficiencyBonus + abilityModifier(char.abilityScores[castingAbility])
+  return resolveCharacter(char).spellSaveDC
 }
 
-/** Compute spell attack bonus from ability scores */
+/** The 2024 spell attack bonus for this character. One copy, in `derive.ts`. */
 export function computeSpellAttackBonus(char: Character): number {
-  const castingAbility = CASTING_ABILITY[char.class]
-  if (!castingAbility) return char.spellAttackBonus
-  return char.proficiencyBonus + abilityModifier(char.abilityScores[castingAbility])
+  return resolveCharacter(char).spellAttackBonus
 }
 
 // ---------------------------------------------------------------------------
@@ -638,7 +695,12 @@ const STALE_REASON =
  * say so in the source rather than by omitting an argument.
  */
 export function saveCharacter(
-  incoming: Character,
+  /* `CharacterBase`, not `Character` — slice 3. A caller does not have to have
+     worked the derived numbers out already, because this function is going to
+     work them out regardless; requiring them would be asking every caller to
+     produce a value it is about to throw away. Every `Character` is a
+     `CharacterBase`, so all three production callers pass unchanged. */
+  incoming: CharacterBase,
   opts: { replacing?: boolean } = {},
 ): CharacterSaveOutcome {
   // SHEET TRUTH slice 2. Resolve FIRST, before the staleness check and before
@@ -658,7 +720,15 @@ export function saveCharacter(
     }
   }
   character.updatedAt = nextStamp(character.id)
-  const wrote = put(CHAR_PREFIX + character.id, JSON.stringify(character))
+  // SHEET TRUTH slice 3 — the one line the whole slice is for. What is RETURNED
+  // is the resolved character, because that is what the screens need; what is
+  // WRITTEN is the base, with the four worked-out numbers subtracted. Slices 1
+  // and 2 made the stored copies right on the way in and on the way out. This
+  // stops there being a stored copy at all, so there is nothing left to be
+  // stale — including the `spellSaveDC` key an older build left on disk, which
+  // is spread through `normalizeInner` but deleted here, so the first save after
+  // this ships is also the migration.
+  const wrote = put(CHAR_PREFIX + character.id, JSON.stringify(storableOf(character)))
   if (!wrote.ok) {
     announceFailure(wrote.reason)
     return wrote
@@ -830,7 +900,7 @@ export function normalizeCharacter(
   parsed: Partial<Character>,
   fallbackId?: string,
   repairs?: string[],
-): Character {
+): CharacterBase {
   repairLog = repairs ?? null
   try {
     return normalizeInner(parsed, fallbackId)
@@ -839,7 +909,31 @@ export function normalizeCharacter(
   }
 }
 
-function normalizeInner(parsed: Partial<Character>, fallbackId?: string): Character {
+/** Say, in plain language, that a number on the file was replaced by one the
+ *  rules work out — Gate 3's answer to "how does Marcus find out his 15 became a
+ *  14?". It is a line in the repair log that already exists, not a modal and not
+ *  a prompt: he is not being asked to decide anything, he is being told what the
+ *  app did, in the one place the app already tells him what it did to his file.
+ *
+ *  Only for a class the app HAS a rule for. For anything else the stored number
+ *  is still the answer, so nothing was replaced and there is nothing to report —
+ *  silence meaning "I have nothing to add", as everywhere else in this codebase. */
+function noteRetiredNumbers(parsed: Partial<Character>): void {
+  if (!repairLog) return
+  const casting = parsed.class ? CASTING_ABILITY[parsed.class] : undefined
+  if (!casting) return
+  // `ABILITY_NAMES` and not the raw key: this line is read by a player, and
+  // "worked out from your CHA" is the app talking to itself out loud. Caught by
+  // the test asserting the sentence names the ability, not the column heading.
+  const ability = ABILITY_NAMES[casting]
+  if (typeof parsed.spellSaveDC === 'number')
+    note(`Your spell save DC (${parsed.spellSaveDC} on the file) is now worked out from your ${ability} and your level, so it can never fall behind an ability score change`)
+  if (typeof parsed.spellAttackBonus === 'number')
+    note(`Your spell attack bonus (${parsed.spellAttackBonus >= 0 ? '+' : ''}${parsed.spellAttackBonus} on the file) is now worked out the same way`)
+}
+
+function normalizeInner(parsed: Partial<Character>, fallbackId?: string): CharacterBase {
+  noteRetiredNumbers(parsed)
   return {
     ...parsed,
     id: parsed.id ?? fallbackId ?? generateId(),
@@ -858,12 +952,23 @@ function normalizeInner(parsed: Partial<Character>, fallbackId?: string): Charac
       level: parsed.level ?? 1,
       hitPoints: parsed.hitPoints ?? { max: 1, current: 1 },
       armorClass: parsed.armorClass ?? 10,
-      proficiencyBonus: parsed.proficiencyBonus ?? 2,
       spellcastingAbility: parsed.spellcastingAbility ?? '',
-      spellSaveDC: parsed.spellSaveDC ?? 10,
-      spellAttackBonus: parsed.spellAttackBonus ?? 0,
       canPrepareSpells: parsed.canPrepareSpells ?? false,
-      maxPreparedSpells: parsed.maxPreparedSpells ?? 0,
+      /* SHEET TRUTH slice 3 — this is where `proficiencyBonus ?? 2`,
+         `spellSaveDC ?? 10`, `spellAttackBonus ?? 0` and `maxPreparedSpells ?? 0`
+         used to be, and it is also the migration for every sheet already on disk.
+         There is no default any more because there is nothing to default: those
+         four are worked out by `resolveCharacter`, which runs on the way off the
+         disk and on the way onto it.
+         The old stored number is not thrown away, it is DEMOTED. It becomes the
+         override, which `resolveCharacter` consults only for a class the app has
+         no rule for. So a Fighter whose DM handed them a spell keeps the DC that
+         was typed in, and Marcus's Paladin has his 15 ignored in favour of the 14
+         his Charisma actually produces. `??` and not `||`, so a legitimately
+         stored 0 survives. */
+      spellSaveDCOverride: parsed.spellSaveDCOverride ?? parsed.spellSaveDC,
+      spellAttackBonusOverride: parsed.spellAttackBonusOverride ?? parsed.spellAttackBonus,
+      maxPreparedSpellsOverride: parsed.maxPreparedSpellsOverride ?? parsed.maxPreparedSpells,
       /* The third instance of the same bug, found 2026-08-17 by importing a
          spell that had only a name. `description` is required by both types and
          is read raw in at least four places — `spell.description.slice(0, 80)`
@@ -1004,7 +1109,7 @@ function normalizeInner(parsed: Partial<Character>, fallbackId?: string): Charac
         name: text(c.name, 'Condition', 'A condition name'),
         cascades: texts(c.cascades, 'Condition cascades'),
       })) as CustomCondition[],
-  } as Character
+  } as CharacterBase
 }
 
 /** Load a specific character by id. Applies migration defaults for new fields. */
@@ -1104,7 +1209,32 @@ export function setActiveId(id: string): SaveOutcome {
 // Legacy migration (one-time, from single-character format)
 // ---------------------------------------------------------------------------
 
-/** Migrate old `codex-character` key into the new roster system. Returns true if migration occurred. */
+/** Migrate old `codex-character` key into the new roster system. Returns true if migration occurred.
+ *
+ *  SHEET TRUTH slice 3. This used to hand-roll its own defaults block — a fifth
+ *  copy of what `normalizeCharacter` already does — and spread `parsed` straight
+ *  into `saveCharacter`. That was survivable while the derived numbers were also
+ *  stored. It stopped being survivable the moment `storableOf` began deleting
+ *  them on write: the legacy record's `spellSaveDC` was spread in and then
+ *  DELETED, rather than demoted to `spellSaveDCOverride` the way every other
+ *  read path demotes it. The number was not retired, it was destroyed.
+ *
+ *  For Marcus that is invisible, because the app can work a Paladin's DC out
+ *  again. For a class it has no casting rule for, the override is the ONLY place
+ *  that number can live — and for a Cleric, Druid or Wizard the same is true of
+ *  `maxPreparedSpells`, since canon ships a levels table for Paladin and nothing
+ *  else. This path would have silently zeroed all of them, with no line in the
+ *  repair log to say so.
+ *
+ *  Found by `_probe-disk.mjs` — a real Chrome against real localStorage —
+ *  reporting `overrides kept: (none)` where it should have read
+ *  `spellSaveDCOverride=15`. The unit tests were green: `storable.test.ts`
+ *  exercises the write paths it calls, and it never called this one. That is the
+ *  whole reason the browser probe exists.
+ *
+ *  Now goes through the one door every other read goes through, which also gets
+ *  it the careful coercions it was skipping — `toStringList` on supplies rather
+ *  than a bare `?? []`. */
 export function migrateFromLegacy(): boolean {
   const raw = localStorage.getItem(LEGACY_KEY)
   if (!raw) return false
@@ -1112,24 +1242,16 @@ export function migrateFromLegacy(): boolean {
     const parsed = JSON.parse(raw) as Partial<Character>
     if (!parsed.name) return false
     const id = generateId()
-    const character: Character = {
-      ...parsed,
-      id,
-      conditions: parsed.conditions ?? [],
-      deathSaves: parsed.deathSaves ?? { successes: 0, failures: 0 },
-      tempHP: parsed.tempHP ?? 0,
-      abilityScores: parsed.abilityScores ?? { ...DEFAULT_ABILITY_SCORES },
-      skillProficiencies: parsed.skillProficiencies ?? [],
-      skillExpertise: parsed.skillExpertise ?? [],
-      savingThrowProficiencies: parsed.savingThrowProficiencies ?? [],
-      weapons: parsed.weapons ?? [],
-      gender: parsed.gender ?? '',
-      pronouns: parsed.pronouns ?? '',
-      equipment: parsed.equipment ?? [],
-      supplies: parsed.supplies ?? [],
-    } as Character
-    character.id = id
-    saveCharacter(character)
+    /* `id` is FORCED, not merely passed as a fallback. `normalizeCharacter`'s
+     * second argument only applies when the record has no id of its own, and a
+     * legacy record may well carry one — at which point the sheet is filed under
+     * THAT id while `setActiveId` below points at this one. The active id then
+     * names a character that does not exist and the app drops to the roster
+     * picker on boot. That is a regression this very edit introduced, and the
+     * browser probe caught it within a minute: no character screen, so no prep
+     * tab, so nothing to click. The old hand-rolled block ended with an
+     * unexplained `character.id = id`; this is what it was for. */
+    saveCharacter({ ...normalizeCharacter(parsed, id), id })
     setActiveId(id)
     localStorage.removeItem(LEGACY_KEY)
     return true

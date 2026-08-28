@@ -1,4 +1,5 @@
 import { normalizeCharacter, type Character } from './character'
+import { resolveCharacter } from './rules-2024/derive'
 
 /**
  * Read a character out of an exported `.json` file.
@@ -83,7 +84,13 @@ export function parseCharacterFile(text: string): ImportResult {
      lists, because "your file is old" and "your file is damaged and I altered
      it" are different sentences and he should not have to guess which he got. */
   const repairs: string[] = []
-  const character = normalizeCharacter(raw, undefined, repairs)
+  /* SHEET TRUTH slice 3. An imported file is untrusted in exactly the way a
+     stored one is, so it goes through the same two steps in the same order as
+     `loadCharacter`: normalise what was typed in, then work out what the rules
+     work out. Before this, an old export carried its own `spellSaveDC` in and the
+     app believed it. `normalizeCharacter` has already written the plain-language
+     line into `repairs` saying which numbers it stopped believing. */
+  const character = resolveCharacter(normalizeCharacter(raw, undefined, repairs))
   return { ok: true, character, warnings, repairs }
 }
 

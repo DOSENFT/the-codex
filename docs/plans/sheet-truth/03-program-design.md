@@ -83,6 +83,15 @@ export interface CharacterBase {
   spellSaveDCOverride?: number
   spellAttackBonusOverride?: number
 
+  /** DEVIATION FROM THIS GATE, recorded rather than slipped in. Gate 3 named two
+   *  overrides; slice 3 shipped three. Canon ships a levels table for Paladin and
+   *  for NO other class, so `maxPreparedSpells` is derivable for Marcus and for
+   *  nobody else. Retiring the stored field without an escape hatch would have
+   *  silently zeroed the prepared-spell count of every Cleric, Druid and Wizard
+   *  the app has ever saved. Pinned by `derive.test.ts` — "a Cleric saved before
+   *  slice 3 does not lose their prepared count". */
+  maxPreparedSpellsOverride?: number
+
   /** Same shape as today. `.max` fields are overwritten by resolve() when canon
    *  has a table for the class; `.current` is his and is never raised. */
   paladinResources?: PaladinResources

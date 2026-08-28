@@ -52,7 +52,71 @@ _Full detail and per-slice proof in `04-slices.md`._
    resolves to **zero** elements while `button[aria-label="Character"]` resolves to one
    that is visible, enabled and 97×64. **A screen-reader user cannot reach the tab bar.**
    Not in this phase's scope; nothing here fixes it. Logged so it cannot be forgotten.
-- [ ] Slice 3 — the type split, strip-on-write, migration, overrides. No second copy can exist.
+- [x] **Slice 3 — there is no second copy.** Done 2026-08-28.
+      Files: `src/lib/character.ts` — `Character` split into `CharacterBase & DerivedNumbers`,
+      the four derived fields removed from the stored interface and replaced by
+      `spellSaveDCOverride` / `spellAttackBonusOverride` / `maxPreparedSpellsOverride`;
+      `saveCharacter` takes a `CharacterBase` and writes `storableOf(character)`;
+      new `noteRetiredNumbers` writes a plain-language line into the existing repair log;
+      `migrateFromLegacy` routed through `normalizeCharacter` (see finding BI);
+      `src/lib/rules-2024/vitals.ts` — `proficiencyForLevel` delegates to `proficiencyFor`
+      (finding BJ); `src/lib/import-character.ts`, `src/components/CharacterSetup.tsx`
+      (a fifth copy of the proficiency formula deleted), `src/components/Settings.tsx`;
+      `src/lib/rules-2024/storable.test.ts` (new, 13 tests); `derive.test.ts` +4 tests, 2 retargeted;
+      `character.save.test.ts` widened to `CharacterBase`, no assertion softened.
+      Full suite **1033 green** / 45 files / 7 skipped, `tsc -b --noEmit` clean.
+
+      **Visible change: none, deliberately.** Slices 1–2 made the numbers right; this one
+      makes them unable to go wrong. Both regression probes still read **0** against the
+      slice-3 build (`_probe-follow.mjs`, `_probe-baseline.mjs`).
+
+      **Measured by micro-revert, not asserted.** Each claim pinned to the line it guards by
+      putting that line back; both files restored byte-identically afterwards, verified with
+      `diff`:
+
+      | line put back | tests that go red |
+      |---|---|
+      | `storableOf(character)` → `character` on write | 2 |
+      | the demotion in `normalizeInner` | 1 |
+      | `proficiencyForLevel` doing its own arithmetic | 1 |
+      | `migrateFromLegacy` hand-rolling its defaults | 2 |
+      | `migrateFromLegacy` passing `id` as a fallback rather than forcing it | 1 |
+
+      So **6 of 13 are pinned to a line of the slice; 7 are forward guards** that cannot fail
+      against old code and are labelled as such in the file — three exercise `storableOf` /
+      `DERIVED_KEYS`, which did not exist; three are source scans (finding BG: forbid the
+      fault rather than fail to observe it); one is a slice-1 regression guard that also
+      stops "delete the four numbers" from being a route to green.
+
+#### Three things slice 3 turned up that were not in the plan
+
+1. **FINDING BI — the unit tests were green and the app was wrong.** `migrateFromLegacy`
+   never called `normalizeCharacter`; it spread the legacy record straight into
+   `saveCharacter`, which now deletes the four derived keys on the way to disk. So the
+   stored number was not *retired*, it was *destroyed*, and the demotion every other read
+   path performs never ran. Invisible for Marcus — the app can work a Paladin's DC out
+   again — but for a class with no casting rule the override is the only place that number
+   can live, and for a Cleric, Druid or Wizard the same is true of `maxPreparedSpells`.
+   **Found by `_probe-disk.mjs` in a real Chrome, reporting `overrides kept: (none)`.**
+   `storable.test.ts` was fully green at the time: a unit test only checks the write paths
+   it calls, and it never called this one. This is the concrete argument for the browser
+   probe existing at all.
+2. **The first fix introduced a worse bug, and the same probe caught it.** Routing through
+   `normalizeCharacter(parsed, id)` passes `id` as a *fallback*, and a legacy record carries
+   an id of its own — so the sheet was filed under that id while `setActiveId` pointed at a
+   freshly minted one. Active id named a character that did not exist and the app booted to
+   the roster picker instead of Marcus's sheet. The old code's unexplained `character.id = id`
+   was load-bearing. Now forced, commented, and pinned by an assertion — one that was itself
+   inert until the fixture was given an id, because a prefix scan finds the record either
+   way. It is just not the one anybody asked for.
+3. **FINDING BJ — a comment asserting an invariant is not the invariant.** Slice 1's
+   `derive.ts` claims to hold "THE ONLY COPY" of the proficiency formula and names
+   `vitals.ts:84 proficiencyForLevel` among those it replaced. It had not replaced it, and
+   the two copies had **already drifted**: `vitals.ts` clamped only the bottom
+   (`Math.max(1, level)`), `derive.ts` clamps both. A level-24 character — nothing prevents
+   one, `level` is a free number — got +7 from one and +6 from the other, so the discrepancy
+   reporter would have accused the sheet using a number the app itself no longer agreed
+   with. **Found by the source scan, not by reading.**
 - [ ] Slice 4 — Level Up moves all seven numbers; pools clamp down, never up.
 - [ ] Slice 5 — `personalise.ts` wired at `detail.ts:284`, proved on one string (Bless).
 - [ ] Slice 6 — the remaining 7 canon strings, hand-edited and classified.

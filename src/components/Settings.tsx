@@ -347,10 +347,14 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   /* ------ level up ------ */
   const handleLevelUp = useCallback(() => {
     if (character.level >= 20) return
+    /* SHEET TRUTH slice 3. `proficiencyBonus: Math.ceil((level + 1) / 4) + 1` was
+       here, and it was one of five copies of that formula in four spellings. It is
+       gone rather than corrected: the level goes up, and `resolveCharacter` works
+       out the bonus from it on the way to disk. Nothing here needs to know the rule.
+       (The other six numbers a level-up should move are slice 4.) */
     const updated = {
       ...character,
       level: character.level + 1,
-      proficiencyBonus: Math.ceil((character.level + 1) / 4) + 1,
     }
     onCharacterUpdate(updated)
     setRestFeedback(`Leveled up to ${updated.level}! Update your spells and features as needed.`)
