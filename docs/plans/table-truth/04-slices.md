@@ -414,8 +414,13 @@ the baseline. Full numbers, the corrected finding, and **finding BG** are in `00
   the button floats and `<main>` is finally bounded against it, at the 71px the header comment had
   already budgeted.
 
-**10f — HEARTH-05: total retaliation damage per encounter.** *(Was 10e; deferred twice, both times
-for a measured reason.)* The cloak deals 1d10 Fire to whoever hits Nix in melee, and canon's
+**10f — HEARTH-05: total retaliation damage per encounter. DONE 2026-08-27.** *(Was 10e; deferred
+twice, both times for a measured reason.)* Gate green: tsc clean, **968 passed + 7 skipped across 41
+files**, build ✓, `prove-slice10f.mjs` **21/21** in Chrome at 390×844 and **3/21** against the
+stashed pre-change build. Both suspicions below were confirmed and both are why the tally lives in
+`CombatState` rather than in the log. Full write-up, Marcus's two capture decisions, the two
+structural faults found while building it, and **finding BH** (there is no way to END an encounter
+from the Play tab) are in `00-status.md` §Slice 10f. The cloak deals 1d10 Fire to whoever hits Nix in melee, and canon's
 `appAction` asks for it verbatim: *"Implement as written but display the total retaliation damage
 dealt per encounter so the DM can see the real numbers."* Every number the app shows today is
 *computed* from the sheet; this is the first that must be **captured**. Two things must exist before

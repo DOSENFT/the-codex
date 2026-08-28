@@ -26,7 +26,7 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 10d — HEARTH-04: the grant, and the warning before it destroys a pool — **DONE 2026-08-27**, gate green: tsc clean, **876 passed + 7 skipped across 37 files** (was 841/35), build ✓, `prove-slice10d.mjs` **14/14 in Chrome**. Two faults, one cause. Canon requires a prompt before a new temp-HP pool replaces a live one; `setTempHP` was a blind assignment, which is **VAL-06**, pinned `it.fails` in 10a. But the probe found the larger half first: taking Flaming Cloak granted **nothing** — `tempHP` 0 before, 0 after — while the sheet displayed the pool computed from canon's own formula, so the app did the arithmetic and made Marcus type the answer into a different screen. A warning about replacing a pool the app never grants is a warning about nothing, so both shipped together. **One decision, two askers**: `tempHPReplacement` decides and never applies; `HPTracker` asks by arming ("Apply" → **"Replace 5 with 3"**), `OptionDetailSheet` asks with a sentence painted above Spend. Neither surface can reach `setTempHP` without the sentence having been on the glass — enforced *without* making the setter refuse, because 2024 lets the player keep either pool. The grant is **computed, never read**: 11 at level 7 with Charisma 18, matching canon's own worked example, 24 at level 20. **The double-grant bug was designed out and pinned**: Hearthfire Manifest composes as two options sharing one `canonId`, and the grant hangs off `cost.resourcePoolId` — SHAPE, never a name — so the free Bonus Action face grants nothing and Nix cannot stand in 24 temp HP the rules never gave him. **VAL-06 flipped `violated` → `enforced`** and its gap pin was *inverted*, not deleted. The prover was run against the stashed pre-change build and went **5/14 — red on all nine HEARTH-04 and grant claims, green on exactly the four controls**; the new unit tests could not even compile against 10c's types (**24 `error TS`**). **HEARTH-05 split out to 10e** — it needs roll-result capture, which does not exist
 - [x] 10e — reactions truth: every reaction he owns, with its trigger and its price — **DONE 2026-08-27**, gate green: tsc clean, **914 passed + 7 skipped across 38 files** (was 876/37), build ✓, `prove-slice10e.mjs` **18/18 in Chrome at 390×844**. **Re-scoped by Marcus on 2026-08-27**, off his own sheet: *"I have Sentinel and interception"* — the app showed neither. Measured, the cause was **finding AT** with a second name on it: `character.feats` was read by **NOTHING**, zero references across `src/lib/turn/` and `src/lib/canon/`, so a feat could not become a turn option however his sheet was filled in. Fixed by `feats.ts`, which recognises a reaction by its **cost phrase** — *takes/uses/spends a Reaction* — and never by a feat name, with a veto for the inverse shape so a feat that *denies* reactions is not offered as one. **One row per effect, not per feat**: Sentinel is one feat with two different triggers and gets two rows; its Speed-0 rider gets none, because it costs nothing. It plugs into **`compose.ts`, not `options.ts`** — `options.ts` is pinned byte-identical to `main` by `overlay.test.ts` case 15 (**finding BD**), and slice 6 had already ruled at `compose.ts:389` that the composer is the layer that gets to know about reactions. Wiring it exposed **finding BE**: option ids were **never unique** — minted from type+name and deduped by id — so one feat with two reactions silently collapsed to one row, latent since slice 1 and invisible until a feat like Sentinel arrived. Also settled the cloak's price: Marcus believed the 1d10 retaliation *costs* a Reaction; canon makes the **activation** the Reaction and the retaliation free, automatic and uncapped, and the row's blank price is what taught him otherwise. `isFreeRider` derives this from the **shape** of canon's own sentence — a die with a trigger of its own and no named price — so Smoldering Smite's `1d8 Fire` is correctly left alone. Prover run against the stashed pre-change build went **8/18 — red on all ten feat-and-price claims, green on exactly the eight controls**. Produced **finding BF**: at five rows the band now runs under the dice FAB and the sticky deck (see §Slice 10e). **HEARTH-05 moved to 10f**
 - [x] 10f-a — finding BF: the dice control gets a home that is not on top of the page — **DONE 2026-08-27**, gate green: tsc clean, **922 passed + 7 skipped across 39 files** (was 914/38), build ✓, `prove-slice10f-a.mjs` all claims hold in Chrome at 390×844 across three surfaces. Inserted **ahead of** 10f at Marcus's instruction ("fix it first"), because 10f adds a *sixth* row to the very band the button was sitting on. **Half of finding BF as carried out of 10e was wrong, and measuring it corrected the record**: "the deck covers rows 4 and 5" was never occlusion — `<main>` is itself `position: fixed` and already ends 1px above the deck's top edge, so those rows were merely scrolled below their own container, and one thumb-flick recovers them. The naive overlap check reports **21 covered runs** pre-change and **19 of them are that artefact**; clipping each text run to `<main>`'s box before testing it is what separates real occlusion from scroll-recoverable, and it is the same distinction finding Q drew between the model and the glass. What survived the clip is the other half, **real and permanent**: the dice FAB is `fixed z-50` and sits *wholly inside* `<main>`, and because its `bottom` is expressed in terms of `--turn-deck-h` it **travels with the deck** — minimising does not uncover the text, it changes which text is covered (expanded, the Interception row's rules text; minimised, the Opportunity Attack row's `Reaction` label). Fixed by applying the law this app **already wrote down and then applied to only one of its two overlays** — `Layout.tsx`: *"the scroll region is BOUNDED, not padded."* New seam `DiceControl.tsx`: a surface that already owns fixed bottom chrome **adopts** the control into it; everywhere else the button floats and `<main>` is finally bounded against it. The deck adopts it onto the **slot-pip row**, into 165px of dead width it was already paying for — explicitly *not* the economy row, whose own comment records its 366px budget spent down to 28px of slack. Measured: Play `<main>` **421px → 421px** expanded and **537px → 537px** minimised — **not one pixel lost** — with the band still fitting the same 2 of 5 and 3 of 5 rows, which is the honesty check a "fix" that cleared the overlap by shrinking the porthole would have failed. Grimoire pays the 71px as budgeted (**723 → 652**, 9.8%) and gets the bound it never had. The docking flag is a **count, not a boolean**: a tab change mounts the incoming surface before unmounting the outgoing one, and a boolean would flash the floating button back in over a screen that already has one. Prover run against the stashed pre-change build first, as the baseline; the 8 new unit tests run against pre-change `TurnDeck` went **6 red / 2 green — red on every docking claim, green on exactly the two regression guards**. Produced **finding BG**: "zero text runs covered" is a claim that can pass by luck (see §Slice 10f-a below)
-- [ ] 10f — HEARTH-05: total retaliation damage per encounter. Deferred out of 10d 2026-08-27 and again out of 10e, after measuring what it actually needs: the app has **no memory of what a die came up as** (`DiceRoller` throws a number and forgets it), and the obvious shortcut of summing the session log is **silently wrong** — `LOG_DEPTH = 25`, so past 25 entries the earliest retaliations fall off the end and the total quietly shrinks. A wrong total that looks right is worse at the table than no total. Carries **finding BF** with it
+- [x] 10f — HEARTH-05: total retaliation damage per encounter — **DONE 2026-08-27**, gate green: tsc clean, **968 passed + 7 skipped across 41 files** (was 922/39), build ✓, `prove-slice10f.mjs` **21/21 in Chrome at 390×844**, and **3/21** against the stashed pre-change build. **The first number in this app that is CAPTURED rather than COMPUTED.** Every other figure on the Play tab is derived from the sheet and can be recomputed at any moment; a d10 that came up 7 at a table cannot, and if it is not written down as it happens it is gone. **The tally does not live in the log**, which was the obvious implementation and is quietly wrong: `LOG_DEPTH = 25`, so in a long fight the earliest retaliations fall off the end and the DM's total would *shrink while looking exactly as authoritative as a correct one*. It lives in `CombatState.retaliation`, which is never truncated — and because `reduce.ts:274` snapshots `restore.combat = snap(combat)` on every event, **undo comes free**, and a snapshot rather than a subtraction is what makes "undo the first of three" leave the other two intact. The field is **optional**, following `yourTurn?`, so Marcus's stored `codex-combat-*` never changes meaning (definition-of-done 8); absence *means* zero, so `reconcile` needs no branch and still returns identity. **Per encounter is enforced in the reducer, at BOTH ends** — a comment written first said clearing came free from `createCombatState`, and reading `reduce.ts:453` proved it wrong: the reducer's `endCombat` spreads `...combat` deliberately, to keep concentration, so the tally would have survived into the next fight. **Recognition is by SHAPE**: nothing anywhere names the cloak — the die is found because canon marked a `dice` fact `free` (`isFreeRider`, from 10e), and the proof is the **inverse on real content**, that Opportunity Attack's `1d8+4 Slashing` on the same sheet gets no button, or the DM's real numbers would be inflated by every off-turn swing. **Marcus's two decisions, both measured on the glass**: *"app rolls, but I can correct it"* — the tap rolls and puts the result in a `type="text" inputMode="numeric"` FIELD (`type="number"` was rejected: it reports `""` mid-edit and would flicker Add off between the 1 and the 2 of a 12), proved by reading `input.value` and typing 7 over an app-rolled 1; and *"cloak up, but always reachable"* — the prompt under the HP tracker fires only while the cloak is up, the button on the cloak row has **no condition at all**, proved with `tempHP: 0`. **`activeRetaliation` is read BEFORE the damage is applied**, because `applyDamage` spends temp HP first: a read afterwards reports nothing on the very hit that triggered the retaliation. **Two structural faults found and fixed while building it**: the reaction card *was* one big `<button>`, so the capture control could not go inside it (a button inside a button is invalid HTML and browsers drop the inner one — `+1d10 retaliation` would have painted and done nothing); and a refused Add was a **silent no-op**, because the app's one refusal surface is `OptionDetailSheet` and this control is not inside it. Both are proved: check G reads the painted line *"Start the encounter before recording retaliation damage."* with the typed 7 still in the field. The total **survives a page reload**, because a DM's number that dies when the phone locks is not a number. **Produced finding BH**: there is no way to END an encounter from the Play tab — `onEndCombat` is passed to `TurnSummary` and never used
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
 
@@ -2288,6 +2288,157 @@ Still open and untouched: the **cloak-teleport clause** — Marcus is asking his
 added until he reports back*, because an invented clause is a rule he never agreed to arriving as
 though the book said it. **Finding BC**, **finding AZ / HEARTH-08**, **VAL-13**, and the
 Gemini/Ollama AI fault, which is a later phase.
+
+## Slice 10f — closed 2026-08-27. The first number the app cannot compute.
+
+Canon's `appAction` for HEARTH-05, verbatim: *"Implement as written but display the total retaliation
+damage dealt per encounter so the DM can see the real numbers."*
+
+Every other number on the Play tab is **computed**. Spell save DC is 8 + prof + CHA. The temp-HP pool
+is level + CHA. Slots come off the table. Every one of them can be thrown away and rebuilt from the
+sheet, which is why nothing in this app has ever needed to remember anything. A d10 that came up 7
+cannot be rebuilt from anything. It happened once, at a table, and if the app does not **capture** it
+the number is gone. That is the whole of what makes this slice different from the ten before it, and
+it is why almost every decision below is about storage rather than about display.
+
+### Where the tally lives, and the obvious wrong home
+
+The obvious implementation is to sum the retaliations out of the undo log — they are already events,
+already stamped with a round, already labelled. It is quietly wrong: **`LOG_DEPTH` is 25**. In a long
+fight the earliest retaliations fall off the end of the log, so the DM's total would *shrink* as the
+fight went on, and it would look exactly as authoritative while doing it. A number that decays is
+worse than no number, because nothing on screen tells you it decayed.
+
+So the tally lives in `CombatState` (`src/lib/combat-state.ts`), which is never truncated:
+
+```ts
+retaliation?: { total: number; hits: number }
+```
+
+Three things fall out of that choice for free:
+
+- **Undo.** `reduce.ts:274` already does `restore.combat = snap(combat)`, so a retaliation undoes like
+  every other event without a line of new code. And it is a *restoration*, not a subtraction: undoing
+  the first of three leaves the other two intact, because undo runs against the state as it stands
+  now and "take 7 off" would be right only by accident. Proved in `retaliation.test.ts`.
+- **Persistence.** `CombatState` is what gets written to `codex-combat-*`, so the total survives a
+  page reload — measured in Chrome, not assumed.
+- **Old saves.** The field is **optional**, and `tallyOf` reads absence as `{ total: 0, hits: 0 }`. A
+  `codex-combat-*` written before today does not change meaning, which is definition-of-done item 8.
+  `tallyOf` also clamps: `NaN` from a half-written record reads as 0 rather than painting "NaN
+  damage" at the DM.
+
+**Per ENCOUNTER is enforced in the reducer, at both ends.** The first comment I wrote about this said
+the tally clears for free because `endCombat` builds a fresh combat object. It does not —
+`reduce.ts:453-477` spreads `...combat` deliberately, to keep concentration across the end of a
+fight. So `retaliation: undefined` is set explicitly in **both** `startCombat` and `endCombat`. The
+start-side clear is the one that matters at a real table: the DM says "roll initiative" and nobody
+taps End combat, and last fight's total sitting under this fight's die is a number that is true of
+nothing currently happening.
+
+### Recognition is by shape, and the proof is the inverse
+
+Nothing anywhere in this build says "Flaming Cloak" or "Hearthfire Manifest". The die is found
+because canon marked a `dice` fact `free` (`isFreeRider`), and `retaliation.ts` reads the notation
+off `fact.raw` with `/(\d+)d(\d+)\s+([A-Z][a-z]+)/`, refusing any die type outside
+`[4,6,8,10,12,20,100]`.
+
+The load-bearing claim is not that the cloak gets a button — it is that **Opportunity Attack does
+not**. Opportunity Attack carries `1d8+4 Slashing`: dice, on a reaction row, on this very sheet. A
+recogniser that looked for dice would offer to tally an ordinary swing, and the DM's "real numbers"
+would be inflated by every attack Nix made off his turn. It is excluded because canon states a
+*price* for it (your Reaction) rather than a trigger of its own. Measured in Chrome as **exactly one**
+`Record …retaliation` button in a five-row band.
+
+"The cloak is up" is likewise three facts and not one — `activeRetaliation` requires a live pool, a
+named source, and that the named source actually throws something back. An unattributed pool (the
+ordinary case: Marcus types a number in by hand, and `HPTracker` grants it with **no** source on
+purpose) gets nothing, because naming the wrong feature is worse than naming none.
+
+### Marcus's two decisions, and where each one is measured
+
+**"App rolls, but I can correct it."** Tapping `+1d10 retaliation` rolls, and the roll lands in an
+**editable** `type="text" inputmode="numeric"` field inside a confirm strip: `rolled [ 7 ] Fire
+[Add] [Cancel]`. The app's roll is the fast path; the field is what makes a physical die at the table
+authoritative over it. Measured: the app rolled **1**, 7 was typed over it, band read `TOTAL 7 Fire
+over 1 hit`; a second roll of **3** was added untouched → `TOTAL 10 Fire over 2 hits`; both survived
+a full `page.reload()`.
+
+**"Cloak up, but always reachable."** The prompt (`Hearthfire Manifest — roll 1d10 retaliation?`
+with Yes/No) appears on damage entry **only when the cloak is up**; the standing button on the
+Flaming Cloak row is there **at any time**, cloak or no cloak, in combat or out. The prompt is the
+convenience; the button is the guarantee. Measured on both sides: with `tempHP: 0` logging damage
+offers no prompt and the button is unchanged; with the cloak up, the prompt rolled **10**, 9 was
+typed over it, and the band — a different component entirely — read `TOTAL 9 Fire over 1 hit`. One
+tally, two doors.
+
+### Two structural faults found while building it
+
+**A nested `<button>`.** The first draft put the Record control inside the reaction row, which is
+itself a button. HTML does not allow that and React renders it anyway; the browser's fix-up is to
+close the outer button early, which silently re-parents everything after it. Fixed by lifting the
+control out of the row's button.
+
+**A silent no-op — found by reading, not by a failing test.** The app's one place for painting a
+refusal is `OptionDetailSheet`, and `RetaliationCapture` is not inside it. So a refused Add (out of
+combat, say) left the number sitting on screen and said *nothing* — indistinguishable, from the
+user's side, from a dead button. This is exactly the 🔴 "half-built feature running as if done" line.
+Fixed by threading the provider's `refusal` down to the strip and painting it in a `role="status"`
+line — but **gated on this control's own Add having come back false**, because `refusal` is the last
+refusal from anywhere in the app and would otherwise arrive already true and complain about something
+else. Measured: out of combat, Add paints `"Start the encounter before recording retaliation
+damage."`, the typed 7 stays in the field, and closing the strip confirms nothing was recorded.
+
+### Proved able to fail
+
+`prove-slice10f.mjs` is **21/21** green against the built app in Chrome at 390×844, and **3/21**
+against the rebuilt pre-change build. The 3 that stayed green are exactly the controls — no prompt
+with the cloak down, no ellipsis in the band, clean console — which is the shape you want: the
+controls do not move, the claims do. Before the two new test files were also stashed, `npm run build`
+failed with **15 `error TS`** across them, which is its own kind of evidence.
+
+Two prover corrections are worth recording, both cases of the prover reading the wrong moment rather
+than the app being wrong:
+
+- Check G asserted `field.value === '7'` and `tally === 'none yet'` in one breath, and `tally` came
+  back `null` — the confirm strip **replaces** the standing form rather than sitting under it. Split
+  into two moments, which is the *stronger* claim: the number is still there with the strip open, and
+  nothing was recorded once it closes.
+- The prover **crashed** against the pre-change build (`page.click` timeout on a button that does not
+  exist), reporting a crash where what is needed is a red/green split. It now checks for the control
+  first and, if it is missing, fails all 16 gated checks by name with `'there is no control to tap'`,
+  still measures the three controls, and exits 1 with a full tally.
+
+### FINDING BH (OPEN, not this slice)
+
+**There is no way to end an encounter from the Play tab.** `CombatHelper.tsx:1303` passes
+`onEndCombat={handleEndCombat}` to `TurnSummary`, which declares it at line 91, destructures it at
+line 117, and **never uses it** — two references in the whole file. `TurnDeck.tsx:250` renders a
+Start Combat button when `!inCombat`; there is no counterpart. This matters more after 10f than
+before it: "per encounter" is now a number on screen, and the only thing that clears it from the UI
+is starting the *next* fight. Wants its own slice.
+
+### The helper bug worth remembering
+
+`RetaliationCapture.test.tsx` failed 2/18 on its first run, on `viewBox="0` and `stroke=` — not on
+any text a human will ever see. I had copied `ReactionsBand.test.tsx`'s `blocks()` helper by eye, and
+that helper cuts markup on a **literal NUL byte** (which the Read tool renders as a space and grep
+treats as binary). Splitting on a space instead shredded HTML attribute values into fragments that
+survived tag-stripping and read as glued words, so the glued-words check fired on a lucide chevron
+icon. Fixed with an explicit `'\0'` and a comment saying why.
+
+### Files
+
+New: `src/lib/turn/retaliation.ts`, `src/lib/turn/retaliation.test.ts`,
+`src/components/combat/RetaliationCapture.tsx`, `src/components/combat/RetaliationCapture.test.tsx`,
+`docs/plans/table-truth/prove-slice10f.mjs`.
+Changed: `src/lib/combat-state.ts`, `src/lib/turn/events.ts`, `src/lib/turn/reduce.ts`,
+`src/lib/turn/reactions.ts`, `src/components/turn/CombatProvider.tsx`,
+`src/components/combat/ReactionsBand.tsx`, `src/components/combat/ReactionRow.tsx`,
+`src/components/CombatHelper.tsx`, `src/components/HPTracker.tsx`.
+
+Gate: `tsc --noEmit` clean · `npm run build` ✓ · `vitest run` **968 passed + 7 skipped across 41
+files** (baseline 922/39) · `prove-slice10f.mjs` **21/21** · falsifiability **3/21**.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

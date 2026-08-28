@@ -35,6 +35,7 @@ import type { CombatState } from '../combat-state'
 import { spellSlotSpentThisTurn } from '../rules-2024/economy'
 import { findPool, setPoolCurrent, spendable } from '../rules-2024/resources'
 import { LOG_DEPTH, type CombatEvent, type LogEntry, type Restore, type TakenOption } from './events'
+import { addRetaliation } from './retaliation'
 import type { TurnOption } from './types'
 
 /** The two things a turn can change, together.  Deliberately NOT a class and
@@ -196,6 +197,8 @@ export function reduce(
       return startCombat(state, event)
     case 'endCombat':
       return endCombat(state, event)
+    case 'retaliate':
+      return retaliate(state, event, event.amount, event.source)
     default:
       // Forward compatibility, and it is not theoretical: an entry written by
       // a newer build can be sitting in localStorage when Safari serves the
@@ -444,6 +447,9 @@ function startCombat(state: SessionState, event: CombatEvent): Applied {
         // Shield of Faith in the corridor and then get jumped, which is
         // exactly how it goes. Nothing about initiative breaks concentration.
         concentrating: combat.concentrating,
+        // A new fight starts at zero. Slice 10f — see `endCombat` below for why
+        // it is cleared at BOTH ends rather than only one.
+        retaliation: undefined,
       },
     }),
     entry,
@@ -470,8 +476,63 @@ function endCombat(state: SessionState, event: CombatEvent): Applied {
         // "concentrating on Bless" badge three sessions later is worse than a
         // dropped one. Undo restores it from the snapshot if it mattered.
         concentrating: null,
+        // PER ENCOUNTER, and cleared at both ends on purpose. Clearing only on
+        // `startCombat` would leave last fight's total on screen for as long as
+        // the party stayed out of initiative — a number that is true of nothing
+        // currently happening, sitting where the DM reads it. Clearing only on
+        // `endCombat` would carry a tally into a fight that began without the
+        // last one being formally ended, which is how it usually goes. Both.
+        //
+        // Undo puts it back either way: `restore.combat` is the whole state.
+        retaliation: undefined,
       },
     }),
+    entry,
+  }
+}
+
+/** Write down a retaliation die that has already been rolled.
+ *
+ *  THE ONLY EVENT THAT ADDS INFORMATION. Every other variant rearranges facts
+ *  the app could recompute from the sheet; this one is the app's only memory of
+ *  a physical thing that happened once. That asymmetry is why it is the only
+ *  event whose payload is validated: an `amount` of NaN reaching the tally
+ *  would render "NaN damage" to the DM and there would be nothing left to
+ *  recover it from.
+ *
+ *  Refused out of combat, deliberately. "Per encounter" is meaningless when
+ *  there is no encounter, and silently accepting would open a tally that the
+ *  next `startCombat` immediately wipes — the app would have taken the tap,
+ *  shown a total, and then lost it, which is worse than saying no. */
+function retaliate(
+  state: SessionState,
+  event: CombatEvent,
+  amount: number,
+  source: string,
+): Applied {
+  const { character, combat } = state
+
+  if (!combat.inCombat) {
+    return refuse(state, 'Start the encounter before recording retaliation damage.')
+  }
+  if (!Number.isFinite(amount) || Math.trunc(amount) < 1) {
+    return refuse(state, 'A retaliation has to be at least 1 damage.')
+  }
+
+  const rolled = Math.trunc(amount)
+  const entry: LogEntry = {
+    event,
+    // Whole, as always. `addRetaliation` returns a new object, but the snapshot
+    // is what makes undo a restoration rather than a subtraction — and
+    // subtracting is exactly where a tally would drift, since undoing the
+    // FIRST of three retaliations must leave the other two intact.
+    restore: { combat: snap(combat) },
+    label: `${source} — ${rolled} retaliation`,
+    round: combat.round,
+  }
+
+  return {
+    state: reconcile({ character, combat: addRetaliation(combat, rolled) }),
     entry,
   }
 }

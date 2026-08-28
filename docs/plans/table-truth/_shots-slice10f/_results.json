@@ -1,0 +1,209 @@
+{
+  "rolled": 1,
+  "second": 8,
+  "promptRoll": 2,
+  "band": {
+    "band": "Your reactions5Sentinel ReactionWHEN a creature within 5 feet of you takes the Disengage actionyou can take an Opportunity Attack against it.▸Sentinel ReactionWHEN a creature within 5 feet of you attacks a target other than youyou can take a Reaction to make one melee attack against the attacker.▸Interception ReactionWHEN a creature you can see hits another creature within 5 feet of you with an attackyou can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.▸Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationTOTAL 15 Fire over 2 hits",
+    "buttons": [
+      {
+        "label": "Record 1d10 Fire retaliation",
+        "text": "+1d10 retaliation",
+        "painted": true
+      }
+    ],
+    "rowName": "Flaming Cloak Reaction · 1/2 useswhen no",
+    "rowLabel": "Flaming Cloak",
+    "rowText": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationTOTAL 15 Fire over 2 hits",
+    "tally": "TOTAL 15 Fire over 2 hits",
+    "field": null,
+    "addDisabled": null,
+    "note": null
+  },
+  "cloakDown": {
+    "band": "Your reactions5Sentinel ReactionWHEN a creature within 5 feet of you takes the Disengage actionyou can take an Opportunity Attack against it.▸Sentinel ReactionWHEN a creature within 5 feet of you attacks a target other than youyou can take a Reaction to make one melee attack against the attacker.▸Interception ReactionWHEN a creature you can see hits another creature within 5 feet of you with an attackyou can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.▸Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationnone yet",
+    "buttons": [
+      {
+        "label": "Record 1d10 Fire retaliation",
+        "text": "+1d10 retaliation",
+        "painted": true
+      }
+    ],
+    "rowName": "Flaming Cloak Reaction · 1/2 useswhen no",
+    "rowLabel": "Flaming Cloak",
+    "rowText": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationnone yet",
+    "tally": "none yet",
+    "field": null,
+    "addDisabled": null,
+    "note": null
+  },
+  "cloakUp": {
+    "band": "Your reactions5Sentinel ReactionWHEN a creature within 5 feet of you takes the Disengage actionyou can take an Opportunity Attack against it.▸Sentinel ReactionWHEN a creature within 5 feet of you attacks a target other than youyou can take a Reaction to make one melee attack against the attacker.▸Interception ReactionWHEN a creature you can see hits another creature within 5 feet of you with an attackyou can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.▸Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationTOTAL 9 Fire over 1 hit",
+    "buttons": [
+      {
+        "label": "Record 1d10 Fire retaliation",
+        "text": "+1d10 retaliation",
+        "painted": true
+      }
+    ],
+    "rowName": "Flaming Cloak Reaction · 1/2 useswhen no",
+    "rowLabel": "Flaming Cloak",
+    "rowText": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationTOTAL 9 Fire over 1 hit",
+    "tally": "TOTAL 9 Fire over 1 hit",
+    "field": null,
+    "addDisabled": null,
+    "note": null
+  },
+  "atRest": {
+    "band": "Your reactions5Sentinel ReactionWHEN a creature within 5 feet of you takes the Disengage actionyou can take an Opportunity Attack against it.▸Sentinel ReactionWHEN a creature within 5 feet of you attacks a target other than youyou can take a Reaction to make one melee attack against the attacker.▸Interception ReactionWHEN a creature you can see hits another creature within 5 feet of you with an attackyou can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.▸Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸rolled Fire AddCancelStart the encounter before recording retaliation damage.",
+    "buttons": [],
+    "rowName": "Flaming Cloak Reaction · 1/2 useswhen no",
+    "rowLabel": "Flaming Cloak",
+    "rowText": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸rolled Fire AddCancelStart the encounter before recording retaliation damage.",
+    "tally": null,
+    "field": {
+      "value": "7",
+      "label": "1d10 Fire retaliation damage",
+      "type": "text",
+      "inputmode": "numeric",
+      "painted": true,
+      "editable": true
+    },
+    "addDisabled": false,
+    "note": "Start the encounter before recording retaliation damage."
+  },
+  "atRestClosed": {
+    "band": "Your reactions5Sentinel ReactionWHEN a creature within 5 feet of you takes the Disengage actionyou can take an Opportunity Attack against it.▸Sentinel ReactionWHEN a creature within 5 feet of you attacks a target other than youyou can take a Reaction to make one melee attack against the attacker.▸Interception ReactionWHEN a creature you can see hits another creature within 5 feet of you with an attackyou can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.▸Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationnone yet",
+    "buttons": [
+      {
+        "label": "Record 1d10 Fire retaliation",
+        "text": "+1d10 retaliation",
+        "painted": true
+      }
+    ],
+    "rowName": "Flaming Cloak Reaction · 1/2 useswhen no",
+    "rowLabel": "Flaming Cloak",
+    "rowText": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸+1d10 retaliationnone yet",
+    "tally": "none yet",
+    "field": null,
+    "addDisabled": null,
+    "note": null
+  },
+  "prompt": {
+    "prompt": "Hearthfire Manifest — roll 1d10 retaliation?",
+    "count": 1,
+    "yes": [
+      "Yes",
+      "No"
+    ],
+    "painted": true,
+    "inBand": false
+  },
+  "results": [
+    {
+      "name": "A · exactly ONE row offers the die, and it is the cloak  <-- THIS IS THE SLICE",
+      "pass": true,
+      "detail": "«+1d10 retaliation» on the Flaming Cloak row"
+    },
+    {
+      "name": "A · and before anything is recorded it says \"none yet\", not a zero",
+      "pass": true,
+      "detail": "the row reads \"none yet\" — a 0 reads as a measurement (\"the cloak has done nothing\"); the truth is that nothing has been written down yet, and at a table those are different facts"
+    },
+    {
+      "name": "B · the tap ROLLED — a whole number between 1 and 10, from the app’s own d10",
+      "pass": true,
+      "detail": "the strip opened carrying 1 — canon says 1d10, so 1..10 is the whole range"
+    },
+    {
+      "name": "B · and it is an EDITABLE TEXT FIELD, not a label  <-- MARCUS’S ANSWER",
+      "pass": true,
+      "detail": "type=text inputmode=numeric editable=true — half the time the die that decides this is a real d10 on a real table and the app cannot see it. type=\"number\" was rejected on purpose: it reports \"\" mid-edit, which would flicker Add off between the 1 and the 2 of a 12."
+    },
+    {
+      "name": "C · the tally reads the number he TYPED, not the number the app rolled",
+      "pass": true,
+      "detail": "the app rolled 1; he typed 7; the row says \"TOTAL 7 Fire over 1 hit\""
+    },
+    {
+      "name": "C · the strip closed behind it — the number is recorded, not still pending",
+      "pass": true,
+      "detail": "back to the standing button, with the total beside it"
+    },
+    {
+      "name": "C · and it counts HITS as well as damage",
+      "pass": true,
+      "detail": "«TOTAL 7 Fire over 1 hit» — the count is what tells him the app MISSED one, which is the failure mode of any tally a human has to remember to tap"
+    },
+    {
+      "name": "D · Cancel records nothing and leaves the total where it was",
+      "pass": true,
+      "detail": "after rolling and cancelling, the row still reads \"TOTAL 7 Fire over 1 hit\""
+    },
+    {
+      "name": "D · leaving the app’s own roll alone records THAT number, to the point",
+      "pass": true,
+      "detail": "rolled 8, added untouched, and 7 + 8 = 15: the row reads \"TOTAL 15 Fire over 2 hits\""
+    },
+    {
+      "name": "D · and it survives a reload — the DM’s number outlives the tab",
+      "pass": true,
+      "detail": "after a full page reload the row still reads \"TOTAL 15 Fire over 2 hits\""
+    },
+    {
+      "name": "E · with no temp HP at all, the standing button is unchanged  <-- MARCUS’S ANSWER",
+      "pass": true,
+      "detail": "«+1d10 retaliation» — the prompt is the convenience, this is the guarantee, and a guarantee with a condition on it is not one"
+    },
+    {
+      "name": "E · and logging damage with the cloak down offers nothing",
+      "pass": true,
+      "detail": "no prompt, correctly: there is no live pool for the cloak to have absorbed anything with"
+    },
+    {
+      "name": "F · logging damage while the cloak is up asks, in the feature’s own name",
+      "pass": true,
+      "detail": "«Hearthfire Manifest — roll 1d10 retaliation?» under the HP tracker (inBand=false), answerable Yes or No"
+    },
+    {
+      "name": "F · Yes rolls, the number is correctable here too, and Add takes it away",
+      "pass": true,
+      "detail": "the prompt rolled 2, took a typed 9 over it, and dismissed itself on Add"
+    },
+    {
+      "name": "F · and it feeds the SAME tally the band shows — one number, two routes",
+      "pass": true,
+      "detail": "the reactions band now reads \"TOTAL 9 Fire over 1 hit\" for a hit logged on the HP tracker — both controls dispatch the same event to the same reducer"
+    },
+    {
+      "name": "G · the button is there out of combat too — it is genuinely unconditional",
+      "pass": true,
+      "detail": "«+1d10 retaliation»"
+    },
+    {
+      "name": "G · the refusal is PAINTED, in the reducer’s own words",
+      "pass": true,
+      "detail": "«Start the encounter before recording retaliation damage.»"
+    },
+    {
+      "name": "G · and the number he typed is still in the field, waiting",
+      "pass": true,
+      "detail": "the field still reads \"7\" — the fix is \"start the encounter, press Add again\", not \"roll it a second time and hope it comes up 7\""
+    },
+    {
+      "name": "G · and nothing was recorded — the refusal refused",
+      "pass": true,
+      "detail": "with the strip closed the row reads \"none yet\": a refused Add leaves no total behind, which is the point of refusing it — \"per encounter\" is meaningless with no encounter, and a tally opened here is one the next startCombat wipes"
+    },
+    {
+      "name": "H · nothing in the band trails off",
+      "pass": true,
+      "detail": "the phase’s standing claim, re-measured on the surface this slice changed"
+    },
+    {
+      "name": "H · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

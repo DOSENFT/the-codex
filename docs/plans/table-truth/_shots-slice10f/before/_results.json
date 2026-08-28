@@ -1,0 +1,121 @@
+{
+  "band": {
+    "band": "Your reactions5Sentinel ReactionWHEN a creature within 5 feet of you takes the Disengage actionyou can take an Opportunity Attack against it.▸Sentinel ReactionWHEN a creature within 5 feet of you attacks a target other than youyou can take a Reaction to make one melee attack against the attacker.▸Interception ReactionWHEN a creature you can see hits another creature within 5 feet of you with an attackyou can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon.▸Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation (free)⚑ Canon lists 4 errata on this feature▸",
+    "buttons": [],
+    "rowName": "",
+    "rowLabel": null,
+    "rowText": "",
+    "tally": null,
+    "field": null,
+    "addDisabled": null,
+    "note": null
+  },
+  "results": [
+    {
+      "name": "A · exactly ONE row offers the die, and it is the cloak  <-- THIS IS THE SLICE",
+      "pass": false,
+      "detail": "0 buttons: (none) — Opportunity Attack carries 1d8+4 Slashing on this same sheet. A recogniser that looked for DICE would tally every off-turn swing and inflate the exact number the DM asked for; it looks for a die canon marked FREE."
+    },
+    {
+      "name": "A · and before anything is recorded it says \"none yet\", not a zero",
+      "pass": false,
+      "detail": "the row reads null — a 0 reads as a measurement (\"the cloak has done nothing\"); the truth is that nothing has been written down yet, and at a table those are different facts"
+    },
+    {
+      "name": "B · the tap ROLLED — a whole number between 1 and 10, from the app’s own d10",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "B · and it is an EDITABLE TEXT FIELD, not a label  <-- MARCUS’S ANSWER",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "C · the tally reads the number he TYPED, not the number the app rolled",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "C · the strip closed behind it — the number is recorded, not still pending",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "C · and it counts HITS as well as damage",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "D · Cancel records nothing and leaves the total where it was",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "D · leaving the app’s own roll alone records THAT number, to the point",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "D · and it survives a reload — the DM’s number outlives the tab",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "E · with no temp HP at all, the standing button is unchanged  <-- MARCUS’S ANSWER",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "F · logging damage while the cloak is up asks, in the feature’s own name",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "F · Yes rolls, the number is correctable here too, and Add takes it away",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "F · and it feeds the SAME tally the band shows — one number, two routes",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "G · the button is there out of combat too — it is genuinely unconditional",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "G · the refusal is PAINTED, in the reducer’s own words",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "G · and the number he typed is still in the field, waiting",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "G · and nothing was recorded — the refusal refused",
+      "pass": false,
+      "detail": "there is no control to tap"
+    },
+    {
+      "name": "E · and logging damage with the cloak down offers nothing",
+      "pass": true,
+      "detail": "no prompt — true here for the trivial reason that no prompt exists yet"
+    },
+    {
+      "name": "H · nothing in the band trails off",
+      "pass": true,
+      "detail": "the standing claim"
+    },
+    {
+      "name": "H · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

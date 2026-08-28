@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { Character } from '../../lib/character'
 import type { ComposedTurn, TurnOption } from '../../lib/turn/types'
 import { reactionRows } from '../../lib/turn/reactions'
+import type { RetaliationTally } from '../../lib/turn/retaliation'
 import type { ErratumRulings } from '../../lib/errata-rulings'
 import { ReactionRow } from './ReactionRow'
 
@@ -49,6 +50,14 @@ export interface ReactionsBandProps {
    *  the same reason `turn` is: the band stays renderable without a DOM. Omitted
    *  → nothing recorded, which is the slice 6 band exactly. */
   rulings?: ErratumRulings
+  /** Records a free retaliation die — Table Truth slice 10f. Passed in, like
+   *  everything else here, so the band stays renderable without a provider.
+   *  Omitted → no row offers one, which is the slice 8b band exactly. */
+  onRetaliate?: (amount: number, source: string) => boolean
+  /** The encounter's running total, for whichever row carries the die. */
+  tally?: RetaliationTally
+  /** The reducer's words for a refused Add. Passed straight through. */
+  refusal?: string | null
 }
 
 export function ReactionsBand({
@@ -58,6 +67,9 @@ export function ReactionsBand({
   onToggle,
   onOpen,
   rulings = {},
+  onRetaliate,
+  tally,
+  refusal,
 }: ReactionsBandProps) {
   const rows = reactionRows(turn, character, rulings)
 
@@ -87,7 +99,13 @@ export function ReactionsBand({
           <ul className="mt-2 flex flex-col gap-1.5">
             {rows.map(row => (
               <li key={row.id}>
-                <ReactionRow row={row} onOpen={onOpen} />
+                <ReactionRow
+                  row={row}
+                  onOpen={onOpen}
+                  onRetaliate={onRetaliate}
+                  tally={tally}
+                  refusal={refusal}
+                />
               </li>
             ))}
           </ul>

@@ -109,6 +109,14 @@ export interface CombatApi {
   beginTurn: () => void
   startEncounter: () => void
   endEncounter: () => void
+  /** Write down a retaliation die that has already come up.  Slice 10f.
+   *
+   *  Returns whether it was recorded, for the same reason `take` does: the
+   *  confirm strip that offered the number has to close on success and stay
+   *  open — with the number still in it, still editable — on a refusal. The one
+   *  refusal that will actually happen at the table is "not in combat", and the
+   *  worst possible response to it is to swallow the roll. */
+  retaliate: (amount: number, source: string) => boolean
   undoLast: () => void
   /** "Divine Smite" — what the Undo button should offer, or null if nothing. */
   undoLabel: string | null
@@ -263,6 +271,10 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
   const beginTurn = useCallback(() => dispatch({ type: 'beginTurn' }), [dispatch])
   const startEncounter = useCallback(() => dispatch({ type: 'startCombat' }), [dispatch])
   const endEncounter = useCallback(() => dispatch({ type: 'endCombat' }), [dispatch])
+  const retaliate = useCallback(
+    (amount: number, source: string) => dispatch({ type: 'retaliate', amount, source }),
+    [dispatch],
+  )
 
   const undoLast = useCallback(() => {
     const stepped = undo({ character, combat }, log)
@@ -288,12 +300,13 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
       beginTurn,
       startEncounter,
       endEncounter,
+      retaliate,
       undoLast,
       undoLabel: log.length > 0 ? log[log.length - 1]!.label : null,
       refusal,
       dismissRefusal: () => setRefusal(null),
     }),
-    [turn, combat, updateCombat, forgetCombat, take, endTurn, beginTurn, startEncounter, endEncounter, undoLast, log, refusal],
+    [turn, combat, updateCombat, forgetCombat, take, endTurn, beginTurn, startEncounter, endEncounter, retaliate, undoLast, log, refusal],
   )
 
   return <CombatContext.Provider value={value}>{children}</CombatContext.Provider>

@@ -60,6 +60,7 @@ import { OptionDetailSheet } from './combat/OptionDetailSheet'
 import { optionDetail } from '../lib/turn/detail'
 import type { TurnOption } from '../lib/turn/types'
 import { ReactionsBand } from './combat/ReactionsBand'
+import { tallyOf } from '../lib/turn/retaliation'
 import { ContentionBand } from './combat/ContentionBand'
 import { ErrataBand } from './combat/ErrataBand'
 import { liveErrata, laterErrata } from '../lib/canon/errata'
@@ -789,7 +790,11 @@ function ReactionsBandLive({
      answer, and they would disagree the moment one of them re-rendered. */
   rulings: ErratumRulings
 }) {
-  const { turn } = useCombat()
+  /* `combat` joins `turn` here in slice 10f, and it is the same object the
+     engine composed from — `tallyOf` reads the running total off it, so the
+     number beside the button and the number the reducer will add to are one
+     value read twice, never two values kept in step. */
+  const { turn, combat, retaliate, refusal } = useCombat()
   const section = useCollapsible('combat-reactions', character.id, true)
   return (
     <ReactionsBand
@@ -799,6 +804,9 @@ function ReactionsBandLive({
       onToggle={section.toggle}
       onOpen={onOpen}
       rulings={rulings}
+      onRetaliate={retaliate}
+      tally={tallyOf(combat)}
+      refusal={refusal}
     />
   )
 }
@@ -999,7 +1007,7 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
      and the rename would have buried the change that matters in churn. The
      thing that matters is that it is no longer ours: it arrives from context,
      and every writer on this tab now writes the object the engine reads. */
-  const { combat: combatState, updateCombat, forgetCombat } = useCombat()
+  const { combat: combatState, updateCombat, forgetCombat, retaliate, refusal } = useCombat()
 
   /* The option whose detail sheet is open, or null. Slice 7.
      The OPTION itself, not its id: the row already holds the composed option,
@@ -1338,6 +1346,12 @@ function CombatHelperInner({ character, onCharacterUpdate, onOpenDiceRoller }: C
       <HPTracker
         character={character}
         onCharacterUpdate={onCharacterUpdate}
+        /* Slice 10f. The convenience half of the capture: log a hit while the
+           cloak is up and the tracker offers the die on the spot. `retaliate`
+           comes from the same provider the reactions band's standing button
+           uses, so both routes add to one tally. */
+        onRetaliate={retaliate}
+        refusal={refusal}
       />
 
       {/* ── Collapsible: Concentration (only when NOT in combat — TurnSummary handles it during combat) ── */}

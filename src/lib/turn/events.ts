@@ -65,6 +65,19 @@ export type CombatEvent =
   | { type: 'beginTurn' }
   | { type: 'startCombat' }
   | { type: 'endCombat' }
+  /** Slice 10f. A free retaliation die came up N — write it down.
+   *
+   *  The first event in this union that carries a number the app could not have
+   *  derived. Every other variant describes something the app can recompute
+   *  from the sheet; this one carries evidence of a die that has already been
+   *  rolled, whether by `DiceRoller` or by Marcus's hand at the table.
+   *
+   *  `source` is the feature canon hung the die off, and it is stored rather
+   *  than looked up for the reason `TakenOption` gives above: the log outlives
+   *  the thing it points at. `amount` is a total, not a notation — two
+   *  retaliations of 1d10 are two entries, never one `2d10`, because the DM
+   *  asked for the real numbers and a hit count is half of that answer. */
+  | { type: 'retaliate'; amount: number; source: string }
 
 /** Absolute prior values for everything one event touched.
  *

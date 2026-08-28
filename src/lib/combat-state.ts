@@ -60,6 +60,32 @@ export interface CombatState {
    *  as `true`, which is exactly the behaviour he has today. Nothing he has
    *  saved changes meaning. */
   yourTurn?: boolean
+  /** Retaliation damage recorded THIS ENCOUNTER.  Slice 10f (HEARTH-05).
+   *
+   *  The one number in this app that is captured rather than computed — a d10
+   *  came up 7, and nothing on Nix's sheet implies 7. Canon's `appAction` asks
+   *  for it in as many words: "display the total retaliation damage dealt per
+   *  encounter so the DM can see the real numbers."
+   *
+   *  WHY IT LIVES HERE AND NOT IN THE LOG. Summing it out of the event log is
+   *  the obvious implementation and it is wrong quietly: `LOG_DEPTH` is 25 and
+   *  the log truncates, so in a long fight the earliest retaliations fall off
+   *  the end and the DM's total would SHRINK as the fight went on — while
+   *  looking exactly as authoritative as a correct one. `CombatState` is never
+   *  truncated. The log still carries each event, for undo.
+   *
+   *  PER ENCOUNTER is enforced in `turn/reduce.ts`, which clears it on BOTH
+   *  `startCombat` and `endCombat` — not here. This file's `endCombat` rebuilds
+   *  from `createCombatState` and so drops it for free, but the reducer's does
+   *  not (it spreads the prior state to keep concentration), and the reducer is
+   *  the path every real tap takes.
+   *
+   *  OPTIONAL ON PURPOSE, same as `yourTurn` and for the same reason, but with
+   *  less riding on it: absent means nothing has been recorded, which is
+   *  exactly zero. `retaliation.ts`'s `tallyOf` reads absent as `{0, 0}`, so
+   *  `reconcile` needs no branch and Marcus's stored `codex-combat-*` keys do
+   *  not change meaning. */
+  retaliation?: { total: number; hits: number }
 }
 
 const STORAGE_PREFIX = 'codex-combat-'

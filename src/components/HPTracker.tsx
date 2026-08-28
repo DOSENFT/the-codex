@@ -24,6 +24,9 @@ import {
   resetDeathSaves,
 } from '../lib/character'
 import { tempHPReplacement, replacementWarning } from '../lib/rules-2024/temp-hp'
+import { activeRetaliation, type RetaliationDie } from '../lib/turn/retaliation'
+import { featureContextOf } from '../lib/turn/overlay'
+import { RetaliationCapture } from './combat/RetaliationCapture'
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
@@ -36,6 +39,17 @@ import { OrnateHeader } from './ui/OrnateHeader'
 interface HPTrackerProps {
   character: Character
   onCharacterUpdate: (character: Character) => void
+  /** Records a free retaliation die — Table Truth slice 10f.
+   *
+   *  Optional, and the tracker is unchanged without it. With it, logging damage
+   *  WHILE THE CLOAK IS UP offers to roll the die; logging damage with the cloak
+   *  down offers nothing at all. That asymmetry is the whole design: a prompt
+   *  that fires on every damage entry is a prompt that gets dismissed without
+   *  being read, and the standing button on the reaction row is what makes
+   *  dismissing this one safe. */
+  onRetaliate?: (amount: number, source: string) => boolean
+  /** The reducer's words for a refused Add, for the retaliation prompt. */
+  refusal?: string | null
 }
 
 type InputMode = 'damage' | 'heal' | 'temp' | null
@@ -98,7 +112,7 @@ const QUICK_VALUES = [1, 5, 10] as const
 // HPTracker Component
 // ---------------------------------------------------------------------------
 
-export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
+export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }: HPTrackerProps) {
   const [inputMode, setInputMode] = useState<InputMode>(null)
   /* Per character, and through the hook that already exists — this writes into
      the same `codex-ui-${id}` map every other fold in the app uses, so slice 4
@@ -112,6 +126,10 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
      "must prompt" — the warning is read before the press that acts on it, not
      after. */
   const [armed, setArmed] = useState(false)
+  /* Slice 10f. The die a damage entry just made offerable, or null.
+     Held in state rather than derived, because by the time it is on screen the
+     fact that produced it may be gone — see `handleApply`. */
+  const [offered, setOffered] = useState<RetaliationDie | null>(null)
 
   // Derived state
   const currentHP = character.hitPoints.current
@@ -171,6 +189,15 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
       return
     }
 
+    /* READ BEFORE THE DAMAGE IS APPLIED, and that ordering is the whole of it.
+       `applyDamage` spends temp HP first, so a hit that empties the pool takes
+       the cloak down with it — and `activeRetaliation` would then correctly
+       report nothing, on the very hit that triggered the retaliation. The cloak
+       was up when the blow landed; that is the fact the offer is about. Slice
+       10f. */
+    const retaliating =
+      inputMode === 'damage' && onRetaliate ? activeRetaliation(character, featureContextOf(character)) : null
+
     let updated: Character
     switch (inputMode) {
       case 'damage':
@@ -193,7 +220,8 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
     setInputMode(null)
     setInputValue('')
     setArmed(false)
-  }, [inputValue, inputMode, character, onCharacterUpdate, replacement, armed])
+    setOffered(retaliating)
+  }, [inputValue, inputMode, character, onCharacterUpdate, replacement, armed, onRetaliate])
 
   /* One writer for the amount, so arming can be cleared in one place. A changed
      number is a changed decision and must be re-read before it is acted on. */
@@ -461,6 +489,23 @@ export function HPTracker({ character, onCharacterUpdate }: HPTrackerProps) {
             </Button>
           </div>
         </div>
+      )}
+
+      {/* ── The retaliation offer — Table Truth slice 10f ──
+             Appears only after damage was logged while the cloak was up, and
+             takes itself away the moment it is answered either way. It is
+             deliberately NOT the only route to the die: the same capture stands
+             permanently on the Flaming Cloak row in the reactions band, so a
+             "No" here costs nothing and there is no state in which the number
+             cannot be recorded. */}
+      {offered && onRetaliate && (
+        <RetaliationCapture
+          die={offered}
+          offer="prompt"
+          onRecord={onRetaliate}
+          onDismiss={() => setOffered(null)}
+          refusal={refusal}
+        />
       )}
 
       {/* Death Saves — only visible at 0 HP */}

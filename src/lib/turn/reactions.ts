@@ -30,6 +30,7 @@ import { featureByName, spellByName, errataForFeature } from '../canon/lookup'
 import { featureFacts, factsLine } from '../canon/feature'
 import { fitRowDetail, featureContextOf } from './overlay'
 import { triggerFor, ruledTrigger, type RuledTrigger, type TriggerSource } from './trigger'
+import { retaliationOf, type RetaliationDie } from './retaliation'
 import type { ComposedTurn, TurnOption } from './types'
 import type { Provenance } from '../canon/types'
 import type { ErratumRulings } from '../errata-rulings'
@@ -57,6 +58,17 @@ export interface ReactionRow {
   /** Canon's errata ids for the feature this row matched. Empty when canon has
    *  no match or no errata. Slice 8 renders them; slice 6 only counts them. */
   errataIds: string[]
+  /** A die this feature throws back for FREE when its trigger fires, or null.
+   *
+   *  Null for almost every row, and that is the shape of the fact rather than a
+   *  gap in the data: a reaction that costs your Reaction to deal its damage is
+   *  already priced by `cost`, and the engine already spends it. This field is
+   *  only ever set for the rarer thing — canon stating a die that costs nothing
+   *  and fires on the world doing something to you, which the app has no way to
+   *  notice and so has to be TOLD about.
+   *
+   *  Recognised by shape, never by name — see `retaliation.ts`. Slice 10f. */
+  retaliation: RetaliationDie | null
   /** The option this row was built from, carried whole — Table Truth slice 7.
    *
    *  The detail sheet takes a `TurnOption`, and a reaction row must be able to
@@ -123,6 +135,9 @@ export function reactionRows(
         provenance: feature ? 'canon' : (option.provenance ?? 'sheet'),
         homebrew: option.homebrew === true,
         errataIds: errata.map(e => e.id),
+        /* Read off the SAME `feature` and `ctx` the body line was built from, so
+           the row can never offer a die its own text does not mention. */
+        retaliation: retaliationOf(feature, ctx),
         option,
       }
     })

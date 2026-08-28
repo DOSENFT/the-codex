@@ -1,5 +1,7 @@
 import type { ReactionRow as ReactionRowModel } from '../../lib/turn/reactions'
+import type { RetaliationTally } from '../../lib/turn/retaliation'
 import { splitTriggerLead } from '../../lib/turn/trigger'
+import { RetaliationCapture } from './RetaliationCapture'
 
 /* ============================================================================
    ONE REACTION — Table Truth slice 6.
@@ -58,9 +60,17 @@ export interface ReactionRowProps {
   row: ReactionRowModel
   /** Opens the option detail sheet. Omitted → the row is inert, as in slice 6. */
   onOpen?: (option: ReactionRowModel['option']) => void
+  /** Records a free retaliation die — Table Truth slice 10f. Omitted → the row
+   *  is byte-for-byte the slice 8b row, which is how every existing caller and
+   *  every existing test still gets exactly what it got before. */
+  onRetaliate?: (amount: number, source: string) => boolean
+  /** The encounter's running tally, for the row that offers the die. */
+  tally?: RetaliationTally
+  /** Why the last Add was turned down. Only the capture control paints it. */
+  refusal?: string | null
 }
 
-export function ReactionRow({ row, onOpen }: ReactionRowProps) {
+export function ReactionRow({ row, onOpen, onRetaliate, tally, refusal }: ReactionRowProps) {
   const blocked = !row.available
   const unstated = row.when === null
   /* The label is the clause's own lead word, not a fixed "WHEN" bolted on in
@@ -146,17 +156,47 @@ export function ReactionRow({ row, onOpen }: ReactionRowProps) {
     </>
   )
 
-  if (!onOpen) return <div className={skin}>{body}</div>
+  /* THE STANDING CONTROL — slice 10f, and Marcus's own decision about it:
+     "always reachable". It is here whether or not the cloak is up, whether or
+     not the HP tracker prompted him, on his turn and off it. The prompt under
+     the HP tracker is the convenience; this is the guarantee, and the guarantee
+     is the one that must not depend on the app having noticed anything. */
+  const capture =
+    row.retaliation && onRetaliate ? (
+      <RetaliationCapture
+        die={row.retaliation}
+        tally={tally}
+        refusal={refusal}
+        offer="button"
+        onRecord={onRetaliate}
+      />
+    ) : null
 
-  return (
+  /* THE CARD IS A DIV AND THE DETAIL AFFORDANCE IS A BUTTON INSIDE IT.
+     Until 10f the whole card WAS the button, which is the better target when a
+     row does exactly one thing. It cannot survive a second control: a button
+     inside a button is invalid HTML, and browsers resolve it by dropping the
+     inner one — so `+1d10 retaliation` would have painted and done nothing.
+     The skin, the hover and the aria-label are unchanged; only the element the
+     padding hangs off has moved outwards by one. */
+  const detail = onOpen ? (
     <button
       type="button"
       onClick={() => onOpen(row.option)}
       aria-label={`${row.name} — details`}
-      className={`${skin} w-full text-left transition-colors hover:border-gold/40`}
+      className="w-full text-left"
     >
       {body}
       <span className="mt-1 block text-right font-mono text-xs text-forge-2">▸</span>
     </button>
+  ) : (
+    body
+  )
+
+  return (
+    <div className={`${skin}${onOpen ? ' transition-colors hover:border-gold/40' : ''}`}>
+      {detail}
+      {capture}
+    </div>
   )
 }
