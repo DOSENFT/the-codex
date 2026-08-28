@@ -5,7 +5,31 @@
 // Two jobs, deliberately in one file because they read the same fields:
 //
 //   tableVitals()   — the five numbers a turn is actually made of.
-//   discrepancies() — every place the STORED sheet and the 2024 rule differ.
+//   discrepancies() — every place the sheet and the 2024 rule differ.
+//
+// SHEET TRUTH slice 7 REVERSED THE PREMISE OF THIS FILE, and the comments below
+// are corrected rather than quietly left to rot. When this was written the sheet
+// STORED its save DC, spell attack and proficiency bonus, so all three could
+// drift from the rules and this module's job was to notice. Slices 1–4 retired
+// the stored copies: `resolveCharacter` now computes all three on the way out of
+// storage, on Marcus's own Gate 1 ruling ("always compute; retire stored").
+//
+// Three of the four checks below therefore CANNOT FIRE for any character the app
+// is able to produce, and `vitals.test.ts` §slice 7 sweeps thirteen classes ×
+// twenty-three levels × ten ability lines to prove it rather than assert it.
+//
+// They are KEPT anyway, and that is a decision, not an oversight (Gate 3,
+// least-confident #5). A `Character` that never went through `resolveCharacter`
+// — a legacy blob, a hand-edited export, a future bug in a new import path — is
+// exactly what this module was built to catch, and deleting the checks would
+// mean the app's answer to that sheet is silence. Tests 15–18 hold them live
+// against forged characters; test 19 holds the front door shut.
+//
+// SPELL SLOTS ARE THE ASYMMETRY, and the one case that still fires in normal
+// use. `derive.ts:162` deliberately never touches them: Marcus's sheet carries
+// slots his level does not grant, that may be his DM or an item, and deleting a
+// resource he is playing with would be the app overruling his table. So slots
+// stay stored, stay reported, forever.
 //
 // THE LAW OF THIS FILE: it reports, it never corrects. Nothing here returns a
 // "fixed" character and nothing here is allowed to. Marcus's sheet is the only
@@ -36,9 +60,15 @@ import { proficiencyFor } from './derive'
  *  sheet but not on the Play tab. Every one of them is READ or DERIVED — none
  *  is stored by this module and none is written back. */
 export interface TableVitals {
-  /** STORED (`character.spellSaveDC`), not recomputed. If the stored value and
-   *  the formula disagree that is a discrepancy to report, not a number to
-   *  quietly swap at the table — he has been playing with this one. */
+  /** Read straight off `character.spellSaveDC` — which, since slice 3, IS the
+   *  computed number. This field used to carry a note saying the stored value
+   *  was deliberately preferred to the formula because "he has been playing with
+   *  this one"; that reasoning is now history. Marcus's Gate 1 answer overruled
+   *  it after the sheet spent months telling him his Charisma was 18.
+   *
+   *  The pass-through stays a pass-through on purpose: recomputing here would
+   *  make this file a SECOND place the DC is worked out, and two copies of one
+   *  formula is the bug this whole phase existed to kill. */
   saveDC: number
   spellAttack: number
   armorClass: number
@@ -173,8 +203,16 @@ export function discrepancies(character: Character): Discrepancy[] {
   }
 
   /* ── Proficiency bonus ────────────────────────────────────────────────
-     Pure arithmetic off the level, with no legitimate exception in 2024. If
-     this one ever fires, the level or the bonus was mistyped. */
+     Pure arithmetic off the level, with no legitimate exception in 2024.
+
+     SLICE 7: UNREACHABLE THROUGH THE APP'S OWN DOOR. `resolveCharacter` sets
+     `proficiencyBonus = proficiencyFor(level)`, and `proficiencyForLevel` below
+     IS `proficiencyFor` — the same function, since slice 3 collapsed the two
+     copies that had already drifted at level 24. Comparing a value against the
+     function that produced it can only ever be equal. Kept because a forged or
+     legacy sheet is still a sheet, and test 19 proves the door rather than
+     trusting this comment (finding BJ: a comment asserting an invariant is not
+     the invariant). */
   const expectedProf = proficiencyForLevel(character.level)
   if (character.proficiencyBonus !== expectedProf) {
     found.push({
@@ -187,10 +225,23 @@ export function discrepancies(character: Character): Discrepancy[] {
   }
 
   /* ── Save DC and spell attack ─────────────────────────────────────────
-     Recomputed from the ability scores by helpers that already existed in
-     character.ts and were only ever used at character-creation time. Both
-     return the stored value unchanged for a class with no casting ability, so
-     a non-caster can never trip this. */
+     Recomputed from the ability scores. Both return the stored value unchanged
+     for a class with no casting ability, so a non-caster can never trip this.
+
+     SLICE 7: UNREACHABLE THROUGH THE APP'S OWN DOOR, for a sharper reason than
+     the proficiency check above. `computeSpellSaveDC` is now literally
+     `resolveCharacter(char).spellSaveDC` (character.ts:439) — so this line asks
+     a resolved character whether resolving it again would move it. It would not:
+     `resolveCharacter` reads level, class and ability scores, and writing its
+     output back changes none of those. That idempotence IS the unreachability,
+     and test 20 pins it directly instead of inferring it from this paragraph.
+
+     THIS IS THE CHECK MARCUS'S BUG WOULD HAVE TRIPPED. His sheet said 18 and his
+     Charisma was 16; the DC on his Play tab was 15 when it should have been 14.
+     The reporter would have said so — but a report is not a fix, and he had been
+     reading a wrong number for months with the report right there. Slice 3 made
+     the drift impossible instead. Keeping the check costs one comparison and
+     covers the sheets that never came through the front door. */
   const expectedDC = computeSpellSaveDC(character)
   if (character.spellSaveDC !== expectedDC) {
     found.push({

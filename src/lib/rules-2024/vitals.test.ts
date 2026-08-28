@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { NIX } from '../turn/fixtures/nix'
-import type { Character } from '../character'
-import { tableVitals, discrepancies, proficiencyForLevel, signed } from './vitals'
+import type { Character, CharacterBase } from '../character'
+import { resolveCharacter, storableOf } from './derive'
+import { tableVitals, discrepancies, proficiencyForLevel, signed, type DiscrepancyId } from './vitals'
 
 /* ============================================================================
    Table Truth slice 2.
@@ -26,9 +27,17 @@ const CLEAN: Character = {
 }
 
 describe('tableVitals', () => {
-  it('5 — reads the STORED save DC, it does not recompute it', () => {
-    // Deliberate: he has been playing with the stored number. Swapping it for a
-    // computed one at the table would change his rolls with no announcement.
+  it('5 — passes the sheet\'s save DC straight through, it does not recompute it', () => {
+    /* SLICE 7 RENAMED THIS TEST AND REVERSED ITS REASON, without touching a line
+       of what it asserts. It used to read "reads the STORED save DC", and the
+       reason given was that Marcus had been playing with the stored number and
+       swapping it for a computed one would change his rolls unannounced. Gate 1
+       overruled exactly that: the stored copy is retired and the field IS the
+       computed number now.
+       The pass-through survives on a different justification. Recomputing here
+       would make this module a SECOND place the DC is worked out, and two copies
+       of one formula is the bug the whole phase existed to kill. A forged 99
+       still comes back as 99 — this file reports, it never corrects. */
     const drifted = { ...CLEAN, spellSaveDC: 99 }
     expect(tableVitals(drifted).saveDC).toBe(99)
   })
@@ -171,5 +180,143 @@ describe('the app\'s own Nix fixture', () => {
     // Its slots and proficiency, by contrast, are correct for a Paladin 8.
     expect(found.find(d => d.id === 'spell-slots')).toBeUndefined()
     expect(found.find(d => d.id === 'proficiency')).toBeUndefined()
+  })
+})
+
+/* ============================================================================
+   SHEET TRUTH slice 7 — the door three of these four flags came in by is shut.
+
+   Every test above this line hands `discrepancies()` a `Character` built with an
+   object literal. That was the only kind of character there was when they were
+   written. Since slice 3 there are two kinds, and the difference is the whole
+   subject of this section:
+
+     a RESOLVED character — one that came out of `resolveCharacter`, which is now
+     the only producer the app itself uses (character.ts:376). Its save DC, spell
+     attack and proficiency bonus are computed, not stored, so they cannot drift.
+
+     a FORGED character — an object literal, a legacy blob, a hand-edited export,
+     a future import path that forgets to resolve. Its numbers can say anything.
+
+   Tests 15–18 are forged sheets, and they still pass, which is what "kept, not
+   deleted" has to mean: the branches are live code that still works. Tests 19–22
+   are the other half — the proof that no resolved sheet can reach three of them,
+   and that the fourth still fires for everyone, forever.
+   ========================================================================= */
+describe('slice 7 — what retiring the stored numbers made unreachable', () => {
+  /** The three that `resolveCharacter` now computes, so they cannot drift. */
+  const NEVER: DiscrepancyId[] = ['save-dc', 'spell-attack', 'proficiency']
+
+  /* Thirteen classes, not one: full casters, half casters, the two SLOT_TABLE
+     deliberately omits (Warlock's Pact Magic, Artificer's round-up), and four
+     that do not cast at all — because "a non-caster can never trip this" is a
+     claim in the source and claims in the source are what finding BJ is about.
+
+     Levels run past 20 on purpose. `level` is a free number on the sheet with
+     nothing stopping a 24, and level 24 is precisely where the two copies of the
+     proficiency formula had drifted before slice 3 collapsed them. A sweep that
+     stopped at 20 would have missed the only level that ever mattered. */
+  const CLASSES = [
+    'Paladin', 'Ranger', 'Bard', 'Cleric', 'Druid', 'Sorcerer', 'Wizard',
+    'Warlock', 'Artificer', 'Fighter', 'Rogue', 'Barbarian', 'Monk',
+  ]
+  const LEVELS = [0, ...Array.from({ length: 20 }, (_, i) => i + 1), 21, 24]
+  /* Every score set to the same value, so whatever a class's casting ability
+     turns out to be, the sweep has moved it. 3 and 30 are outside the legal
+     range and included for that reason; 9 gives a NEGATIVE modifier, which is
+     the branch `unsigned` exists for elsewhere in this phase. */
+  const SCORES = [3, 8, 9, 10, 11, 14, 16, 18, 20, 30]
+
+  function* sweep(): Generator<Character> {
+    const base = storableOf(NIX)
+    for (const klass of CLASSES) {
+      for (const level of LEVELS) {
+        for (const score of SCORES) {
+          yield resolveCharacter({
+            ...base,
+            class: klass,
+            level,
+            abilityScores: { STR: score, DEX: score, CON: score, INT: score, WIS: score, CHA: score },
+          } as CharacterBase)
+        }
+      }
+    }
+  }
+
+  it('19 — no character the app can produce trips the save DC, spell attack or proficiency check', () => {
+    let checked = 0
+    for (const character of sweep()) {
+      const fired = discrepancies(character)
+        .filter(d => NEVER.includes(d.id))
+        .map(d => d.id)
+      expect(
+        fired,
+        `${character.class} level ${character.level}, all scores ${character.abilityScores.CHA}`,
+      ).toEqual([])
+      checked++
+    }
+    // The sweep must actually have swept. A generator that yields nothing would
+    // pass every assertion above it and prove precisely nothing (finding BG).
+    expect(checked).toBe(CLASSES.length * LEVELS.length * SCORES.length)
+    expect(checked).toBeGreaterThan(2000)
+  })
+
+  it('20 — and the REASON is idempotence: resolving a resolved sheet moves nothing', () => {
+    /* This is the mechanism test 19 measures the consequence of. `vitals.ts`
+       compares `character.spellSaveDC` against `computeSpellSaveDC(character)`,
+       and since character.ts:439 the latter is `resolveCharacter(char).spellSaveDC`
+       — so the comparison asks a resolved sheet whether resolving it again would
+       move it. If that were ever false, test 19 would go red without anyone
+       understanding why; this test names the property by itself. */
+    let checked = 0
+    for (const character of sweep()) {
+      const again = resolveCharacter(character)
+      expect(again.spellSaveDC, `${character.class} ${character.level}`).toBe(character.spellSaveDC)
+      expect(again.spellAttackBonus).toBe(character.spellAttackBonus)
+      expect(again.proficiencyBonus).toBe(character.proficiencyBonus)
+      checked++
+    }
+    expect(checked).toBeGreaterThan(2000)
+  })
+
+  it('21 — but all three are still live code, and a sheet that skipped the door still trips them', () => {
+    /* "Kept rather than deleted" is only true if the branches still work. This
+       is the legacy blob: a Paladin 7 whose three numbers say whatever an old
+       file said, never resolved. All three must fire, together, with both
+       readings — which is also what makes test 19 a real result rather than a
+       test of code that could not fire for anybody. */
+    const forged: Character = {
+      ...CLEAN,
+      proficiencyBonus: 4,
+      spellSaveDC: 18,
+      spellAttackBonus: 9,
+    }
+    const fired = discrepancies(forged).filter(d => NEVER.includes(d.id))
+    expect(fired.map(d => d.id).sort()).toEqual([...NEVER].sort())
+    for (const d of fired) {
+      expect(d.sheet).toBeTruthy()
+      expect(d.rule).toBeTruthy()
+      expect(d.why).toBeTruthy()
+    }
+  })
+
+  it('22 — spell slots still report, through the front door, forever and by design', () => {
+    /* The asymmetry, and it is deliberate (derive.ts:162). Marcus's sheet carries
+       3rd-level slots at level 7, which the half-caster table does not grant.
+       That may be his DM or an item, and deleting a resource he is playing with
+       would be the app overruling his table — so slots stay stored, stay his,
+       and stay reported. This check does NOT become unreachable, and a future
+       slice that "tidies up" the other three must not take this one with them. */
+    const resolved = resolveCharacter({
+      ...storableOf(NIX),
+      level: 7,
+      spellSlots: { 1: { max: 4, current: 4 }, 2: { max: 3, current: 3 }, 3: { max: 2, current: 2 } },
+    } as CharacterBase)
+    const slots = discrepancies(resolved).find(d => d.id === 'spell-slots')
+    expect(slots).toBeDefined()
+    expect(slots!.sheet).toContain('3rd')
+    expect(slots!.rule).not.toContain('3rd')
+    // …and it went through the very door that shut the other three.
+    expect(discrepancies(resolved).filter(d => NEVER.includes(d.id))).toEqual([])
   })
 })

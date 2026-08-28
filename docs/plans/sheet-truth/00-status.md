@@ -349,7 +349,88 @@ _Full detail and per-slice proof in `04-slices.md`._
    even at level 13. That looked like a failure and was really the seed telling the truth
    about a level 8 character. The probe now takes its slot tiers from canon's progression
    table for the case's level.
-- [ ] Slice 7 — discrepancy cases kept but asserted unreachable; phase close.
+- [x] **Slice 7 — the discrepancy cases kept, and proved unreachable.** Done 2026-08-28.
+
+   **What moved, and why.** Nothing on any screen — this slice changed comments and tests
+   only, and that is the point of it. Slices 1–4 retired the stored save DC, spell attack
+   and proficiency bonus, which quietly made three of `discrepancies()`'s four cases
+   impossible to trigger through the app's own door. Code that cannot fire and says
+   nothing about it is exactly the "half-built feature running as if done" the guardrails
+   forbid. So the three are **kept** (Gate 3, least-confident #5) and now carry a proof
+   instead of a promise, and `vitals.ts`'s comments — which still described the stored
+   numbers as the preferred truth — were rewritten rather than left to rot.
+
+   **The sweep.** `vitals.test.ts` §slice 7 builds 13 classes × 23 levels × 10 ability
+   lines = **2,990 characters**, every one of them through `resolveCharacter`, and asserts
+   that not one produces a `save-dc`, `spell-attack` or `proficiency` flag. Test 20 pins
+   the *reason* — resolving a resolved sheet moves nothing — so the property is explained,
+   not just observed. Test 21 keeps forged sheets tripping all three. Test 22 pins spell
+   slots as reporting forever, by design.
+
+   **Suite 1099 passed / 47 files / 7 skipped. Typecheck 0.**
+
+   **The micro-reverts, and the two that taught something.**
+
+   | revert | red |
+   |---|---|
+   | R1 — `resolveCharacter` stops computing proficiency (via a `??` fallback) | **0** |
+   | R1′ — `resolveCharacter` computes a *constant* proficiency | 1 |
+   | R2 — stored save DC trusted again | 3 |
+   | R3 — the save-dc case deleted rather than kept | 3 |
+   | R4 — `resolveCharacter` overrules his spell slots | 1 |
+   | R5 — the sweep stops sweeping | 2 |
+   | R6 — stored spell attack trusted again (via a `??` fallback) | **0** |
+   | R7 — `resolveCharacter` reads a field it writes (idempotence broken) | 6 |
+
+   **FINDING BQ — a revert through `??` on a field nothing supplies is a no-op, not a
+   weak test.** R1 and R6 both went green and both looked like finding BM all over again.
+   They were not. `storableOf` (`derive.ts:226-230`) *deletes* the four `DERIVED_KEYS`, and
+   `spellAttackBonusOverride` is absent from Nix — so `base.proficiencyBonus ?? computed`
+   and `base.spellAttackBonusOverride ?? computed` had nothing to fall back to and took the
+   computed branch every time, for all 2,990 characters. The revert has to break the
+   **producer**, not a fallback with an empty left-hand side. R1′ does, and goes red.
+
+   **FINDING BR — the save-DC and spell-attack checks cannot be broken by any change to
+   the formula.** `computeSpellSaveDC` *is* `resolveCharacter(char).spellSaveDC`
+   (`character.ts:439`), so the check asks a resolved character whether resolving it again
+   would move it. Change the formula however you like and the answer stays no. Only
+   breaking **idempotence** can trip them — which is why R7 exists and why test 20 is
+   load-bearing rather than decorative. R7 makes `resolveCharacter` read a field it writes,
+   and takes tests 19 *and* 20 red.
+
+   **`VitalsBand.tsx` checked, deliberately not edited.** It is entirely count-driven
+   (`flags.map`, "disagree on N things") and names none of the four ids, so nothing in it
+   became false; its one specific comment already names spell slots as the case that
+   survives. An edit here would have been motion, not work.
+
+### Phase close — the headline claim, measured
+
+`_probe-phase-close.mjs` writes **one storage blob into two builds**: Marcus's real ability
+line (CHA 16) carrying the stale numbers his sheet had actually accumulated (DC 15, attack
++7). Neither build is told anything the other is not.
+
+| painted on the Play tab | pre-phase (`main` @ `ea28aad`, :4217) | today (:4223) |
+|---|---|---|
+| Save DC | **15** | **14** |
+| Sp Atk | **+7** | **+6** |
+| Prof | +3 | +3 |
+| disagreement panel | "disagree on **2 things**" — Spell save DC · Spell attack bonus | **none shown** |
+
+Shots: `shots/phase-close-vitals-before-main.png` · `shots/phase-close-vitals-after-slice7.png`.
+
+The warning panel is gone from the second picture not because it was suppressed but
+because the drift it reported can no longer happen. That is the phase in two images, and
+it is the answer to *"what I change in the prep screen must directly effect and be used
+app wide"*.
+
+**Finding BL, paid for a second time.** The probe's first run reported `Prof` as NOT FOUND
+on **both** builds — which would have read as "the band lost a number". It had not:
+`uppercase`/`truncate` are CSS only, so the label text really is `Prof`, and a label really
+was found. It was a *different* `Prof` elsewhere on the Play tab, whose box holds no
+numeral. The same sloppiness clipped the "after" screenshot to a single stat box (4KB
+against the "before"'s 58KB) — two pictures of different things, which is not a
+comparison. Both are now scoped to the band, located as the smallest element containing
+all five of its labels.
 
 ### Two Gate 3 questions, answered in `04-slices.md`
 - The discarded stored DC writes a plain-language line into the existing repair log. Not a modal, not a prompt.
