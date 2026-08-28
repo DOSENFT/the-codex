@@ -8,6 +8,18 @@ deployed to `main` at `ea28aad`, live).
 - Gate 3 — Program Design: **APPROVED 2026-08-28**
 - Gate 4 — Slice plan: **APPROVED 2026-08-28**
 
+**All seven slices done. Phase complete 2026-08-28, awaiting deploy to `main`.**
+
+## Open, and deliberately left open
+
+**The aura-radius fork — Marcus ruled "leave it for now" (2026-08-28).** Canon states the
+Aura of Protection radius as prose in **eight places across five strings**, listed by name
+in `AURA_RADIUS_IN_PROSE` in `personalise.test.ts`. They are correct at every level Marcus
+will play for a long while and go wrong only at **level 18**, when the aura widens from 10
+feet to 30. Templating them would mean a seventh word in the placeholder vocabulary
+(`{auraRange}`), which is a Gate 3 change, not a slice. The pinned list IS the worklist for
+whoever reopens this — it is a decision to defer, not an oversight.
+
 ## Slices
 _Full detail and per-slice proof in `04-slices.md`._
 
