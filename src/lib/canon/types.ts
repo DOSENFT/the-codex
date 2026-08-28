@@ -109,6 +109,25 @@ export interface CanonFeature {
   [key: string]: unknown
 }
 
+/** A feat as canon files it, in any of its four categories.
+ *
+ *  `effects` is the load-bearing field and the reason this type exists: canon
+ *  writes each mechanical effect as ONE self-contained sentence, and 2024's own
+ *  cost phrasing ("you can take a Reaction to…") sits inside it. That is what
+ *  lets the turn engine find a feat's reactions by SHAPE, without ever matching
+ *  a feat name. Table Truth slice 10e. */
+export interface CanonFeat {
+  name: string
+  category?: string
+  prerequisite?: string | null
+  abilityScoreIncrease?: string | null
+  repeatable?: boolean
+  effects?: string[]
+  /** Canon's own advice for a Paladin. Guidance, never rendered as rules. */
+  paladinNote?: string
+  [key: string]: unknown
+}
+
 /** How `paladin-progression.json` stores the 16 base class features: an OBJECT
  *  keyed by feature name, not an array, and with `text` where the oath file uses
  *  `rawText`. Two shapes for the same idea, so index.ts normalises one into the

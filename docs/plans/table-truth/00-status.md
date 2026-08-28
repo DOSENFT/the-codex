@@ -24,7 +24,8 @@ Governing law (inherited, still binding): `V0.9-CAPABILITY-BASELINE.md` — neve
 - [x] 10b — the combat write path — **DONE 2026-08-27**, gate green: tsc clean, **829 passed + 7 skipped across 35 files**, build ✓, `prove-slice10b.mjs` **7/7 in Chrome**. Gate 3's oldest open question is answered *with a measurement*: read-only was **not** a safe resting place, because the read-only mount was already showing Marcus options he had paid for. Two components held two models of one turn — **finding BB** — and the list read `4 → 4 (spend, no change) → 1 (reload)`. Fixed by **deleting** the second model: `CombatHelperInner`'s private `useState<CombatState>` and its saving `useEffect` are gone and its eleven writers now go through `CombatProvider.updateCombat` / `forgetCombat`. Post-fix **4 → 1 → 1**, reload a no-op. **Finding AR is closed, both halves** — `setItem` recorded across a cold load: **0 writes**, where the old build named `codex-combat-*` *and* `codex-action-notes-*`. The prover was run against the stashed pre-change build and went **red on exactly those three claims**, so it is a test that can fail
 - [x] 10c — the ranked rows become takeable — **DONE 2026-08-27**, gate green: tsc clean, **841 passed + 7 skipped across 35 files** (was 829/35), build ✓, `prove-slice10c.mjs` **9/9 in Chrome**. The finding that set the scope: `CombatApi.take` — the rules-checked spend, written in slice 5 and tested ever since — was reachable **only** from `TurnScreenD` behind `D_PREVIEW`, so on the real Play tab it was **dead code**, and Marcus read the option on the sheet and then darkened the deck chip by hand through the ruleless manual path. `OptionDetailBody` already had the button; **both halves of its gate were shut**. Fixed by widening `spendFor` to offer a Spend for any *available* option (not just slot/pool spends — under the old rule 2 of the 4 rows Nix sees got no button), making `take` **return whether it happened** so the sheet can close on a spend and stay open on a refusal, and painting the reducer's refusal `role="alert"` under the button that produced it, read from the **provider** so 10b's finding BB is not re-committed one slice later. Measured `4 → 1 → 1` with deck and disk agreeing at every step. The prover was run against the stashed pre-change build and went **5/9 — red on exactly the four spend claims and nothing else**. It also produced **finding BC**, a defect older than this phase: two hand-rolled overlays sit in the DOM permanently declaring `role="dialog" aria-modal="true"`, and `checkVisibility()` says TRUE for both (see §Slice 10c below). **HEARTH-04 and HEARTH-05 split out to 10d** — a decision, recorded, not an omission
 - [x] 10d — HEARTH-04: the grant, and the warning before it destroys a pool — **DONE 2026-08-27**, gate green: tsc clean, **876 passed + 7 skipped across 37 files** (was 841/35), build ✓, `prove-slice10d.mjs` **14/14 in Chrome**. Two faults, one cause. Canon requires a prompt before a new temp-HP pool replaces a live one; `setTempHP` was a blind assignment, which is **VAL-06**, pinned `it.fails` in 10a. But the probe found the larger half first: taking Flaming Cloak granted **nothing** — `tempHP` 0 before, 0 after — while the sheet displayed the pool computed from canon's own formula, so the app did the arithmetic and made Marcus type the answer into a different screen. A warning about replacing a pool the app never grants is a warning about nothing, so both shipped together. **One decision, two askers**: `tempHPReplacement` decides and never applies; `HPTracker` asks by arming ("Apply" → **"Replace 5 with 3"**), `OptionDetailSheet` asks with a sentence painted above Spend. Neither surface can reach `setTempHP` without the sentence having been on the glass — enforced *without* making the setter refuse, because 2024 lets the player keep either pool. The grant is **computed, never read**: 11 at level 7 with Charisma 18, matching canon's own worked example, 24 at level 20. **The double-grant bug was designed out and pinned**: Hearthfire Manifest composes as two options sharing one `canonId`, and the grant hangs off `cost.resourcePoolId` — SHAPE, never a name — so the free Bonus Action face grants nothing and Nix cannot stand in 24 temp HP the rules never gave him. **VAL-06 flipped `violated` → `enforced`** and its gap pin was *inverted*, not deleted. The prover was run against the stashed pre-change build and went **5/14 — red on all nine HEARTH-04 and grant claims, green on exactly the four controls**; the new unit tests could not even compile against 10c's types (**24 `error TS`**). **HEARTH-05 split out to 10e** — it needs roll-result capture, which does not exist
-- [ ] 10e — HEARTH-05: total retaliation damage per encounter. Deferred out of 10d 2026-08-27 after measuring what it actually needs: the app has **no memory of what a die came up as** (`DiceRoller` throws a number and forgets it), and the obvious shortcut of summing the session log is **silently wrong** — `LOG_DEPTH = 25`, so past 25 entries the earliest retaliations fall off the end and the total quietly shrinks. A wrong total that looks right is worse at the table than no total
+- [x] 10e — reactions truth: every reaction he owns, with its trigger and its price — **DONE 2026-08-27**, gate green: tsc clean, **914 passed + 7 skipped across 38 files** (was 876/37), build ✓, `prove-slice10e.mjs` **18/18 in Chrome at 390×844**. **Re-scoped by Marcus on 2026-08-27**, off his own sheet: *"I have Sentinel and interception"* — the app showed neither. Measured, the cause was **finding AT** with a second name on it: `character.feats` was read by **NOTHING**, zero references across `src/lib/turn/` and `src/lib/canon/`, so a feat could not become a turn option however his sheet was filled in. Fixed by `feats.ts`, which recognises a reaction by its **cost phrase** — *takes/uses/spends a Reaction* — and never by a feat name, with a veto for the inverse shape so a feat that *denies* reactions is not offered as one. **One row per effect, not per feat**: Sentinel is one feat with two different triggers and gets two rows; its Speed-0 rider gets none, because it costs nothing. It plugs into **`compose.ts`, not `options.ts`** — `options.ts` is pinned byte-identical to `main` by `overlay.test.ts` case 15 (**finding BD**), and slice 6 had already ruled at `compose.ts:389` that the composer is the layer that gets to know about reactions. Wiring it exposed **finding BE**: option ids were **never unique** — minted from type+name and deduped by id — so one feat with two reactions silently collapsed to one row, latent since slice 1 and invisible until a feat like Sentinel arrived. Also settled the cloak's price: Marcus believed the 1d10 retaliation *costs* a Reaction; canon makes the **activation** the Reaction and the retaliation free, automatic and uncapped, and the row's blank price is what taught him otherwise. `isFreeRider` derives this from the **shape** of canon's own sentence — a die with a trigger of its own and no named price — so Smoldering Smite's `1d8 Fire` is correctly left alone. Prover run against the stashed pre-change build went **8/18 — red on all ten feat-and-price claims, green on exactly the eight controls**. Produced **finding BF**: at five rows the band now runs under the dice FAB and the sticky deck (see §Slice 10e). **HEARTH-05 moved to 10f**
+- [ ] 10f — HEARTH-05: total retaliation damage per encounter. Deferred out of 10d 2026-08-27 and again out of 10e, after measuring what it actually needs: the app has **no memory of what a die came up as** (`DiceRoller` throws a number and forgets it), and the obvious shortcut of summing the session log is **silently wrong** — `LOG_DEPTH = 25`, so past 25 entries the earliest retaliations fall off the end and the total quietly shrinks. A wrong total that looks right is worse at the table than no total. Carries **finding BF** with it
 
 ## Deploy posture — decided 2026-08-26, ASK-FIRST honoured
 
@@ -1996,6 +1997,224 @@ Still not in Phase 1 at all: **VAL-13**, which needs state recording an attack r
 AZ / HEARTH-08**, Prep-tab work; and **finding AT**, passive features reaching no turn option.
 **Finding BC** remains open and unfixed — two hand-rolled overlays permanently in the DOM claiming
 `role="dialog" aria-modal="true"`, which is why every dialog claim in this prover is geometric.
+
+*(10e did not build HEARTH-05. Marcus re-scoped the slice — see below. HEARTH-05 is now 10f and
+everything in this section still describes what it needs.)*
+
+## Slice 10e — closed 2026-08-27. Two of his reactions could not appear on any screen.
+
+**Gate:** `npx tsc --noEmit` clean · `npx vitest run` **914 passed + 7 skipped across 38 files**
+(10d closed at 876/7 across 37) · `npm run build` ✓ · `prove-slice10e.mjs` **18/18 in Chrome at
+390×844**, and **8/18** against the stashed pre-change build.
+
+### Why this slice is not the HEARTH-05 the plan said
+
+Marcus sent a photograph of his character sheet and re-scoped it in his own words: *"I have Sentinel
+and interception."* Asked to choose, he picked **reactions truth first**. That is a re-steer at a
+slice boundary, which is what the boundary is for, and HEARTH-05 moved to 10f intact.
+
+The same message corrected four things the fixture had wrong or invented, and all four are now
+recorded rather than argued with: **Charisma 16, not 18** · proficient in **Athletics and
+Persuasion** · **"Hearthbrand" is not his weapon** — the fixture invented it in slice 1 to reach the
+magical/mastery branches — and his belief that the cloak's 1d10 *costs* a Reaction.
+
+### The fault: `character.feats` was read by nothing
+
+Not a ranking bug and not a missing row. Measured across `src/lib/turn/` and `src/lib/canon/`,
+`character.feats` had **zero references**. `options.ts` built the turn from weapons, spells and
+features, so a feat could not become an option however the sheet was filled in. That is **finding
+AT** with a second name on it, and it mattered because both of his are **reactions** — canon's own
+note on Interception is *"about 8.5 damage prevented per round"*, for free, every round, and a
+reaction you forget you have is a reaction you never take.
+
+### The rule the fix is built on: recognise SHAPE, never a name
+
+The four-line version matches `"Sentinel"` and `"Interception"` and silently fails for the other 74
+feats in canon, for every homebrew feat Marcus writes, and for every feat published after today.
+`feats.ts` matches the **cost phrase** instead — 2024 defines a Reaction as something you *take*, and
+canon writes it into the effect sentence itself (*"you can take a Reaction to reduce that damage"*).
+A feat is a reaction because of what it costs, which is what a reaction **is**.
+
+Two halves, and the second is not tidiness:
+
+- `REACTION_COST` — the verb carries the cost, so the verb is matched. Not the bare word "Reaction":
+  plenty of feats mention reactions without costing one.
+- `NOT_YOURS` — the veto for the inverse shape. *"The target can't take a Reaction until…"* matches
+  the cost phrase on its tail, and without the veto a feat that **denies** reactions is offered as
+  one: the app inviting Marcus to spend a reaction on taking reactions away.
+
+**The tests caught a real bug in that veto.** *"This prevents the target from **taking** a Reaction"*
+matched `REACTION_COST` (which knew the gerund) and slipped past a veto that only knew `take`. The
+two verb lists have to move together or the veto is narrower than the thing it vetoes.
+
+### One row per effect, not one per feat
+
+Sentinel is one feat with **two** reaction effects on **two different triggers** — a creature
+Disengages; a creature attacks somebody other than you — plus a passive rider (Speed 0 on an
+Opportunity Attack hit). Marcus's question was *"what does it do and when can I use it"*. Collapsing
+two triggers into one row answers the second half wrongly; dropping one loses a reaction he owns. So
+each reaction-shaped sentence becomes its own row, and the rider becomes none, because it costs
+nothing and is not a thing you choose to do.
+
+`splitTrigger` cuts each sentence at its own trigger boundary and hands the halves to
+`mechanicsLine` / `effectsLine`, where `triggerFor` already looks. **No words are added and none
+dropped** — the rejoin invariant is pinned over the whole corpus, because a splitter that quietly
+eats a clause is a splitter that edits a rule. It cuts at the **last** comma before the cost phrase,
+not the first, so a trigger carrying its own aside survives.
+
+### FINDING BD — `options.ts` is pinned byte-identical to `main`
+
+The obvious seam is `options.ts`, beside the weapons/spells/features loops. This slice wired it
+there **first**, ran the suite, and was told no by a test written four slices earlier:
+`overlay.test.ts` case 15 does `execFileSync('git', ['show', 'main:src/lib/turn/options.ts'])` and
+compares it CRLF-normalised to the working copy. Its whole value is being an exact characterization
+record of the V0.9 `TurnSummary` screen.
+
+Slice 6 hit the same wall synthesising the Opportunity Attack and **wrote the ruling down** at
+`compose.ts:389` — *"the composer is the layer that is allowed to know about the action economy, so
+it is the layer that gets to know about reactions."* This slice followed that ruling rather than
+overturning it. `options.ts` was reverted with `git checkout HEAD --` and is untouched. The reward is
+that the Opportunity Attack and these rows now arrive by the same road, and the splice happens
+**before** the canon overlay runs, so feat rows inherit the overlay, ranking, contention, the
+reactions band, the detail sheet and 10c's spend without a line of new wiring in any of them.
+
+### FINDING BE — option ids were never unique
+
+Sentinel produced **one** row, not two. `compose.ts` minted `id` from type + name; `reactions.ts:75`
+dedupes by id. Two options sharing a name silently became one.
+
+This is **latent since slice 1** and was invisible until a feat arrived that is one name with two
+reactions. Fixed generically in `build()` with a `mintedIds` set and a `uniqueId()` that suffixes
+only from the **second** collision, so every pre-existing id is byte-identical — pinned in the tests
+by composing the turn with and without feats and comparing every other id.
+
+Rejected: a per-option `variant` field. That would have made uniqueness the caller's job in every
+future option source, when it is a property the composer can simply guarantee.
+
+### The cloak's price — a correction, not a ruling
+
+Marcus, verbatim: *"my hearth fire manifest is a bonus action, then it's a reaction 1d10 damage if I
+get hit."* Canon disagrees in its own paragraph — the **activation** is the Reaction (plus one
+Channel Divinity use), and then the creature takes 1d10 Fire *in retaliation* every time it hits him,
+uncapped, with nothing to decide. He had been holding a Reaction in reserve for something that was
+already his.
+
+**The app's share of the blame is exact:** the row said `1d10 Fire retaliation` and left the price
+blank, and a blank price at a table reads as expensive. Six characters were missing, and they are the
+six he was missing.
+
+`isFreeRider` **derives** this instead of asserting it: a free rider is a die that states a trigger
+of its own and names no price. Verified empirically against the whole corpus — canon ships exactly
+two dice-shaped mechanics values, and the rule marks Hearthfire Manifest's retaliation and correctly
+leaves Smoldering Smite's `1d8 Fire` alone, because that is the damage a spell slot already paid for.
+A third free rider in canon's next package would be found without an edit here.
+
+The row gets `(free)`; the detail sheet, which has the whole width, gets
+`1d10 Fire to a creature that hits you with a melee attack — free: no Action, no Bonus Action, no
+Reaction, no use` — because *"free"* is the word he would otherwise have to take on trust, and this
+is the sentence that answers *free of what*.
+
+**Slice 8b's law re-checked and holds:** nothing computed moved. 12 is still 12, 1d10 is still 1d10,
+`fact.value` and `fact.raw` are unchanged and pinned as unchanged. Three pinned assertions went red
+on the `(free)` string and were updated **with written reasons**, not weakened.
+
+### Measured in Chrome, post-change — `prove-slice10e.mjs`, 18/18
+
+Seeded with **his** numbers, not the fixture's: level 7 · AC 18 · 67/67 HP · PROF +3 ·
+STR 18 / DEX 12 / CON 14 / INT 9 / WIS 13 / **CHA 16** · spell DC 14 · spell attack +6 ·
+Athletics and Persuasion. His feats are seeded the way an **import** arrives — a name, a flavour
+line, and `effects: []` — so canon has to fill the silence for a row to exist at all. Round 3,
+**not his turn**, which is the window a reactions band is actually read in.
+
+| | before | after |
+|---|---|---|
+| rows in the band | **2** | **5** |
+| Sentinel rows | 0 | **2, different triggers** |
+| Interception | absent | **present, whole sentence** |
+| feat rows stating a WHEN | — | **3 of 3** |
+| the cloak's retaliation | `1d10 Fire retaliation` | `1d10 Fire retaliation **(free)**` |
+| canon's sentence on the detail sheet | **absent** — the sheet printed the gloss | verbatim, with the price under it |
+| ellipsis anywhere | none | none (842 chars painted) |
+| console errors | 0 | 0 |
+
+Two results worth calling out. **The cloak reads 10 temp HP here, not 10d's 11** — same formula, his
+real Charisma 16 instead of the fixture's 18. The app computes and never reads canon's frozen number,
+so a changed score is *supposed* to move it (slice 6), and this is that working on his sheet.
+**Lucky is seeded and correctly absent**: nothing about it costs a Reaction, which is the control
+proving the band matches on cost rather than on the word "feat".
+
+### Proved able to fail — 8/18 against the stashed pre-change build
+
+`compose.ts`, `feature.ts`, `detail.ts`, `feature.test.ts` and `reactions.test.ts` reverted to HEAD;
+`feats.ts` and `feats.test.ts` renamed to `.stashed` — never deleted, because the Atlas guard hook
+blocks destructive removes and a rename is the right verb anyway. Rebuilt, re-run, then restored and
+verified **byte-identical with `cmp` on all seven files**, followed by a clean `tsc` and the full 914.
+
+Red on exactly the ten claims this slice is about — the census, both Sentinel claims, the rider, the
+WHEN line, both Interception claims, `(free)`, and both detail-sheet price claims. Green on all
+eight controls: no ellipsis, every row priced, Lucky absent, the count matching, nothing clipped,
+the computed 10 temp HP, and a clean console. **A first attempt at this run was thrown away**: the
+build had failed on `tsc` because the test files still referenced `fact.free`, so `dist/` was never
+regenerated and four claims passed against stale output. A falsifiability run that does not rebuild
+proves nothing, and the tell was a "before" build passing a claim about code it did not contain.
+
+### One prover claim corrected mid-run, and two prover bugs
+
+- **Corrected.** The first version asserted every row was inside the viewport. Four of five were,
+  because five rows on a 390×844 phone are taller than one screenful — a claim about the length of a
+  page, not about this slice. Replaced with the claim worth enforcing: every row is **painted with
+  area and not clipped out of the band**, which is the failure an ellipsis used to hide and the one
+  `textContent` cannot see. How many fit without scrolling is now printed as a number, not asserted.
+- **Bug, and it made a false accusation.** The detail-sheet reader queried `p, li, h3, h4, span` and
+  reported the free line missing while it was on the screen — band ① is a `<dl>`, so the sentence
+  lives in a `<dd>`. A prover that queries the wrong element is worse than no prover.
+- **Bug.** `\b10 temp HP\b` was tested against the row's *concatenated* text, where the paragraph
+  above ends `…Rules flags`, giving `flags10` and no word boundary. Now read off the paragraph.
+  This is finding AY from the other end: the DOM has a break there and the test threw it away.
+
+### FINDING BF (OPEN — carried to 10f): at five rows the band runs under two overlays
+
+Hit-tested with `elementFromPoint` at four points across each row's body text, band scrolled to top:
+
+- The **dice FAB** (`Layout.tsx:401`, `fixed z-50 right-4`, 56×56) covers the right edge of the
+  **Interception** row's rules text at 90% width. Its own comment records being moved once already
+  for *"precisely the V-6b failure it was already causing against page content"* — it was moved above
+  the turn deck, but it is still a fixed square over a scrolling column.
+- The **sticky turn deck** covers rows 4 and 5 entirely at that scroll position (Opportunity Attack
+  and Flaming Cloak, behind `pip-tap` and the economy chips).
+
+Neither is caused by this slice — both overlays predate it, and the *before* screenshot shows the FAB
+clipping the `Next Turn` button in the same spot. What changed is that the band went from 2 rows to
+5 and is now long enough to collide, and rules text under a floating button is worse than a button
+label under one. The deck one is scroll-recoverable; the FAB one is not, because it is fixed.
+
+**Not fixed here, on purpose.** Both overlays are the subject of Marcus's original ask — *"I wish I
+could also minimize it"* and the button-clutter work — and a z-index change bolted onto a data slice
+is a layout decision made in the wrong place, without its own proof. Recorded, screenshotted, queued.
+
+### Files
+
+- `src/lib/turn/feats.ts` — **new**. `isReactionShaped`, `effectSentencesOf`, `splitTrigger`, `featReactionOptions`.
+- `src/lib/turn/feats.test.ts` — **new**, including the corpus guard and the rejoin invariant.
+- `src/lib/turn/compose.ts` — the splice into the sheet's reaction bucket, and `uniqueId()` in `build()`.
+- `src/lib/canon/feature.ts` — `free?: true` on `FeatureFact`, `isFreeRider`, `(free)` in `factsLine`.
+- `src/lib/turn/detail.ts` — the free fact rendered in full on the detail sheet.
+- `src/lib/canon/feature.test.ts` · `src/lib/turn/reactions.test.ts` — three pins updated with reasons.
+- `src/lib/turn/options.ts` — **reverted and untouched.** See finding BD.
+- `docs/plans/table-truth/prove-slice10e.mjs` — **new**, kept as evidence and regression guard.
+- `docs/plans/table-truth/_probe10e-occlusion.mjs` — kept, per the slice-7 precedent: the probe that produced finding BF is part of the evidence.
+- `docs/plans/table-truth/_shots-slice10e/` · `_shots-slice10e-before/` — screenshots and `_results.json` from both builds.
+
+### What 10f inherits
+
+**HEARTH-05**, unchanged and still needing roll-result capture plus a per-encounter accumulator that
+is not the undo log — see *What 10e inherits* above, which now describes 10f. Plus **finding BF**,
+which is the first thing a reader will see on the screen this slice just filled.
+
+Still open and untouched: the **cloak-teleport clause** — Marcus is asking his DM, and *nothing is
+added until he reports back*, because an invented clause is a rule he never agreed to arriving as
+though the book said it. **Finding BC**, **finding AZ / HEARTH-08**, **VAL-13**, and the
+Gemini/Ollama AI fault, which is a later phase.
 
 ## Live-app evidence, 2026-08-26 (from Marcus's own screenshots)
 

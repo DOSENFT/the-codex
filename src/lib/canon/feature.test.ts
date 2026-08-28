@@ -5,6 +5,7 @@ import {
   factsLine,
   resolveFormula,
   humanizeKey,
+  isFreeRider,
   type FeatureContext,
 } from './feature'
 import type { CanonFeature } from './types'
@@ -144,9 +145,19 @@ describe('featureFacts — classification by the shape of the VALUE', () => {
 
 describe('factsLine — what a row says, and in what order', () => {
   it('states the number, then the die, then the duration', () => {
+    /* CHANGED IN SLICE 10e, and here is the why the guard at the top of this
+       file asks for. The old pin read "…· 1d10 Fire retaliation · …" — the die
+       with no price beside it. Marcus told us on 2026-08-27 what he reads that
+       as: "it's a reaction 1d10 damage if I get hit". It is not. Canon makes the
+       ACTIVATION the Reaction and the retaliation free, automatic and uncapped,
+       so a blank price was costing him a reaction every round he held one back.
+       Six characters, and they are the six he was missing.
+
+       Nothing computed moved: 12 is still 12 and 1d10 is still 1d10. Slice 8b's
+       law — a correction changes what the app SAYS, never what it COMPUTES. */
     const facts = featureFacts(featureByName('Hearthfire Manifest'), NIX_CTX)
     expect(factsLine(facts)).toBe(
-      '12 temp HP · 1d10 Fire retaliation · Until the Temporary Hit Points are depleted'
+      '12 temp HP · 1d10 Fire retaliation (free) · Until the Temporary Hit Points are depleted'
     )
   })
 
@@ -166,5 +177,68 @@ describe('factsLine — what a row says, and in what order', () => {
 
   it('is empty, not "undefined", when there is nothing to say', () => {
     expect(factsLine([])).toBe('')
+  })
+})
+
+/* ============================================================================
+   SLICE 10e — the price of the retaliation.
+
+   Marcus, 2026-08-27: Hearthfire Manifest is "a bonus action, then it's a
+   reaction 1d10 damage if I get hit". Canon disagrees, in its own paragraph:
+   the ACTIVATION is the Reaction (plus one Channel Divinity use), and then "the
+   creature takes 1d10 Fire damage in retaliation" every time it hits him, with
+   no cap and nothing to decide. He has been holding a reaction in reserve for
+   something that was already his.
+
+   The app's share of the blame is exact: the row said "1d10 Fire retaliation"
+   and left the price blank, and a blank price at a table reads as expensive.
+   ========================================================================= */
+
+describe('isFreeRider — a die with its own trigger and no named price', () => {
+  it('marks canon\'s retaliation, which is the sentence Marcus had backwards', () => {
+    expect(isFreeRider('1d10 Fire to a creature that hits you with a melee attack')).toBe(true)
+  })
+
+  it('leaves the damage a feature ALREADY charged for alone', () => {
+    /* Smoldering Smite's "1d8 Fire" is the damage the Smite you cast is made of.
+       It states no trigger of its own, so it is not a rider and is not free —
+       and marking it so would be the app telling Marcus a spell slot is free. */
+    expect(isFreeRider('1d8 Fire')).toBe(false)
+  })
+
+  it('needs BOTH halves — a trigger alone is not enough', () => {
+    // A trigger that names its price is exactly the case this must not mark.
+    expect(isFreeRider('When you are hit, you can take a Reaction to deal 1d6 Fire')).toBe(false)
+    expect(isFreeRider('When you hit, expend one use to deal 2d8 Radiant')).toBe(false)
+    expect(isFreeRider('Whenever you spend a spell slot, deal 1d8 more')).toBe(false)
+  })
+
+  it('needs BOTH halves — a price-free value with no trigger is not a rider either', () => {
+    expect(isFreeRider('3d6 Necrotic')).toBe(false)
+    expect(isFreeRider('')).toBe(false)
+  })
+
+  it('is read off the whole corpus, so a THIRD free rider would be found too', () => {
+    /* The rule, not the two records that satisfy it today. Canon's next package
+       is allowed to add one, and it will be marked without an edit here. */
+    expect(isFreeRider('When the ward breaks, the attacker takes 2d6 Cold')).toBe(true)
+  })
+
+  it('reaches the fact — the cloak\'s die carries `free`, the temp HP does not', () => {
+    const facts = featureFacts(featureByName('Hearthfire Manifest'), NIX_CTX)
+    expect(facts.find(f => f.key === 'retaliation')!.free).toBe(true)
+    // Only a DIE is asked the price question. Marking a duration "free" is noise
+    // where the whole point is a signal.
+    expect(facts.find(f => f.key === 'tempHP')!.free).toBeUndefined()
+    expect(facts.find(f => f.key === 'duration')!.free).toBeUndefined()
+  })
+
+  it('changes what the row SAYS and not one thing it COMPUTES', () => {
+    // Slice 8b's law, applied to a correction rather than a ruling.
+    const facts = featureFacts(featureByName('Hearthfire Manifest'), NIX_CTX)
+    const retaliation = facts.find(f => f.key === 'retaliation')!
+    expect(retaliation.value).toBe('1d10 Fire retaliation')
+    expect(retaliation.raw).toBe('1d10 Fire to a creature that hits you with a melee attack')
+    expect(facts.find(f => f.key === 'tempHP')!.value).toBe('12 temp HP')
   })
 })

@@ -329,11 +329,75 @@ affordance — a different kind of risk, in its own reviewable diff.
 warning **and HEARTH-05's damage tally**". HEARTH-05 was moved out on 2026-08-27, for a reason
 only visible from inside 10d: it needs a mechanism that does not exist.
 
-**10e — HEARTH-05: total retaliation damage per encounter.** The cloak deals 1d10 Fire to whoever
-hits Nix in melee, and canon asks the app to total it for the encounter. Every number the app
-shows today is *computed* from the sheet; this is the first that must be **captured** — the app
-has no memory of what a die actually came up as. Two things must exist before the display is even
-meaningful:
+**Re-scoped 2026-08-27, by Marcus, from his own character sheet.** He sent a screenshot of the real
+Nix and a list of what he actually has. Four things came out of checking it against the app, and
+they reorder the queue — HEARTH-05 moves to **10f**, and **10e becomes the reactions the app never
+knew he had**.
+
+- **His Charisma is 16, not 18.** The cloak therefore grants him **10** at level 7, not 11. The app
+  is right (it computes from the formula), but the **fixture is a synthetic**: level 8, STR 16,
+  CHA 18, AC 19, and a weapon called "Hearthbrand" that Marcus has never seen because it was
+  *invented* to exercise every code path at once (`fixtures/nix.ts:10-34` says so, deliberately).
+  So every number published in a proof doc so far is the fixture's, not his. **Fix: the browser
+  provers seed his real scores; the unit fixture stays an instrument.** The two must stop being
+  confused for each other in the write-ups.
+- **He believes the 1d10 retaliation costs his Reaction. It does not.** Canon's `rawText` makes the
+  *activation* the Reaction ("As a Reaction, you can expend one use of your Channel Divinity");
+  the retaliation is a separate, free, uncapped clause — "When you are hit by a melee attack, the
+  creature takes 1d10 Fire damage in retaliation." That is precisely why HEARTH-05 exists and rates
+  the frequency a problem. **The app models this correctly; the app has never SAID it.** Slice 8b's
+  law applies — this changes what the app says, never what it computes.
+- **Sentinel and Interception reach nothing.** Both are Reactions he owns, both are in
+  `src/canon/feats.json` with full rules text, and his reactions band renders **2** rows where it
+  should render more. Root cause, measured: **`character.feats` is read by nothing in the turn
+  engine** — zero references across `src/lib/turn/` and `src/lib/canon/`. `options.ts` builds from
+  weapons, spells and features only. This is **finding AT** with names on it.
+- **There is no "teleport the cloak to an ally" anywhere in canon.** Marcus believes he can; he
+  does not know the cost or the effect and is asking his DM. **OPEN, pending that answer. Nothing
+  is added to his sheet until it comes back** — inventing a rule onto a character sheet is the one
+  thing slice 6 refused to ship.
+
+**10e — the reactions band tells the truth about every reaction he owns. DONE 2026-08-27.**
+Gate green: tsc clean, **914 passed + 7 skipped across 38 files**, build ✓, `prove-slice10e.mjs`
+**18/18 in Chrome** and **8/18** against the stashed pre-change build. The band went from **2 rows
+to 5** on Marcus's real sheet. Full write-up, the measured table and findings **BD / BE / BF** in
+`00-status.md` §Slice 10e. Two things below did not survive contact and are recorded there rather
+than quietly edited here: the option source landed in **`compose.ts`, not `options.ts`** (finding BD
+— `options.ts` is byte-pinned to `main` by `overlay.test.ts` case 15, and slice 6 had already ruled
+on this exact question), and wiring it exposed **finding BE**, that option ids were never unique, so
+Sentinel's two reactions collapsed into one row. **Finding BF is open**: at five rows the band now
+runs under the dice FAB and the sticky deck. A vertical slice through a path that did not exist:
+feats reach the turn engine, become reaction options, and inherit every surface already built for
+reactions.
+
+- **`character.feats` becomes an option source**, the third one after weapons/spells/features.
+- **A feat is a Reaction by SHAPE, never by name** — the open-world rule, non-negotiable. The
+  handle is 2024's own cost phrasing in the effect text ("you can take a Reaction to…", "as a
+  Reaction", "take an Opportunity Attack"). Sentinel and Interception are found by that rule, and
+  so is a feat the app has never seen. Matching `"Sentinel"` would be the bug this rule exists to
+  prevent.
+- **One row per reaction-shaped effect, not per feat.** Sentinel carries *two* different triggers
+  (a creature Disengages; a creature attacks someone other than you) plus a passive rider. "When
+  can I use it" is the whole question Marcus asked, and two triggers collapsed into one row answers
+  it wrongly.
+- **The trigger costs nothing to build.** Both feats' canon text *begins* "When a creature…", and
+  `triggerFor` already lifts a leading trigger clause out of `option.detail` and leaves the rest as
+  the body. Feed the effect sentence in as `detail` and the existing machinery does the work — no
+  new trigger code, and `whenSource` comes out `'declared'` honestly.
+- **The canon bridge.** `src/canon/feats.json` (76 feats) is imported by `src/canon/index.ts` but
+  **exported as `unknown` and indexed by nothing** — `lookup.ts` never reads it. A stored feat with
+  a thin description would otherwise produce a row with no trigger and no body, which is worse than
+  no row. `featByName` is added on the `featureByName` precedent, and the sheet's own words still
+  win when it has some.
+- **And the cloak row must say the retaliation is free.** The one-line correction that changes how
+  he plays every round.
+
+**10f — HEARTH-05: total retaliation damage per encounter.** *(Was 10e; deferred twice, both times
+for a measured reason.)* The cloak deals 1d10 Fire to whoever hits Nix in melee, and canon's
+`appAction` asks for it verbatim: *"Implement as written but display the total retaliation damage
+dealt per encounter so the DM can see the real numbers."* Every number the app shows today is
+*computed* from the sheet; this is the first that must be **captured**. Two things must exist before
+the display is even meaningful:
 
 1. **Roll-result capture.** `DiceRoller` throws a number and forgets it. Nothing persists a
    result, so nothing can be summed.
@@ -341,6 +405,9 @@ meaningful:
    retaliations out of the session log — is **silently wrong**: `LOG_DEPTH = 25`. Past 25 entries
    the earliest retaliations fall off the end and the total quietly shrinks. A wrong total that
    looks right is worse at the table than no total, so the tally gets its own store.
+
+And it depends on 10e being right first: the tally counts an **uncapped automatic** trigger, so a
+model that thinks the retaliation costs a Reaction would count at most one per round.
 
 ---
 

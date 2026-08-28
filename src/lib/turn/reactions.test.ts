@@ -124,9 +124,19 @@ describe('reactionRows — question two: what does it do?', () => {
   it('the cloak states the temp HP it actually grants HIM — 12', () => {
     /* Before slice 6 this row read "1d10 Fire · recharges on short rest": the
        retaliation only, which reads as though the cloak DEALS 1d10 when you use
-       it, and never mentions the temp HP that are the entire point. */
+       it, and never mentions the temp HP that are the entire point.
+
+       Slice 10e adds "(free)". Marcus, sending his real sheet on 2026-08-27:
+       Hearthfire Manifest is "a bonus action, then it's a reaction 1d10 damage
+       if I get hit". Canon's own paragraph says the ACTIVATION is the Reaction
+       and then "the creature takes 1d10 Fire damage in retaliation" — every
+       hit, no cap, nothing to decide, nothing to pay. He was holding a reaction
+       in reserve for something that was already his. The row said "1d10 Fire
+       retaliation" and left the price blank, and blank reads as expensive.
+
+       Still 12, still 1d10, still one row: 8b's law holds. */
     const row = rowsOn().find(r => r.name === 'Flaming Cloak')!
-    expect(row.body).toBe('12 temp HP · 1d10 Fire retaliation')
+    expect(row.body).toBe('12 temp HP · 1d10 Fire retaliation (free)')
     expect(row.provenance).toBe('canon')
   })
 
@@ -280,7 +290,10 @@ describe('reactionRows — a ruling changes what it SAYS, never what it COMPUTES
   })
 
   it('does not touch a single number: temp HP, die, cost, uses', () => {
-    expect(after.body).toBe('12 temp HP · 1d10 Fire retaliation')
+    // "(free)" arrived in slice 10e and is not a number — see the pin in
+    // "question two" above for why the price is now stated. What this test
+    // guards is unchanged and still holds: a RULING moves neither.
+    expect(after.body).toBe('12 temp HP · 1d10 Fire retaliation (free)')
     expect(after.body).toBe(before.body)
     expect(after.cost).toBe('Reaction · 1/2 uses')
     expect(after.cost).toBe(before.cost)

@@ -1,0 +1,162 @@
+{
+  "band": {
+    "band": "Your reactions2Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation⚑ Canon lists 4 errata on this feature▸",
+    "bandOnGlass": true,
+    "expanded": "true",
+    "countLabel": "2",
+    "rows": [
+      {
+        "name": "Opportunity Attack — Longsword",
+        "cost": "Reaction",
+        "when": "WHEN a creature you can see leaves your reach",
+        "paras": [
+          "WHEN a creature you can see leaves your reach",
+          "+7 to hit · 1d8+4 Slashing · 5 ft"
+        ],
+        "text": "Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing · 5 ft▸",
+        "painted": true,
+        "insideBand": true,
+        "inFirstScreen": true,
+        "openable": true
+      },
+      {
+        "name": "Flaming Cloak",
+        "cost": "Reaction · 1/2 uses",
+        "when": "when not stated — record one in Rules flags",
+        "paras": [
+          "when not stated — record one in Rules flags",
+          "10 temp HP · 1d10 Fire retaliation",
+          "⚑ Canon lists 4 errata on this feature"
+        ],
+        "text": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation⚑ Canon lists 4 errata on this feature▸",
+        "painted": true,
+        "insideBand": true,
+        "inFirstScreen": true,
+        "openable": true
+      }
+    ]
+  },
+  "sheet": {
+    "open": "Flaming Cloak",
+    "text": "Flaming Cloakclose ✕Reaction · 1/2 uses · Homebrewmanifest summon dismissBonus ActionlightBright Light 10 ft, Dim Light 10 ft beyondleashExtinguished if it goes more than 30 feet from youcloak actionReactioncloak cost1 Channel Divinity usetemp HP10 temp HP (Paladin level + Charisma modifier)retaliation1d10 Fire retaliationdurationUntil the Temporary Hit Points are depletedWhat it doesYou bear the manifestation of the Hearthfire both within and without. This manifestation appears in a form you choose, such as a small floating ember, a dancing flame, or a spirit. The manifestation sheds Bright Light for 10 feet and Dim Light for 10 additional feet. If this manifestation goes beyond 30 feet from you, it is extinguished. It can be summoned or dismissed as a Bonus Action. As a Reaction, you can expend one use of your Channel Divinity and issue a command word, causing the Essence of the Hearth to transform into a flaming cloak. The cloak immediately grants you Temporary Hit Points equal to your Paladin level plus your spellcasting ability modifier. When you are hit by a melee attack, the creature takes 1d10 Fire damage in retaliation. This effect lasts until the Temporary Hit Points are depleted.Roll from here1d10roll FireSpendReaction · 1/2 uses",
+    "lines": [
+      "Reaction · 1/2 uses · Homebrew",
+      "manifest summon dismiss",
+      "Bonus Action",
+      "light",
+      "Bright Light 10 ft, Dim Light 10 ft beyond",
+      "leash",
+      "Extinguished if it goes more than 30 feet from you",
+      "cloak action",
+      "Reaction",
+      "cloak cost",
+      "1 Channel Divinity use",
+      "temp HP",
+      "10 temp HP (Paladin level + Charisma modifier)",
+      "retaliation",
+      "1d10 Fire retaliation",
+      "duration",
+      "Until the Temporary Hit Points are depleted",
+      "What it does",
+      "You bear the manifestation of the Hearthfire both within and without. This manifestation appears in a form you choose, such as a small floating ember, a dancing flame, or a spirit. The manifestation sheds Bright Light for 10 feet and Dim Light for 10 additional feet. If this manifestation goes beyond 30 feet from you, it is extinguished. It can be summoned or dismissed as a Bonus Action. As a Reaction, you can expend one use of your Channel Divinity and issue a command word, causing the Essence of the Hearth to transform into a flaming cloak. The cloak immediately grants you Temporary Hit Points equal to your Paladin level plus your spellcasting ability modifier. When you are hit by a melee attack, the creature takes 1d10 Fire damage in retaliation. This effect lasts until the Temporary Hit Points are depleted.",
+      "Roll from here",
+      "1d10",
+      "roll Fire",
+      "Spend",
+      "Reaction · 1/2 uses"
+    ]
+  },
+  "results": [
+    {
+      "name": "A · Opportunity Attack, Flaming Cloak, Sentinel ×2 and Interception  <-- THIS IS THE SLICE",
+      "pass": false,
+      "detail": "2 rows: Opportunity Attack — Longsword | Flaming Cloak — before this slice `character.feats` was read by nothing, so Sentinel and Interception could not appear here however his sheet was filled in (finding AT)."
+    },
+    {
+      "name": "A · Lucky is NOT here — the band matches on cost, not on the word \"feat\"",
+      "pass": true,
+      "detail": "seeded, and correctly absent: nothing about Lucky costs a Reaction"
+    },
+    {
+      "name": "A · the count beside the heading agrees with the list beneath it",
+      "pass": true,
+      "detail": "toggle reads \"2\" · 2 rows painted"
+    },
+    {
+      "name": "A · every row is painted with area and none is clipped out of the band",
+      "pass": true,
+      "detail": "band on glass=true · painted 2/2 · inside the band 2/2 · reaching 2 without scrolling"
+    },
+    {
+      "name": "B · the two Sentinel rows do not carry the same trigger  <-- FINDING BE",
+      "pass": false,
+      "detail": "0 Sentinel row(s). Option ids were minted from type+name and deduped by id, so one feat with two reactions silently became one row — invisible until a feat like this one arrived."
+    },
+    {
+      "name": "B · one is the Disengage trigger, the other is an attack on someone else",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "name": "B · and Sentinel’s Speed-0 rider is NOT offered as a third reaction",
+      "pass": false,
+      "detail": "the rider costs nothing and is not a thing you choose to do, so it gets no row"
+    },
+    {
+      "name": "C · every feat row states a real trigger — none says \"not stated\"",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "name": "C · NOTHING in the band trails off — no ellipsis anywhere  <-- the phase’s whole point",
+      "pass": true,
+      "detail": "282 characters painted, and every one of them a word"
+    },
+    {
+      "name": "C · every row prices itself, and the price is a Reaction",
+      "pass": true,
+      "detail": "Opportunity Attack — Longsword = \"Reaction\" · Flaming Cloak = \"Reaction · 1/2 uses\""
+    },
+    {
+      "name": "D · the row names the reduction and the die, not a summary of them",
+      "pass": false,
+      "detail": "no Interception row — canon’s fighting styles never reached the turn engine"
+    },
+    {
+      "name": "D · the trigger is separated from the effect, and rejoining them is canon’s sentence",
+      "pass": false,
+      "detail": "(missing)"
+    },
+    {
+      "name": "E · the row says the 1d10 is FREE  <-- the sentence Marcus had backwards",
+      "pass": false,
+      "detail": "the row reads \"10 temp HP · 1d10 Fire retaliation\" — a die with a blank price beside it, which at a table reads as expensive. He has been holding a Reaction back for something that was already his."
+    },
+    {
+      "name": "E · and the temp HP moved with his real Charisma — 10, not the fixture’s 12",
+      "pass": true,
+      "detail": "\"10 temp HP · 1d10 Fire retaliation\" — level 7 + Charisma modifier 3, computed from canon’s formula. Canon ships a frozen 11 beside it for CHA 18; the app has never read it (slice 6)."
+    },
+    {
+      "name": "F · the sheet names every cost the retaliation does NOT have",
+      "pass": false,
+      "detail": "the sheet says nothing about the price. \"(free)\" on the row is a word he has to trust; this line is the one that answers \"free of WHAT\"."
+    },
+    {
+      "name": "F · and the sheet still quotes canon’s sentence verbatim beside it",
+      "pass": false,
+      "detail": "slice 8b’s law: a correction changes what the app SAYS, never what it COMPUTES — canon’s own words are still on the page under the gloss"
+    },
+    {
+      "name": "F · no ellipsis on the detail sheet either",
+      "pass": true,
+      "detail": "1260 characters, all words"
+    },
+    {
+      "name": "G · clean console",
+      "pass": true,
+      "detail": "no errors"
+    }
+  ],
+  "errors": []
+}

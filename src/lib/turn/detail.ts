@@ -134,7 +134,14 @@ function factsFromFeature(facts: readonly FeatureFact[]): DetailFact[] {
     value:
       fact.shape === 'computed' && fact.raw !== fact.value
         ? `${fact.value} (${fact.raw})`
-        : fact.value,
+        : // Slice 10e. The row has 46 characters and says "(free)"; the sheet
+          // has the whole width and says which costs are the ones not being
+          // charged, because "free" is the word Marcus would have to take on
+          // trust and this is the sentence that makes it checkable. Canon's own
+          // string is kept in front of it, unedited.
+          fact.free
+          ? `${fact.raw} — free: no Action, no Bonus Action, no Reaction, no use`
+          : fact.value,
   }))
 }
 

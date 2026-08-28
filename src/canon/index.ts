@@ -28,6 +28,7 @@ import type {
   CanonClassFeatureDetail,
   CanonChannelDivinityOption,
   CanonValidationRule,
+  CanonFeat,
 } from '../lib/canon/types'
 
 /* The casts are the seam between "untyped JSON on disk" and "typed corpus in
@@ -121,6 +122,33 @@ export const CHANNEL_DIVINITY_OPTIONS: readonly CanonChannelDivinityOption[] = (
 
 export const SPECIES = speciesRaw as Record<string, unknown>
 export const FEATS = featsRaw as unknown
+
+/* Canon files the four feat categories separately — `origin`, `general`,
+ * `fightingStyle`, `epicBoon` — because the RULES for acquiring them differ.
+ * Nothing downstream of a character sheet cares: by the time a feat is on the
+ * sheet, how it was acquired is history. So this is the same 76 records flat,
+ * and the categories stay readable on each record's own `category` field.
+ *
+ * Kept BESIDE `FEATS` rather than replacing it: `FEATS` is the whole document,
+ * `rules` and `changesFrom2014` included, and CharacterPage reads it that way.
+ * Table Truth slice 10e. */
+export const FEAT_LIST: readonly CanonFeat[] = (() => {
+  const doc = featsRaw as unknown as Record<string, unknown>
+  const out: CanonFeat[] = []
+  for (const category of ['origin', 'general', 'fightingStyle', 'epicBoon']) {
+    const bucket = doc[category]
+    if (!Array.isArray(bucket)) continue
+    for (const record of bucket) {
+      // A record with no name cannot be looked up and cannot be rendered. Skip
+      // it rather than indexing an empty key, which would answer every unknown
+      // feat with whichever malformed record happened to load first.
+      if (record && typeof record === 'object' && typeof (record as CanonFeat).name === 'string') {
+        out.push(record as CanonFeat)
+      }
+    }
+  }
+  return out
+})()
 export const BACKGROUNDS = backgroundsRaw as unknown
 
 /* character-marcus.json is canon's own reading of the sheet. It is NOT the

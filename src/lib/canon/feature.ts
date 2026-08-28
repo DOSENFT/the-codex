@@ -63,6 +63,23 @@ export interface FeatureFact {
   value: string
   /** Canon's value, verbatim, for the detail sheet and for diagnosing a parse. */
   raw: string
+  /** THIS DIE COSTS NOTHING TO ROLL. Slice 10e, and it is here because Marcus
+   *  said the opposite out loud.
+   *
+   *  His words, 2026-08-27: Hearthfire Manifest is "a bonus action, then it's a
+   *  reaction 1d10 damage if I get hit". Canon says otherwise — the ACTIVATION
+   *  is the Reaction (plus one Channel Divinity use), and after that "the
+   *  creature takes 1d10 Fire damage in retaliation" every single time it hits
+   *  him, for free, with no cap and nothing to decide. He has been playing a
+   *  reaction he already spent, which means he has been holding back a reaction
+   *  he still had. That is the app's fault: the row said "1d10 Fire retaliation"
+   *  and left the price blank, and a blank price at a table reads as expensive.
+   *
+   *  Derived by SHAPE, never by name (see `isFreeRider`): a die that fires on a
+   *  trigger of its own and names no cost has no cost. Undefined on every fact
+   *  that does not meet both halves — Smoldering Smite's "1d8 Fire" is the die
+   *  the Smite already paid for, states no trigger, and is left alone. */
+  free?: true
 }
 
 /* ── Classification, by shape ──────────────────────────────────────────────── */
@@ -79,6 +96,38 @@ const DICE_AND_TYPE = /(\d+d\d+(?:\s*[+-]\s*\d+)?)\s+([A-Z][a-z]+)/
 const DURATION_LEAD = /^(?:until|for|while|lasts)\b/i
 
 const MEASURE = /\b\d+\s*(?:ft|feet|foot|mile|miles)\b/i
+
+/* ── Free riders ────────────────────────────────────────────────────────────
+ *
+ * A fact earns `free` on two conditions, both read off canon's own sentence and
+ * neither of them a name:
+ *
+ *   1. IT HAS A TRIGGER OF ITS OWN. "to a creature that hits you with a melee
+ *      attack" fires on something the WORLD does, so it is not the thing the
+ *      feature's cost line already bought. Smoldering Smite's "1d8 Fire" states
+ *      no trigger — it is the damage the Smite you cast is made of — and is
+ *      therefore not free and not marked.
+ *   2. IT NAMES NO PRICE. Every cost in 2024 is spelled out where it applies:
+ *      an Action, a Bonus Action, a Reaction, a use, a slot, a point. A sentence
+ *      that mentions none of them is not being coy; there is nothing to pay.
+ *
+ * Both halves are required. One alone is a guess; together they are a reading. */
+const TRIGGER_CLAUSE =
+  /\b(?:when|whenever|if|each time|any time)\b|\bthat\s+\w+s\s+you\b|\bin retaliation\b/i
+
+const COST_PHRASE =
+  /\b(?:reaction|bonus\s+action|action|expend|expends|spend|spends|use of|uses of|spell\s+slot|charge|charges)\b/i
+
+/** Does canon state this value as something that happens to you for free?
+ *
+ *  Exported so a test can hold the RULE rather than the two records that happen
+ *  to satisfy it today — canon's next package is allowed to add a third. */
+export function isFreeRider(raw: string): boolean {
+  const text = raw.trim()
+  if (!text) return false
+  if (!TRIGGER_CLAUSE.test(text)) return false
+  return !COST_PHRASE.test(text)
+}
 
 /* ── Token resolution ──────────────────────────────────────────────────────── */
 
@@ -181,6 +230,10 @@ export function featureFacts(
     if (typeof value !== 'string' || value.trim().length === 0) continue
     const { shape, value: rendered } = classify(value, ctx)
     const label = humanizeKey(key)
+    // Only a DIE is asked the price question. A duration or a light radius is
+    // not something a player worries about paying for, and marking one "free"
+    // would be noise where the whole point is a signal.
+    const free = shape === 'dice' && isFreeRider(value)
     facts.push({
       key,
       label,
@@ -191,6 +244,7 @@ export function featureFacts(
       value:
         shape === 'computed' || shape === 'dice' ? `${rendered} ${label}` : rendered,
       raw: value,
+      ...(free ? { free: true as const } : {}),
     })
   }
   return facts
@@ -209,6 +263,12 @@ const ROW_SHAPES: readonly FactShape[] = ['computed', 'dice', 'duration']
  *  and is the single place that decides how wide a row is. */
 export function factsLine(facts: readonly FeatureFact[]): string {
   return ROW_SHAPES.flatMap(shape => facts.filter(f => f.shape === shape))
-    .map(f => f.value)
+    // Six characters, and they are the six Marcus was missing. "1d10 Fire
+    // retaliation" left the price blank; "1d10 Fire retaliation (free)" answers
+    // the question he actually asked. `fitRowDetail` drops WHOLE segments, so
+    // if the row cannot afford this segment it loses the retaliation entirely
+    // rather than showing it with the price cut off — which is the correct
+    // failure: a half-priced fact is worse than an absent one.
+    .map(f => (f.free ? `${f.value} (free)` : f.value))
     .join(' · ')
 }

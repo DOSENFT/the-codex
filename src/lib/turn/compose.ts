@@ -54,7 +54,13 @@ import { findContention } from './contention'
 // slug/poolIdFor moved to ./ids in Slice 6 so the reducer PAYS with exactly the
 // id the composer PRICES with. Same functions, one home — see ids.ts.
 import { slug } from './ids'
-import { categorizeTurnOptions, levelLabel, type ActionOption } from './options'
+import {
+  categorizeTurnOptions,
+  levelLabel,
+  type ActionOption,
+  type CategorizedOptions,
+} from './options'
+import { featReactionOptions } from './feats'
 import { featureContextOf, overlayCanon, type EconomyFiling, type OverlaidOption } from './overlay'
 import { featureFacts } from '../canon/feature'
 import { featureByName } from '../canon/lookup'
@@ -219,7 +225,36 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   // composer sees and what TurnSummary sees. Everything else — every summary
   // string, every mechanics line, every pinned quirk — is identical because it
   // is literally the same call.
-  const sheet = categorizeTurnOptions(character, { includeUnaffordable: true })
+  const sheetOptions = categorizeTurnOptions(character, { includeUnaffordable: true })
+
+  /* ── Feats reach the turn, at last. Slice 10e. ─────────────────────────────
+   *
+   * Marcus, 2026-08-27, sending his real character sheet: "I have Sentinel and
+   * interception". The app showed neither, and the cause was not ranking and not
+   * a missing row — `character.feats` was read by NOTHING across
+   * `src/lib/turn/` and `src/lib/canon/`. A feat could not become an option no
+   * matter what its text said. Both of his are REACTIONS, and a reaction you
+   * forget you have is a reaction you never take.
+   *
+   * Spliced HERE for the same reason the Opportunity Attack is synthesised
+   * eighty lines below: `options.ts` is a pinned characterization record of the
+   * V0.9 screen and this composer is the layer allowed to know about the action
+   * economy. Splicing BEFORE the overlay loop means these rows go through every
+   * step the others do — canon overlay, ranking, contention, the band, the
+   * detail sheet — rather than round the back of them.
+   *
+   * LAST IN THE LIST, and deduped by name, because the sheet outranks canon. If
+   * Marcus wrote Sentinel into his features by hand — which is exactly what a
+   * player does when the app never shows it — his words win and this stays out.
+   * That is the open-world rule pointing the other way for once. */
+  const claimed = new Set(sheetOptions.reactions.map(o => o.name.trim().toLowerCase()))
+  const sheet: CategorizedOptions = {
+    ...sheetOptions,
+    reactions: [
+      ...sheetOptions.reactions,
+      ...featReactionOptions(character).filter(o => !claimed.has(o.name.trim().toLowerCase())),
+    ],
+  }
 
   const weaponsByName = new Map<string, Weapon>()
   for (const weapon of character.weapons ?? []) weaponsByName.set(weapon.name, weapon)
@@ -274,6 +309,38 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
     }
   }
 
+  /* AN ID HAS TO BE UNIQUE, and until slice 10e nothing made it so.
+   *
+   * `id` is minted from the option's type and its NAME, and `reactions.ts`
+   * dedupes the band by id — so two options that share a name silently become
+   * one row, and the second one Marcus owns disappears into the first with no
+   * message. It stayed invisible while every name on the sheet happened to be
+   * distinct.
+   *
+   * Sentinel is what makes it visible: ONE feat, TWO reactions, two different
+   * triggers (a creature Disengages; a creature attacks somebody else). Both are
+   * called "Sentinel" because that is what they are called — the app does not
+   * invent sub-names for rules that have none — so the collision is not a defect
+   * in the data, and it is the id that has to give.
+   *
+   * A suffix, and only from the second collision on, so every id the app has
+   * ever minted is byte-identical to what it was. The order is deterministic
+   * (bucket order, then list order), which is what makes the suffix stable
+   * across re-renders — an id that moved between renders would break the open
+   * detail sheet mid-turn. */
+  const mintedIds = new Set<string>()
+  const uniqueId = (base: string): string => {
+    if (!mintedIds.has(base)) {
+      mintedIds.add(base)
+      return base
+    }
+    let n = 2
+    while (mintedIds.has(`${base}-${n}`)) n += 1
+    const id = `${base}-${n}`
+    mintedIds.add(id)
+    return id
+  }
+
   const build = (option: OverlaidOption, slot: EconomySlot): TurnOption => {
     const weapon = option.type === 'weapon' ? weaponsByName.get(option.name) : undefined
     const feature = option.type === 'feature' ? featuresByName.get(option.name) : undefined
@@ -320,7 +387,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
     const grantsTempHP = tempHPGrantOf(option, cost, character)
 
     return {
-      id: `${option.type}-${slug(option.name)}`,
+      id: uniqueId(`${option.type}-${slug(option.name)}`),
       name: option.name,
       kind: KIND[option.type],
       detail: detailOf(option, cost.label),

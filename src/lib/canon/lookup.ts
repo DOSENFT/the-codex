@@ -15,8 +15,8 @@
  *
  * Table Truth slice 1. */
 
-import { SPELLS, CONDITIONS, OATH, CLASS_FEATURES, CHANNEL_DIVINITY_OPTIONS } from '../../canon'
-import type { CanonSpell, CanonCondition, CanonFeature, CanonErratum } from './types'
+import { SPELLS, CONDITIONS, OATH, CLASS_FEATURES, CHANNEL_DIVINITY_OPTIONS, FEAT_LIST } from '../../canon'
+import type { CanonSpell, CanonCondition, CanonFeature, CanonErratum, CanonFeat } from './types'
 
 /** Fold a display name to a match key.
  *
@@ -51,8 +51,26 @@ const FEATURE_INDEX: Map<string, CanonFeature> = indexByName([
   ...CLASS_FEATURES,
 ])
 
+const FEAT_INDEX: Map<string, CanonFeat> = indexByName(FEAT_LIST)
+
 export function spellByName(name: string): CanonSpell | undefined {
   return SPELL_INDEX.get(normalizeName(name))
+}
+
+/** Canon's record for a feat on the sheet, or undefined.
+ *
+ *  Added in slice 10e for a measured reason: `feats.json` ships 76 feats with
+ *  full rules text and was imported by `src/canon/index.ts` but **indexed by
+ *  nothing** — this module never read it. A stored feat whose description is
+ *  thin (and Marcus's are: the importer takes whatever the export gave it)
+ *  would otherwise reach the turn engine with no trigger and no body, and a
+ *  reaction row that cannot say WHEN is worse at a table than no row.
+ *
+ *  Same contract as `featureByName`: a miss is normal and falls through to the
+ *  sheet's own words. No fuzzy matching — a near-miss that answers confidently
+ *  with the wrong feat's rules is the failure mode worth avoiding. */
+export function featByName(name: string): CanonFeat | undefined {
+  return FEAT_INDEX.get(normalizeName(name))
 }
 
 export function conditionByName(name: string): CanonCondition | undefined {
