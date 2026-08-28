@@ -430,6 +430,22 @@ line (CHA 16) carrying the stale numbers his sheet had actually accumulated (DC 
 
 Shots: `shots/phase-close-vitals-before-main.png` · `shots/phase-close-vitals-after-slice7.png`.
 
+**Verified on the deployed site, 2026-08-28.** Pushed `ea28aad..8b8a9c8` to `main`; run
+`33209588109` green in 52s. A green run is not a proof that anything shipped — commit
+`0d8920e` records this same pipeline printing success while deploying nothing, twice — so
+the live bundle hash was checked (`index-BdvvtPEw.js`, not the pre-phase `index-BdTx4OUs.js`)
+and then the probe was re-run against `https://dosenft.github.io/the-codex/` itself:
+
+```
+Save DC painted : 14   (topmost at its own centre)
+Sp Atk painted  : +6
+disagreement    : none shown
+```
+
+The live bundle hash is byte-identical to the slice-6 build, which is corroboration rather
+than a worry: slice 7 changed comments, tests and docs only, so it *should* compile to the
+same bytes.
+
 The warning panel is gone from the second picture not because it was suppressed but
 because the drift it reported can no longer happen. That is the phase in two images, and
 it is the answer to *"what I change in the prep screen must directly effect and be used

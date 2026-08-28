@@ -43,10 +43,18 @@ const NIX = await loadNix();
 const SHOTS = new URL('./shots/', import.meta.url);
 mkdirSync(SHOTS, { recursive: true });
 
-const BUILDS = [
-  { tag: 'before-main', url: 'http://localhost:4217/the-codex/', what: 'pre-phase build (main @ ea28aad)' },
-  { tag: 'after-slice7', url: 'http://localhost:4223/the-codex/', what: "today's build (sheet-truth)" },
-];
+/* Default is the two local builds. Pass URLs to point it anywhere — which is
+   how the deployed site gets checked, because a green Actions run is not a
+   proof that anything shipped (see commit 0d8920e: this pipeline has printed
+   success while deploying nothing, twice).
+
+     node _probe-phase-close.mjs https://dosenft.github.io/the-codex/ */
+const BUILDS = process.argv.length > 2
+  ? process.argv.slice(2).map((url, i) => ({ tag: `arg${i + 1}`, url: url.replace(/\/?$/, '/'), what: url }))
+  : [
+      { tag: 'before-main', url: 'http://localhost:4217/the-codex/', what: 'pre-phase build (main @ ea28aad)' },
+      { tag: 'after-slice7', url: 'http://localhost:4223/the-codex/', what: "today's build (sheet-truth)" },
+    ];
 
 const IN_COMBAT = {
   inCombat: true, round: 3, yourTurn: true,
@@ -199,7 +207,7 @@ for (const b of BUILDS) {
 
 await browser.close();
 
-console.log('SEEDED (identical bytes into both builds):');
+console.log(`SEEDED (identical bytes into ${BUILDS.length === 1 ? 'the build below' : `all ${BUILDS.length} builds`}):`);
 console.log('  CHA 16 · level 7 · stored spellSaveDC 15 · stored spellAttackBonus +7');
 console.log('  TRUE for that sheet: DC 14, attack +6, proficiency +3\n');
 for (const r of report) {
