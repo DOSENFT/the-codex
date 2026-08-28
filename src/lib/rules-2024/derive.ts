@@ -32,6 +32,12 @@
 // wrong".
 
 import { CASTING_ABILITY, type AbilityKey } from '../dnd-rules'
+import { applyPoolMaxima } from './pools'
+// Value import, and safe: resources.ts pulls `Character` back as a TYPE only,
+// so the chain character.ts → derive.ts → resources.ts → turn/ids.ts has no
+// runtime edge closing it. `poolsOf` is used by `changedNumbers` below, which
+// needs the projection over BOTH places a pool can live.
+import { poolsOf } from './resources'
 import { PROGRESSION_BY_CLASS } from '../../canon'
 import type { CanonProgressionLevel } from '../canon/types'
 // Type-only, so the cycle with character.ts is erased at compile time and there
@@ -118,10 +124,15 @@ function modifierOf(score: number): number {
  *  `resolve(x)` — which is what lets it sit on both the read path and the write
  *  path without the two fighting.
  *
- *  Slice 1 derives the four numbers in `DerivedNumbers`. The paladin pools
- *  (Lay on Hands, Channel Divinity, aura range) join them in slice 4, where the
- *  clamp rule they need is built. */
-export function resolveCharacter(base: CharacterBase): Character {
+ *  Slice 1 derives the four numbers in `DerivedNumbers`. Slice 4 adds the
+ *  paladin pools, which are NOT in that set and are not deleted on write —
+ *  `pools.ts` explains why a pool is half arithmetic and half memory. They are
+ *  repaired in place here instead, so that the one call every read and every
+ *  write already goes through fixes them too. That is the whole of slice 4's
+ *  "Level Up moves everything": nothing special happens on level-up, because
+ *  changing `level` and saving is already enough. */
+export function resolveCharacter(input: CharacterBase): Character {
+  const base = applyPoolMaxima(input)
   const level = base.level
   const proficiencyBonus = proficiencyFor(level)
   const row = progressionRow(base.class, level)
@@ -153,6 +164,53 @@ export function resolveCharacter(base: CharacterBase): Character {
     // and deleting a resource he is playing with would be the app overruling
     // his table. `discrepancies()` keeps reporting them, forever, by design.
   }
+}
+
+/** One number `resolveCharacter` moved, in words a player can check. */
+export interface NumberChange {
+  label: string
+  from: number
+  to: number
+}
+
+/** Everything that moved between two resolved sheets.
+ *
+ *  SHEET TRUTH slice 4, and it exists because of what the level-up toast used
+ *  to say: "Leveled up to 8! Update your spells and features as needed." That
+ *  sentence was written when the app moved almost nothing, and it survived into
+ *  a version that now moves seven numbers — so it told Marcus to go and do by
+ *  hand the exact work the app had just done for him, while naming none of it.
+ *
+ *  A diff rather than a hard-coded list of headlines: the toast can only ever
+ *  claim a number that genuinely differs between the two sheets, so it cannot
+ *  drift from what actually happened. A number that did not move is silent,
+ *  which is why levelling 7→8 says nothing about proficiency and 8→9 does.
+ *
+ *  Pool maxima are read through `poolsOf`, which projects BOTH storage
+ *  locations, so this reports Nix's feature-backed Lay on Hands and a legacy
+ *  `paladinResources` one identically without knowing which he has. */
+export function changedNumbers(before: Character, after: Character): NumberChange[] {
+  const out: NumberChange[] = []
+  const add = (label: string, from: number, to: number) => {
+    if (from !== to) out.push({ label, from, to })
+  }
+
+  add('Proficiency', before.proficiencyBonus, after.proficiencyBonus)
+  add('Spell save DC', before.spellSaveDC, after.spellSaveDC)
+  add('Spell attack', before.spellAttackBonus, after.spellAttackBonus)
+  add('Prepared spells', before.maxPreparedSpells, after.maxPreparedSpells)
+
+  const was = new Map(poolsOf(before).map(pool => [pool.id, pool]))
+  for (const pool of poolsOf(after)) {
+    const previous = was.get(pool.id)
+    if (previous) add(pool.name, previous.max, pool.max)
+  }
+
+  if (before.paladinResources && after.paladinResources) {
+    add('Aura', before.paladinResources.auraRange, after.paladinResources.auraRange)
+  }
+
+  return out
 }
 
 /** The inverse of `resolveCharacter`: what actually goes to disk.

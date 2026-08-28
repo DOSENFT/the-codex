@@ -117,7 +117,73 @@ _Full detail and per-slice proof in `04-slices.md`._
    one, `level` is a free number — got +7 from one and +6 from the other, so the discrepancy
    reporter would have accused the sheet using a number the app itself no longer agreed
    with. **Found by the source scan, not by reading.**
-- [ ] Slice 4 — Level Up moves all seven numbers; pools clamp down, never up.
+- [x] **Slice 4 — Level Up moves everything.** Done 2026-08-28.
+
+   `src/lib/rules-2024/pools.ts` (new) is the one producer of every level-scaled pool
+   maximum, read from canon's own `layOnHandsPool` and `channelDivinityUses` columns.
+   `resolveCharacter` calls it, so the repair happens on every read and every write and
+   **nothing special happens on level-up at all** — raising `level` and saving is the
+   whole of it. `computePaladinResources` now delegates instead of holding a sixth copy
+   of the rule. The toast names what moved.
+
+   **Measured in a real Chrome (`_probe-levelup.mjs`, four boundary cases, 390×844):**
+
+   | | before (slice 3, :4220) | after (slice 4, :4221) |
+   |---|---|---|
+   | correct after the tap | 23 of 29 | **29 of 29** |
+   | already-spent kept | 7 of 7 | 7 of 7 |
+   | spell slots untouched | yes | yes |
+
+   What the app now says, instead of *"Update your spells and features as needed"*:
+   > Leveled up to 9. Proficiency 3 → 4, Spell save DC 14 → 15, Spell attack 6 → 7,
+   > Prepared spells 7 → 9, Lay on Hands 40 → 45. Spell slots are still yours to set.
+
+   **The scope this slice was widened to cover, and why.** The plan said "derive
+   `paladinResources`". Nix **has no `paladinResources`** — his Lay on Hands is a
+   `features[].usesMax`, which is what the Grimoire, the loadout panel, print and the AI
+   prompts all read, while `paladinResources` is read by two surfaces. Shipping the plan
+   as written would have moved a number he cannot see and left the one he reads stale:
+   a half-built feature running as if done. Both storage sites are now repaired by the
+   same function, matched through `poolIdFor()` — the app's **existing** name→pool map,
+   the one `compose.ts` already prices with and `reduce.ts` already pays with — so this
+   adds no new name-recognition and cannot disagree with what the app charges.
+
+   **21 new tests in `pools.test.ts`. Six pinned by micro-revert:**
+
+   | line put back | tests that go red |
+   |---|---|
+   | `resolveCharacter` not calling `applyPoolMaxima` | 8 |
+   | feature-backed pools left alone (slice 4 *as planned*) | 6 |
+   | growing a pool refills it (`current = max`) | 3 |
+   | `computePaladinResources` hand-typed again | 1 |
+   | aura range left where it was stored | 1 |
+   | the open-world gate removed (canon's column applied to any class) | 1 |
+
+   Files restored byte-identically after every revert, verified with `diff`. Suite
+   **1054 passed / 46 files / 7 skipped**, up from 1033 / 45.
+
+   **New findings:**
+   1. **FINDING BK — canon disagreed with the code about level 1, and nothing noticed.**
+      `computePaladinResources` used `level >= 11 ? 3 : 2`, giving a level-1 paladin two
+      uses of Channel Divinity. Canon's `channelDivinityUses` column says **0** until
+      level 3, which is right — the feature is not gained until then. A sixth hand-typed
+      copy of a rule canon already carried as a column, drifted at the bottom end where
+      nobody plays and so nobody looked.
+   2. **FINDING BL — a probe that reads by proximity must check the anchor's box too.**
+      The screen reader walked up from a leaf whose text was exactly "Lay on Hands" and
+      took the nearest `n/m`. It reported **76** — the hit-point bar. The permanently
+      mounted print view carries its own zero-height "Lay on Hands" span, and the walk
+      anchored there. Finding Q said a claim about the screen must be geometric; this is
+      the corollary: *both ends* of a geometric claim need a box.
+   3. **Marcus's sheet is wrong right now, today, at level 7.** It carries Lay on Hands
+      at **40** points; canon's level-7 row is **35**. Slice 4 corrects it on load, with
+      his 15 remaining points untouched. This is the one number in the phase that goes
+      *down* — recorded here because it is a visible change to his live sheet.
+   4. **`auraRange` has no canon column** — canon states it only in prose ("10-foot
+      Emanation from you (30 feet at level 18)"). The two distances therefore stay
+      declared in `pools.ts`, but the *levels* are read from canon's `classFeatures`
+      lists, which are structured. A test asserts canon's prose still contains both
+      numbers, so a canon package that reworks the aura is a red test the day it lands.
 - [ ] Slice 5 — `personalise.ts` wired at `detail.ts:284`, proved on one string (Bless).
 - [ ] Slice 6 — the remaining 7 canon strings, hand-edited and classified.
 - [ ] Slice 7 — discrepancy cases kept but asserted unreachable; phase close.

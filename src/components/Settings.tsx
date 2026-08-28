@@ -26,6 +26,7 @@ import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, get
 import { GeminiModelPicker } from './GeminiModelPicker'
 import { useAI } from '../hooks/useAI'
 import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
+import { resolveCharacter, storableOf, changedNumbers } from '../lib/rules-2024/derive'
 import { parseCharacterFile, formatList } from '../lib/import-character'
 import { findSessionRollback, describeRollback, type RollbackEntry } from '../lib/session-rollback'
 import { ASTERA_PERSONA } from '../lib/dnd-data'
@@ -351,14 +352,28 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
        here, and it was one of five copies of that formula in four spellings. It is
        gone rather than corrected: the level goes up, and `resolveCharacter` works
        out the bonus from it on the way to disk. Nothing here needs to know the rule.
-       (The other six numbers a level-up should move are slice 4.) */
-    const updated = {
-      ...character,
-      level: character.level + 1,
-    }
+
+       SLICE 4 adds no rule here either — it only RESOLVES before handing the sheet
+       on, so that the toast can report what moved instead of guessing. Every pool
+       maximum and every derived number is worked out by the same call the save path
+       would have made a moment later; this just makes it early enough to read.
+       Raising the level is still the whole of the level-up. */
+    const updated = resolveCharacter({ ...storableOf(character), level: character.level + 1 })
+    const moved = changedNumbers(character, updated)
     onCharacterUpdate(updated)
-    setRestFeedback(`Leveled up to ${updated.level}! Update your spells and features as needed.`)
-    setTimeout(() => setRestFeedback(null), 4000)
+    /* Naming the numbers, because the old sentence — "Update your spells and
+       features as needed" — asked Marcus to redo by hand the work the app had just
+       finished, and named none of it. Spell slots are still his: `resolveCharacter`
+       refuses to touch them (his sheet carries slots his level does not grant), so
+       they are the one thing the toast still hands back. */
+    setRestFeedback(
+      moved.length === 0
+        ? `Leveled up to ${updated.level}. No derived numbers changed — check your spell slots.`
+        : `Leveled up to ${updated.level}. ${moved
+            .map(change => `${change.label} ${change.from} → ${change.to}`)
+            .join(', ')}. Spell slots are still yours to set.`,
+    )
+    setTimeout(() => setRestFeedback(null), 8000)
   }, [character, onCharacterUpdate])
 
   /* ------ upgrade character (add paladin resources + persona) ------ */

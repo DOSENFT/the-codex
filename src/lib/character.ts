@@ -1,5 +1,6 @@
 import { type AbilityKey, type SkillName, SKILL_ABILITIES, CASTING_ABILITY, ABILITY_NAMES } from './dnd-rules'
 import { resolveCharacter, storableOf, type DerivedNumbers } from './rules-2024/derive'
+import { paladinResourcesFor } from './rules-2024/pools'
 // Slice 6b. `resources.ts` imports Character back, but only as a TYPE, so the
 // cycle is erased at compile time and there is no runtime edge in that
 // direction. Kept that way on purpose: character.ts is the module every screen
@@ -1430,13 +1431,18 @@ export function restoreChannelDivinity(character: Character): Character {
   }
 }
 
-// Compute paladin resources from level
+/** Compute paladin resources from level.
+ *
+ *  SHEET TRUTH slice 4. This was a SIXTH hand-typed copy of a rule canon
+ *  already carries as a column, and it had already drifted from canon in a way
+ *  no test could see: `level >= 11 ? 3 : 2` gives a level-1 paladin two uses of
+ *  Channel Divinity, and canon's `channelDivinityUses` column gives 0 until
+ *  level 3 — which is correct, because a paladin does not have the feature yet.
+ *  Delegating rather than deleting: the signature and the `current = max` are
+ *  kept, because the one caller (`handleUpgradeCharacter`) is CREATING a sheet,
+ *  and a character being created has spent nothing. */
 export function computePaladinResources(level: number): PaladinResources {
-  return {
-    layOnHands: { max: 5 * level, current: 5 * level },
-    channelDivinity: { max: level >= 11 ? 3 : 2, current: level >= 11 ? 3 : 2 },
-    auraRange: level >= 18 ? 30 : 10,
-  }
+  return paladinResourcesFor(level)
 }
 
 // ---------------------------------------------------------------------------
