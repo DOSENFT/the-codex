@@ -2861,7 +2861,38 @@ Shots in `_shots-bh-bj/`.
 Falsifiability was *proved*, not assumed: the BH node tests were run against a neutered door (2
 failed) and neutered copy (1 failed) before being restored.
 
-### Deploy
+### Deploy — 2026-08-28, and the two things that nearly made it a lie
 
-Authorised in the same sentence that asked for the fixes. Pushed `v1` → `main`, live at
-https://dosenft.github.io/the-codex/. This is the **first** deploy of this entire phase.
+Authorised in the same sentence that asked for the fixes. `main` is now `ea28aad`, run
+**33142377189** green in 51s, live at https://dosenft.github.io/the-codex/. Verified past the
+workflow's own green tick: the live `index.html` names the same bundle hashes as the local `dist/`
+(`index-BdTx4OUs.js`, `canon-BFGXi2-O.js`, …), and the shipped JS really contains the new copy —
+`End Combat`, `End the encounter?`, `Keep fighting`, `End combat — confirm`. The **first** deploy of
+this entire phase; the live site had been sitting on pre-canon code for all eleven slices.
+
+**1. The lockfile would have failed `npm ci`.** Slice 6 (`a3d4c66`) put `"@types/node": "^26.4.0"`
+into `package.json` and never updated `package-lock.json`, where `@types/node` existed only as an
+optional peer *range* of vite and vitest with no resolved entry. Nothing local could catch it: every
+gate in this phase ran against an already-populated `node_modules`, and `npm run build` does not read
+the lockfile. `deploy.yml` runs `npm ci`, which refuses a lockfile that disagrees with
+`package.json` — the build would have stopped **before** `npm run build`, and the phase would have
+reported "pushed" while the site stayed on `A-11`. Fixed in `ea28aad`. **The lesson generalises: a
+green local gate says nothing about `npm ci`.** Worth a lockfile check at any phase close that
+touched dependencies.
+
+**2. `git push origin v1:main` did not push `v1`.** Run from `cmd.exe`, it moved `main` from
+`247beda` to `2a41af3` — two *pre-phase* commits — while `v1` resolved to `ea28aad` in every query
+made inside the repo. Nothing was lost (it was a fast-forward between two ancestors), but it did
+briefly look like a successful deploy while shipping none of the work. The cause was not chased; the
+cure was to stop trusting the short name and push the **full SHA to a fully-qualified ref**:
+
+    git push origin ea28aad6c0518ff5872052bb40d5e377c0c596f6:refs/heads/main
+
+**That is the form to use for every future deploy from this repo.** A second trap sat next to it:
+the local `main` branch was stale at `60265a1`, so `git log main..v1` read **49** commits when the
+truth against `origin/main` was **19**. Measure divergence against `origin/main`, never against a
+local branch that has not been fetched.
+
+**Confirming a deploy means reading the remote, not the push output.** Both faults above printed
+something that looked like success. `git ls-remote origin refs/heads/main` and a `curl` of the live
+bundle are what actually settled it.

@@ -503,5 +503,10 @@ Gate: `tsc` clean, **990 passed + 7 skipped across 42 files**, `npm run build` �
 `prove-bh-bj.mjs` **15 proved · 0 failed · FALSIFIABLE: YES**, `prove-phase1.mjs` **21 · 0 · 2
 unproved**. Full write-up: `00-status.md` §POST-CLOSE.
 
-**Deployed** — `v1` → `main`, live at https://dosenft.github.io/the-codex/, authorised in the same
-sentence that asked for the fixes. The first deploy of the phase.
+**Deployed 2026-08-28** — `main` = `ea28aad`, run 33142377189 green, live at
+https://dosenft.github.io/the-codex/, verified by bundle hash and by the new copy being present in
+the shipped JS. The first deploy of the phase; the site had been on pre-canon code throughout.
+
+Two faults surfaced only at the push, both of which printed something resembling success — the
+lockfile that would have failed `npm ci`, and a `v1:main` refspec that pushed a pre-phase commit.
+Both written up, with the deploy form to use next time: `00-status.md` §Deploy.
