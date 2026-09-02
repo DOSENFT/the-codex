@@ -1,6 +1,6 @@
 {
   "target": "http://localhost:4173/the-codex/",
-  "sha": "68f61fb11fd41fb9295a6111b5b01d2faad822e3",
+  "sha": "f3c0e36fc56d6e6a026aa6ed9c9eda1d6d73de27",
   "mode": "local",
   "partial": true,
   "void": false,
@@ -24,7 +24,7 @@
     "E2_nodes": 50,
     "E3_bytes": 4194304
   },
-  "seconds": 71,
+  "seconds": 72,
   "pass": 8,
   "fail": 3,
   "unproven": 0,
@@ -93,7 +93,7 @@
       "id": "V-6c",
       "what": "the same, on the iPad at 834×1112  [5 occluded]",
       "verdict": "FAIL",
-      "detail": "play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Academy @top «Random Catchphrase» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0"
+      "detail": "play/Grimoire @bottom «BlessSpellAction30 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «CommandSpellAction60 feetConc1stSlots:4/4» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Grimoire @bottom «Unprepare Command» covered by button.flex.items-center < div.flex.items-center < header.fixed.top-0\n         prep/Persona @bottom «“A little warmth for the chill in your bones» covered by header.fixed.top-0 < div.flex.flex-col < div\n         prep/Academy @top «Random Catchphrase» covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0"
     }
   ]
 }

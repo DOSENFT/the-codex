@@ -1,0 +1,294 @@
+/* Throwaway. The app's own tokens, copied by value so these files open with no
+   build step and no server. Read `src/index.css` for why each value is what it
+   is — every one of them was measured for contrast at 60cm in a dim room. */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --void-0: #0a0a08;
+  --void-1: #12110e;
+  --void-2: #1c1a15;
+  --arcane: #d4a74a;
+  --arcane-lit: #e8c87a;
+  --eldritch: #8b5cf6;
+  --eldritch-lit: #b39cff;
+  --ember: #e8924a;
+  --ember-lit: #f5b183;
+  --verdant: #39d98a;
+  --gold: #c5a55a;
+  --bronze: #8b7355;
+  --forge-0: #f0e6d3;
+  --forge-1: #bfb5a0;
+  --forge-2: #979182;
+  --blood: #d64545;
+  --display: 'Cinzel', serif;
+  --body: 'IBM Plex Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #06060a;
+  font-family: var(--body);
+  color: var(--forge-0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 16px 60px;
+  min-height: 100vh;
+}
+
+/* ── the review furniture (not part of the app) ───────────────────────────── */
+.sheet-title {
+  font-family: var(--display);
+  font-size: 15px;
+  letter-spacing: .06em;
+  color: var(--arcane-lit);
+  text-transform: uppercase;
+}
+.sheet-note {
+  max-width: 640px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #8d8676;
+  text-align: center;
+}
+.sheet-note b { color: var(--forge-1); font-weight: 600; }
+
+/* ── the phone ────────────────────────────────────────────────────────────── */
+.phone {
+  position: relative;
+  width: 390px; height: 844px;
+  background: var(--void-0);
+  border: 1px solid #26221b;
+  border-radius: 26px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 22px 70px -20px #000;
+}
+
+.hdr {
+  height: 56px; flex: 0 0 56px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px;
+  background: rgba(18,17,14,.94);
+  border-bottom: 1px solid #221f19;
+}
+.hdr .tabs { display: flex; gap: 4px; }
+.hdr .tabs span {
+  font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--forge-2); padding: 5px 9px; border-radius: 6px; font-weight: 600;
+}
+.hdr .tabs span.on { color: var(--void-0); background: var(--arcane); }
+.hdr .who { margin-left: auto; text-align: right; }
+.hdr .who b { display: block; font-family: var(--display); font-size: 12px; color: var(--forge-0); letter-spacing: .04em; }
+.hdr .who i { font-style: normal; font-size: 9.5px; color: var(--forge-2); letter-spacing: .05em; }
+
+.scroll {
+  flex: 1 1 auto; overflow-y: auto; padding: 12px 12px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+/* Without this every child of a scrolling flex column shrinks to fit instead of
+   overflowing, and the card silently renders at half its height. */
+.scroll > * { flex: 0 0 auto; }
+.scroll::-webkit-scrollbar { width: 3px; }
+.scroll::-webkit-scrollbar-thumb { background: #2c2820; border-radius: 3px; }
+
+.nav {
+  height: 65px; flex: 0 0 65px;
+  display: flex; align-items: center; justify-content: space-around;
+  background: rgba(18,17,14,.96);
+  border-top: 1px solid #221f19;
+}
+.nav i {
+  font-style: normal; font-size: 9.5px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--forge-2); text-align: center;
+}
+.nav i.on { color: var(--arcane-lit); }
+.nav i b { display: block; font-size: 16px; font-weight: 400; margin-bottom: 3px; }
+
+/* ── the card ─────────────────────────────────────────────────────────────── */
+.card {
+  background: linear-gradient(180deg, #17150f 0%, var(--void-1) 62%);
+  border: 1px solid #2e2920;
+  border-radius: 13px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(240,230,211,.045) inset, 0 10px 26px -14px #000;
+}
+
+/* 1 — the round */
+.round {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px;
+  background: linear-gradient(90deg, rgba(212,167,74,.16), rgba(212,167,74,.03) 62%, transparent);
+  border-bottom: 1px solid #2b2720;
+}
+.round .n {
+  font-family: var(--display); font-weight: 700; font-size: 12px;
+  letter-spacing: .13em; color: var(--arcane-lit); text-transform: uppercase;
+}
+.round .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--bronze); }
+.round .yours {
+  font-family: var(--display); font-size: 12.5px; font-weight: 600;
+  letter-spacing: .1em; color: var(--forge-0); text-transform: uppercase;
+}
+.round .next {
+  margin-left: auto;
+  font-family: var(--body); font-size: 11px; font-weight: 700;
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--void-0); background: var(--arcane);
+  padding: 7px 13px; border-radius: 7px; border: 0;
+}
+.round .next.ghost {
+  background: transparent; color: var(--arcane-lit);
+  border: 1px solid rgba(212,167,74,.42);
+}
+
+/* 2 — his body */
+.body-strip { padding: 10px 12px 9px; border-bottom: 1px solid #232019; }
+.vit { display: flex; align-items: center; gap: 10px; }
+.hp-num {
+  font-variant-numeric: tabular-nums; font-weight: 700;
+  font-size: 27px; line-height: 1; letter-spacing: -.01em;
+}
+.hp-num small { font-size: 14px; font-weight: 600; color: var(--forge-2); }
+.hp-crit { color: #ff6b6b; text-shadow: 0 0 16px rgba(214,69,69,.55); animation: pulse 1.5s ease-in-out infinite; }
+.hp-ok { color: var(--verdant); }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .62 } }
+.hp-lab { font-size: 8.5px; letter-spacing: .13em; color: var(--forge-2); text-transform: uppercase; margin-bottom: 3px; }
+.bar { height: 5px; border-radius: 3px; background: #262119; overflow: hidden; margin-top: 6px; }
+.bar i { display: block; height: 100%; border-radius: 3px; }
+.bar i.crit { background: linear-gradient(90deg, #8f2020, #ff6b6b); box-shadow: 0 0 9px rgba(255,107,107,.65); }
+.bar i.ok { background: linear-gradient(90deg, #1f7a4d, var(--verdant)); }
+.ac {
+  margin-left: auto; text-align: center;
+  border: 1px solid #34301f; border-radius: 8px; padding: 5px 10px; background: rgba(197,165,90,.07);
+}
+.ac b { display: block; font-size: 17px; font-weight: 700; color: var(--forge-0); font-variant-numeric: tabular-nums; }
+.ac i { font-style: normal; font-size: 8px; letter-spacing: .13em; color: var(--forge-2); }
+.hpbtns { display: flex; gap: 6px; margin-top: 9px; }
+.hpbtns button {
+  flex: 1; font-family: var(--body); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase; padding: 7px 0;
+  border-radius: 7px; border: 1px solid #322d23; background: #191710; color: var(--forge-1);
+}
+.hpbtns button.dmg { border-color: rgba(214,69,69,.42); color: #ff8f8f; }
+.hpbtns button.heal { border-color: rgba(57,217,138,.36); color: var(--verdant); }
+.hpbtns button.temp { border-color: rgba(139,92,246,.4); color: var(--eldritch-lit); }
+.cond {
+  display: flex; align-items: center; gap: 7px; margin-top: 9px;
+  padding: 7px 9px; border: 1px solid #2a261e; border-radius: 7px; background: rgba(28,26,21,.55);
+}
+.cond .k { font-size: 9px; letter-spacing: .13em; text-transform: uppercase; color: var(--forge-2); }
+.cond .v { font-size: 12px; color: var(--forge-1); font-weight: 500; }
+.cond .caret { margin-left: auto; color: var(--forge-2); font-size: 10px; }
+
+/* 3 — the four bands */
+.band { border-bottom: 1px solid #201d17; }
+.band:last-of-type { border-bottom: 0; }
+.band-h {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px 8px 0; position: relative;
+}
+.band-h::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+.band-h .pip { width: 8px; height: 8px; border-radius: 50%; margin-left: 9px; background: var(--accent); box-shadow: 0 0 8px -1px var(--accent); }
+.band-h .name {
+  font-family: var(--display); font-size: 11.5px; font-weight: 700;
+  letter-spacing: .17em; text-transform: uppercase; color: var(--accent);
+}
+.band-h .state { font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--forge-2); }
+.band-h .count { margin-left: auto; font-size: 10px; color: var(--forge-2); font-variant-numeric: tabular-nums; }
+.band-h .caret { color: var(--forge-2); font-size: 10px; width: 12px; text-align: center; }
+
+.band.spent .band-h::before { background: #3a352b; }
+.band.spent .band-h .pip { background: #3a352b; box-shadow: none; }
+.band.spent .band-h .name { color: var(--forge-2); }
+.band.spent .band-h .used { font-size: 10.5px; color: var(--forge-1); font-style: italic; }
+
+.band-a { --accent: var(--arcane); }
+.band-b { --accent: var(--eldritch-lit); }
+.band-r { --accent: var(--ember); }
+.band-m { --accent: var(--verdant); }
+
+.rows { padding: 0 0 8px; }
+.row {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 8px 12px 8px 15px; border-top: 1px solid #1b1813;
+}
+.row .txt { flex: 1 1 auto; min-width: 0; }
+.row .nm { font-size: 13px; font-weight: 600; color: var(--forge-0); line-height: 1.25; }
+.row .dice {
+  font-size: 11.5px; color: var(--forge-1); font-variant-numeric: tabular-nums;
+  margin-top: 3px; letter-spacing: .01em;
+}
+.row .dice b { color: var(--arcane-lit); font-weight: 700; }
+.row .why { font-size: 10.5px; color: var(--forge-2); margin-top: 3px; font-style: italic; line-height: 1.35; }
+.row .go {
+  flex: 0 0 auto; font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--void-0); background: var(--accent, var(--arcane));
+  border: 0; border-radius: 6px; padding: 6px 10px; margin-top: 2px;
+}
+.row .det { flex: 0 0 auto; color: var(--forge-2); font-size: 13px; margin-top: 4px; }
+.row .note { color: var(--eldritch-lit); font-size: 11px; margin-top: 5px; }
+.row.locked { opacity: .52; }
+.row.locked .go { background: transparent; color: var(--forge-2); border: 1px solid #322d23; }
+.row.locked .nm { color: var(--forge-1); }
+.row .cost {
+  display: inline-block; font-size: 9px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--eldritch-lit); border: 1px solid rgba(139,92,246,.4);
+  border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: 1px;
+}
+
+/* 4 — always active */
+.aura {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border-top: 1px solid #201d17; background: rgba(57,217,138,.045);
+}
+.aura .k { font-size: 9px; letter-spacing: .13em; text-transform: uppercase; color: var(--verdant); }
+.aura .v { font-size: 11.5px; color: var(--forge-1); }
+.aura .caret { margin-left: auto; color: var(--forge-2); font-size: 10px; }
+
+/* 5 — the rail */
+.rail {
+  display: flex; align-items: center; gap: 8px; padding: 9px 10px;
+  border-top: 1px solid #2b2720; background: rgba(28,26,21,.75);
+}
+.rail button {
+  font-family: var(--body); font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; padding: 8px 10px; border-radius: 7px;
+  border: 1px solid #35301f; background: #191710; color: var(--forge-1);
+}
+.rail button.dice { color: var(--arcane-lit); border-color: rgba(212,167,74,.42); }
+.rail .slots { display: flex; align-items: center; gap: 9px; margin-left: auto; margin-right: 2px; }
+.slotrow { display: flex; align-items: center; gap: 4px; }
+.slotrow em { font-style: normal; font-size: 8.5px; letter-spacing: .06em; color: var(--forge-2); }
+.slotrow s { width: 9px; height: 9px; border-radius: 50%; text-decoration: none; }
+.slotrow s.full { background: var(--eldritch-lit); box-shadow: 0 0 7px -1px var(--eldritch); }
+.slotrow s.gone { background: #2b2720; border: 1px solid #3a352b; }
+.rail button.end { color: #ff8f8f; border-color: rgba(214,69,69,.4); }
+
+/* ── what remains below the card ──────────────────────────────────────────── */
+.strip {
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 12px; border: 1px solid #241f18; border-radius: 10px;
+  background: var(--void-1); font-size: 12px; color: var(--forge-1);
+}
+.strip .caret { margin-left: auto; color: var(--forge-2); font-size: 11px; }
+.strip .tag {
+  font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 4px;
+}
+.strip .tag.warn { color: var(--ember-lit); border: 1px solid rgba(232,146,74,.42); }
+.strip .num { font-variant-numeric: tabular-nums; color: var(--forge-2); font-size: 11px; }
+.numbers {
+  display: flex; gap: 6px; padding: 9px 10px; border: 1px solid #241f18;
+  border-radius: 10px; background: var(--void-1);
+}
+.numbers div { flex: 1; text-align: center; }
+.numbers b { display: block; font-size: 14px; font-weight: 700; color: var(--forge-0); font-variant-numeric: tabular-nums; }
+.numbers i { font-style: normal; font-size: 8px; letter-spacing: .09em; color: var(--forge-2); text-transform: uppercase; }
+
+.fold {
+  text-align: center; font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: #4b463d; padding: 2px 0 0;
+}

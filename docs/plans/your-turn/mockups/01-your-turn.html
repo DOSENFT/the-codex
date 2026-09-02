@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The one Your Turn — round 3, his turn, nothing spent</title>
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<div class="sheet-title">1 · Round 3 · his turn · nothing spent</div>
+<p class="sheet-note">
+  Everything one turn needs, inside the window — no scrolling. The four bands are
+  the answer to <b>“very apparent and masterful organisation.”</b> Each has its own
+  colour and its own rule down the left edge, so the band is found by shape rather
+  than by reading. The live one is open; the rest collapse to a line that still
+  says how many are waiting in it. <b>“Everything else” is gone as a box</b> —
+  those options now sit in the band they belong to.
+</p>
+
+<div class="phone">
+
+  <div class="hdr">
+    <div class="tabs"><span class="on">Play</span><span>Prep</span></div>
+    <div class="who"><b>NIX</b><i>Paladin 7 · Oath of the Hearth</i></div>
+  </div>
+
+  <div class="scroll">
+
+    <!-- ═══ THE CARD ═══ -->
+    <div class="card">
+
+      <!-- 1 · the round -->
+      <div class="round">
+        <span class="n">Round 3</span>
+        <span class="dot"></span>
+        <span class="yours">Your Turn</span>
+        <button class="next ghost" style="margin-left:auto;padding:7px 9px" title="Reset everything you have spent this turn">↺</button>
+        <button class="next" style="margin-left:6px">Next turn ›</button>
+      </div>
+
+      <!-- 2 · his body -->
+      <div class="body-strip">
+        <div class="vit">
+          <div>
+            <div class="hp-lab">Hit points</div>
+            <div class="hp-num hp-crit">3<small> / 67</small></div>
+          </div>
+          <div style="flex:1">
+            <div class="bar"><i class="crit" style="width:4.5%"></i></div>
+          </div>
+          <div class="ac"><b>18</b><i>AC</i></div>
+        </div>
+        <div class="hpbtns">
+          <button class="dmg">− Damage</button>
+          <button class="heal">+ Heal</button>
+          <button class="temp">◇ Temp HP</button>
+        </div>
+        <div class="cond">
+          <span class="k">Conditions</span>
+          <span class="v">None</span>
+          <span class="caret">▾</span>
+        </div>
+      </div>
+
+      <!-- 3 · the four bands -->
+      <div class="band band-a">
+        <div class="band-h">
+          <span class="pip"></span>
+          <span class="name">Action</span>
+          <span class="state">open</span>
+          <span class="count">5</span>
+          <span class="caret">▾</span>
+        </div>
+        <div class="rows">
+          <div class="row">
+            <div class="txt">
+              <div class="nm">The Dawn Guardian</div>
+              <div class="dice"><b>+7</b> to hit · <b>1d10+4</b> Slashing · reach 5 ft</div>
+            </div>
+            <span class="det">›</span>
+            <button class="go">Roll</button>
+          </div>
+          <div class="row">
+            <div class="txt">
+              <div class="nm">Cure Wounds<span class="cost">1st slot</span></div>
+              <div class="dice"><b>2d8+3</b> healing · touch</div>
+            </div>
+            <span class="det">›</span>
+            <button class="go">Cast</button>
+          </div>
+          <div class="row">
+            <div class="txt">
+              <div class="nm">Command<span class="cost">1st slot</span></div>
+              <div class="dice">WIS save <b>DC 14</b> · 60 ft · 1 creature</div>
+            </div>
+            <span class="det">›</span>
+            <button class="go">Cast</button>
+          </div>
+          <div class="row">
+            <div class="txt">
+              <div class="nm">Warding Bond<span class="cost">2nd slot</span></div>
+              <div class="dice">ally takes half · you take the other half · 60 ft</div>
+              <div class="note">✎ “Cass first — she keeps going down”</div>
+            </div>
+            <span class="det">›</span>
+            <button class="go">Cast</button>
+          </div>
+          <div class="row">
+            <div class="txt">
+              <div class="nm" style="color:var(--forge-1);font-weight:500">The rules of the game</div>
+              <div class="why" style="font-style:normal">Dash · Disengage · Dodge · Help · Hide · Search · Shove · Grapple</div>
+            </div>
+            <span class="det">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="band band-b">
+        <div class="band-h">
+          <span class="pip"></span>
+          <span class="name">Bonus</span>
+          <span class="state">open</span>
+          <span class="count">4</span>
+          <span class="caret">▸</span>
+        </div>
+      </div>
+
+      <div class="band band-r">
+        <div class="band-h">
+          <span class="pip"></span>
+          <span class="name">Reaction</span>
+          <span class="state">held</span>
+          <span class="count">5</span>
+          <span class="caret">▸</span>
+        </div>
+      </div>
+
+      <div class="band band-m">
+        <div class="band-h">
+          <span class="pip"></span>
+          <span class="name">Movement</span>
+          <span class="state">30 ft left</span>
+          <span class="count"></span>
+          <span class="caret">▸</span>
+        </div>
+      </div>
+
+      <!-- 4 · always active -->
+      <div class="aura">
+        <span class="k">Always active</span>
+        <span class="v">Aura of Protection · Aura of Solace</span>
+        <span class="caret">▾</span>
+      </div>
+
+      <!-- 5 · the rail -->
+      <div class="rail">
+        <button class="dice">⚄ Roll</button>
+        <button>⌕ Look up</button>
+        <div class="slots">
+          <div class="slotrow"><em>1st</em><s class="full"></s><s class="full"></s><s class="full"></s><s class="full"></s></div>
+          <div class="slotrow"><em>2nd</em><s class="full"></s><s class="full"></s><s class="gone"></s></div>
+        </div>
+        <button class="end">End</button>
+      </div>
+
+    </div>
+    <!-- ═══ END CARD ═══ -->
+
+    <div class="fold">— the card ends here —</div>
+
+    <div class="numbers">
+      <div><b>14</b><i>Save DC</i></div>
+      <div><b>+1</b><i>Init</i></div>
+      <div><b>+3</b><i>Prof</i></div>
+      <div><b>+6</b><i>Sp Atk</i></div>
+    </div>
+
+    <div class="strip">
+      <span class="tag warn">Check</span>
+      <span>Your sheet and the 2024 rules disagree on 1 thing</span>
+      <span class="caret">›</span>
+    </div>
+
+    <div class="strip"><span>Damage log</span><span class="num">4 entries</span><span class="caret">›</span></div>
+    <div class="strip"><span>Combat advisor</span><span class="caret">›</span></div>
+    <div class="strip"><span>Rules flags</span><span class="num">6 · 6 unanswered</span><span class="caret">›</span></div>
+    <div class="strip"><span>Rest</span><span class="caret">›</span></div>
+    <div class="strip"><span>Who Nix is</span><span class="caret">›</span></div>
+
+  </div>
+
+  <div class="nav">
+    <i class="on"><b>⚔</b>Combat</i>
+    <i><b>✦</b>Grimoire</i>
+    <i><b>☾</b>Roleplay</i>
+  </div>
+
+</div>
+
+<p class="sheet-note" style="margin-top:6px">
+  Nothing is pinned to the bottom of the glass any more. The furniture is the
+  header and the tab bar only — <b>121px instead of 429</b> — and the window he
+  reads the game through goes <b>415px → 723px</b>.
+</p>
+
+</body>
+</html>

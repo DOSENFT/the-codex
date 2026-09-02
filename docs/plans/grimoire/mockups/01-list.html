@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!-- Gate 1 mockup — the Grimoire list, four grouping modes.
+     Plain HTML, no framework, no build. Throwaway by design.
+     Palette lifted from src/index.css so this reads as the app.
+     V-3 holds even in a mockup: a numeral is never dim. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grimoire — list</title>
+<style>
+  :root{
+    --void-0:#0a0a08; --void-1:#12110e; --void-2:#1c1a15;
+    --arcane:#d4a74a; --arcane-lit:#e8c87a;
+    --ember:#e8924a; --ember-lit:#f5b183;
+    --eldritch:#8b5cf6; --eldritch-lit:#b39cff;
+    --verdant:#39d98a; --bronze:#8b7355;
+    --forge-0:#f0e6d3; --forge-1:#bfb5a0; --forge-2:#8b8578;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+       display:flex;gap:28px;flex-wrap:wrap;justify-content:center;padding:28px 16px;color:var(--forge-0)}
+  .phone{width:390px;background:var(--void-0);border:1px solid #2a2720;border-radius:22px;
+         overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+  .caption{width:390px;color:var(--forge-2);font-size:12px;line-height:1.5;margin-bottom:8px}
+  .caption b{color:var(--ember-lit)}
+
+  header{padding:14px 16px 10px;border-bottom:1px solid rgba(139,115,85,.2)}
+  .title{display:flex;align-items:baseline;justify-content:space-between}
+  h1{font-size:19px;letter-spacing:.02em}
+  .count{font-family:ui-monospace,monospace;font-size:19px;color:var(--arcane-lit);font-weight:600}
+  .count small{font-size:10px;color:var(--forge-2);letter-spacing:.08em;text-transform:uppercase;margin-left:5px;font-weight:400}
+
+  .search{margin:10px 16px 0;display:flex;align-items:center;gap:8px;background:var(--void-2);
+          border:1px solid rgba(139,115,85,.25);border-radius:10px;padding:9px 11px}
+  .search span{color:var(--forge-2);font-size:13px}
+
+  /* ── the switcher: his answer was "multiple organization options, like a filter" ── */
+  .switch{display:flex;gap:6px;padding:12px 16px 4px;overflow-x:auto}
+  .switch button{flex:0 0 auto;background:transparent;border:1px solid rgba(139,115,85,.3);
+    color:var(--forge-1);font:inherit;font-size:12px;padding:7px 12px;border-radius:999px;cursor:pointer;min-height:34px}
+  .switch button[aria-pressed="true"]{background:rgba(212,167,74,.14);border-color:var(--arcane);color:var(--arcane-lit);font-weight:600}
+  .switch-label{padding:0 16px;font-size:10px;color:var(--forge-2);text-transform:uppercase;letter-spacing:.09em;margin-top:10px}
+
+  .filters{display:flex;gap:6px;padding:10px 16px 12px;border-bottom:1px solid rgba(139,115,85,.2);overflow-x:auto}
+  .filters span{flex:0 0 auto;font-size:11px;padding:5px 10px;border-radius:999px;
+    border:1px solid rgba(139,115,85,.25);color:var(--forge-2)}
+  .filters span.on{background:rgba(232,146,74,.12);border-color:var(--ember);color:var(--ember-lit)}
+
+  .list{padding:4px 0 20px;max-height:520px;overflow-y:auto}
+  .group{margin-top:14px}
+  .ghead{display:flex;align-items:center;gap:9px;padding:7px 16px;position:sticky;top:0;
+         background:linear-gradient(var(--void-0) 78%,transparent);}
+  .ghead .gname{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+  .ghead .rule{flex:1;height:1px;background:rgba(139,115,85,.25)}
+  .ghead .gn{font-family:ui-monospace,monospace;font-size:13px;color:var(--forge-0);font-weight:600}
+  .a  .gname,.a  .gn{color:var(--arcane-lit)}
+  .b  .gname,.b  .gn{color:var(--ember-lit)}
+  .r  .gname,.r  .gn{color:var(--eldritch-lit)}
+  .p  .gname,.p  .gn{color:var(--verdant)}
+  .lk .gname,.lk .gn{color:var(--forge-2)}
+
+  .row{display:flex;align-items:center;gap:10px;padding:10px 16px;min-height:52px;
+       border-bottom:1px solid rgba(139,115,85,.08);cursor:pointer}
+  .row:hover{background:rgba(255,255,255,.02)}
+  .row .nm{font-size:14px;color:var(--forge-0);line-height:1.25}
+  .row .meta{font-size:11px;color:var(--forge-2);margin-top:2px}
+  .row .grow{flex:1;min-width:0}
+  .dice{font-family:ui-monospace,monospace;font-size:13px;color:var(--forge-0);font-weight:600;white-space:nowrap}
+  .tag{font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;
+       border:1px solid;white-space:nowrap}
+  .t-prep{color:var(--verdant);border-color:rgba(57,217,138,.5);background:rgba(57,217,138,.1)}
+  .t-alw {color:var(--arcane-lit);border-color:rgba(212,167,74,.5);background:rgba(212,167,74,.1)}
+  .t-conc{color:var(--eldritch-lit);border-color:rgba(139,92,246,.5)}
+
+  /* A lock dims, it does not hide. Still 4.85:1, still tappable, still opens. */
+  .row.locked .nm{color:var(--forge-2)}
+  .row.locked .dice{color:var(--forge-2)}
+  .lockchip{font-size:10px;color:var(--forge-2);border:1px dashed rgba(139,115,85,.5);
+            border-radius:5px;padding:2px 6px;white-space:nowrap}
+  .lockbanner{margin:14px 16px 2px;padding:9px 11px;border:1px dashed rgba(139,115,85,.4);
+    border-radius:9px;background:rgba(139,115,85,.06);font-size:11px;color:var(--forge-1);line-height:1.5}
+  .lockbanner b{color:var(--forge-0)}
+  .slots{font-family:ui-monospace,monospace;font-size:12px;color:var(--arcane-lit);letter-spacing:.12em}
+</style>
+</head>
+<body>
+
+<div>
+<div class="caption"><b>01 · The Grimoire list.</b> Click the four grouping chips — they are live.
+94 items, 38 locked, same list every time; only the grouping moves. Search and the filter row are unchanged from today.</div>
+<div class="phone">
+  <header>
+    <div class="title">
+      <h1>Grimoire</h1>
+      <div class="count">94<small>you can do</small></div>
+    </div>
+  </header>
+
+  <div class="search"><span>🔍</span><span>Search 94 abilities…</span></div>
+
+  <div class="switch-label">Organise by</div>
+  <div class="switch" id="sw">
+    <button aria-pressed="true"  data-m="turn">Turn cost</button>
+    <button aria-pressed="false" data-m="source">Source</button>
+    <button aria-pressed="false" data-m="level">Level</button>
+    <button aria-pressed="false" data-m="ready">Ready now</button>
+  </div>
+
+  <div class="filters">
+    <span class="on">All</span><span>Spells</span><span>Features</span>
+    <span>Prepared</span><span>Hide locked</span>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+</div>
+
+<script>
+/* Representative rows only — real names and real numbers out of src/canon/,
+   truncated with honest "… N more" counts. A mockup that invents content is a
+   mockup you cannot judge. */
+const M = {
+  turn: [
+    {c:'a', n:'Action', k:26, rows:[
+      {nm:'Sacred Flame',  meta:'Cantrip · 60 ft · DEX save', d:'2d8 radiant'},
+      {nm:'Searing Smite', meta:'1st · Self · CON save ends', d:'1d6 fire', tag:['t-prep','Prepared']},
+      {nm:'Cure Wounds',   meta:'1st · Touch', d:'2d8+3', tag:['t-prep','Prepared']},
+      {nm:'Scorching Ray', meta:'2nd · 120 ft · granted by the Hearth', d:'3 × 2d6'},
+      {nm:'Abjure Foes',   meta:'Class feature · Channel Divinity', d:'', lockAt:9},
+      {more:'22 more'}]},
+    {c:'b', n:'Bonus action', k:11, rows:[
+      {nm:'Divine Smite',   meta:'1st · on a melee hit', d:'2d8 radiant', tag:['t-alw','Always prepared']},
+      {nm:'Lay on Hands',   meta:'Class feature · level 1', d:'35 pts'},
+      {nm:'Hearthfire Manifest', meta:'Oath feature · level 3 · summon/dismiss', d:''},
+      {nm:'Shield of Faith',meta:'1st · 60 ft', d:'+2 AC', tag:['t-conc','Conc']},
+      {more:'7 more'}]},
+    {c:'r', n:'Reaction', k:3, rows:[
+      {nm:'Flaming Cloak',  meta:'Oath feature · 1 Channel Divinity', d:'11 temp HP'},
+      {nm:'Interception',   meta:'Fighting Style · ally within 5 ft', d:'−1d10+3 dmg'},
+      {nm:'Sentinel',       meta:'Feat · when a foe leaves your reach', d:'speed → 0'}]},
+    {c:'p', n:'Always on', k:6, rows:[
+      {nm:'Aura of Protection', meta:'Class feature · level 6 · 10 ft', d:'+3 saves'},
+      {nm:'Aura of Solace',     meta:'Oath feature · level 7 · 10 ft', d:'fire / cold / psychic resist'},
+      {nm:'Weapon Mastery',     meta:'Class feature · level 1', d:'2 weapons'},
+      {more:'3 more'}]},
+    {lockGroup:'48 more, of which 38 are locked until levels 9 – 20'}
+  ],
+  source: [
+    {c:'a', n:'Paladin — spells', k:53, rows:[
+      {nm:'1st level', meta:'17 spells · 4 slots', d:'●●●●'},
+      {nm:'2nd level', meta:'12 spells · 3 slots', d:'●●○'},
+      {nm:'3rd level', meta:'10 spells', d:'', lockAt:9},
+      {more:'4th (6) and 5th (8), locked'}]},
+    {c:'b', n:'Paladin — class features', k:16, rows:[
+      {nm:'Lay on Hands',       meta:'level 1', d:'35 pts'},
+      {nm:'Paladin’s Smite',    meta:'level 2', d:''},
+      {nm:'Aura of Protection', meta:'level 6 · 10 ft', d:'+3 saves'},
+      {nm:'Abjure Foes',        meta:'level 9', d:'', lockAt:9},
+      {more:'12 more · 6 locked'}]},
+    {c:'r', n:'Oath of the Hearth', k:4, rows:[
+      {nm:'Hearthfire Manifest', meta:'level 3', d:'1d10 fire back'},
+      {nm:'Aura of Solace',      meta:'level 7', d:'3 resistances'},
+      {nm:'Smoldering Smite',    meta:'level 15', d:'', lockAt:15},
+      {nm:'Hearth Warden',       meta:'level 20', d:'', lockAt:20}]},
+    {c:'p', n:'Granted off the Paladin list', k:18, rows:[
+      {nm:'Faerie Fire',   meta:'Oath spell · 2nd', d:'advantage'},
+      {nm:'Scorching Ray', meta:'Oath spell · 2nd', d:'3 × 2d6'},
+      {nm:'Guidance',      meta:'Cantrip · Blessed Warrior', d:'+1d4'},
+      {more:'15 more · 9 cantrips'}]},
+    {c:'lk', n:'Feats & Fighting Styles', k:3, rows:[
+      {nm:'Interception', meta:'Fighting Style · Reaction', d:'−1d10+3 dmg'},
+      {nm:'Sentinel',     meta:'General feat · Reaction', d:'speed → 0'},
+      {nm:'Lucky',        meta:'Origin feat · 3 per long rest', d:'3/3'}]}
+  ],
+  level: [
+    {c:'a', n:'Cantrips', k:9, rows:[
+      {nm:'Sacred Flame', meta:'Evocation · DEX save', d:'2d8 radiant'},
+      {nm:'Guidance',     meta:'Divination · Concentration', d:'+1d4', tag:['t-conc','Conc']},
+      {more:'7 more'}]},
+    {c:'b', n:'1st level', k:17, slots:'●●●● 4/4', rows:[
+      {nm:'Searing Smite', meta:'Evocation · Bonus Action', d:'1d6 fire', tag:['t-prep','Prepared']},
+      {nm:'Bless',         meta:'Enchantment · Concentration', d:'+1d4', tag:['t-prep','Prepared']},
+      {more:'15 more'}]},
+    {c:'r', n:'2nd level', k:12, slots:'●●○ 2/3', rows:[
+      {nm:'Warding Bond',  meta:'Abjuration · Touch · 100 gp rings', d:'−½ dmg', tag:['t-prep','Prepared']},
+      {nm:'Aid',           meta:'Abjuration · 30 ft', d:'+5 max HP'},
+      {more:'10 more'}]},
+    {lockGroup:'3rd (10) · 4th (6) · 5th (8) — locked, and every one of them opens'},
+    {c:'lk', n:'Features & feats', k:23, rows:[
+      {nm:'By level, 1 → 20', meta:'16 class · 4 oath · 3 feats', d:''}]}
+  ],
+  ready: [
+    {c:'p', n:'Prepared tonight', k:7, rows:[
+      {nm:'Searing Smite', meta:'1st · Bonus Action · CON save', d:'1d6 fire'},
+      {nm:'Bless',         meta:'1st · Concentration', d:'+1d4'},
+      {nm:'Cure Wounds',   meta:'1st · Touch', d:'2d8+3'},
+      {nm:'Warding Bond',  meta:'2nd · needs the rings', d:'−½ dmg'},
+      {more:'3 more'}]},
+    {c:'a', n:'Always prepared — free', k:5, rows:[
+      {nm:'Divine Smite',  meta:'does not count against your 7', d:'2d8 radiant', tag:['t-alw','Always']},
+      {nm:'Faerie Fire',   meta:'Oath spell', d:'advantage'},
+      {more:'3 more'}]},
+    {c:'b', n:'Charged', k:4, rows:[
+      {nm:'Channel Divinity', meta:'refreshes on a short rest', d:'2/2'},
+      {nm:'Lay on Hands',     meta:'refreshes on a long rest', d:'35/35'},
+      {nm:'Lucky',            meta:'refreshes on a long rest', d:'3/3'}]},
+    {c:'r', n:'Always on', k:6, rows:[
+      {nm:'Aura of Protection', meta:'10 ft', d:'+3 saves'},
+      {nm:'Aura of Solace',     meta:'10 ft', d:'3 resistances'},
+      {more:'4 more'}]},
+    {c:'lk', n:'Everything else', k:72, rows:[
+      {nm:'Not prepared',   meta:'34 you could prepare on a long rest', d:''},
+      {nm:'Locked',         meta:'38, viewable in full', d:''}]}
+  ]
+};
+
+function rowHTML(r){
+  if (r.more) return `<div class="row" style="min-height:40px"><div class="grow"><div class="meta">${r.more} →</div></div></div>`;
+  const locked = !!r.lockAt;
+  const tag = r.tag ? `<span class="tag ${r.tag[0]}">${r.tag[1]}</span>` : '';
+  const right = locked
+    ? `<span class="lockchip">🔒 level ${r.lockAt}</span>`
+    : `${tag}${r.d ? `<span class="dice">${r.d}</span>` : ''}`;
+  return `<div class="row${locked?' locked':''}">
+      <div class="grow"><div class="nm">${r.nm}</div><div class="meta">${r.meta}</div></div>
+      ${right}</div>`;
+}
+
+function render(mode){
+  document.getElementById('list').innerHTML = M[mode].map(g=>{
+    if (g.lockGroup) return `<div class="lockbanner">🔒 <b>${g.lockGroup}</b><br>
+      Locked means it cannot be prepared. It does not mean you cannot read it.</div>`;
+    return `<div class="group ${g.c}">
+      <div class="ghead"><span class="gname">${g.n}</span><span class="rule"></span>
+        ${g.slots?`<span class="slots">${g.slots}</span>`:''}
+        <span class="gn">${g.k}</span></div>
+      ${g.rows.map(rowHTML).join('')}</div>`;
+  }).join('');
+}
+document.getElementById('sw').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+  render(b.dataset.m);
+});
+render('turn');
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+
+CAPABILITY PINS — BEFORE the change
+Nix, HP 3/67, AC 18 · 390×844 · 41 pins
+
+── KEEP — must be green in BOTH runs ────────
+  ok    round-counter         the round counter                               Round 3
+  ok    next-turn             Next turn / End turn                            Next Turn
+  ok    chip-action           ACTION chip                                     Action: available
+  ok    chip-bonus            BONUS chip                                      Bonus: available
+  ok    chip-reaction         REACTION chip                                   React: available
+  ok    chip-move             MOVE chip                                       Move: available
+  ok    reset-economy         reset action economy                            Reset action economy
+  ok    auras-always-active   always-active auras                             The Dawn Guardian — details
+  ok    row-opens-details     a row opens full details                        9 rows open to details
+  ok    dice-on-row           dice notation on the option row                 2× e.g. 2d8 Radiant · +1d8 Fiend/Undead
+  ok    quick-lookup          quick look-up                                   Quick lookup
+  ok    action-notes          notes he can write on an action                 Edit strategic tip
+  ok    hp-value              his hit points, painted                         Hit points: 3 of 67
+  ok    hp-colour-hurt        the HP colour at 3/67                           gradient oklch(0.637 0.237 25.331) → oklch(0.7
+  ok    armour-class          armour class                                    AC
+  ok    damage-control        damage                                          Apply damage
+  ok    heal-control          heal                                            Apply healing
+  ok    temphp-control        temp hit points                                 Set temporary hit points
+  ok    temphp-source         the temp-HP SOURCE question                     What granted these temporary hit points?
+  ok    conditions            the conditions dropdown                         15 condition buttons behind the disclosure
+  ok    spell-slot-pips       spell-slot pips, tappable                       18 slot buttons
+  ok    dice-roller           the dice roller                                 Open dice roller
+  ok    end-combat            end combat                                      End combat
+  ok    ready-count           the count of what is ready                      5 ready
+  ok    retaliation-offer     the retaliation capture                         Record 1d10 Fire retaliation
+  ok    retaliation-tally     the retaliation tally                           none yet
+  ok    retaliation-undo      undo a recorded retaliation                     Undo Hearthfire Manifest — 2 retaliation
+  ok    no-paladin-crash      NO paladinResources: nothing paints, nothing throwsabsent and no page error — the other half
+  ok    hp-colour-full        the HP colour at 67/67                          gradient rgb(57, 217, 138) → rgb(57, 217, 138)
+  ok    death-saves           death saves at 0 HP                             Death Saves
+  ok    lay-on-hands          Lay on Hands spend controls                     LAY ON HANDS
+  ok    channel-divinity      Channel Divinity uses                           CHANNEL DIVINITY
+  ok    start-combat          start combat, out of combat                     Start Combat
+  ok    no-round-zero         out of combat never says "Round 0"              no "Round 0" anywhere
+
+── RETIRE — green before, expected red after ──
+  ok    minimise              minimise the deck                               Minimise turn deck
+
+── ARRIVE — RED BEFORE is the point — green only after 
+  ok    to-hit-on-row         the to-hit on the option row                    —
+  ok    bloodied              the Bloodied marker                             —
+  ok    one-your-turn         exactly ONE box headed "Your turn"              —
+  ok    hp-painted-once       his hit points painted in exactly ONE place     —
+  ok    four-bands            the four named bands                            —
+  ok    one-screen            one turn fits one screen (≤ 1.05 screens of scroll)—
+
+HP COLOUR: 3/67 → gradient oklch(0.637 0.237 25.331) → oklch(0.704 0.191 22.216)
+           67/67 → gradient rgb(57, 217, 138) → rgb(57, 217, 138)
+           DIFFERENT — the colour really changes
+
+KEEP green:   34/34
+ARRIVE red:   6/6   ← this file has been shown able to fail
+PAGE ERRORS: none

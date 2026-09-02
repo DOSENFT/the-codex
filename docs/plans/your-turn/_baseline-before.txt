@@ -1,0 +1,230 @@
+Nix — HP 3/67, AC 18 · 390×844 · his real export
+
+
+████ IN COMBAT (round 3, nothing spent) ████
+
+── GEOMETRY — the letterbox he reads through ───────────────────
+{
+  screen: 844,
+  readingWindow: 415,
+  contentHeight: 3100,
+  furniturePx: 429,
+  furniturePctOfScreen: 50.8,
+  screensOfScrolling: 7.47
+}
+
+── FURNITURE — pinned to the glass, always ─────────────────────
+[
+  { label: 'PlayPrep3/67NixPaladin', top: 0, h: 56, pctOfScreen: 6.6 },
+  { label: 'Turn deck', top: 472, h: 308, pctOfScreen: 36.5 },
+  { label: 'Main navigation', top: 779, h: 65, pctOfScreen: 7.7 }
+]
+
+── THE STACK, top to bottom inside the scroller ────────────────
+   16  h2988  section Combat Helper
+  381  h 392  section Your turn options
+  394  h  16  h3      Your turn
+  416  h 308  section Turn deck
+  419  h  56  button  The Dawn Guardian — details
+  428  h  56  button  End combat
+  480  h  56  button  Hearthfire Manifest — details
+  494  h  48  button  Action: available
+  494  h  48  button  Bonus: available
+  494  h  48  button  Reaction: available
+  494  h  48  button  Move: available
+  494  h  48  button  Minimise turn deck
+  494  h  48  button  Reset action economy
+  542  h  56  button  Divine Smite — details
+  552  h  48  button  Expend 1st level spell slot
+  604  h  56  button  Hearthfire Manifest — details
+  608  h  48  button  Expend 2nd level spell slot
+  608  h  48  button  Restore 2nd level spell slot
+  608  h  48  button  Expend 3rd level spell slot
+  664  h  48  button  Open dice roller
+  666  h  56  button  Shield of Faith — details
+  789  h 642  section Your reactions
+  802  h  16  h3      Your reactions
+  835  h 114  button  Hearthfire Manifest — details
+  968  h  40  button  Record 1d10 Fire retaliation
+ 1032  h  95  button  Sentinel · takes the Disengage action — details
+ 1153  h 131  button  Sentinel · attacks a target other than you — details
+ 1309  h  98  button  Opportunity Attack — The Dawn Guardian — details
+ 1447  h  43  section Everything else you could do
+ 1460  h  16  h3      Everything else
+ 1520  h  44  button  Quick lookup
+ 1589  h  44  button  Action: available
+ 1589  h  44  button  Bonus: available
+ 1589  h  44  button  React: available
+ 1589  h  44  button  Move: available
+ 1589  h  44  button  Reset action economy
+ 2206  h  16  button  1st slot 1: expend
+ 2206  h  16  button  1st slot 2: expend
+ 2206  h  16  button  1st slot 3: expend
+ 2206  h  16  button  1st slot 4: expend
+ 2206  h  16  button  2nd slot 1: expend
+ 2206  h  16  button  2nd slot 2: expend
+ 2206  h  16  button  2nd slot 3: restore
+ 2234  h  16  button  3rd slot 1: expend
+ 2234  h  16  button  3rd slot 2: expend
+ 2298  h  28  h3      Hit Points
+ 2355  h  41  span    3 of 67 hit points
+ 2453  h  48  button  Apply damage
+ 2453  h  48  button  Apply healing
+ 2453  h  48  button  Set temporary hit points
+ 2803  h  43  section Rules flags on your sheet
+ 2816  h  16  h3      Rules flags
+ 2955  h  20  h3      Character Persona
+
+── HIS HP, everywhere it is painted ────────────────────────────
+[
+  { text: '3 / 67', module: 'Hit points: 3 of 67', at: 'PINNED@17' },
+  { text: 'HP: 3 / 67', module: 'Combat Helper', at: 'scroll@1652' },
+  {
+    text: '3/67',
+    module: 'Combat Helper',
+    at: 'scroll@2342',
+    split: true
+  },
+  {
+    text: '3/67',
+    module: 'Combat Helper',
+    at: 'scroll@2355',
+    split: true
+  }
+]
+
+── TEMP HP BADGES ──────────────────────────────────────────────
+[]
+
+── ECONOMY CHIP SETS, by module ────────────────────────────────
+{
+  'Action: available': [ 'Action: available', 'Action: available' ],
+  'Bonus: available': [ 'Bonus: available', 'Bonus: available' ],
+  'React: available': [ 'React: available' ],
+  'Move: available': [ 'Move: available', 'Move: available' ],
+  'Reaction: available': [ 'Reaction: available' ]
+}
+
+── SPELL-SLOT PIPS, by module ──────────────────────────────────
+{
+  '1st slot 1: expend': { pips: 1, levels: '1' },
+  '1st slot 2: expend': { pips: 1, levels: '1' },
+  '1st slot 3: expend': { pips: 1, levels: '1' },
+  '1st slot 4: expend': { pips: 1, levels: '1' },
+  '2nd slot 1: expend': { pips: 1, levels: '2' },
+  '2nd slot 2: expend': { pips: 1, levels: '2' },
+  '2nd slot 3: restore': { pips: 1, levels: '2' },
+  '3rd slot 1: expend': { pips: 1, levels: '3' },
+  '3rd slot 2: expend': { pips: 1, levels: '3' }
+}
+
+── "1st/2nd/3rd" LEVEL LABELS, by module ───────────────────────
+[
+  { level: '1st', module: 'Combat Helper', at: 'scroll@1878' },
+  { level: '1st', module: 'Combat Helper', at: 'scroll@1939' },
+  { level: '1st', module: 'Combat Helper', at: 'scroll@1999' },
+  { level: '1st', module: 'Combat Helper', at: 'scroll@2138' },
+  { level: '1st', module: 'Turn deck', at: 'scroll@568' },
+  { level: '2nd', module: 'Turn deck', at: 'scroll@624' },
+  { level: '3rd', module: 'Turn deck', at: 'scroll@624' }
+]
+
+── "YOUR TURN" HEADINGS ────────────────────────────────────────
+[
+  {
+    text: 'Your turn',
+    tag: 'h3',
+    module: 'Your turn options',
+    at: 'scroll@394'
+  },
+  {
+    text: 'Your Turn',
+    tag: 'span',
+    module: 'Combat Helper',
+    at: 'scroll@1532'
+  }
+]
+
+
+████ OUT OF COMBAT ████
+
+── GEOMETRY ────────────────────────────────────────────────────
+{
+  screen: 844,
+  readingWindow: 415,
+  contentHeight: 2562,
+  furniturePx: 429,
+  furniturePctOfScreen: 50.8,
+  screensOfScrolling: 6.17
+}
+
+── THE STACK ───────────────────────────────────────────────────
+   16  h2450  section Combat Helper
+  381  h 392  section Your turn options
+  394  h  16  h3      Your turn
+  416  h 308  section Turn deck
+  419  h  56  button  The Dawn Guardian — details
+  480  h  56  button  Hearthfire Manifest — details
+  494  h  48  button  Action: available
+  494  h  48  button  Bonus: available
+  494  h  48  button  Reaction: available
+  494  h  48  button  Move: available
+  494  h  48  button  Minimise turn deck
+  494  h  48  button  Reset action economy
+  542  h  56  button  Divine Smite — details
+  552  h  48  button  Expend 1st level spell slot
+  604  h  56  button  Hearthfire Manifest — details
+  608  h  48  button  Expend 2nd level spell slot
+  608  h  48  button  Restore 2nd level spell slot
+  608  h  48  button  Expend 3rd level spell slot
+  664  h  48  button  Open dice roller
+  666  h  56  button  Shield of Faith — details
+  789  h 642  section Your reactions
+  802  h  16  h3      Your reactions
+  835  h 114  button  Hearthfire Manifest — details
+  968  h  40  button  Record 1d10 Fire retaliation
+ 1032  h  95  button  Sentinel · takes the Disengage action — details
+ 1153  h 131  button  Sentinel · attacks a target other than you — details
+ 1309  h  98  button  Opportunity Attack — The Dawn Guardian — details
+ 1447  h  43  section Everything else you could do
+ 1460  h  16  h3      Everything else
+ 1526  h  28  h3      Hit Points
+ 1583  h  41  span    3 of 67 hit points
+ 1681  h  48  button  Apply damage
+ 1681  h  48  button  Apply healing
+ 1681  h  48  button  Set temporary hit points
+ 1912  h  20  h3      Concentration
+ 2265  h  43  section Rules flags on your sheet
+ 2278  h  16  h3      Rules flags
+ 2417  h  20  h3      Character Persona
+
+── "YOUR TURN" HEADINGS ────────────────────────────────────────
+[
+  {
+    text: 'Your turn',
+    tag: 'h3',
+    module: 'Your turn options',
+    at: 'scroll@394'
+  }
+]
+
+── ONLY WHEN IN COMBAT ─────────────────────────────────────────
+[
+  'End combat',
+  'Quick lookup',
+  'React: available',
+  '1st slot 1: expend',
+  '1st slot 2: expend',
+  '1st slot 3: expend',
+  '1st slot 4: expend',
+  '2nd slot 1: expend',
+  '2nd slot 2: expend',
+  '2nd slot 3: restore',
+  '3rd slot 1: expend',
+  '3rd slot 2: expend'
+]
+
+── ONLY WHEN NOT IN COMBAT ─────────────────────────────────────
+[ 'Concentration' ]
+
+shots in docs/plans/your-turn/_shots/

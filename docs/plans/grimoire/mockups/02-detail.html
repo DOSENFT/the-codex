@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<!-- Gate 1 mockup — one ability open: the three bands.
+     Three shapes side by side so the bands can be judged against all of them:
+     an available spell, a locked spell, and a Fighting Style.
+     Every word of rules text and tactics below is VERBATIM from src/canon/.
+     Nothing here is written by me except the band labels. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grimoire — one ability open</title>
+<style>
+  :root{
+    --void-0:#0a0a08; --void-1:#12110e; --void-2:#1c1a15;
+    --arcane:#d4a74a; --arcane-lit:#e8c87a;
+    --ember:#e8924a; --ember-lit:#f5b183;
+    --eldritch:#8b5cf6; --eldritch-lit:#b39cff;
+    --verdant:#39d98a; --bronze:#8b7355;
+    --forge-0:#f0e6d3; --forge-1:#bfb5a0; --forge-2:#8b8578;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+       display:flex;gap:28px;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+       padding:28px 16px;color:var(--forge-0)}
+  .col{width:390px}
+  .caption{color:var(--forge-2);font-size:12px;line-height:1.5;margin-bottom:8px}
+  .caption b{color:var(--ember-lit)}
+  .phone{background:var(--void-0);border:1px solid #2a2720;border-radius:22px;
+         overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+  .scroll{max-height:760px;overflow-y:auto}
+
+  /* ── sheet header ─────────────────────────────────────────── */
+  .back{padding:11px 16px 0;font-size:12px;color:var(--forge-2)}
+  .head{padding:6px 16px 13px;border-bottom:1px solid rgba(139,115,85,.2)}
+  .head h1{font-size:22px;line-height:1.15;letter-spacing:.01em}
+  .head .sub{font-size:11px;color:var(--forge-2);margin-top:4px;letter-spacing:.03em}
+  .head.lockedhead h1{color:var(--forge-1)}
+  .tagrow{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .tag{font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid}
+  .t-prep{color:var(--verdant);border-color:rgba(57,217,138,.5);background:rgba(57,217,138,.1)}
+  .t-alw {color:var(--arcane-lit);border-color:rgba(212,167,74,.5);background:rgba(212,167,74,.1)}
+  .t-lock{color:var(--forge-2);border-color:rgba(139,115,85,.5);border-style:dashed}
+  .t-conc{color:var(--eldritch-lit);border-color:rgba(139,92,246,.5)}
+  .t-noc {color:var(--verdant);border-color:rgba(57,217,138,.45)}
+
+  /* ── band 1 · AT A GLANCE — the mid-combat band. No scroll allowed. ── */
+  .band{border-bottom:1px solid rgba(139,115,85,.16)}
+  .blabel{display:flex;align-items:center;gap:9px;padding:13px 16px 0}
+  .blabel .n{font-family:ui-monospace,monospace;font-size:10px;color:var(--void-0);
+             background:var(--forge-2);border-radius:3px;padding:1px 5px;font-weight:700}
+  .blabel .t{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--forge-1);font-weight:700}
+  .blabel .rule{flex:1;height:1px;background:rgba(139,115,85,.22)}
+
+  .glance{padding:11px 16px 15px}
+  .costline{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .cost{font-size:19px;font-weight:700;letter-spacing:.01em}
+  .cost.action{color:var(--arcane-lit)} .cost.bonus{color:var(--ember-lit)} .cost.react{color:var(--eldritch-lit)}
+  .costwhen{font-size:12px;color:var(--forge-1);line-height:1.4}
+  .bignum{display:flex;align-items:baseline;gap:10px;margin-top:11px;flex-wrap:wrap}
+  .bignum .d{font-family:ui-monospace,monospace;font-size:34px;font-weight:700;line-height:1;letter-spacing:-.01em}
+  .d.fire{color:var(--ember-lit)} .d.heal{color:var(--verdant)} .d.ward{color:var(--eldritch-lit)}
+  .bignum .dl{font-size:12px;color:var(--forge-1);line-height:1.3}
+  /* V-3: a numeral is never dim. Every value below is forge-0; only its word is forge-2. */
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;margin-top:14px}
+  .fact{min-width:0}
+  .fact .k{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--forge-2)}
+  .fact .v{font-size:13px;color:var(--forge-0);font-weight:600;margin-top:2px;line-height:1.3}
+  .fact .v.mono{font-family:ui-monospace,monospace}
+  .fact.wide{grid-column:1 / -1}
+
+  /* ── band 2 · FULL TEXT ───────────────────────────────────── */
+  .full{padding:11px 16px 16px;font-size:13px;line-height:1.6;color:var(--forge-1)}
+  .full p + p{margin-top:9px}
+  .full .up{margin-top:11px;padding:9px 11px;border-left:2px solid var(--arcane);
+            background:rgba(212,167,74,.06);border-radius:0 7px 7px 0}
+  .full .up .k{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--arcane-lit);font-weight:700}
+  .full .up p{margin-top:4px;color:var(--forge-0);font-size:12px}
+  .src{margin-top:11px;font-size:10px;color:var(--forge-2);letter-spacing:.04em}
+
+  /* ── band 3 · HOW TO USE IT ───────────────────────────────── */
+  .tac{padding:11px 16px 20px}
+  .tacnote{font-size:10px;color:var(--forge-2);margin-bottom:10px;line-height:1.45}
+  .tacitem + .tacitem{margin-top:12px}
+  .tacitem .lede{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ember-lit);
+                 font-weight:700;line-height:1.35}
+  .tacitem p{font-size:13px;line-height:1.6;color:var(--forge-1);margin-top:4px}
+  .tacitem.plain p{margin-top:0}
+
+  /* ── the lock ─────────────────────────────────────────────── */
+  .lockstrip{display:flex;align-items:center;gap:10px;padding:11px 16px;
+    background:rgba(139,115,85,.09);border-bottom:1px solid rgba(139,115,85,.25)}
+  .lockstrip .ic{font-size:15px}
+  .lockstrip .tx{font-size:12px;line-height:1.45;color:var(--forge-1)}
+  .lockstrip .tx b{color:var(--forge-0)}
+  .footer{padding:14px 16px 22px;display:flex;gap:9px}
+  .btn{flex:1;text-align:center;padding:11px;border-radius:10px;font-size:13px;font-weight:600;
+       border:1px solid rgba(212,167,74,.55);color:var(--arcane-lit);background:rgba(212,167,74,.1)}
+  .btn.ghost{border-color:rgba(139,115,85,.3);color:var(--forge-2);background:transparent}
+  .btn.dead{border-style:dashed;border-color:rgba(139,115,85,.35);color:var(--forge-2);background:transparent}
+</style>
+</head>
+<body>
+
+<!-- ════════════ 1 · AVAILABLE SPELL ════════════ -->
+<div class="col">
+<div class="caption"><b>02a · An available spell.</b> Searing Smite. Band 1 is the whole of what he needs
+mid-fight and it fits above the fold with room to spare. Every value is full-contrast; only the label beside it is dim.</div>
+<div class="phone"><div class="scroll">
+
+  <div class="back">‹ Grimoire</div>
+  <div class="head">
+    <h1>Searing Smite</h1>
+    <div class="sub">Level 1 Evocation · Paladin · PHB 2024</div>
+    <div class="tagrow">
+      <span class="tag t-prep">Prepared</span>
+      <span class="tag t-noc">No concentration</span>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="blabel"><span class="n">1</span><span class="t">At a glance</span><span class="rule"></span></div>
+    <div class="glance">
+      <div class="costline">
+        <span class="cost bonus">Bonus Action</span>
+        <span class="costwhen">immediately after you hit with a melee weapon</span>
+      </div>
+      <div class="bignum">
+        <span class="d fire">1d6</span>
+        <span class="dl">Fire on the hit<br>then <b style="color:var(--forge-0)">1d6</b> again each of its turns</span>
+      </div>
+      <div class="facts">
+        <div class="fact"><div class="k">Save</div><div class="v">CON — ends it</div></div>
+        <div class="fact"><div class="k">Duration</div><div class="v mono">1 minute</div></div>
+        <div class="fact"><div class="k">Slot</div><div class="v mono">1st — you have 4</div></div>
+        <div class="fact"><div class="k">Range</div><div class="v">Self</div></div>
+        <div class="fact wide"><div class="k">Components</div><div class="v">Verbal only — no hands, no material</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="blabel"><span class="n">2</span><span class="t">Full text</span><span class="rule"></span></div>
+    <div class="full">
+      <p>Your hit sets the target alight. It takes 1d6 Fire damage immediately, and 1d6 Fire again at the
+      start of each of its turns until it succeeds on a Constitution save to put the fire out. Not Concentration.</p>
+      <div class="up">
+        <div class="k">Cast with a higher slot</div>
+        <p>Both the initial and ongoing damage increase by 1d6 per slot level above 1.</p>
+      </div>
+      <div class="src">PHB 2024 · Casting Time: Bonus Action, taken immediately after hitting a creature with a
+      Melee weapon or an Unarmed Strike</div>
+    </div>
+  </div>
+
+  <div class="band" style="border-bottom:none">
+    <div class="blabel"><span class="n">3</span><span class="t">How to use it</span><span class="rule"></span></div>
+    <div class="tac">
+      <div class="tacnote">Written for a Hearth Paladin. Verbatim from canon.</div>
+
+      <div class="tacitem plain"><p><b style="color:var(--arcane-lit)">The Hearth Paladin's signature level 1 spell</b>,
+        and the numbers back the flavor.</p></div>
+
+      <div class="tacitem"><div class="lede">Honest math</div>
+        <p>Guaranteed damage is only 2d6 (the hit plus one tick) versus Divine Smite's 2d8, and Fire is the most
+        commonly resisted damage type in the game. On raw expected damage against an average enemy, Divine Smite wins.</p></div>
+
+      <div class="tacitem"><div class="lede">Where Searing Smite actually wins</div>
+        <p>(a) it is NOT Concentration, so it runs alongside Bless, Compelled Duel, or Shield of Faith — Divine Smite
+        competes for the same slot but Searing Smite competes for nothing else; (b) it scales better, +2d6 per slot
+        level versus Divine Smite's +1d8; (c) against a low-Constitution target — most casters, most Fey — the ongoing
+        tick is real damage every round; (d) <b style="color:var(--forge-0)">it breaks Concentration repeatedly</b>.
+        Every tick at the start of the enemy caster's turn forces another Concentration save. One Searing Smite on an
+        enemy wizard can strip three separate concentration spells over a fight. That is the play.</p></div>
+
+      <div class="tacitem"><div class="lede">The stealth-killer</div>
+        <p>Ongoing fire damage means an enemy cannot hide from you. It is taking damage every round and that damage
+        reveals position in most rulings.</p></div>
+
+      <div class="tacitem"><div class="lede">At level 15 this becomes your best smite</div>
+        <p>Smoldering Smite adds 1d8 Fire that ignores resistance and immunity. Read your subclass text carefully — as
+        written it only triggers on Divine Smite, and it uses the wrong action type. Ask your DM to rule it as "any
+        spell with Smite in its name" and Searing Smite becomes the centerpiece of the build. See the errata file.</p></div>
+
+      <div class="tacitem"><div class="lede">Target priority</div>
+        <p>Enemy spellcasters, Trolls (fire stops their regeneration in most rulings), and anything you expect to
+        run away.</p></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="btn">Prepared ✓</div>
+    <div class="btn ghost">Cast — 1st slot</div>
+  </div>
+
+</div></div>
+</div>
+
+
+<!-- ════════════ 2 · LOCKED SPELL ════════════ -->
+<div class="col">
+<div class="caption"><b>02b · A locked spell.</b> Aura of Vitality, level 3, his at level 9.
+The lock is a strip he can read, not a wall. Same three bands, same order, full detail — the only difference
+is that the prepare button is refused and says why.</div>
+<div class="phone"><div class="scroll">
+
+  <div class="back">‹ Grimoire</div>
+  <div class="head lockedhead">
+    <h1>Aura of Vitality</h1>
+    <div class="sub">Level 3 Abjuration · Paladin · PHB 2024</div>
+    <div class="tagrow">
+      <span class="tag t-lock">🔒 Level 9</span>
+      <span class="tag t-conc">Concentration</span>
+    </div>
+  </div>
+
+  <div class="lockstrip">
+    <span class="ic">🔒</span>
+    <span class="tx"><b>You get this at level 9.</b> You're level 7 — two levels off, and you don't have
+    3rd-level slots yet. You can read all of it now; you just can't prepare it.</span>
+  </div>
+
+  <div class="band">
+    <div class="blabel"><span class="n">1</span><span class="t">At a glance</span><span class="rule"></span></div>
+    <div class="glance">
+      <div class="costline">
+        <span class="cost action">Action</span>
+        <span class="costwhen">to create it — then the healing costs nothing</span>
+      </div>
+      <div class="bignum">
+        <span class="d heal">2d6</span>
+        <span class="dl">healed to one creature in the aura<br>when you cast it, and every turn after</span>
+      </div>
+      <div class="facts">
+        <div class="fact"><div class="k">Range</div><div class="v mono">30 ft — moves with you</div></div>
+        <div class="fact"><div class="k">Duration</div><div class="v">Conc., 1 minute</div></div>
+        <div class="fact"><div class="k">Slot</div><div class="v mono">3rd — you have 0</div></div>
+        <div class="fact"><div class="k">Save</div><div class="v">None</div></div>
+        <div class="fact wide"><div class="k">Components</div><div class="v">Verbal only — no hands, no material</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="blabel"><span class="n">2</span><span class="t">Full text</span><span class="rule"></span></div>
+    <div class="full">
+      <p>A 30-foot Emanation of healing energy radiates from you for the duration. When you create the aura, and
+      again at the start of each of your turns while it lasts, you can restore 2d6 Hit Points to one creature in it.</p>
+      <div class="src">PHB 2024 · Casting Time: Action · Range: Self (30-foot Emanation)</div>
+    </div>
+  </div>
+
+  <div class="band" style="border-bottom:none">
+    <div class="blabel"><span class="n">3</span><span class="t">How to use it</span><span class="rule"></span></div>
+    <div class="tac">
+      <div class="tacnote">Written for a Hearth Paladin. Verbatim from canon.</div>
+
+      <div class="tacitem"><div class="lede">Correction for your app</div>
+        <p>In 2024 this healing costs NO ACTION. The 2014 version required a Bonus Action each turn; the 2024 version
+        does not — it simply happens when you create the aura and at the start of each of your turns. D&amp;D Beyond's
+        own tooltip is known to still show the stale 2014 wording, so most character tools have this wrong. Getting it
+        right changes the spell from a trap into a strong combat pick.</p></div>
+
+      <div class="tacitem"><div class="lede">Why that matters so much</div>
+        <p>With no action cost, Aura of Vitality is 2d6 of free healing every round while you continue to attack twice
+        AND cast Divine Smite with your Bonus Action. You are healing 7 a round for free. Over ten rounds that is up to
+        20d6, averaging 70 Hit Points, from one level 3 slot — the same total as the level 6 Heal spell, delivered
+        without ever giving up a turn.</p></div>
+
+      <div class="tacitem"><div class="lede">The only real cost is Concentration</div>
+        <p>It competes with Bless, Crusader's Mantle, Beacon of Hope and Faerie Fire. Rule of thumb: Aura of Vitality
+        when the party is taking steady chip damage and the fight will run long; Bless when the fight will be short and
+        decided by hit rates.</p></div>
+
+      <div class="tacitem"><div class="lede">Positioning is the skill</div>
+        <p>It is a 30-foot Emanation anchored to YOU, so it moves as you move and no action is needed to reposition it.
+        You can heal a downed ally across the room without walking there — compare Lay on Hands, which is Touch. In
+        practice this means you should stand where the largest number of wounded allies fall inside 30 feet, which for a
+        Hearth Paladin is the same place your Aura of Protection wants you anyway.</p></div>
+
+      <div class="tacitem"><div class="lede">Out of combat it is still the best healing in your book</div>
+        <p>Cast it the moment a fight ends and top off the whole party over ten quiet rounds, saving everyone's Hit
+        Point Dice for the next Short Rest.</p></div>
+
+      <div class="tacitem"><div class="lede">One creature per turn</div>
+        <p>You cannot split the 2d6. Spend it on whoever is closest to dropping.</p></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="btn dead">🔒 Can't prepare until level 9</div>
+  </div>
+
+</div></div>
+</div>
+
+
+<!-- ════════════ 3 · FIGHTING STYLE ════════════ -->
+<div class="col">
+<div class="caption"><b>02c · A Fighting Style.</b> Interception — today it appears nowhere in the app.
+Same three bands, and they hold: a feature has a cost, a text and a use just like a spell does.
+Band 1 shows <b>1d10+3</b>, not "1d10 + your Proficiency Bonus" — his PB is on his sheet, so the app can do the sum.</div>
+<div class="phone"><div class="scroll">
+
+  <div class="back">‹ Grimoire</div>
+  <div class="head">
+    <h1>Interception</h1>
+    <div class="sub">Fighting Style · from Paladin level 2</div>
+    <div class="tagrow">
+      <span class="tag t-alw">Always available</span>
+      <span class="tag t-noc">No resource cost</span>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="blabel"><span class="n">1</span><span class="t">At a glance</span><span class="rule"></span></div>
+    <div class="glance">
+      <div class="costline">
+        <span class="cost react">Reaction</span>
+        <span class="costwhen">when someone within 5 ft of you is hit</span>
+      </div>
+      <div class="bignum">
+        <span class="d ward">1d10+3</span>
+        <span class="dl">damage taken off that hit<br>average <b style="color:var(--forge-0)">8.5</b>, minimum 0</span>
+      </div>
+      <div class="facts">
+        <div class="fact"><div class="k">Costs</div><div class="v">Nothing — no slot, no use</div></div>
+        <div class="fact"><div class="k">Uses</div><div class="v mono">Every round</div></div>
+        <div class="fact"><div class="k">Concentration</div><div class="v">No</div></div>
+        <div class="fact"><div class="k">Requires</div><div class="v">Shield or weapon in hand</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="blabel"><span class="n">2</span><span class="t">Full text</span><span class="rule"></span></div>
+    <div class="full">
+      <p>When a creature you can see hits another creature within 5 feet of you with an attack, you can take a
+      Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a
+      Shield or a Simple or Martial weapon.</p>
+      <div class="src">PHB 2024 · Fighting Style · Prerequisite: the Fighting Style feature</div>
+    </div>
+  </div>
+
+  <div class="band" style="border-bottom:none">
+    <div class="blabel"><span class="n">3</span><span class="t">How to use it</span><span class="rule"></span></div>
+    <div class="tac">
+      <div class="tacnote">Written for a Hearth Paladin. Verbatim from canon.</div>
+      <div class="tacitem"><div class="lede">The Hearth fighting style</div>
+        <p>This is "guard the hearth" as a mechanic — you physically intercept damage aimed at someone standing next to
+        you, every round, for free, with no Concentration and no resource cost. At Proficiency Bonus +3 that averages
+        about 8.5 damage prevented per round. Over a long fight it outperforms any damage style.</p></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="btn ghost">Your reactions: Interception · Sentinel · Hearthfire Manifest</div>
+  </div>
+
+</div></div>
+</div>
+
+<!-- ════════════ the decision to argue with ════════════ -->
+<div class="col" style="width:390px">
+<div class="caption" style="border-left:2px solid var(--ember);padding-left:11px">
+<b>One thing to say yes or no to.</b><br><br>
+Canon's tactics text already writes its own headings — <span style="color:var(--forge-1)">HONEST MATH:</span>,
+<span style="color:var(--forge-1)">TARGET PRIORITY:</span>, <span style="color:var(--forge-1)">WHERE THIS ACTUALLY WINS:</span>
+— all in capitals, mid-paragraph. Band 3 above pulls each of those out as a small orange heading and starts a new
+paragraph under it. No word is added, removed or reordered; only the line breaks are new.<br><br>
+It turns a 300-word wall into six things you can skim. But it is a transform on canon text, and the fifth screen rule
+says nothing is invented. So it is yours to approve. The alternative is one solid paragraph, exactly as stored.<br><br>
+Same question, smaller: band 1 on Interception says <b>1d10+3</b> where canon says "1d10 plus your Proficiency Bonus".
+The +3 is read off your sheet. Band 2 always shows the rule as written.
+</div>
+</div>
+
+</body>
+</html>

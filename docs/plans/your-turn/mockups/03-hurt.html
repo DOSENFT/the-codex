@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The one Your Turn — not his turn, hit, reacting</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+  /* WHEN sits INLINE with its trigger, not on a line of its own. Five reaction
+     rows with a stacked label overflowed the window by 186px — which is the
+     mockup finding the same problem the app has: a turn's worth of rows only
+     fits if a row is two lines, not four. */
+  .trig { font-size: 11.5px; color: var(--forge-1); line-height: 1.4; margin-top: 3px; }
+  .trig .when {
+    font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ember); font-weight: 700; margin-right: 4px;
+  }
+  .row .go.thin { padding: 6px 8px; font-size: 9.5px; }
+  .hit { display: block; font-size: 10px; color: var(--arcane-lit); font-weight: 700;
+         font-variant-numeric: tabular-nums; text-align: center; margin-bottom: 3px; }
+  .tally {
+    display: flex; align-items: center; gap: 8px; margin-top: 7px;
+    padding: 6px 8px; border: 1px solid rgba(232,146,74,.34);
+    border-radius: 6px; background: rgba(232,146,74,.08);
+  }
+  .tally b { font-size: 12px; color: var(--ember-lit); font-variant-numeric: tabular-nums; }
+  .tally span { font-size: 10.5px; color: var(--forge-2); }
+  .tally u { margin-left: auto; text-decoration: none; font-size: 10px; color: var(--forge-1);
+             border: 1px solid #35301f; border-radius: 5px; padding: 3px 7px; }
+  .tempbadge {
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 7px;
+    font-size: 10.5px; color: var(--eldritch-lit);
+    border: 1px solid rgba(139,92,246,.4); border-radius: 5px; padding: 3px 7px;
+  }
+  .tempbadge i { font-style: normal; color: var(--forge-2); font-size: 9.5px; }
+  .dmgrow { display: flex; align-items: center; gap: 6px; margin-top: 9px; }
+  .dmgrow .lab { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #ff8f8f; }
+  .dmgrow .in {
+    flex: 1; border: 1px solid rgba(214,69,69,.42); border-radius: 7px;
+    background: #191710; color: var(--forge-0); font-size: 15px; font-weight: 700;
+    padding: 6px 9px; font-variant-numeric: tabular-nums;
+  }
+  .dmgrow button {
+    font-family: var(--body); font-size: 10.5px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; padding: 8px 11px; border-radius: 7px; border: 0;
+    background: #d64545; color: #150808;
+  }
+  .dmgrow .alt {
+    background: transparent; border: 1px solid #322d23; color: var(--forge-1);
+  }
+  .band.off .band-h::before { background: #2a2620; }
+  .band.off .band-h .pip { background: #2a2620; box-shadow: none; }
+  .band.off .band-h .name { color: #6b665c; }
+  .band.off .band-h .state { color: #57534a; }
+  /* Off his turn the reaction band is five rows deep and the card runs about
+     60px past the window. Kept, and said out loud in the caption, rather than
+     shortened by deleting a reaction he actually has. */
+  .band-r .row { padding-top: 7px; padding-bottom: 7px; }
+</style>
+</head>
+<body>
+
+<div class="sheet-title">3 · Not his turn. He has just been hit at 3 of 67</div>
+<p class="sheet-note">
+  Off his turn the card <b>reorders itself around the only thing he can do</b>:
+  action, bonus and movement go dark and collapse, and the reaction band opens.
+  He types the 12 he just took, his hit points fall in the colour they already
+  fall in, and <b>the retaliation offers itself right there</b> — with the running
+  total and the take-it-back beside it, because the app is used at a table with
+  physical dice and a mistyped number has to be undoable. This is item 7 and item 8
+  living in the same place as everything else, instead of 642 pixels below it.
+</p>
+
+<div class="phone">
+
+  <div class="hdr">
+    <div class="tabs"><span class="on">Play</span><span>Prep</span></div>
+    <div class="who"><b>NIX</b><i>Paladin 7 · Oath of the Hearth</i></div>
+  </div>
+
+  <div class="scroll">
+
+    <div class="card">
+
+      <div class="round">
+        <span class="n">Round 4</span>
+        <span class="dot"></span>
+        <span class="yours" style="color:var(--forge-2)">Grix's turn</span>
+        <button class="next ghost" style="margin-left:auto">Your turn ›</button>
+      </div>
+
+      <div class="body-strip">
+        <div class="vit">
+          <div>
+            <div class="hp-lab">Hit points</div>
+            <div class="hp-num hp-crit">3<small> / 67</small></div>
+          </div>
+          <div style="flex:1"><div class="bar"><i class="crit" style="width:4.5%"></i></div></div>
+          <div class="ac"><b>18</b><i>AC</i></div>
+        </div>
+
+        <div class="dmgrow">
+          <span class="lab">Took</span>
+          <input class="in" value="12" readonly>
+          <button>Apply</button>
+        </div>
+
+        <div class="cond">
+          <span class="k">Conditions</span>
+          <span class="v" style="color:var(--ember-lit)">Frightened</span>
+          <span class="tempbadge" style="margin:0 0 0 auto">◇ +10 <i>Hearthfire</i></span>
+          <span class="caret" style="margin-left:6px">▾</span>
+        </div>
+      </div>
+
+      <div class="band band-a off">
+        <div class="band-h"><span class="pip"></span><span class="name">Action</span><span class="state">not your turn</span><span class="caret" style="margin-left:auto">▸</span></div>
+      </div>
+      <div class="band band-b off">
+        <div class="band-h"><span class="pip"></span><span class="name">Bonus</span><span class="state">not your turn</span><span class="caret" style="margin-left:auto">▸</span></div>
+      </div>
+
+      <div class="band band-r">
+        <div class="band-h">
+          <span class="pip"></span>
+          <span class="name">Reaction</span>
+          <span class="state">yours to spend</span>
+          <span class="count">5</span>
+          <span class="caret">▾</span>
+        </div>
+        <div class="rows">
+
+          <div class="row">
+            <div class="txt">
+              <div class="nm">Hearthfire Manifest</div>
+              <div class="trig"><span class="when">When</span>you are hit by a melee attack — the attacker takes <b style="color:var(--ember-lit)">1d10</b> Fire</div>
+              <div class="tally">
+                <b>16 Fire</b><span>over 3 hits</span><u>↺ undo the 10</u>
+              </div>
+            </div>
+            <span class="det">›</span>
+            <button class="go">Record</button>
+          </div>
+
+          <div class="row">
+            <div class="txt">
+              <div class="nm">Sentinel</div>
+              <div class="trig"><span class="when">When</span>a creature within 5 ft takes the Disengage action</div>
+            </div>
+            <span class="det">›</span>
+            <div><span class="hit">+7 · 1d10+4</span><button class="go thin">Roll</button></div>
+          </div>
+
+          <div class="row">
+            <div class="txt">
+              <div class="nm">Sentinel</div>
+              <div class="trig"><span class="when">When</span>a creature within 5 ft attacks a target other than you</div>
+            </div>
+            <span class="det">›</span>
+            <div><span class="hit">+7 · 1d10+4</span><button class="go thin">Roll</button></div>
+          </div>
+
+          <div class="row">
+            <div class="txt">
+              <div class="nm">Opportunity Attack — The Dawn Guardian</div>
+              <div class="trig"><span class="when">When</span>a creature you can see leaves your reach</div>
+            </div>
+            <span class="det">›</span>
+            <div><span class="hit">+7 · 1d10+4</span><button class="go thin">Roll</button></div>
+          </div>
+
+          <div class="row locked">
+            <div class="txt">
+              <div class="nm">Interception</div>
+              <div class="why">Which Fighting Style did you take at level 2? The app has
+                never asked, so it has never offered this.</div>
+            </div>
+            <span class="det">›</span>
+            <button class="go">Answer</button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="band band-m off">
+        <div class="band-h"><span class="pip"></span><span class="name">Movement</span><span class="state">not your turn</span><span class="caret" style="margin-left:auto">▸</span></div>
+      </div>
+
+      <div class="aura">
+        <span class="k">Always active</span>
+        <span class="v">Aura of Protection · Aura of Solace</span>
+        <span class="caret">▾</span>
+      </div>
+
+      <div class="rail">
+        <button class="dice">⚄ Roll</button>
+        <button>⌕ Look up</button>
+        <div class="slots">
+          <div class="slotrow"><em>1st</em><s class="full"></s><s class="full"></s><s class="gone"></s><s class="gone"></s></div>
+          <div class="slotrow"><em>2nd</em><s class="full"></s><s class="full"></s><s class="gone"></s></div>
+        </div>
+        <button class="end">End</button>
+      </div>
+
+    </div>
+
+    <div class="fold">— the card ends here —</div>
+
+    <div class="strip">
+      <span class="tag warn">Check</span>
+      <span>Your sheet and the 2024 rules disagree on 1 thing</span>
+      <span class="caret">›</span>
+    </div>
+    <div class="strip"><span>Damage log</span><span class="num">12 taken · 16 dealt</span><span class="caret">›</span></div>
+
+  </div>
+
+  <div class="nav">
+    <i class="on"><b>⚔</b>Combat</i>
+    <i><b>✦</b>Grimoire</i>
+    <i><b>☾</b>Roleplay</i>
+  </div>
+
+</div>
+
+<p class="sheet-note" style="margin-top:6px">
+  <b>This is the one screen that does not quite fit</b> — with all five reactions
+  open the card runs about 75px past the window, so the movement band, the auras
+  and the rail are one flick below. Said out loud rather than fixed by deleting a
+  reaction he actually has. It is the worst case in the whole design, and it is
+  75 pixels against today's 2,214.
+</p>
+<p class="sheet-note">
+  The Interception row is the open item from the last phase, finally visible: the
+  feature is built and wired, and nothing has ever asked him which style he took.
+  It sits in the band it belongs to, <b>saying what it needs instead of being
+  absent</b> — which is how he found out it was missing in the first place.
+</p>
+
+</body>
+</html>

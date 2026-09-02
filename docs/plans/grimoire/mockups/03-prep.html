@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!-- Gate 1 mockup — preparing spells: the hard cap, and the card that teaches it.
+     The five rules on the right are VERBATIM from
+     src/canon/paladin-progression.json → preparedSpellRules.
+     Numbers (7 prepared, 4×1st / 3×2nd, highest level 2) are the level-7 row of
+     the same file. Nothing here is invented. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grimoire — preparing spells</title>
+<style>
+  :root{
+    --void-0:#0a0a08; --void-1:#12110e; --void-2:#1c1a15;
+    --arcane:#d4a74a; --arcane-lit:#e8c87a;
+    --ember:#e8924a; --ember-lit:#f5b183;
+    --eldritch:#8b5cf6; --eldritch-lit:#b39cff;
+    --verdant:#39d98a; --bronze:#8b7355;
+    --forge-0:#f0e6d3; --forge-1:#bfb5a0; --forge-2:#8b8578;
+    --red:#ef6b6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+       display:flex;gap:28px;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+       padding:28px 16px;color:var(--forge-0)}
+  .col{width:390px}
+  .caption{color:var(--forge-2);font-size:12px;line-height:1.5;margin-bottom:8px}
+  .caption b{color:var(--ember-lit)}
+  .phone{background:var(--void-0);border:1px solid #2a2720;border-radius:22px;
+         overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8);position:relative}
+  .scroll{max-height:780px;overflow-y:auto}
+
+  header{padding:14px 16px 12px;border-bottom:1px solid rgba(139,115,85,.2)}
+  .title{display:flex;align-items:baseline;justify-content:space-between}
+  h1{font-size:19px;letter-spacing:.02em}
+  /* V-3: the counter is the number he checks. It is never dim. */
+  .counter{font-family:ui-monospace,monospace;font-size:22px;font-weight:700;color:var(--arcane-lit)}
+  .counter.full{color:var(--ember-lit)}
+  .counter small{font-size:10px;color:var(--forge-2);letter-spacing:.08em;text-transform:uppercase;
+                 margin-left:6px;font-weight:400;font-family:inherit}
+  .meter{display:flex;gap:4px;margin-top:10px}
+  .meter i{flex:1;height:4px;border-radius:2px;background:rgba(139,115,85,.25)}
+  .meter i.on{background:var(--arcane)}
+  .meter i.last{background:var(--ember)}
+  .subline{font-size:11px;color:var(--forge-1);margin-top:9px;line-height:1.45}
+  .subline a{color:var(--arcane-lit);text-decoration:underline;text-underline-offset:2px}
+
+  .ghead{display:flex;align-items:center;gap:9px;padding:15px 16px 6px}
+  .ghead .gname{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--forge-1)}
+  .ghead .rule{flex:1;height:1px;background:rgba(139,115,85,.22)}
+  .ghead .gn{font-family:ui-monospace,monospace;font-size:13px;font-weight:600;color:var(--forge-0)}
+
+  .row{display:flex;align-items:center;gap:11px;padding:10px 16px;min-height:52px;
+       border-bottom:1px solid rgba(139,115,85,.08)}
+  .row .grow{flex:1;min-width:0}
+  .row .nm{font-size:14px;color:var(--forge-0);line-height:1.25}
+  .row .meta{font-size:11px;color:var(--forge-2);margin-top:2px}
+  .box{width:22px;height:22px;border-radius:6px;border:1.5px solid rgba(139,115,85,.45);
+       display:flex;align-items:center;justify-content:center;font-size:12px;flex:0 0 auto}
+  .box.on{background:var(--verdant);border-color:var(--verdant);color:var(--void-0);font-weight:700}
+  .box.lockbox{border-style:dashed;color:var(--forge-2)}
+  .box.always{background:rgba(212,167,74,.18);border-color:var(--arcane);color:var(--arcane-lit);font-weight:700}
+  .row.dim .nm{color:var(--forge-2)}
+  .row.refused{background:rgba(239,107,107,.07);outline:1px solid rgba(239,107,107,.35);outline-offset:-1px}
+  .tag{font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;
+       border:1px solid;white-space:nowrap}
+  .t-free{color:var(--arcane-lit);border-color:rgba(212,167,74,.5);background:rgba(212,167,74,.1)}
+  .t-lock{color:var(--forge-2);border-color:rgba(139,115,85,.5);border-style:dashed}
+
+  /* ── the refusal. It does not shrug; it names the rule. ── */
+  .refusal{margin:0 16px 4px;margin-top:10px;border:1px solid rgba(239,107,107,.45);border-radius:11px;
+           background:rgba(239,107,107,.08);padding:12px 13px}
+  .refusal .h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#ff9d9d}
+  .refusal p{font-size:12px;line-height:1.55;color:var(--forge-1);margin-top:7px}
+  .refusal p b{color:var(--forge-0)}
+  .refusal .acts{display:flex;gap:8px;margin-top:11px}
+  .refusal .acts div{flex:1;text-align:center;font-size:12px;padding:9px;border-radius:9px;
+    border:1px solid rgba(139,115,85,.4);color:var(--forge-1)}
+  .refusal .acts div.primary{border-color:rgba(212,167,74,.6);color:var(--arcane-lit);background:rgba(212,167,74,.1);font-weight:600}
+  .rulechip{display:inline-block;font-size:10px;color:var(--forge-2);border:1px solid rgba(139,115,85,.35);
+            border-radius:5px;padding:2px 6px;margin-top:9px}
+
+  /* ── the teaching card ── */
+  .teach{margin:14px 16px;border:1px solid rgba(212,167,74,.35);border-radius:13px;
+         background:rgba(212,167,74,.05);overflow:hidden}
+  .teach .th{padding:12px 14px 10px;border-bottom:1px solid rgba(212,167,74,.22)}
+  .teach .th .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--arcane-lit);font-weight:700}
+  .teach .th h2{font-size:15px;margin-top:5px;line-height:1.3}
+  .teach ol{list-style:none;padding:6px 14px 12px;counter-reset:r}
+  .teach li{counter-increment:r;display:flex;gap:10px;padding:9px 0;
+            border-bottom:1px solid rgba(139,115,85,.12);font-size:12.5px;line-height:1.55;color:var(--forge-1)}
+  .teach li:last-child{border-bottom:none}
+  .teach li::before{content:counter(r);font-family:ui-monospace,monospace;font-size:11px;font-weight:700;
+    color:var(--void-0);background:var(--arcane);border-radius:4px;padding:1px 5px;height:17px;flex:0 0 auto;margin-top:2px}
+  .teach .yours{padding:10px 14px 13px;border-top:1px solid rgba(212,167,74,.22);
+                background:rgba(212,167,74,.05)}
+  .teach .yours .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--forge-2)}
+  .yline{display:flex;justify-content:space-between;align-items:baseline;margin-top:7px;font-size:12px;color:var(--forge-1)}
+  .yline b{font-family:ui-monospace,monospace;font-size:14px;color:var(--forge-0);font-weight:700}
+
+  .rest{margin:0 16px 22px;border:1px solid rgba(139,115,85,.3);border-radius:12px;padding:12px 13px}
+  .rest .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--forge-2)}
+  .rest h3{font-size:14px;margin-top:5px}
+  .rest p{font-size:12px;line-height:1.5;color:var(--forge-1);margin-top:6px}
+  .rest .btn{margin-top:11px;text-align:center;font-size:13px;font-weight:600;padding:11px;border-radius:10px;
+    border:1px solid rgba(57,217,138,.5);color:var(--verdant);background:rgba(57,217,138,.08)}
+</style>
+</head>
+<body>
+
+<!-- ════════════ 1 · THE CAP, REFUSING ════════════ -->
+<div class="col">
+<div class="caption"><b>03a · Seven means seven.</b> He taps an eighth spell. Today the app lets it through.
+Here it is refused, and the refusal names the rule that refused it and offers the only two real ways forward.
+The counter at the top is the thing he checks — full contrast, never dim.</div>
+<div class="phone"><div class="scroll">
+
+  <header>
+    <div class="title">
+      <h1>Prepare spells</h1>
+      <div class="counter full">7/7<small>prepared</small></div>
+    </div>
+    <div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="last"></i></div>
+    <div class="subline">Full. Untick one to make room. <a>How preparing works</a></div>
+  </header>
+
+  <div class="refusal">
+    <div class="h"><span>✋</span><span>You can't prepare Divine Favor</span></div>
+    <p>You already have <b>7 of 7</b> prepared, and 7 is what a level 7 Paladin gets.
+    Untick one below and this one goes straight in.</p>
+    <div class="acts">
+      <div class="primary">Swap for one of mine</div>
+      <div>Not now</div>
+    </div>
+    <div class="rulechip">Prepared Spells column · Paladin, level 7</div>
+  </div>
+
+  <div class="row refused">
+    <div class="box lockbox">+</div>
+    <div class="grow"><div class="nm">Divine Favor</div><div class="meta">Level 1 · Bonus Action · 1d4 Radiant per hit</div></div>
+  </div>
+
+  <div class="ghead"><span class="gname">Prepared</span><span class="rule"></span><span class="gn">7/7</span></div>
+
+  <div class="row"><div class="box on">✓</div><div class="grow"><div class="nm">Bless</div><div class="meta">Level 1 · Action · Conc.</div></div></div>
+  <div class="row"><div class="box on">✓</div><div class="grow"><div class="nm">Searing Smite</div><div class="meta">Level 1 · Bonus · 1d6 Fire</div></div></div>
+  <div class="row"><div class="box on">✓</div><div class="grow"><div class="nm">Shield of Faith</div><div class="meta">Level 1 · Bonus · Conc.</div></div></div>
+  <div class="row"><div class="box on">✓</div><div class="grow"><div class="nm">Compelled Duel</div><div class="meta">Level 1 · Bonus · Conc.</div></div></div>
+  <div class="row"><div class="box on">✓</div><div class="grow"><div class="nm">Aid</div><div class="meta">Level 2 · Action · +5 max HP</div></div></div>
+  <div class="row"><div class="box on">✓</div><div class="grow"><div class="nm">Lesser Restoration</div><div class="meta">Level 2 · Action</div></div></div>
+  <div class="row"><div class="box on">✓</div><div class="grow"><div class="nm">Magic Weapon</div><div class="meta">Level 2 · Bonus · Conc.</div></div></div>
+
+  <div class="ghead"><span class="gname">Always prepared — free</span><span class="rule"></span><span class="gn">6</span></div>
+  <div class="row"><div class="box always">★</div><div class="grow"><div class="nm">Divine Smite</div><div class="meta">Level 1 · Paladin, level 2</div></div><span class="tag t-free">Free</span></div>
+  <div class="row"><div class="box always">★</div><div class="grow"><div class="nm">Burning Hands</div><div class="meta">Level 1 · Oath of the Hearth, level 3</div></div><span class="tag t-free">Free</span></div>
+  <div class="row"><div class="box always">★</div><div class="grow"><div class="nm">Faerie Fire</div><div class="meta">Level 1 · Oath of the Hearth, level 3</div></div><span class="tag t-free">Free</span></div>
+  <div class="row"><div class="box always">★</div><div class="grow"><div class="nm">Find Steed</div><div class="meta">Level 2 · Paladin, level 5</div></div><span class="tag t-free">Free</span></div>
+  <div class="row"><div class="box always">★</div><div class="grow"><div class="nm">Scorching Ray</div><div class="meta">Level 2 · Oath of the Hearth, level 5</div></div><span class="tag t-free">Free</span></div>
+  <div class="row"><div class="box always">★</div><div class="grow"><div class="nm">Warding Bond</div><div class="meta">Level 2 · Oath of the Hearth, level 5</div></div><span class="tag t-free">Free</span></div>
+
+  <div class="ghead"><span class="gname">Too high a level for you yet</span><span class="rule"></span><span class="gn">30</span></div>
+  <div class="row dim"><div class="box lockbox">🔒</div><div class="grow"><div class="nm">Aura of Vitality</div><div class="meta">Level 3 · you have no 3rd-level slots</div></div><span class="tag t-lock">Level 9</span></div>
+  <div class="row dim"><div class="box lockbox">🔒</div><div class="grow"><div class="nm">Revivify</div><div class="meta">Level 3 · you have no 3rd-level slots</div></div><span class="tag t-lock">Level 9</span></div>
+  <div class="row dim"><div class="box lockbox">🔒</div><div class="grow"><div class="nm">Crusader's Mantle</div><div class="meta">Level 3 · you have no 3rd-level slots</div></div><span class="tag t-lock">Level 9</span></div>
+
+</div></div>
+</div>
+
+
+<!-- ════════════ 2 · THE CARD THAT TEACHES IT ════════════ -->
+<div class="col">
+<div class="caption"><b>03b · How preparing works.</b> Behind the link in the header, and shown once
+unprompted the first time he opens the Prep tab. The five rules are canon, word for word — including the
+long-rest swap he half-remembered and has never been told.</div>
+<div class="phone"><div class="scroll">
+
+  <header>
+    <div class="title"><h1>How preparing works</h1></div>
+    <div class="subline">Paladin · 2024 rules</div>
+  </header>
+
+  <div class="teach">
+    <div class="th">
+      <div class="k">The rules, as written</div>
+      <h2>Five of them, and only the third one is a surprise</h2>
+    </div>
+    <ol>
+      <li>You prepare a list of level 1+ Paladin spells. The number is set by the Prepared Spells column, not by your slots.</li>
+      <li>Every prepared spell must be of a level for which you have spell slots.</li>
+      <li>You may replace ONE prepared spell with another Paladin spell whenever you finish a Long Rest.</li>
+      <li>Spells granted by a Paladin feature as "always prepared" do NOT count against the Prepared Spells number, but they do count as Paladin spells for you.</li>
+      <li>Cantrips gained from Blessed Warrior do not count against the Prepared Spells number.</li>
+    </ol>
+    <div class="yours">
+      <div class="k">What that means for Nix, right now</div>
+      <div class="yline"><span>Rule 1 — your Prepared Spells number</span><b>7</b></div>
+      <div class="yline"><span>Rule 2 — highest level you have slots for</span><b>2nd</b></div>
+      <div class="yline"><span>Rule 4 — always prepared, costing you nothing</span><b>6</b></div>
+      <div class="yline"><span>So the spells you can actually bring</span><b>13</b></div>
+    </div>
+  </div>
+
+  <div class="rest">
+    <div class="k">Rule 3, made pressable</div>
+    <h3>You finished a Long Rest</h3>
+    <p>You can swap one prepared spell for any other Paladin spell. One — not the whole list.
+    You haven't used this rest's swap yet.</p>
+    <div class="btn">Swap one spell</div>
+  </div>
+
+</div></div>
+</div>
+
+
+<!-- ════════════ the decisions to argue with ════════════ -->
+<div class="col">
+<div class="caption" style="border-left:2px solid var(--ember);padding-left:11px">
+<b>Three things to say yes or no to.</b><br><br>
+
+<b style="color:var(--forge-1)">1 · The refusal is a card, not a toast.</b> It stays until dismissed and it names
+the rule. The alternative is the checkbox simply not responding, which is how most character apps do it and which
+teaches nothing.<br><br>
+
+<b style="color:var(--forge-1)">2 · "Swap for one of mine" is a second screen, not built here.</b> It would show
+your seven, you pick the one to drop, and the new one goes in. Cheap, but it is a screen — say if you'd rather the
+refusal just closed and let you untick manually.<br><br>
+
+<b style="color:var(--forge-1)">3 · The teaching card shows itself once, uninvited.</b> First time you open the
+Prep tab after this ships. After that it lives behind "How preparing works" in the header and never interrupts
+again. If you'd rather it never appeared uninvited, it doesn't.<br><br>
+
+<span style="color:var(--forge-2)">Not shown and not planned: the 30 locked spells are listed on the Prep page as
+unpreparable, with the reason. They are not hidden. That was your instruction and it applies here as much as in
+the Grimoire.</span>
+</div>
+</div>
+
+</body>
+</html>
