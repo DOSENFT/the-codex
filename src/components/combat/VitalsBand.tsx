@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react'
-import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import { useMemo } from 'react'
 import { GlassCard } from '../ui/GlassCard'
-import { tableVitals, discrepancies, signed } from '../../lib/rules-2024/vitals'
+import { tableVitals, signed } from '../../lib/rules-2024/vitals'
 import type { Character } from '../../lib/character'
 
 /* ============================================================================
@@ -26,8 +25,26 @@ import type { Character } from '../../lib/character'
    only the words beside them are forge-2. That is the whole reason the numbers
    are not simply crammed into the existing HP card.
 
-   READ-ONLY, like everything before slice 5. It derives, it renders, it
-   persists nothing — not even its own collapse state (see the note below).
+   ⚠ THE FLAG LEFT THIS BAND — "Your Turn" slice 9, 2026-09-02.
+   For a while this band did two jobs: report the five numbers, AND carry the
+   "your sheet and the 2024 rules disagree" notice with its one-tap answer. The
+   second job moved to `combat/SheetRuleFlags.tsx` and it MOVED — it was not
+   copied — so there is still exactly one surface reporting one disagreement.
+
+   The reason is a measurement, not a preference. This band lives in the extras
+   block; the nine slot dots the flag is entirely about live in the rail. On his
+   export at 390×844 in combat they were **2,430px apart** (`_diag9.mjs`): a
+   complaint about spell slots filed four screens away from the spell slots. Its
+   new home is a line directly underneath them.
+
+   Two things this band used to argue for went with it and are argued again, in
+   full, at the top of that file: why the write is not the band's opinion, and
+   why the fold that used to open by default now starts closed. Neither
+   reasoning is repeated here, because a reason kept in two places is a reason
+   that will disagree with itself.
+
+   What is left is what the band was originally for: five numbers, read at 60cm.
+   It derives, it renders, and it persists nothing.
    ========================================================================= */
 
 interface VitalsBandProps {
@@ -36,14 +53,6 @@ interface VitalsBandProps {
 
 export function VitalsBand({ character }: VitalsBandProps) {
   const vitals = useMemo(() => tableVitals(character), [character])
-  const flags = useMemo(() => discrepancies(character), [character])
-
-  /* Deliberately NOT persisted through useCollapsible.
-     A dismissed warning that stays dismissed is a warning that gets dismissed
-     once and never seen again — and the thing it is warning about (slots that
-     do not match his level) survives across sessions. It reopens every load
-     until the underlying disagreement is actually resolved. */
-  const [flagsOpen, setFlagsOpen] = useState(true)
 
   return (
     <GlassCard className="p-3">
@@ -54,48 +63,6 @@ export function VitalsBand({ character }: VitalsBandProps) {
         <Stat label="Prof" value={signed(vitals.proficiency)} />
         <Stat label="Sp Atk" value={signed(vitals.spellAttack)} />
       </div>
-
-      {flags.length > 0 && (
-        <div className="mt-3 border-t border-ember/25 pt-2">
-          <button
-            type="button"
-            onClick={() => setFlagsOpen(v => !v)}
-            aria-expanded={flagsOpen}
-            className="flex w-full min-h-12 items-center gap-2 text-left"
-          >
-            <AlertTriangle size={14} className="shrink-0 text-ember" aria-hidden />
-            <span className="text-xs font-semibold text-ember-lit">
-              {flags.length === 1
-                ? 'Your sheet and the 2024 rules disagree on 1 thing'
-                : `Your sheet and the 2024 rules disagree on ${flags.length} things`}
-            </span>
-            {flagsOpen ? (
-              <ChevronUp size={14} className="ml-auto shrink-0 text-forge-1" aria-hidden />
-            ) : (
-              <ChevronDown size={14} className="ml-auto shrink-0 text-forge-1" aria-hidden />
-            )}
-          </button>
-
-          {flagsOpen && (
-            <div className="flex flex-col gap-2.5 pt-1">
-              {flags.map(flag => (
-                <div key={flag.id}>
-                  <p className="text-xs font-semibold text-forge-0">{flag.title}</p>
-                  <dl className="mt-1 flex flex-col gap-0.5">
-                    <Row term="Your sheet" value={flag.sheet} tone="sheet" />
-                    <Row term="2024 rules" value={flag.rule} tone="rule" />
-                  </dl>
-                  <p className="mt-1 text-xs text-forge-2">{flag.why}</p>
-                </div>
-              ))}
-              <p className="text-xs text-forge-2">
-                Nothing has been changed. The app does not know which of these is right for your
-                table — that is yours and your DM's call.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
     </GlassCard>
   )
 }
@@ -118,17 +85,8 @@ function Stat({ label, value, hero = false }: { label: string; value: string; he
   )
 }
 
-function Row({ term, value, tone }: { term: string; value: string; tone: 'sheet' | 'rule' }) {
-  return (
-    <div className="flex items-baseline gap-2">
-      <dt className="w-20 shrink-0 text-[10px] uppercase tracking-[0.08em] text-forge-2">
-        {term}
-      </dt>
-      <dd
-        className={`font-mono text-xs ${tone === 'sheet' ? 'text-forge-0' : 'text-ember-lit'}`}
-      >
-        {value}
-      </dd>
-    </div>
-  )
-}
+/* `Row` — the sheet-vs-rules two-line comparison — left with the flag. It is
+   `SheetRuleFlags`'s now. `noUnusedLocals` is off in this repo's tsconfig, so a
+   component left behind here would have compiled, shipped and rendered nowhere
+   for as long as anyone cared to leave it: that is precisely how 697 lines of
+   unreachable panel survived until slice 8b went looking. */

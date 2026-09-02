@@ -32,7 +32,61 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.dturn button { font: inherit; color: inherit; }
+/* `:where()` CONTRIBUTES NOTHING TO SPECIFICITY, and that is the whole reason
+   it is here. This rule is (0,1,1) with the `:not()` exactly as it was without
+   it, so every cascade decision about D's OWN buttons is byte-identical —
+   `.dturn .rbtn` is (0,2,0) and still wins its font-size, as it did before
+   slice 8b. Written the obvious way, `:not(.extras *)` would have become
+   (0,2,1), quietly beaten `.rbtn`, and reset every rail button to 15px.
+
+   WHY IT NEEDS EXCLUDING AT ALL. `.extras` holds the legacy tab's survivors,
+   which are Tailwind components: their buttons ask for `text-xs` (0,1,0), and
+   an unscoped `.dturn button` at (0,1,1) beats that and renders every one of
+   them at 15px. The declaration exists so D's controls inherit D's face
+   instead of the UA's 13px Arial; it was never meant to reach anything handed
+   in as an opaque node. */
+.dturn button:not(:where(.extras *)) { font: inherit; color: inherit; }
+
+/* ---- the host, slice 8b ---------------------------------------------------
+   `100dvh` above is right when this screen IS the document, which is what it
+   was behind `?d=1` for five slices. Inside `Layout` it is not: `<main>` is a
+   fixed box between the tab bar and the top of the viewport, and on a 844px
+   phone it measures ~779. A 844px frame in a 779px box puts the last 65px —
+   which is the whole pinned strip, the four dots and End turn — below the fold
+   of a parent that does not scroll. V-6 would be violated by arithmetic.
+
+   So the host says how tall it is and the screen fills it. Two declarations
+   rather than one because `max-height: 100dvh` would otherwise still be the
+   binding constraint on a viewport shorter than the box, which is a state that
+   exists on a phone with the URL bar retracting. The `100dvh` default is left
+   standing, untouched, because it is still correct for every other mount —
+   the design shoot renders this component as the whole page. */
+.dturn-host .dturn {
+  height: 100%;
+  max-height: 100%;
+}
+
+/* AND THE TWO RULES THAT MAKE THAT `100%` MEAN ANYTHING.
+   `height: 100%` resolves against the parent's height, and only if that height
+   is DEFINITE. The host's is — `<main>` is a fixed box with a top and a bottom
+   — but the host is not `.dturn`'s parent: `App` wraps every tab in a
+   `motion.div` for the page transition, and that div is `height: auto`. So the
+   percentage had an indefinite containing block, fell back to `auto`, and the
+   frame grew to its content.
+
+   MEASURED, NOT REASONED: the first mount of 8b put `.dturn` at **3663px** in a
+   723px host. Everything below the first screenful — the whole extras section,
+   and the pinned strip carrying End turn — was outside a parent that does not
+   scroll, i.e. unreachable. V-6 failed by arithmetic exactly as the note above
+   predicted, just one element further down the tree than it looked.
+
+   A column flex container with a definite height gives its items a definite
+   used height, so the wrapper becomes something a percentage can resolve
+   against without either side needing to know the other exists. `min-height: 0`
+   on both because the default `auto` minimum would let a tall child push the
+   item past the container, which is the same failure wearing flexbox. */
+.dturn-host { display: flex; flex-direction: column; min-height: 0; }
+.dturn-host > * { flex: 1 1 auto; min-height: 0; }
 
 /* ---- fixture banner — deleted in Slice 4 with the seed --------------------- */
 .dturn .fixture {
@@ -71,14 +125,23 @@
 }
 .dturn .colA, .dturn .colB, .dturn .colC { display: contents; }
 
-/* ---- chrome --------------------------------------------------------------- */
+/* ---- chrome ---------------------------------------------------------------
+   SLICE 7 — the header is one line now, and the vertical padding came down
+   from --d-s3 to --d-s2 with it.
+
+   THE FLOOR HERE IS 27px AND IT IS NOT NEGOTIABLE: "Round 3" is display type
+   at --d-fs-title, and V-4 forbids Cinzel under 20px. So the header cannot go
+   below 27 + padding + rule however much the list would like it to. Slice 7's
+   plan predicted 40px for this bar by assuming a line height instead of
+   measuring one; the truth is 44. Recorded because the next person to go
+   looking for pixels should start somewhere else. */
 .dturn .chrome {
   flex: 0 0 auto;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--d-s3);
-  padding: var(--d-s3) var(--pad);
+  padding: var(--d-s2) var(--pad);
   border-bottom: 1px solid var(--d-rule);
 }
 /* The subclass is the character, and Nix's is homebrew — "Oath of the He…" is
@@ -156,14 +219,57 @@
 .dturn .tag.good .k { color: var(--d-verdant); }
 .dturn .tag .t { color: var(--d-cream); min-width: 0; }
 
-/* ---- economy strip -------------------------------------------------------- */
+/* ---- an aura opens onto its whole paragraph (slice 8d-2) ------------------
+   Marcus: "so I can always know what they do exactly, and are neat and don't
+   take up room (this is where drop downs or something are very very
+   preferable)." A <details> costs its <summary> and nothing else while closed,
+   so "don't take up room" is satisfied by construction rather than by tuning.
+
+   CLOSED, THIS MUST BE THE PILL IT HAS ALWAYS BEEN. `.tag` sets `display: flex`
+   and a <details> that stayed flex would lay its <summary> and its paragraph
+   out SIDE BY SIDE, so the element itself goes back to `block` and the flex row
+   moves down onto the <summary> — which is what actually holds the name and the
+   line. Everything else about the pill (radius, border, padding, colour) is
+   `.tag`'s and is untouched. */
+.dturn details.tag { display: block; }
+.dturn details.tag > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;          /* Firefox */
+  min-width: 0;
+}
+/* The disclosure triangle. Removed rather than styled: the strip is a row of
+   rounded pills and a marker would be the only glyph on the card that is not a
+   word, on the one zone that must stay quiet. The affordance is carried by the
+   summary being the whole pill — a 100%-wide hit target, which is a better one
+   than a 10px triangle under a thumb. */
+.dturn details.tag > summary::-webkit-details-marker { display: none; }
+.dturn details.tag > summary::marker { content: ''; }
+.dturn details.tag > summary:focus-visible { outline: 2px solid var(--d-gold); outline-offset: 2px; border-radius: 999px; }
+
+/* The paragraph itself. Cream on the pill's own ground — it is the same fact as
+   the line above it, said properly, not a different register. */
+.dturn details.tag .full {
+  margin: 6px 0 0;
+  color: var(--d-cream);
+  line-height: 1.45;
+}
+
+/* ---- economy strip --------------------------------------------------------
+   SLICE 7 MOVED THIS into `.pinned`, out of the scrolling column. It is the
+   same strip with the same four 97x48 slots; only its parent changed. The
+   `border-block` it used to carry is gone because the pinned strip already
+   draws a rule above it and an 8px gap below — two lines in the same place is
+   the small version of the fault this phase is about. That is also the 2px
+   that keeps the strip at 48px rather than 50. */
 .dturn .econ {
   flex: 0 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
   background: var(--d-rule);
-  border-block: 1px solid var(--d-rule);
 }
 .dturn .eslot {
   min-height: var(--d-touch-goal);
@@ -176,6 +282,32 @@
   font-size: var(--d-fs-label);
   color: var(--d-dim);
 }
+
+/* SLICE 8d-1 — the four slots became pressable, and must not move by one pixel.
+   Same argument as `button.act` below: the design shoot measures the inert
+   `<div>` form and Marcus uses the live `<button>` one, so nothing here adds
+   padding, colour or size — it only undoes what a user agent does to a button.
+   `border` and `padding` are the two that matter: a UA button carries an outset
+   border and 1px/6px of padding, and either would push the grid past the 48px
+   this strip is budgeted at and break the `.econ` 1px hairlines into a smear. */
+.dturn button.eslot {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* `display` is set on `.eslot` already, but a UA stylesheet may override it for
+   buttons in older Safari — the same defence `button.face` carries. */
+.dturn button.eslot { display: flex; }
+.dturn button.eslot:active { background: var(--d-e1); }
+.dturn button.eslot:focus-visible { outline: 2px solid var(--d-gold); outline-offset: -2px; }
+
 .dturn .eslot .dot { width: 7px; height: 7px; border-radius: 50%; background: #2b271f; }
 .dturn .eslot.open .dot { background: var(--d-amber); }
 .dturn .eslot.open { color: var(--d-cream); }
@@ -306,13 +438,201 @@
 .dturn .rgrp .v { font-family: var(--d-font-mono); font-size: var(--d-fs-mono); color: var(--d-gold); }
 .dturn .rgrp .v.spent { color: var(--d-dim); }
 
-/* ---- edge ----------------------------------------------------------------- */
+/* ---- the rail (slice 4) ---------------------------------------------------
+   RECONSTRUCTED FROM THE COMPILED BUNDLE. The authored comments for this block
+   were lost when turn-d.css was truncated during slice 5's mutation testing;
+   every declaration below was recovered rule-for-rule from dist and verified
+   by diffing the compiled rule sets, so the behaviour is exact and only the
+   prose is a rewrite. Nothing here is a guess about what the rules should be.
+
+   The rail carries the slot pips, Lay on Hands and Channel Divinity. V-6 says a
+   turn-critical spend control is always visible, and this is where that rule
+   is actually paid for. It wraps rather than scrolls, because a control that
+   has slid off the side of a strip is a control you cannot find in six
+   seconds — wrapping costs a row of height and loses nothing.
+
+   SLICE 7 CHANGED WHAT "ALWAYS VISIBLE" COSTS, and SLICE 8 CHANGED WHERE IT IS
+   PAID. Slice 7 made the rail one row inside `.pinned`. Slice 8 took it out
+   again and put it in the scroller, after the vitals and before the list.
+
+   THE PARAGRAPH ABOVE IS NOW WRONG ABOUT ONE THING and it is left standing so
+   the correction is visible: "V-6 says a turn-critical spend control is always
+   visible, and this is where that rule is actually paid for" was written when
+   the D screen owned the whole viewport. Inside `Layout` it also pays 65px for
+   the tab bar, and 233px of pinned strip plus that bar measured 298px against
+   a Gate 1 promise of 121 (2026-09-01, `_probe8.mjs`). Marcus ruled the strip
+   down to the state of this turn — four dots and End turn. Slots and pools are
+   *what I still have*, not *what I have spent here*, and the list answers that
+   on every row that costs one. See TurnScreenD's note above `{rail}`. */
+.dturn .rail {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--d-s2) var(--d-s3);
+  /* Its own block padding again, for the same reason `.rverbs` needs its own:
+     it no longer inherits `.pinned`'s. The top rule is what separates "what I
+     have" from "what I can do" now that they are adjacent rows of one scroll
+     instead of two regions of the frame. */
+  padding: var(--d-s2) var(--pad);
+  border-top: 1px solid var(--d-rule);
+}
+
+/* ---- the sheet-vs-2024 flag (slice 9) -------------------------------------
+   A sibling of `.rail`, not a child of it, and the difference is deliberate:
+   `.rail` is `flex-wrap: wrap` and this is a full-width line, so inside it the
+   sentence would have competed with the dots for the same row. It sits
+   immediately BELOW them because that is the whole slice — the flag is about
+   those nine dots and until now it was 2,430px away from them (`_diag9.mjs`).
+
+   It takes `.rail`'s horizontal padding so the line starts on the same left
+   edge as the dots it describes, and NOT `.rail`'s `border-top`: a rule between
+   the pips and their own label would read as a seam between two subjects where
+   there is one. The rule below the rail block as a whole is `.list`'s, which is
+   unchanged.
+
+   No height is reserved. Closed it is one 48px tap target; when the sheet and
+   the table agree the component renders nothing at all, and an empty selector
+   here would still have drawn the padding. */
+.dturn .ruleflag {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 0 var(--pad) var(--d-s2);
+}
+
+/* ---- the extras (slice 8b) ------------------------------------------------
+   The legacy tab's survivors, riding at the bottom of the same scroller. Two
+   scrollers cannot be stacked in one tab, so they are IN this one rather than
+   beside it — see the `extras` prop in TurnScreenD.tsx.
+
+   THE TYPOGRAPHY IS HANDED BACK AT THIS LINE, and both declarations are
+   measured deltas rather than defensive resets. `.dturn` sets four inherited
+   properties; `--d-cream` IS `--color-forge-0` and `--d-font-body` IS
+   `--font-body` (tokens.css:45, index.css:125), so colour and face already
+   agree and setting them here would be noise. The two that genuinely differ
+   are size — 15px against the document's 16 — and line-height, 1.35 against
+   normal. Restored to the document's own values, not to a third set, so a
+   survivor renders here exactly as it renders on any other tab.
+
+   `1rem` and not `16px`: the document base is what is being restored, and if
+   a future accessibility pass moves the root size this must move with it.
+
+   The top rule is the seam. Above it is the turn; below it is the session. */
+.dturn .extras {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  line-height: normal;
+  padding: var(--d-s4) var(--pad) 0;
+  border-top: 1px solid var(--d-rule-lit);
+}
+
+/* ---- the pinned strip (slice 7) -------------------------------------------
+   ONE region below the scroller where slice 4 left two — `.rail` at 9/8 and
+   `.edge` at 9/8, stacked, each drawing its own top rule and its own padding.
+   Merged, the padding is paid once and the 18px goes to the list.
+
+   THIS IS THE WHOLE OF V-6's ENFORCEMENT. Nothing here is `position: fixed`;
+   there is no fixed or sticky element anywhere on this screen. `.dturn` is
+   `height: 100dvh` with `overflow: hidden` and `.body` is the only child that
+   scrolls, so everything in here is outside the scroller and CANNOT be
+   scrolled away. That is a stronger guarantee than pinning: a future CSS edit
+   to the list cannot reach it. Measured at scrollTop 0 and at scrollTop 2062
+   — the same pixels both times.
+
+   WHAT BELONGS HERE, after slice 8 narrowed it: THE STATE OF THIS TURN, AND
+   THE BUTTON THAT ENDS IT. Four economy dots and End turn. "Turn-critical
+   SPEND controls" was the wording V-6 shipped with, and it turned out to admit
+   almost everything — slot pips and two class pools arrived under it in slice
+   4 and cost 104px of permanent frame to answer a question the list already
+   answers in place. The narrower rule is the one to apply to a sixth
+   candidate: not "does it spend", but "is it about THIS turn". */
+.dturn .pinned {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--d-s2);
+  padding-block: var(--d-s2) calc(var(--d-s2) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--d-rule);
+  background: var(--d-e1);
+}
+
+/* The verb row, now the first thing in the scroller rather than the first row
+   of the rail. Same buttons, same size, same order; it has to carry its own
+   padding because it no longer inherits the rail's. */
+.dturn .rverbs {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--d-s2) var(--d-s3);
+  padding: var(--d-s2) var(--pad);
+  border-bottom: 1px solid var(--d-rule);
+}
+.dturn .rail .rslots,
+.dturn .rail .rpools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--d-s2) var(--d-s3);
+}
+
+/* V-5b in BOTH dimensions: a rail button is 48px tall AND 48px wide at its
+   smallest, so the dice button — which is an icon and has no text to pad it
+   out — is still a thumb-sized target rather than a 24px glyph. */
+.dturn .rbtn {
+  min-height: var(--d-touch-goal);
+  min-width: var(--d-touch-goal);
+  padding: 0 var(--d-s3);
+  border-radius: var(--d-radius);
+  border: 1px solid var(--d-rule-lit);
+  background: transparent;
+  font-size: var(--d-fs-body);
+  color: var(--d-gold);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dturn .rbtn:hover:enabled { border-color: var(--d-gold); }
+.dturn .rbtn:disabled { color: var(--d-dim); cursor: not-allowed; }
+
+/* Ending combat is amber, not gold: it is the one control on the rail that
+   throws state away, and it should not read as just another verb. */
+.dturn .rbtn.end { color: var(--d-amber); }
+
+/* A spend button carries a number ("Spend 5 Lay on Hands"), so it takes the
+   mono face and the label size — it is a quantity, not a verb. */
+.dturn .rbtn.spend {
+  padding: 0 var(--d-s2);
+  font-size: var(--d-fs-label);
+  font-family: var(--d-font-mono);
+}
+.dturn .rail .slotrow,
+.dturn .rail .rpool { display: flex; align-items: center; gap: 6px; }
+.dturn .rail .slotrow em {
+  font-style: normal;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+}
+.dturn .rail .rpool .k { font-size: var(--d-fs-label); color: var(--d-dim); white-space: nowrap; }
+/* V-3: a pool's remaining count is a numeral you read under pressure, so it
+   takes the 7:1 gold rather than the dim its label uses. */
+.dturn .rail .rpool .v {
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-mono);
+  color: var(--d-gold);
+}
+.dturn .rail .rpool .v.spent { color: var(--d-dim); }
+
+/* ---- edge -----------------------------------------------------------------
+   Slice 7: a row inside `.pinned`, not a region of its own. Its padding and
+   its top rule moved to the parent, and the safe-area inset went with them —
+   the inset belongs to whatever is genuinely last on the screen, and that is
+   now the strip rather than this row. */
 .dturn .edge {
   flex: 0 0 auto;
   display: flex;
   gap: var(--d-s2);
-  padding: var(--d-s2) var(--pad) calc(var(--d-s2) + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--d-rule);
+  padding-inline: var(--pad);
 }
 .dturn .edge .btn {
   flex: 1 1 0;
@@ -342,6 +662,9 @@
     background: var(--d-rule);
   }
   .dturn .body > * { background: var(--d-bg); min-height: 0; }
+  /* With the rail present the third column goes: the rail already carries the
+     resources that colC was showing, and two copies is item 6 rebuilt. */
+  .dturn.has-rail .body { grid-template-columns: 300px minmax(0, 1fr); }
   .dturn .colA, .dturn .colC { display: flex; flex-direction: column; }
   /* On the tablet the SCROLL MOVES ONE LEVEL UP, for the same reason it moved
      on the phone: with .list no longer its own scroll region, the middle
@@ -358,8 +681,12 @@
   .dturn .list { padding-top: var(--d-s4); }
   .dturn .upon { flex-direction: column; align-items: flex-start; }
   .dturn .tag { max-width: 100%; }
-  .dturn .econ { grid-template-columns: 1fr; }
-  .dturn .eslot { flex-direction: row; justify-content: flex-start; gap: 9px; padding: 0 var(--pad); }
+  /* The econ strip used to be the last thing in colA on the tablet too, where
+     a 300px column made four-across cramped and one-per-row read better. Slice
+     7 moved it to the full-width pinned strip, so four-across is now the roomy
+     option and one-per-row would be 192px of permanent furniture. The rules
+     that stacked it are deleted rather than overridden — an override would
+     leave the reason for the original sitting in the file, still looking true. */
   .dturn .res { flex-direction: column; align-items: flex-start; gap: var(--d-s3); padding: var(--d-s4) var(--pad); overflow: visible; }
 }
 
@@ -432,6 +759,60 @@
 .dturn button.face:focus-visible {
   outline: 2px solid var(--d-gold);
   outline-offset: 2px;
+}
+
+/* ---- a row that carries its own control (slice 5, item 7) -----------------
+   One row on this screen is not just a thing you press — it is a thing you
+   press AND a place you record what just happened to you. The card therefore
+   splits: `.acthit` is the part that opens the sheet, `.actx` is the part that
+   belongs to the reaction itself.
+
+   `.acthit` is a bare button, stripped back to the block it replaces, because
+   the card's own padding and border already draw the row. Two rules here are
+   load-bearing and must not be tidied:
+
+   - `min-height: var(--d-touch-goal)` — V-5b. The hit target shrank to the
+     text when the padding moved to the card, and a 34px row is not a thing you
+     hit on the first try under a six second clock.
+
+   - `.act.hasx.blocked { opacity: 1 }` — the card must NOT dim as a whole.
+     Hearthfire Manifest is most often blocked precisely BECAUSE the reaction
+     was spent, and the moment it is spent is the moment there is a hit to
+     record. Dimming the card would grey out the one control that still works
+     at the one moment it is needed, so the dimming is pushed down onto the hit
+     target alone. */
+.dturn .acthit > span { display: block; }
+.dturn button.acthit {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--d-touch-goal);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.dturn button.acthit:disabled { cursor: default; }
+.dturn button.acthit:focus-visible {
+  outline: 2px solid var(--d-gold);
+  outline-offset: 2px;
+}
+.dturn .act.hasx.blocked { opacity: 1; }
+.dturn .act.hasx.blocked > .acthit { opacity: 0.62; }
+
+/* The hairline that joins the extra to its card, so the capture reads as part
+   of the reaction rather than as a loose control that happens to sit under it. */
+.dturn .act.hasx > .actx {
+  margin-top: var(--d-s2);
+  padding-top: var(--d-s2);
+  border-top: 1px solid var(--d-rule);
 }
 
 /* ---- the refusal ----------------------------------------------------------
@@ -524,4 +905,179 @@
   min-height: 60px;
   border-left: 3px solid var(--d-amber);
   background: linear-gradient(90deg, rgba(212, 167, 74, 0.1), var(--d-e1) 60%);
+}
+
+/* ---- THE FOUR BANDS — item 5 ----------------------------------------------
+   "It should be a very apparent and masterful organization visually."
+
+   Apparent means the eye can find the right shelf without reading, so each
+   band header carries the same four things in the same order and at the same
+   size, and the ONLY thing that varies between them is state:
+
+     the pip   lit amber when the slot is his, dark when it is spent
+     the label Cinzel at the 20px title floor (V-4: never smaller)
+     the count --d-tally, 8.55:1, because A NUMERAL IS NEVER DIM (V-3)
+     the state the word "open" or "spent", so the pip is not the only carrier
+               of the fact — colour alone is not a message
+
+   The header IS the collapse control, at 48px (V-5b), because a separate
+   chevron would be a second target for the same intent on a 390px phone. */
+.dturn .bands {
+  display: flex;
+  flex-direction: column;
+  gap: var(--d-s3);
+}
+.dturn .band {
+  border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius);
+  background: transparent;
+  overflow: hidden;
+}
+/* A LIVE BAND IS THE ONE HE CAN STILL SPEND, and it says so with its edge —
+   the same amber edge the lit row uses off-turn, at the same 3px, so the two
+   read as one language rather than two decorations. */
+.dturn .band.live { border-left: 3px solid var(--d-amber); }
+.dturn .band:not(.live) { border-left: 3px solid var(--d-rule-lit); }
+
+.dturn .bhead {
+  display: flex;
+  align-items: center;
+  gap: var(--d-s2);
+  width: 100%;
+  min-height: var(--d-touch-goal);
+  padding: var(--d-s2) var(--d-s3);
+  background: var(--d-e1);
+  text-align: left;
+}
+.dturn button.bhead:not(:disabled):active { background: var(--d-e2); }
+.dturn .bhead:focus-visible { outline: 2px solid var(--d-amber); outline-offset: -2px; }
+.dturn .bhead .dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--d-rule-lit);
+}
+.dturn .band.live .bhead .dot { background: var(--d-amber); }
+/* Cinzel, at the floor and not below it. The band label is the one word on the
+   row that has to be readable from a phone lying on a table between dice. */
+.dturn .bhead .blbl {
+  flex: 1 1 auto;
+  font-family: var(--d-font-display);
+  font-size: var(--d-fs-title);
+  color: var(--d-cream);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.dturn .bhead .bn {
+  flex: 0 0 auto;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-mono);
+  color: var(--d-tally);
+  white-space: nowrap;
+}
+.dturn .bhead .bstate {
+  flex: 0 0 auto;
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.dturn .band.live .bhead .bstate { color: var(--d-amber); }
+.dturn .bhead .bcar {
+  flex: 0 0 auto;
+  width: 16px;
+  text-align: center;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-mono);
+  color: var(--d-dim);
+}
+
+.dturn .brows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--d-s2);
+  padding: var(--d-s2) var(--d-s2) var(--d-s3);
+}
+/* AN EMPTY BAND IS NOT AN EMPTY BOX. See TurnBands.tsx — the sentence is the
+   whole element, and it is cream at body size because it is a sentence he is
+   meant to read, not a label he is meant to skip. */
+.dturn .bempty {
+  padding: var(--d-s3);
+  font-size: var(--d-fs-body);
+  color: var(--d-cream);
+}
+
+/* ---- the band note (slice 6, item 8) --------------------------------------
+   A gap where a row would be, and it must NOT read as a row: an option he can
+   take and a question the app is asking are different kinds of thing, and a
+   note that borrowed `.act`'s frame would look like a fifth reaction that
+   cannot be spent. So it is dashed where a row is solid.
+
+   Amber for the heading, not the ember this screen uses for `.why` and
+   `.refusal`: nothing here is broken and nothing was refused. The app is short
+   a fact and is asking for it, which is a different sentence and gets a
+   different colour. */
+.dturn .bnote {
+  display: block;
+  width: 100%;
+  min-height: var(--d-touch-goal);
+  margin: var(--d-s2) 0 0;
+  padding: var(--d-s3);
+  border: 1px dashed var(--d-rule-lit);
+  border-radius: var(--d-radius);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.dturn .bnote:hover { border-color: var(--d-amber); }
+.dturn .bnote:focus-visible {
+  outline: 2px solid var(--d-gold);
+  outline-offset: 2px;
+}
+.dturn .bnote > span { display: block; }
+.dturn .bnote .bnh {
+  font-size: var(--d-fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--d-amber);
+}
+.dturn .bnote .bnd {
+  margin-top: 4px;
+  font-size: var(--d-fs-body);
+  line-height: 1.45;
+  color: var(--d-cream);
+}
+/* The verb, on its own line and in gold, because everything above it is
+   explanation and this is the only part that is an instruction. */
+.dturn .bnote .bna {
+  margin-top: var(--d-s2);
+  font-size: var(--d-fs-label);
+  color: var(--d-gold);
+}
+
+/* ---- HIS BODY, INSIDE THE CARD — items 10 and 11, slice 3 ------------------
+
+   `VitalsControls` mounts `HPTracker variant="bare"`, which is a Tailwind
+   component and brings its own type, colours and button styling. This block
+   does NOT restyle it — restyling it here would be a second opinion about what
+   a damage button looks like, and the first opinion is already shipped and
+   tested. All this does is give it room and separate it from the readout it
+   belongs to. */
+.dturn .vctl {
+  margin-top: var(--d-s3);
+  padding-top: var(--d-s3);
+  border-top: 1px solid var(--d-rule);
+}
+
+/* The tracker's own controls are already 48px (V-5b) inside their module. This
+   is a floor, not a size: if a future change to the shared Button shrinks them,
+   the turn card is the one surface where that is a table-side failure rather
+   than a cosmetic one, so it is stated here as well as there. */
+.dturn .vctl button {
+  min-height: var(--d-touch-goal);
 }
