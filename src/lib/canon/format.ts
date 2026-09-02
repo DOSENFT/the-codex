@@ -334,7 +334,15 @@ function join(segments: Segment[]): string {
 
 /* ── The detail sheet's stat block ──────────────────────────────────────── */
 
-function renderComponents(spell: CanonSpell): string {
+/** "V, S, M (a pinch of soot)" — canon's component bag as one line.
+ *
+ *  Exported in Open Book slice 5 because `prepare/toggle.ts` needs the same
+ *  string for the other direction: the sheet's `Spell.components` is a display
+ *  string, so a canon record being converted onto the sheet has to produce one.
+ *  Shared rather than copied on purpose — two formatters for one field drift,
+ *  and the drift reads as a spell whose components change depending on which
+ *  screen he opened it from. */
+export function renderComponents(spell: CanonSpell): string {
   const c = spell.components
   const letters = [c.v && 'V', c.s && 'S', c.m && 'M'].filter(Boolean).join(', ')
   if (c.m && c.materialText) {

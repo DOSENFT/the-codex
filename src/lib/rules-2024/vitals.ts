@@ -42,6 +42,20 @@
 // `correct` field. There is nowhere to put the answer, because the app does not
 // have it.
 //
+// THE LAW STILL HOLDS, AND `adopt.ts` IS NOT AN EXCEPTION TO IT. Marcus ruled on
+// 2026-08-28 that his level-3 slots should not appear until the level that grants
+// them. That is the answer this file said it did not have — and it still does not
+// have it, because it was not derived here. It was supplied by the player about
+// his own sheet, so the thing that acts on it is a separate module he presses a
+// button to run, not a field on a `Discrepancy` that some future caller could
+// apply on his behalf. `discrepancies()` is unchanged: same fields, same silence.
+//
+// What DID change is that `SLOT_TABLE` and `describeSlots` are exported. The
+// alternative was a second copy of the class→table mapping inside `adopt.ts`, and
+// two copies of one mapping is the exact fault the whole Sheet Truth phase was
+// spent killing (`derive.ts:83`, "THIS IS THE ONLY COPY"). A shared constant is
+// cheaper to keep honest than a duplicated one.
+//
 // OPEN-WORLD, same as lookup.ts: a class this file has no table for produces no
 // discrepancy. Silence means "I have nothing to add", never "you are wrong".
 //
@@ -138,7 +152,7 @@ export function proficiencyForLevel(level: number): number {
  * that does not exist. Artificer is absent for a subtler reason: it is a
  * half-caster that rounds UP at level 1, so HALF_CASTER_SLOTS is wrong for it
  * specifically. Anything not listed here simply gets no slot check. */
-const SLOT_TABLE: Record<string, Record<number, Record<number, number>>> = {
+export const SLOT_TABLE: Record<string, Record<number, Record<number, number>>> = {
   Paladin: HALF_CASTER_SLOTS,
   Ranger: HALF_CASTER_SLOTS,
   Bard: FULL_CASTER_SLOTS,
@@ -148,7 +162,9 @@ const SLOT_TABLE: Record<string, Record<number, Record<number, number>>> = {
   Wizard: FULL_CASTER_SLOTS,
 }
 
-function describeSlots(slots: Record<number, number>): string {
+/** "1st ×4 · 2nd ×3", or "no spell slots". Levels with a max of 0 are not
+ *  mentioned, because a slot you do not have is not a fact about your turn. */
+export function describeSlots(slots: Record<number, number>): string {
   const levels = Object.keys(slots)
     .map(Number)
     .filter(level => slots[level] > 0)

@@ -161,7 +161,7 @@ describe('splitTrigger — cuts the sentence, never edits it', () => {
   })
 })
 
-describe('effectSentencesOf — the sheet wins when it has words', () => {
+describe('effectSentencesOf — the sheet wins when it SPEAKS', () => {
   it('uses the sheet\'s own effects and never reaches canon', () => {
     /* The open-world rule's other half. A homebrew feat named "Sentinel" that
        does something else must keep its own text, or the app hands Marcus the
@@ -170,14 +170,18 @@ describe('effectSentencesOf — the sheet wins when it has words', () => {
       name: 'Sentinel',
       effects: ['When the fire gutters, you can take a Reaction to feed it.'],
     })
-    expect(effectSentencesOf(mine, SENTINEL)).toEqual([
-      'When the fire gutters, you can take a Reaction to feed it.',
-    ])
+    expect(effectSentencesOf(mine, SENTINEL)).toEqual({
+      sentences: ['When the fire gutters, you can take a Reaction to feed it.'],
+      from: 'sheet',
+    })
   })
 
   it('falls through to canon when the sheet stored nothing — the common import case', () => {
     const thin = feat({ name: 'Sentinel', description: '', effects: [] })
-    expect(effectSentencesOf(thin, SENTINEL)).toEqual(SENTINEL.effects)
+    expect(effectSentencesOf(thin, SENTINEL)).toEqual({
+      sentences: SENTINEL.effects,
+      from: 'canon',
+    })
   })
 
   it('splits a one-paragraph description into sentences when it carries a reaction', () => {
@@ -187,19 +191,210 @@ describe('effectSentencesOf — the sheet wins when it has words', () => {
         'You watch the pot. When it boils over, you can take a Reaction to smother it. You also smell smoke at 30 feet.',
     })
     const out = effectSentencesOf(blob, undefined)
-    expect(out.length).toBe(3)
-    expect(out.filter(isReactionShaped).length).toBe(1)
+    expect(out.sentences.length).toBe(3)
+    expect(out.sentences.filter(isReactionShaped).length).toBe(1)
+    // His paragraph, so his mark — even though canon never got a look in.
+    expect(out.from).toBe('description')
   })
 
   it('does not let a flavour paragraph shut canon out', () => {
     /* A description with no reaction in it is not an answer to the question this
        module asks, so canon still gets to speak. */
     const flavour = feat({ name: 'Sentinel', description: 'A gift of the watchful.' })
-    expect(effectSentencesOf(flavour, SENTINEL)).toEqual(SENTINEL.effects)
+    expect(effectSentencesOf(flavour, SENTINEL)).toEqual({
+      sentences: SENTINEL.effects,
+      from: 'canon',
+    })
   })
 
   it('returns nothing, rather than throwing, when nobody has words', () => {
-    expect(effectSentencesOf(feat({ name: 'Nameless' }), undefined)).toEqual([])
+    expect(effectSentencesOf(feat({ name: 'Nameless' }), undefined)).toEqual({
+      sentences: [],
+      from: 'sheet',
+    })
+  })
+})
+
+/* ============================================================================
+   HELD REACTION SLICE 2 — a silence is a missing FACT, not an empty field.
+
+   Marcus's real export, not the fixture. His importer wrote a feat guide's
+   "who should take this" section into Sentinel's mechanical field, so the app
+   read three marketing bullets, concluded "the sheet has spoken", and shut
+   canon out of the one feat whose reaction is not written anywhere else on his
+   sheet. `own.length > 0` was the whole of the fault.
+
+   The rule is now `own.some(isReactionShaped)`. Everything below is either
+   that fault, or the guarantee it must not break: WHEN THE SHEET GENUINELY
+   STATES A REACTION, IT STILL WINS.
+   ========================================================================= */
+
+/** The three strings his export actually stores under Sentinel.effects.
+ *  Read from `docs/plans/reactions/00-status.md`'s measured record of his
+ *  sheet, and reproduced here because his export is not in the repo. */
+const HIS_SENTINEL_BULLETS = [
+  'Polearm Master (OA when enemies enter your 10 ft reach)',
+  'Reach weapons (Glaive, Halberd) for a massive control zone',
+  'Fighters, Paladins, and other frontliners who want to lock enemies down',
+]
+
+describe("slice 2 — three sentences that state no rule are no more rule than none", () => {
+  const his = feat({ name: 'Sentinel', effects: HIS_SENTINEL_BULLETS })
+
+  it('his stored bullets state no reaction at all — the premise, measured', () => {
+    /* If this ever goes red the rest of this block is about a sheet he does not
+       have. Note the FIRST bullet mentions an Opportunity Attack and is still
+       not one: it is advice about a different feat. */
+    expect(HIS_SENTINEL_BULLETS.filter(isReactionShaped)).toEqual([])
+    expect(HIS_SENTINEL_BULLETS.length).toBe(3)
+  })
+
+  it('reads a silence and lets canon fill it — and says the words are canon\'s', () => {
+    const out = effectSentencesOf(his, SENTINEL)
+    expect(out.from).toBe('canon')
+    expect(out.sentences).toEqual(SENTINEL.effects)
+    expect(out.sentences.filter(isReactionShaped).length).toBe(2)
+  })
+
+  it('canon states the reaction that is nowhere on his sheet', () => {
+    /* The point of the whole slice. This sentence exists in exactly one place in
+       his world, and it is not his character sheet. Matched by its own shape and
+       compared against canon's record, never against a copy typed in here. */
+    const { sentences } = effectSentencesOf(his, SENTINEL)
+    const attackRider = sentences.find(s => /attacks a target other than you/i.test(s))
+    expect(attackRider, "canon's attack-someone-else clause").toBeTruthy()
+    expect(SENTINEL.effects).toContain(attackRider)
+    expect(HIS_SENTINEL_BULLETS.join(' ')).not.toContain('other than you')
+  })
+
+  it('THE SHEET STILL WINS when it genuinely states a reaction', () => {
+    /* The guarantee. One reaction-shaped sentence among his bullets and canon
+       is not asked — not for the reaction, and not for the bullets either: the
+       array comes back whole, because it is his. */
+    const homebrew = feat({
+      name: 'Sentinel',
+      effects: [...HIS_SENTINEL_BULLETS, 'When a torch gutters, you can take a Reaction to feed it.'],
+    })
+    const out = effectSentencesOf(homebrew, SENTINEL)
+    expect(out.from).toBe('sheet')
+    expect(out.sentences).toEqual(homebrew.effects)
+    expect(out.sentences.some(s => SENTINEL.effects!.includes(s))).toBe(false)
+  })
+
+  it('a sheet whose words canon has never heard of keeps them, and keeps his mark', () => {
+    /* No canon record at all. The fall-through must not lose his words on the
+       way past the two silences — that would be the fix eating the sheet. */
+    const unknown = feat({ name: 'Kettlewarden', effects: ['Increase your Wisdom by 1.'] })
+    expect(effectSentencesOf(unknown, undefined)).toEqual({
+      sentences: ['Increase your Wisdom by 1.'],
+      from: 'sheet',
+    })
+  })
+
+  it('a description that states a reaction beats canon, and is marked as HIS', () => {
+    /* His paragraph is still his. Canon holds two clauses; his description holds
+       one; the app must not merge them or silently prefer the longer. */
+    const described = feat({
+      name: 'Sentinel',
+      effects: HIS_SENTINEL_BULLETS,
+      description: 'When a ward breaks, you can take a Reaction to step into the gap.',
+    })
+    const out = effectSentencesOf(described, SENTINEL)
+    expect(out.from).toBe('description')
+    expect(out.sentences).toEqual([
+      'When a ward breaks, you can take a Reaction to step into the gap.',
+    ])
+  })
+})
+
+describe('slice 2 — featReactionOptions says whose words each row is', () => {
+  const his = withFeats([
+    feat({ name: 'Sentinel', effects: HIS_SENTINEL_BULLETS }),
+    feat({ name: 'Interception' }),
+  ])
+
+  it('gives him the two Sentinel rows his sheet could never produce', () => {
+    const options = featReactionOptions(his)
+    const sentinels = options.filter(o => o.name === 'Sentinel')
+    expect(sentinels.length).toBe(2)
+    expect(sentinels[0].mechanicsLine).not.toBe(sentinels[1].mechanicsLine)
+    expect(sentinels.every(o => o.wordsFrom === 'canon')).toBe(true)
+  })
+
+  it('marks a sheet-worded row as his, on the same run as a canon-worded one', () => {
+    /* Both kinds in one call, because the marker is per ROW and a per-character
+       flag would be right for this sheet and wrong for the next one. */
+    const mixed = withFeats([
+      feat({ name: 'Sentinel', effects: HIS_SENTINEL_BULLETS }),
+      feat({
+        name: 'Interception',
+        effects: ['When a friend is struck, you can take a Reaction to catch the blow.'],
+      }),
+    ])
+    const options = featReactionOptions(mixed)
+    const from = (n: string) => options.filter(o => o.name === n).map(o => o.wordsFrom)
+    expect(from('Sentinel')).toEqual(['canon', 'canon'])
+    expect(from('Interception')).toEqual(['sheet'])
+  })
+
+  it('still never ellipsises, on the road canon now takes', () => {
+    for (const o of featReactionOptions(his)) {
+      expect(o.summary + o.mechanicsLine + o.effectsLine).not.toContain('…')
+      expect(o.summary + o.mechanicsLine + o.effectsLine).not.toContain('...')
+    }
+  })
+})
+
+describe("slice 2 — the band, on a sheet shaped like his export", () => {
+  const his = withFeats([
+    feat({ name: 'Sentinel', effects: HIS_SENTINEL_BULLETS }),
+    feat({ name: 'Interception' }),
+  ])
+  const rows = reactionRows(composeTurn({ character: his, combat: null }), his)
+  const named = (n: string) => rows.filter(r => r.option.name === n)
+
+  it('Sentinel reaches the reactions band, twice, with two different triggers', () => {
+    expect(named('Sentinel').length).toBe(2)
+    const whens = named('Sentinel').map(r => r.when)
+    expect(new Set(whens).size).toBe(2)
+    expect(whens.every(w => typeof w === 'string' && w.length > 0)).toBe(true)
+  })
+
+  it('one of them is the trigger that is NOWHERE on his sheet', () => {
+    const attackRider = named('Sentinel').find(r => /other than you/i.test(r.when ?? ''))
+    expect(attackRider, 'the attack-someone-else reaction').toBeTruthy()
+    expect(HIS_SENTINEL_BULLETS.join(' ')).not.toContain('other than you')
+  })
+
+  it("marks the canon-worded rows as canon's, not as his", () => {
+    /* The overlay's third index, measured at the far end of the pipeline rather
+       than at the function that sets it — `wordsFrom` has to survive the trip
+       through `compose.ts`, whose reaction list is typed as plain
+       `ActionOption`s. If that carry is ever lost this goes red. */
+    for (const row of [...named('Sentinel'), ...named('Interception')]) {
+      expect(row.provenance, row.name).toBe('canon')
+    }
+  })
+
+  it('leaves a genuinely homebrew feat marked as his', () => {
+    const mine = withFeats([
+      feat({
+        name: 'Sentinel',
+        effects: ['When a torch gutters, you can take a Reaction to feed it.'],
+      }),
+    ])
+    const band = reactionRows(composeTurn({ character: mine, combat: null }), mine)
+    const sentinels = band.filter(r => r.option.name === 'Sentinel')
+    expect(sentinels.length).toBe(1)
+    expect(sentinels[0].provenance).toBe('sheet')
+    expect(sentinels[0].when).toContain('When a torch gutters')
+  })
+
+  it('displaces nothing — the reactions he already had are all still there', () => {
+    const names = rows.map(r => r.name)
+    expect(names).toContain('Opportunity Attack — Hearthbrand')
+    expect(names).toContain('Flaming Cloak')
+    expect(named('Interception').length).toBe(1)
   })
 })
 

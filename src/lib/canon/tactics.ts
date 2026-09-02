@@ -114,6 +114,24 @@ export function splitTactics(text: string): TacticsBullet[] {
   return bullets
 }
 
+/** The space between a heading and its body — '' or ' '.
+ *
+ *  A colon attaches to the word before it; a dash does not. Canon writes both,
+ *  and `splitTactics` hands the separator to the body with its leading
+ *  whitespace trimmed, so «IT IGNORES COVER — that is» arrives as
+ *  «IT IGNORES COVER— that is» unless the space is put back for dashes only.
+ *
+ *  THIS IS TYPOGRAPHY AND IT IS A RENDERER'S PROBLEM: the model must keep
+ *  canon's characters exactly, and the space is a fact about two rendered
+ *  elements sitting next to each other. It lives HERE, rather than inline in a
+ *  component, because as of Open Book slice 3 there are two components drawing
+ *  band 3 — the combat sheet and the Grimoire panel — and a typographic rule
+ *  written out twice is a rule that will eventually be true in only one place.
+ *  Same doctrine as `bands.ts` itself, one size down. */
+export function leadGap(bullet: TacticsBullet): string {
+  return bullet.lead && /^[—–-]/.test(bullet.body) ? ' ' : ''
+}
+
 /** The rejoin used by the test, and by anything that needs the original back.
  *  Kept here so the invariant is defined next to the thing it constrains. */
 export function rejoinTactics(bullets: readonly TacticsBullet[]): string {

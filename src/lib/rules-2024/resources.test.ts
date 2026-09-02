@@ -83,7 +83,7 @@ describe('poolsOf — every countable thing, from wherever it lives', () => {
   })
 
   it('does not count a half-declared counter as a pool at all', () => {
-    // The app's own rule (GrimoireCard:132, LoadoutPanel:168): tracked means
+    // The app's own rule (GrimoirePage's `uses`, LoadoutPanel:168): tracked means
     // BOTH halves present. A max with no current is UNLIMITED, not empty — and
     // the bug this replaced rendered it as "0 / 2" and refused to fire it.
     const half: ClassFeature = { name: 'Ember Ward', level: 1, description: '...', usesMax: 2 }

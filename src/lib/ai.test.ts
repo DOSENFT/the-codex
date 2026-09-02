@@ -20,6 +20,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   AIError,
   AI_TIMEOUTS,
+  aiErrorMessage,
   canFallBack,
   clearModelNotice,
   describeGeminiModel,
@@ -699,5 +700,107 @@ describe('22 — no model id is compiled into this app', () => {
       offenders,
       `a retired Gemini model id is compiled into:\n${offenders.join('\n')}`,
     ).toEqual([])
+  })
+})
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SWALLOWED ERROR — the Toybox AI's "check your AI settings"
+   ---------------------------------------------------------------------------
+   Marcus reported the Toybox AI failing on all three tabs with "AI suggestion
+   failed. Check your AI settings and try again." while the combat advisor
+   worked. That sentence was not a diagnosis, it was the ABSENCE of one:
+   `ToyboxPanel.handleAISuggest` ended in a bare `catch {}` that discarded the
+   AIError and printed a fixed string. The advice it gave was wrong for every
+   cause except a missing key, and the cause could not be recovered afterwards
+   by anyone — user or session.
+
+   Section A aims at the function; per finding BM that is NOT enough on its own,
+   because a correct function the component does not call is a half-built
+   feature running as if done. Section B aims at the WIRE, by source scan
+   (finding BG: forbid the fault rather than fail to observe it), because this
+   repo has no jsdom and an async catch handler cannot be driven through
+   `renderToStaticMarkup`. The taps themselves are driven for real by
+   docs/plans/toybox-ai/prove-ai-error.mjs.
+   ═════════════════════════════════════════════════════════════════════════ */
+describe('aiErrorMessage — what a failure is allowed to say', () => {
+  /* ─── A. the function ─────────────────────────────────────────────────── */
+
+  it('A1 — keeps what a chatty model actually said, rather than blaming Settings', () => {
+    // The real message queryAIStructured builds. It names the true fault: the
+    // key worked, the model answered, and the answer was not JSON.
+    const err = new AIError('api', 'The model did not return JSON. It said: Sure! Here are some combo ideas')
+    expect(aiErrorMessage(err)).toBe(
+      'The model did not return JSON. It said: Sure! Here are some combo ideas',
+    )
+    expect(aiErrorMessage(err)).not.toContain('Check your AI settings')
+  })
+
+  it('A2 — keeps a retired-model 404, which carries its own fix', () => {
+    const err = new AIError(
+      'api',
+      'models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-2.5-flash',
+      404,
+      '{"error":{"message":"…"}}',
+    )
+    expect(aiErrorMessage(err)).toContain('gemini-2.5-flash')
+  })
+
+  it('A3 — a cancelled request says NOTHING, because it is a decision not a fault', () => {
+    // Not "" and not a generic sentence: null is the signal the caller needs to
+    // paint no red text at all. useAI.ts:103 makes the same distinction.
+    expect(aiErrorMessage(new AIError('cancelled', 'Aborted'))).toBeNull()
+  })
+
+  it('A4 — a config failure still names the provider it is talking about', () => {
+    const err = new AIError('config', 'No Gemini API key set. Add one in Settings, or switch to Ollama.')
+    expect(aiErrorMessage(err)).toContain('Gemini')
+    expect(aiErrorMessage(err)).toContain('Ollama')
+  })
+
+  it('A5 — a plain Error keeps its message; only a non-Error gets the generic sentence', () => {
+    expect(aiErrorMessage(new Error('fetch failed'))).toBe('fetch failed')
+    // A thrown string has genuinely told us nothing, so the fallback is honest.
+    expect(aiErrorMessage('boom')).toBe('AI suggestion failed. Check your AI settings and try again.')
+    expect(aiErrorMessage(new Error('   '))).toBe('AI suggestion failed. Check your AI settings and try again.')
+  })
+
+  /* ─── B. the wire ─────────────────────────────────────────────────────── */
+
+  it('B1 — ToyboxPanel does not swallow its AI error', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { resolve } = await import('node:path')
+    const src = readFileSync(
+      resolve(__dirname, '../components/ToyboxPanel.tsx'),
+      'utf8',
+    )
+
+    // The exact shape of the fault, which is what actually shipped.
+    expect(
+      src.includes("catch {\n      setAiError('AI suggestion failed"),
+      'the bare catch that discarded the AIError is back',
+    ).toBe(false)
+
+    // And the positive claim: the handler routes through the one function that
+    // decides what a failure may say. A `catch (err)` that ignored `err` would
+    // pass the check above and fail this one.
+    expect(src, 'ToyboxPanel no longer calls aiErrorMessage').toContain('setAiError(aiErrorMessage(err))')
+    expect(src, 'ToyboxPanel does not import aiErrorMessage').toMatch(
+      /import \{ aiErrorMessage \} from '\.\.\/lib\/ai'/,
+    )
+  })
+
+  it('B2 — no bare catch remains anywhere in ToyboxPanel', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { resolve } = await import('node:path')
+    const src = readFileSync(resolve(__dirname, '../components/ToyboxPanel.tsx'), 'utf8')
+    /* Comments come out FIRST. The fix's own comment quotes the fault it
+       describes, so a scan of the raw text finds a bare catch in the very
+       sentence explaining why there is no longer one — and a check that cries
+       wolf at prose is a check somebody deletes. Scan the code, not the essay. */
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+    // `catch {` with no binding cannot inspect what it caught. Finding BG: this
+    // forbids the whole class, not just the one instance that was reported.
+    const bare = [...code.matchAll(/\bcatch\s*\{/g)]
+    expect(bare.map(m => code.slice(m.index, m.index + 60)), 'a bare catch is back').toEqual([])
   })
 })

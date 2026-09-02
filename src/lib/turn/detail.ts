@@ -33,20 +33,17 @@
 import type { Character } from '../character'
 import type { CanonErratum, CanonFeature, CanonSpell } from '../canon/types'
 import type { EconomyState, TurnOption } from './types'
-import { errataForFeature, featureByName, spellByName } from '../canon/lookup'
-import { statBlock } from '../canon/format'
-import { featureFacts, type FeatureFact } from '../canon/feature'
-import { splitTactics, type TacticsBullet } from '../canon/tactics'
-import { personaliseBullets } from '../canon/personalise'
+import { featureByName, spellByName } from '../canon/lookup'
+import type { TacticsBullet } from '../canon/tactics'
+import { canonBands, type BandFact } from '../canon/bands'
 import { rollOffers, type RollOffer } from './rolls'
 import { replacementWarning, tempHPReplacement } from '../rules-2024/temp-hp'
-import { casterContextOf, featureContextOf } from './overlay'
+import { casterContextOf } from './overlay'
 
-export interface DetailFact {
-  /** null for a fact the source stated without naming — a bare detail segment. */
-  label: string | null
-  value: string
-}
+/** Band 1's row shape. An alias of `BandFact` since Open Book slice 2 moved the
+ *  assembly into `canon/bands.ts`; kept under its own name because it is part of
+ *  `OptionDetail`, which the combat sheet and its tests are written against. */
+export type DetailFact = BandFact
 
 export interface RuleBox {
   /** 'blocked' means the rule stops this option right now; 'notice' means it
@@ -124,28 +121,6 @@ function factsFromSheet(option: TurnOption): DetailFact[] {
   return facts
 }
 
-/** Band 1 for a feature. Canon's mechanics bag, classified.
- *
- *  A 'computed' fact shows its working — "12 temp HP (Paladin level +
- *  Charisma modifier)" — because the number is derived and Marcus is entitled
- *  to check it against his own sheet rather than trust it. */
-function factsFromFeature(facts: readonly FeatureFact[]): DetailFact[] {
-  return facts.map(fact => ({
-    label: fact.label,
-    value:
-      fact.shape === 'computed' && fact.raw !== fact.value
-        ? `${fact.value} (${fact.raw})`
-        : // Slice 10e. The row has 46 characters and says "(free)"; the sheet
-          // has the whole width and says which costs are the ones not being
-          // charged, because "free" is the word Marcus would have to take on
-          // trust and this is the sentence that makes it checkable. Canon's own
-          // string is kept in front of it, unedited.
-          fact.free
-          ? `${fact.raw} — free: no Action, no Bonus Action, no Reaction, no use`
-          : fact.value,
-  }))
-}
-
 /** The 2024 one-levelled-slot-per-turn rule, read off the ACTUAL turn.
  *
  *  This is the single rule the app is most able to get wrong in the player's
@@ -166,32 +141,6 @@ function ruleBoxFor(option: TurnOption, economy: EconomyState): RuleBox | null {
         tone: 'notice',
         text: `Casting this spends your ${slot} slot AND your one levelled spell slot for the turn. Nothing else levelled can follow it this turn.`,
       }
-}
-
-/** Join the caster's save DC onto canon's Save row. Slice 9.
- *
- *  `statBlock` is pure over the spell and has no character, so it can only say
- *  WHICH save — "Dexterity — negates". The number is the half you say out loud
- *  to a DM, and the retired "Actions Reference" panel had it: it reached for
- *  `character.spellSaveDC` itself and painted «DC 16 Dexterity». Retiring that
- *  panel without this join would have cost Marcus a fact, which the prime law
- *  forbids, so the fact moves here first.
- *
- *  THE JOIN LIVES HERE, NOT IN `format.ts`. That file is the pure canon
- *  formatter; handing it a character would make every one of its callers need
- *  one, which is how a formatter turns into a view model. Here the character is
- *  already in hand.
- *
- *  It is a PREFIX, not a replacement: canon's effect ("negates", "half on a
- *  success") is the other half of the ruling and is never dropped. */
-function withSaveDC(facts: DetailFact[], character: Character): DetailFact[] {
-  const dc = character.spellSaveDC
-  if (!dc) return facts
-  return facts.map(fact =>
-    fact.label === 'Save' && !/\bDC\b/.test(fact.value)
-      ? { ...fact, value: `DC ${dc} ${fact.value}` }
-      : fact
-  )
 }
 
 /* WHAT THE SPEND BUTTON IS FOR — widened in slice 10c.
@@ -236,43 +185,80 @@ function tempHPWarningFor(option: TurnOption, character: Character): string | nu
  *  fetch, no clock. It renders identically with the AI off and the wifi off,
  *  which is the requirement this whole slice was scoped around. */
 export function optionDetail(
-  option: TurnOption,
+  option: TurnOption & { provenance?: 'canon' | 'sheet' },
   character: Character,
   economy: EconomyState
 ): OptionDetail {
   const { spell, feature } = resolve(option)
 
-  // Computed once: band 1 prints these, and band 3 rolls the dice among them.
-  const canonFacts = feature ? featureFacts(feature, featureContextOf(character)) : []
-
-  const facts: DetailFact[] = spell
-    ? withSaveDC(
-        statBlock(spell).map(f => ({ label: f.label, value: f.value })),
-        character
-      )
-    : feature
-      ? factsFromFeature(canonFacts)
-      : factsFromSheet(option)
-
-  // A canon feature whose mechanics bag is empty still deserves a band 1 — it
-  // has a cost and a source like everything else.
-  const filled = facts.length > 0 ? facts : factsFromSheet(option)
+  /* Bands 1, 2 and 4 — and the errata — are assembled by `canon/bands.ts`,
+   * which the Grimoire's detail panel also calls. Open Book slice 2. What is
+   * left in this function is everything that is about a TURN: the rolls, the
+   * spend affordance, the live rule box and the temp-HP warning. */
+  const bands = canonBands(
+    {
+      name: option.name,
+      spell: spell ?? null,
+      feature: feature ?? null,
+      // The turn layer resolves spells and features only; a feat reaches the
+      // deck as an option in its own right, never as a canon record here.
+      feat: null,
+      fallbackText: option.detail,
+      fallbackFacts: factsFromSheet(option),
+    },
+    character
+  )
 
   return {
     title: option.name,
     subtitle: [option.cost.label, option.source].filter(Boolean).join(' · '),
-    provenance: spell || feature ? 'canon' : 'sheet',
-    facts: filled,
-    // The three sources, in order of who has the most to say. `option.detail`
-    // is the fallback and is exactly the string ActionMenu cuts at 80 chars.
-    whatItDoes: spell?.summary || feature?.rawText || option.detail,
+    /* ── WHOSE WORDS THESE ARE IS ASKED ONCE, UPSTREAM — Held Reaction 5b ────
+     *
+     * Measured, not reasoned about. `measure-slice6b.mjs` opened all four rows
+     * of his reactions band and found "your own" painted over BOTH Sentinel
+     * sheets — whose text slice 2 had just finished importing out of the book.
+     * That is this phase's fault wearing its politest costume, and
+     * `overlay.ts:427` names it in as many words: "the book's words, over a
+     * mark that says they are his… the reason Marcus could quote a rule at his
+     * DM believing he had written it." Slice 2 killed it on the ROW. It was
+     * still alive one layer down, on the screen he would actually read before
+     * quoting the rule.
+     *
+     * THE CAUSE IS TWO JUDGES OF ONE FACT. `canonBands` answers "did canon hold
+     * a record?" — `bands.ts:194`, `spell || feature || feat`. This tag asks a
+     * different question: "did these words come out of the book?" They coincide
+     * for spells and features and come apart for FEATS, because `resolve` above
+     * looks up spells and features only, on purpose. Sentinel is neither, so
+     * bands says 'sheet' about text that is verbatim canon.
+     *
+     * AND THE FIX IS NOT TO PASS THE FEAT. `canonBands` would then take band 1
+     * from `factsFromFeat` — Category, Prerequisite, Ability Score — replacing
+     * the reaction's actual numbers with feat trivia on a COMBAT sheet, and
+     * band 2 with the whole feat entry instead of this face's own text.
+     * `bands.ts:150` says so and `bands.test.ts` pins it. That is a real
+     * constraint, not an obstacle to route around: the turn layer wants canon's
+     * PROVENANCE without canon's feat FACTS.
+     *
+     * So it reads the answer that already exists. `overlayCanon` decided this
+     * for the row, from `wordsFrom`, which is the only thing in the app that
+     * knows where the sentences came from. Deciding it a second time here is
+     * how the row and the sheet it opens come to disagree — the same rule
+     * `ReactionRow` states for its undo gate: two judges of one fact is how
+     * they disagree.
+     *
+     * Optional, and the fallback is `bands`. A plain `TurnOption` — every
+     * pre-overlay caller, and every test written against one — carries no
+     * `provenance` and gets exactly the answer it got before. */
+    provenance: option.provenance ?? bands.provenance,
+    facts: bands.facts,
+    whatItDoes: bands.whatItDoes,
     rolls: rollOffers({
       detail: option.detail,
       spell: spell ?? null,
       // A canon feature states its dice in the mechanics bag and nowhere else.
       // See RollSource.segments for why leaving these out made a KNOWN feature
       // worse off than an unknown one.
-      segments: canonFacts.filter(f => f.shape === 'dice').map(f => f.raw),
+      segments: bands.featureFacts.filter(f => f.shape === 'dice').map(f => f.raw),
       ctx: casterContextOf(character),
     }),
     spend: spendFor(option),
@@ -281,10 +267,7 @@ export function optionDetail(
     // warning about itself.
     spendWarning: tempHPWarningFor(option, character),
     ruleBox: ruleBoxFor(option, economy),
-    errata: errataForFeature(option.name) as CanonErratum[],
-    // SHEET TRUTH slice 5 — the one prose seam. `splitTactics` runs on canon
-    // UNMODIFIED so its heading detection still sees the text its author wrote;
-    // the substitution happens to the bullets that come out of it.
-    tactics: spell ? personaliseBullets(splitTactics(spell.tactics), character) : [],
+    errata: bands.errata,
+    tactics: bands.tactics,
   }
 }

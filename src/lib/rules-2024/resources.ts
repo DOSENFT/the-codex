@@ -129,7 +129,7 @@ export function poolsOf(character: Character): ResolvedPool[] {
     const feature = features[index]!
     if (feature.level > character.level) continue
     // BOTH halves. This is the app's own definition of a tracked counter
-    // (GrimoireCard:132, LoadoutPanel:168) and treating a half-declared one as
+    // (GrimoirePage's `uses`, LoadoutPanel:168) and treating a half-declared one as
     // empty is the bug Slice 6 found: a usable homebrew ability displayed as
     // "0 / 2" and refused to fire. Half-declared means UNTRACKED, so it is not
     // a pool at all and nothing may charge it.

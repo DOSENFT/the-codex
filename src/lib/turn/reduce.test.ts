@@ -187,9 +187,9 @@ describe('the round-trip proof — undo restores, it does not recompute', () => 
   })
 
   it('never charges a half-declared counter, so there is nothing absent to restore', () => {
-    // `usesMax` with no `usesCurrent` is UNTRACKED — GrimoireCard:132 and
+    // `usesMax` with no `usesCurrent` is UNTRACKED — GrimoirePage's `uses` and
     // LoadoutPanel:168 both define a tracked counter as having both halves,
-    // and GrimoireCard lets Marcus press an untracked ability freely. The
+    // and the Grimoire lets Marcus press an untracked ability freely. The
     // reducer must not be the one screen that calls it exhausted.
     const feature: ClassFeature = {
       name: 'Ember Ward',

@@ -101,20 +101,53 @@ export function isReactionShaped(effect: string): boolean {
   return REACTION_COST.test(effect)
 }
 
+/** Whose words a feat's reaction rows are made of. */
+export type SentenceSource = 'sheet' | 'description' | 'canon'
+
+/** The sentences, and who said them.
+ *
+ *  ONE function returns both, because two functions would be two answers that
+ *  can disagree about the same row — and "whose words are these" is a question
+ *  the screen has to be able to answer about words it is already printing. */
+export interface FeatSentences {
+  sentences: string[]
+  from: SentenceSource
+}
+
 /** The sentences to read a feat's reactions out of.
  *
- *  THE SHEET WINS WHEN IT HAS WORDS. This is the open-world rule's other half
- *  and it is not politeness: a homebrew feat named "Sentinel" that does
- *  something else entirely must keep its own text, or the app hands Marcus the
- *  published feat's rules under his own feat's name — confident, and wrong.
+ *  THE SHEET WINS WHEN IT SPEAKS. This is the open-world rule's other half and
+ *  it is not politeness: a homebrew feat named "Sentinel" that does something
+ *  else entirely must keep its own text, or the app hands Marcus the published
+ *  feat's rules under his own feat's name — confident, and wrong.
  *
- *  Canon fills a SILENCE, never overrides. Marcus's stored feats came through an
- *  importer that took whatever his export gave it, so `effects: []` beside a
- *  one-line description is the common case — and that case is exactly where
- *  canon's full text is the difference between a usable row and a blank one. */
-export function effectSentencesOf(feat: CharacterFeat, canon?: CanonFeat): string[] {
+ *  ── WHAT "SPEAKS" MEANS, AND WHY IT CHANGED ────────────────────────────────
+ *  Until Held Reaction slice 2 the test was `own.length > 0`: a non-empty
+ *  `effects` array counted as the sheet having spoken. Measured against Marcus's
+ *  real export, that is what makes Sentinel unplayable. His importer wrote a
+ *  feat guide's "who should take this" section into the mechanical field:
+ *
+ *    "Polearm Master (OA when enemies enter your 10 ft reach)"
+ *    "Reach weapons (Glaive, Halberd) for a massive control zone"
+ *    "Fighters, Paladins, and other frontliners who want to lock enemies down"
+ *
+ *  Not one of those is a rule, and none of them is a reaction. Three sentences
+ *  that state no reaction and an empty array are THE SAME AMOUNT OF REACTION,
+ *  and this phase's law says a silence is a missing fact rather than an empty
+ *  field. So the test is now `own.some(isReactionShaped)` — the sheet has spoken
+ *  about this feat's reactions when it states one, not when it stores a string.
+ *
+ *  The scope of that rule is exactly the scope of this function, which is not a
+ *  general "what does this feat do" — it is "which words state this feat's
+ *  reactions". A sheet whose bullets are marketing has answered a different
+ *  question, and canon is not overridden by an answer to a different question.
+ *
+ *  Canon fills a SILENCE, never overrides. When the sheet DOES state a reaction
+ *  — homebrew or not — canon never gets asked, and `from` says so, so a caller
+ *  can never print canon's rules under a mark that says they are his. */
+export function effectSentencesOf(feat: CharacterFeat, canon?: CanonFeat): FeatSentences {
   const own = (feat.effects ?? []).map(e => e.trim()).filter(Boolean)
-  if (own.length > 0) return own
+  if (own.some(isReactionShaped)) return { sentences: own, from: 'sheet' }
 
   /* The description is a fallback for the fallback: some importers put the whole
      feat in one paragraph. Split on sentence ends so a trigger clause can still
@@ -127,10 +160,16 @@ export function effectSentencesOf(feat: CharacterFeat, canon?: CanonFeat): strin
       .split(/(?<=[.!?])\s+(?=[A-Z])/)
       .map(s => s.trim())
       .filter(Boolean)
-    if (sentences.some(isReactionShaped)) return sentences
+    if (sentences.some(isReactionShaped)) return { sentences, from: 'description' }
   }
 
-  return (canon?.effects ?? []).map(e => e.trim()).filter(Boolean)
+  const book = (canon?.effects ?? []).map(e => e.trim()).filter(Boolean)
+  if (book.length > 0) return { sentences: book, from: 'canon' }
+
+  /* Nobody stated a reaction anywhere. The sheet's own words are still the only
+     words there are, so they are what comes back — reported as his, which they
+     are. Empty when he has none either, which is a `[]` and never a throw. */
+  return { sentences: own, from: 'sheet' }
 }
 
 /** Cut a trigger-first sentence into its trigger and everything else.
@@ -165,19 +204,31 @@ export function splitTrigger(sentence: string): { trigger: string; effect: strin
   }
 }
 
+/** An `ActionOption` that came from a feat, carrying the one fact no other
+ *  source has to declare: whose words it is showing.
+ *
+ *  It rides as far as the canon overlay, which is the layer that decides
+ *  `provenance` for every row on the screen. Without it the overlay would have
+ *  to guess — and "canon knows a feat by this name" is not the same claim as
+ *  "these words came from canon", which is the exact confusion this phase
+ *  exists to remove. */
+export interface FeatReactionOption extends ActionOption {
+  wordsFrom: SentenceSource
+}
+
 /** Every reaction a character's feats give them, as sheet-layer options.
  *
  *  Built at the `ActionOption` layer on purpose, not as finished `TurnOption`s:
  *  that is the one seam every other source already passes through, so these rows
  *  inherit the canon overlay, ranking, contention, the reactions band, the
  *  detail sheet and 10c's spend without a line of new wiring in any of them. */
-export function featReactionOptions(character: Character): ActionOption[] {
-  const out: ActionOption[] = []
+export function featReactionOptions(character: Character): FeatReactionOption[] {
+  const out: FeatReactionOption[] = []
 
   for (const feat of character.feats ?? []) {
     if (!feat?.name) continue
     const canon = featByName(feat.name)
-    const sentences = effectSentencesOf(feat, canon)
+    const { sentences, from } = effectSentencesOf(feat, canon)
 
     for (const sentence of sentences) {
       if (!isReactionShaped(sentence)) continue
@@ -193,6 +244,7 @@ export function featReactionOptions(character: Character): ActionOption[] {
         mechanicsLine: trigger,
         effectsLine: effect || sentence,
         strategicTip: feat.tacticalNote || undefined,
+        wordsFrom: from,
       })
     }
   }

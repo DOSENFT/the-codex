@@ -15,6 +15,9 @@ import { composeTurn } from './compose'
 import { reduce, revert, takenFrom, type SessionState } from './reduce'
 import { NIX } from './fixtures/nix'
 import { featureByName } from '../canon/lookup'
+import { featureContextOf } from './overlay'
+import { activeRetaliation } from './retaliation'
+import type { Character } from '../character'
 import type { CombatState } from '../combat-state'
 import type { TurnOption } from './types'
 
@@ -152,6 +155,131 @@ describe('taking the cloak grants the pool', () => {
     )
     expect(applied.state.character.tempHP).toBe(11)
     expect(applied.state.character.tempHPSource).toBe('Flaming Cloak')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Held Reaction slice 3 — the sheet BEFORE anyone split it by hand
+// ---------------------------------------------------------------------------
+//
+// Everything above this line runs against `nix.ts`, where Hearthfire Manifest
+// has already been cut into two features by hand, and the Reaction half
+// declares `usesPerRest`/`usesMax` — which is what derived the resource pool
+// that slice 10d's gate keyed off. Marcus's REAL export is not that sheet. It
+// carries ONE undeclared feature with no uses and `resourcePools: []`, so no row
+// derived a pool, so the gate refused every option he owns, so `tempHPSource`
+// was never set and `activeRetaliation` had never once returned anything.
+//
+// Slice 1's law, restated where it bites: A FIXTURE THAT MODELS THE SHEET AFTER
+// THE REPAIR CANNOT SHOW THE FAULT. So the fixture below models it before.
+//
+// The feature record is copied verbatim out of
+// `codex-nix-lvl7 (2) (1).json` — no `actionType`, no uses, one paragraph of his
+// own prose that restates the WHOLE feature, both faces of it, in five
+// sentences. That last property is why the row is chosen by canon's sentence
+// split and not by reading the row's words: his words say everything on every
+// row, so his words cannot tell the rows apart.
+const HIS_HEARTHFIRE = {
+  name: 'Hearthfire Manifest',
+  level: 3,
+  description:
+    'A manifestation (floating ember, dancing flame, or spirit) sheds bright light 10ft, dim light 10ft more. Range 30ft or extinguished. Summon/dismiss as Bonus Action. As a Reaction, expend one Channel Divinity use to transform it into a flaming cloak: gain Temporary HP equal to Paladin level + spellcasting ability modifier. While active, creatures hitting you with melee attacks take 1d10 Fire damage. Lasts until temp HP is depleted.',
+}
+
+/** Level 7, Charisma 16 — his real numbers, so the pool is 7 + 3 = 10. A number
+ *  that is neither the fixture's 12 nor canon's worked example of 11, which is
+ *  what makes it evidence that the formula ran against HIM. */
+const HIS_SHAPE: Character = {
+  ...NIX,
+  level: 7,
+  abilityScores: { ...NIX.abilityScores, CHA: 16 },
+  resourcePools: [],
+  features: [
+    ...(NIX.features ?? []).filter(f => !/hearthfire|flaming cloak/i.test(f.name)),
+    HIS_HEARTHFIRE,
+  ],
+} as Character
+
+const hearthRows = (): TurnOption[] =>
+  allOptions(HIS_SHAPE).filter(o => o.name === 'Hearthfire Manifest')
+
+describe('slice 3 — the grant reaches a sheet nobody split by hand', () => {
+  it('the fixture is genuinely the un-split shape, or it proves nothing', () => {
+    const sheet = (HIS_SHAPE.features ?? []).filter(f => /hearthfire|flaming/i.test(f.name))
+    expect(sheet).toHaveLength(1)
+    expect(sheet[0].actionType).toBeUndefined()
+    expect(sheet[0].usesMax).toBeUndefined()
+    expect(HIS_SHAPE.resourcePools).toEqual([])
+  })
+
+  it('composes three rows for the one feature, and NO row derives a pool', () => {
+    // The premise of the old gate, measured rather than assumed. Every one of
+    // these had `grantsTempHP === undefined` before this slice.
+    const rows = hearthRows()
+    expect(rows.map(r => r.cost.slot).sort()).toEqual(['action', 'bonusAction', 'reaction'])
+    expect(rows.every(r => r.cost.resourcePoolId === undefined)).toBe(true)
+  })
+
+  it('the Reaction row grants 10, with an empty pool list', () => {
+    const cloak = hearthRows().find(r => r.cost.slot === 'reaction')
+    expect(cloak?.grantsTempHP).toBe(10)
+  })
+
+  it('the free Bonus Action face still grants nothing', () => {
+    const summon = hearthRows().find(r => r.cost.slot === 'bonusAction')
+    expect(summon?.grantsTempHP).toBeUndefined()
+  })
+
+  it('the base row does not grant, though HIS words on it say it does', () => {
+    // This row exists only because `featureActionType` defaulted an undeclared
+    // feature to 'action'. The phase's law is that a default is not an answer,
+    // and a guess does not get to hand out hit points. His own description on
+    // this row contains "gain Temporary HP equal to …" — so a rule that read the
+    // ROW's words would grant here, and Marcus would be standing in 20.
+    const base = hearthRows().find(r => r.cost.slot === 'action')
+    expect(base).toBeDefined()
+    expect(HIS_HEARTHFIRE.description).toMatch(/gain Temporary HP/i)
+    expect(base?.grantsTempHP).toBeUndefined()
+  })
+
+  it('exactly one option on the whole turn grants', () => {
+    const granting = allOptions(HIS_SHAPE).filter(o => o.grantsTempHP !== undefined)
+    expect(granting).toHaveLength(1)
+    expect(granting[0].cost.slot).toBe('reaction')
+  })
+
+  it('taking it ARMS THE RETALIATION — item 7, end to end', () => {
+    // The headline. Before this slice `activeRetaliation` returned null on his
+    // sheet no matter what he did, because nothing could ever set `tempHPSource`
+    // — which is why the retaliation prompt had never received data.
+    const ctx = featureContextOf(HIS_SHAPE)
+    expect(activeRetaliation(HIS_SHAPE, ctx)).toBeNull()
+
+    const cloak = hearthRows().find(r => r.cost.slot === 'reaction')!
+    const applied = reduce(
+      { character: HIS_SHAPE, combat: FIGHTING },
+      { type: 'takeOption', option: takenFrom(cloak) },
+      [],
+    )
+    expect(applied.refused).toBeUndefined()
+    expect(applied.state.character.tempHP).toBe(10)
+
+    const armed = activeRetaliation(applied.state.character, ctx)
+    expect(armed).not.toBeNull()
+    expect(armed?.notation).toBe('1d10')
+    expect(armed?.damageType).toBe('Fire')
+  })
+
+  it('and undo disarms it again', () => {
+    const ctx = featureContextOf(HIS_SHAPE)
+    const cloak = hearthRows().find(r => r.cost.slot === 'reaction')!
+    const applied = reduce(
+      { character: HIS_SHAPE, combat: FIGHTING },
+      { type: 'takeOption', option: takenFrom(cloak) },
+      [],
+    )
+    const reverted = revert(applied.state, applied.entry!)
+    expect(activeRetaliation(reverted.character, ctx)).toBeNull()
   })
 })
 

@@ -113,7 +113,7 @@ export interface Restore {
    *
    *  Always a number, and that is an invariant rather than an accident: the
    *  reducer only ever spends from a pool whose counter is FULLY declared
-   *  (`usesMax` and `usesCurrent` both present), matching how GrimoireCard and
+   *  (`usesMax` and `usesCurrent` both present), matching how the Grimoire and
    *  LoadoutPanel already decide what is trackable. A half-declared counter is
    *  untracked, so it is never charged, so there is never an absent value to
    *  restore. This field carried `| null` for that case until the tests showed

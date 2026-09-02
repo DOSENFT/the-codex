@@ -1,9 +1,11 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { composeTurn } from './compose'
 import { NIX } from './fixtures/nix'
 import { optionDetail } from './detail'
 import { reduce, takenFrom } from './reduce'
 import { createCombatState, type CombatState } from '../combat-state'
+import type { Character } from '../character'
 import type { EconomyState, TurnOption } from './types'
 
 /* ============================================================================
@@ -323,4 +325,106 @@ describe('the Spend button never lies — the affordance and the reducer agree',
       expect(offered, 'no option offered a spend at all, so nothing was graded').toBeGreaterThan(0)
     })
   }
+})
+
+/* ===========================================================================
+   WHOSE WORDS THESE ARE — Held Reaction slice 5b.
+
+   Slice 6 opened all four rows of his reactions band with a browser and read
+   the tag off each one (`measure-slice6b.mjs`, 2026-08-31). Both Sentinel
+   sheets said **"your own"** over text slice 2 had imported out of the book.
+
+   `overlay.ts:427` had already named that exact failure as the reason this
+   phase exists: "the book's words, over a mark that says they are his… the
+   reason Marcus could quote a rule at his DM believing he had written it."
+   Slice 2 fixed it on the ROW. Nothing had fixed it on the sheet the row
+   opens — which is the surface he would actually read before quoting.
+
+   ── WHY NOT THE `NIX` FIXTURE ──────────────────────────────────────────────
+
+   Because it carries `feats: []`, so it composes no feat row, so it cannot
+   reach the branch that was broken. This phase's standing rule, from
+   `04-slices.md`: proved against his real exported sheet, never the fixture —
+   the fixture is the reason a prior session recorded a finding it had not
+   measured. Skipped, never silently passed, when the export is absent.
+
+   ── AND IT IS NOT "TURN THE TAG OFF" ───────────────────────────────────────
+
+   The third case is the one that keeps this honest. Opportunity Attack is
+   built out of HIS weapon, The Dawn Guardian, and canon holds no record of
+   that name. Those words really are his sheet's, the tag really does belong on
+   it, and a fix that merely stopped painting the tag would pass the first two
+   cases and fail this one.
+   ========================================================================= */
+describe("the tag says whose words they are, and it is asked once", () => {
+  const NIX_EXPORT = 'C:/Users/marcu/Downloads/codex-nix-lvl7 (2) (1).json'
+  let real: Character | null = null
+  try {
+    real = JSON.parse(readFileSync(NIX_EXPORT, 'utf8')) as Character
+  } catch {
+    real = null
+  }
+
+  const composed = real ? composeTurn({ character: real, combat: null }) : null
+  const reactions = composed
+    ? [...composed.ranked, ...composed.rest, ...composed.mutex.flatMap(g => g.faces)].filter(
+        o => o.cost.slot === 'reaction'
+      )
+    : []
+  /* EVERY option of that name, not the first. The two Sentinel rows are two
+     OPTIONS both named "Sentinel" — the "· takes the Disengage action" suffix
+     Marcus sees is built by the row model in `reactions.ts` out of the trigger,
+     and is not on the option at all. The first version of this block asserted
+     against the screen's names and threw; the precondition below is what caught
+     it, which is the entire reason a precondition is written first. Returning
+     the whole list also means "one of the two was fixed" cannot read as a pass. */
+  const provenanceOfAll = (name: string) => {
+    const found = reactions.filter(o => o.name === name)
+    if (found.length === 0) {
+      throw new Error(`no reaction option named ${name} — options: ${reactions.map(o => o.name).join(' | ')}`)
+    }
+    return found.map(o => optionDetail(o, real!, composed!.economy).provenance)
+  }
+
+  it.skipIf(!real)('his band composes the four reactions this claim is about', () => {
+    // The precondition, measured rather than assumed. Without it a rename
+    // upstream would turn every assertion below into a thrown lookup that
+    // still reads like a failure of the tag.
+    expect(reactions.map(o => o.name).sort()).toEqual(
+      [
+        'Hearthfire Manifest',
+        'Opportunity Attack — The Dawn Guardian',
+        'Sentinel',
+        'Sentinel',
+      ].sort()
+    )
+  })
+
+  it.skipIf(!real)('canon wrote both Sentinel rows, so neither sheet claims he did', () => {
+    // THE REGRESSION. Both said 'sheet' before slice 5b — canon's own text
+    // under a tag reading "your own".
+    expect(provenanceOfAll('Sentinel')).toEqual(['canon', 'canon'])
+  })
+
+  it.skipIf(!real)('a canon FEATURE was already right, and stays right', () => {
+    expect(provenanceOfAll('Hearthfire Manifest')).toEqual(['canon'])
+  })
+
+  it.skipIf(!real)('his own weapon is still his own — the tag was not merely switched off', () => {
+    expect(provenanceOfAll('Opportunity Attack — The Dawn Guardian')).toEqual(['sheet'])
+  })
+
+  it('an option carrying no provenance at all gets the answer it always got', () => {
+    // Every pre-overlay caller, and every test written against a bare
+    // `TurnOption`. The new read is optional and falls back to `canonBands`,
+    // so a name canon has never heard of is still, correctly, his own.
+    const invented: TurnOption = {
+      id: 'x', name: 'Kettle Mastery', kind: 'feature',
+      detail: 'You are good with kettles.',
+      cost: { slot: 'action', label: 'Action' },
+      available: true, score: 0,
+    }
+    expect('provenance' in invented).toBe(false)
+    expect(optionDetail(invented, NIX, FRESH).provenance).toBe('sheet')
+  })
 })

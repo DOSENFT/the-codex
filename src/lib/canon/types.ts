@@ -123,8 +123,16 @@ export interface CanonFeat {
   abilityScoreIncrease?: string | null
   repeatable?: boolean
   effects?: string[]
-  /** Canon's own advice for a Paladin. Guidance, never rendered as rules. */
-  paladinNote?: string
+  /** Canon's own advice for a Paladin. Guidance, never rendered as rules.
+   *
+   *  NULLABLE, and measured rather than assumed: 5 of the 11 Fighting Styles
+   *  ship `null` here — Archery, Blind Fighting, Great Weapon Fighting,
+   *  Two-Weapon Fighting, Unarmed Fighting — because canon has nothing to say
+   *  to a Paladin about a style a Paladin would not take. This was typed
+   *  `string | undefined`, which is a type that cannot describe its own data,
+   *  and a caller trusting it renders the word "null" as advice. Open Book
+   *  slice 6, found by a test that asserted the old type was true. */
+  paladinNote?: string | null
   [key: string]: unknown
 }
 

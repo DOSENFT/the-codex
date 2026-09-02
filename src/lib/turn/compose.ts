@@ -61,9 +61,12 @@ import {
   type CategorizedOptions,
 } from './options'
 import { featReactionOptions } from './feats'
+import { facesOf, sentencesOf } from './faces'
+import { readsAsTrigger } from './trigger'
 import { featureContextOf, overlayCanon, type EconomyFiling, type OverlaidOption } from './overlay'
-import { featureFacts } from '../canon/feature'
+import { grantedTempHP } from '../rules-2024/temp-hp'
 import { featureByName } from '../canon/lookup'
+import type { CanonFeature } from '../canon/types'
 import { sortByRank, withRank, type RankContext } from './rank'
 import type {
   ComposedTurn,
@@ -126,6 +129,112 @@ const ECONOMY_OF_BUCKET: Record<Bucket, ActionOption['actionEconomy'] | undefine
   passives: undefined,
 }
 
+/** "This canon record already has a row in this bucket." */
+const bucketKey = (canonId: string, bucket: Bucket): string => `${canonId}|${bucket}`
+
+/** One option per separately-priced ability canon states inside this feature.
+ *
+ *  ── WHY THE COMPOSER ─────────────────────────────────────────────────────────
+ *  The composer owns the action economy (the ruling at the foot of this file),
+ *  and `options.ts` is pinned byte-identical. `overlay.ts` finds the faces
+ *  because that is where canon is consulted; spending them is this layer's job.
+ *
+ *  ── THE BASE OPTION IS KEPT ──────────────────────────────────────────────────
+ *  It carries everything canon states WITHOUT a price — the flavour, the light
+ *  radius, the 30-foot leash — plus the sheet's own words. Deleting it would
+ *  remove a row Marcus can see today in order to fix a row he cannot, which is
+ *  a trade this phase does not make.
+ *
+ *  ── A FACE SOMETHING ALREADY OFFERS IS NOT EMITTED ───────────────────────────
+ *  `occupied` is the set of "this canon record already has a row in this
+ *  bucket", built from every sheet option before any face is minted — and the
+ *  key is the CANON ID, not the name. That is what makes this work on a sheet
+ *  where the split was already done by hand: `nix.ts` carries "Hearthfire
+ *  Manifest" as a Bonus Action and "Flaming Cloak" as a Reaction, two names that
+ *  both resolve to the one canon feature, so both faces find their buckets taken
+ *  and nothing is added. Marcus's own sheet carries one undeclared feature, so
+ *  both faces are new. Neither case is written down anywhere; the difference is
+ *  entirely in the data.
+ *
+ *  Matching on the name instead would have shipped him two Reaction rows for one
+ *  ability the moment he renamed anything — the precise thing a reader cannot
+ *  tell apart from the real one.
+ *
+ *  ── WHICH SENTENCE LEADS THE ROW ─────────────────────────────────────────────
+ *  The face's trigger-shaped sentence, when it has one; otherwise the priced
+ *  sentence that opened it. The price is already stated by the row's cost label,
+ *  so leading with "As a Reaction," spends the row's first segment repeating the
+ *  gold text beside it — the duplication `detailOf` exists to remove. Promoting
+ *  a sentence is not reordering canon: nothing is dropped, and the rest follow
+ *  in the order canon wrote them.
+ *
+ *  Held Reaction slice 1. */
+function facesToOptions(
+  option: OverlaidOption,
+  occupied: ReadonlySet<string>,
+): OverlaidOption[] {
+  const faces = option.canonFaces
+  if (!faces || faces.length === 0 || !option.canonId) return []
+
+  // Dropped, not carried: a face is not itself made of faces, and leaving the
+  // field on would invite a second pass over the same record.
+  const { canonFaces: _spent, ...base } = option
+
+  const out: OverlaidOption[] = []
+  for (const face of faces) {
+    // `facesOf` only ever names a cost, so 'passive' is unreachable today. It is
+    // handled rather than asserted away because a bucket with no economy is not
+    // something to do, and a future canon package is not this file's to predict.
+    if (face.economy === 'passive') continue
+    if (occupied.has(bucketKey(option.canonId, BUCKET_FOR[face.economy]))) continue
+
+    const sentences = sentencesOf(face.text)
+    // sentences[0] is the opener, because `face.text` begins with it.
+    const lead = sentences.findIndex(readsAsTrigger)
+    const head = lead >= 0 ? lead : 0
+
+    out.push({
+      ...base,
+      actionEconomy: face.economy,
+      mechanicsLine: sentences[head] ?? face.opener,
+      effectsLine: sentences.filter((_, i) => i !== head).join(' '),
+    })
+  }
+  return out
+}
+
+/** Prose that GRANTS temporary hit points, as opposed to prose that merely
+ *  mentions them.
+ *
+ *  Both sentences are in Hearthfire's Reaction face and only the first is a
+ *  grant:
+ *
+ *      "The cloak immediately GRANTS YOU Temporary Hit Points equal to …"
+ *      "This effect lasts until the Temporary Hit Points are depleted."
+ *
+ *  So the term alone is not the shape — the shape is a granting verb reaching
+ *  the term inside one sentence, which `[^.]*` enforces by being unable to cross
+ *  a full stop. Same reasoning as `faces.ts`'s COST_IN_PROSE, which matches the
+ *  preposition rather than the bare cost word: it is the verb that turns a noun
+ *  into something that happens to you.
+ *
+ *  "temp HP" as well as "temporary hit points", because canon packages and
+ *  homebrew both write it short and neither is wrong. */
+const GRANTS_TEMP_HP =
+  /\b(?:gain|gains|grant|grants|granted|granting|receive|receives)\b[^.]*\btemp(?:orary)?\s+(?:hit\s+points|hp)\b/i
+
+/** The economy canon prices this feature's temp-HP grant under, or undefined.
+ *
+ *  `undefined` in three cases, all of which mean "this constraint has nothing to
+ *  say" rather than "no": canon does not know the feature, canon prices it once
+ *  so `facesOf` returns nothing to choose between, or MORE than one face states a
+ *  grant — which is a shape this cannot honestly divide, so it refuses to divide
+ *  it, exactly as `facesOf` refuses a sentence naming two costs. */
+function grantingFaceEconomy(feature: CanonFeature | undefined): EconomyFiling | undefined {
+  const granting = facesOf(feature).filter(f => GRANTS_TEMP_HP.test(f.text))
+  return granting.length === 1 ? granting[0].economy : undefined
+}
+
 /** The temporary hit points taking this option would grant, or undefined.
  *
  *  ── Why the composer, and why a number ───────────────────────────────────────
@@ -138,40 +247,69 @@ const ECONOMY_OF_BUCKET: Record<Bucket, ActionOption['actionEconomy'] | undefine
  *  lets the reducer grant it, and keeps slice 8b's law: the app COMPUTES the
  *  scaling, it never reads a level off a table of names.
  *
- *  ── Why `cost.resourcePoolId` is the gate ────────────────────────────────────
- *  Hearthfire Manifest composes as TWO options that share one canon feature, and
- *  only one of them grants. The free Bonus Action summons the flame; the
- *  Reaction "Flaming Cloak" spends a Channel Divinity use and is the one canon
- *  prices at `cloakCost: "1 Channel Divinity use"` and the one whose temp HP
- *  pool the feature describes. Attaching the grant to both would double it —
- *  summon, then cloak, and the app hands out 22.
+ *  ── Which of the rows carries it, and why it is no longer the pool ───────────
+ *  Hearthfire Manifest composes as SEVERAL options that share one canon feature,
+ *  and only one of them grants. Attaching the grant to all of them would double
+ *  it — summon, then cloak, and the app hands out 20.
  *
- *  Gating on "this option pays a resource pool" rather than on the name
- *  "Flaming Cloak" is the open-world rule doing its job: SHAPE, NEVER A NAME. A
- *  homebrew feature with a temp-HP formula and a declared cost behaves exactly
- *  like the cloak without anybody teaching the engine it exists, and a free face
- *  of a costed feature stays free. `compose.temphp.test.ts` pins both sides,
- *  because getting this backwards is a bug that would ship looking like a
- *  feature. Table Truth slice 10d. */
+ *  Slice 10d separated them by asking "does this option pay a resource pool?".
+ *  On the `nix.ts` fixture that worked, because the fixture's hand-split "Flaming
+ *  Cloak" declares `usesPerRest`/`usesMax` and so derives a pool. Measured
+ *  against Marcus's REAL export it refuses everything he owns: his sheet carries
+ *  Hearthfire Manifest as ONE undeclared feature with no uses on it, so no row
+ *  derives a pool, so no row ever granted, so `tempHPSource` was never set, so
+ *  `activeRetaliation` returned null and the retaliation prompt had never once
+ *  received data. Item 7 — "i dont think the hearthfire manifest reaction is
+ *  working" — is this line.
+ *
+ *  Slice 1's law: a fixture that models the sheet AFTER the repair cannot show
+ *  the fault. The pool was a property of the fixture's hand-split, not of the
+ *  rule.
+ *
+ *  ── The replacement: the grant belongs to the FACE canon prices it under ─────
+ *  Canon writes the grant inside one of the priced abilities it states in prose,
+ *  and `facesOf` already cuts those apart (slice 1). Exactly one of Hearthfire's
+ *  two faces says "grants you Temporary Hit Points"; it is the Reaction. So the
+ *  economy of THAT face is the economy a row must be filed under to carry the
+ *  grant, and every other row of the same feature — the free Bonus Action summon,
+ *  and the leftover base option that only reached the Action slot because
+ *  `featureActionType` defaulted it there — is refused.
+ *
+ *  This is the phase's law applied to itself: A DEFAULT IS NOT AN ANSWER. The
+ *  base row's Action slot is the app's own guess, and a guess does not get to be
+ *  the thing that hands out hit points.
+ *
+ *  Still SHAPE, NEVER A NAME: nothing below says "Flaming Cloak" or "Hearthfire".
+ *  It reads canon's prose for a granting verb applied to temporary hit points,
+ *  and canon's own sentence split for which price that verb sits under. A
+ *  homebrew feature written the same way behaves the same way with no code
+ *  change. Where canon prices the feature only once there are no faces to
+ *  disagree about, the constraint does not apply, and the single row grants.
+ *
+ *  `compose.temphp.test.ts` pins every side of this, because getting it
+ *  backwards is a bug that would ship looking like a feature.
+ *  Table Truth slice 10d · Held Reaction slice 3. */
 function tempHPGrantOf(
   option: OverlaidOption,
   cost: OptionCost,
   character: Character,
 ): number | undefined {
   if (option.type !== 'feature') return undefined
-  if (cost.resourcePoolId === undefined) return undefined
 
-  const fact = featureFacts(featureByName(option.name), featureContextOf(character)).find(
-    f => f.key === 'tempHP' && f.shape === 'computed',
-  )
-  if (!fact) return undefined
+  const feature = featureByName(option.name)
+  const priced = grantingFaceEconomy(feature)
+  // `cost.slot` and not `option.actionEconomy`: the slot is where the row
+  // actually landed after every refile, which is what the player sees, and the
+  // only thing the reducer will ever spend.
+  if (priced !== undefined && cost.slot !== priced) return undefined
 
-  // `value` is the rendered "11 temp HP"; the number is the leading integer.
-  // Anything else — a formula that stayed a formula, a shape that resolved to
-  // prose — is deliberately dropped rather than guessed at, which is the same
-  // choice `resolveFormula` makes when a term is unprovable.
-  const amount = Number.parseInt(fact.value, 10)
-  return Number.isFinite(amount) && amount > 0 ? amount : undefined
+  // `grantedTempHP` and not an inline read of the fact: slice 4's source picker
+  // asks the SAME question of the same features in order to decide what to
+  // offer, and two readers of `mechanics.tempHP` would eventually disagree. The
+  // way they would disagree is the app offering Marcus a source that then arms
+  // nothing. One reader, in `rules-2024/temp-hp.ts`, which is where the temp-HP
+  // rules already live.
+  return grantedTempHP(feature, featureContextOf(character))
 }
 
 /**
@@ -294,6 +432,13 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
     reactions: [],
     passives: [],
   }
+  /* Every row the sheet itself produced, keyed by the canon record behind it.
+   * Filled by the first pass and read by the second, because "does this ability
+   * already have a row?" cannot be answered until every sheet option has landed
+   * — the option that answers it may sit in a bucket this loop has not reached. */
+  const occupied = new Set<string>()
+  const facedOptions: OverlaidOption[] = []
+
   for (const bucket of Object.keys(raw) as Bucket[]) {
     for (const sheetOption of sheet[bucket]) {
       const option = overlayCanon(sheetOption, character)
@@ -306,6 +451,24 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       raw[target].push(
         target === bucket || economy === undefined ? option : { ...option, actionEconomy: economy },
       )
+      if (option.canonId) occupied.add(bucketKey(option.canonId, target))
+      if (option.canonFaces) facedOptions.push(option)
+    }
+  }
+
+  /* AND THE FACES, second, on top of a settled board.
+   *
+   * `canonEconomy` is undefined for exactly these records — canon named two
+   * prices, so there was no single one to refile under, and `options.ts`'s
+   * default of 'action' stood over both of them. Each face canon prices, and
+   * that nothing already offers, becomes its own option in its own bucket.
+   *
+   * Purely additive. Every row the loop above produced is still there, in the
+   * order it was produced, and a feature canon prices once emits nothing here —
+   * so on a sheet with no two-priced feature this whole pass is a no-op. */
+  for (const option of facedOptions) {
+    for (const face of facesToOptions(option, occupied)) {
+      raw[BUCKET_FOR[face.actionEconomy]].push(face)
     }
   }
 
@@ -535,15 +698,19 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
     // Passives are never offered as things to DO — that was the point of
     // options.ts filing them separately — but they are absolutely things that
     // are TRUE, and the table needs to see Aura of Solace without hunting.
-    ...raw.passives.map(
-      (o): UponYou => ({
+    ...raw.passives.map((o): UponYou => {
+      const text = o.summary || o.effectsLine || o.mechanicsLine
+      const full = fullTextOfPassive(o.name, character)
+      return {
         name: o.name,
         known: true,
-        text: o.summary || o.effectsLine || o.mechanicsLine,
+        text,
+        // Only when it says more. See `UponYou.detail`.
+        ...(full && full !== text ? { detail: full } : {}),
         side: 'you',
         tone: 'good',
-      }),
-    ),
+      }
+    }),
   ]
 
   return {
@@ -766,6 +933,26 @@ function riderOf(weapon: Weapon): OptionRider | undefined {
  *  `note` is the printed caveat and is always better than anything assembled
  *  from booleans. The fallback exists for homebrew conditions, which have no
  *  note and no flags — and for those, saying only the name is honest. */
+/** The whole paragraph behind an always-active passive.  Slice 8d-2.
+ *
+ *  CANON FIRST, THE SHEET SECOND, AND THIS IS NOT A NEW RULE. It is the order
+ *  `canonBands` already applies to a feature — `feature?.rawText ||
+ *  fallbackText`, canon/bands.ts:198 — reused rather than restated, because two
+ *  judges of one fact is how they come to disagree, and the aura and the detail
+ *  sheet must not end up quoting different paragraphs of the same feature.
+ *
+ *  THE OPEN-WORLD RULE HOLDS AT THIS BOUNDARY TOO. A feature canon has never
+ *  heard of is not a lesser citizen: it falls through to the sheet's own
+ *  `description` and reads in full, in Marcus's words. Undefined only when
+ *  there is genuinely no longer text anywhere, which is the honest answer and
+ *  the one that leaves the disclosure undrawn. */
+function fullTextOfPassive(name: string, character: Character): string | undefined {
+  const canon = featureByName(name)
+  if (canon && typeof canon.rawText === 'string' && canon.rawText.trim()) return canon.rawText
+  const own = character.features.find(f => f.name === name)
+  return own?.description?.trim() || undefined
+}
+
 function uponFromCondition(effect: ConditionEffect): UponYou {
   const harmful =
     effect.blocks.length > 0 ||

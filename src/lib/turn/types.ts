@@ -191,6 +191,19 @@ export interface UponYou {
   name: string
   known: boolean
   text: string
+  /** The WHOLE paragraph, when there is more of it than `text` shows.  8d-2.
+   *
+   *  `text` for a passive comes from `featureSummary`, which cuts the first
+   *  sentence at 77 characters and appends "...". On Marcus's own sheet that
+   *  ends Aura of Protection mid-word and ends Aura of Solace before the word
+   *  "Psychic" — a resistance he has and could not read. This is the rest of it.
+   *
+   *  UNDEFINED WHEN IT WOULD ADD NOTHING, and that is load-bearing: the screen
+   *  draws a disclosure only where there is something behind it. A `detail` set
+   *  to a copy of `text` would put a control on the card that opens onto the
+   *  line already showing. Conditions phrase their whole effect in `text`
+   *  already, so they come back without one. */
+  detail?: string
   /** 'on-you' vs 'on-them' — the board reads differently for each. */
   side: 'you' | 'target'
   /** Rules-relevant enough to tint gold, or merely informational. */

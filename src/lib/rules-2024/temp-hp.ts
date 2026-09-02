@@ -42,6 +42,9 @@
 // Table Truth slice 10d.
 
 import type { Character } from '../character'
+import type { CanonFeature } from '../canon/types'
+import { featureByName } from '../canon/lookup'
+import { featureFacts, type FeatureContext } from '../canon/feature'
 
 export interface TempHPReplacement {
   /** The pool that would be destroyed. Always > 0 — there is no replacement to
@@ -113,4 +116,88 @@ export function replacementWarning(r: TempHPReplacement): string {
     ? `Accepting ${r.incoming} replaces ${pool} — you would end up with fewer.`
     : `Accepting ${r.incoming} replaces ${pool}.`
   return `${verdict} Temporary hit points do not stack in 2024: you keep one pool or the other, never both.`
+}
+
+/* ── WHO GRANTED IT — the road he actually walks ─────────────────────────────
+ *
+ * Held Reaction slice 4. Slice 3 opened the ENGINE road: take the cloak from its
+ * reaction row and the composer sizes the pool, the reducer writes the source,
+ * and the retaliation arms. That road works and is proved. It is also not the
+ * road Marcus walks. His words, item 9: *"i most often use my physical dice to
+ * roll at the table and prefer physical dice"* — and a player who rolls his own
+ * dice types his own numbers. He taps **Temp HP**, types 10, and presses Apply.
+ *
+ * Down that road the app has an amount and no source, and `activeRetaliation`
+ * needs a source: `tempHPSource` is the whole of how it knows the cloak is up.
+ * So the honest fix is not to infer one. It is to ASK — Marcus's own ruling,
+ * given at Gate 2 and given for the case where there is exactly ONE candidate:
+ * ask anyway. One candidate is still a guess when the app is the one making it,
+ * and this file's entire reason for existing is that naming the wrong feature is
+ * worse than naming none.
+ *
+ * These two functions supply the question's options. They do not ask it — the
+ * law at the top of this file holds: it decides, it never applies, and it
+ * certainly never prompts. */
+
+/** The temporary hit points canon says this feature grants THIS character, or
+ *  undefined when canon states no such number.
+ *
+ *  ONE READER FOR ONE FACT. `compose.ts` calls this to SIZE the grant when the
+ *  cloak is taken from its row, and `tempHPGrantors` calls it to decide whether
+ *  a feature is worth offering as a source. Two readers of `mechanics.tempHP`
+ *  would eventually disagree, and the way they would disagree is the app
+ *  offering Marcus a source that then arms nothing — a question whose answer
+ *  does not work, which is worse than not asking.
+ *
+ *  Resolved against `ctx`, never read off canon's `atLevel7` snapshot: the app
+ *  COMPUTES the scaling. `featureFacts` renders "10 temp HP"; the number is the
+ *  leading integer, and a value that stayed a formula is dropped whole rather
+ *  than guessed at. */
+export function grantedTempHP(
+  feature: CanonFeature | undefined,
+  ctx: FeatureContext,
+): number | undefined {
+  const fact = featureFacts(feature, ctx).find(
+    f => f.key === 'tempHP' && f.shape === 'computed',
+  )
+  if (!fact) return undefined
+  const amount = Number.parseInt(fact.value, 10)
+  return Number.isFinite(amount) && amount > 0 ? amount : undefined
+}
+
+/** The features on this character that canon says grant temporary hit points —
+ *  the picker's whole option list, in the sheet's own order.
+ *
+ *  NOT A FREE-TEXT FIELD, and that is the point. Every string this returns is a
+ *  name `featureByName` just resolved, which is the same call `activeRetaliation`
+ *  makes on the way back out:
+ *
+ *      tempHPGrantors → he picks "Hearthfire Manifest"
+ *        → setTempHP(character, 10, "Hearthfire Manifest")
+ *          → activeRetaliation → featureByName("Hearthfire Manifest") → the die
+ *
+ *  So the round trip cannot lose the answer he gave. A typed source could, and
+ *  would do it silently.
+ *
+ *  WHAT IT DOES NOT PROMISE. A grantor is not the same thing as a retaliation:
+ *  Inspiring Leader grants temp HP and carries no die, and it belongs on this
+ *  list anyway, because HEARTH-04's replacement warning needs to be able to NAME
+ *  the pool it is about to destroy no matter what granted it. Arming is a
+ *  consequence some sources have; being nameable is what all of them have.
+ *
+ *  EMPTY IS AN ANSWER. A character canon knows nothing about gets no question at
+ *  all, and the temp entry behaves exactly as it did before this slice. */
+export function tempHPGrantors(character: Character, ctx: FeatureContext): string[] {
+  const seen = new Set<string>()
+  const grantors: string[] = []
+  for (const feature of character.features ?? []) {
+    const name = feature.name?.trim()
+    if (!name) continue
+    const key = name.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    if (grantedTempHP(featureByName(name), ctx) === undefined) continue
+    grantors.push(name)
+  }
+  return grantors
 }

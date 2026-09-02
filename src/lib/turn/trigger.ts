@@ -67,6 +67,16 @@ const SEP = ' · '
  *  the cloak would inherit a Smite rider as its trigger. */
 const TRIGGER_LEAD = /^(?:when|if)\b/i
 
+/** Does this clause READ as a trigger?
+ *
+ *  Exported so that the shape has exactly one owner. The composer needs the same
+ *  question answered when it decides which of a face's sentences leads the row,
+ *  and a second copy of this regex somewhere else is a second answer waiting to
+ *  drift from this one. Held Reaction slice 1. */
+export function readsAsTrigger(clause: string): boolean {
+  return TRIGGER_LEAD.test(clause.trim())
+}
+
 /** A span inside quotation marks — straight or curly, since canon writes both. */
 const QUOTED = /['‘“"]([^'’”"]{4,240})['’”"]/g
 

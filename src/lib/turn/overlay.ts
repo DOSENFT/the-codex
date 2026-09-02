@@ -39,11 +39,13 @@
 import type { Character } from '../character'
 import type { ActionEconomyType } from '../combat-state'
 import { poolsOf, type ResourceUnit } from '../rules-2024/resources'
-import { normalizeName, spellByName, featureByName } from '../canon/lookup'
+import { normalizeName, spellByName, featureByName, featByName } from '../canon/lookup'
 import { mechanicsLine, ROW_BUDGET_CHARS, type CasterContext } from '../canon/format'
 import type { FeatureContext } from '../canon/feature'
 import type { CanonFeature, CanonSpell, Provenance } from '../canon/types'
 import type { ActionOption } from './options'
+import { facesOf, type CanonFace } from './faces'
+import type { SentenceSource } from './feats'
 
 /** How canon files a thing in the action economy — the app's three slots plus
  *  the fourth answer `ActionEconomyType` cannot express, which is "this is not
@@ -67,6 +69,15 @@ export interface OverlaidOption extends ActionOption {
   /** Set ONLY when canon states the answer. Undefined means "canon declined",
    *  and the sheet's own filing stands — including its name sniff. */
   canonEconomy?: EconomyFiling
+  /** The separately-priced abilities canon states inside this one feature, when
+   *  it states two or more. Present is rare and means `canonEconomy` was always
+   *  going to be `undefined` — the two costs are exactly why it declined. The
+   *  composer turns each face into its own option; nothing else reads this. */
+  canonFaces?: CanonFace[]
+  /** Set by `featReactionOptions` on a row built out of a FEAT, and read only by
+   *  the feat branch of `apply` below. Absent on every other kind of row, which
+   *  is what makes that branch structurally unable to change one. */
+  wordsFrom?: SentenceSource
 }
 
 /* The joined row line (`detailOf` in compose.ts glues mechanics and effects
@@ -396,12 +407,51 @@ function apply(option: ActionOption, character: Character): OverlaidOption {
     // do. So the sheet keeps its line and canon contributes the one thing it
     // states unambiguously: how the feature is paid for. The prose reaches the
     // player in Slice 7's detail sheet, whole, where there is room for it.
+    //
+    // AND WHERE CANON NAMES TWO PRICES, IT CARRIES BOTH. `economyFromFeature`
+    // returns `undefined` for such a record and is right to — but `undefined`
+    // means the sheet's default of 'action' stands, which tells Marcus his
+    // Reaction is an Action with total confidence. The faces are the answer the
+    // refusal was groping at; the composer, which owns the economy, spends them.
     const filing = economyFromFeature(matchedFeature)
+    const faces = facesOf(matchedFeature)
     return {
       ...base,
       canonId: `feature-${normalizeName(matchedFeature.name)}`,
       provenance: 'canon',
       ...(filing ? { canonEconomy: filing } : {}),
+      ...(faces.length > 0 ? { canonFaces: faces } : {}),
+    }
+  }
+
+  /* ── THE THIRD INDEX ───────────────────────────────────────────────────────
+   *
+   * This module has always asked canon two questions — is it a spell, is it a
+   * feature — and a FEAT is neither. So a Sentinel row built entirely out of
+   * canon's own sentences reached the screen marked `provenance: 'sheet'`: the
+   * book's words, over a mark that says they are his. That is this phase's
+   * fault in its politest costume, and it is the reason Marcus could quote a
+   * rule at his DM believing he had written it.
+   *
+   * TWO CONDITIONS, AND THE SECOND IS THE ONE THAT MATTERS. Canon knowing a
+   * feat by this name is NOT the claim; the claim is that these particular
+   * words came out of the book, which only `effectSentencesOf` knows and which
+   * it says in `wordsFrom`. A homebrew Sentinel that states its own reaction
+   * arrives here `wordsFrom: 'sheet'` with canon holding a record of the same
+   * name, and stays his. So does a hand-written FEATURE called Sentinel, which
+   * carries no `wordsFrom` at all.
+   *
+   * LAST, after both existing branches have returned, so that no row that
+   * reaches canon today can be diverted here. The only rows this can touch are
+   * ones canon's spell and feature indexes both missed. */
+  if (base.wordsFrom === 'canon') {
+    const matchedFeat = featByName(option.name)
+    if (matchedFeat) {
+      return {
+        ...base,
+        canonId: `feat-${normalizeName(matchedFeat.name)}`,
+        provenance: 'canon',
+      }
     }
   }
 

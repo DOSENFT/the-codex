@@ -119,6 +119,33 @@ export class AIError extends Error {
   }
 }
 
+/** The sentence to put in front of a person when an AI call has failed.
+ *
+ *  `null` means SAY NOTHING, and that is why this returns a nullable rather
+ *  than a string. A cancelled request is a decision, not a fault — `useAI`
+ *  already refuses to paint red text for one (`useAI.ts:103`), and a component
+ *  writing its own `catch` must be able to make the same distinction without
+ *  re-deriving it.
+ *
+ *  This exists because the layer below already does the diagnostic work and the
+ *  component layer was throwing it away. `queryAIStructured` builds "The model
+ *  did not return JSON. It said: …" carrying the first 120 characters of what
+ *  the model actually said; `geminiError` builds a 404 whose body names its own
+ *  replacement model. Both were discarded by a bare `catch {}` in favour of a
+ *  fixed sentence that named nothing — so no user and no future session could
+ *  tell a dead key from a chatty model from a retired one. The generic sentence
+ *  survives here as the LAST resort, for a thrown non-Error which has genuinely
+ *  told us nothing, instead of being the only one. */
+export function aiErrorMessage(err: unknown): string | null {
+  if (err instanceof AIError) {
+    if (err.kind === 'cancelled') return null
+    return err.message
+  }
+  // Any other Error still knows more than the generic sentence does.
+  if (err instanceof Error && err.message.trim()) return err.message
+  return 'AI suggestion failed. Check your AI settings and try again.'
+}
+
 /* ─── Where the page is served from decides whether Ollama can exist ──────────
 
    THE DEFECT THIS BLOCK REPLACES, measured on the live site on 2026-08-22.
