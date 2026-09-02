@@ -263,3 +263,109 @@ describe('ReactionsBand — the die is offered on the row that carries it', () =
     expect(offenders, `blocks with glued words: ${offenders.join(' | ')}`).toEqual([])
   })
 })
+
+// ---------------------------------------------------------------------------
+// Taking one back — Held Reaction slice 5
+// ---------------------------------------------------------------------------
+
+/* WHY THIS IS A SLICE AND NOT A FOOTNOTE. `04-slices.md` predicted slice 5 would
+   need no code: `reduce.ts` accumulates, `revert` restores a whole snapshot, and
+   `retaliation.test.ts` already proves that undoing the FIRST of three leaves
+   the other two intact. All true, and all of it behind a door that was not on
+   his screen — `measure-slice5.mjs` found the standing button painted, the tally
+   painted, and no Undo button anywhere in the document. The engine could reverse
+   a mistyped 17; the table could not.
+
+   The label is the LOG ENTRY'S OWN, not a sentence built here. `reduce.ts` sets
+   `${source} — ${rolled} retaliation` and that string is what the button says,
+   so the words on the button and the event behind it are one fact read once. */
+
+const UNDO_LABEL = 'Hearthfire Manifest — 7 retaliation'
+
+describe('the correction — a tally that cannot be corrected is not evidence', () => {
+  const standing = (props: Partial<Parameters<typeof RetaliationCapture>[0]> = {}) =>
+    renderToStaticMarkup(
+      <RetaliationCapture
+        die={DIE}
+        offer="button"
+        onRecord={noop}
+        tally={{ total: 23, hits: 4 }}
+        {...props}
+      />,
+    )
+
+  it('offers to take back the last one, in the log’s own words', () => {
+    /* THE AMOUNT IS THE POINT. He rolls physical dice and types the result, so
+       the mistake this exists to fix is a typed 17 where the die said 7. A
+       button reading only "Undo" would be asking him to remember which. */
+    const seen = domText(standing({ onUndo: () => {}, undoLabel: UNDO_LABEL }))
+    expect(seen).toContain(`Undo ${UNDO_LABEL}`)
+  })
+
+  it('paints nothing at all when there is nothing to take back', () => {
+    /* An empty log. Not a disabled button — `TempHPSource`'s rule, and the same
+       reason: a control that is present and dead teaches Marcus to distrust the
+       ones that are present and live. */
+    const seen = domText(standing({ onUndo: () => {}, undoLabel: null }))
+    expect(seen).not.toContain('Undo')
+  })
+
+  it('paints nothing when the caller withheld the handler', () => {
+    /* THE HONESTY GATE, FROM THIS END. `ReactionsBandLive` passes `onUndo` only
+       when the entry at the top of the log IS a retaliation. When it is not, a
+       label may still arrive; the control must stay silent rather than offer to
+       undo a spell slot from beside a fire total. */
+    const seen = domText(standing({ undoLabel: 'Divine Smite — 2nd-level slot' }))
+    expect(seen).not.toContain('Undo')
+    expect(seen).not.toContain('Divine Smite')
+  })
+
+  it('leaves the pre-slice-5 control byte for byte unchanged', () => {
+    // Every caller not yet wired, and every test written before this slice.
+    expect(standing()).toBe(standing({ undoLabel: null }))
+    expect(standing()).not.toContain('Undo')
+  })
+
+  it('does not put an Undo in front of a man logging damage', () => {
+    /* The prompt is the convenience, fired mid-damage-entry under the HP
+       tracker. Correcting the PREVIOUS hit is not the question being asked
+       there, and the same reasoning already keeps the tally off it. */
+    const html = renderToStaticMarkup(
+      <RetaliationCapture
+        die={DIE}
+        offer="prompt"
+        onRecord={noop}
+        onDismiss={() => {}}
+        onUndo={() => {}}
+        undoLabel={UNDO_LABEL}
+      />,
+    )
+    expect(domText(html)).not.toContain('Undo')
+  })
+
+  it('reaches the row that carries the die, through the band', () => {
+    const seen = domText(
+      band({
+        onRetaliate: noop,
+        tally: { total: 23, hits: 4 },
+        onUndo: () => {},
+        undoLabel: UNDO_LABEL,
+      }),
+    )
+    expect(seen).toContain('TOTAL 23 Fire over 4 hits')
+    expect(seen).toContain(`Undo ${UNDO_LABEL}`)
+  })
+
+  it('separates its words with WORDS, here too', () => {
+    // Finding AY, on the newest text on the tab.
+    const html = band({
+      onRetaliate: noop,
+      tally: { total: 23, hits: 4 },
+      onUndo: () => {},
+      undoLabel: UNDO_LABEL,
+    })
+    const offenders = blocks(html).filter(b => /[a-z][A-Z]/.test(b))
+    expect(offenders, `blocks with glued words: ${offenders.join(' | ')}`).toEqual([])
+    expect(html).not.toContain('…')
+  })
+})

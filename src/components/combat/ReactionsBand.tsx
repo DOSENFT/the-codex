@@ -58,6 +58,13 @@ export interface ReactionsBandProps {
   tally?: RetaliationTally
   /** The reducer's words for a refused Add. Passed straight through. */
   refusal?: string | null
+  /** Take back the last retaliation — Held Reaction slice 5. Omitted → no row
+   *  offers it, which is the slice 10f band exactly, and is also what the caller
+   *  passes whenever the last logged event was something other than a
+   *  retaliation. The decision is made once, above; see `ReactionsBandLive`. */
+  onUndo?: () => void
+  /** The log entry's own words for what would come back. */
+  undoLabel?: string | null
 }
 
 export function ReactionsBand({
@@ -70,6 +77,8 @@ export function ReactionsBand({
   onRetaliate,
   tally,
   refusal,
+  onUndo,
+  undoLabel,
 }: ReactionsBandProps) {
   const rows = reactionRows(turn, character, rulings)
 
@@ -105,6 +114,8 @@ export function ReactionsBand({
                   onRetaliate={onRetaliate}
                   tally={tally}
                   refusal={refusal}
+                  onUndo={onUndo}
+                  undoLabel={undoLabel}
                 />
               </li>
             ))}

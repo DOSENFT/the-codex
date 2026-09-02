@@ -3,6 +3,7 @@ import { Sheet } from '../ui/Sheet'
 import type { OptionDetail } from '../../lib/turn/detail'
 import type { RollOffer } from '../../lib/turn/rolls'
 import { rulingFor, type ErratumRulings } from '../../lib/errata-rulings'
+import { leadGap } from '../../lib/canon/tactics'
 
 /* ============================================================================
    THE OPTION DETAIL SHEET — Table Truth slice 7. This is where the "…" dies.
@@ -64,6 +65,16 @@ export interface OptionDetailBodyProps {
   refusal?: string | null
   /** Band 4 starts open only in tests that need to read it. */
   tacticsOpen?: boolean
+  /** HIS OWN LINE ABOUT THIS OPTION — slice 8d-3. Undefined means he has not
+   *  written one; empty string is normalised to undefined by `noteFor`, so this
+   *  is never `''` and no caller has to decide what a blank means. */
+  note?: string
+  /** Saves that line. Absent and `note` absent → band 5 is not painted at all,
+   *  which keeps the inert render the design shoot measures byte-identical to
+   *  the sheet that shipped before this slice. Absent with a `note` present →
+   *  his words are painted read-only, on the same rule as `onRoll`: the FACT is
+   *  worth showing even where the control cannot act. */
+  onSaveNote?: (text: string) => void
   /** How the table ruled on each erratum — slice 8. Defaults to none recorded,
    *  which is also what every caller passed before this prop existed, so the
    *  band degrades to exactly its slice-7 reading plus "not ruled on yet". */
@@ -113,6 +124,96 @@ function RollButton({
   )
 }
 
+/* ── ⑤ Your note ────────────────────────────────────────────────────────────
+   The one band on this sheet that canon did not write. Slice 8d-3.
+
+   IT IS ADDITIVE AND V0.9's WAS AN OVERRIDE, WHICH IS A DELIBERATE DEPARTURE.
+   `TurnSummary`'s `customTip` REPLACED a one-line auto-generated `strategicTip`,
+   and replacing one line with one line is fair. This sheet has no such line —
+   band ④ is canon's whole tactics text, thousands of characters of it — so
+   inheriting the override would mean his one sentence hiding all of it. His
+   words go BESIDE canon's. The stored field is still `customTip`, so this is a
+   decision about painting and not a migration, and it is reversible in one
+   component if he ever wants the override back.
+
+   IT IS LAST FOR THE SAME REASON BAND ④ IS FOLDED. The order of the bands is
+   the feature (see the header) and the rolls are what he came for. A note is
+   the least urgent thing on the sheet and the only thing he is guaranteed to
+   already know, so it sits under everything and moves nothing above it. */
+function NoteBand({ note, onSave }: { note?: string; onSave?: (text: string) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+
+  /* Nothing written and nowhere to write it — the band does not exist, so the
+     read-only render is exactly the sheet that shipped before this slice. */
+  if (!note && !onSave) return null
+
+  const open = () => {
+    /* Seeded HERE and not from `useState(note)`: this component instance
+       survives the sheet being pointed at a different option, and an initialiser
+       would hand him the last option's words to edit. */
+    setDraft(note ?? '')
+    setEditing(true)
+  }
+
+  return (
+    <div className="px-4 py-3">
+      <span className={`${LABEL} text-gold`}>Your note</span>
+      {editing && onSave ? (
+        <>
+          <textarea
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            aria-label="Your strategic tip for this action"
+            placeholder="Write a custom strategic tip..."
+            rows={3}
+            className="mt-2 w-full rounded-lg border border-bronze/30 bg-void-2/50 px-3 py-2 text-[13px] leading-relaxed text-forge-0"
+          />
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="rounded-lg border border-bronze/30 px-3 py-1.5 text-xs text-forge-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => { onSave(draft); setEditing(false) }}
+              className="rounded-lg border border-gold/50 px-3 py-1.5 text-xs font-semibold text-gold"
+            >
+              Save
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* The placeholder is deliberate. An empty band and a band that has
+              lost his note look identical, and only one of those is fine. */}
+          <p className={`mt-1 text-[13px] leading-relaxed ${note ? 'text-forge-0' : 'text-forge-2 italic'}`}>
+            {note ?? 'No strategic tip — tap edit to add one'}
+          </p>
+          {onSave && (
+            <button
+              type="button"
+              onClick={open}
+              className="mt-2 rounded-lg border border-bronze/30 px-3 py-1.5 text-xs text-forge-2"
+            >
+              {/* V0.9's accessible name to the byte (`TurnSummary.tsx:824`).
+                  The `action-notes` pin was written against that string in
+                  slice 1, before this sheet could show a note at all; a pin
+                  re-pointed at whatever the new code says has stopped being a
+                  pin, so the app moves to meet it. It is also the visible text,
+                  not just the label, so the two cannot disagree. */}
+              Edit strategic tip
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 /** The sheet's contents, as a pure function of its props.
  *
  *  Split out from the `Sheet` wrapper deliberately: `Sheet` portals into
@@ -128,6 +229,8 @@ export function OptionDetailBody({
   refusal = null,
   tacticsOpen = false,
   rulings = {},
+  note,
+  onSaveNote,
 }: OptionDetailBodyProps) {
   const [showTactics, setShowTactics] = useState(tacticsOpen)
 
@@ -321,16 +424,11 @@ export function OptionDetailBody({
                   className="relative pl-3.5 text-[13px] leading-relaxed text-forge-0 before:absolute before:left-0 before:top-2 before:h-1 before:w-1 before:rounded-full before:bg-gold"
                 >
                   {bullet.lead && <b className="font-semibold text-arcane">{bullet.lead}</b>}
-                  {/* A colon attaches to the word before it; a dash does not.
-                      Canon writes both, and `splitTactics` hands the separator
-                      to the body with its leading whitespace trimmed — so
-                      «IT IGNORES COVER — that is» arrived on screen as
-                      «IT IGNORES COVER— that is». Put the space back for
-                      dashes only. This is TYPOGRAPHY AND IT LIVES HERE: the
-                      model must keep canon's characters exactly, and the space
-                      is a fact about two rendered elements sitting next to each
-                      other, which only the renderer knows about. */}
-                  {bullet.lead && /^[—–-]/.test(bullet.body) ? ' ' : ''}
+                  {/* The dash/colon rule moved to `canon/tactics.ts` in Open
+                      Book slice 3, when the Grimoire became the second screen
+                      drawing band 3. It was inline here and correct; two copies
+                      of it would not have stayed correct. */}
+                  {leadGap(bullet)}
                   {bullet.body}
                 </li>
               ))}
@@ -338,6 +436,9 @@ export function OptionDetailBody({
           )}
         </div>
       )}
+
+      {/* ── ⑤ Your note ─────────────────────────────────────────────────── */}
+      <NoteBand note={note} onSave={onSaveNote} />
     </div>
   )
 }

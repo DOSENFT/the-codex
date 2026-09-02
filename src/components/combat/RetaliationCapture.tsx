@@ -70,6 +70,32 @@ export interface RetaliationCaptureProps {
   tally?: RetaliationTally
   /** Take the offer away — 'prompt' only, and required there. */
   onDismiss?: () => void
+  /* ── TAKING ONE BACK — Held Reaction slice 5 ─────────────────────────────
+   *
+   * The tally is the one number on this tab that is EVIDENCE rather than
+   * derivation: a d10 came up 7 and somebody wrote it down. Evidence gets
+   * mistyped. The reducer has been able to reverse a retaliation since Table
+   * Truth — `revert` restores a whole snapshot, so undoing the first of three
+   * leaves the other two intact — but the only door to it was `TurnScreenD`,
+   * behind the `D_PREVIEW` flag, on a screen Marcus has never seen. Measured,
+   * not assumed: `measure-slice5.mjs` found the standing control painted and
+   * the tally painted and **no Undo button in the document at all**.
+   *
+   * So the number he shows his DM could be corrected in the engine and not at
+   * the table, which for a tally whose entire purpose is to be shown to the DM
+   * is the same as not being correctable.
+   *
+   * NARROW ON PURPOSE. `undoLast` undoes the last entry of ANY kind. A generic
+   * Undo sitting beside the fire total would take back a spell slot while
+   * appearing to take back a hit — the caller therefore passes these two only
+   * when the last entry IS a retaliation, and decides that by event shape. See
+   * `ReactionsBandLive`. */
+  onUndo?: () => void
+  /** The log entry's own words for what would come back. Shown in full: this
+   *  button is a correction, and a correction that does not say what it will
+   *  correct is a second guess. Same wording as `TurnScreenD`'s Undo, so the
+   *  two surfaces that can reverse a turn say one thing rather than two. */
+  undoLabel?: string | null
   /** The reducer's own words for why the last event was turned down. Painted
    *  only after this control's Add is the thing that was refused. */
   refusal?: string | null
@@ -80,8 +106,19 @@ export interface RetaliationCaptureProps {
 const defaultRoll = (die: RetaliationDie) =>
   rollDice(die.dieType, die.quantity, 0, 'normal').total
 
+/* 48, NOT 40 — measured, not reviewed. `prove-slice5.mjs` put the standing
+   button on D's card at 182×40 and called it: `tokens.css` V-5b sets a 48px
+   floor for turn controls in BOTH dimensions, and this became a turn control
+   the moment slice 5 hung it under the reaction's own row. It was 40 while it
+   lived only on the legacy tab's reaction band, where nothing had measured it.
+
+   THE CHANGE REACHES THE LEGACY TAB TOO, and that is the right outcome rather
+   than an accepted cost: the same thumb presses it there, under the same clock,
+   and a floor that applies to one surface and not the other is not a floor.
+   Every use is inside a `flex-wrap` strip, so the only effect is that each chip
+   is eight pixels taller. */
 const CHIP =
-  'min-h-[40px] rounded-lg border px-3 font-mono text-[11px] uppercase tracking-wider transition-colors'
+  'min-h-[48px] rounded-lg border px-3 font-mono text-[11px] uppercase tracking-wider transition-colors'
 
 /** The confirm strip: `rolled [ 7 ] Fire  [Add] [Cancel]`.
  *
@@ -153,6 +190,8 @@ export function RetaliationCapture({
   tally,
   onDismiss,
   refusal = null,
+  onUndo,
+  undoLabel = null,
   roll = defaultRoll,
 }: RetaliationCaptureProps) {
   /* A STRING, not a number. It is what is in the field, and mid-edit that is
@@ -243,6 +282,20 @@ export function RetaliationCapture({
       >
         +{die.notation} retaliation
       </button>
+      {/* BOTH CONDITIONS, and neither is decoration. `onUndo` is absent when the
+          last entry was not a retaliation; `undoLabel` is absent when the log is
+          empty. Either way there is nothing truthful to offer, so nothing is
+          painted — the same rule `TempHPSource` follows when it has no sources.
+          `normal-case` because this one carries prose, not a keyword. */}
+      {onUndo && undoLabel && (
+        <button
+          type="button"
+          onClick={onUndo}
+          className={`${CHIP} border-bronze/30 normal-case tracking-normal text-forge-2 hover:text-forge-0`}
+        >
+          Undo {undoLabel}
+        </button>
+      )}
       {/* A COUNT AS WELL AS A TOTAL. The total is what the DM asked for; the
           count is what tells Marcus the app missed one, which is the failure
           mode of any tally a human has to remember to tap. Finding AY's rule

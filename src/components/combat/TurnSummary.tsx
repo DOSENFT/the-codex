@@ -44,6 +44,12 @@ import {
   useAction,
   setConcentration,
 } from '../../lib/combat-state'
+import {
+  loadActionNotes,
+  saveActionNotes,
+  type ActionNote,
+  type ActionNotesData,
+} from '../../lib/action-notes'
 import { getFeatTips } from '../../lib/skill-guide'
 import { categorizeTurnOptions, levelLabel, type ActionOption } from '../../lib/turn/options'
 import { Badge } from '../ui/Badge'
@@ -51,34 +57,15 @@ import { Button } from '../ui/Button'
 
 // ---------------------------------------------------------------------------
 // Action Notes — persistent custom notes per action per character
+//
+// MOVED OUT IN SLICE 8d-3, and this file now IMPORTS what it used to declare.
+// The detail sheet on the new combat tab shows his per-action tip again, and
+// two components owning two copies of the key `codex-action-notes-<id>` is the
+// "drift/mess/conflict" he named as the only thing that would make remounting
+// it not worth doing. One definition, in `lib/action-notes.ts`; both surfaces
+// read it. Nothing about the stored shape changed, so his existing notes need
+// no migration — see that file's header.
 // ---------------------------------------------------------------------------
-
-interface ActionNote {
-  label: string
-  text: string
-}
-
-interface ActionNotesData {
-  [actionName: string]: {
-    customTip?: string        // overrides auto-generated strategicTip
-    notes: ActionNote[]       // custom note categories
-  }
-}
-
-function loadActionNotes(characterId: string): ActionNotesData {
-  try {
-    const raw = localStorage.getItem(`codex-action-notes-${characterId}`)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
-}
-
-function saveActionNotes(characterId: string, notes: ActionNotesData): void {
-  // Guarded: this fires on the same taps as `saveCombatState`, and unguarded it
-  // took the combat screen down the same way. See `saveOrAnnounce`.
-  saveOrAnnounce(`codex-action-notes-${characterId}`, JSON.stringify(notes))
-}
 
 // ---------------------------------------------------------------------------
 // Types

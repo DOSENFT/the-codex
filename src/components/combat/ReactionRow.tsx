@@ -68,9 +68,24 @@ export interface ReactionRowProps {
   tally?: RetaliationTally
   /** Why the last Add was turned down. Only the capture control paints it. */
   refusal?: string | null
+  /** Take back the last retaliation — slice 5. Passed straight to the capture
+   *  control, which paints it only alongside its standing button. The caller
+   *  has already decided the last entry IS a retaliation; this row does not
+   *  re-decide it, because two judges of one fact is how they disagree. */
+  onUndo?: () => void
+  /** The log entry's own words for what would come back. */
+  undoLabel?: string | null
 }
 
-export function ReactionRow({ row, onOpen, onRetaliate, tally, refusal }: ReactionRowProps) {
+export function ReactionRow({
+  row,
+  onOpen,
+  onRetaliate,
+  tally,
+  refusal,
+  onUndo,
+  undoLabel,
+}: ReactionRowProps) {
   const blocked = !row.available
   const unstated = row.when === null
   /* The label is the clause's own lead word, not a fixed "WHEN" bolted on in
@@ -169,6 +184,8 @@ export function ReactionRow({ row, onOpen, onRetaliate, tally, refusal }: Reacti
         refusal={refusal}
         offer="button"
         onRecord={onRetaliate}
+        onUndo={onUndo}
+        undoLabel={undoLabel}
       />
     ) : null
 

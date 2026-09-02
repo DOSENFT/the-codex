@@ -23,6 +23,9 @@ import {
   addDeathSaveFailure,
   resetDeathSaves,
 } from '../../lib/character'
+import { tempHPGrantors } from '../../lib/rules-2024/temp-hp'
+import { featureContextOf } from '../../lib/turn/overlay'
+import { TempHPSource } from './TempHPSource'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -93,6 +96,10 @@ export function StatsBar({
 }: StatsBarProps) {
   const [inputMode, setInputMode] = useState<InputMode>(null)
   const [inputValue, setInputValue] = useState('')
+  /* Slice 4. What he says granted the temp HP he is typing, or null for
+     "Don't know" — the default, and a real answer. Cleared whenever the entry
+     is opened, applied or cancelled. */
+  const [tempSource, setTempSource] = useState<string | null>(null)
 
   // ---- Derived state ----
   const currentHP = character.hitPoints.current
@@ -115,6 +122,14 @@ export function StatsBar({
     if (hpPercent <= 75) return 'hp-bar-fill--mid'
     return 'hp-bar-fill--high'
   }, [currentHP, hpPercent])
+
+  /* Slice 4. The features canon says grant temporary hit points — the picker's
+     whole option list, and empty for a character canon knows nothing about, in
+     which case the picker renders nothing and this surface is unchanged. */
+  const grantors = useMemo(
+    () => tempHPGrantors(character, featureContextOf(character)),
+    [character],
+  )
 
   // ---- Death save derived ----
   const isStabilized = character.deathSaves.successes >= 3
@@ -139,7 +154,11 @@ export function StatsBar({
         updated = applyHealing(character, amount)
         break
       case 'temp':
-        updated = setTempHP(character, amount)
+        /* HIS ANSWER, or null when he left "Don't know" selected. Slice 4 —
+           see `TempHPSource`. Null is not the app declining to ask any more;
+           it is Marcus saying the app cannot know, which is a different fact
+           that happens to store the same way. */
+        updated = setTempHP(character, amount, tempSource)
         break
       default:
         return
@@ -148,7 +167,8 @@ export function StatsBar({
     onCharacterUpdate(updated)
     setInputMode(null)
     setInputValue('')
-  }, [inputValue, inputMode, character, onCharacterUpdate])
+    setTempSource(null)
+  }, [inputValue, inputMode, character, onCharacterUpdate, tempSource])
 
   const handleQuickValue = useCallback((value: number) => {
     setInputValue(String(value))
@@ -157,6 +177,7 @@ export function StatsBar({
   const handleCancel = useCallback(() => {
     setInputMode(null)
     setInputValue('')
+    setTempSource(null)
   }, [])
 
   const handleDeathSaveSuccess = useCallback(() => {
@@ -396,6 +417,16 @@ export function StatsBar({
               </button>
             ))}
           </div>
+
+          {/* ── "What granted this?" — slice 4 ──
+                 THE SAME QUESTION ON BOTH SURFACES. Marcus reaches temp HP from
+                 whichever HP control is in front of him; a source picker on one
+                 of them and not the other is a rule that appears to come and go.
+                 Same component, same "Don't know" default, same list — the one
+                 `tempHPGrantors` builds. */}
+          {inputMode === 'temp' && (
+            <TempHPSource sources={grantors} value={tempSource} onChange={setTempSource} />
+          )}
 
           <div className="flex gap-2">
             <button
