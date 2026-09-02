@@ -120,6 +120,20 @@ export interface CombatApi {
   undoLast: () => void
   /** "Divine Smite" — what the Undo button should offer, or null if nothing. */
   undoLabel: string | null
+  /** The entry `undoLast` would put back, or null when the log is empty.
+   *
+   *  THE WHOLE ENTRY, AND NOT JUST ITS LABEL — Held Reaction slice 5. A surface
+   *  that offers a *narrow* undo has to be able to ask what it would be undoing,
+   *  and the only honest way to ask is by SHAPE: `entry.event.type`. The
+   *  reactions band offers "Undo" beside the fire tally and must not offer it
+   *  when the last thing that happened was a spell slot — and a band that
+   *  decided that by looking for the word "retaliation" inside `label` would be
+   *  this phase's own fault wearing a new coat, since `label` is prose built
+   *  from a feature name the open-world rule says we may never match on.
+   *
+   *  `undoLabel` is derived from this rather than read a second time, so the
+   *  name on the button and the event behind the button cannot come apart. */
+  undoEntry: LogEntry | null
   /** Set when the last tap was refused, with the reason to show Marcus. */
   refusal: string | null
   dismissRefusal: () => void
@@ -288,6 +302,12 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
   // nothing to read until now.
   const turn = useMemo(() => composeTurn({ character, combat, log }), [character, combat, log])
 
+  /* ONE READ OF THE LOG'S LAST ENTRY, and both facts taken off it. Before slice
+     5 the label was read here directly; adding a second read for the event type
+     would have made it possible for a button to say "Undo Divine Smite" while
+     the gate beside it had decided the entry was a retaliation. */
+  const undoEntry = log.length > 0 ? log[log.length - 1]! : null
+
   const value = useMemo<CombatApi>(
     () => ({
       turn,
@@ -302,11 +322,12 @@ export function CombatProvider({ character, onCharacterUpdate, children }: Comba
       endEncounter,
       retaliate,
       undoLast,
-      undoLabel: log.length > 0 ? log[log.length - 1]!.label : null,
+      undoLabel: undoEntry?.label ?? null,
+      undoEntry,
       refusal,
       dismissRefusal: () => setRefusal(null),
     }),
-    [turn, combat, updateCombat, forgetCombat, take, endTurn, beginTurn, startEncounter, endEncounter, retaliate, undoLast, log, refusal],
+    [turn, combat, updateCombat, forgetCombat, take, endTurn, beginTurn, startEncounter, endEncounter, retaliate, undoLast, undoEntry, refusal],
   )
 
   return <CombatContext.Provider value={value}>{children}</CombatContext.Provider>
