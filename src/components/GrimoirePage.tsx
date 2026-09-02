@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import {
   Search,
   BookOpen,
@@ -22,13 +22,24 @@ import {
   type Character,
   type Spell,
   type ClassFeature,
-  toggleSpellPrepared,
   removeSpell,
   expendSpellSlot,
   restoreSpellSlot,
 } from '../lib/character'
-import { GrimoireCard } from './grimoire/GrimoireCard'
+import { togglePrepared, preparedCount, type PrepareRefusal } from '../lib/prepare/toggle'
+import { toggleFightingStyle, FIGHTING_STYLE_FEATURE } from '../lib/prepare/fighting-style'
+import type { CanonFeat } from '../lib/canon/types'
+import { buildCatalogue } from '../lib/catalogue/build'
+import type { CatalogueEntry } from '../lib/catalogue/types'
+import { entryDetail, type EntryDetail } from '../lib/catalogue/detail'
+import { groupCatalogue, DEFAULT_GROUP_MODE, type GroupMode } from '../lib/catalogue/group'
+import { loadRulings, type ErratumRulings } from '../lib/errata-rulings'
+import { normalizeName } from '../lib/canon/lookup'
+import { CatalogueRow } from './grimoire/CatalogueRow'
+import { GroupSwitcher, GroupHeading } from './grimoire/GroupSwitcher'
 import { LoadoutPanel } from './grimoire/LoadoutPanel'
+import { PreparationRules } from './grimoire/PreparationRules'
+import { FightingStylePicker } from './grimoire/FightingStylePicker'
 import { SessionReadyCard } from './grimoire/SessionReadyCard'
 import { SpellEditor } from './SpellEditor'
 import { FeatureEditor } from './FeatureEditor'
@@ -39,10 +50,6 @@ import { GlassCard } from './ui/GlassCard'
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-type AbilityItem =
-  | { type: 'spell'; data: Spell }
-  | { type: 'feature'; data: ClassFeature }
 
 type TypeFilter = 'all' | 'spells' | 'features'
 type ActionFilter = 'all' | 'action' | 'bonus' | 'reaction' | 'passive'
@@ -58,18 +65,15 @@ interface GrimoirePageProps {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getActionType(item: AbilityItem): string {
-  if (item.type === 'spell') {
-    const ct = item.data.castingTime.toLowerCase()
-    if (ct.includes('bonus')) return 'bonus'
-    if (ct.includes('reaction')) return 'reaction'
-    return 'action'
-  }
-  const at = item.data.actionType
-  if (at === 'bonusAction') return 'bonus'
-  if (at === 'reaction') return 'reaction'
-  if (at === 'passive') return 'passive'
-  return 'action'
+/* Slice 1's adapter stood here — 70 lines that squeezed a `CatalogueEntry` back
+ * into the sheet-shaped `AbilityItem` pair so the old `GrimoireCard` could draw
+ * it. It was the tracer bullet's mock, it was labelled TEMPORARY, and slice 3
+ * was declared not done until it was gone. It is gone, along with the card.
+ * `CatalogueRow` reads the entry directly and `entryDetail` does the rest. */
+
+interface CatalogueRowItem {
+  entry: CatalogueEntry
+  detail: EntryDetail
 }
 
 function levelLabel(level: number): string {
@@ -90,6 +94,11 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [lockAndLoadActive, setLockAndLoadActive] = useState(false)
+  const [groupMode, setGroupMode] = useState<GroupMode>(DEFAULT_GROUP_MODE)
+  /* The last refusal, keyed by entry — so it appears in the row he pressed and
+   * nowhere else. One at a time on purpose: a page that accumulates refusals
+   * turns a rule into a scolding. */
+  const [refusals, setRefusals] = useState<Record<string, PrepareRefusal>>({})
 
   // Spell Editor state
   const [spellEditorOpen, setSpellEditorOpen] = useState(false)
@@ -99,81 +108,95 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
   const [featureEditorOpen, setFeatureEditorOpen] = useState(false)
   const [editingFeature, setEditingFeature] = useState<ClassFeature | null>(null)
 
-  // Build unified list
-  const allItems: AbilityItem[] = useMemo(() => {
-    const items: AbilityItem[] = []
+  /* THE ONE LINE THAT WAS ITEM 2. This read `character.spells` and
+   * `character.features`, so the Grimoire showed the eleven things typed onto
+   * his sheet and none of the eighty-four he can actually do. */
+  const allItems: CatalogueRowItem[] = useMemo(
+    () => buildCatalogue(character).map(entry => ({ entry, detail: entryDetail(entry, character) })),
+    [character],
+  )
 
-    character.spells.forEach(spell => {
-      items.push({ type: 'spell', data: spell })
-    })
-
-    character.features.forEach(feature => {
-      items.push({ type: 'feature', data: feature })
-    })
-
-    return items
-  }, [character.spells, character.features])
+  /* Read-only here. The controls that RECORD a ruling live on the combat tab,
+   * for the reason `CombatHelper.tsx:789` gives about a second `loadRulings`
+   * being a second source of truth; the Grimoire only reports what was ruled. */
+  const [rulings, setRulings] = useState<ErratumRulings>(() => loadRulings(character.id))
+  useEffect(() => { setRulings(loadRulings(character.id)) }, [character.id])
 
   // Filter items
   const filteredItems = useMemo(() => {
     let items = allItems
 
-    // Type filter
-    if (typeFilter === 'spells') items = items.filter(i => i.type === 'spell')
-    if (typeFilter === 'features') items = items.filter(i => i.type === 'feature')
+    // Type filter. A feat is a feature as far as this row of chips is
+    // concerned — it is a thing you have, not a thing you prepare.
+    if (typeFilter === 'spells') items = items.filter(i => i.entry.kind === 'spell')
+    if (typeFilter === 'features') items = items.filter(i => i.entry.kind !== 'spell')
 
-    // Action filter
+    // Action filter — canon's cost, not a re-parse of the sheet's wording.
     if (actionFilter !== 'all') {
-      items = items.filter(i => getActionType(i) === actionFilter)
+      items = items.filter(i => i.entry.turnCost === actionFilter)
     }
 
     // Prepared filter
     if (preparedOnly) {
-      items = items.filter(i => {
-        if (i.type === 'spell') return i.data.prepared || i.data.level === 0
-        return true // features are always "prepared"
-      })
+      items = items.filter(i => i.entry.prepared)
     }
 
     // Search
     if (search.trim()) {
       const q = search.toLowerCase()
-      items = items.filter(i => {
-        const name = i.type === 'spell' ? i.data.name : i.data.name
-        const desc = i.type === 'spell' ? i.data.description : i.data.description
-        return name.toLowerCase().includes(q) || desc.toLowerCase().includes(q)
-      })
+      /* Searching CANON's paragraph now, not the sheet's summary. That is a
+       * widening he asked for without naming it: "Divine Smite" used to match
+       * four words of his own typing, and now matches the 1,900-character
+       * record the app has been holding all along. */
+      items = items.filter(i =>
+        i.entry.name.toLowerCase().includes(q) ||
+        i.detail.bands.whatItDoes.toLowerCase().includes(q),
+      )
     }
 
-    // Sort: features first (alphabetical), then spells by level then name
-    items.sort((a, b) => {
-      // Group by type
-      if (a.type !== b.type) return a.type === 'feature' ? -1 : 1
-
-      // Within type, sort by name
-      const nameA = a.data.name.toLowerCase()
-      const nameB = b.data.name.toLowerCase()
-
-      if (a.type === 'spell' && b.type === 'spell') {
-        // Sort spells by level first
-        if (a.data.level !== b.data.level) return a.data.level - b.data.level
+    /* Sort: features first (alphabetical), then spells by level then name.
+     * Since slice 4 this is the order WITHIN a group, not the order of the page
+     * — `groupCatalogue` preserves the order entries arrive in, so this sort is
+     * what decides it. Under the default `level` grouping the level part of it
+     * is a no-op inside a group and the alphabetical part is what shows. */
+    return [...items].sort((a, b) => {
+      const aSpell = a.entry.kind === 'spell'
+      const bSpell = b.entry.kind === 'spell'
+      if (aSpell !== bSpell) return aSpell ? 1 : -1
+      if (aSpell && bSpell && a.entry.spellLevel !== b.entry.spellLevel) {
+        return (a.entry.spellLevel ?? 0) - (b.entry.spellLevel ?? 0)
       }
-
-      return nameA.localeCompare(nameB)
+      return a.entry.name.toLowerCase().localeCompare(b.entry.name.toLowerCase())
     })
-
-    return items
   }, [allItems, typeFilter, actionFilter, preparedOnly, search])
 
-  // Counts
-  const spellCount = allItems.filter(i => i.type === 'spell').length
-  const featureCount = allItems.filter(i => i.type === 'feature').length
+  /* The grouping, applied LAST — after the filters, never instead of them.
+   *
+   * `groupCatalogue` speaks in entries; this page draws entry+detail pairs. The
+   * map is by key rather than by index because `groupCatalogue` reorders, and an
+   * index would silently pair a heading's row with somebody else's detail sheet
+   * — the loudest possible bug wearing the quietest possible cause. */
+  const groups = useMemo(() => {
+    const byKey = new Map(filteredItems.map(i => [i.entry.key, i]))
+    return groupCatalogue(filteredItems.map(i => i.entry), groupMode).map(g => ({
+      id: g.id,
+      label: g.label,
+      items: g.entries.map(e => byKey.get(e.key)!),
+    }))
+  }, [filteredItems, groupMode])
 
-  // Loadout summary counts
-  const preparedSpellCount = useMemo(
-    () => character.spells.filter(s => s.prepared || s.level === 0).length,
-    [character.spells],
-  )
+  // Counts
+  const spellCount = allItems.filter(i => i.entry.kind === 'spell').length
+  const featureCount = allItems.filter(i => i.entry.kind !== 'spell').length
+
+  /* Loadout summary counts.
+   *
+   * This read `s.prepared || s.level === 0` and said "6 spells prepared". The
+   * number the CAP enforces was 2 of 7, because canon's rule 4 excludes his four
+   * Oath grants and rule 5 excludes cantrips. A display count and an enforced
+   * count that disagree is a bar that fills up while the button keeps working —
+   * so there is now one function and both read it. (Slice 5.) */
+  const preparedSpellCount = useMemo(() => preparedCount(character), [character])
   const featuresReadyCount = useMemo(
     () => character.features.filter(f =>
       !f.usesMax || !f.usesCurrent || f.usesCurrent > 0
@@ -186,8 +209,41 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
   )
 
   // Handlers
-  const handleTogglePrepared = useCallback((spellName: string) => {
-    onCharacterUpdate(toggleSpellPrepared(character, spellName))
+  /* Slice 5. This was `toggleSpellPrepared(character, spellName)` — a reducer
+   * that flipped a boolean on a spell already on the sheet and did nothing at
+   * all otherwise. Three consequences, all of which Marcus met:
+   *
+   *  · the cap was displayed and never enforced;
+   *  · the 73 catalogue entries not on his sheet could not be prepared, because
+   *    there was no record to flip — which is why `onTogglePrepared` below used
+   *    to require `entry.onSheet`;
+   *  · a tap on an Oath grant silently unprepared a spell canon says he always
+   *    has, and the count did not even move.
+   *
+   * `togglePrepared` refuses instead, and the refusal names the rule. */
+  const handleTogglePrepared = useCallback((spellName: string, key: string) => {
+    const result = togglePrepared(character, spellName)
+    if (result.ok) {
+      // Clear this row's refusal on success — a stale "you have all 7 prepared"
+      // sitting under a spell he just unprepared is worse than no message.
+      setRefusals(prev => {
+        if (!(key in prev)) return prev
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+      onCharacterUpdate(result.next)
+      return
+    }
+    setRefusals(prev => ({ ...prev, [key]: result.refusal }))
+  }, [character, onCharacterUpdate])
+
+  /* Slice 6. One line, because everything downstream already existed: the style
+   * lands on `character.feats`, `turn/feats.ts` reads its sentences, and
+   * `compose.ts` splices the reaction into the combat tab. Nothing had ever
+   * asked him the question, which is the whole of why Interception was missing. */
+  const handlePickFightingStyle = useCallback((style: CanonFeat) => {
+    onCharacterUpdate(toggleFightingStyle(character, style))
   }, [character, onCharacterUpdate])
 
   const handleDeleteSpell = useCallback((spellName: string) => {
@@ -281,7 +337,9 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
                 <div className="flex items-center gap-1.5">
                   <Sparkles size={12} className="text-arcane shrink-0" aria-hidden />
                   <span className="text-xs text-forge-1">
-                    <span className="font-semibold text-arcane">{preparedSpellCount}</span> {preparedSpellCount === 1 ? 'spell' : 'spells'} prepared
+                    {/* "2 of 7", not "2" — the bare number was the thing that
+                        read as a full loadout when five places were free. */}
+                    <span className="font-semibold text-arcane">{preparedSpellCount}</span> of {character.maxPreparedSpells} prepared
                   </span>
                 </div>
               )}
@@ -341,7 +399,11 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
       {mode === 'prep' && lockAndLoadActive && (
         <LoadoutPanel
           character={character}
-          onTogglePrepared={handleTogglePrepared}
+          /* The panel speaks in names; refusals are keyed the way the rows are,
+             so the key is derived here rather than the panel being taught about
+             catalogue keys. A refusal raised from the panel therefore surfaces
+             on the matching ROW — one message, one place, wherever it started. */
+          onTogglePrepared={name => handleTogglePrepared(name, normalizeName(name))}
         />
       )}
 
@@ -464,6 +526,16 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
         </div>
       )}
 
+      {/* ─── Preparation: his numbers, and canon's five rules (slice 5) ───
+             Above the group switcher and below the filters, because it is a
+             statement about the whole list rather than a control over it. */}
+      {character.canPrepareSpells && <PreparationRules character={character} />}
+
+      {/* ─── Group by (slice 4) ─── */}
+      <div className="border-t border-white/8 pt-3">
+        <GroupSwitcher mode={groupMode} onChange={setGroupMode} total={filteredItems.length} />
+      </div>
+
       {/* ─── Spell Slot Status (session mode) ─── */}
       {mode === 'session' && Object.keys(character.spellSlots).length > 0 && (
         <GlassCard className="p-3">
@@ -518,32 +590,82 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
           </p>
         </GlassCard>
       ) : (
-        <div className="flex flex-col gap-2">
-          {filteredItems.map((item) => {
-            const key = `${item.type}-${item.data.name}`
+        <div className="flex flex-col gap-4">
+          {groups.map(group => (
+          <div key={group.id} className="flex flex-col gap-2" data-group={group.id}>
+          <GroupHeading label={group.label} count={group.items.length} />
+          {group.items.map(({ entry, detail }) => {
+            const key = entry.key
+            /* HIS record, when he has one. Edit, Delete and the use counters all
+               operate on the object that is actually in storage — the catalogue
+               is a list of what exists, not a store, and the seventy-three
+               entries that are not on his sheet have nothing for them to act on.
+               Offering the button anyway would be a button that does nothing. */
+            const ownSpell = character.spells.find(s => normalizeName(s.name) === key)
+            const ownFeature = character.features.find(f => normalizeName(f.name) === key)
+            const uses =
+              ownFeature?.usesMax !== undefined && ownFeature.usesCurrent !== undefined
+                ? { current: ownFeature.usesCurrent, max: ownFeature.usesMax }
+                : null
+
             return (
-              <GrimoireCard
+              <CatalogueRow
                 key={key}
-                item={item}
-                character={character}
+                entry={entry}
+                detail={detail}
                 expanded={expandedItem === key}
                 mode={mode}
+                rulings={rulings}
+                uses={uses}
                 onToggleExpand={() => setExpandedItem(expandedItem === key ? null : key)}
                 onRollDice={handleRollDice}
-                onTogglePrepared={item.type === 'spell' ? () => handleTogglePrepared(item.data.name) : undefined}
-                onExpendUse={item.type === 'feature' ? () => handleExpendUse(item.data.name) : undefined}
-                onRestoreUse={item.type === 'feature' ? () => handleRestoreUse(item.data.name) : undefined}
-                onEdit={mode === 'prep' ? () => {
-                  if (item.type === 'spell') handleEditSpell(item.data as Spell)
-                  else handleEditFeature(item.data as ClassFeature)
-                } : undefined}
-                onDelete={mode === 'prep' ? () => {
-                  if (item.type === 'spell') handleDeleteSpell(item.data.name)
-                  else handleDeleteFeature(item.data.name)
-                } : undefined}
+                /* `entry.onSheet` is gone from this condition, and that is the
+                   line that makes the other 73 preparable at all: `togglePrepared`
+                   converts a canon record onto the sheet when there is nothing
+                   there to flip. `entry.preparable` is still required, so the
+                   button never appears on a cantrip, an Oath grant, a feature or
+                   anything locked — the four cases the refusals exist to explain
+                   when something calls the function anyway. */
+                onTogglePrepared={
+                  entry.preparable ? () => handleTogglePrepared(entry.name, key) : undefined
+                }
+                refusal={refusals[key] ?? null}
+                onExpendUse={ownFeature ? () => handleExpendUse(ownFeature.name) : undefined}
+                onRestoreUse={ownFeature ? () => handleRestoreUse(ownFeature.name) : undefined}
+                onEdit={
+                  mode === 'prep' && entry.onSheet
+                    ? () => {
+                        if (ownSpell) handleEditSpell(ownSpell)
+                        else if (ownFeature) handleEditFeature(ownFeature)
+                      }
+                    : undefined
+                }
+                onDelete={
+                  mode === 'prep' && entry.onSheet
+                    ? () => {
+                        if (ownSpell) handleDeleteSpell(ownSpell.name)
+                        else if (ownFeature) handleDeleteFeature(ownFeature.name)
+                      }
+                    : undefined
+                }
+                /* The one entry in the 84 that carries a choice. `locked` is
+                   the lock `build.ts` already computed for this row — passed
+                   down rather than recomputed, so the picker can never disagree
+                   with the chip above it about what level he is. */
+                extra={
+                  entry.kind === 'feature' && key === normalizeName(FIGHTING_STYLE_FEATURE) ? (
+                    <FightingStylePicker
+                      character={character}
+                      onPick={handlePickFightingStyle}
+                      locked={entry.lockedUntil !== null}
+                    />
+                  ) : undefined
+                }
               />
             )
           })}
+          </div>
+          ))}
         </div>
       )}
 

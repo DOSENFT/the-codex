@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, type ReactNode } from 'react'
 import {
   Heart,
   Swords,
@@ -23,10 +23,11 @@ import {
   addDeathSaveFailure,
   resetDeathSaves,
 } from '../lib/character'
-import { tempHPReplacement, replacementWarning } from '../lib/rules-2024/temp-hp'
+import { tempHPReplacement, replacementWarning, tempHPGrantors } from '../lib/rules-2024/temp-hp'
 import { activeRetaliation, type RetaliationDie } from '../lib/turn/retaliation'
 import { featureContextOf } from '../lib/turn/overlay'
 import { RetaliationCapture } from './combat/RetaliationCapture'
+import { TempHPSource } from './combat/TempHPSource'
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
@@ -50,6 +51,31 @@ interface HPTrackerProps {
   onRetaliate?: (amount: number, source: string) => boolean
   /** The reducer's words for a refused Add, for the retaliation prompt. */
   refusal?: string | null
+  /** How much of itself to paint.
+   *
+   *  `'card'` (the default, and what `CombatHelper` has always rendered) is the
+   *  whole module: its own glass card, its "Hit Points" heading, the 4xl HP
+   *  readout and the HP bar, then the controls.
+   *
+   *  `'bare'` is the CONTROLS ONLY — damage · heal · temp HP, the temp-HP source
+   *  question, death saves and the conditions fold — with no card, no heading,
+   *  no number and no bar.
+   *
+   *  WHY THIS PROP EXISTS, since a prop that only ever has one caller is usually
+   *  a smell. The one card in `TurnScreenD` already paints his hit points: the
+   *  number, the AC beside it, the bar, and the bloodied mark on the bar. Marcus
+   *  asked for the Hit Points module to be "neatly and masterfully rolled into
+   *  the one Your Turn module", and named the thing to keep — "the colour
+   *  changing aspect of the hit point tracker, the damage, heal, and temp health
+   *  buttons, and the conditions drop down". He did not ask for a second copy of
+   *  the number, and this phase exists because his HP is painted in three places.
+   *
+   *  So the alternative to this prop is one of two worse things: reimplement the
+   *  controls somewhere else, which makes a SECOND WRITER to his stored sheet;
+   *  or drop D's own readout and let this one stand, which loses the bloodied
+   *  mark and the compact row the design was measured on. Suppressing a readout
+   *  is the smallest change that keeps one writer and one readout. */
+  variant?: 'card' | 'bare'
 }
 
 type InputMode = 'damage' | 'heal' | 'temp' | null
@@ -112,7 +138,13 @@ const QUICK_VALUES = [1, 5, 10] as const
 // HPTracker Component
 // ---------------------------------------------------------------------------
 
-export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }: HPTrackerProps) {
+export function HPTracker({
+  character,
+  onCharacterUpdate,
+  onRetaliate,
+  refusal,
+  variant = 'card',
+}: HPTrackerProps) {
   const [inputMode, setInputMode] = useState<InputMode>(null)
   /* Per character, and through the hook that already exists — this writes into
      the same `codex-ui-${id}` map every other fold in the app uses, so slice 4
@@ -130,6 +162,13 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
      Held in state rather than derived, because by the time it is on screen the
      fact that produced it may be gone — see `handleApply`. */
   const [offered, setOffered] = useState<RetaliationDie | null>(null)
+  /* Slice 4. What he says granted the temp HP he is typing, or null for
+     "Don't know" — which is where it starts and where it stays unless he
+     answers. Reset by `beginInput`, exactly like `armed`: a new entry is a new
+     question, and a source chosen for the 10 must not be attached to a 5 typed
+     three rounds later. NOT reset by `setAmount`, because correcting a typo is
+     not a change of mind about what granted it. */
+  const [tempSource, setTempSource] = useState<string | null>(null)
 
   // Derived state
   const currentHP = character.hitPoints.current
@@ -168,8 +207,21 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
     if (inputMode !== 'temp') return null
     const amount = parseInt(inputValue, 10)
     if (isNaN(amount)) return null
-    return tempHPReplacement(character, amount)
-  }, [inputMode, inputValue, character])
+    /* The chosen source rides along, which is what lets `tempHPReplacement`
+       recognise the cloak being REFRESHED by the cloak — same source, same
+       number — and stay quiet about it. Answering the question therefore makes
+       the app quieter, not noisier, which is the right incentive for a question
+       he is free to skip. */
+    return tempHPReplacement(character, amount, tempSource)
+  }, [inputMode, inputValue, character, tempSource])
+
+  /* Slice 4. The features canon says grant temporary hit points, which is the
+     whole of the picker's option list. Empty for a character canon knows
+     nothing about, and the picker then renders nothing at all. */
+  const grantors = useMemo(
+    () => tempHPGrantors(character, featureContextOf(character)),
+    [character],
+  )
 
   const handleApply = useCallback(() => {
     const amount = parseInt(inputValue, 10)
@@ -207,10 +259,13 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
         updated = applyHealing(character, amount)
         break
       case 'temp':
-        // No source: a number typed by hand came from somewhere the app cannot
-        // see, and naming the wrong feature is worse than naming none. The
-        // reducer's grant path is the one that knows, and it says so there.
-        updated = setTempHP(character, amount)
+        /* HIS ANSWER, or null — and null is still the honest "the app does not
+           know". Slice 4 changed only where that null comes from: it used to be
+           the app deciding not to ask, and it is now Marcus leaving "Don't
+           know" selected. The first is a guess wearing a comment; the second is
+           a fact he stated. `setTempHP` clears the label whenever the pool
+           reaches 0, so a dead pool never keeps naming the cloak. */
+        updated = setTempHP(character, amount, tempSource)
         break
       default:
         return
@@ -220,8 +275,18 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
     setInputMode(null)
     setInputValue('')
     setArmed(false)
+    setTempSource(null)
     setOffered(retaliating)
-  }, [inputValue, inputMode, character, onCharacterUpdate, replacement, armed, onRetaliate])
+  }, [
+    inputValue,
+    inputMode,
+    character,
+    onCharacterUpdate,
+    replacement,
+    armed,
+    onRetaliate,
+    tempSource,
+  ])
 
   /* One writer for the amount, so arming can be cleared in one place. A changed
      number is a changed decision and must be re-read before it is acted on. */
@@ -241,12 +306,14 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
     setInputMode(mode)
     setInputValue('')
     setArmed(false)
+    setTempSource(null)
   }, [])
 
   const handleCancel = useCallback(() => {
     setInputMode(null)
     setInputValue('')
     setArmed(false)
+    setTempSource(null)
   }, [])
 
   const handleToggleCondition = useCallback(
@@ -279,15 +346,27 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
   // Render
   // -------------------------------------------
 
+  /* THE ONE STRUCTURAL DIFFERENCE BETWEEN THE TWO VARIANTS.
+     Everything below the readout is shared, verbatim — the controls, the source
+     question, the death saves and the conditions fold are one implementation
+     with one writer, which is the whole point of the `bare` variant. */
+  const bare = variant === 'bare'
+  const Shell = bare ? BareShell : CardShell
+
   return (
-    <GlassCard className="space-y-4 ornate-border">
-      {/* Section Header */}
-      <div className="flex items-center gap-2">
-        <Heart size={18} className="text-red-400 shrink-0" aria-hidden />
-        <OrnateHeader className="flex-1">Hit Points</OrnateHeader>
-      </div>
+    <Shell>
+      {/* Section Header — the card's own title. In `bare` the surrounding card
+          already says what this is, and a second "Hit Points" heading inside a
+          box headed "Your turn" is the duplication this phase is removing. */}
+      {!bare && (
+        <div className="flex items-center gap-2">
+          <Heart size={18} className="text-red-400 shrink-0" aria-hidden />
+          <OrnateHeader className="flex-1">Hit Points</OrnateHeader>
+        </div>
+      )}
 
       {/* HP Display */}
+      {!bare && (
       <div className="stat-frame mx-auto px-6 py-3">
         <div className="flex items-center justify-center gap-2">
           <span
@@ -311,8 +390,10 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
           )}
         </div>
       </div>
+      )}
 
       {/* HP Bar */}
+      {!bare && (
       <div
         className="relative w-full h-3 rounded-full bg-void-2 overflow-hidden"
         role="progressbar"
@@ -338,6 +419,7 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
           style={{ width: `${hpPercent}%` }}
         />
       </div>
+      )}
 
       {/* Action Row */}
       {inputMode === null ? (
@@ -436,6 +518,15 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
               </button>
             ))}
           </div>
+
+          {/* ── "What granted this?" — slice 4 ──
+                 ABOVE the warning, because the warning quotes the answer: pick
+                 the cloak and HEARTH-04's sentence can name the pool it is
+                 about to destroy. Temp mode only — a damage entry has no source
+                 to ask about, and asking anyway would train him to ignore it. */}
+          {inputMode === 'temp' && (
+            <TempHPSource sources={grantors} value={tempSource} onChange={setTempSource} />
+          )}
 
           {/* Canon HEARTH-04's mandatory warning. Rendered live — it is on the
               glass before the first press, and the first press only arms the
@@ -712,6 +803,20 @@ export function HPTracker({ character, onCharacterUpdate, onRetaliate, refusal }
         </div>
         )}
       </div>
-    </GlassCard>
+    </Shell>
   )
+}
+
+/* The two shells. `CardShell` is what this component has always rendered and is
+   what `CombatHelper` still gets. `BareShell` is a plain box: no glass, no
+   ornate border, no padding of its own, because in `bare` the surrounding card
+   owns the surface and a card inside a card is the visual duplication Marcus
+   asked to have removed. The `space-y-4` is kept in both — it is the rhythm
+   between the controls, not part of the card. */
+function CardShell({ children }: { children: ReactNode }) {
+  return <GlassCard className="space-y-4 ornate-border">{children}</GlassCard>
+}
+
+function BareShell({ children }: { children: ReactNode }) {
+  return <div className="space-y-4">{children}</div>
 }

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { Character } from '../../lib/character'
+import { preparedCount } from '../../lib/prepare/toggle'
 import { Badge } from '../ui/Badge'
 
 // ---------------------------------------------------------------------------
@@ -59,15 +60,22 @@ function ProgressBar({ current, max, color = 'arcane' }: { current: number; max:
 
 export function SessionReadyCard({ character }: SessionReadyCardProps) {
   // --- Computed stats ---
-  const preparedCount = useMemo(
+  /* Two different counts live on this card and they are NOT the same question.
+   * This one is "how many spells are ready to cast tonight", cantrips included,
+   * and it is only ever shown. The one below is the count canon's cap enforces.
+   * They used to share the name `preparedCount`, which is how a display tally
+   * and an enforced tally end up quietly assumed to be one number. */
+  const spellsReadyToCast = useMemo(
     () => character.spells.filter(s => s.prepared || s.level === 0).length,
     [character.spells],
   )
 
-  const nonCantripPrepared = useMemo(
-    () => character.spells.filter(s => s.prepared && s.level > 0).length,
-    [character.spells],
-  )
+  /* Slice 5 — canon's rule 4, applied. This card's readiness verdict at line 116
+   * is `nonCantripPrepared >= maxPreparedSpells`, so under the old arithmetic it
+   * told Marcus his spells were "session ready" at 6 of 7 while five of his
+   * seven places were in fact empty. A readiness check computed from the wrong
+   * number is worse than no readiness check: it is a green tick over a gap. */
+  const nonCantripPrepared = useMemo(() => preparedCount(character), [character])
 
   const slotEntries = useMemo(
     () =>
@@ -180,7 +188,7 @@ export function SessionReadyCard({ character }: SessionReadyCardProps) {
                 <span className="text-xs text-forge-2 uppercase tracking-wider">Spells</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-semibold text-arcane tabular-nums">{preparedCount}</span>
+                <span className="text-lg font-semibold text-arcane tabular-nums">{spellsReadyToCast}</span>
                 {/* The denominator is a number, not an annotation: "4 / 7" is one
                     value read in one glance, and half of it at 5.4:1 is the half
                     you squint at. forge-1 is the tally step (V-3, ≥7:1). */}

@@ -3,7 +3,8 @@ import { motion, useReducedMotion } from 'motion/react'
 import { SPRING_SETTLE } from './lib/motion-utils'
 import { useCharacter } from './hooks/useCharacter'
 import { Layout, type TabId, type AppMode } from './components/Layout'
-import { CombatHelper } from './components/CombatHelper'
+/* `CombatHelper` is no longer imported by App — 8b. It is imported by
+   `TurnLive`, as `CombatExtras`, which is the one place that mounts it. */
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { SaveAlarm } from './components/SaveAlarm'
 import type { Character } from './lib/character'
@@ -41,12 +42,20 @@ import { CharacterRecord } from './components/print/CharacterRecord'
 
 const MODE_STORAGE_KEY = 'codex-app-mode'
 
-/* V1.0's new turn screen (direction D) rides behind ?d=1 until it is finished.
-   The flag is read once at module load, not from state — it is a build-time
-   switch in spirit, and nothing in the existing app should be able to observe
-   that it exists. */
-const D_PREVIEW =
-  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('d') === '1'
+/* `D_PREVIEW` WAS HERE, AND ITS ABSENCE IS SLICE 8b.
+   ----------------------------------------------------------------------------
+   For fourteen slices the new turn screen rode behind `?d=1`, and the flag did
+   its job: everything from the reducer to the bands was built, shot and proved
+   against the real sheet without one pixel of it reaching the combat tab.
+
+   It is gone because a preview flag that survives its own promotion is worse
+   than no flag. `?d=1` returned TurnLive OUTSIDE `<Layout>` — no header, no tab
+   bar, no dice roller, its own `CombatProvider` — which is a second app with a
+   second copy of the encounter state, reachable by anyone who kept the URL. The
+   day D became the tab, that branch stopped being a preview and became a
+   divergence.
+
+   The revert is `git revert`, not a query string. */
 
 function loadMode(): AppMode {
   const saved = localStorage.getItem(MODE_STORAGE_KEY)
@@ -132,28 +141,6 @@ export default function App() {
     )
   }
 
-  /* Slice 1 wired this pipe with a fixture at the far end. Slice 4 removed the
-     fixture: the real character and the real persisted encounter went into
-     composeTurn, real rules came out, and the real component rendered them.
-     Slice 6 closed the loop — the screen now WRITES. Taps spend real slots and
-     real pool points through the one reducer, persist through the character's
-     one existing owner, and undo by restoration.
-
-     `setCharacter` is passed straight through: this provider deliberately has
-     no save path of its own, because two writers to one localStorage key is
-     the bug class V0.9 spent a year on. */
-  if (D_PREVIEW) {
-    return (
-      <>
-        <ErrorBoundary surface="Turn (preview)">
-          <TurnLive character={character} onCharacterUpdate={setCharacter} />
-        </ErrorBoundary>
-        <CharacterRecord character={character} />
-        <SaveAlarm reason={saveError} onDismiss={dismissSaveError} />
-      </>
-    )
-  }
-
   const handleCharacterUpdate = (updated: Character) => {
     setCharacter(updated)
   }
@@ -190,9 +177,29 @@ export default function App() {
       {/* ─── Session Mode Tabs ─── */}
       {/* One boundary per surface, so a crash in one cannot white-screen the
           others. Combat in particular must survive anything else failing. */}
+      {/* ── THE COMBAT TAB IS THE TURN SCREEN NOW — slice 8b ─────────────────
+          `CombatHelper` stood on this line since the app had tabs. It is not
+          deleted and it is not unmounted: `TurnLive` renders it as
+          `TurnScreenD`'s `extras`, inside the one scroller, below the option
+          list, under the name it earned — `CombatExtras`, the rest of the
+          session.
+
+          Everything it used to paint ABOVE that point is answered better one
+          level up, which was the point of items 5, 6, 10 and 11: one "Your
+          turn" module instead of two plus a pinned strip, all four economy
+          slots in labelled bands instead of a top five with a footer counting
+          what it hid, hit points stated once instead of three times.
+
+          Slice 6 closed the write loop, so this is a live surface and not a
+          view: taps spend real slots and real pool points through one reducer,
+          persist through the character's one existing owner, and undo by
+          restoration. `handleCharacterUpdate` is passed straight through —
+          `CombatProvider` deliberately has no save path of its own, because two
+          writers to one localStorage key is the bug class V0.9 spent a year
+          on. */}
       {appMode === 'session' && activeTab === 'combat' && (
         <ErrorBoundary surface="Combat">
-          <CombatHelper
+          <TurnLive
             character={character}
             onCharacterUpdate={handleCharacterUpdate}
             onOpenDiceRoller={setDicePrefill}

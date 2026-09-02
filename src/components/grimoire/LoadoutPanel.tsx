@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { Character, Spell, ClassFeature, Weapon } from '../../lib/character'
+import { preparedCount } from '../../lib/prepare/toggle'
 import { Badge } from '../ui/Badge'
 import { GlassCard } from '../ui/GlassCard'
 
@@ -159,10 +160,16 @@ export function LoadoutPanel({ character, onTogglePrepared }: LoadoutPanelProps)
     [character.spells],
   )
 
-  const nonCantripPrepared = useMemo(
-    () => character.spells.filter(s => s.prepared && s.level > 0).length,
-    [character.spells],
-  )
+  /* THE COUNT THE CAP ENFORCES — not the count of ticks on the page.
+   *
+   * This was `spells.filter(s => s.prepared && s.level > 0).length`, which for
+   * Nix is 6, so the bar beside "Prepared: 6 / 7" was nearly full and read
+   * "1 remaining". Canon's rule 4 excludes his four Oath grants: the real
+   * figure is 2 of 7, and he has five places free. Slice 5 gave that rule one
+   * home, and this is now a call to it rather than a fifth copy of the wrong
+   * arithmetic. `character` rather than `character.spells` in the deps because
+   * `preparedCount` reads the whole sheet. */
+  const nonCantripPrepared = useMemo(() => preparedCount(character), [character])
 
   const featuresWithUses = useMemo(
     () => character.features.filter(f => f.usesMax !== undefined && f.usesCurrent !== undefined),

@@ -53,6 +53,23 @@ export const SMITE_RULES = smiteRulesRaw as Record<string, unknown>
 export const WEAPON_MASTERY = weaponMasteryRaw as Record<string, unknown>
 export const PALADIN_PROGRESSION = paladinProgressionRaw as Record<string, unknown>
 
+/* Canon's five rules about preparing spells, verbatim, in canon's order.
+ *
+ * OPEN BOOK slice 5. They have been in `paladin-progression.json` since the
+ * canon package landed and nothing has ever read them — `PALADIN_PROGRESSION`
+ * above technically exposed them, as `unknown`, which is to say not at all.
+ * Marcus: "The app should teach me on preparing spells and when i can (i think
+ * on long rests i can swap out a spell or something. The documents should have
+ * information on this.)" They do. Rule 3 is the sentence he was reaching for.
+ *
+ * QUOTED, NEVER PARSED. `prepare/toggle.ts` enforces these with its own code and
+ * quotes these strings in the refusal; it never reads behaviour out of them. A
+ * rule the app both quotes and executes from one string is a rule that silently
+ * changes meaning the day canon rewords it. */
+export const PREPARED_SPELL_RULES: readonly string[] =
+  (paladinProgressionRaw as unknown as { preparedSpellRules?: string[] })
+    .preparedSpellRules ?? []
+
 /* Canon's per-level table, keyed by class name so the open-world rule has
  * somewhere to fail: a class canon has no table for is `undefined` here, and
  * `derive.ts` then adds nothing rather than inventing a row.

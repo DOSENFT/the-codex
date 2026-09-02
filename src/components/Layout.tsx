@@ -111,6 +111,32 @@ export function Layout({
 
   const tabs = appMode === 'session' ? SESSION_TABS : PREP_TABS
 
+  /* ─── the one surface that owns its own box — slice 8b ───
+     Every other tab is a document: it flows, `<main>` scrolls it, and the
+     gutters and `max-w-3xl` below are what keep it readable. `TurnScreenD` is
+     not a document. It is a frame with exactly one internal scroller, pinned so
+     that the strip carrying End turn can never walk off the bottom of the
+     phone, and it sizes itself to its host (`.dturn-host` in turn-d.css).
+
+     Handing it a scrolling, padded, width-capped box would give the tab TWO
+     scrollers — the outer one moving the whole frame, the inner one moving the
+     list — and neither can reach the other's content. So on this tab `<main>`
+     stops being a page and becomes a viewport.
+
+     BY TAB AND NOT BY A PROP FROM App, because Layout already owns `activeTab`
+     and `appMode`; threading a `fullBleed` boolean down would mean two places
+     could disagree about which screen is mounted.
+
+     THE APP HEADER STAYS. 8b as written suppressed it to buy back 56px of
+     furniture, and that was measured but not thought through: the Play/Prep
+     toggle lives nowhere else, the tab bar has no mode switch, and `combat` is
+     the default tab — so the app would have opened on a screen with no route to
+     Prep, Settings, the Toybox, the mechanics reference, the character sheet or
+     the roster. Ruled by Marcus 2026-09-01: keep the header, take the 56px.
+     Furniture lands at ~286px rather than 230px, and `01-product.md`'s success
+     row is rewritten to the honest number rather than the preview's. */
+  const fullBleed = appMode === 'session' && activeTab === 'combat'
+
   return (
     <DiceControlContext.Provider value={diceControl}>
     <div className="flex flex-col h-full min-h-[100dvh] bg-void-0">
@@ -409,13 +435,34 @@ export function Layout({
           diceDocked
             ? 'bottom-[calc(4rem+1px+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]'
             : 'bottom-[calc(5rem+3.5rem+var(--turn-deck-h,0px)+env(safe-area-inset-bottom,0px))]',
-          'pb-[5rem]',
-          'lg:left-52 lg:bottom-[var(--turn-deck-h,0px)] lg:pb-8',
+          // `overflow-hidden`, not `overflow-y-auto`, on the one tab that
+          // scrolls itself. See `fullBleed` above. The trailing reserve goes
+          // with it: `pb-[5rem]` exists to clear a floating dice button, and on
+          // this tab `TurnVerbs` has adopted that button into the frame — which
+          // is also what puts `diceDocked` true above, so the bottom edge is
+          // already the tab bar and nothing floats over the strip.
+          fullBleed
+            ? 'overflow-hidden'
+            : 'overflow-y-auto pb-[5rem] lg:pb-8',
+          'lg:left-52 lg:bottom-[var(--turn-deck-h,0px)]',
         )}
       >
-        <div className="px-4 py-4 mx-auto w-full max-w-3xl lg:px-8 lg:py-6">
-          {children}
-        </div>
+        {/* THE GUTTERS AND THE WIDTH CAP ARE A PAGE'S FURNITURE, so the screen
+            that is not a page does not get them. `dturn-host` is the hook
+            turn-d.css already carries (written in 8a, unused until now): it
+            swaps D's `height: 100dvh` for `height: 100%` so the frame measures
+            THIS box rather than the viewport — 844px of screen inside a ~723px
+            box would have put the whole pinned strip below the fold of a parent
+            that no longer scrolls. */}
+        {fullBleed ? (
+          <div className="dturn-host h-full">
+            {children}
+          </div>
+        ) : (
+          <div className="px-4 py-4 mx-auto w-full max-w-3xl lg:px-8 lg:py-6">
+            {children}
+          </div>
+        )}
       </main>
 
       {/* ─── Floating Dice Button ───

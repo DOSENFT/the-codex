@@ -8,6 +8,7 @@ import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
 import { useAI } from '../hooks/useAI'
+import { aiErrorMessage } from '../lib/ai'
 import { SYSTEM_PROMPTS } from '../lib/prompts'
 import {
   type ToyboxData, type ToyboxCombo, type ToyboxTactic, type ToyboxPersonaPlay,
@@ -441,8 +442,13 @@ export function ToyboxPanel({
         const result = await queryStructured<{ suggestions: unknown[] }>(prompt, 'Suggest persona plays for my character')
         setAiSuggestions(result.suggestions ?? [])
       }
-    } catch {
-      setAiError('AI suggestion failed. Check your AI settings and try again.')
+    } catch (err) {
+      /* The bare `catch {}` that stood here discarded the one artifact that
+         could name the fault, and replaced it with a sentence pointing at
+         Settings — which is wrong advice for every cause except the one where
+         the key really is missing. `aiErrorMessage` keeps what the layer below
+         worked out. A null is a cancelled request, which gets no red text. */
+      setAiError(aiErrorMessage(err))
     }
   }
 
