@@ -458,6 +458,32 @@
       scan is for and is the second time this slice that looking at something for one
       reason turned up another.
 
+      **THREE COMMITS, BY PHASE, ON `v1` — AND `v1` IS PUSHED.**
+      `e7ed5f1` the engine and the pack (`src/lib/toybox-seed/**`, `toybox.ts`) ·
+      `ee2085f` the cards (`ToyboxPanel`, `ComboCard`, `TacticCard`, `PlayLines`) ·
+      `136fda5` the plan docs and the eight provers. `origin/v1` was a clean
+      fast-forward — `dc6a99b..136fda5`. `git status --porcelain -- src docs/plans/toybox-seed`
+      is empty: nothing from the feature was left behind. A large body of unrelated
+      untracked cruft from earlier phases (probes, screenshots, `preview*.log`, root
+      handoffs, `.agents/`) was deliberately **not** staged.
+
+      **THE MERGE TO `main` IS NOT DONE, AND THAT IS ON PURPOSE.** Two reasons, and the
+      second one is the real one:
+
+      1. The Bash permission classifier refused `git checkout main` twice. Per the
+         recorded rule — *"this is not a puzzle to solve"* — no workaround was attempted;
+         the commands were handed to Marcus instead.
+      2. **`.github/workflows/deploy.yml` triggers on `push: branches: [main]` and
+         publishes to GitHub Pages.** For this repo, merging to `main` *is* the deploy,
+         and deploy is 🟡 ASK-FIRST. Marcus did pre-authorise "merge to main" as the ship
+         scope, and he had separately asked why the live codex still looked unchanged —
+         so the intent is not in doubt. But the merge and the publish being the same
+         keystroke is a fact he should hold before he presses it, not after.
+
+      `origin/main` is a strict ancestor of `v1` (0 ahead, 3 behind), so the merge is a
+      fast-forward with no conflict surface. The commands are in
+      **"Handing back" → "The merge, if he wants it"** below.
+
 ## Notes for a fresh session
 
 ### What Marcus asked for, verbatim
@@ -556,3 +582,50 @@ so the lookup returns nothing and the spend is skipped with no error shown. Even
 "Upgrade to Combat-Ready" creates the pool, the feature still has to be pointed at it.
 That is a separate fix from this one, but content that says "expend Channel Divinity" is
 describing something the app currently does not track.
+
+## Handing back
+
+### The merge, if he wants it — **this publishes the site**
+`origin/main` is a strict ancestor of `v1`, so this is a fast-forward and cannot conflict.
+The push on the last line is what fires `deploy.yml` and republishes GitHub Pages.
+
+```
+cd C:\Users\marcu\Documents\Powerhouse\projects\the-codex
+git checkout main
+git pull --ff-only origin main
+git merge --ff-only v1
+git push origin main
+```
+
+Backing it out afterwards means rewinding `main` to `dc6a99b` and overwriting the remote,
+which is a rewrite of published history and needs its own decision. Reversible in principle;
+the site will have been live in the meantime. Cheaper to be sure before, not after.
+
+### Slice 8c — the file deletions he asked to be reminded about
+🟡 ASK-FIRST, and still not done. These are the stale sources that contradict the sheet;
+nothing in the shipped code reads them, so removing them changes no behaviour — it removes
+the risk that a future session treats them as current. **Read the reason on each before
+pressing anything.**
+
+- `WARFARE-DOCTRINE.md` — written at **Charisma 18**, so every CHA-derived number in it is
+  wrong for him at 16 (aura, cloak temp HP, save DC, spell attack). This is the file whose
+  "11 temp HP" `prove-slice2.mjs` asserts against by name.
+- `changling.txt` — two editions stale per `CORRECTIONS.md §15`: Fey rather than Humanoid,
+  no species ASI, advantage on Charisma checks while shape-shifted.
+- The root-level session handoffs superseded by `docs/plans/**` — `SESSION-HANDOFF.md` was
+  already flagged stale at the top of this engagement.
+
+The exact list and the reasoning live in the slice 8c entry above. Nothing goes without him
+saying so, item by item.
+
+### Housekeeping left running
+- **`vite preview` is still up on port 4321.** Stop it when you are done looking at the app.
+- `preview.log` and `preview-4220.log` are untracked and not ignored. Candidate one-liner:
+  add `preview*.log` to `.gitignore`.
+- A large body of unrelated untracked cruft sits in the repo from earlier phases (`.agents/`,
+  `game-night.*`, screenshots, probes, root `.md` handoffs). None of it was staged. Worth a
+  deliberate sweep at some point, and that sweep is his call, not a routine one.
+
+### Slice 0 — his own, and none of it is code
+Three buttons that already shipped and are waiting to be pressed. Listed above under the
+sheet gaps; repeated here because the build being done is exactly when they get forgotten.
