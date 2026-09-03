@@ -2,6 +2,7 @@ import { Star, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
+import { PlayAnnotations, PlayRequirements } from './PlayLines'
 import { TacticDiagram } from './TacticDiagram'
 import type { ToyboxTactic } from '../../lib/toybox'
 
@@ -12,9 +13,19 @@ import type { ToyboxTactic } from '../../lib/toybox'
 
 // ─── Constants ───
 
-const PRIORITY_BADGE_VARIANT: Record<ToyboxTactic['priority'], 'ember' | 'neutral'> = {
+/* THREE TIERS, THREE TINTS — slice 9. `critical` and `high` were both `ember`,
+   which left the priority readable but not SCANNABLE: two colours for three
+   tiers, with the difference surviving only in the label text. The pack files
+   twelve tactics across all three precisely so the urgent ones surface first.
+
+   `gold` is the added one, and it is the right one for a reason recorded in
+   `ui/Badge.tsx`: at 6.28:1 it clears the V-2 text floor and misses only the
+   V-3 numeral floor, and "HIGH" is a word. `TacticCard.test.tsx` pins these
+   labels non-numeric so that the day somebody renumbers them, the failure lands
+   here rather than shipping a numeral below its floor. */
+const PRIORITY_BADGE_VARIANT: Record<ToyboxTactic['priority'], 'ember' | 'gold' | 'neutral'> = {
   critical: 'ember',
-  high: 'ember',
+  high: 'gold',
   normal: 'neutral',
 }
 
@@ -88,9 +99,10 @@ export function TacticCard({
           />
         </button>
 
-        {/* Name */}
+        {/* Name — `line-clamp-3`, not `truncate`. See ComboCard for the why;
+            the tactics tab was the worst of the three, 11 of 12 names clipped. */}
         <div className="flex-1 min-w-0">
-          <span className="font-display text-forge-0 font-semibold text-sm truncate block">
+          <span className="font-display text-forge-0 font-semibold text-sm line-clamp-3">
             {tactic.name}
           </span>
         </div>
@@ -150,16 +162,15 @@ export function TacticCard({
               </div>
             )}
 
-            {/* Requirements */}
-            {tactic.requirements && tactic.requirements.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {tactic.requirements.map((req) => (
-                  <Badge key={req} variant="neutral">
-                    {req}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            {/* Where to stand, who to tell, what to watch for */}
+            <PlayAnnotations annotations={tactic.annotations} />
+
+            {/* Requirements.
+                THIS ROW USED TO BE `tags` WITH DIFFERENT CONTENT — the same
+                `<Badge variant="neutral">`, in the row directly above the real
+                tags, so "Channel Divinity available" and "hearthfire" were the
+                same object to look at. See `PlayLines.tsx`. */}
+            <PlayRequirements requirements={tactic.requirements} />
 
             {/* Tags */}
             {tactic.tags.length > 0 && (

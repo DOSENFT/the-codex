@@ -2,6 +2,7 @@ import { Star, Pencil, Trash2, Play, Focus, ChevronDown, ChevronUp } from 'lucid
 import { cn } from '../../lib/cn'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
+import { PlayAnnotations, PlayRequirements } from './PlayLines'
 import type { ToyboxCombo, ComboBlock } from '../../lib/toybox'
 
 /* ==========================================================================
@@ -163,9 +164,32 @@ export function ComboCard({
           />
         </button>
 
-        {/* Name + block count */}
+        {/* Name — `line-clamp-3`, NOT `truncate`, and slice 9 changed it here,
+            in `TacticCard` and in `PersonaPlayCard` together, because the defect
+            was identical in all three and fixing one would have left the tabs
+            disagreeing about what a long name looks like.
+
+            `truncate` is nowrap + ellipsis, so an over-long name did not break
+            the row — it silently lost its tail and still looked correct in a
+            screenshot. That is why it survived four slices of review: nothing
+            measured it. `prove-slice8.mjs` finally did, at 390px, and found 21
+            of 31 card names clipped, the worst losing 239px of itself.
+
+            The prover now requires zero overflow on BOTH axes, which is the
+            trap this fix creates: a clamp clips at N LINES rather than at one
+            line's width, so an over-long name fails the same way while
+            `scrollWidth === clientWidth` reports everything is fine.
+
+            THREE, NOT TWO, AND THE PROVER IS WHY. `line-clamp-2` was the first
+            attempt and it took the count from 21 clipped to 2 — but the two
+            survivors ("The Mastery You Have Is Not the One You Were Told" and
+            "The Work Before the Ask", the latter squeezed to 98px by a 20-char
+            badge beside it) each needed a third line, and the vertical check
+            caught them within a minute of being added. Two would have shipped
+            looking fixed. Four is not needed by anything in the pack today, and
+            the prover fails the day it is, which is the right way round. */}
         <div className="flex-1 min-w-0">
-          <span className="font-display text-forge-0 font-semibold text-sm truncate block">
+          <span className="font-display text-forge-0 font-semibold text-sm line-clamp-3">
             {combo.name}
           </span>
         </div>
@@ -207,6 +231,12 @@ export function ComboCard({
                 {combo.description}
               </p>
             )}
+
+            {/* Where to stand, who to tell, what to watch for */}
+            <PlayAnnotations annotations={combo.annotations} />
+
+            {/* What it costs before you can run it */}
+            <PlayRequirements requirements={combo.requirements} />
 
             {/* Tags */}
             {combo.tags.length > 0 && (

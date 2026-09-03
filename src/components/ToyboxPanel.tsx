@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   X, Swords, Target, Drama, Sparkles, Plus, Star, Pencil,
-  ChevronUp, ChevronDown, Trash2, Loader2, AlertCircle,
+  ChevronUp, ChevronDown, Trash2, Loader2, AlertCircle, RotateCcw,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { Button } from './ui/Button'
@@ -17,8 +17,10 @@ import {
   addTacticToData, updateTacticInData, deleteTacticFromData,
   addPersonaPlayToData, updatePersonaPlayInData, deletePersonaPlayFromData,
 } from '../lib/toybox'
+import { seedToybox, findPack, packPresent } from '../lib/toybox-seed'
 import { ComboCard, TacticCard } from './toybox'
 import { DeployView } from './toybox/DeployView'
+import { PlayAnnotations } from './toybox/PlayLines'
 import type { Character } from '../lib/character'
 import { generateId } from '../lib/character'
 
@@ -162,11 +164,6 @@ export function ToyboxPanel({
 
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // ── Reload data when character changes (always, not just when open) ──
-  useEffect(() => {
-    setData(loadToybox(character.id))
-  }, [character.id])
-
   // ── Persist helper ──
   const persist = useCallback(
     (updated: ToyboxData) => {
@@ -175,6 +172,62 @@ export function ToyboxPanel({
     },
     [character.id],
   )
+
+  // ── Reload when the character changes, and seed a first-time Toybox ──
+  //
+  // SEEDING HAPPENS HERE AND NOT IN THE `useState` INITIALISER ABOVE. The
+  // initialiser runs during render, and seeding writes to localStorage — a
+  // side effect in a render body is the kind of thing that works until React
+  // renders twice. The cost is one extra render on mount, once per character.
+  //
+  // `seedToybox` is pure and reports whether it did anything, so the common
+  // case (already seeded, or no pack for this character) takes the `setData`
+  // branch and never touches storage.
+  // The character is read through a ref rather than listed as a dependency on
+  // purpose. `Character` is rebuilt by `resolveCharacter` — it is a fresh
+  // object identity on any render that recomputes it — so depending on it
+  // directly would re-run this effect, call `setData` with a new object, and
+  // re-render, forever. The effect must fire when the character CHANGES, which
+  // is `character.id`, not when its object identity does.
+  const characterRef = useRef(character)
+  characterRef.current = character
+
+  useEffect(() => {
+    const loaded = loadToybox(character.id)
+    const seeded = seedToybox(loaded, characterRef.current, Date.now())
+    if (seeded.changed) persist(seeded.data)
+    else setData(seeded.data)
+  }, [character.id, persist])
+
+  // ── The way back from a deletion ──
+  //
+  // Offered under three conditions at once, and each one removes a way for the
+  // button to lie:
+  //   a pack exists for this character  — otherwise it has nothing to load;
+  //   the marker is set                 — otherwise the mount effect is about
+  //                                       to seed anyway, or already tried and
+  //                                       dropped every entry, and a button
+  //                                       that visibly does nothing is worse
+  //                                       than no button;
+  //   nothing from the pack remains     — otherwise pressing it appends a
+  //                                       second copy of entries that are on
+  //                                       the screen right now.
+  // `seedToybox` itself will still force through a live pack and re-address
+  // the copies; that path is a safety net kept correct by its tests, not a
+  // road this UI walks down.
+  const pack = findPack(character)
+  const canReseed =
+    pack !== null
+    && (data.seededPacks ?? []).includes(pack.id)
+    && !packPresent(data, pack.id)
+
+  const reseed = useCallback(() => {
+    persist(seedToybox(data, characterRef.current, Date.now(), { force: true }).data)
+  }, [data, persist])
+
+  const seedProps = canReseed && pack
+    ? { onSeed: reseed, seedLabel: pack.label }
+    : {}
 
   // ── Close forms helper ──
   const closeForm = useCallback(() => {
@@ -742,6 +795,7 @@ export function ToyboxPanel({
                   title="No combos yet"
                   description="Build multi-step action combos for your character"
                   onAdd={() => { setFormMode('create'); resetComboForm() }}
+                  {...seedProps}
                 />
               ) : (
                 <>
@@ -1012,6 +1066,7 @@ export function ToyboxPanel({
                   title="No tactics yet"
                   description="Create if-then playbooks for combat situations"
                   onAdd={() => { setFormMode('create'); resetTacticForm() }}
+                  {...seedProps}
                 />
               ) : (
                 <>
@@ -1218,6 +1273,7 @@ export function ToyboxPanel({
                   title="No persona plays yet"
                   description="Create social strategies and roleplay playbooks"
                   onAdd={() => { setFormMode('create'); resetPersonaForm() }}
+                  {...seedProps}
                 />
               ) : (
                 <>
@@ -1392,11 +1448,18 @@ function EmptyState({
   title,
   description,
   onAdd,
+  onSeed,
+  seedLabel,
 }: {
   icon: typeof Swords
   title: string
   description: string
   onAdd: () => void
+  /* The way back from a deletion. Both props or neither — a labelled button
+     that does nothing and an unlabelled one that does something are each worse
+     than no button, so the render requires the pair. */
+  onSeed?: () => void
+  seedLabel?: string
 }) {
   return (
     <GlassCard className="flex flex-col items-center text-center py-8 space-y-3">
@@ -1407,10 +1470,18 @@ function EmptyState({
         <p className="text-sm font-semibold text-forge-0">{title}</p>
         <p className="text-xs text-forge-2 mt-1">{description}</p>
       </div>
-      <Button variant="primary" size="sm" onClick={onAdd}>
-        <Plus size={14} />
-        Create First
-      </Button>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <Button variant="primary" size="sm" onClick={onAdd}>
+          <Plus size={14} />
+          Create First
+        </Button>
+        {onSeed && seedLabel && (
+          <Button variant="secondary" size="sm" onClick={onSeed}>
+            <RotateCcw size={14} />
+            {seedLabel}
+          </Button>
+        )}
+      </div>
     </GlassCard>
   )
 }
@@ -1469,9 +1540,10 @@ function PersonaPlayCard({
           />
         </button>
 
-        {/* Name */}
+        {/* Name — `line-clamp-3`, not `truncate`. See ComboCard for the why;
+            all five persona names were clipped, this one worst at 90px. */}
         <div className="flex-1 min-w-0">
-          <span className="font-display text-forge-0 font-semibold text-sm truncate block">
+          <span className="font-display text-forge-0 font-semibold text-sm line-clamp-3">
             {play.name}
           </span>
         </div>
@@ -1527,6 +1599,9 @@ function PersonaPlayCard({
                 </div>
               </div>
             )}
+
+            {/* Where to stand, who to tell, what to watch for */}
+            <PlayAnnotations annotations={play.annotations} />
 
             {/* Tags */}
             {play.tags.length > 0 && (
