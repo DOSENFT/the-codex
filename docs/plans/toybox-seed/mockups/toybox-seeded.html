@@ -1,0 +1,268 @@
+<!doctype html>
+<!-- Gate 1 mockup. Throwaway, no framework, no build. The point of this file is NOT
+     the styling — the real cards already exist in the app and look better than this.
+     The point is the SHAPE OF AN ENTRY: does a seeded card carry the right fields, at
+     the right length, with the right voice? Three things here are new to these cards:
+     a REQUIREMENT line, a POSITIONING line, and a PARTY call-out. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Toybox, seeded — Nix, Paladin 7 of the Hearth</title>
+<style>
+  :root {
+    --bg:#12100e; --card:#1c1917; --edge:#2f2a26; --ink:#e8e2d9; --dim:#9a9088;
+    --ember:#e07a3c; --gold:#c9a227; --blue:#6b8fb5; --red:#b5563f; --green:#6f9a68;
+  }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif; padding:28px }
+  h1 { font-size:19px; margin:0 0 2px }
+  .sub { color:var(--dim); font-size:13px; margin-bottom:20px }
+  .tabs { display:flex; gap:6px; border-bottom:1px solid var(--edge); margin-bottom:18px }
+  .tab { padding:8px 16px; color:var(--dim); font-size:14px; border-bottom:2px solid transparent }
+  .tab.on { color:var(--ember); border-bottom-color:var(--ember) }
+  .section { margin-bottom:34px }
+  .section > h2 { font-size:13px; letter-spacing:.09em; text-transform:uppercase;
+                  color:var(--dim); margin:0 0 10px; font-weight:600 }
+  .card { background:var(--card); border:1px solid var(--edge); border-radius:9px;
+          padding:14px 16px; margin-bottom:12px }
+  .head { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:6px }
+  .name { font-weight:650; font-size:15.5px }
+  .badge { font-size:10.5px; letter-spacing:.05em; text-transform:uppercase;
+           padding:2px 7px; border-radius:4px; border:1px solid }
+  .b-burst { color:var(--ember); border-color:#4a3121 }
+  .b-def   { color:var(--blue);  border-color:#293544 }
+  .b-aoe   { color:var(--gold);  border-color:#40381a }
+  .b-core  { color:var(--green); border-color:#28351f }
+  .b-crit  { color:var(--red);   border-color:#432420 }
+  .desc { color:var(--dim); font-size:13.5px; margin-bottom:11px }
+  .blocks { display:flex; flex-direction:column; gap:7px; margin-bottom:11px }
+  .blk { display:flex; gap:10px; align-items:flex-start }
+  .slot { flex:none; width:74px; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase;
+          padding:3px 0; text-align:center; border-radius:4px; font-weight:600 }
+  .s-action { background:#3a2416; color:#e5a06a }
+  .s-bonus  { background:#2a2b3f; color:#9aa6d6 }
+  .s-react  { background:#3d2320; color:#dd8f7d }
+  .s-move   { background:#20301f; color:#95bd8c }
+  .s-free   { background:#2a2724; color:#a89e93 }
+  .blk-body { flex:1 }
+  .blk-label { font-size:14px }
+  .blk-note { color:var(--dim); font-size:12.5px; margin-top:1px }
+  .line { font-size:13px; margin:7px 0; padding-left:22px; position:relative }
+  .line::before { position:absolute; left:0; top:0 }
+  .req::before  { content:"REQ"; font-size:9px; color:var(--gold); letter-spacing:.04em; top:2px }
+  .pos::before  { content:"◈"; color:var(--blue) }
+  .party::before{ content:"⚑"; color:var(--green) }
+  .warn::before { content:"⚠"; color:var(--red) }
+  .req  { color:#d8c98a } .pos { color:#a9c0d6 } .party { color:#a7c4a1 } .warn { color:#e0a99b }
+  ol.steps { margin:0 0 11px; padding-left:20px; font-size:13.5px } ol.steps li { margin:4px 0 }
+  .trigger { font-size:13.5px; margin-bottom:9px }
+  .trigger b { color:var(--ember); font-weight:600 }
+  .tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:11px;
+          border-top:1px solid var(--edge); padding-top:9px }
+  .tag { font-size:11px; color:var(--dim); background:#232020; padding:2px 7px; border-radius:10px }
+  .tag.p { color:#a7c4a1 }
+  .phrase { font-size:13.5px; font-style:italic; color:#cfc6ba; margin:5px 0 5px 14px;
+            border-left:2px solid var(--edge); padding-left:10px }
+  .footnote { color:var(--dim); font-size:12.5px; border-top:1px solid var(--edge);
+              padding-top:12px; margin-top:26px }
+  .footnote b { color:var(--red) }
+</style>
+</head>
+<body>
+
+<h1>Toybox — Nix Vandry, Paladin 7, Oath of the Hearth</h1>
+<div class="sub">
+  STR 18 · CHA 16 → aura <b>+3</b>, cloak <b>10</b> temp HP, save DC <b>14</b> ·
+  AC 18 · The Dawn Guardian (1d10 slash, reach 10 ft) · Sentinel, Lucky ·
+  Rune (Wizard) · Ponzi (Rogue) · Ketza (Ranger) · Talon (Bard)
+</div>
+
+<div class="tabs">
+  <div class="tab on">Combos</div><div class="tab">Tactics</div><div class="tab">Persona</div>
+</div>
+
+<!-- ══════════════════════ COMBOS ══════════════════════ -->
+<div class="section">
+  <h2>Combos — three of roughly twelve</h2>
+
+  <div class="card">
+    <div class="head"><span class="name">Hearth Wall</span>
+      <span class="badge b-def">defensive</span></div>
+    <div class="desc">The turn you take when a charge is coming and the casters are behind you.
+      Spends no spell slot at all — so next turn's smite is still live.</div>
+    <div class="blocks">
+      <div class="blk"><div class="slot s-bonus">Bonus</div><div class="blk-body">
+        <div class="blk-label">Manifest the Hearthfire</div>
+        <div class="blk-note">Summon it <i>before</i> anything is in reach. Costs no slot.</div></div></div>
+      <div class="blk"><div class="slot s-action">Action</div><div class="blk-body">
+        <div class="blk-label">Attack ×2 — The Dawn Guardian</div>
+        <div class="blk-note">1d10+4 each. Reach 10 ft: you threaten the lane without standing in it.</div></div></div>
+      <div class="blk"><div class="slot s-react">Reaction</div><div class="blk-body">
+        <div class="blk-label">Channel Divinity → flaming cloak</div>
+        <div class="blk-note">10 temp HP (7 level + 3 CHA). Anyone hitting you in melee takes 1d10 fire.</div></div></div>
+    </div>
+    <div class="line pos">Stand so the 10-ft aura covers Rune and Talon. Your reach means
+      you can body-block the lane from a square behind the front, not in it.</div>
+    <div class="line warn">Temporary HP never stack. If Talon has already given you any,
+      the cloak's 10 replaces nothing and you have wasted the Channel Divinity.</div>
+    <div class="tags"><span class="tag">hearthfire</span><span class="tag">no-slot</span>
+      <span class="tag">front-line</span><span class="tag p">Rune</span><span class="tag p">Talon</span></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="name">One Slot, Spent Right</span>
+      <span class="badge b-burst">burst</span></div>
+    <div class="desc">The 2024 rule you will get wrong at the table: Divine Smite <i>is a spell</i>,
+      and you may spend only one spell slot per turn. This is the most damage that rule allows.</div>
+    <div class="blocks">
+      <div class="blk"><div class="slot s-action">Action</div><div class="blk-body">
+        <div class="blk-label">Attack — The Dawn Guardian</div>
+        <div class="blk-note">Swing first. Never declare the smite before you know it hit.</div></div></div>
+      <div class="blk"><div class="slot s-bonus">Bonus</div><div class="blk-body">
+        <div class="blk-label">Divine Smite — 2nd-level slot</div>
+        <div class="blk-note">3d8 radiant, +1d8 against an Undead or a Fiend. Declared after the hit lands.</div></div></div>
+      <div class="blk"><div class="slot s-free">Free</div><div class="blk-body">
+        <div class="blk-label">Second attack (Extra Attack)</div>
+        <div class="blk-note">You still get it. Smite once, swing twice.</div></div></div>
+    </div>
+    <div class="line warn">You cannot also cast Bless, Shield of Faith or any other spell this
+      turn. One slot per turn, and the smite already spent it.</div>
+    <div class="line req">Nothing — Divine Smite is always prepared and never counts against your seven.</div>
+    <div class="tags"><span class="tag">smite</span><span class="tag">burst</span>
+      <span class="tag">one-slot-law</span><span class="tag">undead</span></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="name">Faerie Fire Opening</span>
+      <span class="badge b-aoe">aoe</span></div>
+    <div class="desc">Round one, before anyone is set. You trade your own damage for
+      everyone else's, and it is not close.</div>
+    <div class="blocks">
+      <div class="blk"><div class="slot s-action">Action</div><div class="blk-body">
+        <div class="blk-label">Faerie Fire — 1st-level slot</div>
+        <div class="blk-note">20-ft cube, DEX save vs DC 14. Failures are outlined: attacks against
+          them have advantage, and they cannot benefit from being hidden.</div></div></div>
+      <div class="blk"><div class="slot s-bonus">Bonus</div><div class="blk-body">
+        <div class="blk-label">Manifest the Hearthfire</div>
+        <div class="blk-note">Free press. Never waste the bonus action on a round you aren't smiting.</div></div></div>
+      <div class="blk"><div class="slot s-move">Move</div><div class="blk-body">
+        <div class="blk-label">Advance to 10 ft of the lit cluster</div>
+        <div class="blk-note">Reach lets you arrive threatening without ending inside their reach.</div></div></div>
+    </div>
+    <div class="line party">Say it out loud before you cast: Ponzi's Sneak Attack becomes
+      automatic, and Ketza shoots with advantage all round. Two of them getting advantage
+      is worth more than your 3d8.</div>
+    <div class="line req">Faerie Fire — an oath spell, always prepared, free of your seven.</div>
+    <div class="tags"><span class="tag">opener</span><span class="tag">oath-spell</span>
+      <span class="tag p">Ponzi</span><span class="tag p">Ketza</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ TACTICS ══════════════════════ -->
+<div class="section">
+  <h2>Tactics — three of roughly ten</h2>
+
+  <div class="card">
+    <div class="head"><span class="name">The Reaction Is Only One</span>
+      <span class="badge b-crit">critical</span><span class="badge b-core">core</span></div>
+    <div class="trigger"><b>When:</b> Hearthfire is up, an enemy turn is starting, and you
+      have three different things that all want your reaction.</div>
+    <ol class="steps">
+      <li>Decide <i>before</i> their turn begins. Deciding during it is how you freeze the table.</li>
+      <li><b>Cloak</b> if the attention is on <i>you</i> — 10 temp HP eats a hit and answers 1d10 fire.</li>
+      <li><b>Sentinel</b> if an ally is the target — your swing also drops the attacker's speed to 0,
+        which is worth more than the damage.</li>
+      <li><b>Interception</b> if the hit already landed and it is the damage that matters —
+        reduce it by 1d10+3.</li>
+      <li>You get <i>one</i>. Not two. Pick the default now so the table isn't waiting on you.</li>
+    </ol>
+    <div class="line req">Hearthfire Manifest active · Channel Divinity available ·
+      fighting style: Interception</div>
+    <div class="line warn">Interception's and Sentinel's exact wording is <b>not in your source
+      files</b> — this is written from general 5e knowledge. Check both against your book once,
+      then delete this warning.</div>
+    <div class="tags"><span class="tag">reaction</span><span class="tag">sentinel</span>
+      <span class="tag">interception</span><span class="tag">hearthfire</span></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="name">Stand Where the Aura Pays</span>
+      <span class="badge b-crit">critical</span><span class="badge b-core">core</span></div>
+    <div class="trigger"><b>When:</b> anything is about to force saving throws — a caster is
+      spotted, a trap trips, something inhales.</div>
+    <ol class="steps">
+      <li>Aura of Protection is a 10-foot radius, and it is <i>always on</i>. It costs nothing.</li>
+      <li>+3 to every save, for everyone inside it. That is larger than most things you could
+        do with your whole action.</li>
+      <li>Aura of Solace stacks on top: resistance to <b>Fire, Cold and Psychic</b> inside the same radius.</li>
+      <li>So against a fire breath, or a mind-flayer type, <i>moving one square</i> beats every
+        spell on your list.</li>
+    </ol>
+    <div class="line party">Rune and Talon are the low-constitution ones. If the radius only
+      reaches two people, it reaches those two.</div>
+    <div class="line req">None. This is on whether you remember it or not — which is exactly
+      why it is written down.</div>
+    <div class="tags"><span class="tag">aura</span><span class="tag">positioning</span>
+      <span class="tag">no-action</span><span class="tag p">Rune</span><span class="tag p">Talon</span></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="name">Preparing for Tomorrow</span>
+      <span class="badge b-crit">critical</span><span class="badge b-core">core</span></div>
+    <div class="trigger"><b>When:</b> you finish a long rest. You may swap exactly one prepared spell.</div>
+    <ol class="steps">
+      <li>Your four oath spells — Faerie Fire, Burning Hands, Scorching Ray, Warding Bond —
+        are <b>always prepared and do not count</b>. Neither do Divine Smite or Find Steed.</li>
+      <li>So all seven picks are genuinely yours. You are currently using <b>two</b>:
+        Bless and Shield of Faith. Five are sitting empty.</li>
+      <li>Expect a boss with big saves? Keep <b>Bless</b>, add <b>Compelled Duel</b> — it forces
+        the fight to be about you, which is the fight you win.</li>
+      <li>Expect a swarm? Burning Hands is already free. Spend a pick on <b>Wrathful Smite</b>
+        instead — frightened enemies cannot close, and your reach punishes that.</li>
+      <li>Expect a long day with no healer? <b>Cure Wounds</b> and <b>Aid</b>. Aid raises the
+        whole party's maximum, not just their current.</li>
+    </ol>
+    <div class="line req">This entry is the index to every other entry — each combo lists what
+      it needs, and this is where you read them backwards into tomorrow's seven.</div>
+    <div class="tags"><span class="tag">long-rest</span><span class="tag">preparation</span>
+      <span class="tag">index</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PERSONA ══════════════════════ -->
+<div class="section">
+  <h2>Persona — one, pending your call on whether this tab gets seeded at all</h2>
+
+  <div class="card">
+    <div class="head"><span class="name">The Paladin Who Asks First</span></div>
+    <div class="trigger"><b>Situation:</b> a door, a gate, a guard — someone who will not open
+      for four armed strangers, and the party is already looking at you.</div>
+    <div class="desc">You have Persuasion and an aura that makes people feel safe standing near
+      you. Lead with the oath, not the face. The hearth is a promise of shelter — offer it
+      before you ask for anything.</div>
+    <div class="phrase">"You don't have to let us in. Tell me what you need kept out, and
+      I'll stand out here and keep it out."</div>
+    <div class="phrase">"I'm not asking you to trust four people. Trust one, and I'll answer
+      for the rest."</div>
+    <div class="line req">Persuasion (+6 at CHA 16, proficient)</div>
+    <div class="line warn">Nothing here touches the changeling. Your source file on changelings
+      is two editions out of date, and the secret is Scar's and the party's as much as it is
+      yours — so I have not written plays that spend it. <b>Say the word if you want that tab
+      to go there.</b></div>
+    <div class="tags"><span class="tag">social</span><span class="tag">persuasion</span>
+      <span class="tag">oath-forward</span></div>
+  </div>
+</div>
+
+<div class="footnote">
+  <b>What is unsourced here, stated plainly:</b> Interception, Sentinel and the Graze weapon
+  property are named in your files but never defined in them — the wording above is from
+  general knowledge, not from your books. Everything else — the aura, the cloak, the oath
+  spells, Aura of Solace, the one-slot-per-turn rule, the prepared-spell exemptions — is
+  traceable to <code>paladin_oath_of_the_hearth.txt</code>, <code>paladin_1.txt</code>,
+  <code>CORRECTIONS.md</code> or your character sheet.
+</div>
+
+</body>
+</html>
