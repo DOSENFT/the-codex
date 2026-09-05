@@ -54,7 +54,20 @@ const chromium = pw.chromium ?? pw.default?.chromium
 const nix = await loadNix()
 const marcus = { ...nix, level: 7, abilityScores: { ...nix.abilityScores, CHA: 16 } }
 const ID = marcus.id
-const SEED_LABEL = 'Load the Hearth starter plays'
+/* ROUND TWO, SLICE 2 CHANGED THE WORDS ON THE BUTTON, and finding out that way
+   is the prover doing its job. `ToyboxPanel.tsx` names the pack when exactly one
+   is missing and says "Reload the seeded plays" when more than one is — and
+   case 2 below deletes EVERYTHING, so after round two both packs are gone and
+   the plural label is what Marcus's thumb actually meets. Round two, slice 1
+   did not move it because round two delivered nothing to this fixture and there
+   was never a second pack present to delete; slice 2 changed that.
+
+   Both strings are named. The prover asserts the plural one is offered AND that
+   the singular one is not, which is a stronger claim than the old single check:
+   a label that silently stopped naming the pack in the one-pack case would now
+   be caught rather than passed over. */
+const SEED_LABEL = 'Reload the seeded plays'
+const SEED_LABEL_ONE_PACK = 'Load the Hearth starter plays'
 
 const browser = await chromium.launch()
 
@@ -125,10 +138,25 @@ async function deleteHearthWall(page) {
   await page.waitForTimeout(400)
 }
 
-/* Every combo in `hearth-7`. Slice 1's prover carries the note on why this is
-   a literal rather than `> 0`; this prover was red from slice 6 to slice 10
-   because its literal was `1` and nothing re-ran it. */
-const PACK_COMBOS = 14
+/* Every combo this fixture earns. Slice 1's prover carries the note on why this
+   is a literal rather than `> 0`; this prover was red from slice 6 to slice 10
+   because its literal was `1` and nothing re-ran it.
+
+   ROUND TWO, SLICE 2 ADDED THE `+ 3`: round two's three ungated combos reach
+   `loadNix()` too. The sum keeps the two packs legible — round one losing a
+   card while round two gains one is still wrong and still goes red.
+
+   ROUND TWO, SLICE 3 TOOK IT TO `+ 6` — three more ungated cards, all of them
+   needing equipment the fixture does not carry, which is `requirements` and
+   never `needs`. The reasoning in full is in `prove-slice1.mjs`.
+
+   ROUND TWO, SLICE 4 TOOK IT TO `+ 7` and closed round two at ten. The last card
+   is "The Caster Killer"; it is ungated and this fixture carries a melee weapon,
+   so it arrives. Nothing else in this file moves — the delete-one and
+   press-reseed arithmetic below is written against `PACK_COMBOS` and not against
+   any card in particular, which is why a growing pack does not grow the prover
+   that guards deletion. */
+const PACK_COMBOS = 14 + 7
 
 /** SLICE 10 ADDED THIS, and it is a change in what the app requires rather than
  *  a change in the prover's taste. The offer is gated on `!packPresent(...)` —
@@ -233,6 +261,10 @@ const record = (id, what, ok, lines) => results.push({ id, what, ok, lines })
   }, ID)
 
   const offered = await buttonShowing(page, SEED_LABEL)
+  /* And the singular label is NOT offered, because two packs are missing, not
+     one. This is the half that would catch the button quietly reverting to
+     naming only round one while restoring both. */
+  const offeredSingular = await buttonShowing(page, SEED_LABEL_ONE_PACK)
 
   let backAfterPress = null
   let backAfterReload = null
@@ -250,17 +282,23 @@ const record = (id, what, ok, lines) => results.push({ id, what, ok, lines })
     !offeredTooEarly
     && emptied === 0
     && offered
+    && !offeredSingular
     && backAfterPress?.combos.length === PACK_COMBOS
     && paintedAgain
     && backAfterReload?.combos.length === PACK_COMBOS
-    && backAfterReload.seededPacks?.length === 1
+    /* TWO, since round two, slice 2 — and still an exact count. Both markers
+       were already in storage before the delete and neither may be written a
+       second time by the force path; a `>= 1` here would not see a marker
+       doubling, which is precisely what "once means once" is about. */
+    && backAfterReload.seededPacks?.length === 2
   record('reseed', 'the empty state offers it back, and once means once', ok, [
     `offered while the combos were still there: ${offeredTooEarly}  (must be false)`,
     `entries left across all three tabs: ${emptied}  (must be 0)`,
     `offered "${SEED_LABEL}": ${offered}`,
+    `offered "${SEED_LABEL_ONE_PACK}": ${offeredSingular}  (must be false — two packs are gone)`,
     `after pressing:  ${JSON.stringify(backAfterPress)}`,
     `painted again:   ${paintedAgain}`,
-    `after a reload:  ${JSON.stringify(backAfterReload)}  (exactly one, marker not doubled)`,
+    `after a reload:  ${JSON.stringify(backAfterReload)}  (exactly two, neither marker doubled)`,
   ])
   await ctx.close()
 }

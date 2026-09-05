@@ -130,15 +130,66 @@ const CASES = [
         'seed:hearth-7:bless-before-the-door',
         'seed:hearth-7:damage-relocation',
         'seed:hearth-7:before-the-door-opens',
+        /* ROUND TWO, SLICE 2. An archer paladin earns these two as well: they
+           are gated on nothing and they never say `{{weapon}}`. The other
+           three round-two combos are absent for two DIFFERENT reasons, and
+           this list is the only place both are visible at once on a real
+           screen — "The Free Crit" opens with an attack, so an unresolvable
+           token kills the whole card, while "The Sentinel Gate" and "The
+           Second Swing" are refused by `needs` before a token is ever spent. */
+        'seed:hearth-7-r2:three-people-stand-up',
+        'seed:hearth-7-r2:through-the-door',
+        /* ROUND TWO, SLICE 3 ADDED TWO MORE TO THIS LIST, and they are the two
+           cards in the whole pack that are ABOUT not using your weapon: the
+           turn you spend spreading ball bearings, and the turn you spend
+           putting on a shield. Neither names `{{weapon}}` — which is a content
+           decision made once and then held here, on the glass, for an archer.
+           "Bearings" nearly failed it: its first draft said "no attacks this
+           turn, no {{weapon}}, nothing", which is true and would have deleted
+           the card for every paladin who does not carry a melee weapon.
+
+           "One Silver Piece of Fire" is absent for the same reason "The Free
+           Crit" is — its Action is an attack, so the token is load-bearing and
+           the card goes. "Drop the Glaive" is absent for the `needs` reason:
+           this fixture's weapon is not Two-Handed, so there is nothing to
+           drop, and refusing it is the card being right rather than missing. */
+        'seed:hearth-7-r2:bearings-and-the-backward-walk',
+        'seed:hearth-7-r2:the-shield-round',
+        /* ROUND TWO, SLICE 4 ADDED NOTHING TO THIS LIST, and that absence is the
+           assertion. "The Caster Killer" is gated on nothing, so it reaches
+           every other sheet in every other prover — but its Action is a swing at
+           the caster and its Movement is measured in `{{weaponReach}}`, so both
+           tokens are load-bearing and the card deletes itself here. That is the
+           card being honest: an archer cannot walk into reach and hit a mage
+           twice, and a version of this turn with the weapon filed off would be a
+           different turn wearing the same name. Round two now closes at ten
+           combos, and this fixture earns four of them. */
       ],
     },
   },
 ]
 
-/* Every combo in `hearth-7`. See the note in `prove-slice1.mjs`: the literal
-   is deliberate, and this prover was red from slice 6 to slice 10 because the
-   old literal was `1`. */
-const PACK_COMBOS = 14
+/* Every combo this fixture earns. See the note in `prove-slice1.mjs`: the
+   literal is deliberate, and this prover was red from slice 6 to slice 10
+   because the old literal was `1`.
+
+   ROUND TWO, SLICE 2 ADDED THE `+ 3`. Round two's three ungated combos reach
+   `loadNix()`, so fourteen is no longer the whole delivery. Written as a sum
+   rather than as `17` so the two packs stay legible: if round one ever loses a
+   card and round two gains one, this line is still wrong and the prover still
+   goes red — which a bare total would not do.
+
+   ROUND TWO, SLICE 3 TOOK IT TO `+ 6`. The reasoning is written out once, in
+   `prove-slice1.mjs`; the short version is that all three of slice 3's new
+   ungated cards need equipment, equipment is never a `needs`, and so all three
+   reach a paladin who has not bought any of it yet.
+
+   ROUND TWO, SLICE 4 TOOK IT TO `+ 7` and closed the pack at ten. This total is
+   the ARMED fixture's; the archer above still stops at four of round two's, and
+   the two numbers moving apart by exactly one is the point — "The Caster Killer"
+   names a weapon on purpose, so it must arrive on one sheet and be refused on
+   the other, in the same file. */
+const PACK_COMBOS = 14 + 7
 
 const browser = await chromium.launch()
 const results = []

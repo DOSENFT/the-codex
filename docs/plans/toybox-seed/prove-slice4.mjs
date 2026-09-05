@@ -240,7 +240,13 @@ const record = (id, what, ok, lines) => results.push({ id, what, ok, lines })
           ],
           tags: ['mine'], favorite: false, createdAt: 1,
         }],
-        tactics: [], personaPlays: [], seededPacks: ['hearth-7'],
+        /* BOTH MARKERS, since round two slice 2 — and marking them is the
+           point rather than a workaround. This case asks one question: does a
+           combo Marcus wrote himself, with no requirements, grow an empty
+           "REQ" row? Seeded content on the same screen is noise in that
+           question, and `['hearth-7']` alone stopped keeping it out the moment
+           round two shipped an entry this sheet earns. */
+        tactics: [], personaPlays: [], seededPacks: ['hearth-7', 'hearth-7-r2'],
       }))
     },
     [ID],

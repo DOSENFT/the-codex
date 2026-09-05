@@ -55,8 +55,38 @@ const nix = await loadNix()
    The literal is kept, not softened to `>= 1`. A count that only asserts
    "something arrived" would not have caught the duplicate-append bug slice 3
    was written for. It is named here so the next person who changes the pack
-   gets a red prover with an obvious cause instead of a mystery. */
-const PACK_COMBOS = 14
+   gets a red prover with an obvious cause instead of a mystery.
+
+   ROUND TWO, SLICE 2 MOVED IT — AND THAT IS THE MECHANISM WORKING, NOT A
+   NUISANCE. Round two, slice 1 left this file alone because its one entry
+   needed Sentinel and a reach weapon and `loadNix()` has neither, so the pack
+   delivered nothing here. Slice 2 shipped three entries gated on nothing —
+   "Three People Stand Up", "The Free Crit" and "Through the Door" — and this
+   fixture earns all three. Fourteen plus three is the new truth, and the
+   prover went red the same day the content changed, which is the entire reason
+   the literal exists. It is moved to the new true number and STILL not
+   softened; the count is what would catch a double-append.
+
+   AND SLICE 3 MOVED IT AGAIN, 3 → 6. Three more ungated entries — "Bearings and
+   the Backward Walk", "One Silver Piece of Fire" and "The Shield Round". All
+   three need equipment this fixture does not carry, and that is deliberately
+   NOT a gate: `needs` deletes a card forever and gear is something you can go
+   and buy, so it lives in `requirements` where the card can ask for it. The one
+   slice-3 card this fixture does not earn is "Drop the Glaive", which needs a
+   Two-Handed weapon and `loadNix()`'s melee weapon is not one.
+
+   AND SLICE 4 MOVED IT ONCE MORE, 6 → 7, which closes round two's slate at ten.
+   The last entry is "The Caster Killer", and it is ungated, so it reaches every
+   paladin in the window. It DOES name `{{weapon}}` and `{{weaponReach}}` in
+   load-bearing fields — deliberately, because a paladin with no weapon cannot
+   run that turn at all — but `loadNix()` carries a melee weapon, so it earns the
+   card. The sheet that does NOT earn it is the weaponless one, and that lives in
+   `prove-slice2.mjs`, where its own count says so.
+
+   THE NUMBER IS STILL NOT `>=`. Three moves in three slices is what a literal
+   costs, and every time it went red the same day the content changed and named
+   the reason. A `>=` would have cost nothing and caught nothing. */
+const PACK_COMBOS = 14 + 7
 
 const CASES = [
   {
