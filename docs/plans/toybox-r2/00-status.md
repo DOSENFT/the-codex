@@ -23,7 +23,8 @@ Round one (`docs/plans/toybox-seed/`) is COMPLETE, shipped and live. Its 31 entr
       **DONE 2026-09-05** — see "Slice 5, proved" below.
 - [x] Slice 6 — the six persona plays + the `types.ts` scoped exception + its test.
       **DONE 2026-09-05** — see "Slice 6, proved" below.
-- [ ] Slice 7 — tsc, suite, build, all provers (round one's eight AND round two's), ship
+- [x] Slice 7 — tsc, suite, build, all provers (round one's eight AND round two's), ship
+      **DONE 2026-09-05** — see "Slice 7, shipped" below.
 
 Every slice updates round one's prover literals to the new TRUE total. Never to `>=`.
 
@@ -41,6 +42,71 @@ still never softened to `>=`.
 **It happened exactly there.** Slice 2's three ungated combos reach `loadNix()`, and
 seventeen tests plus four provers went red against a `seed.ts` that was perfectly correct.
 Every literal moved to the new true value; nothing was softened. Details below.
+
+## Slice 7, shipped
+
+Round two is committed and pushed. **It is not live.** Publishing is a push to `main`,
+which is what `.github/workflows/deploy.yml` listens for, and that press is Marcus's.
+
+### The branch, and why there is one
+
+The plan inherited from round one assumed this checkout sat on `v1`, with the merge to
+`main` as Marcus's separate step. **It did not — `git branch --show-current` returned
+`main`, in sync with `origin/main`.** Committing here and pushing would have published
+round two the instant it left the machine, with no press in between. `deploy.yml` triggers
+on `push: branches: [main]`, so the publish button is the *push*, not the commit.
+
+So round two went onto a new branch, `toybox-r2`, cut from `main` at the shipped round-one
+commit and pushed to `origin`. Nothing about the live site changed. `the-codex` is **not**
+enrolled in `ops/save-all.repos`, so no auto-checkpoint can push `main` behind his back —
+that was checked, not assumed.
+
+### Four commits, by phase
+
+| commit | what |
+|---|---|
+| `c4d802b` | the plan — the four gate docs and this status file |
+| `591053e` | machinery — `types.ts` (incl. the scoped exception), `template.ts`, `profile.ts`, `seed.ts`, `index.ts`, `ToyboxPanel.tsx` |
+| `bc10922` | the content — the `hearth-7-r2` pack, its 48 tests, and the round-one/round-two count split in `seed.test.ts` |
+| `ea88a9d` | the provers, and the throwaway probes that proved the provers |
+
+### Staged one path at a time — never the whole tree at once
+
+The working tree holds another session's unfinished "your turn" work (`src/lib/turn/*`,
+`src/components/turn/*`, `src/components/combat/*`, `docs/plans/your-turn/*`) plus scratch
+files and screenshots — roughly 38 modified and 230 untracked paths that must not ship
+inside a Toybox commit. Every path was named explicitly at each commit. Afterwards,
+`git diff --name-only main..toybox-r2` returns **36 files, all of them Toybox**. Nothing
+foreign went in; `git status` for the Toybox scope came back empty, so nothing of round two
+was left behind either.
+
+### Proved on the committed state, not just the working tree
+
+A green working tree proves nothing about a commit when a second session's uncommitted work
+is sitting in the same tree — round two could have been leaning on code that was never
+staged. So the branch tip was checked out into a **separate worktree** and everything was
+re-run there:
+
+- `npx tsc --noEmit` — clean
+- suite — **80 files, 1642 passed, 7 skipped, 0 failed**. Fewer files than the working
+  tree's 85/1753 **on purpose**: the missing five files are the other session's uncommitted
+  tests, correctly absent from this branch.
+- `npm run build` — clean
+- all **fourteen** provers against a preview served from that isolated build — PASS
+
+The working tree was green too, at 85 files / 1753 passed / 7 skipped.
+
+### What is still Marcus's to press
+
+    git checkout main
+    git merge toybox-r2
+    git push origin main
+
+The last line is the publish. Round one went out the same way, by his hand, on 2026-09-03.
+
+Two housekeeping items, both 🟡 ASK-FIRST and both still open: the throwaway probes listed
+below, and a scratch worktree at `C:/tmp-r2-check` that could not be removed because a
+preview server still holds the directory.
 
 ## Slice 6, proved
 
