@@ -37,6 +37,15 @@ export interface SeedProfile {
   fightingStyle: string | null
   /** Lowercased feat names, so a lookup is `feats.has('sentinel')`. */
   feats: Set<string>
+  /** The primary melee weapon's properties, lowercased — `has('reach')`.
+   *
+   *  Empty rather than null for a character carrying no melee weapon, so
+   *  `SeedNeeds.weaponProperties` drops such an entry without a special case.
+   *  Note what this is NOT: `weaponReach` above answers 5 for a weapon with no
+   *  Reach property, which is the right answer for a sentence and the wrong one
+   *  for a gate. A combo that only makes sense at ten feet has to ask whether
+   *  the property is there, not what the number came out as. */
+  weaponProperties: Set<string>
   party: Partial<Record<PartyRole, string>>
 }
 
@@ -90,6 +99,7 @@ export function buildProfile(character: Character): SeedProfile {
     weaponReach: weapon ? weaponReach(weapon) : null,
     fightingStyle: style?.name ?? null,
     feats: new Set((character.feats ?? []).map(f => f.name.trim().toLowerCase())),
+    weaponProperties: new Set((weapon?.properties ?? []).map(p => p.trim().toLowerCase())),
     party: resolveParty(character),
   }
 }

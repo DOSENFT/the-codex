@@ -81,6 +81,33 @@ describe('the weapon the content means', () => {
     expect(buildProfile(archer).weaponName, 'and the profile says so, rather than guessing').toBeNull()
   })
 
+  it('reports the primary weapon’s properties as a lowercased set — round two', () => {
+    /* `weaponReach` already reads one property. `needs` reads them all, and it
+       reads them to DROP content, so the shape has to be predictable: a set,
+       lowercased, and never null. */
+    const glaive = {
+      ...NIX,
+      weapons: NIX.weapons.map(w =>
+        w.attackType === 'melee'
+          ? { ...w, properties: ['Reach', 'Two-Handed', ' Heavy '] }
+          : w),
+    }
+    const props = buildProfile(glaive).weaponProperties
+    expect(props.has('reach')).toBe(true)
+    expect(props.has('two-handed')).toBe(true)
+    expect(props.has('heavy'), 'authors put stray spaces in pack data').toBe(true)
+    expect(props.has('Reach'), 'the set is lowercase, so the lookup must be too').toBe(false)
+  })
+
+  it('reports an EMPTY set for a character with no melee weapon, never null', () => {
+    /* So `meetsNeeds` can ask `has('reach')` without a null check, and an
+       archer simply fails every weapon requirement instead of throwing. */
+    const archer = { ...NIX, weapons: NIX.weapons.filter(w => w.attackType === 'ranged') }
+    const props = buildProfile(archer).weaponProperties
+    expect(props.size).toBe(0)
+    expect(props.has('reach')).toBe(false)
+  })
+
   it('reads reach from the property first, then the stated range, then five', () => {
     expect(weaponReach({ ...NIX.weapons[0], properties: ['Reach'], range: '5 ft' }), 'a data slip in `range` must not shorten a glaive').toBe(10)
     expect(weaponReach({ ...NIX.weapons[0], properties: [], range: '15 ft' })).toBe(15)

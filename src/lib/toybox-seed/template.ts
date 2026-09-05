@@ -1,5 +1,5 @@
 import type { PlayNote, ToyboxCombo, ToyboxTactic, ToyboxPersonaPlay } from '../toybox'
-import type { SeedCombo, SeedTactic, SeedPersonaPlay } from './types'
+import type { SeedCombo, SeedTactic, SeedPersonaPlay, SeedNeeds } from './types'
 import type { SeedProfile } from './profile'
 import { PARTY_ROLES } from './party'
 
@@ -102,6 +102,28 @@ export function resolveNotes(
   return out.length > 0 ? out : undefined
 }
 
+/** Does the character HAVE what this entry needs? Absent needs means yes.
+ *
+ *  THE SECOND REASON AN ENTRY CAN BE DROPPED, and it sits beside the first
+ *  rather than above it: everything below this line asks whether the text can
+ *  be WRITTEN, and this asks whether the play can be RUN. Both answer by
+ *  returning null and both mean the same thing on the glass — the card is not
+ *  dealt, and there is no trace of it to puzzle over.
+ *
+ *  Matching is case- and space-insensitive on both sides because the sheet is
+ *  hand-entered. `SeedProfile` lowercases when it builds the sets; this
+ *  lowercases the authored side, so `'  Sentinel '` in a pack and `'sentinel'`
+ *  on a sheet are the same feat. */
+export function meetsNeeds(needs: SeedNeeds | undefined, profile: SeedProfile): boolean {
+  if (needs === undefined) return true
+  const holds = (have: Set<string>, wanted: string[] | undefined) =>
+    (wanted ?? []).every(name => have.has(name.trim().toLowerCase()))
+  return (
+    holds(profile.feats, needs.feats)
+    && holds(profile.weaponProperties, needs.weaponProperties)
+  )
+}
+
 /** Resolve an optional string: absent stays absent, unresolvable fails. */
 function resolveMaybe(
   text: string | undefined,
@@ -117,6 +139,12 @@ export function resolveCombo(
   profile: SeedProfile,
   createdAt: number,
 ): ToyboxCombo | null {
+  if (!meetsNeeds(combo.needs, profile)) return null
+  /* `authored` is the entry MINUS `needs`, and every return below spreads it
+     rather than `combo`. See the note on `SeedNeeds` in `types.ts`: this object
+     goes to localStorage and stays there. */
+  const { needs: _needs, ...authored } = combo
+
   const name = resolveText(combo.name, profile)
   if (name === null) return null
 
@@ -144,7 +172,7 @@ export function resolveCombo(
   }
 
   return {
-    ...combo,
+    ...authored,
     name,
     description: description.value,
     blocks,
@@ -161,6 +189,9 @@ export function resolveTactic(
   profile: SeedProfile,
   createdAt: number,
 ): ToyboxTactic | null {
+  if (!meetsNeeds(tactic.needs, profile)) return null
+  const { needs: _needs, ...authored } = tactic
+
   const name = resolveText(tactic.name, profile)
   const trigger = resolveText(tactic.trigger, profile)
   if (name === null || trigger === null) return null
@@ -177,7 +208,7 @@ export function resolveTactic(
   }
 
   return {
-    ...tactic,
+    ...authored,
     name,
     trigger,
     actions,
@@ -194,6 +225,9 @@ export function resolvePersonaPlay(
   profile: SeedProfile,
   createdAt: number,
 ): ToyboxPersonaPlay | null {
+  if (!meetsNeeds(play.needs, profile)) return null
+  const { needs: _needs, ...authored } = play
+
   const name = resolveText(play.name, profile)
   const situation = resolveText(play.situation, profile)
   const approach = resolveText(play.approach, profile)
@@ -207,7 +241,7 @@ export function resolvePersonaPlay(
   if (!skillCheck.ok) return null
 
   return {
-    ...play,
+    ...authored,
     name,
     situation,
     approach,

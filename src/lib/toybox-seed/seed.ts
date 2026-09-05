@@ -4,6 +4,7 @@ import type { SeedPack } from './types'
 import { buildProfile } from './profile'
 import { resolveCombo, resolveTactic, resolvePersonaPlay } from './template'
 import { HEARTH_7 } from './packs/hearth-7'
+import { HEARTH_7_R2 } from './packs/hearth-7-r2'
 
 /* ==========================================================================
    TOYBOX SEED — choosing a pack, and applying it once
@@ -29,27 +30,46 @@ import { HEARTH_7 } from './packs/hearth-7'
    calls it is offered only when nothing from the pack survives, so in practice
    the collision path is a safety net rather than a road, and it is tested as
    one.
+
+   ROUND TWO — ONE PACK BECAME MANY, AND `force` STOPPED BEING A BOOLEAN.
+
+   The reason a second pack exists at all is this module's own memory. Round
+   two's 24 entries could not be added to `hearth-7`, because `seededPacks`
+   already contains `hearth-7` for the one character that matters and a marked
+   pack is skipped forever. New content reaches an already-seeded Toybox only
+   as a new pack id. So a character now collects EVERY pack whose gate it
+   satisfies, each delivered once, each marked on its own.
+
+   And `force` had to change shape with it. It used to mean "re-apply the pack",
+   which was unambiguous when there was one. With two, a boolean cannot say
+   which one is missing — and forcing both would append a `~2` duplicate of the
+   one still on the screen, which reads as a rendering bug rather than as the
+   double delivery it is. `force` is now the list of pack ids to re-apply, so
+   the UI states which pack it means and the duplicate is unrepresentable
+   rather than merely avoided by discipline.
    ========================================================================== */
 
-const PACKS: readonly SeedPack[] = [HEARTH_7]
+/* ORDER IS CARD ORDER. Entries are appended pack by pack in this order, so
+   round one's 31 keep the top of the list and round two lands beneath them —
+   which is also the order a character seeded from scratch today would get. */
+const PACKS: readonly SeedPack[] = [HEARTH_7, HEARTH_7_R2]
 
 const isPresent = <T,>(x: T | null): x is T => x !== null
 
-/** The pack for this character, or null — and null is a normal answer.
+/** Every pack for this character, in `PACKS` order — and empty is a normal
+ *  answer, meaning exactly what the old `findPack`'s `null` meant.
  *
  *  Matching is exact on class and subclass and inclusive on the level bounds.
  *  There is no "close enough": a Paladin of a different oath gets nothing,
  *  because content written for the Hearth's cloak is wrong for an oath that
  *  has no cloak, and wrong content is worse than an empty tab. */
-export function findPack(character: Character): SeedPack | null {
-  return (
-    PACKS.find(
-      pack =>
-        pack.gate.class === character.class
-        && pack.gate.subclass === character.subclass
-        && character.level >= pack.gate.minLevel
-        && character.level <= pack.gate.maxLevel,
-    ) ?? null
+export function findPacks(character: Character): SeedPack[] {
+  return PACKS.filter(
+    pack =>
+      pack.gate.class === character.class
+      && pack.gate.subclass === character.subclass
+      && character.level >= pack.gate.minLevel
+      && character.level <= pack.gate.maxLevel,
   )
 }
 
@@ -103,41 +123,48 @@ function readdressCombo(combo: ToyboxCombo, taken: Set<string>): ToyboxCombo {
 
 export interface SeedResult {
   data: ToyboxData
-  /** True only when `data` differs from what came in. The caller writes to
-   *  storage on true and does not on false, so a mount that seeds nothing
-   *  costs no write. */
+  /** True only when `data` differs from what came in — that is, when at least
+   *  one pack contributed at least one entry. The caller writes to storage on
+   *  true and does not on false, so a mount that seeds nothing costs no write. */
   changed: boolean
-  /** The pack that MATCHED, whether or not it was applied. The empty state
-   *  needs this to know whether to offer its button at all. */
-  packId: string | null
+  /** Every pack that MATCHED, whether or not it was applied. Was `packId`
+   *  singular; the meaning is unchanged, only the arity. */
+  packIds: string[]
 }
 
-/** Copy the matching pack's entries into `data`, if it has not been done.
+/** Copy every matching pack's entries into `data`, skipping the ones already
+ *  delivered.
  *
  *  Seeded entries are APPENDED, never prepended and never merged, so anything
- *  Marcus wrote himself keeps its place at the top of the list. */
+ *  Marcus wrote himself keeps its place at the top of the list — and packs are
+ *  applied in `PACKS` order, so round two lands beneath round one rather than
+ *  interleaved with it. */
 export function seedToybox(
   data: ToyboxData,
   character: Character,
   createdAt: number,
-  opts?: { force?: boolean },
+  /** Pack ids to apply AGAIN despite their marker. See the header. */
+  opts?: { force?: string[] },
 ): SeedResult {
-  const pack = findPack(character)
-  if (!pack) return { data, changed: false, packId: null }
+  const packs = findPacks(character)
+  if (packs.length === 0) return { data, changed: false, packIds: [] }
 
-  const seededPacks = data.seededPacks ?? []
-  const already = seededPacks.includes(pack.id)
-  if (already && !opts?.force) return { data, changed: false, packId: pack.id }
+  const packIds = packs.map(p => p.id)
+  const force = opts?.force ?? []
 
-  /* Every string in the pack is a template, and `buildProfile` is the only
-     thing that knows what the numbers are. An entry whose text cannot be
-     resolved — no melee weapon to name, no wizard to call out to — is DROPPED
-     rather than rendered vague. See the header of `template.ts`. */
+  /* Every string in a pack is a template, and `buildProfile` is the only thing
+     that knows what the numbers are. An entry whose text cannot be resolved —
+     no melee weapon to name, no wizard to call out to — or whose `needs` the
+     character does not meet is DROPPED rather than rendered vague. See the
+     header of `template.ts`. Built ONCE and shared by every pack: it is a pure
+     function of the character, and rebuilding it per pack would be the same
+     answer at a cost. */
   const profile = buildProfile(character)
 
-  /* Ids already spoken for. Built from the Toybox as it stands, and added to
-     as each entry is placed, so two forced re-seeds in a row do not both land
-     on `~2`. */
+  /* Ids already spoken for. Built from the Toybox as it stands, and added to as
+     each entry is placed — so an id clash BETWEEN two packs is impossible by
+     construction rather than by naming convention, and two forced re-seeds in a
+     row do not both land on `~2`. */
   const taken = new Set<string>([
     ...data.combos.map(c => c.id),
     ...data.tactics.map(t => t.id),
@@ -148,44 +175,66 @@ export function seedToybox(
     return entry
   }
 
-  const combos = pack.combos
-    .map(c => resolveCombo(c, profile, createdAt))
-    .filter(isPresent)
-    .map(c => claim(readdressCombo(c, taken)))
-  const tactics = pack.tactics
-    .map(t => resolveTactic(t, profile, createdAt))
-    .filter(isPresent)
-    .map(t => claim({ ...t, id: freshId(t.id, taken) }))
-  const personaPlays = pack.personaPlays
-    .map(p => resolvePersonaPlay(p, profile, createdAt))
-    .filter(isPresent)
-    .map(p => claim({ ...p, id: freshId(p.id, taken) }))
+  /* Accumulated across packs, then written once. `seededPacks` grows only for
+     packs that actually delivered something — see the guard in the loop. */
+  let combos = data.combos
+  let tactics = data.tactics
+  let personaPlays = data.personaPlays
+  const seededPacks = [...(data.seededPacks ?? [])]
+  let changed = false
 
-  // A pack every one of whose entries was dropped is not a seed. Reporting
-  // `changed: true` here would write an unchanged Toybox to storage AND record
-  // a marker saying content had been delivered that never was — after which
-  // the marker would keep the real delivery from ever happening.
-  //
-  // SLICE 9 COVERED THIS, having carried it since slice 5 as unreachable. It is
-  // unreachable only with the one pack that exists today — `hearth-7` always
-  // delivers something, because "The Reaction Is Only One" spends no token and
-  // survives every sheet. `seed-empty.test.ts` substitutes a pack whose every
-  // entry names an absent party member and runs the real everything else;
-  // deleting these three lines turns three of its six tests red, one of them
-  // reporting `seededPacks: ['hearth-7']` on a Toybox that received nothing.
-  if (combos.length === 0 && tactics.length === 0 && personaPlays.length === 0) {
-    return { data, changed: false, packId: pack.id }
+  for (const pack of packs) {
+    const already = seededPacks.includes(pack.id)
+    if (already && !force.includes(pack.id)) continue
+
+    const fresh = {
+      combos: pack.combos
+        .map(c => resolveCombo(c, profile, createdAt))
+        .filter(isPresent)
+        .map(c => claim(readdressCombo(c, taken))),
+      tactics: pack.tactics
+        .map(t => resolveTactic(t, profile, createdAt))
+        .filter(isPresent)
+        .map(t => claim({ ...t, id: freshId(t.id, taken) })),
+      personaPlays: pack.personaPlays
+        .map(p => resolvePersonaPlay(p, profile, createdAt))
+        .filter(isPresent)
+        .map(p => claim({ ...p, id: freshId(p.id, taken) })),
+    }
+
+    // A pack every one of whose entries was dropped is not a seed. Marking it
+    // would record a delivery that never happened, after which the marker would
+    // keep the real delivery from ever happening.
+    //
+    // SLICE 9 COVERED THIS, having carried it since slice 5 as unreachable. It
+    // is unreachable with the packs that exist today — `hearth-7` always
+    // delivers something, because "The Reaction Is Only One" spends no token and
+    // survives every sheet. `seed-empty.test.ts` substitutes a pack whose every
+    // entry names an absent party member and runs the real everything else.
+    //
+    // ROUND TWO MADE THE `continue` LOAD-BEARING. With one pack this was a
+    // return, and a return and a skip are the same thing when there is nothing
+    // after you. There is now: an empty pack must not abort the packs behind it
+    // in the list, and `seed-empty.test.ts` asserts the pack after an empty one
+    // still seeds.
+    if (
+      fresh.combos.length === 0
+      && fresh.tactics.length === 0
+      && fresh.personaPlays.length === 0
+    ) continue
+
+    combos = [...combos, ...fresh.combos]
+    tactics = [...tactics, ...fresh.tactics]
+    personaPlays = [...personaPlays, ...fresh.personaPlays]
+    if (!already) seededPacks.push(pack.id)
+    changed = true
   }
 
+  if (!changed) return { data, changed: false, packIds }
+
   return {
-    data: {
-      ...data,
-      combos: [...data.combos, ...combos],
-      tactics: [...data.tactics, ...tactics],
-      personaPlays: [...data.personaPlays, ...personaPlays],
-      seededPacks: already ? seededPacks : [...seededPacks, pack.id],
-    },
+    data: { ...data, combos, tactics, personaPlays, seededPacks },
     changed: true,
-    packId: pack.id,
+    packIds,
   }
 }

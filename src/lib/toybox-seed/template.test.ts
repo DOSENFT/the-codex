@@ -12,8 +12,10 @@ import { NIX } from '../turn/fixtures/nix'
 import type { Character } from '../character'
 import { resolveCharacter } from '../rules-2024/derive'
 import { buildProfile } from './profile'
-import { resolveText, resolveCombo, resolveNotes } from './template'
-import type { SeedCombo } from './types'
+import {
+  resolveText, resolveCombo, resolveNotes, resolveTactic, resolvePersonaPlay, meetsNeeds,
+} from './template'
+import type { SeedCombo, SeedTactic, SeedPersonaPlay } from './types'
 
 const marcus: Character = resolveCharacter({
   ...NIX,
@@ -153,6 +155,125 @@ describe('an entry survives or it does not', () => {
     const out = resolveCombo(withBadNote, p, AT)
     expect(out, 'a dropped annotation must never take the combo with it').not.toBeNull()
     expect(out?.annotations).toEqual([{ kind: 'warning', text: 'temp HP never stack' }])
+  })
+})
+
+/* ---------------------------------------------------------------------------
+   `needs` — THE SECOND WAY AN ENTRY CAN BE WRONG. Round two.
+
+   Round one had exactly one: the text cannot be written, so the entry drops.
+   That catches everything a token can see, and tokens cannot see the two facts
+   round two's content is built on. "The Sentinel Gate" is a lie for a paladin
+   without Sentinel — and there is no token for a feat. Worse, `{{weaponReach}}`
+   RESOLVES to 5 for a short sword, so a combo about holding a ten-foot lane
+   would render perfectly and read as a strange card rather than an absent one.
+   Silent wrongness on the glass is the failure this whole feature exists to
+   avoid, so `needs` is a gate that runs BEFORE any text is written.
+
+   The last test in this block is the one that keeps `needs` out of storage.
+   ------------------------------------------------------------------------- */
+
+describe('needs, which is checked before a single character is written', () => {
+  const sentineled = buildProfile({
+    ...marcus,
+    feats: [{ name: 'Sentinel', description: '', isHomebrew: false, effects: [] }],
+    weapons: marcus.weapons.map(w =>
+      w.attackType === 'melee' ? { ...w, properties: ['Reach', 'Two-Handed'] } : w),
+  })
+
+  const gated: SeedCombo = {
+    id: 'seed:test:gated',
+    name: 'Gated',
+    needs: { feats: ['Sentinel'], weaponProperties: ['Reach'] },
+    blocks: [{ id: 'seed:test:gated:1', type: 'action', label: 'Swing {{weapon}}', source: 'weapon' }],
+    tags: ['t'],
+  }
+
+  it('lets the entry through when the sheet has everything it names', () => {
+    expect(resolveCombo(gated, sentineled, AT)).not.toBeNull()
+  })
+
+  it('drops the entry for a paladin without the feat', () => {
+    /* `marcus` is the real sheet minus its feats — and this is not hypothetical:
+       every paladin who is not Marcus reads this pack too. */
+    expect(resolveCombo(gated, p, AT)).toBeNull()
+  })
+
+  it('drops the entry for a five-foot weapon, which NO TOKEN COULD CATCH', () => {
+    /* The reason `needs` exists at all. Give this character the feat but leave
+       the sword short: every token still resolves, `{{weaponReach}}` cheerfully
+       writes "5", and round one's machinery sees nothing wrong. */
+    const shortSword = buildProfile({
+      ...marcus,
+      feats: [{ name: 'Sentinel', description: '', isHomebrew: false, effects: [] }],
+      weapons: marcus.weapons.map(w =>
+        w.attackType === 'melee' ? { ...w, properties: ['Versatile'] } : w),
+    })
+    expect(resolveText('reach {{weaponReach}} ft', shortSword), 'the text writes fine')
+      .toBe('reach 5 ft')
+    expect(resolveCombo(gated, shortSword, AT), 'and the entry drops anyway').toBeNull()
+  })
+
+  it('drops a weapon requirement for a character carrying no melee weapon', () => {
+    const archer = buildProfile({
+      ...marcus,
+      feats: [{ name: 'Sentinel', description: '', isHomebrew: false, effects: [] }],
+      weapons: marcus.weapons.filter(w => w.attackType === 'ranged'),
+    })
+    expect(meetsNeeds({ weaponProperties: ['Reach'] }, archer)).toBe(false)
+  })
+
+  it('ignores case and stray spaces, because packs are hand-written prose', () => {
+    expect(meetsNeeds({ feats: ['  sENTINEL '] }, sentineled)).toBe(true)
+    expect(meetsNeeds({ weaponProperties: ['REACH'] }, sentineled)).toBe(true)
+  })
+
+  it('lets an entry with no needs through, and one with empty needs too', () => {
+    expect(meetsNeeds(undefined, p)).toBe(true)
+    expect(meetsNeeds({}, p)).toBe(true)
+    expect(meetsNeeds({ feats: [], weaponProperties: [] }, p)).toBe(true)
+  })
+
+  it('requires ALL of them, not any', () => {
+    expect(meetsNeeds({ feats: ['Sentinel', 'Great Weapon Master'] }, sentineled)).toBe(false)
+  })
+
+  it('NEVER lets `needs` reach the resolved entry, for any of the three kinds', () => {
+    /* THE ONE THAT MATTERS MOST. A resolved entry goes to localStorage and
+       stays there. `needs` is authoring metadata about a decision that has
+       already been made by the time the entry exists — carrying it forward
+       would put a dead field on Marcus's phone forever, and the editor would
+       eventually have to render or strip it. */
+    const tactic: SeedTactic = {
+      id: 'seed:test:gated-t',
+      name: 'Gated Tactic',
+      trigger: 'it applies',
+      actions: ['Hold the lane.'],
+      priority: 'normal',
+      tags: ['t'],
+      needs: { feats: ['Sentinel'] },
+    }
+    const play: SeedPersonaPlay = {
+      id: 'seed:test:gated-p',
+      name: 'Gated Play',
+      situation: 'someone asks',
+      approach: 'Say less.',
+      keyPhrases: ['Not tonight.'],
+      tags: ['t'],
+      needs: { feats: ['Sentinel'] },
+    }
+
+    const outCombo = resolveCombo(gated, sentineled, AT)
+    const outTactic = resolveTactic(tactic, sentineled, AT)
+    const outPlay = resolvePersonaPlay(play, sentineled, AT)
+
+    expect(outCombo, 'all three had to survive, or this asserts nothing').not.toBeNull()
+    expect(outTactic).not.toBeNull()
+    expect(outPlay).not.toBeNull()
+
+    expect('needs' in outCombo!).toBe(false)
+    expect('needs' in outTactic!).toBe(false)
+    expect('needs' in outPlay!).toBe(false)
   })
 })
 

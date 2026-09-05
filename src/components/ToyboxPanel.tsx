@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
   X, Swords, Target, Drama, Sparkles, Plus, Star, Pencil,
   ChevronUp, ChevronDown, Trash2, Loader2, AlertCircle, RotateCcw,
@@ -17,7 +17,7 @@ import {
   addTacticToData, updateTacticInData, deleteTacticFromData,
   addPersonaPlayToData, updatePersonaPlayInData, deletePersonaPlayFromData,
 } from '../lib/toybox'
-import { seedToybox, findPack, packPresent } from '../lib/toybox-seed'
+import { seedToybox, findPacks, packPresent } from '../lib/toybox-seed'
 import { ComboCard, TacticCard } from './toybox'
 import { DeployView } from './toybox/DeployView'
 import { PlayAnnotations } from './toybox/PlayLines'
@@ -201,32 +201,48 @@ export function ToyboxPanel({
 
   // ── The way back from a deletion ──
   //
-  // Offered under three conditions at once, and each one removes a way for the
-  // button to lie:
-  //   a pack exists for this character  — otherwise it has nothing to load;
-  //   the marker is set                 — otherwise the mount effect is about
-  //                                       to seed anyway, or already tried and
-  //                                       dropped every entry, and a button
-  //                                       that visibly does nothing is worse
-  //                                       than no button;
-  //   nothing from the pack remains     — otherwise pressing it appends a
-  //                                       second copy of entries that are on
-  //                                       the screen right now.
-  // `seedToybox` itself will still force through a live pack and re-address
-  // the copies; that path is a safety net kept correct by its tests, not a
-  // road this UI walks down.
-  const pack = findPack(character)
-  const canReseed =
-    pack !== null
-    && (data.seededPacks ?? []).includes(pack.id)
-    && !packPresent(data, pack.id)
+  // A pack is offered back under two conditions at once, and each one removes a
+  // way for the button to lie:
+  //   the marker is set              — otherwise the mount effect is about to
+  //                                    seed it anyway, or already tried and
+  //                                    dropped every entry, and a button that
+  //                                    visibly does nothing is worse than none;
+  //   nothing from it remains        — otherwise pressing it appends a second
+  //                                    copy of entries on the screen right now.
+  //
+  // ROUND TWO IS WHY THIS IS A LIST. With one pack the second condition could
+  // be checked here and `force: true` trusted to mean the right thing. With two
+  // it cannot: if round one is deleted and round two is intact, a boolean force
+  // restores round one AND duplicates round two — re-addressed to `~2`, so it
+  // reads as a rendering bug rather than as the double delivery it is. Naming
+  // the missing packs makes that unrepresentable instead of merely avoided.
+  //
+  // `seedToybox` will still force through a live pack and re-address the
+  // copies; that path is a safety net kept correct by its tests, not a road
+  // this UI walks down.
+  const missingPacks = useMemo(
+    () =>
+      findPacks(character).filter(
+        p => (data.seededPacks ?? []).includes(p.id) && !packPresent(data, p.id),
+      ),
+    [character, data],
+  )
 
   const reseed = useCallback(() => {
-    persist(seedToybox(data, characterRef.current, Date.now(), { force: true }).data)
-  }, [data, persist])
+    const force = missingPacks.map(p => p.id)
+    persist(seedToybox(data, characterRef.current, Date.now(), { force }).data)
+  }, [data, persist, missingPacks])
 
-  const seedProps = canReseed && pack
-    ? { onSeed: reseed, seedLabel: pack.label }
+  // One button, however many packs are gone — a second button under an empty
+  // state is a menu, and the empty state is not a menu. The label names the
+  // pack when there is exactly one to name and stays honest when there is not.
+  const seedProps = missingPacks.length > 0
+    ? {
+        onSeed: reseed,
+        seedLabel: missingPacks.length === 1
+          ? missingPacks[0].label
+          : 'Reload the seeded plays',
+      }
     : {}
 
   // ── Close forms helper ──
