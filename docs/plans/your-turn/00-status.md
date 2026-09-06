@@ -1,5 +1,36 @@
 # Status: the one "Your Turn"
 
+## 🚀 SHIPPED TO PRODUCTION — 2026-09-06
+
+Commit **`c755116`** · pushed `ed9875d..c755116` · Pages deploy run **34008066166**
+green in 51s · live at **https://dosenft.github.io/the-codex/**
+
+171 files: 99 added · 47 deleted · 25 modified.
+
+**Verified on the production URL, not just locally.** The live `index.html` serves
+`assets/index-CQiOqN_C.js` — the same bundle hash the local `npm run build`
+emitted, so the deployed app is provably this build and not a cached earlier one.
+Then all three provers were re-run **against `https://dosenft.github.io/the-codex/`**:
+
+| Prover | Result on production |
+|---|---|
+| `_repro-marcus.mjs` | Action 7 → 7 · Bonus 3 → 3 · 0 "One of these" captions · 0 mutex boxes |
+| `prove-sliceR6.mjs` | both melee attacks land — 0 of 2 → 1 of 2 → 2 of 2 |
+| `prove-sliceR7.mjs` | two taps to end combat; "Keep going" restores round 3 intact |
+
+**Not committed on purpose:** `docs/plans/codex-v1/` (155 files, a different
+workstream), the root-level scratch and `*.log` files, `.agents/`, and
+`_rank.r8.bak` (a stale pre-R8 copy of `rank.ts` — a duplicate of live source in
+`docs/` is how someone ends up editing the wrong file). All still untracked.
+
+**The 8c vault is still on disk** at
+`C:\Users\marcu\Documents\Powerhouse\projects\_8c-deleted-2026-09-05`. Now that the
+deletion is in history, `git revert c755116` is also an undo — but the vault costs
+215KB and is the only undo that does not also revert the three fixes. Keep it until
+Marcus has played a session on the shipped build.
+
+---
+
 Marcus's items **5, 6, 10 and 11**. Three boxes about his turn plus a bar pinned
 to the bottom of the glass become **one**, losing no feature and no visual, built
 on the middle module — the one with the round counter and Next Turn.
