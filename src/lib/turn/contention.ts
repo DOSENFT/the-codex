@@ -33,6 +33,27 @@ const CAPTION: Partial<Record<EconomySlot, string>> = {
   movement: 'One of these — your movement',
 }
 
+/** WHY these cannot coexist, in the words you would say to a DM.
+ *
+ *  Slice R3, 2026-09-04, and it lives HERE rather than in a component because
+ *  `reason` is computed thirty lines below and a sentence that explains a value
+ *  should not be able to drift from the code that decides it. `ContentionBand`
+ *  holds a private copy of these four strings; that file is mounted nowhere
+ *  (its live wrapper went in slice 8b) and is a deletion candidate for 8c, so
+ *  it is left alone rather than churned.
+ *
+ *  A `Record`, not an index signature: `reason` is a four-member union and this
+ *  map must be TOTAL, or the day the fourth arm starts being emitted the screen
+ *  paints an `undefined` where the rule should be. */
+export const CONTENTION_WHY: Readonly<Record<MutexGroup['reason'], string>> = {
+  both: 'They want the same slot — and only one levelled spell slot leaves your hands per turn.',
+  resource: 'They draw on the same pool, so spending one leaves less for the other.',
+  economy: 'They want the same slot, so this turn you get one of them.',
+  /* `findContention`'s ternary yields both / resource / economy and never this.
+     The sentence is written anyway, for the reason above. */
+  spellSlot: 'Only one levelled spell slot leaves your hands per turn, so casting one rules out the other.',
+}
+
 /** True if this option spends something finite.  Free options never contend:
  *  there is no decision in "which unlimited thing shall I do", only in "which
  *  of my limited things do I spend". */
@@ -42,10 +63,17 @@ function hasLimitedCost(option: TurnOption): boolean {
 
 /** Group the options that cannot coexist this turn.
  *
- *  Faces are marked `contended` so the caller can keep them out of the flat
- *  lists — `compose.test.ts` asserts no option is ever listed twice, and a
- *  face rendered both in its bracket and in the ranked list would be exactly
- *  the "three rows" lie this module exists to prevent. */
+ *  Faces are marked `contended` so the caller can SAY SO ON THE ROW — Slice R2,
+ *  2026-09-04. This used to read "so the caller can keep them out of the flat
+ *  lists", and that removal was the defect: because the loop below skips
+ *  unavailable options, an option left its band for exactly as long as it was
+ *  takeable and returned the moment it was not. The screen was emptiest when it
+ *  had the most to offer.
+ *
+ *  The claim this module makes is still true and still worth making — these
+ *  five are one decision, not five — and after R3 it is made where the decision
+ *  is: a marker on each row and one sentence at the foot of the band. Nothing
+ *  is listed twice, which was always the property worth defending. */
 export function findContention(options: readonly TurnOption[]): MutexGroup[] {
   const bySlot = new Map<EconomySlot, TurnOption[]>()
   for (const option of options) {

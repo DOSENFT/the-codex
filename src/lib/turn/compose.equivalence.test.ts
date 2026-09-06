@@ -37,11 +37,26 @@ import type { TurnOption } from './types'
 const census = (c: CategorizedOptions) =>
   [...c.actions, ...c.bonusActions, ...c.reactions].map(o => o.name).sort()
 
-const listed = (t: ReturnType<typeof composeTurn>): TurnOption[] => [
-  ...t.ranked,
-  ...t.rest,
-  ...t.mutex.flatMap(g => g.faces),
-]
+/** Every option the turn offers, counted once.
+ *
+ *  SLICE R2, 2026-09-04. This used to be a plain concatenation of `ranked`,
+ *  `rest` and every mutex face, which was right while contention REMOVED its
+ *  faces from the flat lists. It no longer does — a face is annotated where it
+ *  already lives — so the same concatenation counted the contended ones twice
+ *  and reported 19 options on a sheet that has 12.
+ *
+ *  The mutex arm is kept rather than dropped, and only its NEW ids are taken.
+ *  Dropping it would make this helper assume compose.ts always puts every face
+ *  in a flat list; keeping it means a face that ever went missing from both
+ *  lists is still counted here, and the equivalence tests below still see it.
+ *  That is the open-world rule applied to a test helper: tolerate the shape you
+ *  did not predict rather than silently report fewer options than exist. */
+const listed = (t: ReturnType<typeof composeTurn>): TurnOption[] => {
+  const flat = [...t.ranked, ...t.rest]
+  const seen = new Set(flat.map(o => o.id))
+  const orphanedFaces = t.mutex.flatMap(g => g.faces).filter(f => !seen.has(f.id))
+  return [...flat, ...orphanedFaces]
+}
 
 /** Every row that came off the character sheet — i.e. everything the census
  *  above could possibly know about. Slice 7's synthesised rows are held out
@@ -284,11 +299,22 @@ describe("contention — D's defining element, on real data", () => {
     }
   })
 
-  it('keeps every face out of the flat lists', () => {
+  /* INVERTED, Slice R2, 2026-09-04. This test was called "keeps every face out
+   * of the flat lists" and asserted `expect(flat).not.toContain(face.id)`.
+   *
+   * It was a faithful test of the defect Marcus reported. Keeping a face out of
+   * the flat lists keeps it out of its BAND — `groupBySlot` reads nothing else —
+   * and because `findContention` only ever brackets AVAILABLE options, the
+   * removal lasted exactly as long as he could still take the thing.
+   *
+   * The assertion is reversed rather than deleted: where a face lives is
+   * load-bearing either way, and an untested answer is how it drifted once. */
+  it('keeps every face IN the flat lists, marked so the row can say it competes', () => {
     const flat = [...turn.ranked, ...turn.rest].map(o => o.id)
+    expect(turn.mutex.flatMap(g => g.faces).length).toBeGreaterThan(0)
     for (const face of turn.mutex.flatMap(g => g.faces)) {
       expect(face.contended).toBe(true)
-      expect(flat).not.toContain(face.id)
+      expect(flat).toContain(face.id)
     }
   })
 

@@ -19,8 +19,16 @@
 // them, the fix is a deliberate edit to the assertion with a reason attached,
 // which is exactly the conversation that should happen.
 
+// SLICE 8c, 2026-09-05 — this import was re-pointed, and nothing else changed.
+// It used to read `from './TurnSummary'`, which re-exports the function it does
+// not own: `TurnSummary.tsx:54` imports `categorizeTurnOptions` out of
+// `lib/turn/options.ts` and passes it straight back out again at line 90. So
+// the old path routed a pure-function test through a 951-line component that
+// the app does not mount, and made a dead file look alive to the compiler.
+// Same function, same bytes, one hop fewer — the assertions below are untouched.
+
 import { describe, it, expect } from 'vitest'
-import { categorizeTurnOptions, type ActionOption } from './TurnSummary'
+import { categorizeTurnOptions, type ActionOption } from '../../lib/turn/options'
 import { NIX } from '../../lib/turn/fixtures/nix'
 
 const names = (opts: ActionOption[]) => opts.map(o => o.name)

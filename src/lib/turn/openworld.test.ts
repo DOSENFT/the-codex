@@ -172,14 +172,25 @@ describe('composing a turn out of invented content', () => {
     })
   })
 
-  it('puts two invented bonus actions into one mutex, because they contend', () => {
+  it('marks two invented bonus actions as contending, and still lists them', () => {
     const group = turn.mutex.find(g => g.faces.some(f => f.name === 'Riptide Step'))
     expect(group).toBeDefined()
     expect(group!.faces.map(f => f.name)).toContain('Set Your Feet')
-    // And a face is shown ONCE. A face left in the flat list as well as its
-    // bracket is the "three rows for one decision" lie contention.ts exists
-    // to prevent, and homebrew is exactly where a filter gets forgotten.
-    expect(turn.ranked.map(o => o.name)).not.toContain('Riptide Step')
+
+    // And a face is shown ONCE — that property survives Slice R2 intact and is
+    // still the thing worth guarding, because "three rows for one decision" is
+    // exactly the lie contention.ts exists to prevent, and homebrew is where a
+    // duplicate gets forgotten.
+    //
+    // What changed is WHICH list holds the one row. This line used to read
+    // `not.toContain('Riptide Step')`: a homebrew bonus action had to be ABSENT
+    // from the flat list because its bracket held it instead. That absence is
+    // the defect Marcus reported — an option left its band for exactly as long
+    // as he could still take it. The face now sits in `ranked`, once, carrying
+    // `contended` so the row can say it competes.
+    const flat = [...turn.ranked, ...turn.rest].map(o => o.name)
+    expect(flat.filter(n => n === 'Riptide Step')).toHaveLength(1)
+    expect(find(turn, 'Riptide Step')!.contended).toBe(true)
   })
 })
 

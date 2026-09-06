@@ -1,4 +1,5 @@
 import { useDiceDock } from '../DiceControl'
+import { EndCombatDoor } from './EndCombatD'
 import type { SpellSlotLine, TurnResource } from '../../lib/turn/types'
 
 /* ============================================================================
@@ -44,7 +45,21 @@ export interface TurnVerbsProps {
   onReset?: () => void
   inCombat: boolean
   onStartCombat?: () => void
+  /** THE CONFIRM, not the first tap — when `onArmEndCombat` is supplied. Slice
+   *  R7: this used to be the button's own `onClick`, which made ending a fight
+   *  a one-gesture, undoable-by-nobody act. */
   onEndCombat?: () => void
+  /** Is the confirm showing? A PROP, not state.
+   *
+   *  Same law as `bandsOpen`: `TurnScreenD` holds no state, and `TurnVerbs`
+   *  reaches the screen through the opaque `verbs` seam — private state here
+   *  would put the one destructive control in this tab outside the only
+   *  component allowed to own state. It also has to be cleared when the fight
+   *  ends by some other route, and only `TurnLive` can see that happen. */
+  endArmed?: boolean
+  /** The first tap. Absent => the button falls back to the old direct wiring. */
+  onArmEndCombat?: () => void
+  onCancelEndCombat?: () => void
 }
 
 /* ============================================================================
@@ -69,6 +84,9 @@ export function TurnVerbs({
   inCombat,
   onStartCombat,
   onEndCombat,
+  endArmed,
+  onArmEndCombat,
+  onCancelEndCombat,
 }: TurnVerbsProps) {
   /* Same seam as the rail's: null provider, no button, rather than a dead one.
      No `DiceControl` provider wraps the D path today, so this renders nothing —
@@ -101,9 +119,20 @@ export function TurnVerbs({
           the design shoot measures supplies neither. */}
       {inCombat
         ? onEndCombat && (
-            <button type="button" className="rbtn end" onClick={onEndCombat} aria-label="End combat">
-              End combat
-            </button>
+            /* TWO TAPS, BECAUSE ENDING IS NOT UNDOABLE. The branch itself lives
+               in `EndCombatD.tsx` and not here: this component calls
+               `useDiceDock`, so it cannot be invoked outside a renderer, and
+               with no jsdom in this repo that would leave the one irreversible
+               control provable only by the shape of its markup. See that file's
+               header. `endArmed` is read ONLY inside this in-combat branch, so a
+               flag left set when the fight ends cannot paint a confirm for a
+               fight that is not running. */
+            <EndCombatDoor
+              armed={endArmed}
+              onArm={onArmEndCombat}
+              onCancel={onCancelEndCombat}
+              onConfirm={onEndCombat}
+            />
           )
         : onStartCombat && (
             <button type="button" className="rbtn end" onClick={onStartCombat}>

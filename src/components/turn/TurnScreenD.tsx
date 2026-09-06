@@ -1,7 +1,9 @@
 import '../../design/tokens.css'
 import './turn-d.css'
 import type { ReactNode } from 'react'
-import type { ComposedTurn, MutexGroup, TurnOption } from '../../lib/turn/types'
+/* `MutexGroup` left this import with the `Mutex` component in slice R3 — the
+   screen no longer receives a group, it receives an opaque `contention` node. */
+import type { ComposedTurn, TurnOption } from '../../lib/turn/types'
 import { groupBySlot, type BandSlot } from '../../lib/turn/bands'
 import { TurnBands } from './TurnBands'
 import { Act } from './TurnRow'
@@ -56,6 +58,27 @@ export interface TurnScreenDProps {
    *  amount of looking at rows can find it. Whether there is such a gap, and
    *  what to say about it, is a rules question answered in `TurnLive`. */
   bandNote?: (slot: BandSlot) => ReactNode
+  /** The contention sentence for one band — Slice R3, and the replacement for
+   *  the `Mutex` component this file used to hold.
+   *
+   *  Opaque for the third time and the third reason. `turn.mutex` is right here
+   *  and this file could read it, which is exactly why the prop exists: reading
+   *  it would mean deciding what to SAY about a `reason`, and that is a rules
+   *  sentence, not a layout one. The last time this file held such a decision it
+   *  held it as a box, and the box turned out to be removing options from the
+   *  screen. Passing it through keeps this file at what it is good at — where
+   *  things go — and leaves what they mean to `lib/turn/contention.ts`. */
+  contention?: (slot: BandSlot) => ReactNode
+  /** Something to hang in one band's HEADER — Slice R6, and the fourth opaque
+   *  node on this screen.
+   *
+   *  It exists because the other three cannot reach the header, and the header
+   *  is the only part of a band that survives collapsing it. `turn.attack` is
+   *  right here and this file could read it — which is, again, exactly why the
+   *  prop exists: reading it would mean deciding when a count is worth printing
+   *  and what to call it, and that is a rules sentence. See `TurnBands`, where
+   *  the text-only contract is spelled out. */
+  headNote?: (slot: BandSlot) => ReactNode
   /** Mark one of the four spent, or un-spend it.  Slice 8d-1.
    *
    *  THE TALLY THE LEGACY DECK KEPT, and the reason it has to come back: the
@@ -167,6 +190,8 @@ export function TurnScreenD({
   onDismissRefusal,
   rowExtra,
   bandNote,
+  contention,
+  headNote,
   bandsOpen,
   onToggleBand,
   vitalsControls,
@@ -394,6 +419,8 @@ export function TurnScreenD({
                 onOpen={onOpen}
                 rowExtra={rowExtra}
                 bandNote={bandNote}
+                contention={contention}
+                headNote={headNote}
               />
             ) : (
               <>
@@ -414,14 +441,17 @@ export function TurnScreenD({
             )}
           </section>
 
-          {turn.mutex.map(g => (
-            <Mutex key={g.id} g={g} onOpen={onOpen} />
-          ))}
+          {/* THE MUTEX BRACKETS RENDERED HERE UNTIL SLICE R3. The middle rank
+              of this column's priority order — "what to do now, then the
+              decisions that contend, then everything else" — is gone because
+              the decisions that contend are no longer a separate thing to
+              rank: they are rows in the bands above, marked, with one sentence
+              under each band that has any. Two ranks now, and the order of
+              what remains is unchanged. */}
 
-          {/* LAST, AND BELOW THE MUTEX BRACKETS, because the order of this
-              column is a priority order and has been since slice 9 of the
-              previous phase: what to do now, then the decisions that contend,
-              then everything else. Nothing in here is read in the six seconds
+          {/* LAST, because the order of this column is a priority order and has
+              been since slice 9 of the previous phase: what to do now, then
+              everything else. Nothing in here is read in the six seconds
               a turn gets — the damage log is written after the hit, the rest
               buttons between fights, the rules flags at the pub. */}
           {extras && <section className="extras">{extras}</section>}
@@ -589,47 +619,35 @@ function EconSlot({
    from each other for that same reason one layer down; this is the same
    argument at the next size up. */
 
-function MutexFace({ f, onOpen }: { f: TurnOption; onOpen?: (o: TurnOption) => void }) {
-  const body = (
-    <>
-      <span className="fnm">{f.name}</span>
-      {/* The bracket is ORDERED by rank, so it owes the same explanation the
-          flat rows give. A face that climbed to the top because Nix is
-          bleeding has to say so, or the reorder looks like the app moved his
-          options around for no reason. Nested in the detail cell rather than
-          added as a fourth column, so the three-column grid is untouched. */}
-      <span className="fd">
-        {f.detail}
-        {f.why && <span className="fnote">{f.why}</span>}
-      </span>
-      <span className="fc">{f.cost.label}</span>
-    </>
-  )
-  if (!onOpen) return <div className="face">{body}</div>
-  return (
-    <button type="button" className="face" disabled={!f.available} onClick={() => onOpen(f)}>
-      {body}
-    </button>
-  )
-}
+/* `Mutex` AND `MutexFace` STOOD HERE, AND SLICE R3 DELETED THEM.
+ *
+ * They painted a captioned fence — "One of these — your action · pick one" —
+ * holding the faces of a contended decision, as a SIBLING of the list. The
+ * caption is the one Marcus quoted back at us on 2026-09-04, and the reason it
+ * had to go is not that it was ugly. It was a PLACE: an option was removed from
+ * its band in order to be put in here, and because contention only ever brackets
+ * options he can still take, that removal emptied his Action band for exactly
+ * as long as the Action was his to spend.
+ *
+ * NOTHING IS LOST WITH THEM, AND THAT IS THE POINT OF SPLITTING R2 FROM R3.
+ * R2 put the faces back in their bands, so by the time this deletion happens
+ * every face already has a row — the same row, from the same `Act` component,
+ * as every other option. What these two components said that a row cannot is
+ * WHICH RULE binds them and HOW MANY, and that is now `ContentionNote`, one
+ * sentence at the foot of the band, supplied through the `contention` prop.
+ *
+ * The old markup's `.fnote` — a face's `why`, so a reorder never looked
+ * arbitrary — needed no rescue: `ActBody` has always painted `o.why` on the
+ * row, which is where it now appears.
+ */
 
-function Mutex({ g, onOpen }: { g: MutexGroup; onOpen?: (o: TurnOption) => void }) {
-  return (
-    <section className="mutex">
-      <div className="cap">
-        <span className="lbl">{g.label}</span>
-        <span className="n">pick one</span>
-      </div>
-      <div className="faces">
-        {g.faces.map(f => (
-          <MutexFace key={f.id} f={f} onOpen={onOpen} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-/** True if some mutex face already states this pool's cost on screen. */
+/** True if some mutex face already states this pool's cost on screen.
+ *
+ *  Still true after R3, and still worth asking. The faces have moved into the
+ *  bands but they have NOT stopped stating their price — `cost.label` is the
+ *  same string on the same rows — so the resource strip would still be the
+ *  second place that reading appeared. `turn.mutex` survives as the record of
+ *  which options contend; only its role as a container is gone. */
 function mutexPrices(turn: ComposedTurn, poolId: string): boolean {
   return turn.mutex.some(g => g.faces.some(f => f.cost.resourcePoolId === poolId))
 }

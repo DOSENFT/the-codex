@@ -13,6 +13,9 @@ import { BAND_ORDER, type BandSlot } from '../../lib/turn/bands'
 import { useCollapsible } from '../../hooks/useCollapsible'
 import { VitalsControls } from './VitalsControls'
 import { FightingStyleGap } from './FightingStyleGap'
+import { ContentionNote, groupForSlot } from './ContentionNote'
+import { AttackTally, SwingAgain, midAttack } from './AttackTally'
+import { isWeaponAttack } from '../../lib/rules-2024/attacks'
 import type { TurnOption } from '../../lib/turn/types'
 import { featureByName } from '../../lib/canon/lookup'
 import { featureContextOf } from '../../lib/turn/overlay'
@@ -80,6 +83,15 @@ function Screen({
      disagree. `CombatHelper` holds the identical pair (`:1040`). */
   const [openOption, setOpenOption] = useState<TurnOption | null>(null)
 
+  /* ── SLICE R7: IS THE END-COMBAT CONFIRM SHOWING? ───────────────────────
+     Here rather than in `TurnVerbs` for the same law that made `bandsOpen` a
+     prop: `TurnScreenD` holds no state, and the verb row reaches it through the
+     opaque `verbs` seam. Giving the one destructive control in this tab private
+     state would put it outside the only component allowed to own any. It also
+     has to be cleared when the fight ends by any other route, and this is the
+     only place that can see that happen — which is what the effect below is. */
+  const [endArmed, setEndArmed] = useState(false)
+
   /* The DM's answers to canon's twelve rules problems, read once per character.
      The SAME map the Rules flags band writes, so a ruling recorded on the
      legacy tab is the ruling this tab's sheet reports — one fact, one store.
@@ -87,6 +99,16 @@ function Screen({
      component renders in the node suite, where there is no `localStorage`. */
   const [rulings, setRulings] = useState<ErratumRulings>({})
   useEffect(() => setRulings(loadRulings(character.id)), [character.id])
+
+  /* Least-confident decision 3 in the R7 design, answered rather than left
+     open. `EndCombatDoor` only reads `armed` inside the in-combat branch, so a
+     stale flag is already harmless to LOOK at — but it would still be set the
+     next time a fight starts, and he would meet an armed confirm he never
+     asked for. Anything that leaves combat clears it, including routes this
+     slice does not know about: the condition is the fight, not the button. */
+  useEffect(() => {
+    if (!combat.inCombat) setEndArmed(false)
+  }, [combat.inCombat])
 
   /* ── THE WRITER CAME UP HERE IN 8b, AND HAD TO ──────────────────────────
      This function was `handleRule` in `CombatHelper`, beside a second
@@ -149,6 +171,32 @@ function Screen({
   const undoable = combat.undoEntry?.event.type === 'retaliate' ? combat.undoEntry : null
 
   const rowExtra = (option: TurnOption) => {
+    /* ── SLICE R6: THE SECOND SWING, OFFERED ON THE ROW THAT TAKES IT ───────
+       "It also doesnt allow me to take my two mele attacks."
+
+       R5 made it allow him and told him nothing: the weapon row mid-Attack is
+       byte-identical to the weapon row before he swung, so the one row he needs
+       is the only one on the screen that has not changed. This is the sentence
+       that changes it.
+
+       `isWeaponAttack` is the SAME predicate the reducer prices the spend with
+       (`reduce.ts`, via `rules-2024/attacks.ts`), so the row that offers a
+       second swing is exactly the row the reducer will accept. Deciding it here
+       from `option.kind` and the slot by hand would be a second definition of
+       "weapon attack", and the two would eventually disagree about a homebrew
+       reaction attack — which is precisely the case the predicate exists for.
+
+       `midAttack` IS ASKED HERE, BEFORE THE NODE IS BUILT, and that is
+       load-bearing. `Act` chooses between two different markups on the
+       truthiness of `extra` (`TurnRow.tsx:105`), and an element that renders
+       null is still a truthy element — handing over `<SwingAgain/>`
+       unconditionally would put a permanent empty box with a hairline under
+       every weapon attack in the app, on every turn. `AttackTally.test.tsx`
+       holds that fault as a test so it cannot be tidied back in. */
+    if (isWeaponAttack(option) && midAttack(combat.turn.attack)) {
+      return <SwingAgain attack={combat.turn.attack} />
+    }
+
     /* THE REACTION ROW, AND ONLY THE REACTION ROW — measured, not assumed.
        Probing NIX's fourteen options for a free die returned TWO: the bonus
        action "Hearthfire Manifest", which puts the cloak up, and the reaction
@@ -213,6 +261,23 @@ function Screen({
       <FightingStyleGap character={character} onPick={handlePickStyle} />
     ) : null
 
+  /* THE CONTENTION SENTENCE — slice R3, and the last of the bracket.
+     Returns null for every band with no live contention, which on Nix's sheet
+     is three of the four. `groupForSlot` and the wording both live beside the
+     rule that computes `reason`; this line only says WHERE. */
+  const contention = (slot: BandSlot) => (
+    <ContentionNote group={groupForSlot(combat.turn.mutex, slot)} />
+  )
+
+  /* THE ATTACK TALLY — slice R6, and the half of it that survives collapsing the
+     band. Extra Attack is a rule about the ACTION, so no other band is asked:
+     a "1 of 2 used" hanging under Bonus would be furniture at best and a wrong
+     rule at worst. `AttackTally` returns null for everyone whose Attack action
+     contains one swing, which is most characters and every martial below level
+     5, so their header is what it was before this slice to the byte. */
+  const headNote = (slot: BandSlot) =>
+    slot === 'action' ? <AttackTally attack={combat.turn.attack} /> : null
+
   /* ── THE RAIL'S WRITES ──────────────────────────────────────────────────
      Slots and pools are the CHARACTER's, so they go through `onCharacterUpdate`
      — `useCharacter`'s `setCharacter`, the sheet's one and only writer. The
@@ -275,6 +340,15 @@ function Screen({
          too the moment he has answered. Delete this one line and the bands are
          exactly what slice 5 shipped — this slice's declared revert. */
       bandNote={bandNote}
+      /* SLICE R3. Returns null for every band with no live contention. Delete
+         this one line and the claim is back to living only on the rows — which
+         is this slice's declared revert. */
+      contention={contention}
+      /* SLICE R6. Returns null for every band but Action, and null for that one
+         too on any sheet whose Attack action contains one swing. Delete this one
+         line and the held action is invisible again — which is this slice's
+         declared revert. */
+      headNote={headNote}
       onToggleEconomy={handleToggleEconomy}
       onEndTurn={combat.endTurn}
       onBeginTurn={combat.beginTurn}
@@ -354,7 +428,19 @@ function Screen({
           onReset={handleReset}
           inCombat={combat.inCombat}
           onStartCombat={combat.startEncounter}
-          onEndCombat={combat.endEncounter}
+          /* SLICE R7 — TWO TAPS, BECAUSE ENDING IS NOT UNDOABLE. This prop used
+             to be the button's own `onClick`. Measured on his export
+             2026-09-05, one tap took `inCombat true -> false` and `round 3 ->
+             1` and rewrote `codex-combat-<id>` with nothing asked. It is now
+             reached only by the confirm strip's second door, and it clears the
+             flag on the way through so the strip is never left armed. */
+          endArmed={endArmed}
+          onArmEndCombat={() => setEndArmed(true)}
+          onCancelEndCombat={() => setEndArmed(false)}
+          onEndCombat={() => {
+            setEndArmed(false)
+            combat.endEncounter()
+          }}
         />
       }
       /* ── THE REST OF THE SESSION — slice 8b, and the whole of item 6 ───────

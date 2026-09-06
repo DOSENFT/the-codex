@@ -620,6 +620,13 @@ describe('takenFrom — the narrowing between what is rendered and what is store
       id: smite.id,
       name: 'Divine Smite',
       slot: 'bonusAction',
+      // Slice R5 widened the narrowing by exactly one field, and it earns its
+      // place under this test's own rule: `kind` is not presentation. The
+      // reducer needs it to tell a weapon swing (which may HOLD the action
+      // open across two attacks) from a spell (which closes it outright), and
+      // `slot` cannot answer that — Sacred Flame and Hearthbrand both cost the
+      // action. It is a cost input, not a label.
+      kind: 'spell',
       spellSlotLevel: 1,
     })
 
@@ -630,7 +637,7 @@ describe('takenFrom — the narrowing between what is rendered and what is store
     // No detail, no rider, no score — those are regenerated every render and
     // would be stale the moment Marcus edits the sheet.
     expect(Object.keys(flat).sort()).toStrictEqual(
-      ['id', 'name', 'resourceAmount', 'resourcePoolId', 'slot'].sort(),
+      ['id', 'kind', 'name', 'resourceAmount', 'resourcePoolId', 'slot'].sort(),
     )
   })
 

@@ -23,6 +23,21 @@ export function ActBody({ o }: { o: TurnOption }) {
     <>
       <span className="hd">
         <span className="anm">{o.name}</span>
+        {/* THE ROW SAYS IT COMPETES — Slice R3, and it is half of what replaces
+            the bracket. The other half is the sentence at the foot of the band,
+            which says how many and which rule; this says WHICH ROWS, in the one
+            place he is already looking when he is choosing.
+
+            Beside the name and before the price on purpose. It qualifies the
+            option itself — "this is one of several ways to spend one thing" —
+            whereas the price says what that thing is, and reading them the
+            other way round puts the exception after the fact it modifies.
+
+            `contended` is set only on options he can still take
+            (`contention.ts` skips unavailable ones), so a spent Action carries
+            no markers. That is right: there is no decision left to warn about,
+            and marking greyed rows would be the app arguing with itself. */}
+        {o.contended && <span className="cmark">competes</span>}
         <span className="cost">{o.cost.label}</span>
       </span>
       <span className="det">{o.detail}</span>

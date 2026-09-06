@@ -367,62 +367,28 @@
 }
 .dturn .act .rider b { color: var(--d-gold); font-weight: 500; }
 
-/* ---- the mutex — D's defining element ------------------------------------
-   A SIBLING of the list, never a child of it.  It is not one more option; it
-   is one decision that happens to have three faces, and nesting it inside the
-   scrolling list says the opposite. */
-.dturn .mutex {
-  flex: 0 0 auto;
-  padding: var(--d-s2) var(--pad) var(--d-s3);
-  background: var(--d-e1);
-  border-top: 1px solid var(--d-rule-lit);
-}
-.dturn .mutex .cap { padding-bottom: 6px; }
-.dturn .faces { display: flex; flex-direction: column; gap: 6px; }
-/* Two rows, not one.  On 390px a single row ellipsed the faces down to
-   "+2d8 radia…", "Touch · r…", "Teleport 30 ft t…" — and a mutex whose faces
-   you cannot read is not a decision, it is three mystery buttons.  Name and
-   price share the top line because price is what you are weighing. */
-.dturn .face {
-  min-height: var(--d-touch-goal);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-content: center;
-  gap: 1px var(--d-s3);
-  padding: 7px 12px;
-  border-radius: var(--d-radius);
-  background: var(--d-e2);
-  border: 1px solid var(--d-rule-lit);
-  text-align: left;
-}
-.dturn .face .fnm {
-  grid-area: 1 / 1;
-  font-family: var(--d-font-display);
-  font-size: var(--d-fs-title);
-  color: var(--d-cream);
-  line-height: var(--d-lh-tight);
-}
-.dturn .face .fc {
-  grid-area: 1 / 2;
-  justify-self: end;
-  font-family: var(--d-font-mono);
-  font-size: var(--d-fs-mono);
-  color: var(--d-gold);
-  white-space: nowrap;
-}
-.dturn .face .fd {
-  grid-area: 2 / 1 / 2 / -1;
-  min-width: 0;
-  font-size: var(--d-fs-label);
-  color: var(--d-dim);
-  line-height: 1.3;
-}
+/* ---- the mutex, and where its fifty lines went — Slice R3 -----------------
+   `.mutex`, `.faces`, `.face` and the four child rules stood here until
+   2026-09-04. They dressed a BOX, and the box was the defect: to appear inside
+   it an option had to leave its band, so Marcus's Action band was emptiest at
+   exactly the moment he had the most to spend.
+
+   Nothing about D's defining element is lost with them, because the element
+   was never the box — it was the CLAIM that these options are one decision
+   with several faces. R2 put the faces back among their own rows; R3 moved the
+   claim to `.cmark` on each competing row and `.bcon` at the foot of the band,
+   both below. Those two are dressed like the rest of a band, which is the
+   point: the claim now sits WITH the options rather than instead of them.
+
+   Deleted rather than left in place because a stylesheet that dresses markup
+   nothing emits is a map of a building that has been demolished — the next
+   reader spends their time working out which of the two is out of date. */
 
 /* ---- resource strip -------------------------------------------------------
    Four groups do not fit on 390px at a 12px floor — 451px of content measured
    into 362px of strip, and "Lay on hands 15/40" folded into itself.  The strip
    carries only what nothing else on this screen carries.  Anything already
-   stated as a cost on a mutex face is not repeated here. */
+   stated as a cost on a contending row is not repeated here (`mutexPrices`). */
 .dturn .res {
   flex: 0 0 auto;
   display: flex;
@@ -598,6 +564,45 @@
    throws state away, and it should not read as just another verb. */
 .dturn .rbtn.end { color: var(--d-amber); }
 
+/* ── THE END-COMBAT CONFIRM — slice R7 ───────────────────────────────────────
+   It replaces the button IN PLACE, so it is a flex child of `.rverbs` and
+   wraps rather than being given a line of its own by the layout. `flex: 1 1
+   100%` means: take the whole row when the sentence will not sit beside Look up
+   and Reset, which at 390px it never will — so in practice it wraps below the
+   surviving verbs, and it costs the scroller nothing while unarmed because then
+   it is not rendered at all.
+
+   AMBER, NOT EMBER, for the text. `--d-ember` is 4.68:1 and tokens.css marks it
+   `>=16px only`; `.endc-msg` is `--d-fs-body` (15px). Ember appears once, as
+   the 1px border, where a contrast ratio does not apply — enough to make the
+   strip read as the one dangerous object on the card without printing 15px type
+   below the floor this design system sets for itself. */
+.dturn .endc {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--d-s2) var(--d-s3);
+  padding: var(--d-s2) var(--d-s3);
+  border: 1px solid var(--d-ember);
+  border-radius: var(--d-radius-lg);
+  background: color-mix(in srgb, var(--d-ember) 9%, transparent);
+}
+.dturn .endc-msg {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: var(--d-fs-body);
+  line-height: 1.35;
+  color: var(--d-cream);
+}
+.dturn .endc-doors {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--d-s2);
+}
+
 /* A spend button carries a number ("Spend 5 Lay on Hands"), so it takes the
    mono face and the label size — it is a quantity, not a verb. */
 .dturn .rbtn.spend {
@@ -702,34 +707,58 @@
   letter-spacing: 0.02em;
 }
 
-/* Same register as .note, inside the bracket's detail cell. */
-.dturn .face .fnote {
-  display: block;
+/* THE ROW SAYS IT COMPETES — Slice R3, half of what replaces the bracket.
+
+   A WORD, NOT A TINT. The cheap move is to colour contending rows, and it is
+   wrong twice: every colour on this screen is already spoken for (gold names a
+   mechanic, ember refuses, amber is live, verdant affirms), and a tint has no
+   NAME, so it teaches a player nothing he can repeat to a DM. One word does.
+
+   `--d-tally`, which is the same ink as the count in `.bck` at the foot of the
+   band — because the marker and that sentence are ONE statement said in two
+   places, and they have to look like it. Not gold: gold holds at ~36% of lit
+   ink by design, and seven new gold chips on Nix's Action band alone is how a
+   highlight becomes a background. Tally is the neutral 8.55:1 ink this system
+   already keeps for facts that are not mechanics.
+
+   Sized and spaced like `.cost`, because it is the same kind of aside; the
+   `margin-left: auto` is what keeps it there. `.hd` is `space-between`, which
+   works for two children and scatters three — the auto margin eats the free
+   space so name stays left and marker and price sit together on the right,
+   leaving every uncontended row laid out exactly as it was. */
+.dturn .act .cmark {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-family: var(--d-font-mono);
   font-size: var(--d-fs-label);
-  color: var(--d-dim);
-  margin-top: 2px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  color: var(--d-tally);
 }
+/* A blocked row has no decision left in it, so it has nothing to compete for.
+   `findContention` already skips unavailable options, so this rule should never
+   have anything to hide — it is here so that a future rule that stops skipping
+   them cannot silently start arguing with the greyed-out state. */
+.dturn .act.blocked .cmark { display: none; }
 
 /* ============================================================================
    SLICE 6 — the rows became pressable
    ----------------------------------------------------------------------------
-   `.act` and `.face` are now <button> when the screen is live and <div> when
-   it is not, and the two must be pixel-identical: the design shoot measures the
-   inert form and Marcus uses the live one. So nothing below adds padding,
-   colour or size — it only undoes what a user agent does to a button.
+   `.act` is a <button> when the screen is live and a <div> when it is not, and
+   the two must be pixel-identical: the design shoot measures the inert form and
+   Marcus uses the live one. So nothing below adds padding, colour or size — it
+   only undoes what a user agent does to a button.
 
    The children moved from <div> to <span> in the same change (a <div> inside a
    <button> is legal but a <span> is what the element actually is), so they need
    their block behaviour restated. `.hd` keeps its flex: three class selectors
    beat two-classes-plus-an-element, so its rule wins on specificity regardless
    of order.
-   ========================================================================== */
-.dturn .act > span,
-.dturn .face > span { display: block; }
 
-.dturn button.act,
-.dturn button.face {
+   `.face` shared every rule here until slice R3 deleted the bracket it dressed.
+   ========================================================================== */
+.dturn .act > span { display: block; }
+
+.dturn button.act {
   width: 100%;
   min-width: 0;
   margin: 0;
@@ -740,23 +769,16 @@
   appearance: none;
   -webkit-tap-highlight-color: transparent;
 }
-/* The grid the two-row face is built on. `display` is set on `.face` already,
-   but a UA stylesheet may override it for buttons in older Safari. */
-.dturn button.face { display: grid; }
 
 /* Pressed, not hovered. This screen is a thumb on glass; hover states are for
    a mouse that is not there, and a hover that sticks after a tap on iOS reads
    as a stuck selection. */
 .dturn button.act:not(:disabled):active { background: var(--d-e2); }
-.dturn button.face:not(:disabled):active { background: var(--d-e1); }
-.dturn button.act:disabled,
-.dturn button.face:disabled { cursor: default; }
-.dturn button.face:disabled { opacity: 0.62; }
+.dturn button.act:disabled { cursor: default; }
 
 /* Focus: visible, and only for the keyboard. An always-on ring would put a
    second gold line on every row and blow the density budget D was built for. */
-.dturn button.act:focus-visible,
-.dturn button.face:focus-visible {
+.dturn button.act:focus-visible {
   outline: 2px solid var(--d-gold);
   outline-offset: 2px;
 }
@@ -806,6 +828,42 @@
 }
 .dturn .act.hasx.blocked { opacity: 1; }
 .dturn .act.hasx.blocked > .acthit { opacity: 0.62; }
+
+/* ---- the second swing, offered on the row that takes it (slice R6) ---------
+   The other thing an `.actx` can hold, and the first one that is not a control.
+
+   Two spans on one line, split the way `.bcon` splits its two: the numeral is
+   the fact he cannot derive by looking, in the tally ink every count on this
+   screen carries; the verb is the only part that is an INSTRUCTION, and it is
+   the only part that is amber — the same amber the live pip and the live band
+   edge use, because it means the same thing here as it does there.
+
+   No border, no ground, no target. Pressing the row is already what swings
+   again; a framed "Swing again" would be a second control for the one intent —
+   and, sitting inside `.actx` where a real button sits on the reaction row, a
+   convincing one that did nothing. That is `ReactionRow.tsx:192`'s fault
+   rebuilt, and it is worth naming here because this is the only place in the
+   file where inert text shares a container with live controls. */
+.dturn .swing {
+  display: flex;
+  align-items: baseline;
+  gap: var(--d-s2);
+  margin: 0;
+}
+.dturn .swing .swn {
+  flex: 0 0 auto;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  letter-spacing: 0.04em;
+  color: var(--d-tally);
+}
+.dturn .swing .swv {
+  flex: 0 0 auto;
+  font-size: var(--d-fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--d-amber);
+}
 
 /* The hairline that joins the extra to its card, so the capture reads as part
    of the reaction rather than as a loose control that happens to sit under it. */
@@ -976,6 +1034,35 @@
   color: var(--d-tally);
   white-space: nowrap;
 }
+/* THE ATTACK TALLY — slice R6, and the second count in the header.
+
+   `--d-tally`, mono, sized exactly like `.bn` beside it, because it IS the same
+   kind of statement: "3 ready" counts what he could take, "1 of 2 used" counts
+   how much of one of them he has taken, and two counts that looked like
+   different species would make the eye stop at each of them separately. V-3 —
+   A NUMERAL IS NEVER DIM — so this is 8.55:1 and not `--d-dim`, whatever else it
+   sits next to.
+
+   NOT AMBER, though it is about a live action. Amber on this screen means "this
+   is still yours", and it is already spoken by the pip and the state word two
+   spans away; a third amber thing in one header would make the row a warning
+   rather than a heading. The count is a fact, and facts are tally ink.
+
+   `flex: 0 1 auto` with `min-width: 0` where every other chip is `0 0 auto`:
+   this is the last thing added to a header that already carries a 20px Cinzel
+   label, a count, a state word and a caret at 390px, so it is the one that
+   yields first if the line ever runs out of room. Everything before it was
+   there when the header was measured; this was not. */
+.dturn .bhead .batk {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-mono);
+  color: var(--d-tally);
+  white-space: nowrap;
+}
 .dturn .bhead .bstate {
   flex: 0 0 auto;
   font-size: var(--d-fs-label);
@@ -1006,6 +1093,49 @@
   padding: var(--d-s3);
   font-size: var(--d-fs-body);
   color: var(--d-cream);
+}
+
+/* ---- the contention sentence (slice R3) -----------------------------------
+   All that survives of a fifty-line box: two lines of text under the last row
+   of the band it is about.
+
+   NO BORDER, NO GROUND, NO PADDING BOX. That is the entire lesson of the thing
+   it replaces. The bracket was a CONTAINER, and a container needs contents, and
+   getting contents meant taking options out of the list Marcus was reading. A
+   sentence cannot regress that way — there is nowhere in it to put an option.
+
+   It is not `.bnote`'s dashed frame either, though both sit at the foot of a
+   band, because they are opposite kinds of remark: `.bnote` is the app asking
+   for something it lacks and is therefore pressable, while this is the app
+   stating a rule about rows already on screen and there is nothing to press.
+   Giving it a frame would offer a target that does nothing — the exact failure
+   ReactionRow.tsx:192 was fixed for.
+
+   Two lines, and the split is the point. `.bck` is the fact he cannot derive by
+   looking (how many of these are alternatives) and carries the tally ink his
+   markers carry; `.bcw` is WHY, in a DM's words, dim like every other remark
+   the eye is allowed to skip on a second reading. */
+.dturn .bcon {
+  margin: 0;
+  padding: 0 var(--d-s3) var(--d-s3);
+  /* Pulled up under the rows it is about. `.brows` ends in its own bottom
+     padding, and without this the sentence floats midway between the band it
+     describes and the one below — which on a phone is a claim about the wrong
+     rows. */
+  margin-top: calc(-1 * var(--d-s2));
+}
+.dturn .bcon > span { display: block; }
+.dturn .bcon .bck {
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  letter-spacing: 0.04em;
+  color: var(--d-tally);
+}
+.dturn .bcon .bcw {
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+  line-height: 1.35;
+  margin-top: 2px;
 }
 
 /* ---- the band note (slice 6, item 8) --------------------------------------

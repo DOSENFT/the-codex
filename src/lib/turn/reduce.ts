@@ -35,6 +35,7 @@ import type { CombatState } from '../combat-state'
 import { spellSlotSpentThisTurn } from '../rules-2024/economy'
 import { findPool, setPoolCurrent, spendable } from '../rules-2024/resources'
 import { LOG_DEPTH, type CombatEvent, type LogEntry, type Restore, type TakenOption } from './events'
+import { attacksPerAction, isWeaponAttack } from '../rules-2024/attacks'
 import { addRetaliation } from './retaliation'
 import type { TurnOption } from './types'
 
@@ -211,6 +212,26 @@ function refuse(state: SessionState, why: string): Applied {
   return { state, entry: null, refused: why }
 }
 
+/** Drop a half-finished Attack action.  Slice R5.
+ *
+ *  A function, and not the `attacksUsed: undefined` it replaced, because those
+ *  are different objects and this file's round-trip proof can tell. Writing the
+ *  key as undefined leaves it PRESENT, and `toStrictEqual` counts a
+ *  present-but-undefined key as different from an absent one — which is the
+ *  whole reason the proof uses the strict matcher (see this file's header, and
+ *  `events.ts`'s). Setting it to undefined therefore made `revert` land one key
+ *  away from where it started on every turn boundary: invisible in JSON,
+ *  invisible on screen, and a failing property test.
+ *
+ *  Returns the SAME object when there is nothing to drop, so the identity
+ *  guarantee `reconcile` documents survives this too. */
+function clearHeldAttacks(combat: CombatState): CombatState {
+  if (combat.attacksUsed === undefined) return combat
+  const next = { ...combat }
+  delete next.attacksUsed
+  return next
+}
+
 function takeOption(
   state: SessionState,
   event: CombatEvent,
@@ -319,9 +340,35 @@ function takeOption(
     nextCharacter = setTempHP(nextCharacter, option.grantsTempHP, option.name)
   }
 
+  // -- 5. Extra Attack: the action is HELD, not spent -------------------------
+  //
+  // Slice R5, and the smallest change that answers "It also doesnt allow me to
+  // take my two mele attacks." One Attack action contains `attacksPerAction`
+  // swings, so the action must stay OPEN between them — otherwise the first
+  // swing closes it and the second is refused at the top of this function.
+  //
+  // The promotion to `action: true` happens on the LAST swing, so every other
+  // rule in this file keeps working unchanged: the double-spend refusal above
+  // still catches a third attack, `endTurn` still clears the slot, and Undo
+  // still restores from `restore.combat`, which was snapshotted whole before
+  // any of this ran. `attacksUsed` needs no inverse written for it.
+  //
+  // `option.kind` is optional on `TakenOption`, so an entry replayed from a
+  // build that never wrote it reads as "not a swing" and closes the action
+  // outright — the behaviour that entry was recorded under.
+  const attacksInAction = attacksPerAction(character)
+  const held =
+    isWeaponAttack({ kind: option.kind, cost: { slot } }) &&
+    attacksInAction > 1 &&
+    (combat.attacksUsed ?? 0) + 1 < attacksInAction
+  const nextAttacksUsed = isWeaponAttack({ kind: option.kind, cost: { slot } })
+    ? (combat.attacksUsed ?? 0) + 1
+    : combat.attacksUsed
+
   const closesSlot =
     slot === 'action' || slot === 'bonusAction' || slot === 'reaction' || slot === 'movement'
-  const turnActions = closesSlot ? { ...combat.turnActions, [slot]: true } : combat.turnActions
+  const turnActions =
+    closesSlot && !held ? { ...combat.turnActions, [slot]: true } : combat.turnActions
 
   // NOTHING HAPPENED is a real outcome, and it must not produce a log entry.
   // A free rider on a homebrew feature the sheet does not count — Vow of
@@ -338,6 +385,12 @@ function takeOption(
   const nextCombat: CombatState = {
     ...combat,
     turnActions,
+    // Spread conditionally, never as `attacksUsed: undefined`. This file's
+    // round-trip proof uses `toStrictEqual`, which counts a present-but-
+    // undefined key as different from an absent one — writing the key
+    // unconditionally would make every Undo test fail on a difference that is
+    // invisible in JSON and real in JavaScript.
+    ...(nextAttacksUsed !== undefined ? { attacksUsed: nextAttacksUsed } : {}),
     // Starting a new concentration spell drops the old one, which is the rule
     // and is also why `restore.combat` is captured whole: undo has to put the
     // previous spell back, not merely clear this one.
@@ -373,7 +426,7 @@ function endTurn(state: SessionState, event: CombatEvent): Applied {
     state: {
       ...state,
       combat: {
-        ...combat,
+        ...clearHeldAttacks(combat),
         round: combat.round + 1,
         // SLICE 7 — THE ONE CHANGE HERE, AND IT IS A RULES FIX.
         //
@@ -417,7 +470,7 @@ function beginTurn(state: SessionState, event: CombatEvent): Applied {
     state: {
       ...state,
       combat: {
-        ...combat,
+        ...clearHeldAttacks(combat),
         turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
         yourTurn: true,
       },
@@ -438,7 +491,7 @@ function startCombat(state: SessionState, event: CombatEvent): Applied {
     state: reconcile({
       character,
       combat: {
-        ...combat,
+        ...clearHeldAttacks(combat),
         inCombat: true,
         round: 1,
         turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
@@ -468,7 +521,7 @@ function endCombat(state: SessionState, event: CombatEvent): Applied {
     state: reconcile({
       character,
       combat: {
-        ...combat,
+        ...clearHeldAttacks(combat),
         inCombat: false,
         round: 1,
         turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
@@ -607,6 +660,10 @@ export function takenFrom(option: TurnOption): TakenOption {
     id: option.id,
     name: option.name,
     slot: option.cost.slot,
+    // Slice R5. Copied at take-time for the reason every other field here is
+    // copied: the log outlives the option list, and by the time this entry is
+    // read the option object it came from may no longer exist.
+    kind: option.kind,
     ...(option.cost.spellSlotLevel !== undefined ? { spellSlotLevel: option.cost.spellSlotLevel } : {}),
     ...(option.cost.resourcePoolId !== undefined
       ? {

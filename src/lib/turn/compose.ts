@@ -48,6 +48,7 @@ import {
   type SlotSpendRecord,
   spellSlotSpentThisTurn,
 } from '../rules-2024/economy'
+import { attacksPerAction, isWeaponAttack } from '../rules-2024/attacks'
 import { riderFor } from '../rules-2024/mastery'
 import { findPool, poolIdForFeature, poolsOf } from '../rules-2024/resources'
 import { findContention } from './contention'
@@ -357,6 +358,22 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   }
   const slotSpentThisTurn = spellSlotSpentThisTurn(log, round)
 
+  // -- how far into the Attack action you are --------------------------------
+  //
+  // Slice R5. `attacksUsed` is absent on every combat state Marcus has saved,
+  // and absent is zero, so `midAttack` is false for all of them — the arm this
+  // feeds cannot fire on a sheet that predates it.
+  //
+  // MID means strictly between: you have swung at least once and you have at
+  // least one swing left. At zero the action has not started; at the full count
+  // it is genuinely spent and `spent('action')` says so in the ordinary way.
+  // Both ends land on the pre-R5 behaviour, which is what keeps this arm from
+  // having opinions about anybody who is not mid-swing.
+  const attacksInAction = attacksPerAction(character)
+  const attacksSwung = combat?.attacksUsed ?? 0
+  const midAttack = attacksSwung > 0 && attacksSwung < attacksInAction
+  const attacksLeft = () => attacksInAction - attacksSwung
+
   // -- the options themselves ------------------------------------------------
   //
   // `includeUnaffordable` is the ONLY behavioural difference between what this
@@ -540,6 +557,27 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       // bookkeeping attached to something else, not a thing you spend a turn on.
       // Reactions are exempt because they are the entire point of the moment.
       blockedReason = 'It is not your turn'
+    } else if (
+      midAttack &&
+      slot === 'action' &&
+      !isWeaponAttack({ kind: KIND[option.type], cost: { slot } })
+    ) {
+      // SLICE R5, and its POSITION is the whole of it. Mid-Attack the action is
+      // held open, not spent — so `spent('action')` below is false and this row
+      // would otherwise compose as perfectly available, letting Marcus cast a
+      // spell in the middle of an Attack action he has not finished.
+      //
+      // It sits ABOVE `spent(slot)` for the same reason every arm in this chain
+      // sits where it does: the specific true reason beats the general one.
+      // "Your action is spent" would be a lie here, and a visible one — the
+      // weapon row two lines up is still live, so the screen would be arguing
+      // with itself while the player waits to swing.
+      //
+      // It sits BELOW the condition and off-turn arms because those outlive the
+      // moment: a Paralyzed character does not need to hear about his Attack
+      // action, and off-turn the whole question is moot.
+      const left = attacksLeft()
+      blockedReason = `You are taking the Attack action — ${left} attack${left === 1 ? '' : 's'} left`
     } else if (spent(slot)) {
       blockedReason = `Your ${ECONOMY_LABEL[slot].toLowerCase()} is spent`
     } else if (cost.spellSlotLevel !== undefined && slotSpentThisTurn) {
@@ -664,13 +702,35 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   // only saw the shortlist would show two faces of a three-face decision.
   // findContention marks faces in place, so it must see the scored objects.
   const mutex = findContention(everything).map(g => ({ ...g, faces: sortByRank(g.faces) }))
-  const loose = everything.filter(o => !o.contended)
 
-  const affordable = sortByRank(loose.filter(o => o.available))
+  // CONTENTION ANNOTATES; IT DOES NOT RELOCATE.  Slice R2, 2026-09-04.
+  //
+  // This line used to read `everything.filter(o => !o.contended)`, and being
+  // contended took an option out of both lists — which is to say out of its
+  // band, because `groupBySlot` reads only these two. Marcus found what that
+  // does at a table:
+  //
+  //   "I cannot see the full available list of spells and abilities under
+  //    Action, Bonus, Reaction, etc unless and until I click on those buttons
+  //    ... When I expend that action and it's no longer available, that's when
+  //    I can see the full list. This is backwards."
+  //
+  // He is describing the rule exactly. `findContention` brackets only AVAILABLE
+  // options (contention.ts:52), so availability was the trigger for removal:
+  // his five slot-spending spells left the Action band precisely while he could
+  // still cast them, and came back the moment he could not. Measured on his own
+  // level-7 export, the Action band held 2 rows open and 7 rows spent, and
+  // announced "2 ready" over seven takeable things.
+  //
+  // So the split is over `everything` now. `contended` survives and still means
+  // something — it means SAY SO ON THIS ROW, and the band prints the sentence
+  // at its foot. The claim contention makes is true and worth making; making it
+  // by moving things was the defect.
+  const affordable = sortByRank(everything.filter(o => o.available))
   // Blocked options are sorted too. They are greyed, not gone, and a greyed
   // list in arbitrary order is a wall of text: the thing he most wishes he
   // could do should be the first thing he cannot do.
-  const blocked = sortByRank(loose.filter(o => !o.available))
+  const blocked = sortByRank(everything.filter(o => !o.available))
 
   // The shortlist is headed "Your turn", so it holds only things you can do ON
   // your turn. A reaction is by definition something that happens on someone
@@ -755,6 +815,14 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       movement: yourTurn && !spent('movement') && !forbidden.includes('movement'),
       spellSlotUsedThisTurn: slotSpentThisTurn,
     },
+
+    /* SLICE R6 — the two numbers above, returned instead of kept.
+       They were computed for the `blockedReason` arm and discarded, which left
+       the screen able to say why six rows had greyed and unable to say what he
+       was in the middle of. Read here rather than recomputed anywhere else, so
+       the header chip, the weapon row's offer and every blocked row's reason are
+       three statements about ONE fight and cannot disagree. */
+    attack: { used: attacksSwung, of: attacksInAction },
 
     ranked: shortlist,
     mutex,

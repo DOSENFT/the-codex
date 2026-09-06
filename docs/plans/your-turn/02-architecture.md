@@ -389,3 +389,141 @@ phase, and item 1 remains open and 🟡 ASK-FIRST.
    Caught by looking at the screenshot, fixed in `_probe-d2.mjs`. Recorded because
    it is HANDOFF §4's third law live: *a probe that can see the broken case but
    not the working one reports every working case as broken.*
+
+---
+
+## ⚠ AMENDED 2026-09-04 — THE CONTENTION BRACKET IS REVERSED
+
+**Backtracking rule. Raised by Marcus, reproduced before anything was changed,
+ruled by him the same day.** His words:
+
+> "I cannot see the full available list of spells and abilities under Action,
+> Bonus, Reaction, etc unless and until I click on those buttons in the other box
+> at the bottom of the screen. When I expend that action and it's no longer
+> available, that's when I can see the full list. This is backwards."
+
+He is right, and the cause is this gate's own defining element.
+
+### What the screen actually does, measured
+
+`_repro-marcus.mjs` reads the same combat tab twice on his real level-7 export,
+changing exactly one thing — whether the Action is spent:
+
+```
+  Action: 2 rows available -> 7 rows when spent   <<< BACKWARDS
+  mutex boxes: 1 when available -> 0 when spent
+```
+
+With the Action **open**, the Action band holds The Dawn Guardian and Hearthfire
+Manifest and says **"2 ready"**. Bless, Burning Hands, Faerie Fire, Scorching Ray
+and Warding Bond are not in it. They are in a box below everything else headed
+*"One of these — your action · pick one"*. Spend the Action and all five return
+to the band, greyed. **The band advertises 2 of the 7 things he can do, at the
+one moment he can still do them.**
+
+### Why — the mechanism, in three lines
+
+```js
+// contention.ts:52   — only AVAILABLE options are ever bracketed
+if (!option.available) continue
+// contention.ts:77   — and being bracketed marks them
+for (const face of faces) face.contended = true
+// compose.ts         — and being marked removes them from the lists bands read
+const loose = everything.filter(o => !o.contended)
+```
+
+`groupBySlot` builds the bands from `ranked` + `rest`, both derived from `loose`.
+So *availability is the trigger for removal*. The inversion is not a rendering
+accident downstream of the rule — **it is the rule**, stated exactly once, and
+the deeper the option's availability the more certainly it is hidden.
+
+### What was right about it, and is kept
+
+The reasoning in `contention.ts`'s header stands and is not being thrown away:
+five options wanting one bonus action **is** one decision with five faces, and
+listing them as five equal rows is a lie about the rules. That claim was never
+the defect. **Relocation was.** The bracket answered a true question by moving
+things, and moving them out of the place he looks is what made a true statement
+read as a missing feature.
+
+### The amendment — annotate in place, never relocate
+
+**His ruling, 2026-09-04:** the bracket becomes an **annotation inside the band**.
+
+1. **`compose.ts` stops filtering on `contended`.** The lists become `everything`.
+   An option's home is its band, unconditionally and in both states.
+2. **`findContention` keeps running and keeps marking.** `contended` stays on the
+   option, and stays meaningful — it now means *"say so on this row"* rather than
+   *"remove this row"*. The groups it returns keep their `reason`, which is the
+   part that carries the teaching.
+3. **The contention sentence renders at the foot of the band it belongs to**, not
+   below the whole screen. The Action band's five slot-spenders sit in the Action
+   band and are followed by the note that says they compete.
+4. **`Mutex` as a bottom-of-screen element is retired**, and with it the last
+   place on this screen where an option lives somewhere other than under the
+   heading naming its price.
+
+### What this costs, named
+
+- **"No option is listed twice" survives, and matters more, not less.** Faces are
+  annotated where they already are, so nothing is duplicated. The `compose.test.ts`
+  assertion is kept; what changes is the assertion that contended options are
+  ABSENT from `ranked`/`rest` — that one was encoding the defect and it goes.
+- **`bands.ts`'s "NOTHING IS DROPPED" property gets stronger.** It was previously
+  a claim about the two lists only, explicitly disclaiming the mutex faces (see
+  its own header). After this it is a claim about **every option the engine
+  composed**, which is what a reader always assumed it meant.
+- **The bands get longer, and that is the point.** Gate 1 was re-ruled on
+  2026-09-02 to *"I'm fine with having to scroll"*. A band that scrolls and is
+  true beats a band that fits and is not.
+- **`readyCount` becomes correct as a side effect.** "2 ready" on a band holding
+  seven takeable things was the same bug wearing a numeral.
+
+## ⚠ AMENDED 2026-09-04 — EXTRA ATTACK
+
+**Second defect, raised in the same message, unrelated cause.** *"It also doesn't
+allow me to take my two melee attacks."*
+
+`demandOfWeapon()` (`rules-2024/economy.ts:95`) returns a flat `{ slot: 'action' }`
+for every weapon, under a header that defers the question:
+
+> *"the two-weapon-fighting bonus action, Extra Attack, and the Nick mastery ...
+> are all questions about how many attacks one Attack action contains — that is
+> contention, and it belongs to Slice 5, not to 'what slot does swinging a sword
+> want'."*
+
+Slice 5 built `rank.ts` and contention. **It never picked this up.** Nothing in
+`src/` models attacks-per-action, so one swing closes the whole Action, and Nix —
+a level 7 Paladin, two attacks since level 5 — gets one.
+
+**It is derivable without touching his sheet.** His export's `features` array
+lists only Divine Smite, Hearthfire Manifest and the two auras; Extra Attack is
+not in it. But canon already knows it as a base Paladin feature in
+`paladin-progression.json` (asserted by `lookup.test.ts:164`), and the sheet
+carries `class: 'Paladin'` and `level: 7`. So the count comes from **class +
+level, with the sheet's own features as an override** — homebrew keeps the right
+to disagree, which is the standing rule for this app.
+
+### The model — the Action is held, not spent
+
+**His ruling, 2026-09-04:** taking the Attack action does not close the Action
+until every attack it contains is swung.
+
+- `attacksPerAction(character) -> number` — a new pure rule, class+level, sheet
+  overrides, **defaults to 1** for anything it does not recognise.
+- `CombatState` gains **`attacksUsed?: number`**, read defensively like every
+  other field on it, because that object round-trips localStorage and a state
+  written by today's build must load in tomorrow's.
+- While `0 < attacksUsed < N` the Action slot stays **open**, and **only weapon
+  attacks are legal in it**. Everything else in the Action band greys with a
+  reason that names the true cause — *"You are taking the Attack action"* — not
+  the false one, *"your action is spent"*, which is the failure this whole phase
+  exists to end.
+- When `attacksUsed` reaches N, `turnActions.action` becomes `true` and the band
+  closes as it does today.
+- **End turn and Undo reset it**, on the same path that resets the four booleans.
+
+### Data
+
+No new storage key. `codex-combat-<id>` gains one optional numeric field, absent
+until the first swing of a multi-attack turn.

@@ -86,6 +86,30 @@ export interface CombatState {
    *  `reconcile` needs no branch and Marcus's stored `codex-combat-*` keys do
    *  not change meaning. */
   retaliation?: { total: number; hits: number }
+  /** Attacks already swung from THIS TURN's Attack action.  Slice R5.
+   *
+   *  Marcus: "It also doesnt allow me to take my two mele attacks." A level 5+
+   *  martial's Attack action contains more than one swing, and before this
+   *  field the app had nowhere to put "you are one attack into a two-attack
+   *  action" — so the first swing closed the action and the second was simply
+   *  never offered.
+   *
+   *  Zero and absent are the same thing, which is what makes it safe: a state
+   *  in Marcus's localStorage written before this existed loads as "no attack
+   *  in progress", which is the behaviour he has today. Nothing saved changes
+   *  meaning. Same contract as `yourTurn` and `retaliation` above.
+   *
+   *  PER TURN, and cleared everywhere the four booleans are — `nextTurn` here,
+   *  and `endTurn`/`beginTurn`/`startCombat`/`endCombat` in `turn/reduce.ts`,
+   *  which is the path every real tap takes. A held action that survived the
+   *  turn that opened it would be a worse bug than the one this fixes: it would
+   *  hand a free attack to the next round, silently.
+   *
+   *  A NUMBER, NOT A LIST of what was swung. The Codex cannot say "you hit with
+   *  the first and missed with the second" — that is a damage-log question and
+   *  the log lives in `CombatHelper`. If two attacks are ever to be rolled
+   *  separately on the row, this is the field that would have to grow. */
+  attacksUsed?: number
 }
 
 const STORAGE_PREFIX = 'codex-combat-'
@@ -122,6 +146,9 @@ export function nextTurn(state: CombatState): CombatState {
     ...state,
     round: state.round + 1,
     turnActions: { action: false, bonusAction: false, reaction: false, movement: false },
+    // Slice R5. Cleared wherever the four booleans are: a half-finished Attack
+    // action belongs to the turn that started it and to no other.
+    attacksUsed: undefined,
   }
 }
 

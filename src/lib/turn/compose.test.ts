@@ -26,11 +26,36 @@ describe('composeTurn', () => {
     expect(vitals.bloodied).toBe(vitals.hp <= vitals.bloodiedAt)
   })
 
-  it('never lists a contended option twice', () => {
+  /* THIS TEST USED TO ASSERT THE BUG — Slice R2, 2026-09-04.
+   *
+   * It read `expect(listedIds).not.toContain(id)`: a contended face had to be
+   * ABSENT from `ranked` and `rest`. That is a faithful description of what the
+   * code did and of what Marcus reported — his five slot-spending spells left
+   * the Action band for exactly as long as he could still cast them, because
+   * `findContention` brackets only AVAILABLE options.
+   *
+   * It is deleted rather than weakened. The property worth keeping was never
+   * "absent"; it was "exactly once", and that one survives the reversal intact.
+   * A face is now listed once, in the band its price names, marked `contended`
+   * so the row can say so. */
+  it('lists every contended option exactly once, in the lists the bands read', () => {
     const t = turn()
-    const faceIds = t.mutex.flatMap(g => g.faces.map(f => f.id))
+    const faces = t.mutex.flatMap(g => g.faces)
+    expect(faces.length).toBeGreaterThan(0) // else this asserts nothing
     const listedIds = [...t.ranked, ...t.rest].map(o => o.id)
-    for (const id of faceIds) expect(listedIds).not.toContain(id)
+    for (const face of faces) {
+      expect(listedIds.filter(id => id === face.id)).toHaveLength(1)
+    }
+  })
+
+  it('drops nothing: every composed option is in ranked or rest', () => {
+    // The count property `bands.ts` advertises, asserted at the source. Before
+    // the reversal the mutex faces were in neither list and this was false.
+    const t = turn()
+    const listed = new Set([...t.ranked, ...t.rest].map(o => o.id))
+    for (const face of t.mutex.flatMap(g => g.faces)) {
+      expect(listed.has(face.id)).toBe(true)
+    }
   })
 
   it('only groups options that genuinely contend for one economy slot', () => {

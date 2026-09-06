@@ -28,6 +28,7 @@
 import type { SpellSlots } from '../character'
 import type { CombatState } from '../combat-state'
 import type { EconomySlot, SlotSpendRecord } from '../rules-2024/economy'
+import type { OptionKind } from './types'
 
 /** An option as it was TAKEN: a flat, self-contained record of what it cost.
  *
@@ -40,6 +41,21 @@ export interface TakenOption {
   /** For the undo affordance: "Undo — Divine Smite". */
   name: string
   slot: EconomySlot
+  /** What sort of thing this was.  Slice R5.
+   *
+   *  Here for exactly one reason: the reducer has to tell a weapon swing from a
+   *  spell, because a swing may HOLD the action open across two attacks while a
+   *  spell closes it outright. `slot` alone cannot answer that — Sacred Flame
+   *  and Hearthbrand both cost the action.
+   *
+   *  OPTIONAL, like everything else on this type, and for the reason stated at
+   *  the top of this file: a `TakenOption` rides inside every log entry into
+   *  localStorage, and Marcus has entries there written before this field
+   *  existed. Absent means the reducer cannot know it was a swing, so it treats
+   *  it as one that is not — the action closes, which is exactly the behaviour
+   *  those entries were written under. The unknown resolves DOWN, matching the
+   *  direction of error `rules-2024/attacks.ts` chose. */
+  kind?: OptionKind
   spellSlotLevel?: number
   resourcePoolId?: string
   resourceAmount?: number

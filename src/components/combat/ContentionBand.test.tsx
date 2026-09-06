@@ -113,8 +113,25 @@ describe('ContentionBand — the seven that had no row', () => {
     expect(closed).toContain('aria-expanded="false"')
     expect(text(closed)).toContain('Everything else')
     expect(text(closed)).not.toContain('Divine Smite')
-    // The count is the reason to open it, so it survives the fold.
-    expect(text(closed)).toContain('8')
+
+    /* The count is the reason to open it, so it survives the fold — and the
+       count has to be the TRUTH about what is behind it, which is the part a
+       literal could never say.
+
+       This read `toContain('8')` until Slice R2, and 8 was a number copied off
+       a run. It is now 9, for a reason that is correct: contended options are
+       no longer deleted from the shortlist, so they compete for its five places
+       and one uncontended option got pushed down here. Re-typing 9 would leave
+       the same trap armed for the next person, and `toContain` on a bare digit
+       is a weak claim anyway — "18" contains "8".
+
+       So it is counted off the open band instead. Every row this card paints
+       carries a details label, so the number in the closed header must equal
+       how many labels the open one has. That can fail in both directions: a row
+       the count forgets, and a count with no row behind it. */
+    const rows = (paint().match(/ — details"/g) ?? []).length
+    expect(rows).toBeGreaterThanOrEqual(8) // the seven slot-spenders, at least
+    expect(text(closed)).toContain(`Everything else ${rows}`)
   })
 })
 

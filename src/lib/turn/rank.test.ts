@@ -228,9 +228,38 @@ describe('on Nix’s real sheet', () => {
     ...over,
   })
 
-  it('leads with the weapon he actually swings', () => {
-    const turn = composeTurn({ character: NIX, combat: fresh() })
+  /* WHOLE vs. the fixture as shipped — Slice R2, 2026-09-04.
+   *
+   * `NIX` sits at 41 of 76 hp, and until this slice that detail could not be
+   * seen from here. rank.ts scores Cure Wounds 31 ("You are hurt") and Lay on
+   * Hands 25 against Hearthbrand's 24, so on the shipped fixture rank.ts has
+   * ALWAYS wanted to lead with healing. The two tests below only read
+   * `ranked[0] === 'Hearthbrand'` because contention deleted rank.ts's top two
+   * picks out of `ranked` before anyone could look at them — the screen has
+   * never once shown the engine's actual first opinion.
+   *
+   * So these are not weakened to fit the new behaviour; their subject is made
+   * explicit. "Leads with the weapon he actually swings" was always a claim
+   * about a paladin who is FINE, and it is asserted here on a paladin who is
+   * fine. The claim about a paladin who is hurt is the next test, and it is new
+   * because there was previously no way to state it. */
+  const WHOLE = { ...NIX, hitPoints: { ...NIX.hitPoints, current: NIX.hitPoints.max } }
+
+  it('leads with the weapon he actually swings, when nothing is wrong with him', () => {
+    const turn = composeTurn({ character: WHOLE, combat: fresh() })
     expect(turn.ranked[0].name).toBe('Hearthbrand')
+  })
+
+  it('leads with the heal instead once he is hurt, and says why', () => {
+    // NIX ships at 41/76 — under the bloodied line's neighbourhood and squarely
+    // in "you are hurt" territory. This is rank.ts's own long-standing opinion,
+    // reaching the shortlist for the first time.
+    const turn = composeTurn({ character: NIX, combat: fresh() })
+    expect(turn.ranked[0].name).toBe('Cure Wounds')
+    expect(turn.ranked[0].why).toBe('You are hurt')
+    expect(turn.ranked[0].score).toBeGreaterThan(
+      turn.ranked.find(o => o.name === 'Hearthbrand')!.score,
+    )
   })
 
   it('orders the shortlist by score, descending', () => {
@@ -286,7 +315,11 @@ describe('on Nix’s real sheet', () => {
   const REVERSED = { ...NIX, weapons: [JUNK, ...NIX.weapons] }
 
   it('sorts the shortlist even when sheet order fights it', () => {
-    const turn = composeTurn({ character: REVERSED, combat: fresh() })
+    // Built on WHOLE for the reason given above: this test is about SHEET ORDER
+    // losing to score, so it must not also be about a wound. A hurt paladin
+    // would put Cure Wounds on the front and the sheet-order claim would pass
+    // without ever exercising the weapons against each other.
+    const turn = composeTurn({ character: { ...REVERSED, hitPoints: WHOLE.hitPoints }, combat: fresh() })
     expect(turn.ranked.map(o => o.name)).toContain('Bent Spoon')
     expect(turn.ranked[0].name).toBe('Hearthbrand')
     const scores = turn.ranked.map(o => o.score)

@@ -58,6 +58,15 @@ export interface RankFactor {
   readonly name: string
   readonly delta: number
   readonly phrase?: string
+  /** Does this phrase explain the option's SLOT rather than the situation?
+   *
+   *  Slice R8. Two phrased factors can fire on one row, and when they disagree
+   *  the sentence has to pick a side: a reaction that also grants hit points is
+   *  both "not legal this turn" and "exactly what a bleeding paladin wants".
+   *  Magnitude alone picked the second, which read as *do this now* on a row
+   *  sitting eleventh. A structural phrase wins regardless of size — see the
+   *  selection at the foot of `scoreOption`. */
+  readonly structural?: boolean
 }
 
 export interface Ranking {
@@ -169,8 +178,11 @@ const textOf = (o: TurnOption, hints: RankHints) => `${o.name} ${o.detail} ${hin
 
 export function scoreOption(option: TurnOption, ctx: RankContext, hints: RankHints = {}): Ranking {
   const factors: RankFactor[] = []
-  const add = (name: string, delta: number, phrase?: string) => {
-    if (delta !== 0) factors.push(phrase ? { name, delta, phrase } : { name, delta })
+  const add = (name: string, delta: number, phrase?: string, structural?: true) => {
+    if (delta === 0) return
+    if (!phrase) factors.push({ name, delta })
+    else if (structural) factors.push({ name, delta, phrase, structural })
+    else factors.push({ name, delta, phrase })
   }
 
   // -- structure: what kind of turn-thing is this ---------------------------
@@ -198,7 +210,7 @@ export function scoreOption(option: TurnOption, ctx: RankContext, hints: RankHin
     // what this file's rule asks for — the row speaks only when it has
     // something the screen does not already show.
     if (ctx.yourTurn === false) add('reaction', W.reactionNow)
-    else add('reaction', W.reaction, 'Not on your turn')
+    else add('reaction', W.reaction, 'Not on your turn', true)
   }
 
   // No magnitude term — see the note above the weights. `option.dice` is read
@@ -238,10 +250,36 @@ export function scoreOption(option: TurnOption, ctx: RankContext, hints: RankHin
   // facts about the situation that appear nowhere else on the row. Whichever
   // phrased factor moved the score furthest wins — including a negative one,
   // because "why is this so far down" is the same question.
+  //
+  // STRUCTURE FIRST (Slice R8), and the reason is that magnitude answers the
+  // wrong question when two phrases disagree. Measured on Marcus's own export:
+  // his homebrew `Hearthfire Manifest` is a reaction whose authored prose says
+  // the cloak "grants you Temporary Hit Points", so at 3/67 hp both
+  //
+  //     healing, hurt   +47   "You are bloodied"
+  //     reaction        −40   "Not on your turn"
+  //
+  // fired, the larger number took the line, and a row sitting ELEVENTH OF
+  // FOURTEEN told him he was bleeding — a sentence that reads as *do this now*
+  // about a thing he cannot do until somebody hits him. The heal factor is not
+  // the bug and is deliberately left alone: it fired on words its author wrote,
+  // which is the open-world guarantee at the top of this file working. Only the
+  // sentence was wrong.
+  //
+  // So: if any phrase explains that the option is not legal THIS turn, the line
+  // comes from that set and magnitude only breaks ties within it. A row's first
+  // duty is to explain its own position, and no situational fact outranks "you
+  // cannot pick this yet". Note what this does NOT do — off-turn the reaction
+  // phrase is never added at all (see the asymmetry above), so during the
+  // moment the situational line still wins, which is right: a bleeding paladin
+  // looking at the one legal row on the screen wants "You are bloodied".
+  const phrased = factors.filter(f => f.phrase !== undefined)
+  const pool = phrased.some(f => f.structural) ? phrased.filter(f => f.structural) : phrased
+
   let why: string | undefined
   let strongest = 0
-  for (const f of factors) {
-    if (f.phrase && Math.abs(f.delta) > strongest) {
+  for (const f of pool) {
+    if (Math.abs(f.delta) > strongest) {
       strongest = Math.abs(f.delta)
       why = f.phrase
     }

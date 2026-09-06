@@ -62,11 +62,19 @@ export interface Band {
 
 /** `ranked` + `rest`, shelved on `option.cost.slot`.
  *
- *  MUTEX GROUPS ARE NOT HERE. A contention bracket is one decision with several
- *  faces, not several options, and D renders it as its own element below the
- *  bands. Its faces are marked `contended` and were removed from `ranked`/
- *  `rest` by compose.ts before this function ever sees them, so the count
- *  property above is a claim about the two lists this reads and no more.
+ *  CONTENDED FACES ARE HERE — Slice R2, 2026-09-04, and this is the reversal.
+ *  This header used to say mutex faces "were removed from `ranked`/`rest` by
+ *  compose.ts before this function ever sees them", which made the NOTHING IS
+ *  DROPPED property above a claim about two lists rather than about the turn.
+ *  A reader who trusted it was trusting a promise the screen did not keep:
+ *  contention removed an option from its band for exactly as long as it was
+ *  available, which is the one span of time it mattered.
+ *
+ *  compose.ts no longer filters, so the property is now what every reader
+ *  already took it to mean — EVERY option the engine composed lands in exactly
+ *  one band. A contended one lands in the band its price names, like the rest,
+ *  and carries `contended` so the row can say it competes and the band can
+ *  print the sentence at its foot.
  *
  *  WHERE A FREE-COST OPTION GOES. Measured on the composer rather than assumed:
  *  `everything` is built from three buckets at three fixed prices — actions at

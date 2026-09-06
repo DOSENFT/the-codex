@@ -221,6 +221,27 @@ export interface TurnVitals {
   bloodiedAt: number
 }
 
+/** The Attack action, counted.  Slice R6.
+ *
+ *  R5 taught the engine that one Attack action can contain more than one swing,
+ *  and taught the screen nothing: the two numbers lived inside `composeTurn`
+ *  just long enough to write one `blockedReason` and were then thrown away. So
+ *  after Marcus's first swing the app was correct and silent — the Action band
+ *  read `ACTION · open` exactly as it would have if the tap had been ignored.
+ *
+ *  ONE PAIR OF NUMBERS, THREE SURFACES. The header chip, the "swing again" line
+ *  on the weapon row, and the reason printed on every row that is now blocked
+ *  all read THIS. A component that recomputed the count from the character would
+ *  be a second authority on Extra Attack, and the day the two drifted the header
+ *  would contradict the rows under it while looking entirely confident. */
+export interface TurnAttack {
+  /** Swings already taken from THIS turn's Attack action.  0 when none. */
+  used: number
+  /** How many swings one Attack action contains for this character.
+   *  Always >= 1 — see `attacksPerAction`, where every unknown resolves down. */
+  of: number
+}
+
 export interface EconomyState {
   action: boolean
   bonusAction: boolean
@@ -264,8 +285,27 @@ export interface ComposedTurn {
   vitals: TurnVitals
   upon: UponYou[]
   economy: EconomyState
-  /** Sorted, highest score first.  Excludes anything in `mutex`. */
+  /** How far into the Attack action you are.  Slice R6.
+   *
+   *  REQUIRED, unlike `CombatState.attacksUsed` which it is computed from, and
+   *  for the same reason `yourTurn` is required here and optional there: this
+   *  object is built fresh on every compose, so there is no stored value to be
+   *  kind to and every reader is owed a straight answer. `{used: 0, of: 1}` is
+   *  the honest shape for a Cleric — a screen that decided by ABSENCE would be
+   *  one optional field away from silently dropping the tally for everybody. */
+  attack: TurnAttack
+  /** Sorted, highest score first.
+   *
+   *  INCLUDES contended options — Slice R2, 2026-09-04. This used to read
+   *  "Excludes anything in `mutex`", and that exclusion was the bug Marcus
+   *  reported: an option vanished from its band for as long as he could
+   *  actually take it. Every composed option is now in `ranked` or `rest`. */
   ranked: TurnOption[]
+  /** The contention groups, kept for their `reason` and their caption.
+   *
+   *  These are no longer a PLACE — their faces sit in `ranked`/`rest` like
+   *  everything else, marked `contended`. A group is now the sentence a band
+   *  prints at its foot, not a box that holds rows. */
   mutex: MutexGroup[]
   /** Legal but low-value, or blocked-with-a-reason.  Behind "everything else". */
   rest: TurnOption[]

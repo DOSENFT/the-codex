@@ -83,7 +83,27 @@ export function ContentionBand({ turn, isOpen, onToggle, onOpen }: ContentionBan
   const groups = turn.mutex
     .map(g => ({ ...g, faces: g.faces.filter(onTurn) }))
     .filter(g => g.faces.length > 0)
-  const rest = turn.rest.filter(onTurn)
+
+  /* THE DE-DUPE THIS FILE NOW HAS TO DO ITSELF — Slice R2, 2026-09-04.
+   *
+   * Until this slice `compose.ts` guaranteed a face was in NO list, so `rest`
+   * and the brackets could not overlap and this line was a plain filter. R2
+   * deleted that guarantee on purpose: a contended option now sits in
+   * `ranked`/`rest` like everything else, in the band its price names, because
+   * removing it was what made Marcus's Action band go empty exactly while he
+   * could still act.
+   *
+   * Which lands the old invariant here. Left alone, every face would paint
+   * twice inside this one card — once in its bracket, once under "Also yours" —
+   * and the count would read 14 for 8 things. That is worse than either layout
+   * on its own: it is the screen telling him there are two Divine Smites.
+   *
+   * This band is scheduled for deletion in Slice R3, when the contention
+   * sentence moves into the band it is about and the bracket stops being a
+   * place. It is kept alive for one slice so that R2's diff is one behaviour,
+   * and keeping it alive means keeping it honest. */
+  const bracketed = new Set(groups.flatMap(g => g.faces.map(f => f.id)))
+  const rest = turn.rest.filter(o => onTurn(o) && !bracketed.has(o.id))
   const total = groups.reduce((n, g) => n + g.faces.length, 0) + rest.length
 
   return (
