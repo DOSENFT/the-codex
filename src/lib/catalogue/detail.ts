@@ -237,6 +237,12 @@ export function entryDetail(entry: CatalogueEntry, character: Character): EntryD
        * complaint that opened this phase — the app was showing him his four-word
        * Divine Smite while canon held the paragraph. */
       fallbackText: entry.sheetText ?? '',
+      /* THE AMENDMENT TO DECISION 4. Canon still beats an importer's stub —
+         that regression stays fixed. What it no longer beats is a paragraph he
+         opened the editor and pressed Save on, which until now was written to
+         disk and then painted over on the next render, making the Save button
+         look broken when the write had worked all along. */
+      fallbackWins: entry.sheetEdited,
       fallbackFacts: [{ label: 'Source', value: entry.origin }],
     },
     character,

@@ -159,6 +159,8 @@ interface SheetMatch {
   onSheet: boolean
   prepared: boolean
   sheetText: string | null
+  /** He pressed Save on this one, so `sheetText` outranks canon's paragraph. */
+  sheetEdited: boolean
   sheetFeature: ClassFeature | null
 }
 
@@ -170,6 +172,7 @@ function sheetIndex(character: Character): Map<string, SheetMatch> {
       // A cantrip is always prepared; the sheet's flag on one means nothing.
       prepared: spell.prepared || spell.level === 0,
       sheetText: spell.description || null,
+      sheetEdited: spell.userEdited === true && Boolean(spell.description?.trim()),
       sheetFeature: null,
     })
   }
@@ -186,6 +189,7 @@ function sheetIndex(character: Character): Map<string, SheetMatch> {
       onSheet: true,
       prepared: true, // a feature you have is a feature you have
       sheetText: feature.description || null,
+      sheetEdited: feature.userEdited === true && Boolean(feature.description?.trim()),
       sheetFeature: feature,
     })
   }
@@ -206,6 +210,9 @@ function sheetIndex(character: Character): Map<string, SheetMatch> {
          `prepared` and `sheetText` below stay as they were — a feat he has IS
          had, and the row still carries his words. Only reachability changes. */
       onSheet: false,
+      /* FALSE too: no editor writes `character.feats`, so there is no human
+         Save behind this text and nothing here may outrank canon. */
+      sheetEdited: false,
       prepared: true,
       sheetText: feat.description || null,
       sheetFeature: null,
@@ -249,6 +256,7 @@ export function buildCatalogue(character: Character): CatalogueEntry[] {
       preparable: locked === null && spell.level > 0 && !alwaysPrepared,
       onSheet: match?.onSheet ?? false,
       sheetText: match?.sheetText ?? null,
+      sheetEdited: match?.sheetEdited ?? false,
       canonSpell: spell,
       canonFeature: null,
       canonFeat: null,
@@ -281,6 +289,7 @@ export function buildCatalogue(character: Character): CatalogueEntry[] {
       preparable: false,
       onSheet: match?.onSheet ?? false,
       sheetText: match?.sheetText ?? null,
+      sheetEdited: match?.sheetEdited ?? false,
       canonSpell: null,
       canonFeature: feature,
       canonFeat: null,
@@ -322,6 +331,9 @@ export function buildCatalogue(character: Character): CatalogueEntry[] {
          actually means so the next reader does not make the same inference. */
       onSheet: false,
       sheetText: feat.description || null,
+      /* FALSE for the same reason `onSheet` is: no editor can reach a feat, so
+         there is never a human Save behind this text to outrank canon with. */
+      sheetEdited: false,
       canonSpell: null,
       canonFeature: null,
       canonFeat: canon ?? null,
@@ -357,6 +369,7 @@ function sheetSpellEntry(spell: Spell): CatalogueEntry {
     preparable: spell.level > 0,
     onSheet: true,
     sheetText: spell.description || null,
+    sheetEdited: spell.userEdited === true && Boolean(spell.description?.trim()),
     canonSpell: canon,
     canonFeature: feature,
     canonFeat: null,
@@ -381,6 +394,7 @@ function sheetFeatureEntry(feature: ClassFeature, character: Character): Catalog
     preparable: false,
     onSheet: true,
     sheetText: feature.description || null,
+    sheetEdited: feature.userEdited === true && Boolean(feature.description?.trim()),
     canonSpell,
     canonFeature,
     canonFeat: null,

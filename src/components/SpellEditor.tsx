@@ -221,6 +221,11 @@ export function SpellEditor({
       tacticalNote: form.tacticalNote || undefined,
       higherLevels: form.higherLevels || undefined,
       source: form.source || undefined,
+      /* THE ONLY PLACE THIS IS EVER SET. Reaching this line means a human
+         opened the editor and pressed Save, which is exactly the fact the
+         Grimoire needs in order to stop painting canon over his words. An
+         importer writes `description`; it cannot write this. */
+      userEdited: true,
     } as Spell
 
     let updated: Character

@@ -160,6 +160,8 @@ export function FeatureEditor({ isOpen, onClose, character, onCharacterUpdate, e
       source: form.source || undefined,
       tacticalNote: form.tacticalNote || undefined,
       category: form.category || undefined,
+      /* See `SpellEditor.handleSave` — the same flag, the same reason. */
+      userEdited: true,
     }
 
     let features: ClassFeature[]

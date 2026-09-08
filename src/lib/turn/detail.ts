@@ -61,7 +61,10 @@ export interface OptionDetail {
   /** 'canon' when the words below are the book's; 'sheet' when they are
    *  Marcus's own. Shown, not hidden — homebrew is not a lesser citizen, but
    *  the player is entitled to know which he is reading. */
-  provenance: 'canon' | 'sheet'
+  /** Widened with `CanonBands.provenance` — 'edited' means he overrode canon
+   *  in the Grimoire editor, and the Combat card must say so too or the same
+   *  words carry two different claims on two screens. */
+  provenance: 'canon' | 'sheet' | 'edited'
 
   /** Band 1. */
   facts: DetailFact[]
@@ -249,7 +252,7 @@ function combatCost(fromCanon: HeroCost | null, cost: TurnOption['cost']): HeroC
 }
 
 export function optionDetail(
-  option: TurnOption & { provenance?: 'canon' | 'sheet' },
+  option: TurnOption & { provenance?: 'canon' | 'sheet' | 'edited' },
   character: Character,
   economy: EconomyState
 ): OptionDetail {

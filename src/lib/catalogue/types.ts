@@ -60,8 +60,18 @@ export interface CatalogueEntry {
    *  loop, where saying `true` here drew two buttons that did nothing at all. */
   onSheet: boolean
   /** His own words, for band 2 when canon is silent. Never his words when canon
-   *  is not silent — Gate 3 decision 4. */
+   *  is not silent — Gate 3 decision 4, as amended by `sheetEdited` below. */
   sheetText: string | null
+  /** HE PRESSED SAVE ON `sheetText`, so it outranks canon after all.
+   *
+   *  Decision 4 was aimed at an IMPORTER's stub — a four-word "Divine Smite"
+   *  beating canon's paragraph. It was never aimed at a sentence he typed on
+   *  purpose, and until this flag existed the app could not tell the two apart,
+   *  so the Spell Editor's Save button wrote to disk and changed nothing on
+   *  screen. Set only by `SpellEditor`/`FeatureEditor`; an import cannot
+   *  produce it. False whenever `sheetText` is blank — an empty override would
+   *  erase canon's words and show him nothing at all. */
+  sheetEdited: boolean
 
   /* AT MOST ONE of these three is non-null. See the header. */
   canonSpell: CanonSpell | null

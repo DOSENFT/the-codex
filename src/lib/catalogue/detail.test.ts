@@ -341,6 +341,11 @@ describe.skipIf(!nix)('entryDetail — the open-world rule survives the second c
       preparable: true,
       onSheet: true,
       sheetText: 'A kettle appears. Canon has never heard of it.',
+      /* FALSE ON PURPOSE. This entry proves the OPEN-WORLD route — canon is
+         silent, so his words win without any override being needed. Setting it
+         true here would let the override path satisfy this test instead, and
+         the two routes must be able to fail independently. */
+      sheetEdited: false,
       canonSpell: null,
       canonFeature: null,
       canonFeat: null,
@@ -361,7 +366,7 @@ describe('lockNoticeFor — the arithmetic, without a fixture', () => {
     key: 'x', name: 'X', kind: 'spell', provenance: 'canon',
     lockedUntil: null, spellLevel: null, turnCost: 'action', origin: 'Paladin',
     prepared: false, alwaysPrepared: false, preparable: false, onSheet: false,
-    sheetText: null, canonSpell: null, canonFeature: null, canonFeat: null,
+    sheetText: null, sheetEdited: false, canonSpell: null, canonFeature: null, canonFeat: null,
     ...over,
   })
   const at = (level: number, slots: Character['spellSlots']): Character =>

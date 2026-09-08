@@ -218,7 +218,9 @@ export function EntryDetailPanel({ detail, rulings = {} }: EntryDetailPanelProps
         <p data-provenance={detail.bands.provenance} className="mt-3 text-[10px] tracking-wide text-forge-2">
           {detail.bands.provenance === 'canon'
             ? [detail.source, detail.subtitle].filter(Boolean).join(' · ')
-            : 'From your sheet — canon has no record of this, so these are your own words.'}
+            : detail.bands.provenance === 'edited'
+              ? 'Your own words — you edited this, so it is shown instead of canon’s text.'
+              : 'From your sheet — canon has no record of this, so these are your own words.'}
         </p>
       </section>
 

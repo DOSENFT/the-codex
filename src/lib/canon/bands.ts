@@ -70,13 +70,24 @@ export interface BandInput {
   feat: CanonFeat | null
   /** Band 2 when all three above are null. */
   fallbackText: string
+  /** HE PRESSED SAVE ON `fallbackText`, so it wins band ② even against canon.
+   *
+   *  Default false, and every existing caller therefore keeps canon-wins
+   *  unchanged. Only `entryDetail` ever passes true, and only when the Spell or
+   *  Feature editor set `userEdited` on the record — an imported description
+   *  cannot reach this, which is the whole distinction. Ignored when
+   *  `fallbackText` is blank: an empty override would blank the paragraph. */
+  fallbackWins?: boolean
   /** Band 1 when all three above are null, and when a canon record turns out to
    *  have no facts to state. */
   fallbackFacts: BandFact[]
 }
 
 export interface CanonBands {
-  provenance: 'canon' | 'sheet'
+  /** `'canon'` — canon's words. `'sheet'` — canon has no record at all, so his
+   *  words are the only words. `'edited'` — canon HAS a record and he overrode
+   *  it in the editor, which is a different thing and gets a different line. */
+  provenance: 'canon' | 'sheet' | 'edited'
   /** Band 1. Labelled facts, in canon's order. NOT laid out — the panel does
    *  the layout, because where a fact goes on a grid is a fact about a screen
    *  width and this module has never seen one. */
@@ -251,8 +262,19 @@ export function canonBands(input: BandInput, character: Character): CanonBands {
 
   const advice = adviceFor(input, prose)
 
+  /* HIS SAVE BEATS CANON'S PARAGRAPH — but only a real one.
+     `fallbackWins` is meaningless without text to win with, and an override
+     that is blank or whitespace would replace canon's words with nothing. That
+     is not what pressing Save on an empty box should mean, so it falls through
+     to the ordinary precedence below instead. */
+  const overridden = input.fallbackWins === true && input.fallbackText.trim().length > 0
+
   return {
-    provenance: spell || feature || feat ? 'canon' : 'sheet',
+    /* 'edited' is the third answer, and it is not a cosmetic distinction: the
+       panel prints a different sentence for each, and telling him canon wrote a
+       paragraph he wrote himself is the same class of lie `tacticsSource` was
+       added to stop. */
+    provenance: overridden ? 'edited' : spell || feature || feat ? 'canon' : 'sheet',
     facts: personalisedFacts,
     /* The sources, in order of who has the most to say. The fallback is last
        and is exactly the string a collapsed row would have cut at 80 chars.
@@ -263,7 +285,9 @@ export function canonBands(input: BandInput, character: Character): CanonBands {
        `2d8`. `input.fallbackText` goes through it too, because a homebrew line
        he wrote himself is exactly as entitled to his numbers as canon's is. */
     whatItDoes: personaliseText(
-      spell?.summary || feature?.rawText || (feat ? textFromFeat(feat) : '') || input.fallbackText,
+      overridden
+        ? input.fallbackText
+        : spell?.summary || feature?.rawText || (feat ? textFromFeat(feat) : '') || input.fallbackText,
       prose
     ),
     /* SHEET TRUTH slice 5 — the one prose seam. `splitTactics` runs on canon

@@ -675,7 +675,25 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
       )}
 
       {/* ─── Editors ─── */}
+      {/* THE `key` IS THE FIX FOR "I MAKE MY EDITS, SAVE IT, AND IT DOESN'T SAVE".
+          Both editors seed their form from `useState(editX ?? empty())` and then
+          re-seed from a `useEffect` when they open. Measured in the browser on a
+          clean load: the effect did not re-seed. The panel rendered with the
+          right props — `aria-label="Edit spell: Divine Smite"`, `isOpen: true`,
+          `editSpell: 'Divine Smite'` on the committed fiber — while `form.name`
+          was still `""` and no re-render followed. So he got a BLANK form on a
+          spell he already owns, typed his paragraph into it, pressed Save, and
+          `handleSave` bailed at `if (!trimmedName)` before writing a thing.
+          Nothing was broken downstream; the write was never reached.
+
+          Keying by the subject makes the seeding a MOUNT instead of an update,
+          which is React's own answer to "reset state when the subject changes"
+          and does not depend on an effect firing. Delete this and the blank form
+          comes back — and it comes back silently, because this repo has no jsdom
+          and no test in it can see a form that renders empty on the second
+          render. It was found with a browser and it can only be seen with one. */}
       <SpellEditor
+        key={editingSpell ? `spell:${editingSpell.name}` : 'spell:new'}
         isOpen={spellEditorOpen}
         onClose={() => { setSpellEditorOpen(false); setEditingSpell(null) }}
         character={character}
@@ -684,6 +702,7 @@ export function GrimoirePage({ character, onCharacterUpdate, mode, onOpenDiceRol
       />
 
       <FeatureEditor
+        key={editingFeature ? `feature:${editingFeature.name}` : 'feature:new'}
         isOpen={featureEditorOpen}
         onClose={() => { setFeatureEditorOpen(false); setEditingFeature(null) }}
         character={character}

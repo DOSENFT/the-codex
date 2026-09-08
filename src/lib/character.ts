@@ -125,6 +125,15 @@ export interface Spell {
   saveType?: string // e.g. "DEX", "WIS", "CON"
   areaOfEffect?: string // e.g. "20ft radius", "30ft cone"
   tacticalNote?: string // Brief combat tip
+  /** HE OPENED THE EDITOR AND PRESSED SAVE ON THIS.
+   *
+   *  The Grimoire renders canon, not the sheet, and deliberately: the app used
+   *  to show a four-word imported "Divine Smite" while canon held the
+   *  paragraph. But "canon beats an importer's stub" and "canon beats a
+   *  sentence Marcus just typed" are different rulings, and only the first was
+   *  ever decided. This flag is the difference between them — nothing sets it
+   *  except `SpellEditor`, so an import can never claim it. */
+  userEdited?: boolean
 }
 
 export interface PaladinResources {
@@ -203,6 +212,9 @@ export interface ClassFeature {
   resourcePoolId?: string
   /** How much of that pool one use costs.  Absent means 1. */
   resourceAmount?: number
+
+  /** He opened the editor and pressed Save on this. See `Spell.userEdited`. */
+  userEdited?: boolean
 }
 
 export interface SpellSlots {
@@ -994,12 +1006,25 @@ function normalizeInner(parsed: Partial<Character>, fallbackId?: string): Charac
         ritual: bool(s.ritual, false),
         description: text(s.description, '', 'A spell description'),
         prepared: bool(s.prepared, false),
+        /* COERCED, NOT INHERITED FROM THE SPREAD. This flag lets a description
+           outrank canon, so `"userEdited": "yes"` in a hand-made file must not
+           become truthy. It is deliberately KEPT rather than stripped: his own
+           export round-tripping back in should not silently lose his edits, and
+           the stub imports this rule was written against predate the field and
+           cannot carry it.
+
+           `=== true` AND NOT `bool()`. The shared coercer ends in
+           `Boolean(value)`, which is right for `prepared` — a lenient read of a
+           messy file — and wrong here, because this flag outranks the rulebook
+           and `"userEdited": "yes"` must not buy that. A test asserts it. */
+        userEdited: s.userEdited === true,
       })) as Spell[],
       features: records<ClassFeature>(parsed.features, 'A feature').map(f => ({
         ...f,
         name: text(f.name, 'Feature', 'A feature name'),
         level: num(f.level, 1, 'A feature level'),
         description: text(f.description, '', 'A feature description'),
+        userEdited: f.userEdited === true, // strict, for the reason above
       })) as ClassFeature[],
       spellSlots: parsed.spellSlots ?? {},
       createdAt: parsed.createdAt ?? new Date().toISOString(),

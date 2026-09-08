@@ -96,7 +96,7 @@ describe('groupCatalogue — the open world', () => {
       key: 'x', name: 'X', kind: 'spell', provenance: 'canon',
       lockedUntil: null, spellLevel: 1, turnCost: 'action', origin: 'Paladin',
       prepared: false, alwaysPrepared: false, preparable: true, onSheet: false,
-      sheetText: null, canonSpell: null, canonFeature: null, canonFeat: null,
+      sheetText: null, sheetEdited: false, canonSpell: null, canonFeature: null, canonFeat: null,
       ...over,
     }
   }
