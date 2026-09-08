@@ -1,0 +1,1280 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the promotions, frozen before they move > every entry in the catalogue 1`] = `
+{
+  "Abjure Foes": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Aid": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": "+5 to both current and maximum HP per slot level above 2.",
+    "source": "PHB 2024",
+  },
+  "Aura Expansion": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Aura of Courage": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Aura of Life": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Aura of Protection": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": {
+      "tone": "passive",
+      "when": null,
+      "word": "Always active",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Aura of Purity": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Aura of Solace": {
+    "consumed": [],
+    "cost": {
+      "tone": "passive",
+      "when": null,
+      "word": "Always active",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": null,
+  },
+  "Aura of Vitality": {
+    "consumed": [
+      "Casting Time",
+      "Healing",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "2d6",
+      "note": "— one creature in the Emanation, automatically when you create the aura and again at the start of each of your turns. NO ACTION COST.",
+      "tone": "healing",
+    },
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Banishing Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "5d10",
+      "note": "Force",
+      "tone": "damage",
+    },
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Banishment": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": "Target one additional creature per slot level above 4.",
+    "source": "PHB 2024",
+  },
+  "Beacon of Hope": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Bless": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": "Target one additional creature for each slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Blinding Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "3d8",
+      "note": "Radiant",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d8 per slot level above 3.",
+    "source": "PHB 2024",
+  },
+  "Burning Hands": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "3d6",
+      "note": "Fire",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d6 per slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Channel Divinity": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Channel Divinity: Sacred Weapon": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Your sheet",
+  },
+  "Circle of Power": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Command": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": "Target one additional creature for each slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Compelled Duel": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Create Food and Water": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Crusader's Mantle": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "1d4",
+      "note": "Radiant (added to each weapon hit by you and allies in the Emanation)",
+      "tone": "damage",
+    },
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Cure Wounds": {
+    "consumed": [
+      "Casting Time",
+      "Healing",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "2d8+4",
+      "note": "Healing",
+      "tone": "healing",
+    },
+    "higherLevel": "+2d8 healing per slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Daylight": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Death Ward": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Destructive Wave": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "5d6",
+      "note": "Thunder plus 5d6 Radiant or Necrotic (your choice) Thunder + Radiant/Necrotic",
+      "tone": "damage",
+    },
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Detect Evil and Good": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Detect Magic": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action or Ritual",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Detect Poison and Disease": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action or Ritual",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Dispel Evil and Good": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Dispel Magic": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": "Automatically ends spells of a level equal to or less than the slot level used.",
+    "source": "PHB 2024",
+  },
+  "Divine Favor": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "1d4",
+      "note": "Radiant (added to each weapon hit)",
+      "tone": "damage",
+    },
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Divine Sense": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Divine Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a target with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "2d8",
+      "note": "Radiant (+1d8 if the target is a Fiend or Undead)",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d8 per slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Elemental Weapon": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "1d4",
+      "note": "chosen: Acid, Cold, Fire, Lightning, or Thunder (plus +1 to attack rolls)",
+      "tone": "damage",
+    },
+    "higherLevel": "Slot 5-6: +2 attack and 2d4 damage. Slot 7+: +3 attack and 3d4 damage.",
+    "source": "PHB 2024",
+  },
+  "Epic Boon": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Extra Attack": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Faerie Fire": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Faithful Steed": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Fighting Style": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Find Steed": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": "The steed's statistics improve; use the slot's level as the spell's level in its stat block.",
+    "source": "PHB 2024",
+  },
+  "Fire Shield": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "2d8",
+      "note": "Fire or Cold (matching the shield you chose) (to a creature that hits you with a melee attack while within 5 feet)",
+      "tone": "damage",
+    },
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Fireball": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "8d6",
+      "note": "Fire",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d6 per slot level above 3.",
+    "source": "PHB 2024",
+  },
+  "Flame Strike": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "5d6",
+      "note": "Fire plus 5d6 Radiant Fire + Radiant",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d6 to either the Fire or Radiant damage per slot level above 5.",
+    "source": "PHB 2024",
+  },
+  "Flaming Cloak": {
+    "consumed": [],
+    "cost": {
+      "tone": "reaction",
+      "when": null,
+      "word": "Reaction",
+    },
+    "hero": {
+      "dice": "1d10",
+      "note": "Fire to a creature that hits you with a melee attack",
+      "tone": "ward",
+    },
+    "higherLevel": null,
+    "source": null,
+  },
+  "Geas": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "time",
+      "when": null,
+      "word": "1 minute",
+    },
+    "hero": {
+      "dice": "5d10",
+      "note": "Psychic (each day the target acts contrary to the command, once per day)",
+      "tone": "damage",
+    },
+    "higherLevel": "Slot 7-8: 1 year. Slot 9: until dispelled.",
+    "source": "PHB 2024",
+  },
+  "Gentle Repose": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action or Ritual",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Greater Restoration": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Hallow": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "time",
+      "when": null,
+      "word": "24 hours",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Hearth Warden": {
+    "consumed": [],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": null,
+  },
+  "Hearthfire Manifest": {
+    "consumed": [],
+    "cost": {
+      "tone": "reaction",
+      "when": null,
+      "word": "Reaction",
+    },
+    "hero": {
+      "dice": "1d10",
+      "note": "Fire to a creature that hits you with a melee attack",
+      "tone": "ward",
+    },
+    "higherLevel": null,
+    "source": null,
+  },
+  "Heroism": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Lay On Hands": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Lesser Restoration": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Locate Creature": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Locate Object": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Magic Circle": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "time",
+      "when": null,
+      "word": "1 minute",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Magic Weapon": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": "Slot level 3-5: +2 bonus. Slot level 6+: +3 bonus.",
+    "source": "PHB 2024",
+  },
+  "Misty Step": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Your sheet",
+  },
+  "Paladin's Smite": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Prayer of Healing": {
+    "consumed": [
+      "Casting Time",
+      "Healing",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "time",
+      "when": null,
+      "word": "10 minutes",
+    },
+    "hero": {
+      "dice": "2d8",
+      "note": "— up to 5 creatures — also confers the benefits of a Short Rest",
+      "tone": "healing",
+    },
+    "higherLevel": "+1d8 healing per slot level above 2.",
+    "source": "PHB 2024",
+  },
+  "Protection from Evil and Good": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Protection from Poison": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Purify Food and Drink": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action or Ritual",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Radiant Strikes": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Raise Dead": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "time",
+      "when": null,
+      "word": "1 hour",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Remove Curse": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Restoring Touch": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Revivify": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Sacred Flame": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "2d8",
+      "note": "Radiant",
+      "tone": "damage",
+    },
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Scorching Ray": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "2d6",
+      "note": "per ray, 3 rays Fire",
+      "tone": "damage",
+    },
+    "higherLevel": "+1 ray per slot level above 2.",
+    "source": "PHB 2024",
+  },
+  "Searing Orb": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Post-launch official digital release (D&D Beyond Drops, 2026)",
+  },
+  "Searing Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "1d6",
+      "note": "Fire (on the hit, then 1d6 Fire at the start of each of the target's turns until it succeeds on the save)",
+      "tone": "damage",
+    },
+    "higherLevel": "Both the initial and ongoing damage increase by 1d6 per slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Shield of Faith": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": null,
+      "word": "Bonus Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Shining Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "2d6",
+      "note": "Radiant",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d6 per slot level above 2.",
+    "source": "PHB 2024",
+  },
+  "Smoldering Smite": {
+    "consumed": [],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "1d8",
+      "note": "Fire",
+      "tone": "ward",
+    },
+    "higherLevel": null,
+    "source": null,
+  },
+  "Spellcasting": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Staggering Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "4d6",
+      "note": "Psychic",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d6 per slot level above 4.",
+    "source": "PHB 2024",
+  },
+  "Summon Celestial": {
+    "consumed": [
+      "Casting Time",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": "The spirit's Armor Class, Hit Points, and attack damage increase with the slot level.",
+    "source": "PHB 2024",
+  },
+  "Thunderous Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "2d6",
+      "note": "Thunder",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d6 per slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Wall of Fire": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": {
+      "dice": "5d8",
+      "note": "Fire",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d8 per slot level above 4.",
+    "source": "PHB 2024",
+  },
+  "Wardaway": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "Forgotten Realms: Heroes of Faerun (FRHoF)",
+  },
+  "Warding Bond": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+  "Weapon Mastery": {
+    "consumed": [
+      "Source",
+    ],
+    "cost": null,
+    "hero": null,
+    "higherLevel": null,
+    "source": "Paladin",
+  },
+  "Wrathful Smite": {
+    "consumed": [
+      "Casting Time",
+      "Damage",
+      "Higher Level",
+      "Source",
+    ],
+    "cost": {
+      "tone": "bonus",
+      "when": "taken immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
+      "word": "Bonus Action",
+    },
+    "hero": {
+      "dice": "1d6",
+      "note": "Necrotic",
+      "tone": "damage",
+    },
+    "higherLevel": "+1d6 per slot level above 1.",
+    "source": "PHB 2024",
+  },
+  "Zone of Truth": {
+    "consumed": [
+      "Casting Time",
+      "Source",
+    ],
+    "cost": {
+      "tone": "action",
+      "when": null,
+      "word": "Action",
+    },
+    "hero": null,
+    "higherLevel": null,
+    "source": "PHB 2024",
+  },
+}
+`;

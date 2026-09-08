@@ -12,9 +12,20 @@
  *   6  the invariant that must NOT break — `splitTactics` still finds the same
  *      four headings in a Bless whose sentence now has braces in it
  */
+import { readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { personalise, personaliseBullets, segmentsOf } from './personalise'
+import {
+  personalise,
+  personaliseBullets,
+  personaliseText,
+  segmentsOf,
+  type PersonaliseContext,
+} from './personalise'
 import { rejoinTactics, splitTactics } from './tactics'
+import { resolvedDice } from './format'
+import { canonBands } from './bands'
+import { spellByName } from './lookup'
+import { casterContextOf } from '../turn/overlay'
 import { resolveCharacter, storableOf } from '../rules-2024/derive'
 import { auraRangeFor, levelOfClassFeature } from '../rules-2024/pools'
 import { NIX } from '../turn/fixtures/nix'
@@ -458,6 +469,51 @@ describe('the wire', () => {
       expect(bullet.lead ?? '').not.toContain('{')
     }
   })
+
+  /* THE GUARD THAT WAS MISSING, AND THE BUG IT NOW HOLDS DOWN — slice 6.
+   *
+   * Written after finding a raw `{prof|your Proficiency Bonus}` on the
+   * Interception ROW in a real browser. Slice 5 templated that canon string and
+   * proved the CARD renders it; `turn/feats.ts` feeds the collapsed row from
+   * the same string by a different route and printed the brace.
+   *
+   * Everything above measures a band. This measures EVERY ROW ON THE SCREEN,
+   * for a character carrying every feat canon has, so the next canon string
+   * someone templates cannot leak through a renderer nobody thought of. */
+  it('and no ROW anywhere carries a brace, for a character with every feat in canon', () => {
+    /* `feats.json` is not one array. It is `{rules, changesFrom2014, origin,
+       general, fightingStyle, epicBoon}`, and only the last four hold feats.
+       Named explicitly rather than "every array in the file" so that adding a
+       fifth CATEGORY is a decision someone makes here, and so `changesFrom2014`
+       — a changelog, whose entries have no `name` — never quietly becomes a
+       feat this test hands to a character. */
+    const buckets = FEATS as unknown as Record<string, Array<{ name?: string }>>
+    const names = ['origin', 'general', 'fightingStyle', 'epicBoon']
+      .flatMap(key => buckets[key] ?? [])
+      .map(f => f.name)
+      .filter((n): n is string => typeof n === 'string')
+    expect(names.length, 'read the real feats file').toBeGreaterThan(10)
+    expect(names, 'the four buckets really are the feat buckets').toContain('Sentinel')
+
+    const loaded = resolveCharacter({
+      ...storableOf(NIX),
+      ...NIX_16,
+      feats: names.map(name => ({ name, description: '', isHomebrew: false, effects: [] })),
+      spells: (NIX.spells ?? []).map(s => ({ ...s, prepared: true })),
+    } as CharacterBase)
+
+    const turn = composeTurn({ character: loaded, combat: null })
+    const rows = [...turn.ranked, ...turn.rest, ...turn.mutex.flatMap(g => g.faces)]
+    expect(rows.length, 'the composer produced rows to measure').toBeGreaterThan(20)
+
+    const offenders: string[] = []
+    for (const row of rows) {
+      for (const text of [row.name, row.detail, row.why ?? '', row.blockedReason ?? '', row.source ?? '']) {
+        if (text.includes('{') || text.includes('}')) offenders.push(`${row.name}: ${text}`)
+      }
+    }
+    expect(offenders).toEqual([])
+  })
 })
 
 // ── 7 · the invariant that must stay green ──────────────────────────────────
@@ -477,5 +533,226 @@ describe('splitTactics is unharmed by the placeholders', () => {
 
   it('{CHA} is never mistaken for a heading', () => {
     expect(splitTactics('Something. With Charisma {CHA} that is a lot.').map(b => b.lead)).toEqual([null])
+  })
+})
+
+// ── 8 · bands 1 and 2 — the non-dropping twin ───────────────────────────────
+//
+// COMBAT OPEN BOOK slice 5. Sections 1–7 above are about band 3, where a
+// sentence with a hole in it is worse than no sentence and dropping is right.
+// Bands 1 and 2 are RULES TEXT, where a dropped sentence is a rule Marcus no
+// longer has. `personaliseText` is the twin that cannot drop, and these tests
+// are what stop the two from quietly becoming the same function again.
+
+/** No spellcasting at all. Section 2 builds the same fixture inside its own
+ *  describe; it is rebuilt rather than hoisted so that section's tests keep
+ *  reading top-to-bottom. */
+const NON_CASTER = resolveCharacter({
+  ...storableOf(NIX),
+  ...NIX_16,
+  class: 'Fighter',
+  subclass: 'Champion',
+} as CharacterBase)
+
+/** The prose context EXACTLY as `bands.ts:184-187` builds it — same function,
+ *  same arguments, same order. If this helper and `canonBands` could disagree,
+ *  `{dice}` would have two answers, which is the fault slice 5 exists to
+ *  remove. Test 1 below closes that by asserting both against each other. */
+function proseFor(spellName: string, char: Character): PersonaliseContext {
+  const spell = spellByName(spellName)
+  if (!spell) throw new Error(`canon has no spell called ${spellName} — measuring the wrong file`)
+  return { character: char, dice: resolvedDice(spell, casterContextOf(char)) }
+}
+
+/** The three bands for a spell, through the real door both screens use. */
+function bandsOf(name: string, char: Character) {
+  return canonBands(
+    {
+      name,
+      spell: spellByName(name) ?? null,
+      feature: null,
+      feat: null,
+      fallbackText: 'the sheet said this',
+      fallbackFacts: [{ label: 'Cost', value: 'Action' }],
+    },
+    char,
+  )
+}
+
+describe('personaliseText — bands 1 and 2, slice 5', () => {
+  it('{dice} resolves to the very number band 1 prints, for the same character', () => {
+    // Nix has Charisma 16 here, so the modifier is +3. `turn/fixtures/nix.ts`
+    // has +4 and its own tests say `2d8 + 4`; three fixtures producing three of
+    // his numbers is the evidence the arithmetic is per-character.
+    const prose = proseFor('Cure Wounds', NIX7)
+    expect(personaliseText('restore {dice|2d8 + your Charisma modifier} Hit Points', prose)).toBe(
+      'restore 2d8 + 3 Hit Points',
+    )
+
+    // AND THE CARD AGREES WITH ITSELF. Band 1's Healing row, built by
+    // `statBlockFor` and not by this file, must open with the same string —
+    // that is the whole claim of slice 5 in one assertion.
+    const healing = bandsOf('Cure Wounds', NIX7).facts.find(f => f.label === 'Healing')
+    expect(healing, 'Cure Wounds has a Healing row in canon').toBeDefined()
+    expect(healing!.value.startsWith('2d8 + 3')).toBe(true)
+  })
+
+  it('falls back to canon\'s own words when there is no dice in scope, sentence intact', () => {
+    // A homebrew entry — no canon spell, so `bands.ts` hands down `dice: null`.
+    // He reads the sentence the book has always had, and no brace.
+    const out = personaliseText('restore {dice|2d8 + your Charisma modifier} Hit Points', {
+      character: NIX7,
+      dice: null,
+    })
+    expect(out).toBe('restore 2d8 + your Charisma modifier Hit Points')
+    expect(out).not.toContain('{')
+  })
+
+  it('the dropping twin deletes the same sentence the non-dropping twin keeps', () => {
+    // THE ASYMMETRY, ON ONE STRING. If `personaliseText` were ever rewritten to
+    // delegate to `personalise` this test is the one that goes red.
+    const text = 'Restore {dice} Hit Points. Then swing.'
+    const ctx: PersonaliseContext = { character: NIX7, dice: null }
+    expect(personalise(text, ctx)).toBe('Then swing.')
+    expect(personaliseText(text, ctx)).toBe('Restore Hit Points. Then swing.')
+  })
+
+  it('a written fallback counts as an answer on the DROPPING path too', () => {
+    // Interception's rules text, as it is on disk. A Fighter has a Proficiency
+    // Bonus, so this one resolves; what matters is the sentence next to it.
+    expect(personalise('Reduce it by 1d10 + {prof|your Proficiency Bonus}.', NON_CASTER)).toBe(
+      'Reduce it by 1d10 + 3.',
+    )
+    // No fallback, no answer, still dropped — slice 5 widened the rule, it did
+    // not remove it.
+    expect(personalise('Your DC is {saveDC}.', NON_CASTER)).toBe('')
+    // And a fallback saves that same sentence.
+    expect(personalise('Your DC is {saveDC|set by your spellcasting ability}.', NON_CASTER)).toBe(
+      'Your DC is set by your spellcasting ability.',
+    )
+  })
+
+  it('never drops a sentence even when it can answer nothing at all — case 3', () => {
+    // The DATA ERROR case, asserted rather than assumed: a bare token with no
+    // answer loses its phrase and keeps its rule. It reads badly on purpose —
+    // this is a shape no shipped canon string is allowed to have, which is what
+    // the corpus test below exists to enforce.
+    expect(personaliseText('Your DC is {saveDC}. Swing anyway.', { character: NON_CASTER })).toBe(
+      'Your DC is . Swing anyway.',
+    )
+  })
+
+  it('a brace inside a fallback is not a fallback — which is why canon may not write one', () => {
+    // `PLACEHOLDER` forbids `{}` inside the fallback, so `{prof|{CHAmod}}` does
+    // not parse as one token: the outer text is left literal and only the inner
+    // token substitutes. A brace therefore reaches the screen. It is asserted
+    // here as the reason the corpus test below is not optional.
+    expect(personaliseText('Reduce by {prof|{CHAmod}}.', { character: NIX7 })).toBe('Reduce by {prof|3}.')
+  })
+
+  it('a string with no brace comes back as the same string, not merely an equal one', () => {
+    const text = 'Touch a creature. It has no effect on Constructs or Undead.'
+    expect(personaliseText(text, { character: NIX7 })).toBe(text)
+  })
+})
+
+// ── 9 · canon carries no token this app cannot render ───────────────────────
+describe('canon carries no token this app cannot render — slice 5', () => {
+  /** Every string in every canon file, with the key it sits on and a path to
+   *  blame. Read off disk rather than off the two JSON imports above, so a
+   *  token written into a canon file this test has never heard of still fails
+   *  it. */
+  function everyCanonString(): Array<{ where: string; key: string; text: string }> {
+    const dir = new URL('../../canon/', import.meta.url)
+    const out: Array<{ where: string; key: string; text: string }> = []
+    const walk = (node: unknown, key: string, path: string) => {
+      if (typeof node === 'string') return out.push({ where: path, key, text: node })
+      if (Array.isArray(node)) return node.forEach((n, i) => walk(n, key, `${path}[${i}]`))
+      if (!node || typeof node !== 'object') return
+      for (const [k, v] of Object.entries(node as Record<string, unknown>)) walk(v, k, `${path}.${k}`)
+    }
+    for (const file of readdirSync(dir).filter(f => f.endsWith('.json'))) {
+      walk(JSON.parse(readFileSync(new URL(file, dir), 'utf8')), '', file)
+    }
+    return out
+  }
+
+  /** Band 3's two keys. Advice is rendered by `personaliseBullets`, which
+   *  drops, so a bare token there is correct and deliberate. */
+  const DROPPABLE = new Set(['tactics', 'paladinNote'])
+
+  it('every token outside band 3 has a fallback written — case 3 is unreachable on shipped data', () => {
+    const offenders: string[] = []
+    for (const { where, key, text } of everyCanonString()) {
+      if (DROPPABLE.has(key)) continue
+      for (const match of text.matchAll(/\{([A-Za-z]+)(?:\|([^{}]*))?\}/g)) {
+        if (match[2] === undefined) offenders.push(`${where} — {${match[1]}} has no fallback`)
+      }
+    }
+    expect(offenders).toEqual([])
+  })
+
+  it('the corpus is actually being measured — some canon string does carry a token', () => {
+    // The guard above passes trivially if the walk finds nothing. This is the
+    // canary that says it found the real files.
+    const withTokens = everyCanonString().filter(s => /\{[A-Za-z]+[|}]/.test(s.text))
+    expect(withTokens.length).toBeGreaterThan(5)
+  })
+
+  it('no brace survives into a rendered band 1 or band 2, for a caster or a non-caster', () => {
+    const spells = ((SPELLS as { spells?: unknown[] }).spells ?? (SPELLS as unknown as unknown[])) as Array<{
+      name: string
+    }>
+    expect(spells.length).toBeGreaterThan(50)
+    const offenders: string[] = []
+    for (const char of [NIX7, NON_CASTER]) {
+      for (const spell of spells) {
+        const bands = bandsOf(spell.name, char)
+        const strings = [bands.whatItDoes, ...bands.facts.map(f => f.value)]
+        for (const s of strings) {
+          if (s.includes('{') || s.includes('}')) offenders.push(`${spell.name}: ${s}`)
+        }
+      }
+    }
+    expect(offenders).toEqual([])
+  })
+})
+
+// ── 10 · the self-contradiction that started slice 5 ────────────────────────
+describe('Sacred Flame stops arguing with itself', () => {
+  it("band 2 says 2d8 at level 8, which is what band 1's numeral says", () => {
+    const eight = sheet({ level: 8 })
+    const bands = bandsOf('Sacred Flame', eight)
+    expect(bands.whatItDoes).toContain('2d8 Radiant damage')
+    expect(bands.whatItDoes).not.toContain('1d8')
+    expect(bands.facts.find(f => f.label === 'Damage')!.value.startsWith('2d8')).toBe(true)
+  })
+
+  it('and says 1d8 at level 1, because the number is his and not a constant', () => {
+    const one = sheet({ level: 1 })
+    const bands = bandsOf('Sacred Flame', one)
+    expect(bands.whatItDoes).toContain('take 1d8 ')
+    expect(bands.facts.find(f => f.label === 'Damage')!.value.startsWith('1d8')).toBe(true)
+
+    /* AND IT CARRIES CANON'S PROGRESSION TABLE WITH IT, which is pre-slice-4
+       behaviour left deliberately alone. `scaledDamageDice` strips
+       "(2d8 at character level 5, 3d8 at 11, 4d8 at 17)" only when it has
+       actually scaled — at tier 1 canon's own string is returned untouched, and
+       band 1 has printed it that way since before this feature existed.
+
+       It is asserted rather than fixed because band 1 and band 2 read the SAME
+       function, so "tidy the parenthetical out of the paragraph" is not a prose
+       change — it is a change to what the grid shows a level 1-4 character, and
+       Marcus is level 7 (tier 2) and would never see the difference. Making an
+       invisible-to-him change to a character nobody is playing is exactly the
+       kind of unrequested edit this plan does not do. If a level 1 sheet ever
+       matters, that is its own slice with its own before-and-after. */
+    expect(bands.whatItDoes).toContain('(2d8 at character level 5, 3d8 at 11, 4d8 at 17)')
+    expect(bands.facts.find(f => f.label === 'Damage')!.value).toContain('at character level 5')
+  })
+
+  it('and his save DC is in the paragraph, not just in the grid', () => {
+    const bands = bandsOf('Sacred Flame', NIX7)
+    expect(bands.whatItDoes).toContain(`DC ${NIX7.spellSaveDC}`)
   })
 })

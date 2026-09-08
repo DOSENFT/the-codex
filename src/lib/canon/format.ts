@@ -352,10 +352,129 @@ export function renderComponents(spell: CanonSpell): string {
   return letters || '—'
 }
 
+/** Canon's damage dice with the caster's cantrip tier already applied, and
+ *  NOTHING ELSE TOUCHED. Combat Open Book slice 4.
+ *
+ *  THE SUBSTITUTION HAPPENS IN CANON'S OWN STRING, which is the whole care in
+ *  this function. `scaleDice` returns the die expressions alone, so printing
+ *  its output here would silently delete every qualifier canon wrote around
+ *  them — "per ray, 3 rays", "if the target is missing any Hit Points", "or
+ *  Necrotic (your choice)". Band 1's stated promise is "canon's fields as
+ *  printed, nothing compacted"; a scaling pass that quietly compacts is the
+ *  same class of loss slice 2 caught on the cost line, and no screenshot shows
+ *  a sentence that is no longer there.
+ *
+ *  So each die expression is rewritten where it stands and the rest of the
+ *  string survives. The one thing removed is canon's own scaling parenthetical
+ *  — "(2d8 at character level 5, 3d8 at 11, 4d8 at 17)" — because the moment
+ *  the arithmetic is done that clause is not extra information, it is the same
+ *  information stated twice with only one of them true today.
+ *
+ *  AT TIER 1 IT RETURNS CANON VERBATIM, including the parenthetical, so a level
+ *  1 caster and every non-cantrip read exactly what `statBlock` has always said.
+ *
+ *  IT AGREES WITH THE ROW BY CONSTRUCTION, not by luck: `mechanicsLine` scales
+ *  the same string through `scaleDice`, which strips through the same helper and
+ *  multiplies by the same `cantripTier`. Pinned over the whole corpus anyway —
+ *  see `format.test.ts`, "the card and the row agree about the dice". */
+function scaledDamageDice(dice: string, isCantrip: boolean, characterLevel: number): string {
+  const tier = isCantrip ? cantripTier(characterLevel) : 1
+  if (tier === 1) return dice
+  return stripScalingParentheticals(dice).replace(DIE, (_m, n: string, faces: string) =>
+    `${Number(n) * tier}d${faces}`
+  )
+}
+
+/** Canon's `healing.mod` — the words "spellcasting ability modifier" — resolved
+ *  to the number it stands for. "2d8 + 4", the same arithmetic `renderHealing`
+ *  already does for the row, uncompacted for the band.
+ *
+ *  A negative modifier is printed as a subtraction rather than as "+ -1", which
+ *  is not pedantry: this is the string he reads out at a table. */
+function resolvedHealing(dice: string, mod: number): string {
+  return mod >= 0 ? `${dice} + ${mod}` : `${dice} − ${Math.abs(mod)}`
+}
+
+/** THE `{dice}` TOKEN'S ONE ANSWER — Combat Open Book slice 5.
+ *
+ *  Canon's prose says "restore 2d8 + your Charisma modifier Hit Points" and
+ *  "take 1d8 Radiant damage"; band 1 three lines above now says `2d8 + 4` and
+ *  `2d8`. Slice 4 fixed the numerals and left the paragraph, so the card could
+ *  still contradict itself — in the same card rather than across two taps.
+ *
+ *  SO THE PARAGRAPH READS THE SAME FUNCTION THE NUMERAL DOES. This returns
+ *  exactly the head that `buildStatBlock` puts in its Damage or Healing row —
+ *  the same `scaledDamageDice`, the same `resolvedHealing` — and NOT a second
+ *  arithmetic. If it built its own, band 1 and band 2 would be two answers to
+ *  "how much does Cure Wounds heal", which is this feature's founding complaint
+ *  wearing its third hat.
+ *
+ *  DAMAGE BEFORE HEALING, the same preference `promoteBands` uses for the 34px
+ *  numeral, so a spell that somehow had both never has the paragraph and the
+ *  numeral naming different halves of it.
+ *
+ *  Null for the spells that have neither, which is most of them. `{dice}` in a
+ *  string about such a spell has no answer, and the fallback carries it. */
+export function resolvedDice(spell: CanonSpell, ctx: CasterContext): string | null {
+  if (spell.damage) return scaledDamageDice(spell.damage.dice, spell.level === 0, ctx.characterLevel)
+  const h = spell.healing
+  if (h?.dice) return h.mod ? resolvedHealing(h.dice, ctx.abilityMod) : h.dice
+  return null
+}
+
 /** Band 1 of the detail sheet: canon's fields as printed, nothing compacted.
  *  The row is where space is scarce; here it is not, so nothing is abbreviated
- *  and nothing is dropped. */
+ *  and nothing is dropped.
+ *
+ *  CHARACTER-BLIND, AND STAYS THAT WAY. `statBlockFor` below is the version with
+ *  the caster in scope; this one keeps its signature, its callers and its tests
+ *  untouched, which is what makes that an addition rather than a change. */
 export function statBlock(spell: CanonSpell): Array<{ label: string; value: string }> {
+  return buildStatBlock(spell, null)
+}
+
+/** `statBlock` with the caster in scope — Combat Open Book slice 4.
+ *
+ *  ── THE BUG THIS EXISTS FOR ─────────────────────────────────────────────────
+ *  Marcus, in his own words: "some wording of spells don't include my actual
+ *  data (like prof bonus, range, modifiers, etc)". The sharpest instance is a
+ *  self-contradiction rather than a mere omission — at level 8 the Sacred Flame
+ *  ROW reads `2d8` (it goes through `mechanicsLine`, which scales) while band 1
+ *  of the card two taps away reads `1d8 (2d8 at character level 5, …)`, because
+ *  `statBlock` has no character and cannot do the arithmetic. Since Open Book
+ *  slice 1 those two are on screen AT ONCE, three inches apart, and the card
+ *  even prints `1d8` in 34px type directly above a roll button that says `2d8`.
+ *  Pinned deliberately in `InlineOptionCard.test.tsx` since slice 1; this slice
+ *  is the one that inverts that pin.
+ *
+ *  ── EXACTLY TWO ROWS DIFFER FROM `statBlock`, AND NO OTHERS ─────────────────
+ *    Damage   scaled to his character level, in canon's own string
+ *    Healing  canon's `mod` words resolved to his modifier
+ *  Everything else is the same eleven rows built by the same code below. That is
+ *  a property worth having rather than a coincidence worth hoping for, so it is
+ *  measured: `format.test.ts` diffs the two outputs across all 71 spells and
+ *  asserts the changed labels are a subset of those two.
+ *
+ *  ── IT DOES NOT REWRITE A WORD OF CANON ─────────────────────────────────────
+ *  Only the numerals canon itself derived from the caster move. Band 2's
+ *  paragraph is untouched here — that is slice 5's job and it has its own gate. */
+export function statBlockFor(
+  spell: CanonSpell,
+  ctx: CasterContext,
+): Array<{ label: string; value: string }> {
+  return buildStatBlock(spell, ctx)
+}
+
+/** The eleven rows, once. `ctx === null` is the character-blind reading.
+ *
+ *  ONE BUILDER AND NOT TWO, deliberately: a second copy would be eleven rows
+ *  that must agree forever and a `Trigger` row added to only one of them is a
+ *  fact missing from one screen — which is the fault this whole feature exists
+ *  to remove, reintroduced in the function that removes it. */
+function buildStatBlock(
+  spell: CanonSpell,
+  ctx: CasterContext | null,
+): Array<{ label: string; value: string }> {
   const rows: Array<{ label: string; value: string }> = [
     {
       label: 'Level',
@@ -371,16 +490,23 @@ export function statBlock(spell: CanonSpell): Array<{ label: string; value: stri
   if (spell.attackRoll) rows.push({ label: 'Attack', value: spell.attackRoll })
 
   if (spell.damage) {
-    const parts = [spell.damage.dice, spell.damage.type].filter(Boolean).join(' ')
+    const dice = ctx
+      ? scaledDamageDice(spell.damage.dice, spell.level === 0, ctx.characterLevel)
+      : spell.damage.dice
+    const parts = [dice, spell.damage.type].filter(Boolean).join(' ')
     const extra = [spell.damage.bonus, spell.damage.note].filter(Boolean).join('; ')
     rows.push({ label: 'Damage', value: extra ? `${parts} (${extra})` : parts })
   }
 
   if (spell.healing) {
     const h = spell.healing
-    const value = [h.dice && `${h.dice}${h.mod ? ` + ${h.mod}` : ''}`, h.targets, h.note]
-      .filter(Boolean)
-      .join(' — ')
+    /* `h.mod` is canon's WORDS for a number — "spellcasting ability modifier".
+       With a caster in scope it becomes the number; without one it stays the
+       words, because "2d8" alone would be a smaller and wronger answer than
+       "2d8 + spellcasting ability modifier". */
+    const head =
+      h.dice && (h.mod ? (ctx ? resolvedHealing(h.dice, ctx.abilityMod) : `${h.dice} + ${h.mod}`) : h.dice)
+    const value = [head, h.targets, h.note].filter(Boolean).join(' — ')
     rows.push({ label: 'Healing', value })
   }
 

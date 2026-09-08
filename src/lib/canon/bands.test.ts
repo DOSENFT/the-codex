@@ -2,6 +2,8 @@ import { readFileSync, existsSync } from 'node:fs'
 import { describe, it, expect } from 'vitest'
 import { canonBands, withSaveDC, type BandInput } from './bands'
 import { spellByName, featureByName, featByName } from './lookup'
+import { HOUSE_NOTE_NAMES } from './feature-notes'
+import { CLASS_FEATURES } from '../../canon'
 import { NIX } from '../turn/fixtures/nix'
 import type { Character } from '../character'
 
@@ -109,10 +111,19 @@ describe('canonBands — a feature', () => {
     expect(bandsFor('Searing Smite').featureFacts).toHaveLength(0)
   })
 
-  it('band 3 is empty for a feature — canon files tactics on spells only', () => {
-    // Empty is HONEST. The alternative is inventing advice, which is the one
-    // thing this module refuses to fall back on.
-    expect(bandsFor('Hearthfire Manifest').tactics).toEqual([])
+  it('band 3 is empty for a feature nobody has written advice for', () => {
+    /* Empty is HONEST. The alternative is inventing advice unasked, which is the
+       one thing this module refuses to fall back on.
+
+       THE SUBJECT CHANGED IN 9b AND THE CLAIM DID NOT. This test said "canon
+       files tactics on spells only" and used Hearthfire Manifest to prove it.
+       Both halves of that turned out to be wrong: 9a found `CanonFeature.notes`
+       on three features, and 9b gave Hearthfire Manifest a house note — so it
+       went red with its four bullets printed in the diff, which is the review
+       this suite is for. Faithful Steed carries neither, which is what the
+       sentence above was always actually about. */
+    expect(featureByName('Faithful Steed'), 'the new subject left canon').not.toBeNull()
+    expect(bandsFor('Faithful Steed').tactics).toEqual([])
   })
 })
 
@@ -265,7 +276,31 @@ describe('neither caller reaches past this module', () => {
      slice 3; it is checked the moment it does, so slice 3 cannot introduce the
      drift this slice was run to prevent.
      ========================================================================= */
-  const FORBIDDEN = ['statBlock', 'splitTactics', 'personaliseBullets', 'featureFacts']
+  /* `statBlockFor` joined the list in Open Book slice 4, the slice that added
+     it. A new function outside the guard list is the guard quietly getting
+     weaker — and this one is more tempting to reach for than `statBlock` ever
+     was, because it is the one that knows the character. (It is also caught by
+     the `statBlock` entry as a substring; it is named anyway, so that deleting
+     `statBlock` from this list some day does not silently free both.) */
+  /* `personaliseText` and `resolvedDice` joined in slice 5, for the same reason
+     and with a sharper edge: `resolvedDice` is the ONE answer to `{dice}`, so a
+     caller that imported it would be a second place deciding what Cure Wounds
+     heals for — which is the exact fault the whole feature exists to remove. */
+  /* `reachFor` joined in slice 6. It is the one entry on this list whose second
+     caller would not merely drift but would DISAGREE WITH HIS DM: the 10 ft is a
+     table ruling that must name The Dawn Guardian on the line every time it
+     applies, and a caller that computed reach itself would be free to print a
+     bare 10. One place decides, one place attributes. */
+  const FORBIDDEN = [
+    'statBlock',
+    'statBlockFor',
+    'resolvedDice',
+    'reachFor',
+    'splitTactics',
+    'personaliseBullets',
+    'personaliseText',
+    'featureFacts',
+  ]
   const CALLERS = ['src/lib/turn/detail.ts', 'src/lib/catalogue/detail.ts']
 
   it('turn/detail.ts is one of the callers, and it exists', () => {
@@ -308,4 +343,192 @@ describe('neither caller reaches past this module', () => {
       }
     })
   }
+})
+
+/* ===========================================================================
+   BAND ③ FOR A FEATURE — Combat Open Book slice 9.
+
+   `04-slices.md` scoped this slice as "I write tactical advice and the card
+   presents it in canon's voice", and flagged it as a different KIND of act from
+   the eight before it, all of which only re-arranged words that already
+   existed. It turned out not to be that act — for these, anyway. Canon ships a
+   `notes` array on three features and nothing has ever read it, so band ③ for
+   Lay On Hands and Aura of Protection is canon's own text, not mine.
+
+   The two abilities `04-slices.md` names that canon has NO notes for — Channel
+   Divinity and Hearthfire Manifest — are still the invented half, and are still
+   Marcus's to read before they ship. They are not in this file, because they
+   are not in the app.
+   ========================================================================= */
+describe('band ③ prints the advice canon already wrote for a feature', () => {
+  it('Lay On Hands: the highest-value use is on the card, in canon voice', () => {
+    const bullets = bandsFor('Lay On Hands').tactics
+    expect(bullets.length, 'band 3 is empty — canon\'s notes are being dropped').toBeGreaterThan(0)
+    const bodies = bullets.map(b => b.body)
+    // Verbatim from `paladin-progression.json`. Asserted as a substring of one
+    // bullet rather than reformatted, because the claim is that nothing was
+    // rewritten on the way to the screen.
+    expect(bodies.some(b => b.includes('revives a creature at 0 HP'))).toBe(true)
+    expect(bodies.some(b => b.includes('Does not work on Constructs or Undead'))).toBe(true)
+  })
+
+  it('Aura of Protection: the aura reaches him too, which canon had to say twice', () => {
+    const bodies = bandsFor('Aura of Protection').tactics.map(b => b.body)
+    expect(bodies.some(b => b.includes('You DO benefit from your own aura'))).toBe(true)
+  })
+
+  it('is canon verbatim — every bullet matches a note, none invented', () => {
+    /* THE INVARIANT, not the instance. `tactics.ts` promises a splitter may
+       never drop, reorder or invent; this branch does not split at all, so the
+       equivalent promise is one bullet per note, in order, unchanged. If a
+       later edit routes these through `splitTactics` after all, this goes red
+       rather than quietly re-cutting canon's sentences. */
+    for (const name of ['Lay On Hands', 'Aura of Protection', 'Radiant Strikes']) {
+      const notes = featureByName(name)?.notes
+      expect(notes, `${name} lost its canon notes`).toBeDefined()
+      const bullets = bandsFor(name).tactics
+      expect(bullets.map(b => b.body), name).toEqual([...notes!])
+      expect(bullets.every(b => b.lead === null), `${name} invented a heading`).toBe(true)
+    }
+  })
+
+  it('stays empty for the features nobody has notes for', () => {
+    /* Empty is the honest answer and the slice must not have quietly grown a
+       fallback.
+
+       THIS TEST WENT RED ON PURPOSE IN 9b, AND THAT WAS THE POINT. As written in
+       9a it also named Channel Divinity and Hearthfire Manifest, with the note:
+       "the day house-written advice arrives it must arrive deliberately, and go
+       red here first". It did — `vitest -t "stays empty"` failed with the three
+       Channel Divinity bullets printed in the diff — and the two names moved to
+       the 9b block below, where their source is asserted rather than their
+       absence. Extra Attack stays here because nothing has an opinion about it,
+       and the day something does this must go red again. */
+    for (const name of ['Extra Attack', 'Faithful Steed', 'Weapon Mastery']) {
+      expect(featureByName(name), `${name} left canon`).not.toBeNull()
+      expect(bandsFor(name).tactics, `${name} grew advice from somewhere`).toEqual([])
+      expect(bandsFor(name).tacticsSource, `${name} named a voice for no words`).toBeNull()
+    }
+  })
+
+  it('a spell still wins over a feature of the same name', () => {
+    /* Divine Smite is canon's level 1 SPELL and his sheet's class feature — the
+       collision `catalogue/types.ts` names in its header. The new branch sits
+       BELOW the spell branch, so it cannot capture a record that has both. */
+    const bullets = bandsFor('Divine Smite').tactics
+    expect(bullets.length).toBeGreaterThan(0)
+    expect(bullets.some(b => b.lead !== null), 'read as notes, not as canon tactics').toBe(true)
+  })
+})
+
+/* ===========================================================================
+   BAND ③ IN THE APP'S OWN VOICE — Open Book slice 9b.
+
+   `feature-notes.ts` is the only text on the card nobody in canon wrote. These
+   tests own the one thing that makes that acceptable: that it is LABELLED. A
+   suite that checked the words appeared and not whose they were would pass on
+   the exact failure the field was added to prevent.
+   ========================================================================= */
+describe("band ③ says whose voice it is in", () => {
+  it('gives the two note-less abilities advice, marked as the app’s own', () => {
+    for (const name of HOUSE_NOTE_NAMES) {
+      const bands = bandsFor(name)
+      expect(bands.tactics.length, `${name} has a house note and printed nothing`).toBeGreaterThan(0)
+      expect(bands.tacticsSource, `${name} passed the app’s words off as canon’s`).toBe('house')
+    }
+  })
+
+  it('is exactly the two Marcus approved — a third needs a decision, not a commit', () => {
+    /* The count, not the contents. `feature-notes.ts` shipped under the condition
+       that anything added there gets the same approval the first two got; this is
+       what makes that condition cost something. Raising the number is allowed —
+       raising it silently is not. */
+    expect(HOUSE_NOTE_NAMES).toHaveLength(2)
+  })
+
+  it('canon outranks the house, so a canon note added later wins on its own', () => {
+    /* THE PRECEDENCE, EXERCISED RATHER THAN READ OFF THE BRANCH ORDER. A synthetic
+       feature carrying the name of a house entry AND a `notes` array is exactly
+       what a future canon package looks like from inside `adviceFor`. If the house
+       branch ever moves above the canon one this goes red, and `feature-notes.ts`
+       stops being able to make its own docstring's promise. */
+    const bands = canonBands(
+      {
+        name: 'Channel Divinity',
+        spell: null,
+        feature: { level: 3, name: 'Channel Divinity', rawText: 'x', notes: ['Canon spoke up.'] },
+        feat: null,
+        fallbackText: 'the sheet said this',
+        fallbackFacts: [],
+      },
+      CHAR
+    )
+    expect(bands.tactics.map(b => b.body)).toEqual(['Canon spoke up.'])
+    expect(bands.tacticsSource).toBe('canon')
+  })
+
+  it('follows the sheet’s own name for an ability to the canon record beneath it', () => {
+    /* THE BUG THE BROWSER FOUND, and the reason slice 8's rule about proving in a
+       browser is not ceremony. His sheet calls the Hearthfire cloak "Flaming
+       Cloak"; `lookup.ts` reconciles that alias and hands `canonBands` the
+       Hearthfire Manifest record with the sheet's label still in `input.name`.
+       Keyed off the label, the house note missed — band ③ was on the Grimoire
+       card and absent from the Combat card for the same ability, which is the
+       exact complaint this phase exists to fix. Two bands rendered where three
+       should have, observed at localhost:5175 before this line existed. */
+    const feature = featureByName('Flaming Cloak')
+    expect(feature?.name, 'the alias stopped resolving; this test is now vacuous')
+      .toBe('Hearthfire Manifest')
+
+    const bands = canonBands(
+      {
+        name: 'Flaming Cloak',
+        spell: null,
+        feature: feature ?? null,
+        feat: null,
+        fallbackText: 'the sheet said this',
+        fallbackFacts: [],
+      },
+      CHAR
+    )
+    expect(bands.tactics.length, 'the sheet’s name lost him the advice').toBeGreaterThan(0)
+    expect(bands.tacticsSource).toBe('house')
+  })
+
+  it('a canon-noted feature is still marked canon, so the label discriminates', () => {
+    /* Without this the previous tests pass against a field hard-wired to 'house'. */
+    expect(bandsFor('Lay On Hands').tacticsSource).toBe('canon')
+    expect(bandsFor('Sacred Flame').tacticsSource).toBe('canon')
+  })
+
+  it('house advice gets his numbers too, not canon’s placeholders', () => {
+    /* `{saveDC}` is written into the Channel Divinity note. If house text skipped
+       `personaliseBullets` the card would print him the brace.
+
+       THE EXPECTED NUMBER IS READ OFF THE FIXTURE, not typed in: a hard-coded 16
+       would still pass the day Nix's Charisma changes and the card went stale. */
+    const dc = String(CHAR.spellSaveDC)
+    expect(dc, 'the fixture has no save DC, so this proves nothing').not.toBe('undefined')
+    const bodies = bandsFor('Channel Divinity').tactics.map(b => b.body)
+    expect(bodies.join(' '), 'an unresolved token reached the card').not.toContain('{')
+    expect(bodies.some(b => b.includes(dc)), 'his save DC never landed').toBe(true)
+  })
+
+  it('never names a voice for an empty band, and never a band with no voice', () => {
+    /* THE INVARIANT THE PANEL RELIES ON. `EntryDetailPanel` only renders the
+       subhead when `tactics.length > 0`, and picks its wording off
+       `tacticsSource`. The two must move together on EVERY record in the corpus,
+       not just the ones a test remembered to name. */
+    const names = [
+      ...CLASS_FEATURES.map(f => f.name),
+      ...HOUSE_NOTE_NAMES,
+      'Sacred Flame',
+      'Divine Smite',
+      'Something Canon Has Never Heard Of',
+    ]
+    for (const name of names) {
+      const { tactics, tacticsSource } = bandsFor(name)
+      expect(tactics.length > 0, `${name}: words without a voice`).toBe(tacticsSource !== null)
+    }
+  })
 })

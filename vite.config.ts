@@ -2,7 +2,7 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 
 const BASE = '/the-codex/'
 
@@ -48,10 +48,34 @@ function precachePlugin(): Plugin {
         .map(f => BASE + f)
         .sort()
 
+      /* THE MARKS — Combat Open Book slice 7, and the ONE exception to the
+         "public/ is not precached" rule stated in this plugin's header.
+
+         The rule above is not "public/ is off limits", it is a size argument:
+         88MB of backgrounds would make a first launch a 90MB download, and a
+         missing background costs him a dark panel he would not notice. Both
+         halves of that argument invert here. The whole mark set is ~48KB — 1.8%
+         of the 2.6MB already precached, and 0.05% of the art that is not — and a
+         missing mark costs him the thing the marks were built for. His words:
+         "so it's super easy for me to see the spell and know what I'm looking at
+         at a glance." A finding aid that needs a network round-trip has failed
+         in exactly the room it was built for, which is a basement with no bars.
+
+         Read off DISK, not off `bundle`: Vite copies `public/` verbatim and
+         those files never enter the Rollup bundle, so the filter above cannot
+         see them. `readdirSync` rather than a hardcoded list, so adding a mark
+         is one file and not two — and if the directory is ever removed this
+         throws at build time rather than shipping a worker that precaches a
+         404. */
+      const marks = readdirSync(new URL('public/marks', import.meta.url))
+        .filter(f => f.endsWith('.svg'))
+        .map(f => `${BASE}marks/${f}`)
+        .sort()
+
       // The shell root itself. Not `index.html`: sw.js stores the navigation
       // response under the scope URL, and precaching the two spellings of the
       // same document would put two copies in the cache that can disagree.
-      const urls = [BASE, ...assets]
+      const urls = [BASE, ...assets, ...marks]
 
       // The build id changes when, and only when, the asset list changes — so
       // a rebuild that produces identical output does not throw away a warm

@@ -106,6 +106,24 @@ export interface CanonFeature {
   rawText: string
   /** Field names vary per feature — it is a free-form bag by design. */
   mechanics?: Record<string, unknown>
+  /** Canon's own advice on this feature — band ③'s source, added in Combat Open
+   *  Book slice 9. Guidance, never rendered as rules, which is the same contract
+   *  `CanonFeat.paladinNote` states below.
+   *
+   *  IT WAS ALWAYS THERE AND NOTHING READ IT. `paladin-progression.json` ships a
+   *  `notes` array on Lay On Hands, Aura of Protection and Radiant Strikes, and
+   *  `canon/index.ts:107` spreads it onto every record — but the index signature
+   *  below typed it `unknown`, so no caller could reach it without a cast and no
+   *  caller tried. `04-slices.md` planned slice 9 as "I write tactical advice",
+   *  on the belief that features have no advice field. Two of the four abilities
+   *  it names turned out to have one, in canon's voice, being dropped on the
+   *  floor.
+   *
+   *  SPARSE, AND MEASURED RATHER THAN ASSUMED: 3 of the 20 features carry it.
+   *  The other 17 get an empty band ③, exactly as a feat with no `paladinNote`
+   *  does. Empty is honest; a fallback here would be invention wearing canon's
+   *  label. */
+  notes?: readonly string[]
   [key: string]: unknown
 }
 

@@ -47,8 +47,8 @@ import { abilityModifier } from '../character'
 import { castingAbilityOf } from '../rules-2024/derive'
 import type { TacticsBullet } from './tactics'
 
-/** The whole vocabulary. Deliberately six, all character-derived, all numbers
- *  the app prints elsewhere on its own authority. */
+/** The whole vocabulary. Six were character-derived; the seventh is not, and
+ *  that is stated rather than smuggled — see `PersonaliseContext` below. */
 export type Placeholder =
   | 'level'
   | 'CHA'
@@ -56,10 +56,34 @@ export type Placeholder =
   | 'saveDC'
   | 'spellAttack'
   | 'prof'
+  /** SIX BECAME SEVEN AT A GATE — Combat Open Book, Gate 3, 2026-09-08.
+   *
+   *  The paragraph above says a seventh "is a decision to take at a gate, not a
+   *  regex to widen". This is that gate, and the widening is deliberate and
+   *  minimal. `{dice}` is this spell's damage or healing, scaled for his level
+   *  with the ability modifier resolved — the ONLY token whose answer is not a
+   *  fact about the character alone.
+   *
+   *  It exists because slice 4 fixed band 1's numerals and left band 2's
+   *  paragraph saying `1d8`, so the card began contradicting itself inside one
+   *  card. The alternative considered and rejected at Gate 3: leave band 2 alone
+   *  and let band 1 carry the truth. Rejected because band 2 is the band he
+   *  reads, and "the numbers aren't mine" is the whole complaint. */
+  | 'dice'
 
-/** `{name}` — letters only, so canon's own braces (there are none today, and a
- *  test says so) and any JSON-ish debris could never be mistaken for one. */
-const PLACEHOLDER = /\{([A-Za-z]+)\}/g
+/** `{name}` or `{name|canon's own words}` — Combat Open Book slice 5.
+ *
+ *  The half after the pipe is what canon's author wrote before the token
+ *  existed, kept verbatim for the character the token has no answer for. It is
+ *  how band 2 can be personalised WITHOUT being droppable: a Fighter reading
+ *  Cure Wounds sees the sentence the book has always had.
+ *
+ *  `[^{}]*` on the fallback, so a nested brace does not parse — a fallback is
+ *  literal text and never a second template. That is not a style rule: the
+ *  substitution runs once, so a `{` surviving inside a fallback would reach his
+ *  screen, and `{` on the screen mid-fight is the exact failure this file's
+ *  header spends four paragraphs forbidding. */
+const PLACEHOLDER = /\{([A-Za-z]+)(?:\|([^{}]*))?\}/g
 
 /** Canon writes "+{CHAmod}" and "+{spellAttack}" — the sign belongs to the
  *  sentence, not to the number. So a negative value has no rendering here that
@@ -80,6 +104,20 @@ function plain(value: number | null | undefined): string | null {
   return String(value)
 }
 
+/** Everything a substitution can know. `character` is the whole of it for the
+ *  six original tokens; `dice` is the seventh, resolved by the caller.
+ *
+ *  Optional so that `personalise` and `personaliseBullets` keep their exact
+ *  signatures and every existing caller and test is untouched — `{dice}` in a
+ *  string with no dice in scope simply has no answer, which is the behaviour
+ *  this file has always had for a token it cannot fill. */
+export interface PersonaliseContext {
+  character: Character
+  /** `resolvedDice(spell, casterContextOf(char))`, or null/absent when no spell
+   *  is in scope. See the `dice` case in `answer` for why it arrives resolved. */
+  dice?: string | null
+}
+
 /** One placeholder's answer for this character, or null for "I have nothing to
  *  say about that" — which costs the sentence, never the paragraph.
  *
@@ -89,8 +127,21 @@ function plain(value: number | null | undefined): string | null {
  *  byte-identical to main), so a Fighter carries an 8 in `spellSaveDC` the way
  *  an empty box carries a zero. Printing that 8 into a sentence would turn a
  *  structural default into a claim. */
-function answer(name: string, char: Character): string | null {
+function answer(name: string, ctx: PersonaliseContext): string | null {
+  const char = ctx.character
   switch (name as Placeholder) {
+    case 'dice':
+      /* RESOLVED BY THE CALLER, HANDED IN AS A STRING. `{dice}` needs a
+         `CasterContext` and a `CanonSpell`, and building one here would mean
+         this file — which is `canon/` — reaching into `turn/overlay.ts` for
+         `casterContextOf`. `bands.ts:37-45` already records ONE deliberate
+         exception to that layering rule and explains why a second is exactly
+         what the rule forbids: two builders is two answers to "what is his
+         Charisma modifier". So the caller, which has already built the context
+         for band 1, calls `resolvedDice` once and passes the answer down.
+         GATE 3 WROTE THIS AS `spell?: CanonSpell` ON THE CONTEXT; the shape
+         changed and the behaviour did not — recorded in 00-status.md. */
+      return ctx.dice ?? null
     case 'level':
       return plain(char.level)
     case 'CHA':
@@ -145,16 +196,41 @@ export function segmentsOf(text: string): string[] {
   return out
 }
 
-/** True when every placeholder in this text has an answer for this character. */
-function resolvable(text: string, char: Character): boolean {
+/** True when every placeholder in this text can be rendered without a hole.
+ *
+ *  A FALLBACK COUNTS AS AN ANSWER, and that is the one rule slice 5 adds to the
+ *  dropping path. `{CHAmod|your Charisma modifier}` on a Fighter's screen is not
+ *  the app admitting it does not know — it is the book's own sentence, which is
+ *  what he would have read anyway. Dropping still fires, and fires only where it
+ *  always meant to: a token with no answer AND no words to fall back on. */
+function resolvable(text: string, ctx: PersonaliseContext): boolean {
   for (const match of text.matchAll(PLACEHOLDER)) {
-    if (answer(match[1]!, char) === null) return false
+    if (answer(match[1]!, ctx) === null && match[2] === undefined) return false
   }
   return true
 }
 
-function fill(text: string, char: Character): string {
-  return text.replace(PLACEHOLDER, (whole, name: string) => answer(name, char) ?? whole)
+/** The substitution itself. Runs ONCE over the string: a fallback is literal
+ *  text and is never re-scanned, which is why `PLACEHOLDER` forbids a brace
+ *  inside one.
+ *
+ *  THE LAST RESORT IS THE EMPTY STRING, NEVER `whole`. Returning the raw
+ *  `{token}` would put a brace on his screen, and that is the one outcome both
+ *  public functions exist to prevent. `personalise` filters unanswerable
+ *  sentences out before it ever reaches this, so the empty case is only
+ *  `personaliseText`'s documented case 3. */
+function fill(text: string, ctx: PersonaliseContext): string {
+  return text.replace(
+    PLACEHOLDER,
+    (_whole, name: string, fallback: string | undefined) =>
+      answer(name, ctx) ?? fallback ?? ''
+  )
+}
+
+/** Normalise the two shapes a caller may hand in. Every pre-slice-5 caller
+ *  passes a bare `Character` and keeps working unchanged. */
+function contextOf(input: Character | PersonaliseContext): PersonaliseContext {
+  return 'character' in input ? input : { character: input }
 }
 
 /** Substitute his numbers into one string, dropping any sentence this character
@@ -163,13 +239,55 @@ function fill(text: string, char: Character): string {
  *  A string with no placeholders is returned unchanged — not merely equal, but
  *  the same string — so the overwhelming majority of canon, which this feature
  *  never touches, provably passes through. */
-export function personalise(text: string, char: Character): string {
+export function personalise(text: string, char: Character | PersonaliseContext): string {
   if (!text.includes('{')) return text
-  const kept = segmentsOf(text).filter(segment => resolvable(segment, char))
+  const ctx = contextOf(char)
+  const kept = segmentsOf(text).filter(segment => resolvable(segment, ctx))
   // Every sentence went. The caller decides what to do with nothing; it must
   // not be an empty bullet with a heading over it.
   if (kept.length === 0) return ''
-  return fill(kept.join(''), char).trim()
+  return fill(kept.join(''), ctx).trim()
+}
+
+/** BANDS 1 AND 2 — THE NON-DROPPING TWIN — Combat Open Book slice 5.
+ *
+ *  ── WHY THERE ARE TWO FUNCTIONS AND NOT ONE FLAG ───────────────────────────
+ *  The asymmetry is the whole point, so it is two named functions rather than a
+ *  boolean nobody reads at the call site:
+ *
+ *    band 3, `personaliseBullets`  ADVICE.      A tip with a hole in it is worse
+ *                                              than no tip. Drop the sentence.
+ *    bands 1-2, `personaliseText`  RULES TEXT.  A sentence removed from band 2
+ *                                              is a rule Marcus no longer has.
+ *                                              Never drop. Fall back to canon.
+ *
+ *  ── WHAT IT DOES WHEN IT CANNOT ANSWER ─────────────────────────────────────
+ *  1. Token has an answer            → his number.
+ *  2. No answer, fallback written     → canon's own words, verbatim.
+ *  3. No answer, no fallback written  → the token renders as nothing, AND THE
+ *                                       SENTENCE STILL STANDS.
+ *
+ *  NO SENTENCE IS EVER DROPPED HERE. That is the entire difference from
+ *  `personalise`, and it is not a preference: `segmentsOf` is not run at all, so
+ *  there is no code path in this function capable of removing text.
+ *
+ *  Case 3 is a DATA ERROR, not a rendering mode — it is the one hole this file's
+ *  header forbids, and it is reachable only if an author writes a bare `{prof}`
+ *  into a spell summary. `personalise.corpus.test.ts` asserts that no string in
+ *  canon carries a fallback-less token, so on shipped data case 3 cannot fire.
+ *  It is written as "lose a phrase" rather than "lose a rule" because band 2 is
+ *  the rules text: the sentence Marcus keeps is worth more than the tidiness of
+ *  the one he loses.
+ *
+ *  ── GATE 3 SAID "THE SENTENCE IS KEPT VERBATIM" FOR CASE 3 ─────────────────
+ *  Kept verbatim and containing no brace are not both possible — the sentence
+ *  either shows the token or shows a hole. Resolved here in favour of no brace,
+ *  because test 13 (no `{` or `}` survives into any rendered band) is the
+ *  assertion with a screen behind it. Recorded in 00-status.md rather than left
+ *  for a reader to find in a diff. */
+export function personaliseText(text: string, ctx: PersonaliseContext): string {
+  if (!text.includes('{')) return text
+  return fill(text, ctx).replace(/ {2,}/g, ' ').trim()
 }
 
 /** Bullets in, bullets out. Applied AFTER `splitTactics` so heading detection
@@ -185,14 +303,15 @@ export function personalise(text: string, char: Character): string {
  *  a Fighter's screen the first time someone writes one. */
 export function personaliseBullets(
   bullets: TacticsBullet[],
-  char: Character,
+  char: Character | PersonaliseContext,
 ): TacticsBullet[] {
+  const ctx = contextOf(char)
   const out: TacticsBullet[] = []
   for (const bullet of bullets) {
-    if (bullet.lead !== null && !resolvable(bullet.lead, char)) continue
-    const body = personalise(bullet.body, char)
+    if (bullet.lead !== null && !resolvable(bullet.lead, ctx)) continue
+    const body = personalise(bullet.body, ctx)
     if (body.length === 0) continue
-    const lead = bullet.lead === null ? null : fill(bullet.lead, char)
+    const lead = bullet.lead === null ? null : fill(bullet.lead, ctx)
     out.push(lead === bullet.lead && body === bullet.body ? bullet : { lead, body })
   }
   return out

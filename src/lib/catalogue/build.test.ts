@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 import { describe, it, expect } from 'vitest'
 import { buildCatalogue, catalogueSpells } from './build'
 import { normalizeName } from '../canon/lookup'
+import { CLASS_FEATURES } from '../../canon'
+import { NIX } from '../turn/fixtures/nix'
 import type { Character, CharacterFeat, Spell } from '../character'
 
 /* ===========================================================================
@@ -227,5 +229,100 @@ describe('catalogueSpells — the Blessed Warrior menu', () => {
     const sheet: Character = { ...nix!, feats: [...(nix!.feats ?? []), style] }
     expect(catalogueSpells(sheet)).toHaveLength(71)
     expect(catalogueSpells(sheet).filter(s => s.level === 0)).toHaveLength(9)
+  })
+})
+
+/* ===========================================================================
+   `onSheet` — THE FLAG THAT DRAWS THE PENCILS. Combat Open Book slice 8.
+
+   The flag has exactly one consumer: the Edit and Delete buttons in
+   `GrimoirePage.tsx:635-650`. They call `handleEditSpell(ownSpell)` and
+   `handleEditFeature(ownFeature)`, both of which look the row up in
+   `character.spells` / `character.features`. So the flag's real meaning is
+   "an editor can reach this record", and a feat — which lives in
+   `character.feats` — cannot be reached by either.
+
+   Until this slice the feat loop said `onSheet: true`, and every feat row in
+   the Grimoire carried a pencil and a bin that painted perfectly and did
+   nothing when pressed. Both tests below fail against that code.
+
+   RUN UNCONDITIONALLY, unlike most of this file: they are built on the
+   in-repo `NIX` fixture rather than on his export, because a claim about a
+   button he can see must not go quiet on a machine that has no Downloads
+   folder.
+   ========================================================================= */
+describe('onSheet is a claim about what the editors can reach', () => {
+  const SENTINEL: CharacterFeat = {
+    name: 'Sentinel',
+    description: 'Creatures provoke an opportunity attack even if they Disengage.',
+    isHomebrew: false,
+    effects: [],
+  }
+  const withFeat: Character = { ...NIX, feats: [SENTINEL] }
+
+  it('is false on a feat, because neither editor knows where feats live', () => {
+    const feat = buildCatalogue(withFeat).find(e => e.key === normalizeName('Sentinel'))
+    expect(feat, 'the feat left the catalogue entirely').toBeDefined()
+    expect(feat!.kind).toBe('feat')
+    // The row still carries his words — this slice removes two dead buttons,
+    // not the feat's description.
+    expect(feat!.sheetText).toBe(SENTINEL.description)
+    expect(feat!.onSheet).toBe(false)
+  })
+
+  it('is never true for a record `handleEditSpell`/`handleEditFeature` cannot find', () => {
+    /* THE INVARIANT, RATHER THAN THE INSTANCE. The test above pins the feat
+       that is wrong today; this one forbids the next `onSheet: true` written
+       beside a collection the two handlers do not read. */
+    const reachable = new Set([
+      ...withFeat.spells.map(s => normalizeName(s.name)),
+      ...withFeat.features.map(f => normalizeName(f.name)),
+    ])
+    const orphans = buildCatalogue(withFeat)
+      .filter(e => e.onSheet && !reachable.has(e.key))
+      .map(e => `${e.kind} · ${e.name}`)
+      .sort()
+    expect(orphans).toEqual([])
+  })
+})
+
+/* ===========================================================================
+   THE SECOND DOOR — `sheetIndex`, found while browser-proving slice 8.
+
+   Fixing the feat loop in `buildCatalogue` (`build.ts:312`) is not the whole
+   fix, because `sheetIndex` ALSO writes `onSheet: true` for every feat
+   (`build.ts:197`), and the spell and feature loops read that index by NAME
+   (`build.ts:239`, `build.ts:271`). So a feat whose name canon also files as a
+   class feature hands `onSheet: true` to the FEATURE row — a row `build.ts:312`
+   never touches — and the two dead pencils come straight back on a different
+   record.
+
+   This is the case `04-slices.md` predicted in one line: "will bite the moment
+   you pick a Fighting Style". `prepare/fighting-style.ts:208` records the
+   chosen style on `character.feats`, so the collision is not hypothetical; it
+   is one tap away the day he picks one.
+   ========================================================================= */
+describe('a feat cannot lend `onSheet` to a canon row of the same name', () => {
+  /* Chosen from canon rather than typed, and chosen to be a name his sheet does
+     NOT already carry — if it did, `sheetIndex`'s feature loop would claim the
+     key first and the feat loop would `continue`, so the test would pass
+     without ever reaching the code it is about. */
+  const onHisSheet = new Set(NIX.features.map(f => normalizeName(f.name)))
+  const collide = CLASS_FEATURES.map(f => f.name).find(n => !onHisSheet.has(normalizeName(n)))
+
+  it('has a canon feature name to collide with, or this test proves nothing', () => {
+    expect(collide, 'every canon class feature is already on his sheet').toBeDefined()
+  })
+
+  it('leaves the canon feature row unreachable by the editors', () => {
+    const character: Character = {
+      ...NIX,
+      feats: [{ name: collide!, description: 'Recorded as a feat.', isHomebrew: false, effects: [] }],
+    }
+    const row = buildCatalogue(character).find(e => e.key === normalizeName(collide!))
+    expect(row, 'the collided name left the catalogue entirely').toBeDefined()
+    // `handleEditFeature` would look this up in `character.features` and find
+    // nothing, exactly as `handleEditSpell` did for a feat.
+    expect(row!.onSheet).toBe(false)
   })
 })

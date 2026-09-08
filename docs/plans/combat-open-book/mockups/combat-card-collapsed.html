@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Combat page — today (reference)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void-0:#0a0a08; --void-1:#12110e; --void-2:#1c1a15;
+    --arcane:#d4a74a; --arcane-lit:#e8c87a;
+    --ember:#e8924a; --ember-lit:#f5b183;
+    --verdant:#39d98a; --gold:#c5a55a; --bronze:#8b7355;
+    --cream:#f0e6d3; --tally:#bfb5a0; --dim:#979182;
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--void-0); color:var(--cream);
+    font-family:'IBM Plex Sans',sans-serif;
+    display:flex; justify-content:center; padding:24px 12px 80px;
+  }
+  .phone { width:390px; }
+
+  .caption {
+    font-size:11px; color:var(--dim); text-transform:uppercase;
+    letter-spacing:.14em; margin-bottom:14px; text-align:center;
+  }
+
+  .econ { display:flex; gap:8px; margin-bottom:16px; }
+  .econ div {
+    flex:1; background:var(--void-1); border:1px solid #26231c;
+    border-radius:8px; padding:8px 6px; text-align:center;
+  }
+  .econ .lab { font-size:9px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; }
+  .econ .val { font-family:'Cinzel',serif; font-size:13px; color:var(--arcane); margin-top:3px; }
+  .econ .spent .val { color:#4a463d; }
+
+  .band {
+    font-family:'Cinzel',serif; font-size:20px; color:var(--arcane);
+    letter-spacing:.02em; margin:20px 0 4px;
+  }
+  .band-sub { font-size:11px; color:var(--dim); margin-bottom:10px; }
+
+  .row {
+    background:var(--void-1); border:1px solid #26231c; border-radius:10px;
+    padding:12px 14px; margin-bottom:8px;
+    display:flex; align-items:center; gap:12px;
+    transition:border-color .2s var(--ease);
+  }
+  .row:active { border-color:#3a352a; }
+
+  /* today: no mark slot at all — every row opens with a name */
+  .row .body { flex:1; min-width:0; }
+  .row .name { font-family:'Cinzel',serif; font-size:15px; color:var(--cream); }
+  .row .detail {
+    font-size:12px; color:var(--dim); margin-top:3px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .row .cost {
+    font-family:'JetBrains Mono',monospace; font-size:11px;
+    color:var(--bronze); flex-shrink:0;
+  }
+  .chev { color:#4a463d; font-size:14px; flex-shrink:0; }
+
+  .compete {
+    font-size:10px; color:var(--ember); margin-top:5px;
+    letter-spacing:.02em;
+  }
+
+  .annot {
+    margin-top:22px; border-left:2px solid var(--ember);
+    padding:8px 0 8px 12px; font-size:12px; color:var(--tally); line-height:1.55;
+  }
+  .annot b { color:var(--ember-lit); font-weight:600; }
+  .annot code {
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--cream);
+    background:var(--void-2); padding:1px 4px; border-radius:3px;
+  }
+
+  .sheet-note {
+    margin-top:16px; background:var(--void-2); border:1px dashed #3a352a;
+    border-radius:10px; padding:14px; font-size:12px; color:var(--dim); line-height:1.6;
+  }
+  .sheet-note .t {
+    font-family:'Cinzel',serif; font-size:13px; color:var(--tally);
+    display:block; margin-bottom:6px;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="caption">Combat — as it is today (reference, not the target)</div>
+
+  <div class="econ">
+    <div><div class="lab">Action</div><div class="val">Open</div></div>
+    <div><div class="lab">Bonus</div><div class="val">Open</div></div>
+    <div class="spent"><div class="lab">Reaction</div><div class="val">Spent</div></div>
+  </div>
+
+  <div class="band">Strike</div>
+  <div class="band-sub">What you do when it's your turn to hurt something.</div>
+
+  <div class="row">
+    <div class="body">
+      <div class="name">Hearthbrand</div>
+      <div class="detail">+8 to hit · 1d8+4 slashing · 5 ft</div>
+    </div>
+    <div class="cost">Action</div>
+    <div class="chev">›</div>
+  </div>
+
+  <div class="row">
+    <div class="body">
+      <div class="name">Sacred Flame</div>
+      <div class="detail">DC 16 Dex save · 2d8 radiant · 60 ft</div>
+    </div>
+    <div class="cost">Action</div>
+    <div class="chev">›</div>
+  </div>
+
+  <div class="row">
+    <div class="body">
+      <div class="name">Divine Smite</div>
+      <div class="detail">2d8 radiant, +1d8 vs undead</div>
+      <div class="compete">Competes with Cure Wounds for slots</div>
+    </div>
+    <div class="cost">Slot 1</div>
+    <div class="chev">›</div>
+  </div>
+
+  <div class="band">Sustain</div>
+  <div class="band-sub">Keep yourself and the people next to you upright.</div>
+
+  <div class="row">
+    <div class="body">
+      <div class="name">Cure Wounds</div>
+      <div class="detail">Restores 2d8 + your Charisma modifier · Touch</div>
+    </div>
+    <div class="cost">Action · Slot 1</div>
+    <div class="chev">›</div>
+  </div>
+
+  <div class="row">
+    <div class="body">
+      <div class="name">Lay On Hands</div>
+      <div class="detail">40 hp pool remaining</div>
+    </div>
+    <div class="cost">Bonus</div>
+    <div class="chev">›</div>
+  </div>
+
+  <div class="band">React</div>
+  <div class="band-sub">Things you do on someone else's turn.</div>
+
+  <div class="row">
+    <div class="body">
+      <div class="name">Interception</div>
+      <div class="detail">Reduce damage by 1d10 plus your Proficiency Bonus</div>
+    </div>
+    <div class="cost">Reaction</div>
+    <div class="chev">›</div>
+  </div>
+
+  <div class="row">
+    <div class="body">
+      <div class="name">Sentinel</div>
+      <div class="detail">Creature within 5 feet of you attacks another target</div>
+    </div>
+    <div class="cost">Reaction</div>
+    <div class="chev">›</div>
+  </div>
+
+  <div class="annot">
+    <b>Every row is the same shape.</b> A name, a grey line. Finding "the healing one"
+    means reading seven names.<br><br>
+    <b>The numbers are the book's, not his.</b> <code>2d8 + your Charisma modifier</code>
+    instead of <code>2d8 + 4</code>. <code>1d10 plus your Proficiency Bonus</code>
+    instead of <code>1d10 + 3</code>. <code>within 5 feet</code> when Dawn Guardian
+    makes it <code>10 ft</code>.<br><br>
+    <b>Tapping a row leaves the page.</b> A bottom sheet slides over everything, with a
+    bare fact list, no hero die, and "How to use it" folded behind a <code>▸</code>.
+  </div>
+
+  <div class="sheet-note">
+    <span class="t">What the tap opens today</span>
+    A sheet covering the screen: name, a flat list of facts, the rules paragraph, and a
+    collapsed <code>▸ How to use it</code>. It's the same data as the Grimoire card —
+    laid out so it reads like a tooltip instead of a card. That's the whole gap.
+  </div>
+
+</div>
+</body>
+</html>

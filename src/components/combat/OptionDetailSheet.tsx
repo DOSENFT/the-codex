@@ -4,6 +4,7 @@ import type { OptionDetail } from '../../lib/turn/detail'
 import type { RollOffer } from '../../lib/turn/rolls'
 import { rulingFor, type ErratumRulings } from '../../lib/errata-rulings'
 import { leadGap } from '../../lib/canon/tactics'
+import { NoteBand } from './NoteBand'
 
 /* ============================================================================
    THE OPTION DETAIL SHEET — Table Truth slice 7. This is where the "…" dies.
@@ -127,92 +128,14 @@ function RollButton({
 /* ── ⑤ Your note ────────────────────────────────────────────────────────────
    The one band on this sheet that canon did not write. Slice 8d-3.
 
-   IT IS ADDITIVE AND V0.9's WAS AN OVERRIDE, WHICH IS A DELIBERATE DEPARTURE.
-   `TurnSummary`'s `customTip` REPLACED a one-line auto-generated `strategicTip`,
-   and replacing one line with one line is fair. This sheet has no such line —
-   band ④ is canon's whole tactics text, thousands of characters of it — so
-   inheriting the override would mean his one sentence hiding all of it. His
-   words go BESIDE canon's. The stored field is still `customTip`, so this is a
-   decision about painting and not a migration, and it is reversible in one
-   component if he ever wants the override back.
-
-   IT IS LAST FOR THE SAME REASON BAND ④ IS FOLDED. The order of the bands is
-   the feature (see the header) and the rolls are what he came for. A note is
-   the least urgent thing on the sheet and the only thing he is guaranteed to
-   already know, so it sits under everything and moves nothing above it. */
-function NoteBand({ note, onSave }: { note?: string; onSave?: (text: string) => void }) {
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-
-  /* Nothing written and nowhere to write it — the band does not exist, so the
-     read-only render is exactly the sheet that shipped before this slice. */
-  if (!note && !onSave) return null
-
-  const open = () => {
-    /* Seeded HERE and not from `useState(note)`: this component instance
-       survives the sheet being pointed at a different option, and an initialiser
-       would hand him the last option's words to edit. */
-    setDraft(note ?? '')
-    setEditing(true)
-  }
-
-  return (
-    <div className="px-4 py-3">
-      <span className={`${LABEL} text-gold`}>Your note</span>
-      {editing && onSave ? (
-        <>
-          <textarea
-            value={draft}
-            onChange={e => setDraft(e.target.value)}
-            aria-label="Your strategic tip for this action"
-            placeholder="Write a custom strategic tip..."
-            rows={3}
-            className="mt-2 w-full rounded-lg border border-bronze/30 bg-void-2/50 px-3 py-2 text-[13px] leading-relaxed text-forge-0"
-          />
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={() => setEditing(false)}
-              className="rounded-lg border border-bronze/30 px-3 py-1.5 text-xs text-forge-2"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => { onSave(draft); setEditing(false) }}
-              className="rounded-lg border border-gold/50 px-3 py-1.5 text-xs font-semibold text-gold"
-            >
-              Save
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* The placeholder is deliberate. An empty band and a band that has
-              lost his note look identical, and only one of those is fine. */}
-          <p className={`mt-1 text-[13px] leading-relaxed ${note ? 'text-forge-0' : 'text-forge-2 italic'}`}>
-            {note ?? 'No strategic tip — tap edit to add one'}
-          </p>
-          {onSave && (
-            <button
-              type="button"
-              onClick={open}
-              className="mt-2 rounded-lg border border-bronze/30 px-3 py-1.5 text-xs text-forge-2"
-            >
-              {/* V0.9's accessible name to the byte (`TurnSummary.tsx:824`).
-                  The `action-notes` pin was written against that string in
-                  slice 1, before this sheet could show a note at all; a pin
-                  re-pointed at whatever the new code says has stopped being a
-                  pin, so the app moves to meet it. It is also the visible text,
-                  not just the label, so the two cannot disagree. */}
-              Edit strategic tip
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
+   IT LEFT THIS FILE IN OPEN BOOK SLICE 3 and now lives in `NoteBand.tsx`,
+   unchanged. This file is what Open Book slice 8 deletes, and the band is the
+   one thing on the sheet the inline card still needed — leaving it here would
+   have meant either two implementations of it or the card importing from a
+   corpse. It renders below in exactly the place it always did, so every test in
+   `OptionDetailSheet.test.tsx` still describes this sheet. Both decisions it
+   carries — additive rather than override, and last — are recorded in its own
+   header. */
 
 /** The sheet's contents, as a pure function of its props.
  *

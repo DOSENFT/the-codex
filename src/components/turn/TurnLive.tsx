@@ -6,7 +6,7 @@ import { CombatProvider, useCombat } from './CombatProvider'
 import { TurnScreenD } from './TurnScreenD'
 import { TurnRail, TurnVerbs } from './TurnRail'
 import { QuickLookup } from '../combat/QuickLookup'
-import { OptionDetailSheetLive } from '../combat/OptionDetailSheetLive'
+import { InlineOptionCard } from '../combat/InlineOptionCard'
 import { RetaliationCapture } from '../combat/RetaliationCapture'
 import { SheetRuleFlags } from '../combat/SheetRuleFlags'
 import { BAND_ORDER, type BandSlot } from '../../lib/turn/bands'
@@ -17,10 +17,12 @@ import { ContentionNote, groupForSlot } from './ContentionNote'
 import { AttackTally, SwingAgain, midAttack } from './AttackTally'
 import { isWeaponAttack } from '../../lib/rules-2024/attacks'
 import type { TurnOption } from '../../lib/turn/types'
+import { optionDetail } from '../../lib/turn/detail'
 import { featureByName } from '../../lib/canon/lookup'
 import { featureContextOf } from '../../lib/turn/overlay'
 import { retaliationOf, tallyOf } from '../../lib/turn/retaliation'
 import { loadRulings, saveRulings, setRuling, type ErratumRulings, type RulingStatus } from '../../lib/errata-rulings'
+import { loadActionNotes, noteFor, saveActionNotes, withNote, type ActionNotesData } from '../../lib/action-notes'
 import { CombatExtras } from '../CombatHelper'
 import { shouldAskFightingStyle, toggleFightingStyle } from '../../lib/prepare/fighting-style'
 import type { CanonFeat } from '../../lib/canon/types'
@@ -80,8 +82,23 @@ function Screen({
      reason the look-up panel is: the screen is presentational and must stay
      renderable by `renderToStaticMarkup` with no provider under it. Null is
      the closed state — there is no second boolean beside it that could
-     disagree. `CombatHelper` holds the identical pair (`:1040`). */
-  const [openOption, setOpenOption] = useState<TurnOption | null>(null)
+     disagree. `CombatHelper` holds the identical pair (`:1040`).
+
+     ── OPEN BOOK SLICE 1: AN ID, NOT AN OPTION ──────────────────────────────
+     It held the whole `TurnOption` while the sheet was a sibling of the screen,
+     because a modal outside the list has nothing else to identify what it is
+     about. The card is now rendered BY the list, inside the row, so the row
+     already has the option in hand and only needs to know whether it is the
+     open one. Holding the object here as well would be a second copy of a row
+     the composer rebuilds every render — and the copy would be the stale one
+     the moment a spend changed the turn, which is exactly the kind of "one fact,
+     two models" this tab spent slice 8b removing.
+
+     A SINGLE ID AND NOT A SET. One card open at a time: a second tap on an open
+     row closes it, a tap on a different row moves the open state. Two open cards
+     means scrolling to compare, which is the behaviour this feature exists to
+     remove. */
+  const [openId, setOpenId] = useState<string | null>(null)
 
   /* ── SLICE R7: IS THE END-COMBAT CONFIRM SHOWING? ───────────────────────
      Here rather than in `TurnVerbs` for the same law that made `bandsOpen` a
@@ -99,6 +116,37 @@ function Screen({
      component renders in the node suite, where there is no `localStorage`. */
   const [rulings, setRulings] = useState<ErratumRulings>({})
   useEffect(() => setRulings(loadRulings(character.id)), [character.id])
+
+  /* ── OPEN BOOK SLICE 3: HIS OWN NOTES ────────────────────────────────────
+     Read on the SAME rule as `rulings` directly above — in an effect, not in a
+     `useState` initialiser, because this component renders in the node suite
+     where there is no `localStorage`.
+
+     AND FOR THE SAME REASON IT IS HERE RATHER THAN IN THE CARD. The card is
+     built fresh inside `rowExtra` on every paint of the open row; a store read
+     inside it would run on every keystroke of anything else on this screen. One
+     reader, one store, handed down — finding-10b's shape, already paid for once
+     when `handleRule` came up here in 8b.
+
+     KEYED BY `option.name`, NOT `option.id`. That is `action-notes`' own key
+     (`action-notes.ts:noteFor`) and it is INHERITED, not chosen: the notes he
+     has already written are filed under names, and re-keying them by id would
+     silently orphan every one of them. Names are stable in this corpus and ids
+     are not — `composeTurn` mints an id per option per shape. */
+  const [notes, setNotes] = useState<ActionNotesData>({})
+  useEffect(() => setNotes(loadActionNotes(character.id)), [character.id])
+
+  const saveNote = useCallback(
+    (optionName: string, text: string) => {
+      /* `next` computed OUTSIDE the updater, same as `handleRule`: an updater is
+         a function React may call twice, and a double call would be a double
+         write. */
+      const next = withNote(notes, optionName, text)
+      setNotes(next)
+      saveActionNotes(character.id, next)
+    },
+    [notes, character.id]
+  )
 
   /* Least-confident decision 3 in the R7 design, answered rather than left
      open. `EndCombatDoor` only reads `armed` inside the in-combat branch, so a
@@ -170,7 +218,31 @@ function Screen({
      `ReactionsBandLive`, which reaches the same answer the same way. */
   const undoable = combat.undoEntry?.event.type === 'retaliate' ? combat.undoEntry : null
 
-  const rowExtra = (option: TurnOption) => {
+  /* CLEARING THE REFUSAL ON CLOSE is what keeps one shared refusal honest —
+     whichever way the card goes away, the next one opens with nothing carried
+     over from the last. Inherited verbatim from the sheet this replaces
+     (`OptionDetailSheetLive.tsx:78-84`), and it is not optional: the refusal
+     lives on the provider so that the reducer has one voice, which is only safe
+     while a refusal cannot outlive the surface that produced it. */
+  const closeCard = () => {
+    combat.dismissRefusal()
+    setOpenId(null)
+  }
+
+  /* A tap on the open row closes it; a tap on another row moves the open state.
+     Written as a function of the previous value rather than of `openId` so that
+     two taps landing in one batch cannot both read the same stale id. */
+  const toggleCard = (option: TurnOption) => {
+    combat.dismissRefusal()
+    setOpenId(prev => (prev === option.id ? null : option.id))
+  }
+
+  /* The row's own controls — everything `rowExtra` returned before Open Book
+     slice 1, unchanged, lifted into its own function so the open card can be
+     composed BESIDE it rather than instead of it. A row can be mid-Attack AND
+     open at the same time, and before this split the early return meant the
+     first one found won and the other silently did not exist. */
+  const rowControls = (option: TurnOption) => {
     /* ── SLICE R6: THE SECOND SWING, OFFERED ON THE ROW THAT TAKES IT ───────
        "It also doesnt allow me to take my two mele attacks."
 
@@ -225,6 +297,66 @@ function Screen({
         onUndo={undoable ? combat.undoLast : undefined}
         undoLabel={undoable?.label ?? null}
       />
+    )
+  }
+
+  /* ── OPEN BOOK SLICE 1: THE CARD, IN THE ROW ────────────────────────────
+     "It seems like what we have built in the and for the grimoire tab is really
+     really good, I just want that same build on the combat page."
+
+     IT RIDES `rowExtra`, WHICH ALREADY EXISTED, AND THAT IS THE WHOLE TRICK.
+     `TurnRow` splits a row into `.acthit` (the hit target) and `.actx` (the
+     extra) precisely because the retaliation capture contains buttons and a
+     button inside a button is silently dropped by the browser
+     (`TurnRow.tsx:84-95`). The open card contains buttons too. So it goes
+     through the seam built for that exact problem, and **`TurnRow.tsx` and
+     `TurnBands.tsx` are not touched by this slice at all.**
+
+     `Act` CHOOSES ITS MARKUP ON THE TRUTHINESS OF `extra` (`TurnRow.tsx:105`),
+     and an element that renders null is still a truthy element. So this returns
+     a real `null` when there is neither a control nor an open card — handing
+     over a fragment unconditionally would put a permanent empty box with a
+     hairline under every row in the app. `AttackTally.test.tsx` already holds
+     that fault as a test for the R6 half; the same rule applies here.
+
+     THE DETAIL IS BUILT HERE AND NOT MEMOISED, deliberately: `optionDetail` is
+     pure with no fetch and no clock (`turn/detail.ts:184-186`), it runs for the
+     ONE open row rather than for the list, and `turn.economy` changing is
+     exactly when its answer must change — the one-slot-per-turn box is live or
+     it is furniture. */
+  const rowExtra = (option: TurnOption) => {
+    const controls = rowControls(option)
+    const open = option.id === openId
+
+    if (!open) return controls
+
+    const detail = optionDetail(option, character, combat.turn.economy)
+
+    return (
+      <>
+        {controls}
+        <InlineOptionCard
+          detail={detail}
+          rulings={rulings}
+          note={noteFor(notes, option.name)}
+          onSaveNote={text => saveNote(option.name, text)}
+          onRollDice={onOpenDiceRoller}
+          /* CLOSES ON A SPEND, STAYS OPEN ON A REFUSAL — byte-for-byte the rule
+             the sheet held (`OptionDetailSheetLive.tsx:102-108`). On success the
+             option in hand has become a description of something already done,
+             and leaving it up invites a second tap on a slot that is gone; on
+             refusal the reason has to land on the surface the tap happened on,
+             or it lands nowhere.
+
+             `combat.take` and NOT `updateCombat`: this is the one path on either
+             tab that spends through the rules and can be refused. */
+          onSpend={() => {
+            if (combat.take(option)) closeCard()
+          }}
+          refusal={combat.refusal}
+          onClose={closeCard}
+        />
+      </>
     )
   }
 
@@ -331,8 +463,13 @@ function Screen({
          did. The deck never behaved that way and the legacy tab never has
          either — both open `OptionDetailSheet` — so D was the odd one out, and
          it was the one Marcus is meant to keep. Putting `combat.take` back on
-         this line is this slice's declared revert. */
-      onOpen={setOpenOption}
+         this line is this slice's declared revert.
+
+         OPEN BOOK SLICE 1: it toggles a row open instead of mounting a sheet.
+         The press still opens and the card still spends — what changed is that
+         the card appears UNDER the row rather than over the list, so the turn
+         he is reading about stays on the screen he is reading it on. */
+      onOpen={toggleCard}
       /* ITEM 7. Returns null for all but the reactions canon gives a free die;
          see `rowExtra` above for why that is a shape and not a name. */
       rowExtra={rowExtra}
@@ -476,19 +613,21 @@ function Screen({
         SAME wrapper the legacy tab mounts (`CombatHelper.tsx`), imported
         rather than copied, so the two tabs cannot drift on what a spend
         does. */}
-    {/* `onRollDice` on both of these is new in 8b, and it is not a feature —
-        it is a feature that stops being lost. The legacy tab handed
-        `onOpenDiceRoller` to both overlays; this tab mounted them without it,
-        so until now every "roll this" affordance inside a detail sheet or a
-        look-up was dead on D. Restoring it is what makes 8b a move rather than
-        a trade. */}
-    <OptionDetailSheetLive
-      option={openOption}
-      character={character}
-      onClose={() => setOpenOption(null)}
-      onRollDice={onOpenDiceRoller}
-      rulings={rulings}
-    />
+    {/* `onRollDice` is new in 8b, and it is not a feature — it is a feature
+        that stops being lost. The legacy tab handed `onOpenDiceRoller` to both
+        overlays; this tab mounted them without it, so until 8b every "roll
+        this" affordance inside a look-up was dead on D. */}
+    {/* ── OPEN BOOK SLICE 1: THE SHEET IS GONE FROM THIS TAB ─────────────────
+        `<OptionDetailSheetLive option={openOption} … />` stood here. The card it
+        used to open is now rendered inline, under the row that opened it, by
+        `rowExtra` above.
+
+        BOTH FILES STAY ON DISK UNTIL SLICE 8, and this comment is why: the
+        revert is putting these six lines back and changing `onOpen` to
+        `setOpenOption`. `CombatHelper.tsx` still mounts the same wrapper for the
+        legacy tab, so nothing is orphaned in the meantime — slice 8 greps every
+        mount before deleting anything, and re-points the sheet's tests at the
+        inline card rather than deleting them. */}
     <QuickLookup
       isOpen={lookupOpen}
       onClose={() => setLookupOpen(false)}

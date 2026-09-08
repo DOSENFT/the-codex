@@ -49,6 +49,15 @@ export interface CatalogueEntry {
   /** False for features, feats, cantrips, always-prepared spells and anything
    *  locked — everything, in other words, that a tap could not change. */
   preparable: boolean
+  /** THE EDITORS CAN REACH THIS RECORD — not "he owns it".
+   *
+   *  It has exactly one consumer: the Edit and Delete pencils in `GrimoirePage`
+   *  (`GrimoirePage.tsx:635-650`), which call `handleEditSpell(ownSpell)` or
+   *  `handleEditFeature(ownFeature)`. Those two handlers write
+   *  `character.spells` and `character.features` and know nothing else, so this
+   *  flag means "a row in one of those two arrays". A feat lives in
+   *  `character.feats`, which neither handler can see — see `build.ts`'s feat
+   *  loop, where saying `true` here drew two buttons that did nothing at all. */
   onSheet: boolean
   /** His own words, for band 2 when canon is silent. Never his words when canon
    *  is not silent — Gate 3 decision 4. */

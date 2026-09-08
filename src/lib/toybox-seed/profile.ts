@@ -1,4 +1,5 @@
-import type { Character, Weapon } from '../character'
+import type { Character } from '../character'
+import { primaryWeapon, weaponReach } from '../rules-2024/reach'
 import { currentFightingStyle } from '../prepare/fighting-style'
 import { resolveParty, type PartyRole } from './party'
 
@@ -53,28 +54,18 @@ export function abilityMod(score: number): number {
   return Math.floor((score - 10) / 2)
 }
 
-/** The weapon the content means when it says "your weapon".
+/* MOVED UP A LAYER — Combat Open Book slice 6.
  *
- *  A magical melee weapon first, then any melee weapon, then nothing. Nothing
- *  is a real answer: a character with only a bow gets no weapon tokens, and
- *  every combo that names a weapon is dropped rather than told to swing a bow
- *  in melee. Ranged weapons are deliberately never chosen — this pack is
- *  written for a paladin standing in the way of something. */
-export function primaryWeapon(character: Character): Weapon | null {
-  const melee = (character.weapons ?? []).filter(w => w.attackType === 'melee')
-  return melee.find(w => w.magical) ?? melee[0] ?? null
-}
-
-/** Reach in feet: the property first, then the stated range, then 5.
+ * `primaryWeapon` and `weaponReach` now live in `rules-2024/reach.ts`, because
+ * the combat card and the Grimoire need the same two answers and the Toybox is
+ * one READER of that rule rather than its owner. Nothing about them changed;
+ * the definitions moved and their comments went with them.
  *
- *  The property wins over `range` because a Reach weapon whose range field
- *  still says "5 ft" is a data entry slip, not a five-foot glaive, and the
- *  positioning advice that hangs off this number is wrong at 5. */
-export function weaponReach(weapon: Weapon): number {
-  if (weapon.properties?.some(p => /reach/i.test(p))) return 10
-  const stated = /(\d+)\s*ft/i.exec(weapon.range ?? '')
-  return stated ? Number(stated[1]) : 5
-}
+ * Re-exported rather than relinked at every call site so that `profile.test.ts`
+ * — which names both functions and has proved them since the seeding work —
+ * keeps passing at its current path, unedited. A move whose own regression net
+ * has to be rewritten to survive it is not a move, it is a rewrite. */
+export { primaryWeapon, weaponReach }
 
 export function buildProfile(character: Character): SeedProfile {
   const chaMod = abilityMod(character.abilityScores.CHA)

@@ -6,6 +6,7 @@ import { CatalogueRow } from './CatalogueRow'
 import { entryDetail, type EntryDetail } from '../../lib/catalogue/detail'
 import { buildCatalogue } from '../../lib/catalogue/build'
 import { normalizeName } from '../../lib/canon/lookup'
+import type { CanonBands } from '../../lib/canon/bands'
 import type { CatalogueEntry } from '../../lib/catalogue/types'
 import type { Character } from '../../lib/character'
 
@@ -27,8 +28,22 @@ const paint = (node: React.ReactElement): string => renderToStaticMarkup(node)
 
 /** A hand-built detail. Deliberately NOT derived from canon: the point of the
  *  fall-through test is a label canon does not contain, and a fixture that can
- *  only produce canon's labels could never express it. */
-function detailOf(over: Partial<EntryDetail> = {}): EntryDetail {
+ *  only produce canon's labels could never express it.
+ *
+ *  `bands` is a PARTIAL here while `EntryDetail.bands` is whole, and that is
+ *  deliberate rather than lazy. Every caller below sets the one or two bands its
+ *  assertion is about; making them restate the other four means a field added to
+ *  `CanonBands` breaks seven fixtures that have no opinion about it — which is
+ *  exactly what `tacticsSource` did in slice 9b. The default below is the whole
+ *  shape, so the fixture still cannot produce a detail the panel could not get
+ *  from the real builder. */
+function detailOf(
+  over: Partial<Omit<EntryDetail, 'bands'>> & { bands?: Partial<CanonBands> } = {}
+): EntryDetail {
+  /* PULLED OUT OF THE SPREAD, not merely read from it. `...rest` at the bottom
+     must not carry `bands` — a second, partial copy landing after the merged one
+     is how a fixture ends up missing the very field this refactor added. */
+  const { bands, ...rest } = over
   return {
     title: 'Test Entry',
     subtitle: 'Level 1 Evocation · Paladin',
@@ -39,16 +54,21 @@ function detailOf(over: Partial<EntryDetail> = {}): EntryDetail {
       facts: [{ label: 'Range', value: 'Self' }],
       whatItDoes: 'It does the thing.',
       tactics: [],
+      /* null, because the default fixture has no tactics — and the panel's
+         subhead switch reads this, so a fixture that claimed 'canon' with an
+         empty band ③ would be asserting a combination `canonBands` never
+         builds. */
+      tacticsSource: null,
       errata: [],
       featureFacts: [],
-      ...(over.bands ?? {}),
+      ...bands,
     },
     cost: null,
     hero: null,
     higherLevel: null,
     source: null,
     consumed: [],
-    ...over,
+    ...rest,
   }
 }
 
@@ -211,6 +231,35 @@ describe('EntryDetailPanel — the bands, and whose words they are', () => {
     const html = paint(<EntryDetailPanel detail={detailOf()} />)
     expect(html).not.toContain('data-band="3"')
     expect(html).not.toContain('How to use it')
+  })
+
+  it('BAND ③ NAMES WHOSE ADVICE IT IS, and gets it the other way round too', () => {
+    /* THE TEST SLICE 9b EXISTS FOR. `feature-notes.ts` puts text on the card that
+       no canon file contains. The only thing that makes that acceptable is the
+       subhead, and a subhead that ignored `tacticsSource` would be the app
+       telling Marcus canon said something the app made up — printed in canon's
+       own typography, under a numbered band whose whole promise is provenance.
+
+       BOTH DIRECTIONS ARE ASSERTED. Checking only the 'house' case passes against
+       a panel hard-wired to the disclaimer, which would libel canon on 68 cards
+       to protect two. */
+    const advice = [{ lead: 'SUMMON IT BEFORE THE FIGHT', body: '— it is a Bonus Action.' }]
+
+    const house = paint(
+      <EntryDetailPanel
+        detail={detailOf({ bands: { tactics: advice, tacticsSource: 'house' } })}
+      />,
+    )
+    expect(house).toContain('Not canon')
+    expect(house).not.toContain('own words, with your numbers')
+
+    const canon = paint(
+      <EntryDetailPanel
+        detail={detailOf({ bands: { tactics: advice, tacticsSource: 'canon' } })}
+      />,
+    )
+    expect(canon).toContain('own words, with your numbers')
+    expect(canon).not.toContain('Not canon')
   })
 })
 

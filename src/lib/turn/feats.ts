@@ -66,6 +66,7 @@
  */
 import type { Character, CharacterFeat } from '../character'
 import { featByName } from '../canon/lookup'
+import { personaliseText } from '../canon/personalise'
 import type { CanonFeat } from '../canon/types'
 import type { ActionOption } from './options'
 
@@ -233,16 +234,39 @@ export function featReactionOptions(character: Character): FeatReactionOption[] 
     for (const sentence of sentences) {
       if (!isReactionShaped(sentence)) continue
       const { trigger, effect } = splitTrigger(sentence)
+
+      /* HIS NUMBER ON THE ROW TOO — Combat Open Book slice 6.
+       *
+       * FOUND LIVE, not reasoned about. Slice 5 templated canon's Interception
+       * effect to `1d10 + {prof|your Proficiency Bonus}` and proved the CARD
+       * renders it as `1d10 + 3`. This function feeds the collapsed ROW from
+       * that same canon string by a different route, and the row printed the
+       * brace — on his screen, mid-fight, which is the one outcome
+       * `personalise.ts`'s header spends four paragraphs forbidding. Slice 5's
+       * corpus guard could not catch it: that guard measures `canonBands`, and
+       * a row is not a band.
+       *
+       * `personaliseText`, not `personalise`. This is rules text: a reaction
+       * whose sentence got dropped is a reaction he no longer knows he has.
+       *
+       * RUN AFTER `isReactionShaped` AND `splitTrigger`, never before — the same
+       * rule slice 5 held for `splitTactics`. Both read canon's SHAPE ("When X,
+       * you can take a Reaction to Y"), and a shape detector fed edited input is
+       * a detector whose invariant no longer means anything. */
+      const shownTrigger = personaliseText(trigger, { character })
+      const shownEffect = personaliseText(effect, { character })
+      const shownWhole = personaliseText(sentence, { character })
+
       out.push({
         name: feat.name,
         type: 'feature',
         actionEconomy: 'reaction',
-        summary: effect || sentence,
+        summary: shownEffect || shownWhole,
         /* The trigger goes in `mechanicsLine` because that is the FIRST segment
            of the composed detail, and first is where `triggerFor` looks. This is
            the whole of the integration. */
-        mechanicsLine: trigger,
-        effectsLine: effect || sentence,
+        mechanicsLine: shownTrigger,
+        effectsLine: shownEffect || shownWhole,
         strategicTip: feat.tacticalNote || undefined,
         wordsFrom: from,
       })

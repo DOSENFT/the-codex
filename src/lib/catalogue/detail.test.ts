@@ -243,8 +243,22 @@ describe.skipIf(!nix)('entryDetail — the promotions keep what they move', () =
   })
 
   it('the numeral picks damage over healing, and healing over a feature die', () => {
+    /* Cure Wounds reads `2d8+3` and not `2d8` from Open Book slice 4 onward:
+       band ① now resolves canon's "spellcasting ability modifier" to his
+       modifier, and the whole resolved string parses as the die. The ORDER of
+       preference — which is what this test is named for — is unchanged.
+
+       AND THE +3 IS THE POINT. The two sibling pins on this same promotion —
+       `canon/promote.snapshot.test.ts` and `turn/detail.promote.test.ts` —
+       both read `2d8+4`, because both run off the hand-built `turn/fixtures/
+       nix.ts` whose spellcasting modifier is +4. This file runs off the REAL
+       export in his Downloads folder, where it is +3. Before slice 4 all three
+       said `2d8` and the disagreement was invisible, which is exactly the
+       complaint: the card was printing canon's words instead of his number.
+       Three fixtures now producing three of his numbers is the evidence the
+       arithmetic is per-character rather than baked in. */
     expect(entryDetail(find('Divine Smite'), nix!).hero).toMatchObject({ dice: '2d8', tone: 'damage' })
-    expect(entryDetail(find('Cure Wounds'), nix!).hero).toMatchObject({ dice: '2d8', tone: 'healing' })
+    expect(entryDetail(find('Cure Wounds'), nix!).hero).toMatchObject({ dice: '2d8+3', tone: 'healing' })
     expect(entryDetail(find('Hearthfire Manifest'), nix!).hero).toMatchObject({ dice: '1d10', tone: 'ward' })
   })
 

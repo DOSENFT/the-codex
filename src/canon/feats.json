@@ -726,7 +726,7 @@
       "abilityScoreIncrease": null,
       "repeatable": false,
       "effects": [
-        "When a creature you can see hits another creature within 5 feet of you with an attack, you can take a Reaction to reduce that damage by 1d10 plus your Proficiency Bonus (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon."
+        "When a creature you can see hits another creature within 5 feet of you with an attack, you can take a Reaction to reduce that damage by 1d10 + {prof|your Proficiency Bonus} (to a minimum of 0). You must be wielding a Shield or a Simple or Martial weapon."
       ],
       "paladinNote": "THE HEARTH FIGHTING STYLE. This is 'guard the hearth' as a mechanic - you physically intercept damage aimed at someone standing next to you, every round, for free, with no Concentration and no resource cost. At Proficiency Bonus +3 that averages about 8.5 damage prevented per round. Over a long fight it outperforms any damage style."
     },

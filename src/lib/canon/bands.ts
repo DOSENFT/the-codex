@@ -47,11 +47,13 @@
 import type { Character } from '../character'
 import type { CanonErratum, CanonFeat, CanonFeature, CanonSpell } from './types'
 import { errataForFeature } from './lookup'
-import { statBlock } from './format'
+import { resolvedDice, statBlockFor } from './format'
 import { featureFacts, type FeatureFact } from './feature'
 import { splitTactics, type TacticsBullet } from './tactics'
-import { personaliseBullets } from './personalise'
-import { featureContextOf } from '../turn/overlay'
+import { houseNoteFor } from './feature-notes'
+import { personaliseBullets, personaliseText, type PersonaliseContext } from './personalise'
+import { reachFor } from '../rules-2024/reach'
+import { casterContextOf, featureContextOf } from '../turn/overlay'
 
 export interface BandFact {
   /** null for a fact the source stated without naming — a bare detail segment. */
@@ -81,8 +83,22 @@ export interface CanonBands {
   facts: BandFact[]
   /** Band 2. The full paragraph. Never truncated. */
   whatItDoes: string
-  /** Band 3. Empty when canon has no advice, and empty is honest. */
+  /** Band 3. Empty when nobody has advice, and empty is honest. */
   tactics: TacticsBullet[]
+  /** WHOSE VOICE BAND ③ IS IN — Open Book slice 9b.
+   *
+   *  `null` whenever `tactics` is empty, `'canon'` for a spell's `tactics`, a
+   *  feature's `notes` or a feat's `paladinNote`, and `'house'` for the two
+   *  entries in `feature-notes.ts` that the app wrote itself.
+   *
+   *  IT EXISTS BECAUSE THE SUBHEAD ALREADY MADE A CLAIM. Band ③ has printed
+   *  "Canon's own words, with your numbers filled in." since Table Truth. The
+   *  moment app-written advice went through the same channel that line became a
+   *  lie about the app's own text, told in the app's own voice — so the panel
+   *  reads this field and says something different. A renderer that ignored it
+   *  would be back to the lie, which is why `bands.test.ts` asserts the two
+   *  cannot disagree rather than leaving it to review. */
+  tacticsSource: 'canon' | 'house' | null
   /** Canon's recorded problems with this feature. Both screens show them. */
   errata: CanonErratum[]
   /** The classified feature facts, raw. Empty for a spell.
@@ -175,9 +191,26 @@ export function canonBands(input: BandInput, character: Character): CanonBands {
   // Computed once: band 1 prints these, and the turn layer rolls dice among them.
   const canonFacts = feature ? featureFacts(feature, featureContextOf(character)) : []
 
+  /* OPEN BOOK SLICE 5: the prose context, built ONCE for this record.
+     `{dice}` arrives already resolved because resolving it needs a
+     `CasterContext`, and `personalise.ts` is not allowed to build one — see the
+     layering note at :37-45 and the `dice` case in `answer`. This line is the
+     only place in the app that answers `{dice}`, which is what makes band 1 and
+     band 2 incapable of naming different numbers. */
+  const prose: PersonaliseContext = {
+    character,
+    dice: spell ? resolvedDice(spell, casterContextOf(character)) : null,
+  }
+
+  /* OPEN BOOK SLICE 4: `statBlockFor`, not `statBlock`. Band 1 now does the
+     arithmetic canon left as words — the cantrip tier on Damage, the modifier on
+     Healing — so it stops disagreeing with the row three inches above it. Both
+     screens change together because both read this line; that is the point of
+     the module. `casterContextOf` is IMPORTED rather than rebuilt here, on the
+     rule this file's own header states at :37-45. */
   const facts: BandFact[] = spell
     ? withSaveDC(
-        statBlock(spell).map(f => ({ label: f.label, value: f.value })),
+        statBlockFor(spell, casterContextOf(character)).map(f => ({ label: f.label, value: f.value })),
         character
       )
     : feature
@@ -188,30 +221,134 @@ export function canonBands(input: BandInput, character: Character): CanonBands {
 
   // A canon feature whose mechanics bag is empty still deserves a band 1 — it
   // has a cost and a source like everything else.
-  const filled = facts.length > 0 ? facts : input.fallbackFacts
+  const base = facts.length > 0 ? facts : input.fallbackFacts
+
+  /* OPEN BOOK SLICE 6 — HIS REACH, WHEN IT IS NOT CANON'S.
+     Sentinel's rules text says "within 5 feet of you"; his Dawn Guardian makes
+     it ten. `reachFor` returns null for every ability whose distance does not
+     follow the weapon, for a character wielding nothing with Reach, and for the
+     plain default of 5 — so for almost everything this line adds no row at all.
+
+     BAND 2 IS DELIBERATELY LEFT SAYING FIVE. Canon's paragraph is the book, and
+     the book has not changed; this is a fact ABOUT HIM sitting next to it, with
+     the item named, so the two can be read together and the ruling can be
+     argued with. Making the paragraph say ten would be the app editing the
+     rulebook, which is a different and much worse thing than adding a row.
+     `reach.test.ts` asserts that disagreement rather than leaving it to chance. */
+  const reach = reachFor(input.name, character)
+  const filled = reach
+    ? [...base, { label: 'Your reach', value: `${reach.feet} ft — ${reach.source}` }]
+    : base
+
+  /* SLICE 5, BAND 1. `personaliseText` and not `personalise`: a fact is one
+     phrase and there is no second sentence to fall back on, so dropping here
+     would silently delete a whole labelled row from the grid. The LABEL is left
+     alone — canon's labels carry no tokens today and a personalised label is a
+     grid column heading that changes per character, which is not a thing. */
+  const personalisedFacts = filled.map(fact =>
+    fact.value.includes('{') ? { ...fact, value: personaliseText(fact.value, prose) } : fact
+  )
+
+  const advice = adviceFor(input, prose)
 
   return {
     provenance: spell || feature || feat ? 'canon' : 'sheet',
-    facts: filled,
-    // The sources, in order of who has the most to say. The fallback is last
-    // and is exactly the string a collapsed row would have cut at 80 chars.
-    whatItDoes: spell?.summary || feature?.rawText || (feat ? textFromFeat(feat) : '') || input.fallbackText,
+    facts: personalisedFacts,
+    /* The sources, in order of who has the most to say. The fallback is last
+       and is exactly the string a collapsed row would have cut at 80 chars.
+
+       SLICE 5, BAND 2 — THE HALF SLICE 4 COULD NOT REACH. Slice 4 made every
+       number the app COMPUTES his. This is the number canon TYPED: Sacred
+       Flame's paragraph said "take 1d8 Radiant damage" three lines under a 34px
+       `2d8`. `input.fallbackText` goes through it too, because a homebrew line
+       he wrote himself is exactly as entitled to his numbers as canon's is. */
+    whatItDoes: personaliseText(
+      spell?.summary || feature?.rawText || (feat ? textFromFeat(feat) : '') || input.fallbackText,
+      prose
+    ),
     /* SHEET TRUTH slice 5 — the one prose seam. `splitTactics` runs on canon
      * UNMODIFIED so its heading detection still sees the text its author wrote;
      * the substitution happens to the bullets that come out of it.
      *
-     * A FEAT'S ADVICE IS `paladinNote`, added in Open Book slice 3. Canon's own
-     * type comment calls it "canon's advice for a Paladin — guidance, never
-     * rendered as rules", which is band 3's definition word for word. It was
-     * being dropped only because the turn layer never passes a feat. Still no
-     * fallback and still no invention: a feat canon has no note for gets an
-     * empty band 3, the same as a feature. */
-    tactics: spell
-      ? personaliseBullets(splitTactics(spell.tactics), character)
-      : feat?.paladinNote
-        ? personaliseBullets(splitTactics(feat.paladinNote), character)
-        : [],
+     * The four sources, their precedence and the shape each one arrives in are
+     * all in `adviceFor` below — it returns the text and the voice together, so
+     * they cannot drift apart. */
+    tactics: advice.bullets,
+    tacticsSource: advice.source,
     errata: errataForFeature(input.name) as CanonErratum[],
     featureFacts: canonFacts,
   }
+}
+
+/** Band ③, and the answer to "whose words are these?" in the same breath.
+ *
+ *  ONE FUNCTION RATHER THAN TWO because the source and the text have to be
+ *  decided by the same branch. Computing `tactics` in one expression and
+ *  `tacticsSource` in another that re-tested the same conditions would be two
+ *  places to edit and one of them eventually forgotten — and the failure would
+ *  be the app printing "Canon's own words" over text the app wrote. That is
+ *  precisely the lie `tacticsSource` was added to prevent, so it is made
+ *  unrepresentable instead of merely tested for.
+ *
+ *  THE ORDER IS THE PRECEDENCE, AND IT IS DELIBERATE:
+ *
+ *    1. a spell's `tactics`      — canon
+ *    2. a feature's `notes`      — canon        (slice 9a)
+ *    3. a feat's `paladinNote`   — canon
+ *    4. `houseNoteFor(name)`     — THE APP      (slice 9b)
+ *
+ *  House notes come LAST, so canon can never be overridden by this app's
+ *  opinion: the day a canon package adds notes to Channel Divinity, canon wins
+ *  and `feature-notes.ts` goes quiet without being edited. The alternative
+ *  ordering would let a stale house note outrank the book, which is the one
+ *  direction this file must never fail in.
+ *
+ *  Empty stays empty. A record nobody has advice for gets `[]` and `null`, and
+ *  the panel draws no band at all — the same honest silence as before slice 9. */
+function adviceFor(
+  input: BandInput,
+  prose: PersonaliseContext
+): { bullets: TacticsBullet[]; source: 'canon' | 'house' | null } {
+  const { spell, feature, feat } = input
+
+  const canon: TacticsBullet[] | null = spell
+    ? splitTactics(spell.tactics)
+    : /* NOT PUT THROUGH `splitTactics`, unlike every other branch, and this is
+         the one place the sources genuinely differ in SHAPE. A spell's
+         `tactics`, a feat's `paladinNote` and a house note are single long
+         strings whose author wrote headings into them in capitals; `notes` is
+         already an array of separate sentences with no headings at all. Joining
+         them in order to split them again could only lose the boundaries canon
+         already drew, and inventing an outline is the exact thing `tactics.ts`
+         forbids the splitter to do. One note, one bullet, verbatim. */
+      feature?.notes?.length
+      ? feature.notes.map(note => ({ lead: null, body: note }))
+      : feat?.paladinNote
+        ? splitTactics(feat.paladinNote)
+        : null
+
+  if (canon) {
+    const bullets = personaliseBullets(canon, prose)
+    return { bullets, source: bullets.length > 0 ? 'canon' : null }
+  }
+
+  /* THE RESOLVED RECORD'S NAME FIRST, AND `input.name` ONLY AS THE FALLBACK.
+     Found in a browser, not in a test: on the Combat tab the Hearthfire cloak's
+     row is called "Flaming Cloak", because that is what HIS SHEET calls it and
+     the open-world rule says his words stand. `lookup.ts` already reconciles the
+     two — `CanonChannelDivinityOption` exists for exactly this alias — so by the
+     time we are here `feature` IS the Hearthfire Manifest record while
+     `input.name` is still the sheet's label. Keying the house note off the label
+     meant band ③ appeared in the Grimoire and vanished in Combat, on the same
+     ability, which is the switching-back-and-forth this whole phase is about.
+     `input.name` stays as the fallback so a purely homebrew row — no canon
+     record at all — could still be given advice under its own name. */
+  const house = (feature ? houseNoteFor(feature.name) : null) ?? houseNoteFor(input.name)
+  if (!house) return { bullets: [], source: null }
+
+  const bullets = personaliseBullets(splitTactics(house), prose)
+  /* `null` and not `'house'` when personalising empties it out. The source
+     describes the text that is actually on the screen; claiming a voice for a
+     band with nothing in it would be a label with no referent. */
+  return { bullets, source: bullets.length > 0 ? 'house' : null }
 }

@@ -348,6 +348,37 @@
   text-align: left;
 }
 .dturn .act.blocked { border-left-color: var(--d-rule-lit); opacity: 0.62; }
+
+/* THE MARK — Combat Open Book slice 7.
+   ----------------------------------------------------------------------------
+   `.act` becomes a flex row and everything that used to be its children moves
+   inside `.abody`. That wrapper is the whole trick: the stacked lines (name,
+   detail, why, rider) keep stacking exactly as before, and the mark sits beside
+   the stack instead of on top of it.
+
+   `min-width: 0` on `.abody` is not tidiness. Without it a flex child refuses
+   to shrink below its content's intrinsic width, and the long detail lines push
+   the cost chip off the right edge of a phone — a bug that only appears on the
+   narrow screen this app is for.
+
+   A ROW WITH NO MARK IS UNCHANGED. `.amark` is not rendered at all when
+   `markFor` answers null, so there is no reserved gap and no empty box; the
+   flex row has one child and lays out identically to the block it replaced.
+   That is the open-world rule holding at the pixel level. */
+.dturn .act { display: flex; align-items: flex-start; gap: 11px; }
+.dturn .act .abody { flex: 1; min-width: 0; }
+.dturn .act .amark {
+  flex: 0 0 auto;
+  width: 34px; height: 34px;
+  margin-top: 1px;
+  border-radius: 9px;
+  border: 1px solid var(--d-rule-lit);
+  background: var(--d-e2, var(--d-e1));
+}
+/* A blocked row dims its whole body; the mark dims with it rather than staying
+   bright and pulling the eye to an option he cannot take. */
+.dturn .act.blocked .amark { opacity: 0.7; }
+
 .dturn .act .hd { display: flex; align-items: baseline; justify-content: space-between; gap: var(--d-s3); }
 .dturn .act .anm { font-family: var(--d-font-display); font-size: var(--d-fs-title); color: var(--d-cream); }
 .dturn .act .cost { flex: 0 0 auto; font-size: var(--d-fs-label); color: var(--d-dim); white-space: nowrap; }

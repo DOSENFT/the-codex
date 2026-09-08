@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { SPELLS } from '../../canon'
 import { spellByName } from './lookup'
-import { mechanicsLine, statBlock, cantripTier, ROW_BUDGET_CHARS, type CasterContext } from './format'
+import { mechanicsLine, statBlock, statBlockFor, cantripTier, ROW_BUDGET_CHARS, type CasterContext } from './format'
 
 /* ============================================================================
    TESTS 5-9 of docs/plans/table-truth/03-program-design.md, plus the ones the
@@ -239,5 +239,128 @@ describe('statBlock — the detail sheet, where prose is allowed', () => {
     const cantrip = SPELLS.find(s => s.level === 0)!
     expect(statBlock(cantrip)[0].value).toMatch(/cantrip$/)
     expect(statBlock(cantrip)[0].value).not.toContain('Level 0')
+  })
+})
+
+describe('statBlockFor — band ① with the caster in scope, Open Book slice 4', () => {
+  /* ===========================================================================
+     "some wording of spells don't include my actual data (like prof bonus,
+     range, modifiers, etc)" — Marcus, 2026-09-07.
+
+     The sharpest instance is not an omission but a self-contradiction. At level
+     7 the Sacred Flame ROW says 2d8, and band ① of the card — since Open Book
+     slice 1, three inches below it on the same screen — says
+     "1d8 (2d8 at character level 5, …)", because `statBlock` has no character
+     and cannot do the arithmetic. `InlineOptionCard.test.tsx` has pinned that
+     contradiction deliberately since slice 1. This is the slice that inverts it.
+     ========================================================================= */
+
+  const LEVEL_1: CasterContext = { ...NIX, characterLevel: 1 }
+
+  it('does the arithmetic canon left as words, and the row already did', () => {
+    const spell = spellByName('Sacred Flame')!
+    const damageFor = (rows: Array<{ label: string; value: string }>) =>
+      rows.find(r => r.label === 'Damage')!.value
+
+    expect(damageFor(statBlockFor(spell, NIX))).toBe('2d8 Radiant')
+
+    /* BOTH ASSERTIONS, IN ONE TEST, BECAUSE THE POINT IS THAT IT IS AN ADDITION.
+       `statBlock` keeps its signature, its caller-blindness and its tests; if
+       this line ever goes red it means the character-blind reading was quietly
+       changed underneath every other caller. */
+    expect(damageFor(statBlock(spell))).toBe('1d8 (2d8 at character level 5, 3d8 at 11, 4d8 at 17) Radiant')
+  })
+
+  it('resolves canon\'s "spellcasting ability modifier" to his actual modifier', () => {
+    const spell = spellByName('Cure Wounds')!
+    const healing = statBlockFor(spell, NIX).find(r => r.label === 'Healing')!.value
+    expect(healing).toBe('2d8 + 4')
+    // And the words are still the words when nobody is holding the phone.
+    expect(statBlock(spell).find(r => r.label === 'Healing')!.value)
+      .toBe('2d8 + spellcasting ability modifier')
+  })
+
+  it('scales in canon\'s OWN string and drops none of the qualifier', () => {
+    /* THE TEST THAT DECIDED THE IMPLEMENTATION. Toll the Dead's dice field is
+       "1d8, or 1d12 if the target is missing any Hit Points (scales at …)".
+       Printing `scaleDice`'s expressions — which is the obvious way to write
+       this function — would have rendered "2d8/2d12" and silently deleted the
+       condition under which the second one applies: a rule he no longer has,
+       in the band whose promise is "canon's fields as printed, nothing
+       compacted". Same class of loss slice 2 caught on the cost line. */
+    const rows = statBlockFor(spellByName('Toll the Dead')!, NIX)
+    const damage = rows.find(r => r.label === 'Damage')!.value
+    expect(damage).toBe('2d8, or 2d12 if the target is missing any Hit Points Necrotic')
+    expect(damage).toContain('if the target is missing any Hit Points')
+    // The clause that is now stated twice, once wrongly, is the only thing gone.
+    expect(damage).not.toContain('scales at character levels')
+  })
+
+  it('is byte-identical to statBlock for EVERY spell at character level 1', () => {
+    /* Tier 1 is the identity, and saying so over the corpus is what makes
+       "nothing else changed" checkable rather than asserted. It also pins the
+       one thing a scaling bug would break quietly: a level-1 caster reading a
+       number no book contains. Healing is the exception by design and is
+       excluded by name rather than by a loose matcher. */
+    const drift: string[] = []
+    for (const spell of SPELLS) {
+      const blind = statBlock(spell)
+      const seeing = statBlockFor(spell, LEVEL_1)
+      for (let i = 0; i < blind.length; i++) {
+        if (blind[i].label === 'Healing') continue
+        if (blind[i].value !== seeing[i].value) {
+          drift.push(`${spell.name} / ${blind[i].label}: "${blind[i].value}" → "${seeing[i].value}"`)
+        }
+      }
+    }
+    expect(drift).toEqual([])
+  })
+
+  it('changes exactly two labels and no others, across all 71 spells', () => {
+    /* The claim in the docstring, measured. A `Range` or `Duration` that starts
+       varying by character is canon being rewritten, which is the one thing
+       this slice promised not to do — and it would be invisible on any screen
+       Marcus looks at, because he has only ever seen one character's copy. */
+    const changed = new Set<string>()
+    for (const spell of SPELLS) {
+      const blind = statBlock(spell)
+      const seeing = statBlockFor(spell, NIX)
+      expect(seeing.map(r => r.label)).toEqual(blind.map(r => r.label))
+      for (let i = 0; i < blind.length; i++) {
+        if (blind[i].value !== seeing[i].value) changed.add(blind[i].label)
+      }
+    }
+    expect([...changed].sort()).toEqual(['Damage', 'Healing'])
+  })
+
+  it('THE ONE THAT MATTERS: the card and the row agree about the dice, for every spell', () => {
+    /* THE BUG THIS FEATURE WAS REPORTED FOR, AS A PROPERTY OVER THE WHOLE
+       CORPUS rather than as one example. `mechanicsLine` scales through
+       `scaleDice`; band ① now scales through `scaledDamageDice`. They agree by
+       construction — same strip, same `cantripTier`, same regex — and that is
+       precisely why it is worth a corpus test: "by construction" is a claim
+       about code that one edit ends, silently, on a screen where the two
+       numbers are three inches apart. */
+    const contradictions: string[] = []
+    for (const spell of SPELLS) {
+      if (!spell.damage) continue
+      const row = mechanicsLine(spell, NIX).text
+      const rowDice: string[] = row.match(/\b\d+d\d+\b/g) ?? []
+      if (rowDice.length === 0) continue
+
+      const card = statBlockFor(spell, NIX).find(r => r.label === 'Damage')!.value
+      const cardDice: string[] = card.match(/\b\d+d\d+\b/g) ?? []
+
+      /* Every die the ROW prints must appear on the CARD saying the same thing.
+         Not set equality: the card is allowed to say MORE (a bonus die the row
+         had no room for), it is not allowed to say something DIFFERENT. */
+      for (const die of rowDice) {
+        if (!cardDice.includes(die)) {
+          contradictions.push(`${spell.name}: row "${row}" vs card "${card}"`)
+          break
+        }
+      }
+    }
+    expect(contradictions).toEqual([])
   })
 })

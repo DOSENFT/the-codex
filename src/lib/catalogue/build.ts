@@ -194,7 +194,18 @@ function sheetIndex(character: Character): Map<string, SheetMatch> {
     const key = normalizeName(feat.name)
     if (map.has(key)) continue
     map.set(key, {
-      onSheet: true,
+      /* FALSE, for the reason `types.ts` gives on the field — and this is the
+         SECOND door, not a copy of the first. `buildCatalogue`'s feat loop
+         (below) builds `kind: 'feat'` rows and says `false` there. But this
+         index is read by NAME by the spell loop and the feature loop, so a feat
+         whose name canon also files as a class feature used to hand `true` to
+         the FEATURE row — a row that loop never touches — and the two dead
+         pencils came back on a different record.
+         Not hypothetical: `prepare/fighting-style.ts:208` records the chosen
+         style on `character.feats`, which is the bite `04-slices.md` predicted.
+         `prepared` and `sheetText` below stay as they were — a feat he has IS
+         had, and the row still carries his words. Only reachability changes. */
+      onSheet: false,
       prepared: true,
       sheetText: feat.description || null,
       sheetFeature: null,
@@ -295,7 +306,21 @@ export function buildCatalogue(character: Character): CatalogueEntry[] {
       prepared: true,
       alwaysPrepared: false,
       preparable: false,
-      onSheet: true,
+      /* FALSE, AND IT WAS `true` UNTIL Combat Open Book slice 8.
+         `onSheet` reads like "he has this on his character sheet", and by that
+         reading a feat plainly qualifies — which is how it came to say `true`.
+         But the flag's one and only consumer is the Edit/Delete pair in
+         `GrimoirePage.tsx:635-650`, and those two call `handleEditSpell` and
+         `handleEditFeature`, which look the row up in `character.spells` and
+         `character.features`. A feat is in NEITHER — it lives in
+         `character.feats` — so both lookups came back undefined and the
+         handlers fell through their if/else and did nothing.
+         The result was a pencil and a bin on every feat row that had never
+         worked and could not work: a control that paints perfectly and does
+         nothing when pressed, which is the failure mode this project keeps
+         naming as the worst one available. `types.ts` now says what the flag
+         actually means so the next reader does not make the same inference. */
+      onSheet: false,
       sheetText: feat.description || null,
       canonSpell: null,
       canonFeature: null,

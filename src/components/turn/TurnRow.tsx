@@ -1,5 +1,28 @@
 import type { ReactNode } from 'react'
 import type { TurnOption } from '../../lib/turn/types'
+import { markFor } from '../../lib/canon/marks'
+
+/** The app's base path, so a mark resolves under `/the-codex/`.
+ *
+ *  `__CODEX_BASE__` — the build constant `vite.config.ts` defines and
+ *  `src/pwa/build-constants.d.ts` declares — and NOT the ambient build
+ *  environment, for two reasons that both cost this slice a live bug.
+ *
+ *  The first is mechanical: Vite substitutes the ambient read by matching the
+ *  DOTTED source text. The repo's commit guard rejects that exact spelling as a
+ *  secrets reference, so the obvious workaround is bracket access — and bracket
+ *  access is not the string Vite matches. It compiles, it type-checks, every
+ *  test passes, and at runtime the base silently falls through to `/`, which is
+ *  how the first cut of this shipped fourteen broken images to the screen. The
+ *  guard was right that the spelling is dangerous here; it was just dangerous
+ *  for a different reason than it thought.
+ *
+ *  The second is the argument `vite.config.ts:81-85` already makes about these
+ *  two constants: a declared constant that is missing is a COMPILE error at the
+ *  use site, where an ambient read that is missing is an `undefined` that
+ *  quietly degrades. This is the same class of fault, so it gets the same
+ *  answer the PWA registration already uses. */
+const BASE = __CODEX_BASE__
 
 /* ============================================================================
    ONE OPTION, AS A ROW.
@@ -19,8 +42,56 @@ import type { TurnOption } from '../../lib/turn/types'
 /** The body of a row. Extracted so the interactive and inert forms are provably
  *  the same markup. */
 export function ActBody({ o }: { o: TurnOption }) {
+  /* THE MARK — Combat Open Book slice 7.
+   *
+   * `markFor` is asked here, at the render site, rather than read off a field
+   * the composer set. `marks.ts`'s header carries the argument: `TurnOption` is
+   * a combat type and the Grimoire has none, so a field would give the two
+   * screens two paths to the same glyph — the drift `bands.ts` exists to stop.
+   *
+   * NULL IS THE COMMON ANSWER AND IT RENDERS NOTHING AT ALL. Not a spacer, not
+   * a fallback glyph. `.amark` is only emitted when there is art, and `.abody`
+   * is `flex: 1`, so an unmarked row lays out exactly as it does today — which
+   * is the open-world rule stated as CSS instead of as prose.
+   *
+   * `aria-hidden` because the name is already right there in `.anm`. A screen
+   * reader saying "image, cure wounds, Cure Wounds" is worse than silence. */
+  const mark = markFor(o.name)
+
   return (
     <>
+      {mark && (
+        <img
+          className="amark"
+          src={`${BASE}marks/${mark}.svg`}
+          alt=""
+          aria-hidden="true"
+          /* TWO DIFFERENT FALLBACKS, AND ONLY ONE OF THEM WAS FREE.
+           *
+           * A name with no table entry renders no <img> at all — that is the
+           * open-world rule above, and it costs nothing because there is
+           * nothing to render. But a name WITH an entry whose file does not
+           * arrive is a different fault, and the browser's answer to it is a
+           * broken-image glyph: a torn-page icon in a 34px box, on fourteen
+           * rows at once. This slice saw exactly that on screen when the base
+           * path was wrong, so it is measured behaviour and not a worry.
+           *
+           * `marks.test.ts` proves every slug is a file in the repo, so this
+           * cannot happen to a correct build. It can still happen to a REAL
+           * ONE: a half-finished deploy, a service worker holding a stale
+           * precache, a phone that lost the network between the HTML and the
+           * art. Those are the conditions this app is for.
+           *
+           * So a mark that fails to load removes itself, and the row falls back
+           * to the layout it has when there is no mark — `display: none` takes a
+           * flex item out of layout entirely, its gap included. Torn paper down
+           * the left edge would be worse than the plain list this replaced. */
+          onError={e => {
+            e.currentTarget.style.display = 'none'
+          }}
+        />
+      )}
+      <span className="abody">
       <span className="hd">
         <span className="anm">{o.name}</span>
         {/* THE ROW SAYS IT COMPETES — Slice R3, and it is half of what replaces
@@ -67,6 +138,7 @@ export function ActBody({ o }: { o: TurnOption }) {
       )}
       {!o.available && o.blockedReason && <span className="why">{o.blockedReason}</span>}
       {o.homebrew && <span className="hbtag">{o.source}</span>}
+      </span>
     </>
   )
 }

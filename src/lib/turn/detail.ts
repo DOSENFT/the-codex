@@ -32,11 +32,13 @@
 
 import type { Character } from '../character'
 import type { CanonErratum, CanonFeature, CanonSpell } from '../canon/types'
-import type { EconomyState, TurnOption } from './types'
+import type { EconomySlot, EconomyState, TurnOption } from './types'
 import { featureByName, spellByName } from '../canon/lookup'
 import type { TacticsBullet } from '../canon/tactics'
 import { canonBands, type BandFact } from '../canon/bands'
+import { promoteBands, type HeroCost } from '../canon/promote'
 import { rollOffers, type RollOffer } from './rolls'
+import type { EntryDetail } from '../catalogue/detail'
 import { replacementWarning, tempHPReplacement } from '../rules-2024/temp-hp'
 import { casterContextOf } from './overlay'
 
@@ -86,6 +88,24 @@ export interface OptionDetail {
   errata: CanonErratum[]
   /** Band 4. Empty when canon has no advice, and empty is honest. */
   tactics: TacticsBullet[]
+
+  /* ── THE OPEN CARD — Combat Open Book slice 1 ──────────────────────────────
+   * Every field above stays exactly as it was. The combat sheet's tests are
+   * written against them and slices 5/10c/10d are documented in this file's
+   * comments; a rename here would be a rewrite of four slices' worth of proof
+   * to buy nothing.
+   *
+   * This is the ONE new field: the same model the Grimoire's card eats, built
+   * from the same `canonBands()` call this function already makes. Nothing is
+   * recomputed and nothing is duplicated — `panel.bands` IS the object the
+   * `facts` / `whatItDoes` / `tactics` fields above are read out of.
+   *
+   * Marcus's complaint, in his words: "I don't have to keep switching back and
+   * forth in order to truly grasp the spells/abilities." The gap between the two
+   * screens was never the data — both have called `canonBands` since Open Book
+   * slice 2. It was that only one of them had a layout for it. This field is
+   * what lets the other one borrow it. */
+  panel: EntryDetail
 }
 
 const ORDINALS = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th']
@@ -184,6 +204,50 @@ function tempHPWarningFor(option: TurnOption, character: Character): string | nu
 /** Everything the detail sheet paints, assembled once. Pure: no hooks, no
  *  fetch, no clock. It renders identically with the AI off and the wifi off,
  *  which is the requirement this whole slice was scoped around. */
+/** The colour of the hero cost line on the combat card. Only tones that already
+ *  exist, and two of the five need a reason:
+ *
+ *  - `movement` takes the neutral `time` tone. The three slot colours are a
+ *    promise that the thing is reachable on a turn as an Action, a Bonus Action
+ *    or a Reaction (`EntryDetailPanel.tsx:61-65`), and movement is none of them.
+ *  - `free` takes `passive`, which is verdant — the same colour the panel
+ *    already gives its `free` tag (`EntryDetailPanel.tsx:79`). Costing nothing
+ *    reads green on both, rather than green on one and neutral on the other. */
+const SLOT_TONE: Record<EconomySlot, HeroCost['tone']> = {
+  action: 'action',
+  bonusAction: 'bonus',
+  reaction: 'reaction',
+  movement: 'time',
+  free: 'passive',
+}
+
+/** The row's word, canon's occasion.
+ *
+ *  ── MEASURED, AND IT WENT THE OTHER WAY ───────────────────────────────────
+ *  This function was first written to let canon's Casting Time win outright,
+ *  on the assumption canon's string is the richer of the two. Running it across
+ *  every option on his sheet said otherwise, in nine cases:
+ *
+ *      Cure Wounds:  card "Action"        vs row "Action · 1st-level slot"
+ *      Divine Smite: card "Bonus Action"  vs row "Bonus action · 1st-level slot"
+ *
+ *  The ROW is richer. It knows which slot level this particular cast will
+ *  spend, which canon cannot know and the engine computed. Letting canon win
+ *  would have taken the slot level off the largest word on the combat card —
+ *  a loss, dressed as a consistency fix, that no screenshot would have shown.
+ *
+ *  So neither wins the whole line. `OptionCost.label` is "ALWAYS populated,
+ *  because the engine may not understand the cost well enough to describe it
+ *  and must still be able to show it" (`types.ts:46-49`) — it takes the word,
+ *  which also means a homebrew cost the engine does not model still prints.
+ *  Canon keeps the OCCASION, the half a row has never had room for: Divine
+ *  Smite's "taken immediately after hitting a target with a Melee weapon". The
+ *  card now says strictly more than either surface said alone, and it cannot
+ *  contradict the row above it, because it is quoting it. */
+function combatCost(fromCanon: HeroCost | null, cost: TurnOption['cost']): HeroCost {
+  return { word: cost.label, when: fromCanon?.when ?? null, tone: SLOT_TONE[cost.slot] }
+}
+
 export function optionDetail(
   option: TurnOption & { provenance?: 'canon' | 'sheet' },
   character: Character,
@@ -209,9 +273,44 @@ export function optionDetail(
     character
   )
 
+  const subtitle = [option.cost.label, option.source].filter(Boolean).join(' · ')
+
+  /* ── THE PANEL — Combat Open Book slice 2 ─────────────────────────────────
+   * Slice 1 hard-coded all four promotions to `null`, so band 1 rendered as a
+   * plain grid — exactly how the Combat sheet read before, which is what made
+   * slice 1 a change of PLACE only. Slice 2 asks `canon/promote.ts` the same
+   * question the Grimoire asks it, so the hero die and the cost chip arrive on
+   * the combat card and there is one answer on the machine instead of two.
+   *
+   * `lock` is null because a locked option never reaches the turn deck — the
+   * deck is built from what he can do now. `tags` is empty because every chip it
+   * carries (prepared / always / locked) is a CATALOGUE state, and the row that
+   * opened this card already said it.
+   *
+   * The panel's own subtitle DROPS the cost label, because the cost has just
+   * been promoted to the hero line directly beneath it. `OptionDetail.subtitle`
+   * keeps it: that string belongs to the row and the old sheet, and quietly
+   * changing it here to save one line would have been a second edit hiding
+   * inside this one.
+   *
+   * `promoteBands` is asked with NO fallback — canon only — and the cost line is
+   * then merged with the row's. That keeps `consumed` honest for free: canon's
+   * `Casting Time` row is consumed exactly when canon supplied something, and
+   * `combatCost` adding the row's word afterwards cannot hide a fact. */
+  const promotions = promoteBands(bands.facts, bands, null)
+  const panel: EntryDetail = {
+    title: option.name,
+    subtitle: option.source ?? '',
+    tags: [],
+    lock: null,
+    bands,
+    ...promotions,
+    cost: combatCost(promotions.cost, option.cost),
+  }
+
   return {
     title: option.name,
-    subtitle: [option.cost.label, option.source].filter(Boolean).join(' · '),
+    subtitle,
     /* ── WHOSE WORDS THESE ARE IS ASKED ONCE, UPSTREAM — Held Reaction 5b ────
      *
      * Measured, not reasoned about. `measure-slice6b.mjs` opened all four rows
@@ -269,5 +368,6 @@ export function optionDetail(
     ruleBox: ruleBoxFor(option, economy),
     errata: bands.errata,
     tactics: bands.tactics,
+    panel,
   }
 }

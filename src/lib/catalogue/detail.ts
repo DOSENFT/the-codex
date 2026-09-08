@@ -31,7 +31,15 @@
 
 import type { Character } from '../character'
 import { canonBands, type BandFact, type CanonBands } from '../canon/bands'
-import type { CatalogueEntry } from './types'
+import { promoteBands, type HeroCost, type HeroDice } from '../canon/promote'
+import type { CatalogueEntry, TurnCost } from './types'
+
+/* Band 1's two promoted shapes moved down to `canon/promote.ts` in Combat Open
+ * Book slice 2, so the combat page could reach them without importing the
+ * Grimoire's assembler. Re-exported here because this is where every caller
+ * above already looks for them, and a move that renames an import is a move
+ * that has to be reviewed in every file it touches instead of one. */
+export type { HeroCost, HeroDice }
 
 /** Why he cannot prepare it, in a sentence he can read without doing arithmetic.
  *
@@ -48,25 +56,6 @@ export interface LockNotice {
 export interface DetailTag {
   label: string
   tone: 'prepared' | 'always' | 'locked' | 'concentration' | 'free'
-}
-
-/** Band 1's hero line: what it costs, and — when canon said so in the same
- *  breath — when you may pay it. */
-export interface HeroCost {
-  word: string
-  /** "immediately after hitting a creature with a Melee weapon", or null. */
-  when: string | null
-  /** `'time'` is canon pricing it in minutes or hours — Prayer of Healing is
-   *  "10 minutes". It is NOT one of the three turn slots and must not be
-   *  coloured as one; see `heroCostFor`. */
-  tone: 'action' | 'bonus' | 'reaction' | 'passive' | 'time'
-}
-
-/** Band 1's 34px numeral. The one number he is looking for mid-fight. */
-export interface HeroDice {
-  dice: string
-  note: string | null
-  tone: 'damage' | 'healing' | 'ward'
 }
 
 export interface EntryDetail {
@@ -211,92 +200,28 @@ const COST_TONE: Record<string, HeroCost['tone']> = {
   action: 'action', bonus: 'bonus', reaction: 'reaction', passive: 'passive',
 }
 
-/** The hero cost line.
+/** What band 1 says it costs when canon states no casting time — a feature, a
+ *  feat. The word comes from the entry's own `turnCost`, which the builder
+ *  derived from canon by SHAPE.
  *
- *  Canon writes a spell's casting time as cost-and-occasion in one string —
- *  "Bonus Action, taken immediately after hitting a creature with a Melee
- *  weapon" — so the first comma is the seam, and both halves are kept. The
- *  occasion is the half that answers "can I do this right now", which is the
- *  question being asked at the moment this panel is open.
+ *  THE GRIMOIRE'S ANSWER, AND ONLY THE GRIMOIRE'S. The parse of canon's casting
+ *  time moved to `canon/promote.ts` in Combat Open Book slice 2 so the combat
+ *  page could share it; this stayed, because `turnCost` is a catalogue idea and
+ *  the combat page has a better answer of its own — the label its row is already
+ *  printing. Deriving a second answer for it here is how a card comes to
+ *  contradict the row above it.
  *
- *  When canon has no casting time (a feature, a feat) the cost comes from the
- *  entry's own `turnCost`, which the builder derived from canon by SHAPE. And
  *  `'other'` yields NO hero line at all: canon did not price it, and a hero line
  *  is the largest type on the screen — the wrong word there is worse than no
- *  word. It stays available as an ordinary grid row either way.
- *
- *  ── THE FALL-THROUGH THAT WAS A LIE, FOUND 2026-08-29 ──────────────────────
- *  The tone started as "bonus, else reaction, else ACTION", and Prayer of
- *  Healing is priced at "10 minutes". The word printed was canon's and correct;
- *  the colour said Action, which is a claim he could act on at a table — he
- *  would go looking for it in his Action list mid-fight and it is not there.
- *  Found by measuring the parse across all 84 entries rather than by reading
- *  the branch, which is the only way a default that is usually right is ever
- *  caught. So the default is now `'time'`: a duration canon named, and not one
- *  of the three slots. `'Action'` is claimed only when canon says the word. */
-function heroCostFor(entry: CatalogueEntry, facts: readonly BandFact[]): HeroCost | null {
-  const castingTime = facts.find(f => f.label === 'Casting Time')?.value
-  if (castingTime) {
-    const comma = castingTime.indexOf(',')
-    const word = comma === -1 ? castingTime : castingTime.slice(0, comma)
-    const when = comma === -1 ? null : castingTime.slice(comma + 1).trim() || null
-    const lower = word.toLowerCase()
-    const tone: HeroCost['tone'] =
-      lower.includes('bonus') ? 'bonus'
-      : lower.includes('reaction') ? 'reaction'
-      : lower.includes('action') ? 'action'
-      : 'time'
-    return { word: word.trim(), when, tone }
-  }
-
-  if (entry.turnCost === 'other') return null
+ *  word. It stays available as an ordinary grid row either way. */
+function costFromTurnCost(turnCost: TurnCost): HeroCost | null {
+  if (turnCost === 'other') return null
   const word =
-    entry.turnCost === 'bonus' ? 'Bonus Action'
-    : entry.turnCost === 'reaction' ? 'Reaction'
-    : entry.turnCost === 'passive' ? 'Always active'
+    turnCost === 'bonus' ? 'Bonus Action'
+    : turnCost === 'reaction' ? 'Reaction'
+    : turnCost === 'passive' ? 'Always active'
     : 'Action'
-  return { word, when: null, tone: COST_TONE[entry.turnCost] ?? 'action' }
-}
-
-/** "1d6 Fire on the hit" → the numeral and the words after it.
- *  No match means no hero numeral: the value still prints as a grid row. */
-const DICE = /^\s*(\d*d\d+(?:\s*[+-]\s*\d+)?)\s*(.*)$/
-
-/** The numeral, and the grid row it is allowed to stand in for.
- *
- *  THE SECOND HALF IS NOT A DETAIL. A promotion that does not say what it
- *  consumed shows the die twice; a promotion that assumes it consumed the whole
- *  row deletes whatever else that row said. `factsFromFeature` appends to a
- *  feature's value — the working of a computed number, or "— free: no Action,
- *  no Bonus Action…" — and the numeral carries none of that. So the row is
- *  consumed ONLY when its value is exactly the string the numeral was parsed
- *  from. Anything the layout cannot carry keeps its row, by construction. */
-function heroDiceFor(
-  detailFacts: readonly BandFact[],
-  bands: CanonBands
-): { hero: HeroDice; consumes: string | null } | null {
-  // A spell states its dice as a labelled row; a feature states them inside the
-  // mechanics bag, where the label is canon's field name and varies per feature.
-  const damage = detailFacts.find(f => f.label === 'Damage')
-  const healing = detailFacts.find(f => f.label === 'Healing')
-  const featureDie = bands.featureFacts.find(f => f.shape === 'dice')
-
-  const picked =
-    damage ? { value: damage.value, tone: 'damage' as const, label: 'Damage' }
-    : healing ? { value: healing.value, tone: 'healing' as const, label: 'Healing' }
-    : featureDie
-      ? { value: featureDie.raw, tone: 'ward' as const, label: featureDie.label }
-      : null
-  if (!picked) return null
-
-  const match = DICE.exec(picked.value)
-  if (!match) return null
-
-  const row = detailFacts.find(f => f.label === picked.label)
-  return {
-    hero: { dice: match[1].replace(/\s+/g, ''), note: match[2].trim() || picked.label, tone: picked.tone },
-    consumes: row && row.value === picked.value ? picked.label : null,
-  }
+  return { word, when: null, tone: COST_TONE[turnCost] ?? 'action' }
 }
 
 /** Everything the detail panel paints. Pure: no hooks, no fetch, no clock. */
@@ -321,32 +246,12 @@ export function entryDetail(entry: CatalogueEntry, character: Character): EntryD
   const withSlot = slot ? { ...bands, facts: [...bands.facts, slot] } : bands
   const facts = withSlot.facts
 
-  const cost = heroCostFor(entry, facts)
-  const die = heroDiceFor(facts, withSlot)
-  const higherLevel = facts.find(f => f.label === 'Higher Level')?.value ?? null
-  const source = facts.find(f => f.label === 'Source')?.value ?? null
-
-  /* Consumed only when actually USED. A spell with no `Damage` row does not
-   * consume one, and — the case that matters — a hero cost line built from
-   * `turnCost` rather than from a `Casting Time` row consumes nothing, so a
-   * feature that happens to carry a Casting Time fact still shows it. */
-  const consumed = [
-    cost && facts.some(f => f.label === 'Casting Time') ? 'Casting Time' : null,
-    die?.consumes ?? null,
-    higherLevel !== null ? 'Higher Level' : null,
-    source !== null ? 'Source' : null,
-  ].filter((l): l is string => l !== null)
-
   return {
     title: entry.name,
     subtitle: subtitleFor(entry),
     tags: tagsFor(entry),
     lock: lockNoticeFor(entry, character),
     bands: withSlot,
-    cost,
-    hero: die?.hero ?? null,
-    higherLevel,
-    source,
-    consumed,
+    ...promoteBands(facts, withSlot, costFromTurnCost(entry.turnCost)),
   }
 }
