@@ -36,6 +36,7 @@ import {
   savingThrowBonus,
   passivePerception,
   attackBonus,
+  upsertWeapon,
   generateId,
 } from '../lib/character'
 import { SKILL_ABILITIES, ABILITY_NAMES } from '../lib/dnd-rules'
@@ -251,8 +252,14 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
     onCharacterUpdate({ ...character, savingThrowProficiencies: newSaves })
   }, [character, onCharacterUpdate])
 
-  // Add weapon
-  const handleAddWeapon = useCallback(() => {
+  /* SAVE A WEAPON — the one form serves both "new" and "edit".
+     `editingWeapon` is -1 while adding and the weapon's INDEX while editing.
+     It was always typed `number | null` for exactly that, and nothing ever set
+     it to an index: the form appended unconditionally, so the pencil this file
+     never grew would have silently duplicated the weapon instead of changing
+     it. Marcus hit the consequence from the other side — his Dawn Guardian was
+     missing its +1, and the app gave him no way at all to put it in. */
+  const handleSaveWeapon = useCallback(() => {
     const newWeapon: Weapon = {
       name: weaponForm.name || 'New Weapon',
       attackType: weaponForm.attackType || 'melee',
@@ -269,12 +276,49 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
       masteryProperty: weaponForm.masteryProperty || undefined,
       specialAbilities: weaponFormAbilities.length ? weaponFormAbilities : undefined,
     }
-    onCharacterUpdate({ ...character, weapons: [...character.weapons, newWeapon] })
+    /* The add-or-replace rule lives in `upsertWeapon`, not here, because this
+       callback cannot be tested — there is no jsdom in this repo. */
+    onCharacterUpdate(upsertWeapon(character, editingWeapon ?? -1, newWeapon))
     setWeaponForm({})
     setWeaponFormAbilities([])
     setWeaponAdvancedOpen(false)
     setEditingWeapon(null)
-  }, [weaponForm, character, onCharacterUpdate])
+  }, [weaponForm, weaponFormAbilities, editingWeapon, character, onCharacterUpdate])
+
+  /* LOAD AN EXISTING WEAPON BACK INTO THE FORM.
+     Every field the form can write has to be read back here or editing one
+     field would blank the others — the form is the whole record, not a patch,
+     so an unpopulated input saves as empty. `specialAbilities` is copied into a
+     NEW array: the form's ability editor mutates by index, and handing it the
+     character's own array would edit live state behind React's back. */
+  const handleEditWeapon = useCallback((index: number) => {
+    const w = character.weapons[index]
+    if (!w) return
+    setWeaponForm({
+      name: w.name,
+      attackType: w.attackType,
+      abilityMod: w.abilityMod,
+      proficient: w.proficient,
+      damageDice: w.damageDice,
+      damageType: w.damageType,
+      properties: [...w.properties],
+      magical: w.magical,
+      bonusToHit: w.bonusToHit,
+      bonusDamage: w.bonusDamage,
+      description: w.description,
+      range: w.range,
+      masteryProperty: w.masteryProperty,
+    })
+    setWeaponFormAbilities((w.specialAbilities ?? []).map(a => ({ ...a })))
+    /* OPEN THE ADVANCED PANEL WHEN THERE IS SOMETHING IN IT. Collapsed, the
+       +1 and the abilities are invisible, and invisible fields on a form that
+       saves the whole record look exactly like fields that are empty. */
+    setWeaponAdvancedOpen(
+      Boolean(w.magical || w.bonusToHit || w.bonusDamage || w.range || w.masteryProperty ||
+        w.description || w.specialAbilities?.length)
+    )
+    setEditingWeapon(index)
+  }, [character.weapons])
 
   // Delete weapon
   const handleDeleteWeapon = useCallback((index: number) => {
@@ -947,6 +991,17 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
                       <Badge variant="neutral">{weapon.range}</Badge>
                     )}
                     <button
+                      onClick={() => handleEditWeapon(i)}
+                      className={cn(
+                        'min-h-[44px] min-w-[44px] flex items-center justify-center',
+                        'rounded-lg text-forge-2 hover:text-arcane hover:bg-arcane/10',
+                        'transition-all duration-200 active:scale-95',
+                      )}
+                      aria-label={`Edit ${weapon.name}`}
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
                       onClick={() => handleDeleteWeapon(i)}
                       className={cn(
                         'min-h-[44px] min-w-[44px] flex items-center justify-center',
@@ -1054,10 +1109,12 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
             )
           })}
 
-          {/* Add weapon form */}
-          {editingWeapon === -1 ? (
+          {/* Add/edit weapon form — one form, two jobs. See handleSaveWeapon. */}
+          {editingWeapon !== null ? (
             <GlassCard className="p-4 border-arcane/20">
-              <h4 className="text-xs font-bold text-forge-0 uppercase tracking-wider mb-3">New Weapon</h4>
+              <h4 className="text-xs font-bold text-forge-0 uppercase tracking-wider mb-3">
+                {editingWeapon >= 0 ? `Edit ${character.weapons[editingWeapon]?.name ?? 'Weapon'}` : 'New Weapon'}
+              </h4>
               <div className="flex flex-col gap-3">
                 {/* ── Basic Section ── */}
                 <div className="flex flex-col gap-2">
@@ -1479,8 +1536,16 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
                 {/* ── Submit / Cancel ── */}
                 <div className="flex gap-2">
-                  <Button variant="primary" size="sm" onClick={handleAddWeapon} className="flex-1">
-                    <Plus size={14} aria-hidden /> Add Weapon
+                  <Button variant="primary" size="sm" onClick={handleSaveWeapon} className="flex-1">
+                    {editingWeapon >= 0 ? (
+                      <>
+                        <Check size={14} aria-hidden /> Save Changes
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={14} aria-hidden /> Add Weapon
+                      </>
+                    )}
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => { setEditingWeapon(null); setWeaponForm({}); setWeaponFormAbilities([]); setWeaponAdvancedOpen(false); setCustomPropertyInput('') }}>
                     Cancel

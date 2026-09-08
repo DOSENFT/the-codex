@@ -1588,3 +1588,34 @@ export function removeSpell(char: Character, spellName: string): Character {
     spells: char.spells.filter(s => s.name !== spellName),
   }
 }
+
+// ---------------------------------------------------------------------------
+// Weapon CRUD
+// ---------------------------------------------------------------------------
+
+/** Where a weapon save lands: append, or replace the weapon at this index.
+ *  `-1` is the sentinel `CharacterPage` already used for "the new-weapon form
+ *  is open", kept so the component's one state variable keeps meaning one
+ *  thing. */
+export type WeaponSlot = number
+
+/** ADD OR REPLACE, DECIDED BY THE SLOT — the rule `CharacterPage` got wrong.
+ *
+ *  Weapons are addressed by INDEX and not by name, unlike `updateSpell` above.
+ *  That is deliberate: a rename is the single most likely weapon edit ("Glaive"
+ *  → "The Dawn Guardian"), and name-keyed replacement cannot express it — it
+ *  would find nothing and change nothing, which is the failure mode this
+ *  function exists to end.
+ *
+ *  Out-of-range slots append rather than throw. A stale index can only come
+ *  from a weapon deleted in another tab while the form was open, and silently
+ *  keeping his typing is a better answer there than losing it. */
+export function upsertWeapon(char: Character, slot: WeaponSlot, weapon: Weapon): Character {
+  const inRange = slot >= 0 && slot < char.weapons.length
+  return {
+    ...char,
+    weapons: inRange
+      ? char.weapons.map((w, i) => (i === slot ? weapon : w))
+      : [...char.weapons, weapon],
+  }
+}
