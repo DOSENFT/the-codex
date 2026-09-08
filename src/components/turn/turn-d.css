@@ -364,8 +364,24 @@
    A ROW WITH NO MARK IS UNCHANGED. `.amark` is not rendered at all when
    `markFor` answers null, so there is no reserved gap and no empty box; the
    flex row has one child and lays out identically to the block it replaced.
-   That is the open-world rule holding at the pixel level. */
-.dturn .act { display: flex; align-items: flex-start; gap: 11px; }
+   That is the open-world rule holding at the pixel level.
+
+   ── THE `:not(.hasx)` IS LOAD-BEARING, AND IT COST A LIVE DEPLOY ───────────
+   This rule was written as a bare `.dturn .act` and it broke every row that
+   carries an `.actx`. `TurnRow.tsx` has TWO shapes: without an extra, `.act`
+   holds `ActBody` directly and wants this flex row for mark-beside-body; WITH
+   an extra it holds `.acthit` and `.actx` as siblings, which must STACK. A
+   flex row turned those two siblings into two columns, so the open card
+   rendered in a ~60% gutter to the right of a squeezed-up row — Marcus's
+   screenshots of the Dawn Guardian and the Flaming Cloak on the live build.
+
+   It was invisible here because the mark and the inline card arrived in
+   different slices (7 and 1) and nothing rendered both until they met on a
+   phone. The flex belongs to WHATEVER BOX HOLDS `ActBody`, which is `.act`
+   in one shape and `.acthit` in the other — so it is stated twice, narrowly,
+   rather than once at a level that catches a sibling it was never about. */
+.dturn .act:not(.hasx), .dturn .acthit { display: flex; align-items: flex-start; gap: 11px; }
+.dturn .act.hasx { display: block; }
 .dturn .act .abody { flex: 1; min-width: 0; }
 .dturn .act .amark {
   flex: 0 0 auto;
@@ -836,7 +852,14 @@
      target alone. */
 .dturn .acthit > span { display: block; }
 .dturn button.acthit {
-  display: block;
+  /* FLEX, NOT BLOCK, and the change is not cosmetic. `button.acthit` outranks
+     the `.dturn .acthit` rule above on specificity, so a `block` here silently
+     cancelled the mark-beside-body layout for exactly the rows that carry an
+     extra — the reaction rows, which are the ones with marks. Same fault as the
+     `:not(.hasx)` note above, arriving from the other direction. */
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
   width: 100%;
   min-width: 0;
   min-height: var(--d-touch-goal);
