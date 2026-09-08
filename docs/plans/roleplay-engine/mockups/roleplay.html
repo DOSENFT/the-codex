@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roleplay Engine — the whole tab</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void-0:#0a0a08; --void-1:#12110e; --void-2:#1c1a15;
+    --arcane:#d4a74a; --arcane-lit:#e8c87a;
+    --ember:#e8924a; --verdant:#39d98a; --bronze:#8b7355;
+    --cream:#f0e6d3; --tally:#bfb5a0; --dim:#979182;
+    --line:#26231c;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--void-0); color:var(--cream);
+    font-family:'IBM Plex Sans',sans-serif;
+    display:flex; justify-content:center; padding:20px 12px 60px;
+  }
+  .phone { width:390px; }
+  .cap {
+    font-size:10px; color:#5d584c; text-transform:uppercase; letter-spacing:.14em;
+    margin:22px 0 8px; padding-left:2px;
+  }
+
+  /* ══ ZONE 1 — THE SCENE ══════════════════════════════════════════════════
+     Thin, always at the top, and it is the INPUT to everything below. This is
+     where "campfire" and "two new players" enter the app at all. */
+  .scene {
+    background:linear-gradient(180deg,#1a1712,#12110e);
+    border:1px solid #2e2a21; border-radius:12px; padding:12px 14px;
+  }
+  .scene .row1 { display:flex; align-items:center; gap:8px; }
+  .scene .where {
+    font-family:'Cinzel',serif; font-size:17px; color:var(--arcane-lit);
+  }
+  .scene .edit { margin-left:auto; font-size:11px; color:var(--bronze); }
+  .scene .mood {
+    font-size:11px; color:var(--dim); margin-top:3px; letter-spacing:.02em;
+  }
+  .who-row { display:flex; gap:6px; margin-top:11px; flex-wrap:wrap; }
+  .chip {
+    font-size:11px; padding:5px 9px; border-radius:20px;
+    border:1px solid #2e2a21; background:#16140f; color:var(--tally);
+    display:flex; align-items:center; gap:5px;
+  }
+  .chip .dot { width:5px; height:5px; border-radius:50%; background:#3a352a; }
+  .chip.quiet { border-color:rgba(232,146,74,.35); color:var(--ember); }
+  .chip.quiet .dot { background:var(--ember); }
+  .chip.new { border-color:rgba(57,217,138,.35); color:var(--verdant); }
+  .chip.new .dot { background:var(--verdant); }
+  .chip.add { color:var(--bronze); border-style:dashed; }
+
+  /* ══ ZONE 2 — THE ASK ════════════════════════════════════════════════════
+     One box, one question. "What would I say" survives — it just became the
+     doorway to the whole engine instead of a feature beside it. */
+  .ask {
+    margin-top:10px; background:var(--void-1);
+    border:1px solid #2e2a21; border-radius:12px; padding:12px 13px;
+  }
+  .ask input {
+    width:100%; background:transparent; border:none; outline:none;
+    color:var(--cream); font-family:inherit; font-size:15px;
+  }
+  .ask input::placeholder { color:#5d584c; }
+  .ask .go {
+    margin-top:11px; width:100%; padding:11px; border-radius:9px; border:none;
+    background:var(--arcane); color:#14120d; font-family:'Cinzel',serif;
+    font-size:14px; letter-spacing:.04em; font-weight:600;
+  }
+  .quick { display:flex; gap:6px; margin-top:9px; flex-wrap:wrap; }
+  .quick button {
+    flex:1 1 auto; background:#16140f; border:1px solid #2b2720; border-radius:8px;
+    color:var(--tally); font-family:inherit; font-size:11.5px; padding:8px 10px;
+  }
+  .quick button.lit { border-color:rgba(212,167,74,.4); color:var(--arcane); }
+
+  /* ══ ZONE 3 — THE BEAT (hero) ════════════════════════════════════════════ */
+  .beat { background:var(--void-1); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .aim {
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    background:#171510; border-bottom:1px solid var(--line);
+  }
+  .aim .who { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.06em; color:var(--arcane); text-transform:uppercase; }
+  .aim .tag {
+    font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 6px; border-radius:4px;
+    background:rgba(57,217,138,.12); color:var(--verdant); border:1px solid rgba(57,217,138,.3);
+  }
+  .aim .src { margin-left:auto; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#5d584c; }
+  .band { padding:13px 16px; border-top:1px solid #1e1b16; }
+  .band:first-of-type { border-top:none; }
+  .band h4 { font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+  .move { display:flex; gap:10px; margin-bottom:9px; }
+  .move:last-child { margin-bottom:0; }
+  .move .kind { flex:0 0 32px; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em; text-transform:uppercase; padding-top:4px; }
+  .move.say .kind { color:var(--arcane); } .move.do .kind { color:var(--ember); } .move.ask .kind { color:var(--verdant); }
+  .move .text { flex:1; font-size:15px; line-height:1.5; }
+  .move.say .text { font-style:italic; color:var(--arcane-lit); }
+  .goal, .follow { font-size:13px; line-height:1.55; color:var(--tally); }
+  .follow { border-left:2px solid #2e2a21; padding-left:12px; }
+  .follow em { color:var(--arcane-lit); font-style:italic; }
+  .dirs { display:flex; flex-direction:column; gap:7px; }
+  .dir { display:flex; gap:9px; font-size:13px; line-height:1.5; color:var(--tally); }
+  .dir .arrow { color:var(--bronze); font-size:12px; padding-top:1px; }
+  .dir b { color:var(--cream); font-weight:600; }
+  .out { font-size:12.5px; line-height:1.55; color:var(--dim); font-style:italic; }
+  .foot { display:flex; gap:6px; padding:12px 14px; border-top:1px solid var(--line); background:#0f0e0b; }
+  .foot button {
+    flex:1; background:transparent; border:1px solid #2b2720; border-radius:8px;
+    color:var(--dim); font-family:inherit; font-size:11px; letter-spacing:.06em; padding:9px 0; text-transform:uppercase;
+  }
+  .foot button.hero { flex:0 0 44px; color:var(--arcane); font-size:14px; }
+
+  /* ══ ZONE 4 — THE TABLE ══════════════════════════════════════════════════
+     The spotlight tracker. The one thing on this page that is about the OTHER
+     seven people, and the reason he is the social engine instead of a player
+     with good lines. */
+  .table-card { background:var(--void-1); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .tr { display:flex; align-items:center; gap:11px; padding:11px 14px; border-top:1px solid #1e1b16; }
+  .tr:first-child { border-top:none; }
+  .tr .nm { font-size:14px; }
+  .tr .meta { font-size:11px; color:var(--dim); margin-top:2px; }
+  .tr .bar { flex:0 0 54px; height:4px; border-radius:2px; background:#221f19; overflow:hidden; }
+  .tr .bar i { display:block; height:100%; background:var(--bronze); }
+  .tr .aimbtn {
+    margin-left:auto; font-size:11px; padding:6px 11px; border-radius:7px;
+    border:1px solid #2b2720; background:#16140f; color:var(--tally); white-space:nowrap;
+  }
+  .tr.urgent .aimbtn { border-color:rgba(232,146,74,.4); color:var(--ember); }
+  .nudge {
+    padding:11px 14px; background:rgba(232,146,74,.07); border-top:1px solid var(--line);
+    font-size:12px; line-height:1.5; color:var(--ember);
+  }
+
+  .thin {
+    margin-top:10px; text-align:center; font-size:11.5px; color:#5d584c;
+    padding:11px; border:1px solid #1e1b16; border-radius:10px;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ── ZONE 1 ─────────────────────────────────────────────────────────── -->
+  <div class="cap">The scene</div>
+  <div class="scene">
+    <div class="row1">
+      <span class="where">The campfire</span>
+      <span class="edit">edit ›</span>
+    </div>
+    <div class="mood">first night after the ridge · everyone’s still up · nobody’s said the thing yet</div>
+    <div class="who-row">
+      <span class="chip new"><i class="dot"></i>Sarah · new</span>
+      <span class="chip new"><i class="dot"></i>Dev · new</span>
+      <span class="chip quiet"><i class="dot"></i>Priya · quiet 22m</span>
+      <span class="chip"><i class="dot"></i>Marcus (Nix)</span>
+      <span class="chip"><i class="dot"></i>Tom</span>
+      <span class="chip add">+ add</span>
+    </div>
+  </div>
+
+  <!-- ── ZONE 2 ─────────────────────────────────────────────────────────── -->
+  <div class="ask">
+    <input placeholder="What do I do right now?" value="">
+    <div class="quick">
+      <button class="lit">Pull someone in</button>
+      <button>Start the scene</button>
+      <button>React</button>
+      <button>Raise the stakes</button>
+      <button>Land the moment</button>
+    </div>
+    <button class="go">Give me the beat</button>
+  </div>
+
+  <!-- ── ZONE 3 ─────────────────────────────────────────────────────────── -->
+  <div class="cap">The beat</div>
+  <div class="beat">
+    <div class="aim">
+      <span class="who">→ Sarah</span>
+      <span class="tag">first session</span>
+      <span class="src">live · scene-aware</span>
+    </div>
+    <div class="band">
+      <h4>The move</h4>
+      <div class="move do"><span class="kind">Do</span><span class="text">Push a second stick into the fire, then slide it toward her side of the ring — you’re making room, not asking permission.</span></div>
+      <div class="move say"><span class="kind">Say</span><span class="text">“You’ve got the look of someone who left in a hurry. My mother had it for eleven years.”</span></div>
+      <div class="move ask"><span class="kind">Ask</span><span class="text">“What did you take with you that you didn’t need?”</span></div>
+    </div>
+    <div class="band">
+      <h4>What it’s for</h4>
+      <div class="goal">Sarah has never played before, so the worst thing you can hand her is an open floor. This gives her a small, concrete, impossible-to-fail question — and the physical action is already done for her. She only has to name one object.</div>
+    </div>
+    <div class="band">
+      <h4>If she bites</h4>
+      <div class="follow">Take whatever object she names <em>completely seriously</em>. Repeat it back once, then ask who gave it to her. Two questions in, she has a backstory she invented herself — and she’ll defend it for the rest of the campaign.</div>
+    </div>
+    <div class="band">
+      <h4>Where it can go</h4>
+      <div class="dirs">
+        <div class="dir"><span class="arrow">↗</span><span><b>Warmer</b> — Nix admits what <i>he</i> carries and can’t put down. Trade for trade.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Darker</b> — the object is something she stole. Don’t flinch; ask who’s still looking for it.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Wider</b> — turn it on the circle: “Everyone shows one thing they’d run back into a fire for.”</span></div>
+      </div>
+    </div>
+    <div class="band">
+      <h4>If it lands flat</h4>
+      <div class="out">Answer your own question out loud, laugh at your answer, and pass the fire to the person on her left. She’s off the hook, nobody noticed, and the campfire keeps going.</div>
+    </div>
+    <div class="foot">
+      <button>Nailed it</button><button>Close</button><button>Off</button><button class="hero">↻</button>
+    </div>
+  </div>
+
+  <!-- ── ZONE 4 ─────────────────────────────────────────────────────────── -->
+  <div class="cap">The table</div>
+  <div class="table-card">
+    <div class="tr urgent">
+      <div><div class="nm">Priya</div><div class="meta">last spoke 22 min ago</div></div>
+      <span class="bar"><i style="width:12%"></i></span>
+      <button class="aimbtn">Aim a beat →</button>
+    </div>
+    <div class="tr">
+      <div><div class="nm">Sarah <span style="color:var(--verdant);font-size:10px">· new</span></div><div class="meta">1 beat aimed · landed</div></div>
+      <span class="bar"><i style="width:34%"></i></span>
+      <button class="aimbtn">Aim a beat →</button>
+    </div>
+    <div class="tr">
+      <div><div class="nm">Dev <span style="color:var(--verdant);font-size:10px">· new</span></div><div class="meta">no beat aimed yet</div></div>
+      <span class="bar"><i style="width:5%"></i></span>
+      <button class="aimbtn">Aim a beat →</button>
+    </div>
+    <div class="tr">
+      <div><div class="nm">Tom</div><div class="meta">carrying the scene</div></div>
+      <span class="bar"><i style="width:78%"></i></span>
+      <button class="aimbtn">Aim a beat →</button>
+    </div>
+    <div class="nudge">Dev hasn’t been handed anything all night. He’s new — one aimed question now is worth three later.</div>
+  </div>
+
+  <div class="cap">Tonight</div>
+  <div class="thin">7 beats used · 4 nailed · every player named<br>tap to review the night ›</div>
+
+</div>
+</body>
+</html>

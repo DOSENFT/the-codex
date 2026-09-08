@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roleplay Engine — the beat card, four states</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void-0:#0a0a08; --void-1:#12110e; --void-2:#1c1a15;
+    --arcane:#d4a74a; --arcane-lit:#e8c87a;
+    --ember:#e8924a; --ember-lit:#f5b183;
+    --verdant:#39d98a; --gold:#c5a55a; --bronze:#8b7355;
+    --cream:#f0e6d3; --tally:#bfb5a0; --dim:#979182;
+    --line:#26231c;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--void-0); color:var(--cream);
+    font-family:'IBM Plex Sans',sans-serif;
+    display:flex; flex-wrap:wrap; gap:22px; justify-content:center;
+    padding:24px 12px 80px;
+  }
+  .col { width:390px; }
+  .caption {
+    font-size:10px; color:var(--dim); text-transform:uppercase;
+    letter-spacing:.14em; margin-bottom:12px; text-align:center; line-height:1.6;
+  }
+  .caption b { color:var(--tally); }
+
+  /* ── the card ─────────────────────────────────────────────────────────── */
+  .beat {
+    background:var(--void-1); border:1px solid var(--line);
+    border-radius:14px; overflow:hidden;
+  }
+
+  /* Aim strip. THE TABLE-FACING HALF: every beat is pointed at a human. */
+  .aim {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; background:#171510; border-bottom:1px solid var(--line);
+  }
+  .aim .who {
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.06em;
+    color:var(--arcane); text-transform:uppercase;
+  }
+  .aim .tag {
+    font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+    padding:2px 6px; border-radius:4px;
+    background:rgba(57,217,138,.12); color:var(--verdant); border:1px solid rgba(57,217,138,.3);
+  }
+  .aim .src {
+    margin-left:auto; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+    color:#5d584c;
+  }
+  .aim .src.banked { color:var(--bronze); }
+
+  /* Bands. Same eye-shape as the Grimoire's detail card, on purpose: he has
+     already learned to read that layout, so this one costs him nothing. */
+  .band { padding:14px 16px; border-top:1px solid #1e1b16; }
+  .band:first-of-type { border-top:none; }
+  .band h4 {
+    font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--dim); margin-bottom:8px;
+  }
+
+  /* THE MOVE — the hero. Say / Do / Ask are visually distinct because they are
+     three different physical things he has to do with his body. */
+  .move { display:flex; gap:10px; margin-bottom:10px; }
+  .move:last-child { margin-bottom:0; }
+  .move .kind {
+    flex:0 0 34px; font-family:'JetBrains Mono',monospace; font-size:9px;
+    letter-spacing:.08em; text-transform:uppercase; padding-top:4px;
+  }
+  .move.say  .kind { color:var(--arcane); }
+  .move.do   .kind { color:var(--ember); }
+  .move.ask  .kind { color:var(--verdant); }
+  .move .text { flex:1; font-size:15px; line-height:1.5; }
+  .move.say .text { font-style:italic; color:var(--arcane-lit); }
+  .move.do  .text { color:var(--cream); }
+  .move.ask .text { color:var(--cream); }
+
+  .goal { font-size:13px; line-height:1.55; color:var(--tally); }
+
+  .follow {
+    font-size:13px; line-height:1.55; color:var(--tally);
+    border-left:2px solid #2e2a21; padding-left:12px;
+  }
+  .follow em { color:var(--arcane-lit); font-style:italic; }
+
+  /* WHERE IT CAN GO — the thing that turns a line into a scene with a future. */
+  .dirs { display:flex; flex-direction:column; gap:7px; }
+  .dir { display:flex; gap:9px; font-size:13px; line-height:1.5; color:var(--tally); }
+  .dir .arrow { color:var(--bronze); font-size:12px; padding-top:1px; }
+  .dir b { color:var(--cream); font-weight:600; }
+
+  .out {
+    font-size:12.5px; line-height:1.55; color:var(--dim); font-style:italic;
+  }
+
+  /* Footer: the rating that, today, is written and never read. */
+  .foot {
+    display:flex; gap:6px; padding:12px 14px;
+    border-top:1px solid var(--line); background:#0f0e0b;
+  }
+  .foot button {
+    flex:1; background:transparent; border:1px solid #2b2720; border-radius:8px;
+    color:var(--dim); font-family:inherit; font-size:11px; letter-spacing:.06em;
+    padding:9px 0; text-transform:uppercase;
+  }
+  .foot button.hero { flex:0 0 44px; color:var(--arcane); font-size:14px; }
+
+  .notice {
+    display:flex; gap:8px; align-items:flex-start;
+    padding:10px 14px; background:rgba(139,115,85,.08);
+    border-bottom:1px solid var(--line);
+    font-size:11.5px; line-height:1.5; color:var(--bronze);
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ STATE A — live, aimed at a brand-new player ═══════════════════════ -->
+<div class="col">
+  <div class="caption"><b>A · live, aimed at a new player</b><br>
+    the default. one tap on “pull someone in”.</div>
+
+  <div class="beat">
+    <div class="aim">
+      <span class="who">→ Sarah</span>
+      <span class="tag">first session</span>
+      <span class="src">live · scene-aware</span>
+    </div>
+
+    <div class="band">
+      <h4>The move</h4>
+      <div class="move do"><span class="kind">Do</span>
+        <span class="text">Push a second stick into the fire, then slide it toward her side of the ring — you’re making room, not asking permission.</span></div>
+      <div class="move say"><span class="kind">Say</span>
+        <span class="text">“You’ve got the look of someone who left in a hurry. My mother had it for eleven years.”</span></div>
+      <div class="move ask"><span class="kind">Ask</span>
+        <span class="text">“What did you take with you that you didn’t need?”</span></div>
+    </div>
+
+    <div class="band">
+      <h4>What it’s for</h4>
+      <div class="goal">Sarah has never played before, so the worst thing you can hand her is an open floor. This gives her a small, concrete, impossible-to-fail question with a physical action already done for her. She only has to name one object.</div>
+    </div>
+
+    <div class="band">
+      <h4>If she bites</h4>
+      <div class="follow">Take whatever object she names <em>completely seriously</em> — repeat it back once, then ask who gave it to her. Two questions in, she has a backstory she invented herself, and she’ll defend it for the rest of the campaign.</div>
+    </div>
+
+    <div class="band">
+      <h4>Where it can go</h4>
+      <div class="dirs">
+        <div class="dir"><span class="arrow">↗</span><span><b>Warmer</b> — Nix admits what <i>he</i> carries and can’t put down. Trade for trade.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Darker</b> — the object is something she stole. Don’t flinch; ask who’s still looking for it.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Wider</b> — turn it on the circle: “Everyone shows one thing they’d run back into a fire for.”</span></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <h4>If it lands flat</h4>
+      <div class="out">Answer your own question out loud, laugh at your answer, and pass the fire to the person on her left. She’s off the hook, nobody noticed, and the campfire keeps going.</div>
+    </div>
+
+    <div class="foot">
+      <button>Nailed it</button><button>Close</button><button>Off</button>
+      <button class="hero">↻</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STATE B — the model was down, and he cannot tell ═══════════════════ -->
+<div class="col">
+  <div class="caption"><b>B · the model is overloaded</b><br>
+    the screenshot bug. no error, ever — the card still fills.</div>
+
+  <div class="beat">
+    <div class="aim">
+      <span class="who">→ the circle</span>
+      <span class="src banked">from the bank</span>
+    </div>
+
+    <div class="notice">
+      <span>⌁</span>
+      <span>Gemini is slow right now, so this one’s from the on-device bank. It’s a real beat, just not written for tonight specifically. Tap ↻ to try live again.</span>
+    </div>
+
+    <div class="band">
+      <h4>The move</h4>
+      <div class="move do"><span class="kind">Do</span>
+        <span class="text">Stop cleaning your weapon. Set it down where everyone can see you set it down.</span></div>
+      <div class="move say"><span class="kind">Say</span>
+        <span class="text">“Before we sleep. One rule for this fire: nobody lies tonight. Starting with me.”</span></div>
+    </div>
+
+    <div class="band">
+      <h4>What it’s for</h4>
+      <div class="goal">The single most reliable campfire opener in improv: declare a rule, then be the first to obey it. It gives every player at the table permission and a format, and it costs them nothing to join.</div>
+    </div>
+
+    <div class="band">
+      <h4>If they bite</h4>
+      <div class="follow">Go first and go <em>small</em> — a real, unheroic admission, not a monologue. One sentence. Then look at exactly one person and wait. Silence is the invitation; don’t fill it.</div>
+    </div>
+
+    <div class="band">
+      <h4>Where it can go</h4>
+      <div class="dirs">
+        <div class="dir"><span class="arrow">↗</span><span><b>Escalate</b> — the second truth has to be bigger than the first. Say so.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Complicate</b> — someone lies anyway, and Nix knows. Say nothing. Remember.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Bond</b> — two truths rhyme. Name the rhyme out loud; that’s a party forming.</span></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <h4>If it lands flat</h4>
+      <div class="out">“…and the rule expires at dawn.” Pick the weapon back up. The scene closes itself and nobody had to fail at anything.</div>
+    </div>
+
+    <div class="foot">
+      <button>Nailed it</button><button>Close</button><button>Off</button>
+      <button class="hero">↻</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STATE C — an impulse, built out to a full beat ════════════════════ -->
+<div class="col">
+  <div class="caption"><b>C · “Ambush!”, rebuilt</b><br>
+    today this is one line. this is the same tap.</div>
+
+  <div class="beat">
+    <div class="aim">
+      <span class="who">→ the DM</span>
+      <span class="tag">reaction · 4 sec</span>
+      <span class="src">live · scene-aware</span>
+    </div>
+
+    <div class="band">
+      <h4>Use it when</h4>
+      <div class="goal">The DM has just described something arriving and the table has gone quiet. You have about four seconds before someone asks for initiative and the roleplay window closes for the night.</div>
+    </div>
+
+    <div class="band">
+      <h4>The move</h4>
+      <div class="move do"><span class="kind">Do</span>
+        <span class="text">Step in front of the smallest person near you. Not a decision — a reflex. Say the line while you’re already moving.</span></div>
+      <div class="move say"><span class="kind">Say</span>
+        <span class="text">“Behind me. <i>Now.</i> — Talk to me when it’s over.”</span></div>
+      <div class="move ask"><span class="kind">Ask</span>
+        <span class="text">To the DM: “What do I smell before I see them?”</span></div>
+    </div>
+
+    <div class="band">
+      <h4>Why the question</h4>
+      <div class="follow">Asking the DM for one <em>sense detail</em> mid-ambush is the single highest-leverage move in table roleplay. It costs one second, it makes the DM improvise texture instead of numbers, and the whole table leans in — because now the fight has a smell.</div>
+    </div>
+
+    <div class="band">
+      <h4>Where it can go</h4>
+      <div class="dirs">
+        <div class="dir"><span class="arrow">↗</span><span><b>Into combat clean</b> — you already have position and a protected ally. Roll.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Into a scene</b> — whoever you shielded owes you a look afterward. Collect it.</span></div>
+        <div class="dir"><span class="arrow">↗</span><span><b>Into a mistake</b> — it isn’t an ambush. Nix drew steel on a friend. Better.</span></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <h4>If it lands flat</h4>
+      <div class="out">Stay in the stance one beat too long, then: “…huh.” Let the table laugh. A missed read played straight is a character trait.</div>
+    </div>
+
+    <div class="foot">
+      <button>Nailed it</button><button>Close</button><button>Off</button>
+      <button class="hero">↻</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
