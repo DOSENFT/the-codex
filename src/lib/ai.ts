@@ -479,21 +479,112 @@ const geminiBody = (systemPrompt: string, userMessage: string) => JSON.stringify
   generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
 })
 
-/** Turn a non-OK Gemini response into something a person can act on. */
-async function geminiError(response: Response, model: string): Promise<AIError> {
-  const errText = await response.text().catch(() => '')
-  if (response.status === 429) {
+/* ─── Transient failures, and the one that was never handled ──────────────────
+
+   REPORTED BY MARCUS ON 2026-09-07, with the screenshot, mid-session:
+
+       Gemini error (503): { "error": { "code": 503, "message": "This model is
+       currently experiencing high demand. Spikes in demand are usually
+       temporary. Please try again later.", "status": "UNAVAILABLE" } }
+
+   Read what the app did with that. Google said *temporary* and *try again*, and
+   the app did neither — it pasted the raw JSON into the middle of a roleplay
+   card and stopped. Only 429 was ever retried, so a quota problem recovered
+   silently while an overloaded-model problem died in his face. From the table
+   that reads as "the AI works randomly", which is exactly how he described it.
+
+   A 503 is the single most common Gemini failure on a free tier at peak hours,
+   and it is the most retryable thing the API can say. */
+
+/** Statuses worth trying again. 429 is quota, the 5xx family is Google having a
+ *  bad minute; both are about WHEN you asked, not WHAT you asked. Everything
+ *  else — a bad key, a retired model, a malformed request — will fail exactly
+ *  the same way the second time, and retrying it just makes the user wait. */
+const TRANSIENT_STATUSES = new Set([429, 500, 502, 503, 504])
+
+const MAX_RETRIES = 2
+
+/** How long to wait before attempt N+1, or null to stop trying.
+ *
+ *  Pure and exported so it can be tested without a network: the retry policy is
+ *  the part most likely to be wrong, and the part hardest to observe in a
+ *  browser at a D&D table.
+ *
+ *  `retryAfterSeconds` is Google's own advice, which arrives over the network
+ *  and is therefore clamped before it is obeyed — an upstream that says "retry
+ *  in 3600 seconds" must not be able to park the app for an hour. When there is
+ *  no advice (a 503 rarely carries any) the wait backs off 1s then 3s, which is
+ *  long enough for a demand spike to pass and short enough that he does not put
+ *  the phone down. */
+export function retryDelayMs(
+  status: number,
+  attempt: number,
+  retryAfterSeconds: number | null,
+  capMs: number = AI_TIMEOUTS.retryCapMs,
+): number | null {
+  if (!TRANSIENT_STATUSES.has(status)) return null
+  if (attempt >= MAX_RETRIES) return null
+
+  const advised = retryAfterSeconds !== null && retryAfterSeconds > 0 ? retryAfterSeconds * 1000 : null
+  // 429 without advice means quota, where a long wait is the honest one. A 5xx
+  // is a spike, where a short one usually clears it.
+  const base = advised ?? (status === 429 ? 15_000 : attempt === 0 ? 1_000 : 3_000)
+  return Math.min(base, capMs)
+}
+
+/** Google's `RetryInfo.retryDelay`, if the body carries one. Never throws: an
+ *  error body that is not JSON is normal and must not become a second error. */
+export function retryAfterSecondsFrom(errText: string): number | null {
+  try {
+    const data = JSON.parse(errText)
+    const info = data.error?.details?.find((d: { '@type'?: string }) => d['@type']?.includes('RetryInfo'))
+    if (!info?.retryDelay) return null
+    const seconds = parseInt(info.retryDelay, 10)
+    return Number.isFinite(seconds) && seconds > 0 ? seconds : null
+  } catch {
+    return null
+  }
+}
+
+/** Turn a non-OK Gemini response into something a person can act on.
+ *
+ *  NOTHING HERE PASTES A RESPONSE BODY INTO THE UI ANY MORE, except the 404
+ *  case, whose body names the model that replaced the retired one and is the
+ *  only body that has ever helped anybody. The full text still rides along in
+ *  `AIError.body` for the console and for the model-retirement parser; it just
+ *  no longer lands in the middle of a scene. */
+export function geminiErrorFrom(status: number, errText: string, model: string): AIError {
+  if (status === 429) {
     return new AIError('api',
       `Rate limited on ${model}. Your free-tier quota is exhausted. Try switching to a different model in Settings — each model has its own quota.`,
-      429)
+      429, errText)
   }
-  if (response.status === 400 && errText.includes('API_KEY_INVALID')) {
+  if (status === 400 && errText.includes('API_KEY_INVALID')) {
     return new AIError('api', 'Invalid API key. Check your key at aistudio.google.com/apikey', 400)
   }
-  if (response.status === 403) {
+  if (status === 403) {
     return new AIError('api', 'API key does not have permission. Make sure the Generative Language API is enabled.', 403, errText)
   }
-  return new AIError('api', `Gemini error (${response.status}): ${errText.slice(0, 200)}`, response.status, errText)
+  if (status === 404) {
+    // The body is the fix. `recoverRetiredModel` reads it; the message keeps it.
+    return new AIError('api', `Gemini error (404): ${errText.slice(0, 200)}`, 404, errText)
+  }
+  if (TRANSIENT_STATUSES.has(status)) {
+    // We already retried and it still failed. Say so as a fact about Google's
+    // afternoon, not as a stack trace — and say what is still true, because at
+    // a table the useful half of a failure is what still works without it.
+    return new AIError('api',
+      `${model} is overloaded right now — Google's side, not yours (HTTP ${status}). ` +
+      `Tried ${MAX_RETRIES + 1} times. Your sheet, dice and everything already on screen still work.`,
+      status, errText)
+  }
+  return new AIError('api',
+    `Gemini refused that request (${status}). Check the model and key in Settings.`,
+    status, errText)
+}
+
+async function geminiError(response: Response, model: string): Promise<AIError> {
+  return geminiErrorFrom(response.status, await response.text().catch(() => ''), model)
 }
 
 /* ─── Which model? Asked, never assumed ───────────────────────────────────────
@@ -788,28 +879,23 @@ async function queryGemini(
     )
     b.touch()
 
-    if (response.status === 429 && attempt < 2) {
-      // Gemini's advice about how long to wait arrives over the network, so it
-      // is clamped before it is obeyed: an upstream that says "retry in 3600
-      // seconds" must not be able to park the app for an hour.
-      let waitMs = 15_000
-      try {
-        const errData = await response.json()
-        const retryInfo = errData.error?.details?.find((d: { '@type': string }) => d['@type']?.includes('RetryInfo'))
-        if (retryInfo?.retryDelay) {
-          const seconds = parseInt(retryInfo.retryDelay, 10)
-          if (seconds > 0) waitMs = seconds * 1000
-        }
-      } catch { /* use default */ }
-      waitMs = Math.min(waitMs, AI_TIMEOUTS.retryCapMs)
+    if (!response.ok) {
+      /* The body is read ONCE and then reasoned about, rather than read for the
+         retry and read again for the message — a Response body can only be
+         consumed once, and the old shape got away with it only because the 429
+         branch returned before the error branch could try. */
+      const errText = await response.text().catch(() => '')
+      const waitMs = retryDelayMs(response.status, attempt, retryAfterSecondsFrom(errText))
 
-      // And the wait itself is interruptible. A sleep that ignores the signal
-      // is the same bug as a fetch that ignores it, wearing a different hat.
-      await sleep(waitMs, signal)
-      return queryGemini(cfg, model, systemPrompt, userMessage, signal, attempt + 1)
+      if (waitMs !== null) {
+        // The wait itself is interruptible. A sleep that ignores the signal is
+        // the same bug as a fetch that ignores it, wearing a different hat.
+        await sleep(waitMs, signal)
+        return queryGemini(cfg, model, systemPrompt, userMessage, signal, attempt + 1)
+      }
+
+      throw geminiErrorFrom(response.status, errText, model)
     }
-
-    if (!response.ok) throw await geminiError(response, model)
 
     const data = await response.json()
     return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated'
@@ -960,7 +1046,7 @@ async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: st
   }
 }
 
-async function streamGemini(cfg: AIConfig, model: string, systemPrompt: string, userMessage: string, onText: (t: string) => void, signal?: AbortSignal): Promise<string> {
+async function streamGemini(cfg: AIConfig, model: string, systemPrompt: string, userMessage: string, onText: (t: string) => void, signal?: AbortSignal, attempt = 0): Promise<string> {
   const b = bound(cfg, signal)
   try {
     const response = await fetch(
@@ -968,7 +1054,21 @@ async function streamGemini(cfg: AIConfig, model: string, systemPrompt: string, 
       { method: 'POST', headers: geminiHeaders(cfg.geminiApiKey!), signal: b.signal, body: geminiBody(systemPrompt, userMessage) },
     )
     b.touch()
-    if (!response.ok || !response.body) throw await geminiError(response, model)
+    /* The streaming path retries the same overload the blocking path does. It
+       is safe here for the same reason it is safe there: nothing has been
+       emitted yet, so a retry cannot double up text on screen. Once `pump`
+       starts delivering, this branch is behind us and a mid-stream failure
+       stays a failure. */
+    if (!response.ok || !response.body) {
+      const errText = await response.text().catch(() => '')
+      const waitMs = retryDelayMs(response.status, attempt, retryAfterSecondsFrom(errText))
+      if (waitMs !== null) {
+        await sleep(waitMs, signal)
+        b.done()
+        return streamGemini(cfg, model, systemPrompt, userMessage, onText, signal, attempt + 1)
+      }
+      throw geminiErrorFrom(response.status, errText, model)
+    }
     return await pump(response, b, geminiDelta, onText)
   } catch (err) {
     throw b.explain(err, 'Gemini')

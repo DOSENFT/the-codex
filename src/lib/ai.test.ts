@@ -34,6 +34,9 @@ import {
   rankGeminiModels,
   replacementFromError,
   resolveGeminiModel,
+  retryDelayMs,
+  retryAfterSecondsFrom,
+  geminiErrorFrom,
   getLastUsedProvider,
   type AIConfig,
 } from './ai'
@@ -428,6 +431,144 @@ describe('the 429 retry', () => {
   })
 })
 
+/* ═══ THE 503 THAT DIED IN HIS FACE ═══════════════════════════════════════════
+
+   Marcus, 2026-09-07, mid-session, screenshot in hand:
+
+       Gemini error (503): { "error": { "code": 503, "message": "This model is
+       currently experiencing high demand. Spikes in demand are usually
+       temporary. Please try again later.", "status": "UNAVAILABLE" } }
+
+   Google said *temporary* and *try again*; the app did neither. Only 429 was
+   ever retried, so a quota problem recovered silently while an overload died
+   as raw JSON in the middle of a roleplay card — which at a table reads as
+   "the AI works randomly", his exact words.
+
+   NONE OF THESE CAN PASS AGAINST THE OLD CODE. The three functions did not
+   exist (the import alone fails), and the two end-to-end tests assert a second
+   request that the old code never made.
+   ========================================================================== */
+
+describe('retryDelayMs — which failures are about WHEN you asked', () => {
+  it('retries the overload family, and only that family', () => {
+    for (const status of [429, 500, 502, 503, 504]) {
+      expect(retryDelayMs(status, 0, null), `${status} should be retried`).not.toBeNull()
+    }
+    // A bad key, a retired model, a malformed request: all fail identically the
+    // second time, so retrying them only makes him wait longer for the same news.
+    for (const status of [400, 401, 403, 404, 422]) {
+      expect(retryDelayMs(status, 0, null), `${status} must NOT be retried`).toBeNull()
+    }
+  })
+
+  it('stops after two retries instead of looping at the table', () => {
+    expect(retryDelayMs(503, 0, null)).not.toBeNull()
+    expect(retryDelayMs(503, 1, null)).not.toBeNull()
+    expect(retryDelayMs(503, 2, null)).toBeNull()
+  })
+
+  it('waits a short beat for a spike and a long one for a quota', () => {
+    // A 5xx is Google having a bad minute — a second usually clears it. A 429
+    // with no advice is quota, where pounding it immediately is what caused it.
+    expect(retryDelayMs(503, 0, null)).toBeLessThan(retryDelayMs(429, 0, null)!)
+    expect(retryDelayMs(503, 0, null)).toBeLessThanOrEqual(retryDelayMs(503, 1, null)!)
+  })
+
+  it('clamps advice that would park the app for an hour', () => {
+    expect(retryDelayMs(503, 0, 3600, 20_000)).toBe(20_000)
+    expect(retryDelayMs(503, 0, 2, 20_000)).toBe(2000)   // sensible advice is obeyed
+  })
+})
+
+describe('retryAfterSecondsFrom — never a second error', () => {
+  it('reads Google’s own RetryInfo', () => {
+    expect(retryAfterSecondsFrom(JSON.stringify({
+      error: { details: [{ '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '7s' }] },
+    }))).toBe(7)
+  })
+
+  it('returns null for a body that is not JSON, without throwing', () => {
+    // An overloaded frontend often returns an HTML error page. Parsing that must
+    // not turn a retryable failure into a crash.
+    expect(retryAfterSecondsFrom('<html>503 Service Unavailable</html>')).toBeNull()
+    expect(retryAfterSecondsFrom('')).toBeNull()
+    expect(retryAfterSecondsFrom('{"error":{"code":503}}')).toBeNull()
+  })
+})
+
+describe('geminiErrorFrom — what he is allowed to be shown', () => {
+  const body503 = JSON.stringify({
+    error: { code: 503, message: 'This model is currently experiencing high demand.', status: 'UNAVAILABLE' },
+  })
+
+  it('never pastes the JSON blob from the screenshot into the message', () => {
+    /* THE ASSERTION THAT IS THE WHOLE BUG. The old message was
+       `Gemini error (503): ${errText.slice(0, 200)}` — the literal blob. */
+    const err = geminiErrorFrom(503, body503, TEST_MODEL)
+    expect(err.message).not.toContain('{')
+    expect(err.message).not.toContain('UNAVAILABLE')
+    expect(err.message).not.toContain('"error"')
+  })
+
+  it('still says which model and which code, so it stays debuggable', () => {
+    const err = geminiErrorFrom(503, body503, TEST_MODEL)
+    expect(err.message).toContain(TEST_MODEL)
+    expect(err.message).toMatch(/503/)
+    expect(err.status).toBe(503)
+    // The blob is kept for the console and the retirement parser, just not shown.
+    expect(err.body).toBe(body503)
+  })
+
+  it('tells him what still works, because at a table that is the useful half', () => {
+    expect(geminiErrorFrom(503, body503, TEST_MODEL).message.toLowerCase()).toContain('dice')
+  })
+
+  it('keeps the 404 body, which is the one that carries its own fix', () => {
+    // Slice 3's retirement recovery reads this. Suppressing it would re-break
+    // the thing `replacementFromError` exists to fix.
+    const err = geminiErrorFrom(404, retiredBody(TEST_MODEL, 'gemini-9.9-flash'), TEST_MODEL)
+    expect(err.message).toContain('gemini-9.9-flash')
+  })
+})
+
+describe('the overload retry, end to end', () => {
+  it('recovers from a 503 without the table ever seeing it', async () => {
+    vi.useFakeTimers()
+    let n = 0
+    stubFetch(() => {
+      n++
+      return n === 1
+        ? jsonResponse({ error: { code: 503, message: 'high demand' } }, 503)
+        : jsonResponse({ candidates: [{ content: { parts: [{ text: 'the line he needed' }] } }] })
+    })
+    const pending = queryAI('sys', 'msg', GEMINI)
+    await vi.advanceTimersByTimeAsync(AI_TIMEOUTS.retryCapMs)
+    expect(await pending).toBe('the line he needed')
+    expect(n).toBe(2)
+  })
+
+  it('retries the STREAMING path too — that is the one the roleplay card uses', async () => {
+    /* The blocking path and the streaming path are separate functions, and a
+       fix applied to one of them is a fix he only gets on some screens. It is
+       safe to retry here because nothing has been emitted yet: the response was
+       never OK, so `pump` never ran and no text can double up. */
+    vi.useFakeTimers()
+    let n = 0
+    stubFetch(() => {
+      n++
+      return n === 1
+        ? jsonResponse({ error: { code: 503, message: 'high demand' } }, 503)
+        : new Response('data: {"candidates":[{"content":{"parts":[{"text":"streamed"}]}}]}\n\n', { status: 200 })
+    })
+    const seen: string[] = []
+    const pending = queryAIStream('sys', 'msg', t => seen.push(t), GEMINI)
+    await vi.advanceTimersByTimeAsync(AI_TIMEOUTS.retryCapMs)
+    expect(await pending).toContain('streamed')
+    expect(seen.join('')).toBe('streamed')   // once, not twice
+    expect(n).toBe(2)
+  })
+})
+
 /* ═══ Table Truth slice 3 — the model the app must not know ═══════════════════
 
    Marcus, 2026-08-26, with the error in hand:
@@ -649,13 +790,23 @@ describe('the retirement retry — 19 and 20', () => {
   })
 
   it('does not treat an ordinary server error as a retirement', async () => {
+    /* AMENDED 2026-09-07 WITH THE OVERLOAD FIX. This test used to assert ONE
+       generate call, because a 5xx was not retried at all — which is the bug
+       Marcus hit mid-session as a raw 503 JSON blob in a roleplay card. The
+       count is now three, and that change is the feature.
+       Its actual subject is unchanged and is the line below about the LIST:
+       a 500 is not a fact about which models exist. */
+    vi.useFakeTimers()
     stubFetch(() => jsonResponse({ error: { code: 500, message: 'Internal error' } }, 500))
-    await expect(queryAI('sys', 'msg', GEMINI)).rejects.toThrow(/500/)
+    const pending = queryAI('sys', 'msg', GEMINI)
+    const settled = expect(pending).rejects.toThrow(/500/)
+    await vi.advanceTimersByTimeAsync(AI_TIMEOUTS.retryCapMs * 2)
+    await settled
     // No model-list call: a 500 is not a fact about which models exist, and
     // spending a second request to re-ask would double the cost of every
     // outage.
     expect(calls.filter(isListCall)).toHaveLength(0)
-    expect(calls.filter(isGenerateCall)).toHaveLength(1)
+    expect(calls.filter(isGenerateCall)).toHaveLength(3)   // the try and two retries
   })
 
   it('self-heals a 404 that names no replacement, using the live list', async () => {
