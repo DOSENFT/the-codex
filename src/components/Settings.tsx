@@ -22,8 +22,9 @@ import {
   ClipboardPaste,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
-import { loadAIConfig, saveAIConfig, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIProvider } from '../lib/ai'
+import { loadAIConfig, updateAIConfig, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIProvider } from '../lib/ai'
 import { GeminiModelPicker } from './GeminiModelPicker'
+import { OpenRouterModelPicker } from './OpenRouterModelPicker'
 import { useAI } from '../hooks/useAI'
 import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
 import { resolveCharacter, storableOf, changedNumbers } from '../lib/rules-2024/derive'
@@ -52,6 +53,97 @@ interface SettingsProps {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Provider vocabulary                                                */
+/* ------------------------------------------------------------------ */
+
+/* One place that knows what a provider is CALLED, keyed by the union so
+   adding a fourth provider to `AIProvider` is a type error here rather than a
+   toggle strip that silently renders one fewer button. The names are the
+   vendors' own — nothing invented, because the thing Marcus has to match is
+   the label on the page where he gets the key. */
+const PROVIDER_LABEL: Record<AIProvider, string> = {
+  gemini: 'Gemini',
+  openrouter: 'OpenRouter',
+  ollama: 'Ollama',
+}
+
+/** Where a key comes from, for the "add one for fallback" prompts. */
+const PROVIDER_KEY_HOME: Record<AIProvider, string> = {
+  gemini: 'aistudio.google.com/apikey',
+  openrouter: 'openrouter.ai/keys',
+  ollama: '',
+}
+
+/* ------------------------------------------------------------------ */
+/*  SecretInput                                                        */
+/* ------------------------------------------------------------------ */
+
+/* The password field with the eye on the end of it, which existed three times
+   in this file with three slightly diverging copies of the same class list
+   before OpenRouter would have made it four. Extracted rather than pasted:
+   the reveal toggle is the control that decides whether a key ends up on
+   screen in a room with other people in it, and three near-copies of that is
+   three places for it to quietly stop working.
+
+   It renders exactly the markup the Gemini field already rendered. This is a
+   de-duplication, not a redesign. */
+function SecretInput({
+  id, label, value, onChange, placeholder, show, onToggleShow,
+}: {
+  id?: string
+  label?: string
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+  show: boolean
+  onToggleShow: () => void
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {label && (
+        <label htmlFor={id} className="text-sm font-medium text-forge-1">
+          {label}
+        </label>
+      )}
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? 'text' : 'password'}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={cn(
+            'min-h-[44px] w-full rounded-xl',
+            'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
+            'border border-bronze/25',
+            'font-mono text-sm',
+            'pl-4 pr-12',
+            'transition-all duration-200 ease-forge',
+            'focus:border-arcane/60 focus:bg-void-2/80',
+            'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
+            'focus:outline-none',
+          )}
+        />
+        <button
+          type="button"
+          onClick={onToggleShow}
+          className={cn(
+            'absolute right-2 top-1/2 -translate-y-1/2',
+            'w-9 h-9 flex items-center justify-center rounded-lg',
+            'text-forge-2 hover:text-forge-1',
+            'transition-colors duration-200',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+          )}
+          aria-label={show ? 'Hide API key' : 'Show API key'}
+        >
+          {show ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -69,6 +161,9 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   const [geminiModel, setGeminiModel] = useState('')
   const [ollamaUrl, setOllamaUrl] = useState(getDefaultOllamaUrl)
   const [ollamaModel, setOllamaModel] = useState('gemma3-27b-abliterated:latest')
+  const [openrouterKey, setOpenrouterKey] = useState('')
+  // '' is Automatic — resolve the roomiest FREE model, every request.
+  const [openrouterModel, setOpenrouterModel] = useState('')
   const [fallbackEnabled, setFallbackEnabled] = useState(true)
 
   /* ------ Ollama model discovery ------ */
@@ -99,6 +194,8 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
     if (config.geminiModel) setGeminiModel(config.geminiModel)
     if (config.ollamaUrl) setOllamaUrl(config.ollamaUrl)
     if (config.ollamaModel) setOllamaModel(config.ollamaModel)
+    if (config.openrouterApiKey) setOpenrouterKey(config.openrouterApiKey)
+    if (config.openrouterModel) setOpenrouterModel(config.openrouterModel)
     setFallbackEnabled(config.fallbackEnabled !== false)
   }, [])
 
@@ -131,22 +228,35 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
 
   /* ------ handlers ------ */
   const handleSaveConfig = useCallback(() => {
-    // Always save BOTH provider configs so fallback works
-    saveAIConfig({
+    // Always save ALL THREE provider configs so the fallback chain works. It is
+    // a chain now, not a pair — a key typed on the OpenRouter tab has to still
+    // be there when Gemini is the one that 429s.
+    //
+    // A MERGE, NOT A WHOLE-CONFIG WRITE. This form holds all three providers,
+    // so it was not losing keys the way first-run setup was — but it does not
+    // hold `connectTimeoutMs`/`idleTimeoutMs`, and `saveAIConfig` writes the
+    // ENTIRE config, so anything this screen has no input for was being deleted
+    // every time Save was pressed. `updateAIConfig` writes only what is named.
+    //
+    // The raw state strings go through, not `x || undefined`: '' now MEANS
+    // "he cleared this box, remove it" and is the only way to delete a key he
+    // pasted by mistake. `updateAIConfig` deletes the field rather than storing
+    // '', so absent stays the single spelling of "not set" — which is what
+    // `resolveGeminiModel` reads as "ask Google".
+    updateAIConfig({
       provider,
-      geminiApiKey: geminiKey || undefined,
-      // Absent, not empty-string: absent is what `resolveGeminiModel` reads as
-      // "ask Google", and it is also what a config that has never been touched
-      // looks like. Two spellings for one meaning is how the old default leaked.
-      geminiModel: geminiModel || undefined,
-      ollamaUrl: ollamaUrl || undefined,
-      ollamaModel: ollamaModel || undefined,
+      geminiApiKey: geminiKey,
+      geminiModel,
+      ollamaUrl,
+      ollamaModel,
+      openrouterApiKey: openrouterKey,
+      openrouterModel,
       fallbackEnabled,
     })
     setConfigSaved(true)
     setTestSuccess(false)
     setTimeout(() => setConfigSaved(false), 2500)
-  }, [provider, geminiKey, geminiModel, ollamaUrl, ollamaModel, fallbackEnabled])
+  }, [provider, geminiKey, geminiModel, ollamaUrl, ollamaModel, openrouterKey, openrouterModel, fallbackEnabled])
 
   const handleTestConnection = useCallback(async () => {
     setTestSuccess(false)
@@ -397,21 +507,44 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
      bar and nothing in this component can change it. */
   const ollamaBlocked = ollamaBlockedReason()
 
+  /* ------ the fallback chain, as the screen has to describe it ------ */
+  /* Fallback used to be a pair, so the UI could say "the other one" and be
+     right. With three providers it has to say WHICH, IN WHAT ORDER, because
+     the order is now a fact he can be surprised by at a table. This mirrors
+     `FALLBACK_ORDER` in ai.ts deliberately — if those two ever disagree, the
+     screen is lying about what the app will do, which is worse than the screen
+     saying nothing. Ollama is dropped from the list wherever the browser
+     cannot open it, for the same reason its address box is: a fallback that
+     the browser will refuse is not a fallback, it is a delay. */
+  const CHAIN_ORDER: readonly AIProvider[] = ['gemini', 'openrouter', 'ollama']
+  const isConfigured = (p: AIProvider) =>
+    p === 'gemini' ? !!geminiKey.trim()
+      : p === 'openrouter' ? !!openrouterKey.trim()
+        : !!ollamaUrl.trim() && !!ollamaModel.trim()
+  const backups = CHAIN_ORDER.filter(p => p !== provider && !(p === 'ollama' && ollamaBlocked))
+  const readyBackups = backups.filter(isConfigured)
+
   const renderAIConfig = () => (
     <GlassCard className="ornate-border">
       <OrnateHeader className="mb-5">AI Configuration</OrnateHeader>
 
-      {/* Provider toggle */}
+      {/* Provider toggle.
+          Three now, not two — OpenRouter was added 2026-09-09 because a single
+          free tier that fails three different ways in one week is a single
+          point of failure, and Ollama cannot be the answer on the phone he
+          actually plays on. The label is the shortest true one; `text-xs` on
+          the row because three names in a phone-width strip is exactly where
+          `text-sm` starts wrapping "OpenRouter" mid-word. */}
       <div className="flex flex-col gap-1.5 mb-5">
         <span className="text-sm font-medium text-forge-1">Provider</span>
         <div className="flex rounded-xl overflow-hidden border border-bronze/25">
-          {(['gemini', 'ollama'] as const).map((p) => (
+          {(['gemini', 'openrouter', 'ollama'] as const).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setProvider(p)}
               className={cn(
-                'flex-1 min-h-[44px] text-sm font-medium',
+                'flex-1 min-h-[44px] text-xs sm:text-sm font-medium px-1',
                 'transition-all duration-200 ease-forge',
                 'active:scale-[0.98]',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
@@ -420,7 +553,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
                   : 'bg-gold/[0.04] text-forge-2 hover:bg-gold/[0.08] hover:text-forge-1',
               )}
             >
-              {p === 'gemini' ? 'Gemini' : ollamaBlocked ? 'Ollama (not here)' : 'Ollama'}
+              {p === 'ollama' && ollamaBlocked ? 'Ollama (not here)' : PROVIDER_LABEL[p]}
             </button>
           ))}
         </div>
@@ -429,47 +562,38 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       {/* Gemini config */}
       {provider === 'gemini' && (
         <div className="flex flex-col gap-4 mb-5">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="gemini-key" className="text-sm font-medium text-forge-1">
-              API Key
-            </label>
-            <div className="relative">
-              <input
-                id="gemini-key"
-                type={showKey ? 'text' : 'password'}
-                value={geminiKey}
-                onChange={(e) => setGeminiKey(e.target.value)}
-                placeholder="Enter your Gemini API key"
-                className={cn(
-                  'min-h-[44px] w-full rounded-xl',
-                  'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                  'border border-bronze/25',
-                  'font-mono text-sm',
-                  'pl-4 pr-12',
-                  'transition-all duration-200 ease-forge',
-                  'focus:border-arcane/60 focus:bg-void-2/80',
-                  'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
-                  'focus:outline-none',
-                )}
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className={cn(
-                  'absolute right-2 top-1/2 -translate-y-1/2',
-                  'w-9 h-9 flex items-center justify-center rounded-lg',
-                  'text-forge-2 hover:text-forge-1',
-                  'transition-colors duration-200',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
-                )}
-                aria-label={showKey ? 'Hide API key' : 'Show API key'}
-              >
-                {showKey ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
-              </button>
-            </div>
-          </div>
+          <SecretInput
+            id="gemini-key"
+            label="API Key"
+            value={geminiKey}
+            onChange={setGeminiKey}
+            placeholder="Enter your Gemini API key"
+            show={showKey}
+            onToggleShow={() => setShowKey(!showKey)}
+          />
 
           <GeminiModelPicker apiKey={geminiKey} value={geminiModel} onChange={setGeminiModel} />
+        </div>
+      )}
+
+      {/* OpenRouter config */}
+      {provider === 'openrouter' && (
+        <div className="flex flex-col gap-4 mb-5">
+          <SecretInput
+            id="openrouter-key"
+            label="API Key"
+            value={openrouterKey}
+            onChange={setOpenrouterKey}
+            placeholder="Enter your OpenRouter API key"
+            show={showKey}
+            onToggleShow={() => setShowKey(!showKey)}
+          />
+          <p className="text-xs text-forge-2">
+            Free at <span className="underline">openrouter.ai/keys</span>. It reaches a
+            different set of free models from Google's, on a separate daily allowance — which
+            is the entire point of having it: two free tiers do not run out at the same moment.
+          </p>
+          <OpenRouterModelPicker apiKey={openrouterKey} value={openrouterModel} onChange={setOpenrouterModel} />
         </div>
       )}
 
@@ -543,11 +667,11 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
         <div className="flex-1">
           <span className="text-sm font-medium text-forge-1">Auto-Fallback</span>
           <p className="text-xs text-forge-2 mt-0.5">
-            {provider === 'ollama'
-              ? 'Use Gemini automatically when Ollama is unreachable (away from home WiFi)'
-              : ollamaBlocked
-                ? 'There is no second provider to fall back to on this device — Ollama cannot be reached from here.'
-                : 'Use Ollama automatically when Gemini is unavailable'}
+            {backups.length === 0
+              ? 'There is no second provider to fall back to on this device — Ollama cannot be reached from here.'
+              : readyBackups.length === 0
+                ? `When ${PROVIDER_LABEL[provider]} fails, try the others — but none of them are set up yet. Add one below.`
+                : `When ${PROVIDER_LABEL[provider]} fails, try ${readyBackups.map(p => PROVIDER_LABEL[p]).join(', then ')}${readyBackups.length > 1 ? ' — in that order' : ''}.`}
           </p>
         </div>
         <button
@@ -571,78 +695,82 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
         </button>
       </div>
 
-      {fallbackEnabled && provider === 'ollama' && !geminiKey && (
+      {/* Nothing to fall back TO. Said once, about the whole chain, rather
+          than once per provider — he does not need three boxes telling him
+          three separate halves of "you have set up one provider". */}
+      {fallbackEnabled && backups.length > 0 && readyBackups.length === 0 && (
         <div className="flex items-start gap-2 mb-5 p-3 rounded-lg bg-ember/10 border border-ember/25">
           <AlertTriangle size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
           <p className="text-xs text-ember">
-            Add a Gemini API key below for fallback to work away from home.
-            Get one free at{' '}
-            <span className="underline">aistudio.google.com/apikey</span>
+            Fallback is on but nothing is behind it. Fill in one of the boxes below —
+            both keys are free, and having two of them is the point: two free tiers do not
+            run out at the same moment.
           </p>
         </div>
       )}
 
-      {/* Show secondary provider config when fallback is on */}
-      {fallbackEnabled && provider === 'ollama' && (
-        <div className="mb-5 p-3 rounded-xl bg-gold/[0.02] border border-bronze/20">
-          <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-2">
-            Fallback: Gemini
-          </span>
-          <div className="flex flex-col gap-3">
-            <div className="relative">
-              <input
-                type={showKey ? 'text' : 'password'}
-                value={geminiKey}
-                onChange={(e) => setGeminiKey(e.target.value)}
-                placeholder="Gemini API key"
-                className={cn(
-                  'min-h-[44px] w-full rounded-xl',
-                  'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
-                  'border border-bronze/25 font-mono text-sm',
-                  'pl-4 pr-12',
-                  'transition-all duration-200 ease-forge',
-                  'focus:border-arcane/60 focus:bg-void-2/80',
-                  'focus:shadow-[0_0_0_3px_rgba(197,165,90,0.12)]',
-                  'focus:outline-none',
-                )}
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-forge-2 hover:text-forge-1 transition-colors duration-200"
-                aria-label={showKey ? 'Hide API key' : 'Show API key'}
-              >
-                {showKey ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
-              </button>
-            </div>
-            <GeminiModelPicker
-              apiKey={geminiKey}
-              value={geminiModel}
-              onChange={setGeminiModel}
-              variant="chips"
-            />
-          </div>
-        </div>
-      )}
+      {/* Show every OTHER provider's config when fallback is on, in the order
+          the chain will actually try them. This was two hardcoded boxes for
+          the gemini/ollama pair; a third provider made "the other one" stop
+          being a thing that exists.
 
-      {/* Only offer an Ollama address as the fallback where one could be used.
-          On the deployed site this box invited Marcus to type an address that
-          the browser would refuse to open — a control presented as though it
+          Ollama is absent from `backups` wherever the browser would refuse to
+          open it. On the deployed site the old box invited Marcus to type an
+          address the browser cannot reach — a control presented as though it
           might work, over a thing that cannot. */}
-      {fallbackEnabled && provider === 'gemini' && !ollamaBlocked && (
-        <div className="mb-5 p-3 rounded-xl bg-gold/[0.02] border border-bronze/20">
+      {fallbackEnabled && backups.map((p, i) => (
+        <div key={p} className="mb-5 p-3 rounded-xl bg-gold/[0.02] border border-bronze/20">
           <span className="text-xs font-semibold text-forge-2 uppercase tracking-wider block mb-2">
-            Fallback: Ollama
+            {backups.length > 1 ? `Fallback ${i + 1}: ${PROVIDER_LABEL[p]}` : `Fallback: ${PROVIDER_LABEL[p]}`}
           </span>
-          <Input
-            icon={Server}
-            label="Ollama URL"
-            value={ollamaUrl}
-            onChange={(e) => setOllamaUrl(e.target.value)}
-            placeholder="http://localhost:11434"
-          />
+
+          {p === 'gemini' && (
+            <div className="flex flex-col gap-3">
+              <SecretInput
+                value={geminiKey}
+                onChange={setGeminiKey}
+                placeholder={`Gemini API key — free at ${PROVIDER_KEY_HOME.gemini}`}
+                show={showKey}
+                onToggleShow={() => setShowKey(!showKey)}
+              />
+              <GeminiModelPicker
+                apiKey={geminiKey}
+                value={geminiModel}
+                onChange={setGeminiModel}
+                variant="chips"
+              />
+            </div>
+          )}
+
+          {p === 'openrouter' && (
+            <div className="flex flex-col gap-3">
+              <SecretInput
+                value={openrouterKey}
+                onChange={setOpenrouterKey}
+                placeholder={`OpenRouter API key — free at ${PROVIDER_KEY_HOME.openrouter}`}
+                show={showKey}
+                onToggleShow={() => setShowKey(!showKey)}
+              />
+              <OpenRouterModelPicker
+                apiKey={openrouterKey}
+                value={openrouterModel}
+                onChange={setOpenrouterModel}
+                variant="chips"
+              />
+            </div>
+          )}
+
+          {p === 'ollama' && (
+            <Input
+              icon={Server}
+              label="Ollama URL"
+              value={ollamaUrl}
+              onChange={(e) => setOllamaUrl(e.target.value)}
+              placeholder="http://localhost:11434"
+            />
+          )}
         </div>
-      )}
+      ))}
 
       {/* Test + Save buttons */}
       <div className="flex gap-2.5">

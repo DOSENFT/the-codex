@@ -38,7 +38,19 @@ import {
   retryAfterSecondsFrom,
   geminiErrorFrom,
   getLastUsedProvider,
+  AI_TEMPERATURE,
+  AI_FALLBACK_BUDGET_MS,
+  fallbackChain,
+  isProviderConfigured,
+  listOpenRouterModels,
+  openrouterErrorFrom,
+  rankOpenRouterModels,
+  describeOpenRouterModel,
+  retryAfterHeaderSeconds,
+  saveAIConfig,
+  updateAIConfig,
   type AIConfig,
+  type OpenRouterModel,
 } from './ai'
 
 /* ─── harness ────────────────────────────────────────────────────────────── */
@@ -402,6 +414,155 @@ describe('loadAIConfig', () => {
   it('defaults fallback on for a config saved before the setting existed', () => {
     store.set('codex-ai-config', JSON.stringify({ provider: 'ollama' }))
     expect(loadAIConfig().fallbackEnabled).toBe(true)
+  })
+})
+
+/* ═══ THE SAVE THAT DELETED THE OTHER PROVIDERS ═══════════════════════════════
+
+   `saveAIConfig` writes the WHOLE config — by design, and that design is kept.
+   The bug was in what the forms handed it. Both call sites in `CharacterSetup`
+   built the object out of the currently-selected provider alone:
+
+       { provider, geminiApiKey: p === 'gemini' ? key : undefined,
+                   ollamaUrl:    p === 'ollama' ? url : undefined }
+
+   — no OpenRouter fields at all. So finishing first-run setup on Gemini wrote
+   a config in which the OpenRouter key Marcus had pasted the day before simply
+   did not exist. Nothing on screen said so. The three-provider fallback chain
+   he built specifically so a 429 could not end a session had collapsed back to
+   one provider, which is the single point of failure the third provider was
+   added to remove — and it collapsed at the only moment it mattered, at a
+   table, hours after the save that did it.
+
+   `updateAIConfig` is the fix: name a field to change it, leave it out to keep
+   it. Every test below fails against the old call sites, and the last two pin
+   the two things that must NOT change — that `provider` really does switch,
+   and that a key can still be deliberately deleted.
+   ========================================================================== */
+
+describe('updateAIConfig — a patch, not an overwrite', () => {
+  // Obviously fictional. Nothing here is or resembles a real credential.
+  const FAKE_GEMINI = 'AIza-not-a-real-key-0000'
+  const FAKE_OPENROUTER = 'sk-or-v1-not-a-real-key-0000'
+
+  const seedAll = () => {
+    store.setItem('codex-ai-config', JSON.stringify({
+      provider: 'gemini',
+      geminiApiKey: FAKE_GEMINI,
+      geminiModel: TEST_MODEL,
+      ollamaUrl: 'http://ollama.test:11434',
+      ollamaModel: 'test-model',
+      openrouterApiKey: FAKE_OPENROUTER,
+      openrouterModel: 'vendor/fictional-free',
+      fallbackEnabled: true,
+    }))
+  }
+  const stored = (): AIConfig => JSON.parse(store.getItem('codex-ai-config')!) as AIConfig
+
+  it('keeps a saved OpenRouter key when a Gemini config is saved', () => {
+    // THE BUG, in the shape the setup wizard wrote it: a Gemini-only form
+    // submission. The old code deleted the OpenRouter key here.
+    seedAll()
+    updateAIConfig({ provider: 'gemini', geminiApiKey: FAKE_GEMINI, geminiModel: TEST_MODEL })
+    expect(stored().openrouterApiKey).toBe(FAKE_OPENROUTER)
+    expect(stored().openrouterModel).toBe('vendor/fictional-free')
+  })
+
+  it('keeps a saved Gemini key when an Ollama config is saved', () => {
+    seedAll()
+    updateAIConfig({ provider: 'ollama', ollamaUrl: 'http://desk.test:11434', ollamaModel: 'other-model' })
+    expect(stored().geminiApiKey).toBe(FAKE_GEMINI)
+    expect(stored().openrouterApiKey).toBe(FAKE_OPENROUTER)
+    expect(stored().ollamaUrl).toBe('http://desk.test:11434')
+  })
+
+  it('treats an explicit `undefined` as “not editing this”, not as “delete this”', () => {
+    // The literal defective object the forms used to build. A plain spread
+    // merge would NOT have fixed it: `{...base, ...{k: undefined}}` still
+    // copies the key over as undefined. Skipping undefined is the fix.
+    seedAll()
+    updateAIConfig({
+      provider: 'gemini',
+      geminiApiKey: FAKE_GEMINI,
+      ollamaUrl: undefined,
+      ollamaModel: undefined,
+    })
+    expect(stored().ollamaUrl).toBe('http://ollama.test:11434')
+    expect(stored().ollamaModel).toBe('test-model')
+    expect(stored().openrouterApiKey).toBe(FAKE_OPENROUTER)
+  })
+
+  it('leaves fields no form has an input for alone', () => {
+    // Settings has no timeout boxes, so a whole-config write from that screen
+    // silently dropped a LAN-tuned timeout every time Save was pressed.
+    store.setItem('codex-ai-config', JSON.stringify({
+      provider: 'gemini', geminiApiKey: FAKE_GEMINI, connectTimeoutMs: 45_000, idleTimeoutMs: 90_000,
+    }))
+    updateAIConfig({ provider: 'gemini', geminiApiKey: FAKE_GEMINI })
+    expect(stored().connectTimeoutMs).toBe(45_000)
+    expect(stored().idleTimeoutMs).toBe(90_000)
+  })
+
+  it('still switches the active provider — that is the one thing it MUST change', () => {
+    seedAll()
+    expect(updateAIConfig({ provider: 'openrouter' }).provider).toBe('openrouter')
+    expect(stored().provider).toBe('openrouter')
+    expect(loadAIConfig().provider).toBe('openrouter')
+    // …without that switch costing the provider he switched away from.
+    expect(stored().geminiApiKey).toBe(FAKE_GEMINI)
+  })
+
+  it('still deletes a key the user deliberately blanked', () => {
+    // A merge must not make removal impossible. '' is a field he cleared and
+    // saved; it is a different statement from a field he never touched.
+    seedAll()
+    updateAIConfig({ geminiApiKey: '' })
+    expect(stored().geminiApiKey).toBeUndefined()
+    expect('geminiApiKey' in stored()).toBe(false)   // absent, not stored as ''
+    expect(isProviderConfigured(loadAIConfig(), 'gemini')).toBe(false)
+    // and only that field
+    expect(stored().openrouterApiKey).toBe(FAKE_OPENROUTER)
+  })
+
+  it('blanking the model box means Automatic, not a model literally named ""', () => {
+    seedAll()
+    updateAIConfig({ geminiModel: '' })
+    expect('geminiModel' in stored()).toBe(false)
+    expect(loadAIConfig().geminiModel).toBeUndefined()
+  })
+
+  it('keeps `fallbackEnabled: false` — false is a value, not a blank', () => {
+    seedAll()
+    updateAIConfig({ fallbackEnabled: false })
+    expect(stored().fallbackEnabled).toBe(false)
+    expect(loadAIConfig().fallbackEnabled).toBe(false)
+  })
+
+  it('is what the provider forms actually call — no whole-config write left in one', async () => {
+    /* The unit tests above prove the function. This proves the wiring, which is
+       where the bug lived: `updateAIConfig` existing changes nothing if a form
+       still hands its one-provider object to `saveAIConfig`. Source-scanned in
+       the idiom of B1/B2 above, because a button click is not reachable from
+       `renderToStaticMarkup` — and this is the check that stops a FOURTH call
+       site from quietly reintroducing it. Comments come out first so the essay
+       explaining the fault does not read as the fault. */
+    const { readFileSync } = await import('node:fs')
+    const { resolve } = await import('node:path')
+    for (const file of ['CharacterSetup.tsx', 'Settings.tsx']) {
+      const code = readFileSync(resolve(__dirname, `../components/${file}`), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+      expect([...code.matchAll(/\bsaveAIConfig\s*\(/g)], `${file} writes the WHOLE config from one provider's fields`).toEqual([])
+      expect(code, `${file} does not patch the config`).toMatch(/\bupdateAIConfig\s*\(/)
+    }
+  })
+
+  it('leaves saveAIConfig’s overwrite semantics exactly as they were', () => {
+    // The wholesale write is still needed — a reset means a reset — so this
+    // pins it rather than quietly softening it under the fix above.
+    seedAll()
+    saveAIConfig({ provider: 'ollama' })
+    expect('geminiApiKey' in stored()).toBe(false)
+    expect('openrouterApiKey' in stored()).toBe(false)
   })
 })
 
@@ -953,5 +1114,566 @@ describe('aiErrorMessage — what a failure is allowed to say', () => {
     // forbids the whole class, not just the one instance that was reported.
     const bare = [...code.matchAll(/\bcatch\s*\{/g)]
     expect(bare.map(m => code.slice(m.index, m.index + 60)), 'a bare catch is back').toEqual([])
+  })
+})
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE THIRD PROVIDER, THE CHAIN, AND THE TWO NUMBERS — 2026-09-09
+   ---------------------------------------------------------------------------
+   Marcus, in one week, on one free tier:
+
+       "429 quota exhausted" · "503 the model is overloaded" · "503 this model
+       is currently experiencing high demand"
+
+   Three different sentences for one fact: a single free tier is a single point
+   of failure, and the second provider the app already had is Ollama — which the
+   phone he actually plays on cannot reach, because an https page may not open
+   http://localhost. So the fallback "pair" had, at a table, exactly one member.
+
+   Everything below drives real code through the same stubbed `fetch` as the
+   rest of this file. None of it can pass against the previous version:
+   OpenRouter did not exist, fallback went to "the other one" rather than along
+   a chain, `num_ctx` was never sent, and every request in the app — prose and
+   JSON alike — went out at temperature 0.3.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/** An OpenRouter id no vendor has ever published.
+ *
+ *  Same rule as TEST_MODEL above, and it matters more here: OpenRouter
+ *  withdraws free models WEEKLY. A test that passed because the code
+ *  recognised a real slug would be certifying the one behaviour
+ *  `rankOpenRouterModels` exists to prevent. */
+const OR_MODEL = 'testvendor/fictional-scribe:free'
+
+const OPENROUTER: AIConfig = {
+  provider: 'openrouter',
+  openrouterApiKey: 'or-test-key-abc123',
+  openrouterModel: OR_MODEL,
+  fallbackEnabled: false,
+  connectTimeoutMs: 60,
+  idleTimeoutMs: 80,
+}
+
+/** Every provider configured at once — the config Settings now writes, because
+ *  a key typed on one tab has to still be there when another provider 429s. */
+const ALL_THREE: AIConfig = {
+  ...GEMINI,
+  ...OPENROUTER,
+  ...OLLAMA,
+  provider: 'gemini',
+  fallbackEnabled: true,
+  connectTimeoutMs: 60,
+  idleTimeoutMs: 80,
+}
+
+/** OpenRouter's list, already answered — the exact counterpart of
+ *  `seedModelCache`, and needed for the same reason: without it every
+ *  OpenRouter test below would spend its first fetch on `GET /models` and
+ *  every call-counting assertion would be counting the wrong thing. */
+function seedOpenRouterCache(models: OpenRouterModel[] = [describeOpenRouterModel(OR_MODEL, true, 128_000)]) {
+  store.setItem('codex-openrouter-models', JSON.stringify({ fetchedAt: Date.now(), models }))
+}
+
+const openrouterSaid = (text: string) => jsonResponse({ choices: [{ message: { content: text } }] })
+
+/** An SSE body, already complete. `\n`-terminated because `pump` splits on it. */
+const sse = (lines: string[]) => new Response(lines.join('\n') + '\n', { status: 200 })
+
+const bodyOf = (c: Call) => JSON.parse(String(c.init.body))
+
+/** Which provider a recorded call went to, by address rather than by order. */
+const providerOf = (c: Call) =>
+  c.url.includes('openrouter.ai') ? 'openrouter'
+    : c.url.includes('ollama.test') ? 'ollama'
+      : 'gemini'
+
+/* ─── OpenRouter: the request ────────────────────────────────────────────── */
+
+describe('OpenRouter — the second free tier', () => {
+  beforeEach(() => { seedOpenRouterCache() })
+
+  it('asks the OpenAI-compatible endpoint and reads the answer out of it', async () => {
+    stubFetch(() => openrouterSaid('the hook he asked for'))
+    expect(await queryAI('sys', 'msg', OPENROUTER)).toBe('the hook he asked for')
+    expect(calls).toHaveLength(1)
+    expect(calls[0].url).toBe('https://openrouter.ai/api/v1/chat/completions')
+    expect(bodyOf(calls[0]).model).toBe(OR_MODEL)
+    expect(bodyOf(calls[0]).messages).toEqual([
+      { role: 'system', content: 'sys' },
+      { role: 'user', content: 'msg' },
+    ])
+    expect(getLastUsedProvider()).toBe('openrouter')
+  })
+
+  it('sends the key as a Bearer header and NEVER in the URL', async () => {
+    // Same law as the Gemini test above, and it is not inherited — this is a
+    // second provider with a second header convention, verified against
+    // openrouter.ai/docs/api-reference/overview on 2026-09-09.
+    stubFetch(() => openrouterSaid('ok'))
+    await queryAI('sys', 'msg', OPENROUTER)
+    expect(calls[0].url).not.toContain(OPENROUTER.openrouterApiKey!)
+    expect(calls[0].url).not.toContain('key=')
+    const headers = calls[0].init.headers as Record<string, string>
+    expect(headers.Authorization).toBe('Bearer or-test-key-abc123')
+  })
+
+  it('refuses before it reaches the network when there is no key', async () => {
+    stubFetch(() => openrouterSaid('should never be read'))
+    const err = await queryAI('sys', 'msg', { ...OPENROUTER, openrouterApiKey: undefined }).catch(e => e) as AIError
+    expect(err.kind).toBe('config')
+    expect(err.message).toContain('Settings')
+    expect(calls).toHaveLength(0)
+  })
+
+  it('names a 200 that carries an error object instead of a choice', async () => {
+    // OpenRouter answers 200 with `{error:…}` when the upstream provider dies
+    // after the response is committed. Reading `content` off that is undefined,
+    // and the old `|| 'No response generated'` idiom would report a working
+    // request that happened to say nothing.
+    stubFetch(() => jsonResponse({ error: { code: 502, message: 'upstream exploded' } }))
+    const err = await queryAI('sys', 'msg', OPENROUTER).catch(e => e) as AIError
+    expect(err).toBeInstanceOf(AIError)
+    expect(err.status).toBe(502)
+    expect(err.message).not.toBe('No response generated')
+  })
+})
+
+/* ─── OpenRouter: streaming ──────────────────────────────────────────────── */
+
+describe('OpenRouter streaming', () => {
+  beforeEach(() => { seedOpenRouterCache() })
+
+  it('reads OpenAI-style SSE deltas and paints them as they arrive', async () => {
+    stubFetch(() => sse([
+      'data: {"choices":[{"delta":{"content":"Nix "}}]}',
+      '',
+      'data: {"choices":[{"delta":{"content":"draws steel."}}]}',
+      '',
+      'data: [DONE]',
+    ]))
+    const seen: string[] = []
+    const out = await queryAIStream('sys', 'msg', t => seen.push(t), OPENROUTER)
+    expect(out).toBe('Nix draws steel.')
+    // Accumulated, not per-token: the panel is repainted with the whole line.
+    expect(seen).toEqual(['Nix ', 'Nix draws steel.'])
+    expect(bodyOf(calls[0]).stream).toBe(true)
+  })
+
+  it('ignores the keepalive comment lines rather than printing them', async () => {
+    /* OpenRouter emits `: OPENROUTER PROCESSING` as an SSE comment while it
+       waits for an upstream provider to start. It is a sign of life for the
+       idle clock and nothing else — a stream that pasted it into the roleplay
+       card would be the 503-blob defect wearing a new costume. */
+    stubFetch(() => sse([
+      ': OPENROUTER PROCESSING',
+      'data: {"choices":[{"delta":{"content":"clean"}}]}',
+      'data: [DONE]',
+    ]))
+    const seen: string[] = []
+    const out = await queryAIStream('sys', 'msg', t => seen.push(t), OPENROUTER)
+    expect(out).toBe('clean')
+    expect(seen).toEqual(['clean'])
+    expect(out).not.toContain('PROCESSING')
+  })
+})
+
+/* ─── OpenRouter: what a failure is allowed to say ───────────────────────── */
+
+describe('openrouterErrorFrom — every status says whose fault it is', () => {
+  const blob = JSON.stringify({ error: { code: 429, message: 'rate limit', metadata: { provider: 'x' } } })
+
+  it('401 is auth, not api — a rejected key is terminal', () => {
+    // The kind is the load-bearing part: `auth` is what stops the chain from
+    // burning the other two providers over a credential neither can mend.
+    const err = openrouterErrorFrom(401, blob, OR_MODEL)
+    expect(err.kind).toBe('auth')
+    expect(err.message).toContain('openrouter.ai/keys')
+  })
+
+  it('402 explains that the model was not free, which is what it actually means', () => {
+    const err = openrouterErrorFrom(402, blob, OR_MODEL)
+    expect(err.status).toBe(402)
+    expect(err.message).toContain(OR_MODEL)
+    expect(err.message.toLowerCase()).toContain('free')
+  })
+
+  it('403 says moderation, and says it is not the key and not the quota', () => {
+    const err = openrouterErrorFrom(403, blob, OR_MODEL)
+    expect(err.message.toLowerCase()).toContain('moderation')
+    expect(err.message.toLowerCase()).toContain('dice')
+  })
+
+  it('404 says the free model was withdrawn, and names the setting that fixes it', () => {
+    // Not an emergency here the way it is on Gemini: OpenRouter's free list
+    // turns over weekly, so this is the ordinary case.
+    const err = openrouterErrorFrom(404, blob, OR_MODEL)
+    expect(err.message).toContain(OR_MODEL)
+    expect(err.message).toContain('Automatic')
+  })
+
+  it('429 says the allowance is per model, which is the fix he can act on', () => {
+    const err = openrouterErrorFrom(429, blob, OR_MODEL)
+    expect(err.message.toLowerCase()).toContain('rate limited')
+    expect(err.message.toLowerCase()).toContain('different free model')
+  })
+
+  it('502 and 503 are somebody else\'s afternoon, and say how many times we tried', () => {
+    for (const status of [502, 503]) {
+      const err = openrouterErrorFrom(status, blob, OR_MODEL)
+      expect(err.message).toContain(String(status))
+      expect(err.message).toMatch(/Tried \d+ times/)
+      expect(err.message.toLowerCase()).toContain('dice')
+    }
+  })
+
+  it('never pastes the JSON blob into the sentence — the 503 lesson, applied', () => {
+    for (const status of [401, 402, 403, 404, 429, 500, 502, 503, 418]) {
+      const message = openrouterErrorFrom(status, blob, OR_MODEL).message
+      expect(message, `status ${status} leaked the body`).not.toContain('{')
+      expect(message, `status ${status} leaked the body`).not.toContain('"error"')
+    }
+    // …but the blob is still CARRIED, for the console and for any parser.
+    expect(openrouterErrorFrom(429, blob, OR_MODEL).body).toBe(blob)
+  })
+
+  it('an unrecognised status still gets a sentence, not a stack trace', () => {
+    const err = openrouterErrorFrom(418, blob, OR_MODEL)
+    expect(err.message).toContain('418')
+    expect(err.message).toContain('Settings')
+    expect(err.message).not.toContain('An error occurred')
+  })
+
+  it('reads Retry-After off the response, because OpenRouter sends it as a header', () => {
+    // Google puts its advice in the BODY; OpenRouter puts it in a header. Two
+    // providers, two dialects of the same sentence, one retry policy.
+    expect(retryAfterHeaderSeconds(new Response('', { headers: { 'Retry-After': '7' } }))).toBe(7)
+    expect(retryAfterHeaderSeconds(new Response(''))).toBeNull()
+    // A header that is not a number must never become a NaN-millisecond wait.
+    expect(retryAfterHeaderSeconds(new Response('', { headers: { 'Retry-After': 'Wed, 21 Oct 2026 07:28:00 GMT' } })))
+      .toBeNull()
+  })
+})
+
+/* ─── OpenRouter: the model list, and free first ─────────────────────────── */
+
+describe('rankOpenRouterModels — free first, and nothing outranks it', () => {
+  const m = (id: string, free: boolean, ctx: number) => describeOpenRouterModel(id, free, ctx)
+
+  it('puts every free model above every paid one, however big the paid one is', () => {
+    /* THE ASSERTION THAT IS THE WHOLE FEATURE. Marcus is not paying for any of
+       this. An automatic pick that lands on a paid model does not fail
+       politely — it either 402s mid-scene or, worse, works and spends money. */
+    const ranked = rankOpenRouterModels([
+      m('paid/enormous', false, 2_000_000),
+      m('testvendor/small-free:free', true, 8_000),
+      m('paid/modest', false, 8_000),
+      m('testvendor/roomy-free:free', true, 128_000),
+    ])
+    expect(ranked.map(x => x.id)).toEqual([
+      'testvendor/roomy-free:free',   // free, and the roomiest of the free ones
+      'testvendor/small-free:free',
+      'paid/enormous',
+      'paid/modest',
+    ])
+  })
+
+  it('breaks a tie on the id, so Automatic does not change model between turns', () => {
+    // Two answers in one scene that disagree about who Nix is, because the
+    // ranking reshuffled, is worse than either answer alone.
+    const twice = () => rankOpenRouterModels([
+      m('b/model', true, 8_000),
+      m('a/model', true, 8_000),
+    ]).map(x => x.id)
+    expect(twice()).toEqual(['a/model', 'b/model'])
+    expect(twice()).toEqual(twice())
+  })
+
+  it('does not mutate the array it was handed', () => {
+    const input = [m('b/model', false, 1), m('a/model', true, 1)]
+    rankOpenRouterModels(input)
+    expect(input.map(x => x.id)).toEqual(['b/model', 'a/model'])
+  })
+})
+
+describe('listOpenRouterModels — free is decided by PRICE, never by the suffix', () => {
+  const raw = (id: string, prompt: string, completion: string, extra: object = {}) =>
+    ({ id, context_length: 32_000, pricing: { prompt, completion }, ...extra })
+
+  it('reads a zero price out of the STRING the API actually sends', async () => {
+    /* Verified against the live endpoint on 2026-09-09: prices arrive as
+       strings ("0.00000004", "0"). And 21 models priced at zero, of which only
+       18 carried `:free` — so a check on the suffix would have hidden three
+       free models from a man who is not paying for any of this. */
+    stubFetch(() => jsonResponse({
+      data: [
+        raw('testvendor/free-without-the-suffix', '0', '0'),
+        raw('testvendor/cheap-but-not-free', '0.00000004', '0'),
+      ],
+    }))
+    const found = await listOpenRouterModels()
+    expect(found.find(x => x.id === 'testvendor/free-without-the-suffix')!.free).toBe(true)
+    expect(found.find(x => x.id === 'testvendor/cheap-but-not-free')!.free).toBe(false)
+  })
+
+  it('needs no key, because the list is public and the question comes first', async () => {
+    // "Is there anything free on this thing?" is asked BEFORE "here is my
+    // credential", and the picker in Settings has to be able to answer it.
+    stubFetch(() => jsonResponse({ data: [raw('testvendor/anything', '0', '0')] }))
+    await listOpenRouterModels()
+    const headers = calls[0].init.headers as Record<string, string>
+    expect(headers.Authorization).toBeUndefined()
+    expect(calls[0].url).toBe('https://openrouter.ai/api/v1/models')
+  })
+
+  it('drops models that answer in something other than text', async () => {
+    // The same list carries music models, and some of them are free. Asking one
+    // for a roleplay hook returns audio.
+    stubFetch(() => jsonResponse({
+      data: [
+        raw('testvendor/writes-words', '0', '0', { architecture: { output_modalities: ['text'] } }),
+        raw('testvendor/sings-instead', '0', '0', { architecture: { output_modalities: ['text', 'audio'] } }),
+        raw('testvendor/declares-nothing', '0', '0'),
+      ],
+    }))
+    const ids = (await listOpenRouterModels()).map(x => x.id)
+    expect(ids).toContain('testvendor/writes-words')
+    expect(ids).not.toContain('testvendor/sings-instead')
+    // Open-world rule: a filter may prefer, it may not decide that an
+    // unfamiliar thing does not exist.
+    expect(ids).toContain('testvendor/declares-nothing')
+  })
+
+  it('describes a model from its id and its price, not from the API\'s marketing copy', () => {
+    const described = describeOpenRouterModel('testvendor/fictional-scribe:free', true, 128_000)
+    expect(described.label).toBe('Testvendor · Fictional Scribe')
+    expect(described.description).toBe('Free · 128K context')
+    expect(describeOpenRouterModel('paid/thing', false, 8_000).description).toBe('Paid · 8K context')
+  })
+})
+
+/* ─── the fallback CHAIN ─────────────────────────────────────────────────── */
+
+describe('the fallback chain — three providers, walked in order', () => {
+  beforeEach(() => { seedOpenRouterCache() })
+
+  it('names the order, skipping the one that is primary', () => {
+    expect(fallbackChain(ALL_THREE, new AIError('network', 'x'))).toEqual(['openrouter', 'ollama'])
+    expect(fallbackChain({ ...ALL_THREE, provider: 'ollama' }, new AIError('network', 'x')))
+      .toEqual(['gemini', 'openrouter'])
+  })
+
+  it('leaves out a provider that is not configured, rather than attempting it', () => {
+    // "Unconfigured" is not "failed". An unconfigured provider must never cost
+    // a clock, and must never be the thing the sentence at the table is about.
+    expect(fallbackChain({ ...ALL_THREE, openrouterApiKey: undefined }, new AIError('network', 'x')))
+      .toEqual(['ollama'])
+    expect(isProviderConfigured(ALL_THREE, 'openrouter')).toBe(true)
+    expect(isProviderConfigured({ ...ALL_THREE, openrouterApiKey: undefined }, 'openrouter')).toBe(false)
+    // A URL with no model is still not a configured Ollama.
+    expect(isProviderConfigured({ ...ALL_THREE, ollamaModel: undefined }, 'ollama')).toBe(false)
+  })
+
+  it('walks PAST a failing second provider to reach the third', async () => {
+    /* THE DEFECT THIS SLICE IS NAMED AFTER. Before the chain, "fall back" meant
+       "try the other one" — so a rate-limited Gemini fell through to an Ollama
+       the phone cannot reach and stopped, while a working OpenRouter key sat in
+       the same config, never tried. */
+    stubFetch(url =>
+      url.includes('ollama.test') ? ollamaSaid('the third one answered')
+        : Promise.reject(new TypeError('fetch failed')))
+
+    const started = Date.now()
+    expect(await queryAI('sys', 'msg', ALL_THREE)).toBe('the third one answered')
+    expect(calls.map(providerOf)).toEqual(['gemini', 'openrouter', 'ollama'])
+    expect(getLastUsedProvider()).toBe('ollama')
+
+    /* And the clocks did not multiply without bound. The documented worst case
+       is the primary's own clock plus AI_FALLBACK_BUDGET_MS plus one idle
+       clock — the budget gates STARTING an attempt, it never interrupts one. */
+    expect(Date.now() - started).toBeLessThan(
+      ALL_THREE.connectTimeoutMs! + AI_FALLBACK_BUDGET_MS + ALL_THREE.idleTimeoutMs!,
+    )
+  })
+
+  it('never contacts a provider that is not configured', async () => {
+    stubFetch(url =>
+      url.includes('ollama.test') ? ollamaSaid('ollama caught it')
+        : Promise.reject(new TypeError('fetch failed')))
+    const cfg: AIConfig = { ...ALL_THREE, openrouterApiKey: undefined }
+    expect(await queryAI('sys', 'msg', cfg)).toBe('ollama caught it')
+    expect(calls.some(c => c.url.includes('openrouter.ai')), 'an unconfigured provider was called').toBe(false)
+    expect(calls.map(providerOf)).toEqual(['gemini', 'ollama'])
+  })
+
+  it('does not walk the chain on a cancel — he pressed Stop, and Stop means stop', async () => {
+    // Continuing would restart, on his data allowance and on two more
+    // providers, the precise thing he just stopped.
+    stubFetch(never)
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), 10)
+    const err = await queryAI('sys', 'msg', ALL_THREE, controller.signal).catch(e => e) as AIError
+    expect(err.kind).toBe('cancelled')
+    expect(calls).toHaveLength(1)
+  })
+
+  it('does not walk the chain on a key the provider has actively REJECTED', async () => {
+    /* A rejected key is a broken credential wearing an HTTP status. The other
+       two providers cannot mend it, and routing silently around it is how a
+       dead key stays dead for a month while nothing on screen says "key". */
+    stubFetch(url =>
+      url.includes('generativelanguage')
+        ? jsonResponse({ error: { code: 400, status: 'INVALID_ARGUMENT', message: 'API_KEY_INVALID' } }, 400)
+        : openrouterSaid('should never be read'))
+    const err = await queryAI('sys', 'msg', ALL_THREE).catch(e => e) as AIError
+    expect(err.kind).toBe('auth')
+    expect(err.message).toContain('aistudio.google.com/apikey')
+    expect(calls.map(providerOf)).toEqual(['gemini'])
+  })
+
+  it('does not walk the chain on a missing credential', async () => {
+    stubFetch(() => openrouterSaid('should never be read'))
+    const err = await queryAI('sys', 'msg', { ...ALL_THREE, geminiApiKey: undefined }).catch(e => e) as AIError
+    expect(err.kind).toBe('config')
+    expect(calls).toHaveLength(0)
+  })
+
+  it('surfaces the FIRST provider\'s error when the whole chain is dead, never the last', async () => {
+    /* He chose Gemini. If everything is dead, the sentence he reads has to be
+       about the provider he chose — "OpenRouter no longer offers …" is an
+       incomprehensible thing to be told by an app you had set to Gemini, and it
+       sends him to fix a setting that was never wrong. */
+    stubFetch(url => {
+      if (url.includes('generativelanguage')) return jsonResponse({ error: { code: 404, message: 'gone' } }, 404)
+      if (url.includes('openrouter.ai')) return jsonResponse({ error: { code: 404, message: 'gone' } }, 404)
+      return Promise.reject(new TypeError('fetch failed'))
+    })
+    const err = await queryAI('sys', 'msg', ALL_THREE).catch(e => e) as AIError
+    expect(err.status).toBe(404)
+    expect(err.message).toContain('Gemini')
+    expect(err.message).not.toContain('OpenRouter')
+    expect(err.message).not.toContain('Ollama')
+    // All three were genuinely tried — the first error is chosen, not the only one.
+    expect(calls.map(providerOf)).toEqual(['gemini', 'openrouter', 'ollama'])
+  })
+
+  it('brings the whole chain to the streaming path too', async () => {
+    // The blocking path and the streaming path are separate functions, and a
+    // fix applied to one of them is a fix he only gets on some screens.
+    stubFetch(url =>
+      url.includes('ollama.test') ? ollamaSaid('ollama finished the sentence')
+        : Promise.reject(new TypeError('fetch failed')))
+    const seen: string[] = []
+    const out = await queryAIStream('sys', 'msg', t => seen.push(t), ALL_THREE)
+    expect(out).toBe('ollama finished the sentence')
+    expect(seen).toEqual(['ollama finished the sentence']) // painted, not left blank
+    expect(calls.map(providerOf)).toEqual(['gemini', 'openrouter', 'ollama'])
+  })
+})
+
+/* ─── num_ctx: the truncation that never reported itself ─────────────────── */
+
+describe('Ollama num_ctx — the silent truncation', () => {
+  it('states the context window in the request body, on the blocking path', async () => {
+    /* OLLAMA'S DEFAULT IS 4096 TOKENS AND IT DROPS THE OVERFLOW WITHOUT AN
+       ERROR. Nothing fails; the model simply never saw the front of the prompt,
+       which is where the character's backstory is. "The AI keeps forgetting who
+       my character is" is what that looks like from a table. */
+    stubFetch(() => ollamaSaid('ok'))
+    await queryAI('sys', 'msg', OLLAMA)
+    expect(bodyOf(calls[0]).options.num_ctx).toBe(32768)
+  })
+
+  it('states it on the streaming path as well', async () => {
+    stubFetch(() => trickle(['streamed'], 1))
+    await queryAIStream('sys', 'msg', () => {}, OLLAMA)
+    expect(bodyOf(calls[0]).stream).toBe(true)
+    expect(bodyOf(calls[0]).options.num_ctx).toBe(32768)
+  })
+
+  it('is in the API CALL, not left to an environment variable on the box', async () => {
+    // OLLAMA_NUM_CTX on the desktop would be invisible here, unversioned, and
+    // absent on any other machine. This is the one place it can be verified.
+    stubFetch(() => ollamaSaid('ok'))
+    await queryAIStructured('sys', 'msg', OLLAMA).catch(() => {})
+    expect(bodyOf(calls[0]).options).toHaveProperty('num_ctx')
+  })
+})
+
+/* ─── temperature: two settings, because there are two audiences ─────────── */
+
+describe('temperature — a parser reads one of these, a person reads the other', () => {
+  beforeEach(() => { seedOpenRouterCache() })
+
+  it('has a creative prose band and a low structured one, and they are not the same', () => {
+    /* Every call in this app used to go out at 0.3 — an extraction setting,
+       applied to roleplay hooks. Raising it globally was never an option:
+       most call sites arrive at `queryAIStructured` and a model asked to be
+       creative garnishes JSON with a sentence of preamble. */
+    expect(AI_TEMPERATURE.structured).toBe(0.3)
+    expect(AI_TEMPERATURE.prose).toBeGreaterThan(AI_TEMPERATURE.structured)
+    expect(AI_TEMPERATURE.prose).toBeGreaterThanOrEqual(0.85)
+    expect(AI_TEMPERATURE.prose).toBeLessThanOrEqual(1.0)
+  })
+
+  it('sends the prose value on every provider, by default', async () => {
+    stubFetch(url =>
+      url.includes('ollama.test') ? ollamaSaid('ok')
+        : url.includes('openrouter.ai') ? openrouterSaid('ok')
+          : jsonResponse({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] }))
+
+    /* Asserted against the LITERAL as well as the constant. A test that only
+       compared each body to `AI_TEMPERATURE.prose` would still pass if that
+       constant were quietly set back to the extraction value, which is the
+       exact regression this is here to catch. */
+    await queryAI('sys', 'msg', OLLAMA)
+    expect(bodyOf(calls[0]).options.temperature).toBe(AI_TEMPERATURE.prose)
+    expect(bodyOf(calls[0]).options.temperature).toBeGreaterThan(0.3)
+
+    calls = []
+    await queryAI('sys', 'msg', GEMINI)
+    expect(bodyOf(calls[0]).generationConfig.temperature).toBe(AI_TEMPERATURE.prose)
+    expect(bodyOf(calls[0]).generationConfig.temperature).toBeGreaterThan(0.3)
+
+    calls = []
+    await queryAI('sys', 'msg', OPENROUTER)
+    expect(bodyOf(calls[0]).temperature).toBe(AI_TEMPERATURE.prose)
+    expect(bodyOf(calls[0]).temperature).toBeGreaterThan(0.3)
+  })
+
+  it('sends the structured value on every provider when a parser is waiting', async () => {
+    stubFetch(url =>
+      url.includes('ollama.test') ? ollamaSaid('{"ok":1}')
+        : url.includes('openrouter.ai') ? openrouterSaid('{"ok":1}')
+          : jsonResponse({ candidates: [{ content: { parts: [{ text: '{"ok":1}' }] } }] }))
+
+    await queryAIStructured('sys', 'msg', OLLAMA)
+    expect(bodyOf(calls[0]).options.temperature).toBe(AI_TEMPERATURE.structured)
+
+    calls = []
+    await queryAIStructured('sys', 'msg', GEMINI)
+    expect(bodyOf(calls[0]).generationConfig.temperature).toBe(AI_TEMPERATURE.structured)
+
+    calls = []
+    await queryAIStructured('sys', 'msg', OPENROUTER)
+    expect(bodyOf(calls[0]).temperature).toBe(AI_TEMPERATURE.structured)
+  })
+
+  it('streams at the prose value too — that is the path the roleplay card uses', async () => {
+    stubFetch(() => trickle(['a hook'], 1))
+    await queryAIStream('sys', 'msg', () => {}, OLLAMA)
+    expect(bodyOf(calls[0]).options.temperature).toBe(AI_TEMPERATURE.prose)
+    expect(bodyOf(calls[0]).options.temperature).toBeGreaterThan(0.3)
+  })
+
+  it('carries an explicit value through the chain rather than resetting it', async () => {
+    // The fallback provider answers the same question, so it answers it at the
+    // same temperature. A chain that silently re-defaulted would make the
+    // second provider's prose measurably flatter than the first's.
+    stubFetch(url =>
+      url.includes('openrouter.ai') ? openrouterSaid('{"ok":1}')
+        : Promise.reject(new TypeError('fetch failed')))
+    await queryAIStructured('sys', 'msg', { ...ALL_THREE, ollamaUrl: undefined, ollamaModel: undefined })
+    const orCall = calls.find(c => providerOf(c) === 'openrouter')!
+    expect(bodyOf(orCall).temperature).toBe(AI_TEMPERATURE.structured)
   })
 })

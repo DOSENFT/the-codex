@@ -45,7 +45,36 @@
 
 import { saveOrAnnounce } from './character'
 
-export type AIProvider = 'gemini' | 'ollama'
+export type AIProvider = 'gemini' | 'ollama' | 'openrouter'
+
+/* WHY THERE IS A THIRD PROVIDER, added 2026-09-09 at Marcus's request.
+   ----------------------------------------------------------------------------
+   Three separate failures inside one week, all from the same free tier, all at
+   a table mid-session: a 429 (quota exhausted), a 503 (model overloaded) and a
+   503 (high demand). Slice 11's retry and slice 12's overload handling made
+   each of those survivable; none of them made it survivABLE TWICE, because the
+   only place to fall back to was Ollama, and Ollama is unreachable from an
+   https page on a phone (see the origin block below). So on the device he
+   actually plays on, "fallback" meant one provider with a retry.
+
+   One free tier was a single point of failure. OpenRouter is a second one, and
+   critically a second one that is reachable from where the app is served.
+
+   IT HAD TO BE CORS-CLEAN OR IT WAS NOT AN OPTION. This app is a static
+   GitHub Pages site with no backend at all: every request in this file goes
+   browser → provider, directly. Verified against the live endpoint on
+   2026-09-09 before a line of this was written —
+
+       OPTIONS https://openrouter.ai/api/v1/chat/completions
+         Origin: https://dosenft.github.io
+       → 204, Access-Control-Allow-Origin: *
+         Access-Control-Allow-Headers: Authorization, …, HTTP-Referer, X-Title
+
+   — which is the whole reason this is possible and Anthropic's or OpenAI's
+   direct API would not have been. Do not "simplify" the header set below
+   without re-checking that list; `Authorization`, `HTTP-Referer` and `X-Title`
+   are on it by name, and a header that is not on it turns every request into a
+   preflight failure that looks like a network outage. */
 
 /* THERE IS NO LIST OF GEMINI MODELS IN THIS FILE. There used to be — four ids
    compiled into the bundle, offered in three dropdowns, and one of them was the
@@ -75,13 +104,71 @@ export type AIProvider = 'gemini' | 'ollama'
  *  from the network and must not be trusted with the app's responsiveness. */
 export const AI_TIMEOUTS = { connectMs: 8_000, idleMs: 30_000, retryCapMs: 20_000 } as const
 
+/** How much EXTRA wall-clock the fallback chain is allowed to spend after the
+ *  provider he chose has already failed.
+ *
+ *  THE NUMBER IS ABOUT A PERSON, NOT ABOUT A NETWORK. With three providers the
+ *  naive chain is unbounded in the way that matters: connect 8s, then up to two
+ *  retries whose waits are capped at 20s each, then the next provider, then the
+ *  one after that. Worst case is well over a minute of a disabled panel — which
+ *  is the exact defect slice 11 is named for, wearing the costume of
+ *  resilience. Twenty seconds is roughly the longest anyone holds a phone
+ *  mid-combat before they just roll and narrate it themselves; past that the
+ *  honest thing is to fail and give the table back its turn.
+ *
+ *  IT GATES STARTING AN ATTEMPT, IT DOES NOT INTERRUPT ONE. Checked before each
+ *  provider, and it clamps that provider's CONNECT clock to whatever is left —
+ *  but never its IDLE clock. That is deliberate and it is this file's oldest
+ *  rule: silence is the failure, slowness is not. A fallback that has started
+ *  producing words has earned the same patience as the primary, so the true
+ *  worst case is this budget plus one idle clock, and not one attempt more. */
+export const AI_FALLBACK_BUDGET_MS = 20_000
+
+/** Temperature is a function of what is being asked for, not a global.
+ *
+ *  Every call in this file used to send 0.3 — Gemini's, Ollama's, all of them.
+ *  0.3 is an EXTRACTION setting. It is the right number for "read this sheet
+ *  and give me the JSON", and it is why the roleplay hooks all sounded like the
+ *  same NPC: at 0.3 a model reaches for its single most probable next word
+ *  every time, so the prose comes out sanded flat. Marcus's stated ask was
+ *  "really good rp hooks, context, understanding, creativity."
+ *
+ *  `structured` stays at 0.3 on purpose. Most of the 22 call sites in this app
+ *  go through `queryAIStructured`, which parses the answer; a creative model
+ *  breaks JSON by garnishing it, and a parse failure is a dead panel rather
+ *  than a duller sentence. Reliability beats flair everywhere a machine reads
+ *  the output.
+ *
+ *  `prose` is 0.9. The creative band for roleplay generation sits around
+ *  0.8–1.0; 0.9 is chosen inside it rather than at either edge for two specific
+ *  reasons. Below ~0.8 the flattening above is still visible — it reads like a
+ *  summary of a scene instead of the scene. At 1.0 and up, the quantized local
+ *  models this app is actually pointed at (a 27B on his 3090) start dropping
+ *  proper nouns and drifting off the character sheet, which at a table is worse
+ *  than dull: it is confidently wrong about his own paladin. 0.9 buys the
+ *  variety and keeps the sheet. */
+export const AI_TEMPERATURE = {
+  /** Anything a parser reads. Do not raise this. */
+  structured: 0.3,
+  /** Anything a person reads. */
+  prose: 0.9,
+} as const
+
 export interface AIConfig {
   provider: AIProvider
   geminiApiKey?: string
   geminiModel?: string
   ollamaUrl?: string
   ollamaModel?: string
-  /** When true, if the primary provider fails, try the other */
+  /* NOTHING ABOVE THIS LINE MAY BE RENAMED. There is a real saved config in a
+     real browser's localStorage, written by a build that never heard of
+     OpenRouter, and `loadAIConfig` merges it over the defaults key by key. A
+     rename is not a rename, it is a silent wipe of his Gemini key at a table. */
+  openrouterApiKey?: string
+  /** '' / absent means automatic — resolve the best free model every request,
+   *  exactly as an absent `geminiModel` does. */
+  openrouterModel?: string
+  /** When true, if the primary provider fails, walk the others. */
   fallbackEnabled?: boolean
   /** Overrides for AI_TIMEOUTS. Present so a slow model on a slow LAN can be
    *  accommodated without editing code — the one thing the old hard-coded URL
@@ -96,7 +183,7 @@ export interface AIConfig {
  *  substring search of an error message, which is what the old `isNetworkError`
  *  did and which quietly classified any model whose text happened to contain
  *  the word "timeout" as a connection failure. */
-export type AIFailure = 'timeout' | 'cancelled' | 'config' | 'network' | 'api'
+export type AIFailure = 'timeout' | 'cancelled' | 'config' | 'auth' | 'network' | 'api'
 
 export class AIError extends Error {
   readonly kind: AIFailure
@@ -292,8 +379,67 @@ export function loadAIConfig(): AIConfig {
   return config
 }
 
+/** Write the WHOLE config. Everything not in `config` is gone.
+ *
+ *  Read that sentence again before calling this. The object you hand it is not
+ *  a set of changes, it is the entire remembered state of every provider, and
+ *  a field you simply did not mention is a field you just deleted. Reach for
+ *  `updateAIConfig` instead unless you genuinely mean "replace all of it" —
+ *  a reset, or a caller that has already merged (see `resolveGeminiModel`'s
+ *  `{ ...loadAIConfig(), geminiModel: next }`). */
 export function saveAIConfig(config: AIConfig): void {
   saveOrAnnounce(CONFIG_KEY, JSON.stringify(config))
+}
+
+/* WHY A PATCH FUNCTION EXISTS, added 2026-09-09.
+   ----------------------------------------------------------------------------
+   `saveAIConfig` is a whole-config write, and every form in the app was handing
+   it an object built from ONE provider's fields:
+
+       saveAIConfig({ provider, geminiApiKey: p === 'gemini' ? key : undefined,
+                                ollamaUrl:    p === 'ollama' ? url : undefined })
+
+   Read as a form submission that looks right. Read as what it is — a full
+   overwrite — it says "and delete the OpenRouter key". So finishing first-run
+   setup on Gemini silently erased the OpenRouter key that had been pasted in
+   the day before, with nothing on screen saying so. The failure only surfaces
+   later, at a table, as "fallback didn't work": the chain Marcus built out of
+   three providers to survive a 429 had quietly collapsed back to one, which is
+   the exact single point of failure the third provider was added to remove.
+
+   TWO SPELLINGS OF NOTHING, AND THEY MEAN OPPOSITE THINGS. That is the whole
+   design of this function:
+
+     • `undefined` / key absent — "I am not editing this field." Left alone.
+       This is what a form for one provider says about the other two.
+     • `''` — "I am editing this field and I blanked it." Deleted, so a key
+       really can be removed and an emptied model box really does go back to
+       Automatic.
+
+   Deleted, not stored as `''`, because ABSENT is the spelling the rest of this
+   module reads: `resolveGeminiModel` treats absent as "ask Google", and a
+   config that has never been touched has no key at all. Two spellings for one
+   meaning is how the old hard-coded default leaked. */
+
+/** Change only the fields you name, and keep every other provider's
+ *  credentials. Returns the config as it now stands on disk.
+ *
+ *  `provider` is a field like any other: naming it DOES switch the active
+ *  provider, which is the one thing these forms are supposed to change. */
+export function updateAIConfig(patch: Partial<AIConfig>): AIConfig {
+  // Index-signature view of a closed interface: the loop below is generic over
+  // keys, and `Partial<AIConfig>`'s value union cannot be narrowed per-key
+  // without writing all eleven fields out by hand — which is precisely the
+  // enumerate-every-field pattern that caused the bug.
+  const merged = { ...loadAIConfig() } as unknown as Record<string, unknown>
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined) continue        // not named = not edited = not touched
+    if (value === '') { delete merged[key]; continue }   // named and blanked = removed
+    merged[key] = value
+  }
+  const next = merged as unknown as AIConfig
+  saveAIConfig(next)
+  return next
 }
 
 /* ─── The clocks ─────────────────────────────────────────────────────────── */
@@ -362,27 +508,82 @@ function bound(cfg: AIConfig, external?: AbortSignal): Bound {
   }
 }
 
-/** Was this failure worth trying the other provider for?
+/** Was this failure worth trying another provider for?
  *
  *  A cancel is the user's decision and is final. A missing credential is a
  *  fact about configuration that a second attempt cannot change. Everything
  *  else — dead host, timeout, exhausted quota, a 500 from Google — is exactly
- *  the case the second provider exists for. */
+ *  the case the other providers exist for.
+ *
+ *  `auth` JOINED THAT LIST ON 2026-09-09, and it is a real change of behaviour:
+ *  a key the provider has actively REJECTED used to be kind `api`, and so used
+ *  to fall back. It no longer does, for the same reason a missing key does not.
+ *  A rejected key is a broken credential wearing an HTTP status, the second
+ *  provider cannot repair it, and routing silently around it is how a dead key
+ *  stays dead for a month — every session quietly costing him the provider he
+ *  actually chose while nothing on screen ever says the word "key". The one
+ *  thing the app owes him here is the sentence naming what to fix. */
 function isWorthFallingBackFrom(err: unknown): boolean {
-  if (err instanceof AIError) return err.kind !== 'cancelled' && err.kind !== 'config'
+  if (err instanceof AIError) {
+    return err.kind !== 'cancelled' && err.kind !== 'config' && err.kind !== 'auth'
+  }
   return true
 }
 
-/** The whole fallback decision, in one named place.
+/** Does this provider have what it needs to be worth ATTEMPTING?
  *
- *  Exported because the expression it replaces was a precedence bug that no
- *  amount of reading caught and one unit test would have. Do not inline it. */
+ *  The chain below is built out of this rather than out of hope. A provider
+ *  with no key is not a provider that failed, it is a provider that was never
+ *  there — attempting it would spend one of the three clocks in the budget to
+ *  rediscover a fact already sitting in the config, and would then report a
+ *  `config` error naming a provider Marcus never chose. */
+export function isProviderConfigured(cfg: AIConfig, provider: AIProvider): boolean {
+  if (provider === 'gemini') return !!cfg.geminiApiKey
+  if (provider === 'openrouter') return !!cfg.openrouterApiKey
+  return !!cfg.ollamaUrl && !!cfg.ollamaModel
+}
+
+/** The order the chain is walked, before the primary and the unconfigured are
+ *  removed from it.
+ *
+ *  Both cloud providers come before Ollama, and that ordering is a fact about
+ *  the room rather than about the models. Gemini and OpenRouter are reachable
+ *  from wherever the phone is; Ollama is reachable from one house, on one
+ *  network, when one desktop happens to be awake — and from the deployed https
+ *  page it is not reachable at all (see the origin block above). Putting the
+ *  address most likely to be dead first would spend the budget on it.
+ *
+ *  Gemini before OpenRouter because Gemini is the tier Marcus already has a key
+ *  for and has been using; when it is the primary it is removed anyway, so this
+ *  only decides the order for an Ollama-primary desktop. */
+const FALLBACK_ORDER: readonly AIProvider[] = ['gemini', 'openrouter', 'ollama'] as const
+
+/** Every provider worth trying after `err`, in the order to try them.
+ *
+ *  Empty means stop and surface the failure — either because the switch is off,
+ *  because the failure is terminal, or because there is genuinely nowhere else
+ *  to go. All three of those are different situations and none of them is
+ *  "try harder".
+ *
+ *  Exported and pure so the ORDER is testable without a network. The pair-wise
+ *  version of this ("the other one") could be checked by eye; a chain cannot,
+ *  which is the same argument that made `canFallBack` a named function after
+ *  the precedence bug. */
+export function fallbackChain(cfg: AIConfig, err: unknown): AIProvider[] {
+  if (cfg.fallbackEnabled === false) return []
+  if (!isWorthFallingBackFrom(err)) return []
+  return FALLBACK_ORDER.filter(p => p !== cfg.provider && isProviderConfigured(cfg, p))
+}
+
+/** Is there anywhere at all to fall back to?
+ *
+ *  Kept as its own exported name because the expression it originally replaced
+ *  was a precedence bug that no amount of reading caught and one unit test did.
+ *  It is now one question about the chain rather than a second copy of the
+ *  chain's reasoning — two places that both decide "may we fall back?" is how
+ *  the first version of this got it wrong. Do not inline it. */
 export function canFallBack(cfg: AIConfig, err: unknown): boolean {
-  if (cfg.fallbackEnabled === false) return false
-  if (!isWorthFallingBackFrom(err)) return false
-  return cfg.provider === 'ollama'
-    ? !!cfg.geminiApiKey
-    : !!cfg.ollamaUrl && !!cfg.ollamaModel
+  return fallbackChain(cfg, err).length > 0
 }
 
 /** The credentials each provider cannot work without, checked BEFORE any
@@ -392,6 +593,9 @@ export function canFallBack(cfg: AIConfig, err: unknown): boolean {
 function requireCredentials(cfg: AIConfig, provider: AIProvider): void {
   if (provider === 'gemini' && !cfg.geminiApiKey) {
     throw new AIError('config', 'No Gemini API key set. Add one in Settings, or switch to Ollama.')
+  }
+  if (provider === 'openrouter' && !cfg.openrouterApiKey) {
+    throw new AIError('config', 'No OpenRouter API key set. Add one in Settings — a free key at openrouter.ai/keys reaches the free models.')
   }
   if (provider === 'ollama' && (!cfg.ollamaUrl || !cfg.ollamaModel)) {
     throw new AIError('config', 'No Ollama address or model set. Check Settings.')
@@ -432,7 +636,37 @@ export async function fetchOllamaModels(
   }
 }
 
-async function queryOllama(cfg: AIConfig, systemPrompt: string, userMessage: string, signal?: AbortSignal): Promise<string> {
+/* ─── `num_ctx`, and the truncation nobody can see ────────────────────────────
+
+   OLLAMA'S DEFAULT CONTEXT IS 4096 TOKENS AND IT TRUNCATES SILENTLY. Not an
+   error, not a warning, not a field in the response — the server simply drops
+   the front of the conversation off the edge and answers confidently with what
+   is left. Every request this app makes carries a full character sheet plus
+   scene history plus the system prompt, which is comfortably past 4096, so the
+   part that fell off the front was the BACKSTORY: the model would answer in
+   fluent, plausible, entirely generic D&D, having never seen who Nix is.
+
+   That is the worst shape a bug can have here. A dead provider is obvious and
+   the fallback catches it. This looked like the AI working — it just quietly
+   stopped knowing anything about his character, and there is no output you
+   could inspect to tell the two apart.
+
+   32768 because it must hold sheet + history + answer with room to spare, and
+   because it is what a 3090 can actually keep resident alongside a 27B model.
+
+   IT IS IN THE REQUEST BODY ON PURPOSE, not in OLLAMA_NUM_CTX or a Modelfile.
+   An env var on the server is a setting that lives on one desktop and is absent
+   the moment he points this at any other host — which is precisely how the app
+   ended up with a hard-coded LAN address once already. The request is the only
+   place the app controls.
+
+   DO NOT DELETE THIS AS DEAD CONFIG. It looks like a tunable and it is a
+   correctness fix; removing it restores a silent failure that reports success. */
+const OLLAMA_NUM_CTX = 32768
+
+const ollamaOptions = (temperature: number) => ({ temperature, num_ctx: OLLAMA_NUM_CTX })
+
+async function queryOllama(cfg: AIConfig, systemPrompt: string, userMessage: string, temperature: number, signal?: AbortSignal): Promise<string> {
   const b = bound(cfg, signal)
   try {
     const response = await fetch(`${cfg.ollamaUrl}/api/chat`, {
@@ -446,7 +680,7 @@ async function queryOllama(cfg: AIConfig, systemPrompt: string, userMessage: str
           { role: 'user', content: userMessage },
         ],
         stream: false,
-        options: { temperature: 0.3 },
+        options: ollamaOptions(temperature),
       }),
     })
     b.touch()
@@ -473,10 +707,10 @@ const geminiHeaders = (apiKey: string) => ({
   'x-goog-api-key': apiKey,
 })
 
-const geminiBody = (systemPrompt: string, userMessage: string) => JSON.stringify({
+const geminiBody = (systemPrompt: string, userMessage: string, temperature: number) => JSON.stringify({
   system_instruction: { parts: [{ text: systemPrompt }] },
   contents: [{ parts: [{ text: userMessage }] }],
-  generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+  generationConfig: { temperature, maxOutputTokens: 2048 },
 })
 
 /* ─── Transient failures, and the one that was never handled ──────────────────
@@ -560,7 +794,10 @@ export function geminiErrorFrom(status: number, errText: string, model: string):
       429, errText)
   }
   if (status === 400 && errText.includes('API_KEY_INVALID')) {
-    return new AIError('api', 'Invalid API key. Check your key at aistudio.google.com/apikey', 400)
+    // `auth`, not `api` — see `isWorthFallingBackFrom`. A key Google has looked
+    // at and refused is not a bad minute, it is a broken credential, and no
+    // other provider in the chain can mend it.
+    return new AIError('auth', 'Invalid API key. Check your key at aistudio.google.com/apikey', 400)
   }
   if (status === 403) {
     return new AIError('api', 'API key does not have permission. Make sure the Generative Language API is enabled.', 403, errText)
@@ -625,36 +862,65 @@ export interface GeminiModel {
 }
 
 const MODEL_CACHE_KEY = 'codex-ai-models'
+/** OpenRouter's list gets its OWN key rather than sharing Gemini's.
+ *
+ *  One key holding two providers' lists would mean opening Settings on the
+ *  OpenRouter tab evicts the Gemini list and vice versa, so the "asked once a
+ *  day" bound below quietly becomes "asked every time he switches tabs" — and
+ *  worse, a cache read by the wrong resolver hands Gemini ids to OpenRouter.
+ *  Separate keys also mean this whole feature is additive in storage: a browser
+ *  that has never seen this build has no `codex-openrouter-models` and reads it
+ *  as a miss, which is exactly right. */
+const OPENROUTER_MODEL_CACHE_KEY = 'codex-openrouter-models'
 /** A day. Google retires models on the scale of months; asking more often than
  *  this spends a request on a question whose answer almost never changes, and
  *  asking less often is a day of 404s. The 404 path refreshes it immediately
- *  regardless, so this bound is about the quiet case only. */
+ *  regardless, so this bound is about the quiet case only.
+ *
+ *  It governs OpenRouter's list too. That list churns considerably faster —
+ *  free models appear and are withdrawn weekly — but the failure mode is
+ *  identical and so is the fix: a model that has gone away answers 404, and the
+ *  resolver re-asks rather than trusting the day-old answer. */
 export const MODEL_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
-interface ModelCache { fetchedAt: number; models: string[] }
+interface ModelCache<T> { fetchedAt: number; models: T[] }
 
-function readModelCache(): ModelCache | null {
+/** The 24h cache, over any model record.
+ *
+ *  Generic because OpenRouter needs to remember more than an id: the ranking
+ *  below is free-models-first, and whether a model is free is not derivable
+ *  from its id (verified against the live list on 2026-09-09 — 21 models price
+ *  at zero, only 18 of them carry the `:free` suffix). A cache of bare ids
+ *  would force a second network call to re-learn the prices, which is the
+ *  opposite of what a cache is for. `keep` is passed in so a cache written by a
+ *  different build cannot be read back as the wrong shape. */
+function readCache<T>(key: string, keep: (v: unknown) => v is T): ModelCache<T> | null {
   try {
-    const raw = localStorage.getItem(MODEL_CACHE_KEY)
+    const raw = localStorage.getItem(key)
     if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object') return null
-    const c = parsed as Partial<ModelCache>
+    const c = parsed as Partial<ModelCache<unknown>>
     if (!Array.isArray(c.models) || typeof c.fetchedAt !== 'number') return null
-    return { fetchedAt: c.fetchedAt, models: c.models.filter(m => typeof m === 'string') }
+    return { fetchedAt: c.fetchedAt, models: c.models.filter(keep) }
   } catch {
     return null
   }
 }
 
-function writeModelCache(models: string[]): void {
+function writeCache<T>(key: string, models: T[]): void {
   try {
-    localStorage.setItem(MODEL_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), models }))
+    localStorage.setItem(key, JSON.stringify({ fetchedAt: Date.now(), models }))
   } catch {
     /* A cache that cannot be written is a cache miss, not a failure. Private
        browsing and a full quota both land here and neither is worth an error. */
   }
 }
+
+const isString = (v: unknown): v is string => typeof v === 'string'
+
+const readModelCache = () => readCache(MODEL_CACHE_KEY, isString)
+const writeModelCache = (models: string[]) => writeCache(MODEL_CACHE_KEY, models)
 
 /** Ask the key what it can actually reach.
  *
@@ -868,6 +1134,7 @@ async function queryGemini(
   model: string,
   systemPrompt: string,
   userMessage: string,
+  temperature: number,
   signal?: AbortSignal,
   attempt = 0,
 ): Promise<string> {
@@ -875,7 +1142,7 @@ async function queryGemini(
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      { method: 'POST', headers: geminiHeaders(cfg.geminiApiKey!), signal: b.signal, body: geminiBody(systemPrompt, userMessage) },
+      { method: 'POST', headers: geminiHeaders(cfg.geminiApiKey!), signal: b.signal, body: geminiBody(systemPrompt, userMessage, temperature) },
     )
     b.touch()
 
@@ -891,7 +1158,7 @@ async function queryGemini(
         // The wait itself is interruptible. A sleep that ignores the signal is
         // the same bug as a fetch that ignores it, wearing a different hat.
         await sleep(waitMs, signal)
-        return queryGemini(cfg, model, systemPrompt, userMessage, signal, attempt + 1)
+        return queryGemini(cfg, model, systemPrompt, userMessage, temperature, signal, attempt + 1)
       }
 
       throw geminiErrorFrom(response.status, errText, model)
@@ -901,6 +1168,362 @@ async function queryGemini(
     return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated'
   } catch (err) {
     throw b.explain(err, 'Gemini')
+  } finally {
+    b.done()
+  }
+}
+
+/* ─── OpenRouter ──────────────────────────────────────────────────────────────
+
+   The second free tier, added 2026-09-09. See the note under `AIProvider` for
+   why it exists and for the CORS preflight that made it possible at all.
+
+   Everything below is deliberately shaped like the Gemini block above it: the
+   key rides in a header, no model id is compiled in, the list is asked for and
+   ranked by pattern, the errors go through `retryDelayMs` and come out as
+   sentences rather than response bodies. That is not tidiness. It is so that
+   the next failure at a table behaves the same way whichever provider is
+   serving, and so that a fix to one of them is obviously a fix to all three.
+   ------------------------------------------------------------------------- */
+
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1'
+
+/** Verified against the live preflight on 2026-09-09; all three of these are
+ *  named in OpenRouter's `Access-Control-Allow-Headers`.
+ *
+ *  `HTTP-Referer` and `X-Title` are OPTIONAL — they only decide how the app is
+ *  labelled on openrouter.ai's own leaderboards, and nothing about whether the
+ *  request works. They are sent anyway because a request that arrives
+ *  anonymous is one Marcus cannot recognise in his own usage dashboard when he
+ *  is trying to work out which of his devices burned the day's free quota.
+ *
+ *  The referer is read from the live origin rather than hard-coded, because a
+ *  compiled-in address is the exact defect this file already has a 200-line
+ *  comment about. Under node (tests, build) there is no window and the two
+ *  optional headers are simply absent, which is what "optional" means. */
+const openrouterHeaders = (apiKey: string): Record<string, string> => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${apiKey}`,
+  ...(typeof window === 'undefined' ? {} : {
+    'HTTP-Referer': window.location.origin,
+    'X-Title': 'The Codex',
+  }),
+})
+
+/** OpenAI-shaped, because OpenRouter is an OpenAI-compatible endpoint. Same two
+ *  messages and the same 2048-token ceiling the Gemini body uses, so a switch
+ *  between providers is not also a silent switch of answer length. */
+const openrouterBody = (
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+  temperature: number,
+  stream: boolean,
+) => JSON.stringify({
+  model,
+  messages: [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userMessage },
+  ],
+  temperature,
+  max_tokens: 2048,
+  stream,
+})
+
+/** OpenRouter answers 429 and 503 with a `Retry-After` header rather than
+ *  Google's `RetryInfo` inside the body, so the advice arrives somewhere else
+ *  and is read somewhere else — but it is clamped by the same `retryDelayMs`,
+ *  for the same reason. Advice from the network does not get to decide how long
+ *  the app is allowed to be unresponsive. */
+export function retryAfterHeaderSeconds(response: Pick<Response, 'headers'>): number | null {
+  const raw = response.headers?.get?.('Retry-After')
+  if (!raw) return null
+  const seconds = parseInt(raw, 10)
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : null
+}
+
+/** Turn a non-OK OpenRouter response into something a person can act on.
+ *
+ *  The statuses and their meanings are OpenRouter's own, read from
+ *  https://openrouter.ai/docs/api-reference/errors on 2026-09-09 rather than
+ *  guessed from the OpenAI shape — 402 and 503 in particular mean things no
+ *  other provider in this file means.
+ *
+ *  SAME RULE AS `geminiErrorFrom`: the body never lands in the middle of a
+ *  scene. It rides in `AIError.body` for the console, and the sentence names
+ *  what broke, whose fault it is, and what still works without it. */
+export function openrouterErrorFrom(status: number, errText: string, model: string): AIError {
+  if (status === 401) {
+    // `auth`: terminal, and it stops the chain. See `isWorthFallingBackFrom`.
+    return new AIError('auth',
+      'OpenRouter rejected that key. Check it at openrouter.ai/keys — a key that worked yesterday can be disabled or rotated from that page.',
+      401)
+  }
+  if (status === 402) {
+    /* The one status that is genuinely surprising on a free tier, and the
+       reason it gets its own sentence instead of the generic one: it does not
+       mean "you owe money", it almost always means the model that got picked
+       was not actually a free one. */
+    return new AIError('api',
+      `OpenRouter wants credits for ${model}. The free models cost nothing, so this means that one is not free — pick a model marked Free in Settings, or set the model to Automatic and it will only ever choose free ones.`,
+      402, errText)
+  }
+  if (status === 403) {
+    return new AIError('api',
+      `OpenRouter's moderation refused that request on ${model} — not your key, and not your quota (HTTP 403). Free models filter differently from each other, so another one in Settings will often take it. Your sheet, dice and everything already on screen still work.`,
+      403, errText)
+  }
+  if (status === 404) {
+    /* Free models on OpenRouter appear and are withdrawn on the scale of
+       WEEKS, not months — a much faster clock than Google's retirements. So a
+       404 here is the ordinary case rather than an emergency, and the sentence
+       points at the setting that makes it stop happening. */
+    return new AIError('api',
+      `OpenRouter no longer offers ${model}. Its free models come and go weekly — pick another in Settings, or set the model to Automatic and it will choose a live free one every request.`,
+      404, errText)
+  }
+  if (status === 429) {
+    return new AIError('api',
+      `Rate limited on ${model}. OpenRouter's free allowance is counted per model and per day, so switching to a different free model in Settings usually works immediately. Your sheet, dice and everything already on screen still work.`,
+      429, errText)
+  }
+  if (TRANSIENT_STATUSES.has(status)) {
+    // 502 is "the model provider behind OpenRouter is down"; 503 is "no
+    // provider could be routed to at all". Both are somebody else's afternoon.
+    return new AIError('api',
+      `${model} is unavailable right now — OpenRouter's side, not yours (HTTP ${status}). ` +
+      `Tried ${MAX_RETRIES + 1} times. Your sheet, dice and everything already on screen still work.`,
+      status, errText)
+  }
+  return new AIError('api',
+    `OpenRouter refused that request (${status}). Check the model and key in Settings.`,
+    status, errText)
+}
+
+/** One OpenRouter model as a picker and a ranker want it.
+ *
+ *  `free` and `contextLength` are carried rather than re-derived because
+ *  neither is recoverable from the id. Verified against the live list on
+ *  2026-09-09: 21 models price at zero and only 18 of those carry the `:free`
+ *  suffix, so a ranking that trusted the suffix alone would hide three free
+ *  models from a man who is not paying for any of this. */
+export interface OpenRouterModel {
+  id: string
+  label: string
+  description: string
+  free: boolean
+  contextLength: number
+}
+
+/** A model id, described for a human, derived from the id and the price.
+ *
+ *  Same doctrine as `describeGeminiModel`: NOT read from the API's `name` and
+ *  `description` fields, even though OpenRouter has both. Those are a second
+ *  response shape to depend on and they are marketing copy; what actually
+ *  decides whether Marcus can use a model is the price and the context window,
+ *  and both of those are said here in his own terms. */
+export function describeOpenRouterModel(id: string, free: boolean, contextLength: number): OpenRouterModel {
+  const [vendor, rest] = id.includes('/') ? [id.slice(0, id.indexOf('/')), id.slice(id.indexOf('/') + 1)] : ['', id]
+  const title = (s: string) => s
+    .replace(/:free$/, '')
+    .split(/[-_]/)
+    .map(w => (/^\d/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ')
+
+  const label = [vendor && title(vendor), title(rest)].filter(Boolean).join(' · ')
+
+  // Context in thousands, because "262144" is a number nobody reads and "262K"
+  // is the one fact that decides whether a full character sheet fits.
+  const ctx = contextLength >= 1000 ? `${Math.round(contextLength / 1000)}K context` : `${contextLength} context`
+  const description = free ? `Free · ${ctx}` : `Paid · ${ctx}`
+
+  return { id, label, description, free, contextLength }
+}
+
+/** Ask OpenRouter what it currently has.
+ *
+ *  The key is OPTIONAL here and that is not an oversight: `GET /models` is a
+ *  public endpoint, so Settings can fill its picker with real free models
+ *  before he has typed a key — which is the order a person actually does it in
+ *  ("what can this thing even do?" comes before "here is my credential").
+ *  The key is still sent when there is one, so the request is attributable in
+ *  his own dashboard.
+ *
+ *  THE FILTER IS THE ANALOGUE OF GEMINI'S `generateContent` CHECK. The same
+ *  list carries music and image models — `google/lyria-3-pro-preview` is free,
+ *  and asking it for a roleplay hook returns audio. Anything that emits
+ *  something other than text is dropped. A model that declares no modality at
+ *  all is KEPT: the open-world rule again — a filter may prefer, it may not
+ *  decide that an unfamiliar thing does not exist. */
+export async function listOpenRouterModels(
+  apiKey?: string,
+  signal?: AbortSignal,
+  timeoutMs: number = AI_TIMEOUTS.connectMs,
+): Promise<OpenRouterModel[]> {
+  const b = bound({ provider: 'openrouter', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal)
+  try {
+    const response = await fetch(`${OPENROUTER_BASE}/models`, {
+      method: 'GET',
+      headers: apiKey ? openrouterHeaders(apiKey) : { 'Content-Type': 'application/json' },
+      signal: b.signal,
+    })
+    b.touch()
+    if (!response.ok) {
+      throw openrouterErrorFrom(response.status, await response.text().catch(() => ''), 'the model list')
+    }
+    const data = await response.json()
+    const raw: Array<{
+      id?: string
+      context_length?: number
+      pricing?: { prompt?: string; completion?: string }
+      architecture?: { output_modalities?: string[] }
+    }> = data.data ?? []
+
+    return raw
+      .filter(m => typeof m.id === 'string' && m.id.length > 0)
+      .filter(m => {
+        const out = m.architecture?.output_modalities
+        return !Array.isArray(out) || (out.includes('text') && out.length === 1)
+      })
+      .map(m => {
+        /* Prices arrive as STRINGS ("0.00000004", "0"), confirmed against the
+           live endpoint. `Number()` rather than `=== '0'`, because a provider
+           that starts writing "0.0" or "0e0" would otherwise turn every free
+           model paid overnight and Marcus would be looking at a 402. */
+        const prompt = Number(m.pricing?.prompt ?? NaN)
+        const completion = Number(m.pricing?.completion ?? NaN)
+        const free = prompt === 0 && completion === 0
+        return describeOpenRouterModel(m.id!, free, m.context_length ?? 0)
+      })
+  } catch (err) {
+    throw b.explain(err, 'OpenRouter')
+  } finally {
+    b.done()
+  }
+}
+
+/** Rank by SHAPE, never by name — and free before everything.
+ *
+ *  FREE FIRST IS THE WHOLE POINT. Marcus is not paying for any of this, and an
+ *  automatic pick that lands on a paid model does not fail politely: it answers
+ *  402 mid-scene, or worse, it works and quietly spends money. Free is the hard
+ *  first key and there is no tie-break that can jump it.
+ *
+ *  Then LARGEST CONTEXT, which is the same argument as `num_ctx` above. The
+ *  thing this app sends is a full character sheet plus scene history, and a
+ *  model that cannot hold it does not say so — it truncates and answers about
+ *  a paladin it has never met. Between two free models the one that fits the
+ *  sheet is strictly the better one, and the API states the number.
+ *
+ *  Then the id, alphabetically, purely so the answer is stable. A ranking that
+ *  reshuffles on every fetch means "Automatic" silently changes model between
+ *  turns, and two answers in one scene disagree about who Nix is. */
+export function rankOpenRouterModels(models: OpenRouterModel[]): OpenRouterModel[] {
+  return models
+    .slice()
+    .sort((a, b) =>
+      Number(b.free) - Number(a.free) ||
+      b.contextLength - a.contextLength ||
+      a.id.localeCompare(b.id))
+}
+
+const isOpenRouterModel = (v: unknown): v is OpenRouterModel =>
+  !!v && typeof v === 'object' &&
+  typeof (v as OpenRouterModel).id === 'string' &&
+  typeof (v as OpenRouterModel).free === 'boolean'
+
+/** The live list, cached for the same day Gemini's is. Null when it cannot be
+ *  had at all — a stale cache beats no cache, and no cache beats a guess. */
+async function knownOpenRouterModels(apiKey: string, signal?: AbortSignal): Promise<OpenRouterModel[] | null> {
+  const cached = readCache(OPENROUTER_MODEL_CACHE_KEY, isOpenRouterModel)
+  if (cached && Date.now() - cached.fetchedAt < MODEL_CACHE_TTL_MS && cached.models.length > 0) {
+    return cached.models
+  }
+  try {
+    const live = await listOpenRouterModels(apiKey, signal)
+    if (live.length > 0) writeCache(OPENROUTER_MODEL_CACHE_KEY, live)
+    return live.length > 0 ? live : (cached?.models ?? null)
+  } catch {
+    return cached?.models ?? null
+  }
+}
+
+/** Which OpenRouter model this request should use.
+ *
+ *  Same precedence as `resolveGeminiModel`, and for the same reasons: a chosen
+ *  model the service still has → the best free one by ranking → a chosen model
+ *  we could not verify (offline) → an error that says so. No branch invents an
+ *  id, because OpenRouter withdraws free models weekly and a compiled-in
+ *  default would be a shipped expiry date measured in days rather than months. */
+export async function resolveOpenRouterModel(cfg: AIConfig, signal?: AbortSignal): Promise<string> {
+  if (!cfg.openrouterApiKey) {
+    throw new AIError('config', 'No OpenRouter API key set. Add one in Settings — a free key at openrouter.ai/keys reaches the free models.')
+  }
+  const chosen = cfg.openrouterModel?.trim() || ''
+  const live = await knownOpenRouterModels(cfg.openrouterApiKey, signal)
+
+  if (live && live.length > 0) {
+    if (chosen && live.some(m => m.id === chosen)) return chosen
+    const best = rankOpenRouterModels(live)[0]
+    if (best) {
+      if (chosen) {
+        _lastModelNotice = `${chosen} is not on OpenRouter any more. Now using ${best.id}.`
+      }
+      return best.id
+    }
+  }
+
+  // Could not ask. An id he chose himself is still the best information here.
+  if (chosen) return chosen
+  throw new AIError(
+    'api',
+    'Could not ask OpenRouter which models it has, and no model has been chosen in Settings. Check the key and your connection.',
+  )
+}
+
+async function queryOpenRouter(
+  cfg: AIConfig,
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+  temperature: number,
+  signal?: AbortSignal,
+  attempt = 0,
+): Promise<string> {
+  const b = bound(cfg, signal)
+  try {
+    const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+      method: 'POST',
+      headers: openrouterHeaders(cfg.openrouterApiKey!),
+      signal: b.signal,
+      body: openrouterBody(model, systemPrompt, userMessage, temperature, false),
+    })
+    b.touch()
+
+    if (!response.ok) {
+      // Body read ONCE, then reasoned about — a Response body can only be
+      // consumed once, and the Gemini path learned that the hard way.
+      const errText = await response.text().catch(() => '')
+      const waitMs = retryDelayMs(response.status, attempt, retryAfterHeaderSeconds(response))
+      if (waitMs !== null) {
+        await sleep(waitMs, signal)
+        return queryOpenRouter(cfg, model, systemPrompt, userMessage, temperature, signal, attempt + 1)
+      }
+      throw openrouterErrorFrom(response.status, errText, model)
+    }
+
+    const data = await response.json()
+    /* An OpenAI-shaped 200 can still carry an error object instead of a
+       choice — OpenRouter returns one when the upstream provider fails after
+       the response has already been committed. Reading `content` off that
+       yields undefined and the old-style `|| 'No response generated'` would
+       report a working request that said nothing. Name it instead. */
+    if (data.error && !data.choices?.length) {
+      throw openrouterErrorFrom(Number(data.error.code) || 502, JSON.stringify(data.error), model)
+    }
+    return data.choices?.[0]?.message?.content || 'No response generated'
+  } catch (err) {
+    throw b.explain(err, 'OpenRouter')
   } finally {
     b.done()
   }
@@ -927,47 +1550,108 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 let _lastUsedProvider: AIProvider | null = null
 export function getLastUsedProvider(): AIProvider | null { return _lastUsedProvider }
 
-const ask = async (cfg: AIConfig, provider: AIProvider, systemPrompt: string, userMessage: string, signal?: AbortSignal): Promise<string> => {
+const ask = async (cfg: AIConfig, provider: AIProvider, systemPrompt: string, userMessage: string, temperature: number, signal?: AbortSignal): Promise<string> => {
   requireCredentials(cfg, provider)
-  if (provider !== 'gemini') return queryOllama(cfg, systemPrompt, userMessage, signal)
+  if (provider === 'ollama') return queryOllama(cfg, systemPrompt, userMessage, temperature, signal)
+
+  if (provider === 'openrouter') {
+    const model = await resolveOpenRouterModel(cfg, signal)
+    return queryOpenRouter(cfg, model, systemPrompt, userMessage, temperature, signal)
+  }
 
   const model = await resolveGeminiModel(cfg, signal)
   try {
-    return await queryGemini(cfg, model, systemPrompt, userMessage, signal)
+    return await queryGemini(cfg, model, systemPrompt, userMessage, temperature, signal)
   } catch (err) {
     // ONCE. `retiredModelReplacement` returns null when the replacement is the
     // model that just failed, so a Google that keeps naming a dead id cannot
     // spin here — and a second 404 has no third attempt to reach for.
     const next = await retiredModelReplacement(cfg, model, err, signal)
     if (!next) throw err
-    return await queryGemini(cfg, next, systemPrompt, userMessage, signal)
+    return await queryGemini(cfg, next, systemPrompt, userMessage, temperature, signal)
   }
 }
 
-// Main query function — with automatic fallback
+/** Clamp a config's CONNECT clock to what is left of the chain's budget.
+ *
+ *  Only the connect clock. The idle clock is deliberately untouched — see
+ *  `AI_FALLBACK_BUDGET_MS`. Shrinking it would cut off a fallback provider that
+ *  is genuinely mid-sentence, which is the failure this file has spent eleven
+ *  slices refusing to commit: silence is the failure, slowness is not. */
+function withinBudget(cfg: AIConfig, remainingMs: number): AIConfig {
+  return { ...cfg, connectTimeoutMs: Math.min(cfg.connectTimeoutMs ?? AI_TIMEOUTS.connectMs, remainingMs) }
+}
+
+/** Walk the fallback chain. Returns the answer, or null when nothing answered.
+ *
+ *  THE CHAIN IS WALKED, NOT PAIRED. Until 2026-09-09 this was "try the other
+ *  one", which was correct when there were two providers and quietly wrong the
+ *  moment there were three: with Gemini primary, an exhausted Gemini quota fell
+ *  through to an Ollama that an https page cannot reach, and stopped — while a
+ *  perfectly good OpenRouter key sat in the same config, never tried. The
+ *  second provider being unreachable is exactly why there is now a third.
+ *
+ *  A CANCEL MID-CHAIN IS TERMINAL AND RETHROWS. He pressed Stop; continuing to
+ *  the next provider would restart, on his data allowance, the precise thing he
+ *  just stopped. Everything else is swallowed so the loop can continue, because
+ *  the error the caller surfaces is the FIRST one — see `queryAI`. */
+async function walkChain(
+  cfg: AIConfig,
+  chain: AIProvider[],
+  attempt: (cfg: AIConfig, provider: AIProvider) => Promise<string>,
+): Promise<{ provider: AIProvider; text: string } | null> {
+  const deadline = Date.now() + AI_FALLBACK_BUDGET_MS
+  for (const provider of chain) {
+    const remaining = deadline - Date.now()
+    // Out of budget. Stopping here is the feature: a fourth clock spent on a
+    // fourth dead address is a minute of frozen panel, not resilience.
+    if (remaining <= 0) break
+    try {
+      const text = await attempt(withinBudget(cfg, remaining), provider)
+      return { provider, text }
+    } catch (err) {
+      if (err instanceof AIError && err.kind === 'cancelled') throw err
+    }
+  }
+  return null
+}
+
+/** Main query function — with the automatic fallback chain.
+ *
+ *  `temperature` is an explicit parameter with a prose default rather than
+ *  something read from config or flipped by a boolean, because the right value
+ *  is a fact about the CALL and not about the user or the provider. The one
+ *  caller that needs the other value is `queryAIStructured`, and it says so. */
 export async function queryAI(
   systemPrompt: string,
   userMessage: string,
   config?: AIConfig,
   signal?: AbortSignal,
+  temperature: number = AI_TEMPERATURE.prose,
 ): Promise<string> {
   const cfg = config || loadAIConfig()
+  let primaryErr: unknown
   try {
-    const result = await ask(cfg, cfg.provider, systemPrompt, userMessage, signal)
+    const result = await ask(cfg, cfg.provider, systemPrompt, userMessage, temperature, signal)
     _lastUsedProvider = cfg.provider
     return result
-  } catch (primaryErr) {
-    if (!canFallBack(cfg, primaryErr)) throw primaryErr
-    const other: AIProvider = cfg.provider === 'gemini' ? 'ollama' : 'gemini'
-    try {
-      const result = await ask(cfg, other, systemPrompt, userMessage, signal)
-      _lastUsedProvider = other
-      return result
-    } catch {
-      // Fallback also failed — throw the original error (more useful to the user)
-      throw primaryErr
-    }
+  } catch (err) {
+    primaryErr = err
   }
+
+  const won = await walkChain(cfg, fallbackChain(cfg, primaryErr), (c, p) =>
+    ask(c, p, systemPrompt, userMessage, temperature, signal))
+  if (won) {
+    _lastUsedProvider = won.provider
+    return won.text
+  }
+
+  /* THE FIRST ERROR, NEVER THE LAST. He picked a provider; if the whole chain
+     is dead the sentence he reads has to be about the one he picked. The
+     alternative was tried and is baffling in practice — "OpenRouter no longer
+     offers …" is an incomprehensible thing to be told by an app you had set to
+     Gemini, and it sends him to fix a setting that was never wrong. */
+  throw primaryErr
 }
 
 /* ─── Streaming ───
@@ -1019,7 +1703,24 @@ const geminiDelta = (line: string): string | undefined => {
   try { return JSON.parse(payload).candidates?.[0]?.content?.parts?.[0]?.text } catch { return undefined }
 }
 
-async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: string, onText: (t: string) => void, signal?: AbortSignal): Promise<string> {
+/** OpenAI-style SSE: `data:` lines, a `[DONE]` sentinel, the token in
+ *  `choices[0].delta.content`.
+ *
+ *  OpenRouter also emits SSE COMMENT lines — `: OPENROUTER PROCESSING` — as a
+ *  keepalive while it waits for an upstream provider to start. They are
+ *  ignored here for free, because they do not begin with `data:`, and that is
+ *  worth knowing rather than rediscovering: they are the reason a slow
+ *  OpenRouter request does not trip the idle clock. `pump` calls `touch()` on
+ *  every byte that arrives, so a keepalive counts as the sign of life it is
+ *  meant to be, even though it yields no text. */
+const openrouterDelta = (line: string): string | undefined => {
+  if (!line.startsWith('data:')) return undefined
+  const payload = line.slice(5).trim()
+  if (!payload || payload === '[DONE]') return undefined
+  try { return JSON.parse(payload).choices?.[0]?.delta?.content } catch { return undefined }
+}
+
+async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: string, temperature: number, onText: (t: string) => void, signal?: AbortSignal): Promise<string> {
   const b = bound(cfg, signal)
   try {
     const response = await fetch(`${cfg.ollamaUrl}/api/chat`, {
@@ -1033,7 +1734,11 @@ async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: st
           { role: 'user', content: userMessage },
         ],
         stream: true,
-        options: { temperature: 0.3 },
+        /* Same `num_ctx` as the blocking path, and it must stay that way. The
+           streaming path is the one the roleplay card uses, so a fix applied to
+           only one of these is a fix he gets on some screens — the exact split
+           that let the 503 die in his face while the retry worked elsewhere. */
+        options: ollamaOptions(temperature),
       }),
     })
     b.touch()
@@ -1046,12 +1751,12 @@ async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: st
   }
 }
 
-async function streamGemini(cfg: AIConfig, model: string, systemPrompt: string, userMessage: string, onText: (t: string) => void, signal?: AbortSignal, attempt = 0): Promise<string> {
+async function streamGemini(cfg: AIConfig, model: string, systemPrompt: string, userMessage: string, temperature: number, onText: (t: string) => void, signal?: AbortSignal, attempt = 0): Promise<string> {
   const b = bound(cfg, signal)
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
-      { method: 'POST', headers: geminiHeaders(cfg.geminiApiKey!), signal: b.signal, body: geminiBody(systemPrompt, userMessage) },
+      { method: 'POST', headers: geminiHeaders(cfg.geminiApiKey!), signal: b.signal, body: geminiBody(systemPrompt, userMessage, temperature) },
     )
     b.touch()
     /* The streaming path retries the same overload the blocking path does. It
@@ -1065,13 +1770,54 @@ async function streamGemini(cfg: AIConfig, model: string, systemPrompt: string, 
       if (waitMs !== null) {
         await sleep(waitMs, signal)
         b.done()
-        return streamGemini(cfg, model, systemPrompt, userMessage, onText, signal, attempt + 1)
+        return streamGemini(cfg, model, systemPrompt, userMessage, temperature, onText, signal, attempt + 1)
       }
       throw geminiErrorFrom(response.status, errText, model)
     }
     return await pump(response, b, geminiDelta, onText)
   } catch (err) {
     throw b.explain(err, 'Gemini')
+  } finally {
+    b.done()
+  }
+}
+
+async function streamOpenRouter(
+  cfg: AIConfig,
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+  temperature: number,
+  onText: (t: string) => void,
+  signal?: AbortSignal,
+  attempt = 0,
+): Promise<string> {
+  const b = bound(cfg, signal)
+  try {
+    const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+      method: 'POST',
+      headers: openrouterHeaders(cfg.openrouterApiKey!),
+      signal: b.signal,
+      body: openrouterBody(model, systemPrompt, userMessage, temperature, true),
+    })
+    b.touch()
+    /* Retries the same overload the blocking path does, and it is safe here for
+       the same reason it is safe there: the response was never OK, so `pump`
+       never ran and nothing has been painted. Once tokens start arriving this
+       branch is behind us and a mid-stream failure stays a failure. */
+    if (!response.ok || !response.body) {
+      const errText = await response.text().catch(() => '')
+      const waitMs = retryDelayMs(response.status, attempt, retryAfterHeaderSeconds(response))
+      if (waitMs !== null) {
+        await sleep(waitMs, signal)
+        b.done()
+        return streamOpenRouter(cfg, model, systemPrompt, userMessage, temperature, onText, signal, attempt + 1)
+      }
+      throw openrouterErrorFrom(response.status, errText, model)
+    }
+    return await pump(response, b, openrouterDelta, onText)
+  } catch (err) {
+    throw b.explain(err, 'OpenRouter')
   } finally {
     b.done()
   }
@@ -1088,6 +1834,7 @@ export async function queryAIStream(
   onText: (fullText: string) => void,
   config?: AIConfig,
   signal?: AbortSignal,
+  temperature: number = AI_TEMPERATURE.prose,
 ): Promise<string> {
   const cfg = config || loadAIConfig()
   let received = false
@@ -1102,16 +1849,19 @@ export async function queryAIStream(
     if (cfg.provider === 'gemini') {
       const model = await resolveGeminiModel(cfg, signal)
       try {
-        result = await streamGemini(cfg, model, systemPrompt, userMessage, guardedOnText, signal)
+        result = await streamGemini(cfg, model, systemPrompt, userMessage, temperature, guardedOnText, signal)
       } catch (streamErr) {
         // Same one-shot contract as `ask`. A retirement 404 arrives before any
         // bytes do, so `received` is still false and retrying is honest.
         const next = await retiredModelReplacement(cfg, model, streamErr, signal)
         if (!next) throw streamErr
-        result = await streamGemini(cfg, next, systemPrompt, userMessage, guardedOnText, signal)
+        result = await streamGemini(cfg, next, systemPrompt, userMessage, temperature, guardedOnText, signal)
       }
+    } else if (cfg.provider === 'openrouter') {
+      const model = await resolveOpenRouterModel(cfg, signal)
+      result = await streamOpenRouter(cfg, model, systemPrompt, userMessage, temperature, guardedOnText, signal)
     } else {
-      result = await streamOllama(cfg, systemPrompt, userMessage, guardedOnText, signal)
+      result = await streamOllama(cfg, systemPrompt, userMessage, temperature, guardedOnText, signal)
     }
     _lastUsedProvider = cfg.provider
     return result
@@ -1131,23 +1881,22 @@ export async function queryAIStream(
     // failure this slice is named after, wearing the costume of a retry. For
     // those two, go to the OTHER provider if there is one, and otherwise stop.
     if (err instanceof AIError && (err.kind === 'timeout' || err.kind === 'network')) {
-      if (!canFallBack(cfg, err)) throw err
-      const other: AIProvider = cfg.provider === 'gemini' ? 'ollama' : 'gemini'
-      try {
-        const result = await ask(cfg, other, systemPrompt, userMessage, signal)
-        _lastUsedProvider = other
-        onText(result)
-        return result
-      } catch {
-        throw err // the original failure is the useful one
-      }
+      // The CHAIN, not "the other one" — same correction as `queryAI`. A dead
+      // Ollama on a laptop away from home now reaches Gemini AND OpenRouter,
+      // where before it reached Gemini and gave up.
+      const won = await walkChain(cfg, fallbackChain(cfg, err), (c, p) =>
+        ask(c, p, systemPrompt, userMessage, temperature, signal))
+      if (!won) throw err // the original failure is the useful one
+      _lastUsedProvider = won.provider
+      onText(won.text)
+      return won.text
     }
 
     // Anything else — a gateway that 404s the SSE endpoint, a proxy that
     // strips a chunked body — is a fact about STREAMING, not about the host.
     // The non-streaming path is exactly the right thing to try, and it brings
-    // the provider fallback with it.
-    const result = await queryAI(systemPrompt, userMessage, cfg, signal)
+    // the provider chain with it.
+    const result = await queryAI(systemPrompt, userMessage, cfg, signal, temperature)
     onText(result)
     return result
   }
@@ -1165,6 +1914,13 @@ export async function queryAIStructured<T>(
     userMessage,
     config,
     signal,
+    /* THE LOW ONE, EXPLICITLY. This is the reason temperature is a parameter at
+       all rather than a raised constant: most of this app's AI calls arrive
+       here, a parser reads every one of them, and a model asked to be creative
+       garnishes JSON with a sentence of preamble. That failure is not a duller
+       answer, it is the `did not return JSON` error below and a dead panel.
+       The prose default belongs to the two functions a PERSON reads. */
+    AI_TEMPERATURE.structured,
   )
 
   // Strip markdown code blocks if AI includes them anyway

@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
-import { loadAIConfig, saveAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIProvider } from '../lib/ai'
+import { loadAIConfig, updateAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIConfig, type AIProvider } from '../lib/ai'
 import { GeminiModelPicker } from './GeminiModelPicker'
 import { generateId, type Character, type CharacterBase, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
 import { resolveCharacter } from '../lib/rules-2024/derive'
@@ -234,15 +234,31 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
 
   const hasApiKey = aiProvider === 'gemini' ? geminiKey.trim().length > 0 : ollamaUrl.trim().length > 0
 
+  /* The fields this wizard is entitled to write, and not one more.
+   *
+   * This screen only offers Gemini and Ollama, so it must say NOTHING about
+   * OpenRouter — and "nothing" has to mean an absent key, not `undefined`.
+   * The old version of this spelled the other provider's fields
+   * `x === 'gemini' ? key : undefined` and handed the result to `saveAIConfig`,
+   * which is a whole-config write: finishing setup erased the OpenRouter key
+   * Marcus had already pasted into Settings, silently, and the fallback chain
+   * he built to survive a 429 was a chain of one again by the time he needed it.
+   * `updateAIConfig` merges, so an unmentioned provider keeps its credentials. */
+  const aiPatch = useCallback((): Partial<AIConfig> => ({
+    provider: aiProvider,
+    // '' is meaningful here and is passed through deliberately: blanking the
+    // key field and saving really should remove the key, and an empty model
+    // box really does mean Automatic.
+    ...(aiProvider === 'gemini' ? { geminiApiKey: geminiKey, geminiModel } : {}),
+    ...(aiProvider === 'ollama' ? { ollamaUrl, ollamaModel } : {}),
+  }), [aiProvider, geminiKey, geminiModel, ollamaUrl, ollamaModel])
+
   const saveAndTestAI = useCallback(async () => {
-    const config = {
-      provider: aiProvider,
-      geminiApiKey: aiProvider === 'gemini' ? geminiKey : undefined,
-      geminiModel: aiProvider === 'gemini' ? (geminiModel || undefined) : undefined,
-      ollamaUrl: aiProvider === 'ollama' ? ollamaUrl : undefined,
-      ollamaModel: aiProvider === 'ollama' ? ollamaModel : undefined,
-    }
-    saveAIConfig(config)
+    // Test what he just chose, not what the chain would rescue it with. The
+    // merged config now carries the other providers' keys, so leaving fallback
+    // on would let a broken Gemini key report a green tick because OpenRouter
+    // answered for it.
+    const config: AIConfig = { ...updateAIConfig(aiPatch()), fallbackEnabled: false }
     setAiTestError(null)
     setAiTestSuccess(false)
     setAiTestLoading(true)
@@ -254,7 +270,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
     } finally {
       setAiTestLoading(false)
     }
-  }, [aiProvider, geminiKey, ollamaUrl, ollamaModel])
+  }, [aiPatch])
 
   // Homebrew subclass state
   const [customSubclassName, setCustomSubclassName] = useState('')
@@ -320,14 +336,9 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
     setForgeError(null)
     clearResponse()
 
-    // Ensure AI config is saved before forging
-    saveAIConfig({
-      provider: aiProvider,
-      geminiApiKey: aiProvider === 'gemini' ? geminiKey : undefined,
-      geminiModel: aiProvider === 'gemini' ? (geminiModel || undefined) : undefined,
-      ollamaUrl: aiProvider === 'ollama' ? ollamaUrl : undefined,
-      ollamaModel: aiProvider === 'ollama' ? ollamaModel : undefined,
-    })
+    // Ensure AI config is saved before forging — a merge, not an overwrite, for
+    // the same reason as `saveAndTestAI` above.
+    updateAIConfig(aiPatch())
 
     const raceSection = RACE_CONTENT[race]
       ? `\n\n--- SPECIES RULES ---\n${RACE_CONTENT[race]}\n--- END SPECIES ---\nUse the above species rules. Note the creature type, traits, and any special mechanics.`
