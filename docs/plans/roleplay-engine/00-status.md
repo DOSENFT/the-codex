@@ -1,12 +1,33 @@
 # Status: The Roleplay Engine
 
-- Gate 1 — Product: in progress
-- Gate 2 — Architecture: pending
-- Gate 3 — Program Design: pending
-- Gate 4 — Slice plan: pending
+- Gate 1 — Product: APPROVED 2026-09-07
+- Gate 2 — Architecture: APPROVED 2026-09-07
+- Gate 3 — Program Design: APPROVED 2026-09-07
+- Gate 4 — Slice plan: APPROVED 2026-09-07
+
+All four approved in one message — *"Approve all gates, I'm leaving in 5 min"* —
+with the session that night as the deadline. The gate docs are still the record
+of what was decided and why; what was skipped was the pause between them, not the
+thinking.
 
 ## Slices
-_(not yet planned)_
+- [x] Slice 1 — tracer bullet: `Beat`, `normaliseBeat`, the bank, `BeatCard`.
+- [x] Slice 2 — live beats: `SYSTEM_PROMPTS.improvBeat` + `requestBeat`, with the
+      bank as the floor. **The screenshots' bug is now structurally impossible.**
+- [x] Slice 3 — the table: `TableState`, `SceneBar`, `TableCard`, the spotlight
+      tracker and the nudge. Beats are aimable by name.
+- [x] Slice 4 — the impulse grid, rebuilt. Every situation now sends a real
+      MOMENT (not a noun) through `requestBeat` and renders a whole beat.
+      The `{error && <p className="text-red-400">}` at old line 192 is deleted.
+- [x] Slice 5 — the page has a spine: persona → **scene / ask / beat / table** →
+      a "Between scenes" rule → everything that used to be a peer of it.
+- [ ] Slice 6 — the bank gets deep (5+ beats per intent).
+
+## Verification
+
+`npx tsc --noEmit` clean · `npx vitest run` — 99 files, 1952 passed, 7 skipped.
+66 of those tests are new and live in `src/lib/rp/*.test.ts` and
+`src/components/session/BeatCard.test.tsx`.
 
 ## Notes for a fresh session
 

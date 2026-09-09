@@ -14,6 +14,7 @@ import {
 
 import { ActionCard } from './ActionCard'
 import { PersonaStrip } from './PersonaStrip'
+import { RoleplayEngine } from './RoleplayEngine'
 import { SceneContextFilter, type SceneContext } from './SceneContextFilter'
 import { IdentitySwitcher } from './IdentitySwitcher'
 import { AIAssistPanel } from './AIAssistPanel'
@@ -54,7 +55,11 @@ function dedupeStrings(arr: string[]): string[] {
 // ---------------------------------------------------------------------------
 
 export function SessionCockpit({ character, onCharacterUpdate }: SessionCockpitProps) {
-  const [expandedCard, setExpandedCard] = useState<'perform' | 'impulse' | 'recall' | 'engage' | null>('perform')
+  /* Nothing is expanded on arrival any more. The Roleplay engine below the
+     persona strip is now the doorway, and a Perform card that opens itself
+     underneath it is a second doorway competing with the first — which is most
+     of what "the page seems decently disorganized" was pointing at. */
+  const [expandedCard, setExpandedCard] = useState<'perform' | 'impulse' | 'recall' | 'engage' | null>(null)
   const [sceneContext, setSceneContext] = useState<SceneContext>('all')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -164,6 +169,29 @@ export function SessionCockpit({ character, onCharacterUpdate }: SessionCockpitP
     <div className="space-y-4 animate-fade-in">
       {/* ── Persona strip ── */}
       <PersonaStrip character={character} />
+
+      {/* ══════════════════════════════════════════════════════════════════
+          THE ROLEPLAY ENGINE — scene, ask, beat, table.
+
+          FIRST, and given the whole top of the page, because it is the only
+          zone here he uses WHILE PEOPLE ARE LOOKING AT HIM. Everything below
+          this line is a between-scenes tool: useful, and none of it worth a
+          thumb-scroll during a silence at the table.
+      ══════════════════════════════════════════════════════════════════ */}
+      <RoleplayEngine
+        character={character}
+        onMomentLogged={handleMomentLogged}
+      />
+
+      {/* ══════════════════════════════════════════════════════════════════
+          EVERYTHING ELSE — demoted, on purpose, behind one heading.
+      ══════════════════════════════════════════════════════════════════ */}
+      <div className="flex items-center gap-3 pt-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forge-2">
+          Between scenes
+        </span>
+        <span className="flex-1 h-px bg-white/[0.06]" />
+      </div>
 
       {/* ── Scene context filter ── */}
       <SceneContextFilter value={sceneContext} onChange={setSceneContext} />

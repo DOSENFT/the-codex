@@ -1,11 +1,36 @@
-import { useState, useCallback } from 'react'
-import { Zap, RefreshCw, Loader2 } from 'lucide-react'
+/* Impulse — eight situations, each of which now produces a whole beat.
+ *
+ * ── WHAT WAS WRONG WITH IT ─────────────────────────────────────────────────
+ * Marcus, 2026-09-07, after tapping one of these buttons while prepping:
+ *
+ *     "the impulse module seems OK, but doesn't seem fully built. Like I just
+ *      tapped on 'ambush' but Idk when I'd actually use what it suggested, and
+ *      it literally is just one or two lines."
+ *
+ * Both halves of that are the same defect. The card used to render SAY / DO /
+ * THINK — three sentences with no situation attached, so the hard part (working
+ * out the moment they belong in) was still his. `useWhen` is the literal answer
+ * to his first clause and `directions` / `followUp` / `out` are the answer to
+ * the second: the grid now hands him a beat with a future instead of a line.
+ *
+ * ── WHAT ELSE LEFT ─────────────────────────────────────────────────────────
+ * The `{error && <p className="text-red-400">{error}</p>}` that used to live at
+ * line 192 of this file. That element is what put a raw Gemini 503 blob in the
+ * middle of his roleplay card. `requestBeat` cannot reject, so there is nothing
+ * for it to say and it is gone rather than merely unreachable. */
+
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { Zap } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { Character } from '../../lib/character'
 import type { RPMoment } from '../../lib/session-log'
-import { useAI } from '../../hooks/useAI'
-import { SYSTEM_PROMPTS } from '../../lib/prompts'
+import { queryAIStructured } from '../../lib/ai'
+import { requestBeat } from '../../lib/rp/engine'
+import type { Beat } from '../../lib/rp/beat'
+import { loadTable, nextToAim } from '../../lib/rp/table'
+import type { BeatIntent } from '../../lib/rp/types'
 import { ActionCard } from './ActionCard'
+import { BeatCard } from './BeatCard'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -19,12 +44,6 @@ interface ImpulseEngineProps {
   onMomentLogged: (moment: Omit<RPMoment, 'id' | 'timestamp'>) => void
 }
 
-interface ReactionResult {
-  say: string
-  do: string
-  think: string
-}
-
 // ---------------------------------------------------------------------------
 // Situation grid data
 // ---------------------------------------------------------------------------
@@ -32,17 +51,29 @@ interface ReactionResult {
 interface SituationButton {
   label: string
   color: 'ember' | 'verdant' | 'arcane' | 'eldritch'
+  intent: BeatIntent
+  /** The sentence the model actually receives. The button label alone ("Gift!")
+   *  is a noun; a beat needs a moment, and these are the moment. */
+  moment: string
 }
 
 const SITUATIONS: SituationButton[] = [
-  { label: 'Ambush!',      color: 'ember' },
-  { label: 'Betrayal!',    color: 'eldritch' },
-  { label: 'Gift!',        color: 'verdant' },
-  { label: 'Insult!',      color: 'eldritch' },
-  { label: 'Revelation!',  color: 'arcane' },
-  { label: 'Death!',       color: 'ember' },
-  { label: 'Victory!',     color: 'verdant' },
-  { label: 'Request!',     color: 'arcane' },
+  { label: 'Ambush!', color: 'ember', intent: 'react',
+    moment: 'An ambush has just landed on us — no warning, everyone is still reacting.' },
+  { label: 'Betrayal!', color: 'eldritch', intent: 'raise',
+    moment: 'Someone we trusted has just turned on us in front of everyone.' },
+  { label: 'Gift!', color: 'verdant', intent: 'react',
+    moment: 'Someone has just given me something, and I did not expect it.' },
+  { label: 'Insult!', color: 'eldritch', intent: 'raise',
+    moment: 'I have just been insulted out loud, in front of the others.' },
+  { label: 'Revelation!', color: 'arcane', intent: 'land',
+    moment: 'Something just came out that changes what we thought was true.' },
+  { label: 'Death!', color: 'ember', intent: 'land',
+    moment: 'Someone has just died and the room has gone silent.' },
+  { label: 'Victory!', color: 'verdant', intent: 'land',
+    moment: 'We have just won, and nobody has decided yet what winning feels like.' },
+  { label: 'Request!', color: 'arcane', intent: 'pull-in',
+    moment: 'Someone has just asked me for something I do not have to give them.' },
 ]
 
 /* Ink lit, ground unchanged — the same move as the condition chips and for the
@@ -87,52 +118,75 @@ const SITUATION_COLOR_MAP: Record<SituationButton['color'], {
 // ---------------------------------------------------------------------------
 
 export function ImpulseEngine({ character, sceneContext, expanded, onToggle, onMomentLogged }: ImpulseEngineProps) {
-  const [activeSituation, setActiveSituation] = useState<string | null>(null)
-  const [reaction, setReaction] = useState<ReactionResult | null>(null)
+  const [active, setActive] = useState<SituationButton | null>(null)
+  const [beat, setBeat] = useState<Beat | null>(null)
+  const [loading, setLoading] = useState(false)
+  const nth = useRef(0)
 
-  const { loading, error, queryStructured, clearResponse } = useAI()
+  const abortRef = useRef<AbortController | null>(null)
+  const genRef = useRef(0)
+  useEffect(() => () => { abortRef.current?.abort() }, [])
 
   // ── Fire a situation ──────────────────────────────────────────────────
-  const fireSituation = useCallback(async (situationLabel: string) => {
-    setActiveSituation(situationLabel)
-    setReaction(null)
-    clearResponse()
+  const fire = useCallback(async (situation: SituationButton, again = false) => {
+    setActive(situation)
+    if (!again) { setBeat(null); nth.current = 0 } else { nth.current += 1 }
 
-    try {
-      const prompt = SYSTEM_PROMPTS.impulseReaction(character, situationLabel, sceneContext)
-      const result = await queryStructured<ReactionResult>(prompt, `${character.name} reacts to: ${situationLabel}`)
-      setReaction(result)
-    } catch {
-      // Error handled by useAI
-    }
-  }, [character, sceneContext, queryStructured, clearResponse])
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    genRef.current += 1
+    const mine = genRef.current
 
-  // ── "Another" — re-fire the same situation ────────────────────────────
+    setLoading(true)
+
+    /* The roster is read at FIRE time rather than held in state, so a player
+       added in the Roleplay zone thirty seconds ago is already known here. */
+    const table = loadTable(character.id)
+    if (sceneContext && !table.scene) table.scene = sceneContext
+
+    // No try/catch: `requestBeat` resolves with a banked beat on every failure
+    // there is, which is asserted in `lib/rp/engine.test.ts`.
+    const result = await requestBeat(
+      {
+        character,
+        table,
+        intent: situation.intent,
+        aimAt: nextToAim(table, Date.now()),
+        custom: situation.moment,
+        nth: nth.current,
+      },
+      (sys, user) => queryAIStructured<unknown>(sys, user, undefined, controller.signal),
+    )
+
+    if (genRef.current !== mine) return
+    setBeat(result)
+    setLoading(false)
+  }, [character, sceneContext])
+
   const handleAnother = useCallback(() => {
-    if (activeSituation) {
-      fireSituation(activeSituation)
-    }
-  }, [activeSituation, fireSituation])
+    if (active) void fire(active, true)
+  }, [active, fire])
 
-  // ── "Played It" — log moment and return to grid ──────────────────────
   const handlePlayedIt = useCallback(() => {
-    if (!reaction || !activeSituation) return
-
-    const text = `${activeSituation} — "${reaction.say.length > 50 ? reaction.say.slice(0, 47) + '...' : reaction.say}"`
+    if (!beat || !active) return
+    const line = beat.moves[0]?.text ?? beat.goal
+    const text = `${active.label} — ${line}`
     onMomentLogged({
       type: 'react',
-      text: text.length > 80 ? text.slice(0, 77) + '...' : text,
+      text: text.length > 80 ? text.slice(0, 77) + '…' : text,
       context: sceneContext,
     })
+    setActive(null)
+    setBeat(null)
+  }, [beat, active, sceneContext, onMomentLogged])
 
-    setActiveSituation(null)
-    setReaction(null)
-  }, [reaction, activeSituation, sceneContext, onMomentLogged])
-
-  // ── Return to grid ────────────────────────────────────────────────────
   const handleBackToGrid = useCallback(() => {
-    setActiveSituation(null)
-    setReaction(null)
+    abortRef.current?.abort()
+    genRef.current += 1      // whatever is in flight no longer owns this panel
+    setActive(null)
+    setBeat(null)
+    setLoading(false)
   }, [])
 
   // ====================================================================
@@ -148,14 +202,14 @@ export function ImpulseEngine({ character, sceneContext, expanded, onToggle, onM
       onToggle={onToggle}
       emptyMessage="Add persona traits and backstory in Prep mode for better reactions"
     >
-      {activeSituation ? (
-        /* ── Reaction view ── */
+      {active ? (
+        /* ── Beat view ── */
         <div className="space-y-3 animate-fade-in">
-          {/* Situation label */}
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleBackToGrid}
+              aria-label="Back to situations"
               className={cn(
                 'inline-flex items-center gap-1.5',
                 'min-h-[44px] px-2 rounded-lg',
@@ -167,116 +221,36 @@ export function ImpulseEngine({ character, sceneContext, expanded, onToggle, onM
             >
               &larr;
             </button>
-            <p className="text-sm font-semibold text-forge-0">
-              {activeSituation}
-            </p>
+            <p className="text-sm font-semibold text-forge-0">{active.label}</p>
           </div>
 
-          {/* Loading skeleton */}
-          {loading && (
+          {loading && !beat && (
             <div className="space-y-2">
-              {[0, 1, 2].map(i => (
-                <div
-                  key={i}
-                  className="h-[64px] rounded-xl bg-white/[0.04] animate-pulse"
-                />
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className="h-[44px] rounded-xl bg-white/[0.04] animate-pulse" />
               ))}
-              <div className="flex items-center gap-2 px-1 text-sm text-forge-2">
-                <Loader2 size={14} className="animate-spin" aria-hidden />
-                Channeling reaction...
-              </div>
             </div>
           )}
 
-          {/* Error */}
-          {error && (
-            <p className="text-sm text-red-400 px-1">{error}</p>
-          )}
-
-          {/* Reaction card */}
-          {reaction && (
-            <div className="space-y-2 animate-fade-in">
-              {/* SAY */}
-              <div className="glass-card rounded-xl px-3 py-3 border border-arcane/20">
-                <p className="text-xs font-semibold text-arcane uppercase tracking-wider mb-1">
-                  Say
-                </p>
-                <p className="text-sm text-forge-0 leading-relaxed">
-                  &ldquo;{reaction.say}&rdquo;
-                </p>
-              </div>
-
-              {/* DO */}
-              <div className="glass-card rounded-xl px-3 py-3 border border-ember/20">
-                <p className="text-xs font-semibold text-ember uppercase tracking-wider mb-1">
-                  Do
-                </p>
-                <p className="text-sm text-forge-0 leading-relaxed">
-                  {reaction.do}
-                </p>
-              </div>
-
-              {/* THINK */}
-              <div className="glass-card rounded-xl px-3 py-3 border border-eldritch/20">
-                <p className="text-xs font-semibold text-eldritch uppercase tracking-wider mb-1">
-                  Think
-                </p>
-                <p className="text-sm text-forge-0 leading-relaxed italic">
-                  {reaction.think}
-                </p>
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handlePlayedIt}
-                  className={cn(
-                    'flex-1 inline-flex items-center justify-center gap-2',
-                    'min-h-[48px] px-3 py-2 rounded-xl',
-                    'bg-verdant/15 border border-verdant/30',
-                    'text-sm font-semibold text-verdant',
-                    'transition-all duration-200 ease-forge',
-                    'active:scale-[0.95]',
-                    'hover:bg-verdant/20',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verdant',
-                  )}
-                >
-                  Played It
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAnother}
-                  disabled={loading}
-                  className={cn(
-                    'flex-1 inline-flex items-center justify-center gap-2',
-                    'min-h-[48px] px-3 py-2 rounded-xl',
-                    'bg-white/[0.06] border border-white/15',
-                    'text-sm font-semibold text-forge-1',
-                    'transition-all duration-200 ease-forge',
-                    'active:scale-[0.95]',
-                    'hover:bg-white/[0.08]',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember',
-                    loading && 'opacity-50 cursor-not-allowed',
-                  )}
-                >
-                  <RefreshCw size={16} className={cn(loading && 'animate-spin')} aria-hidden />
-                  Another
-                </button>
-              </div>
-            </div>
+          {beat && (
+            <BeatCard
+              beat={beat}
+              loading={loading}
+              onAnother={handleAnother}
+              onUsed={handlePlayedIt}
+            />
           )}
         </div>
       ) : (
         /* ── Situation grid ── */
         <div className="grid grid-cols-2 gap-2">
-          {SITUATIONS.map(({ label, color }) => {
-            const colors = SITUATION_COLOR_MAP[color]
+          {SITUATIONS.map(situation => {
+            const colors = SITUATION_COLOR_MAP[situation.color]
             return (
               <button
-                key={label}
+                key={situation.label}
                 type="button"
-                onClick={() => fireSituation(label)}
+                onClick={() => void fire(situation)}
                 className={cn(
                   'inline-flex items-center justify-center',
                   'min-h-[52px] px-3 py-3 rounded-xl',
@@ -291,7 +265,7 @@ export function ImpulseEngine({ character, sceneContext, expanded, onToggle, onM
                   colors.hoverBg,
                 )}
               >
-                {label}
+                {situation.label}
               </button>
             )
           })}
