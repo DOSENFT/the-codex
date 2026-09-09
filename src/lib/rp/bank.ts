@@ -98,6 +98,41 @@ const PULL_IN: readonly BankedBeat[] = [
     ],
     out: 'Take it back with a joke about your own paranoia. The bit closes itself.',
   },
+  {
+    bankId: 'pull-in/say-their-name',
+    aimKind: 'person',
+    useWhen: 'Someone has been at the table for an hour and no other character has said their character\'s name out loud yet. This is much more common than anyone notices, and it is the single loneliest thing that can happen to a new player.',
+    moves: [
+      { kind: 'do', text: 'Find a reason to need their attention specifically, then use their name to get it — not "hey", not "you".' },
+      { kind: 'say', text: '"[Their name]. You are better placed for this than I am."' },
+      { kind: 'ask', text: '"What can you see from there?"' },
+    ],
+    goal: 'Being named by another character is the moment a player stops being a person holding a sheet and starts being someone who exists in the fiction. It is the cheapest and most reliable inclusion move there is, and it works even on players who have been playing for years.',
+    followUp: 'Use the name again within the next two lines, casually, as if you have been saying it for years. The second use is what makes the first one real rather than ceremonial.',
+    directions: [
+      { label: 'Warmer', text: 'Shorten it. A nickname invented at the table is a relationship inventing itself.' },
+      { label: 'Wider', text: 'Ask them to name someone else for the next job. Names spread.' },
+      { label: 'Darker', text: 'Say the name the way somebody else used to say it, and let them ask why.' },
+    ],
+    out: 'If they have nothing, answer the question yourself and thank them by name anyway. The naming already landed; the answer was never the point.',
+  },
+  {
+    bankId: 'pull-in/give-them-a-job',
+    aimKind: 'person',
+    useWhen: 'A scene is about to happen and someone at the table has no reason to be in it — which is the real reason quiet players stay quiet.',
+    moves: [
+      { kind: 'do', text: 'Before the scene starts, assign them something concrete and slightly too important. Watch the door. Hold the light. Count.' },
+      { kind: 'say', text: '"I need one person on this and I need it to be someone who will actually do it."' },
+    ],
+    goal: 'A job is a licence to interrupt. Someone with a task can speak up any time without deciding whether their contribution is interesting enough — that decision is the thing that silences people, and the job removes it entirely.',
+    followUp: 'Check in with them mid-scene, once, without being asked. "Still clear?" That one line tells the table their job is real and gives them a second free entrance.',
+    directions: [
+      { label: 'Escalate', text: 'The job goes wrong. It was never busywork and now they are the scene.' },
+      { label: 'Trust', text: 'Act on their report without verifying it. Publicly.' },
+      { label: 'Swap', text: 'Next scene, ask them to hand the job to whoever they think is best. Now they are casting.' },
+    ],
+    out: 'Release them out loud when the scene turns — "you are off the door, come here" — so leaving the job is also an invitation in.',
+  },
 ]
 
 /* ─── open-scene ─────────────────────────────────────────────────────────── */
@@ -153,6 +188,40 @@ const OPEN_SCENE: readonly BankedBeat[] = [
       { label: 'Habit', text: 'Agree to do this again tomorrow. You have just invented a ritual.' },
     ],
     out: '"Go back to sleep. I have got it." Let them off. The offer stands for another night.',
+  },
+  {
+    bankId: 'open-scene/the-first-night',
+    aimKind: 'room',
+    useWhen: 'Someone new has joined the group tonight, in the fiction or at the table, and the polite version of this scene is about to happen instead of a real one.',
+    moves: [
+      { kind: 'do', text: 'Deal everyone in physically — pass something around the circle so every single person has to take it and hand it on.' },
+      { kind: 'say', text: '"New blood. Which means we do the thing. Everybody gives one piece of advice, and one of them has to be a lie."' },
+    ],
+    goal: 'Turn an introduction into a game with a rule, so nobody has to invent a personality on demand in front of strangers. Structure is kindness. A newcomer who is handed a format performs; a newcomer who is handed an open floor freezes.',
+    followUp: 'Go first, give obviously terrible advice, and let the table roast you for it. You have just shown them that being wrong here is safe, which is the only thing they actually needed to know.',
+    directions: [
+      { label: 'Warmer', text: 'The advice turns sincere three people in. Let it. Do not rescue it with a joke.' },
+      { label: 'Escalate', text: 'Make them guess which one was the lie. Everyone is now paying attention to everyone.' },
+      { label: 'Bond', text: 'Someone\'s advice is genuinely useful. Follow it later, out loud, and say whose it was.' },
+    ],
+    out: '"Or ignore all of us and stay alive out of spite. That works too." The circle closes and nobody was put on the spot.',
+  },
+  {
+    bankId: 'open-scene/why-are-we-still-here',
+    aimKind: 'room',
+    useWhen: 'The group has been together a while and nobody has ever said out loud why any of them stay.',
+    moves: [
+      { kind: 'do', text: 'Look around the whole circle deliberately, one face at a time, before you say anything.' },
+      { kind: 'say', text: '"Any one of us could walk tonight and be fine. So why is nobody walking?"' },
+    ],
+    goal: 'Ask the question the campaign has been assuming the answer to. Every player has a private reason their character stays, and almost none of them have ever been given a moment to say it — this is the moment, and it retroactively makes every session before it mean more.',
+    followUp: 'Do not answer for anyone or fill a pause. Whoever speaks second has told you what they want the campaign to be about; build your next three scenes out of that.',
+    directions: [
+      { label: 'Sincere', text: 'Somebody says something true and the table goes quiet. Sit in it.' },
+      { label: 'Deflect', text: 'Everyone jokes. Ask it once more, quieter. The second ask is the real one.' },
+      { label: 'Fracture', text: 'Somebody genuinely has one foot out. That is now the best plotline you have.' },
+    ],
+    out: '"Money. It is obviously money. Forget I asked." Let the table laugh and keep the answer you already got from their faces.',
   },
 ]
 
@@ -211,6 +280,41 @@ const REACT: readonly BankedBeat[] = [
     ],
     out: '"Right. Later." Move to the practical thing. The beat is banked and you can spend it whenever you want.',
   },
+  {
+    bankId: 'react/yes-and-out-loud',
+    aimKind: 'person',
+    useWhen: 'Another player has just made an offer — invented a detail, claimed something about the world, done something odd — and the table\'s instinct is to question it or correct it.',
+    moves: [
+      { kind: 'do', text: 'Physically accept it. Act as though the thing they invented is already true and has been true for years.' },
+      { kind: 'say', text: '"Right — you would know. You were the one who was there."' },
+      { kind: 'ask', text: '"So what do we do about it?"' },
+    ],
+    goal: 'This is the entire foundation of improv, and it is worth more at a table than any clever line: accept the offer, then add to it. A questioned offer dies and the player who made it stops making them. An accepted offer becomes canon and that player makes ten more tonight.',
+    followUp: 'Add one detail of your own on top of theirs, and make yours smaller than theirs. You are building their idea, not replacing it, and the size of your addition is how they can tell which one you are doing.',
+    directions: [
+      { label: 'Heighten', text: 'Treat their invention as far more important than they meant it. Commit harder than they did.' },
+      { label: 'Bond', text: 'Your character already knew. Now the two of you share a secret nobody else has.' },
+      { label: 'Wider', text: 'Ask the DM to confirm it. You have just co-written the world with a player.' },
+    ],
+    out: 'If it genuinely cannot be true, keep the feeling and drop the fact: "then somebody wanted us to think so." Nothing is corrected and nobody is embarrassed.',
+  },
+  {
+    bankId: 'react/answer-with-a-question',
+    aimKind: 'dm',
+    useWhen: 'You have been asked something your character would not simply answer, and the honest reply would end the scene in one line.',
+    moves: [
+      { kind: 'do', text: 'Do not break eye contact and do not fill the pause. Let them sit in the fact that you heard the question.' },
+      { kind: 'say', text: '"You already know the answer. What I want to know is why you are asking me here, with everyone listening."' },
+    ],
+    goal: 'Return the pressure instead of absorbing it. An answer closes a scene; a question about the question opens a bigger one and moves the interesting material from your backstory to the space between two characters, where the table can actually watch it.',
+    followUp: 'Whatever reason they give, believe it out loud and act slightly wounded that they needed one. Generosity plays as strength, never weakness.',
+    directions: [
+      { label: 'Escalate', text: 'They double down in public. Good — now the whole table is in the scene.' },
+      { label: 'Private', text: 'Offer to answer properly, later, alone. You just scheduled a two-hander.' },
+      { label: 'Reveal', text: 'Answer it honestly after all, and let the delay be what makes it land.' },
+    ],
+    out: '"...it does not matter. Ask me again tomorrow." Break the look first. Refusing to answer is itself an answer and the table read it.',
+  },
 ]
 
 /* ─── raise ──────────────────────────────────────────────────────────────── */
@@ -268,6 +372,40 @@ const RAISE: readonly BankedBeat[] = [
     ],
     out: '"That is all. Forget I did that." Step back. Everyone gets to pretend it did not happen.',
   },
+  {
+    bankId: 'raise/change-your-mind-in-public',
+    aimKind: 'person',
+    useWhen: 'You argued for something, someone else argued against it, and you have quietly realised they were right — and the scene is about to move on without anyone noticing.',
+    moves: [
+      { kind: 'do', text: 'Stop the room. Get everyone\'s attention deliberately, the way you would for bad news.' },
+      { kind: 'say', text: '"I was wrong and they were right, and I want that said in front of everybody rather than quietly later."' },
+    ],
+    goal: 'Publicly losing an argument on purpose raises the stakes of every future argument, because it establishes that the disagreements at this table are real and can actually be won. It also hands the other player a victory they did not have to fight for, which is the most generous thing one character can do to another.',
+    followUp: 'Then do what they said, immediately and completely, without hedging or adding a condition. The follow-through is the entire beat; the words were just the announcement.',
+    directions: [
+      { label: 'Bond', text: 'They are visibly thrown by the grace of it. Let that sit — you have changed something between you.' },
+      { label: 'Cost', text: 'Being right turns out to be worse than being wrong. Neither of you says so.' },
+      { label: 'Pattern', text: 'Ask them to tell you next time, sooner. You have just made them the conscience of the party.' },
+    ],
+    out: 'If the moment is too big for the room, shrink it to one line as you walk past them: "you were right." Said once, quietly, it still counts.',
+  },
+  {
+    bankId: 'raise/name-what-you-want',
+    aimKind: 'room',
+    useWhen: 'Your character has wanted something for several sessions and has never once said it out loud, which means the DM cannot give it to you and no other player can get in its way.',
+    moves: [
+      { kind: 'do', text: 'Sit down opposite the person most likely to object, so the statement has a face pointed at it.' },
+      { kind: 'say', text: '"I want something out of this and I have not said what. I am saying it now, so that when I choose it over you, none of you get to be surprised."' },
+    ],
+    goal: 'A stated want is the most useful thing you can hand a DM and the other players — it turns your character from a participant into a pressure. Wants that stay private cannot be threatened, bargained with, or cost you anything, which is another way of saying they cannot generate a single scene.',
+    followUp: 'Say the specific thing, not the noble abstraction of it. "I want the house back" is playable; "I want justice" is a mission statement and nobody can take it away from you.',
+    directions: [
+      { label: 'Alliance', text: 'Somebody wants the same thing. You now have a faction inside the party.' },
+      { label: 'Collision', text: 'Somebody wants the opposite. Do not resolve it tonight — let it stand.' },
+      { label: 'Leverage', text: 'The DM has now been handed the exact thing to offer you when it will hurt most. That is a gift.' },
+    ],
+    out: '"And if it never happens, I will live. Probably." Break the tension yourself. The want is on the table and it does not go back in.',
+  },
 ]
 
 /* ─── land ───────────────────────────────────────────────────────────────── */
@@ -323,6 +461,40 @@ const LAND: readonly BankedBeat[] = [
       { label: 'Inherit', text: 'A new player is taught the ritual. That is a campaign with a history.' },
     ],
     out: 'If it feels too solemn for the table tonight, make the last line a joke about your own sincerity and pack up.',
+  },
+  {
+    bankId: 'land/hand-on-the-thread',
+    aimKind: 'person',
+    useWhen: 'A scene is finishing and you can feel that the next one is going to default to you again, because it has defaulted to you all night.',
+    moves: [
+      { kind: 'do', text: 'Physically close your own business — put the thing away, sit back, stop occupying the middle.' },
+      { kind: 'say', text: '"That is mine done. [Their name] has been sitting on something all evening and I would rather hear it than sleep."' },
+    ],
+    goal: 'End your scene by starting somebody else\'s. This is the move that separates a player the table enjoys from a player the table needs, and it costs you nothing — you already had your moment, and pointing at the next one makes it look deliberate rather than lucky.',
+    followUp: 'Then actually shut up. Do not co-narrate their scene, do not add colour, do not help. Your job for the next five minutes is to be a good audience, visibly.',
+    directions: [
+      { label: 'Spotlight', text: 'They take it and run. You just produced the best scene of the night without being in it.' },
+      { label: 'Gentle', text: 'They are not ready. Name something smaller for them instead and move on fast.' },
+      { label: 'Ritual', text: 'Make this how every scene ends. The table will start doing it back to you.' },
+    ],
+    out: 'If nobody picks it up, close the night yourself in one sentence. The invitation was witnessed and it will be taken next time.',
+  },
+  {
+    bankId: 'land/one-sentence-each',
+    aimKind: 'room',
+    useWhen: 'The session is ending, everyone is tired, and the last thing anybody says tonight is about to be a rules question or a parking arrangement.',
+    moves: [
+      { kind: 'do', text: 'Stand up before anyone else does, so the ending is yours and not the clock\'s.' },
+      { kind: 'say', text: '"Before we break. One sentence each: what does your character not tell anybody about tonight?"' },
+    ],
+    goal: 'Close the night in the fiction rather than in the room. One sentence is a small enough ask that even the most reluctant player answers, and every answer is a hook the DM can open with next time — you have just written the top of the next session for them.',
+    followUp: 'Go last, not first, so you can echo somebody else\'s shape and make theirs look like the good one. Then say goodnight while the last line is still in the air.',
+    directions: [
+      { label: 'Echo', text: 'Two secrets are about the same moment. Say so and let everyone feel the shape of it.' },
+      { label: 'Carry', text: 'Write them down. Open next session by asking one person if it is still true.' },
+      { label: 'Lighter', text: 'Ask for the best thing instead of the secret. Same ritual, easier night.' },
+    ],
+    out: 'If the table is too tired, answer it yourself in one line and let that be the ending. One person closing the night properly is enough.',
   },
 ]
 

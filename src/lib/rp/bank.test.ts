@@ -12,10 +12,23 @@ import { BEAT_INTENTS } from './types'
    ========================================================================== */
 
 describe('every intent can answer, and answer completely', () => {
-  it('has at least three beats for every intent', () => {
-    // Fewer than three and the ↻ button starts repeating within one scene.
+  it('has at least five beats for every intent', () => {
+    /* RAISED FROM THREE IN SLICE 6, and the raise is the slice.
+       Three survives a blip. It does not survive an evening: ↻ four times on one
+       intent and he is looking at a card he has already read, which tells him
+       the offline mode is a token gesture at precisely the moment he is relying
+       on it. Five is one per major scene of a session. */
     for (const intent of BEAT_INTENTS) {
-      expect(bankFor(intent).length, `${intent} is thin`).toBeGreaterThanOrEqual(3)
+      expect(bankFor(intent).length, `${intent} is thin`).toBeGreaterThanOrEqual(5)
+    }
+  })
+
+  it('never opens two beats in one intent with the same line', () => {
+    // Four distinct entries that all start "Sit down." read as one beat with
+    // different endings, which is how a deep bank still feels shallow.
+    for (const intent of BEAT_INTENTS) {
+      const openings = bankFor(intent).map(b => b.moves[0].text)
+      expect(new Set(openings).size, `${intent} repeats an opening move`).toBe(openings.length)
     }
   })
 
