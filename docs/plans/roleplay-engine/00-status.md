@@ -21,7 +21,9 @@ thinking.
       The `{error && <p className="text-red-400">}` at old line 192 is deleted.
 - [x] Slice 5 — the page has a spine: persona → **scene / ask / beat / table** →
       a "Between scenes" rule → everything that used to be a peer of it.
-- [ ] Slice 6 — the bank gets deep (5+ beats per intent).
+- [x] Slice 6 — the bank gets deep (5+ beats per intent). Ten new entries chosen
+      for a campfire with two first-timers; `bank.test.ts` floor raised 3 → 5 and
+      a new test forbids two beats in one intent opening on the same line.
 
 ## Verification
 

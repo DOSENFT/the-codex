@@ -75,6 +75,67 @@ const TABLE: Readonly<Record<string, string>> = {
   'hearthfire manifest': 'hearthfire-manifest',
   'flaming cloak': 'flaming-cloak',
   'misty step': 'misty-step',
+
+  /* ── THE PREPARED SET ──────────────────────────────────────────────────────
+     Everything above this line is a COMBAT row: a thing the turn composer
+     emits, which is what slice 7 measured itself against. Everything below is
+     a GRIMOIRE row — a spell he can prepare at level 7 but that never becomes
+     a turn option, and therefore never appeared in that measurement at all.
+
+     Marcus's ask, verbatim: "do the spell art for the remaining ones that I
+     have already prepared." Measured rather than guessed: `spells.json` holds
+     41 entries with `castableAtLevel7 && !lockedForMarcus`, of which the
+     seventeen above covered six. These are the other thirty-five minus the
+     eight Blessed Warrior cantrip OPTIONS — he picked two of those nine and
+     Sacred Flame is one; drawing the seven he did not pick would be seven
+     marks nobody ever sees, which is the exact thing the phantom-key test
+     below exists to forbid.
+
+     Deliberately NOT here: everything at spell level 3+. He is a level 7
+     paladin with 2nd-level slots, `castableAtLevel7` is false for all of it,
+     and it cannot appear in his prepared list until he levels. Fireball is the
+     `markFor` null test case precisely because of this.
+
+     Drawn as geometry rather than traced from raster art — see
+     `public/marks/STYLE.md` for the palette, the weight floors and the shape
+     vocabulary that keeps forty-four files looking like one set. */
+
+  // ── fire: the Oath of the Hearth ─────────────────────────────────────────
+  'burning hands': 'burning-hands',
+  'scorching ray': 'scorching-ray',
+  'searing orb': 'searing-orb',
+  'searing smite': 'searing-smite',
+  'faerie fire': 'faerie-fire',
+
+  // ── the blade, and what is added to it ───────────────────────────────────
+  'compelled duel': 'compelled-duel',
+  'divine favor': 'divine-favor',
+  'magic weapon': 'magic-weapon',
+  'shining smite': 'shining-smite',
+  'thunderous smite': 'thunderous-smite',
+  'wrathful smite': 'wrathful-smite',
+
+  // ── verdant keeps someone up ─────────────────────────────────────────────
+  aid: 'aid',
+  'lesser restoration': 'lesser-restoration',
+  'prayer of healing': 'prayer-of-healing',
+  'protection from poison': 'protection-from-poison',
+  'purify food and drink': 'purify-food-and-drink',
+  'detect poison and disease': 'detect-poison-and-disease',
+
+  // ── sensing, and truth ───────────────────────────────────────────────────
+  'detect evil and good': 'detect-evil-and-good',
+  'detect magic': 'detect-magic',
+  'locate object': 'locate-object',
+  'zone of truth': 'zone-of-truth',
+  'gentle repose': 'gentle-repose',
+
+  // ── the word, the ward, and the bond ─────────────────────────────────────
+  command: 'command',
+  heroism: 'heroism',
+  'protection from evil and good': 'protection-from-evil-and-good',
+  wardaway: 'wardaway',
+  'find steed': 'find-steed',
 }
 
 /** The separators the app itself puts between an ability and its instance.

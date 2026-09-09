@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>The marks — contact sheet</title>
+<!-- Throwaway. Open this file to see all 44 marks at the two sizes that matter:
+     34px, which is the combat row on his phone, and 96px, which is how they get
+     judged in an editor. If a glyph reads at the small size it works; if it only
+     reads at the large one it has failed the job it was drawn for. -->
+<style>
+  body { background:#14120f; color:#e8c87a; font:13px/1.4 ui-sans-serif,system-ui; margin:0; padding:24px; }
+  h1 { font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:#8a7f6b; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:18px; margin-top:20px; }
+  .cell { text-align:center; }
+  .row { display:flex; align-items:center; justify-content:center; gap:10px; }
+  img.sm { width:34px; height:34px; border-radius:9px; border:1px solid #2a2620; }
+  img.lg { width:96px; height:96px; border-radius:16px; border:1px solid #2a2620; }
+  .nm { margin-top:7px; color:#cbbf9e; font-size:11px; word-break:break-word; }
+</style>
+<h1>The marks — 34px is the one that counts</h1>
+<div class="grid" id="g"></div>
+<script>
+const SLUGS = ["aid","bless","burning-hands","channel-divinity","command","compelled-duel","cure-wounds","detect-evil-and-good","detect-magic","detect-poison-and-disease","divine-favor","divine-sense","divine-smite","faerie-fire","find-steed","flaming-cloak","gentle-repose","hearthbrand","hearthfire-manifest","heroism","interception","javelin","lay-on-hands","lesser-restoration","locate-object","magic-weapon","misty-step","opportunity-attack","prayer-of-healing","protection-from-evil-and-good","protection-from-poison","purify-food-and-drink","sacred-flame","scorching-ray","searing-orb","searing-smite","sentinel","shield-of-faith","shining-smite","thunderous-smite","wardaway","warding-bond","wrathful-smite","zone-of-truth"];
+// Cache-buster. Chrome caches an SVG hard, and a redrawn mark that still shows
+// the old glyph is worse than no contact sheet at all — it says "your fix did
+// nothing" when the fix landed fine. The page URL's own query is reused so
+// ?v=3 busts every image in one go.
+const V = location.search.slice(1) || '1';
+document.getElementById('g').innerHTML = SLUGS.map(s =>
+  `<div class="cell"><div class="row"><img class="lg" src="${s}.svg?${V}" alt=""><img class="sm" src="${s}.svg?${V}" alt=""></div><div class="nm">${s}</div></div>`
+).join('');
+</script>

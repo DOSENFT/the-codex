@@ -1,0 +1,5 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" style="display: block;" viewBox="0 0 2048 2048" width="1024" height="1024" preserveAspectRatio="xMidYMid meet">
+<path transform="translate(0,0)" fill="rgb(20,18,15)" d="M 0 0 L 2048 0 L 2048 2048 L 0 2048 L 0 0 z"/>
+<path transform="translate(0,0)" fill="rgb(57,217,138)" d="M 1024 250 L 1740 470 C 1740 1180 1450 1610 1024 1800 C 598 1610 308 1180 308 470 Z"/>
+<path transform="translate(0,0)" fill="rgb(20,18,15)" d="M 1024 612 C 1239 908 1333 1064 1333 1236 C 1333 1408 1195 1548 1024 1548 C 853 1548 715 1408 715 1236 C 715 1064 809 908 1024 612 Z"/>
+</svg>

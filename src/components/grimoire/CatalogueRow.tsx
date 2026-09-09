@@ -27,6 +27,7 @@
 import { useState, type ReactNode } from 'react'
 import { ChevronDown, ChevronUp, Copy, Dices, Lock, Minus, Pencil, Plus, Shield, Sparkles, Star, Trash2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { markFor } from '../../lib/canon/marks'
 import type { CatalogueEntry } from '../../lib/catalogue/types'
 import type { EntryDetail } from '../../lib/catalogue/detail'
 import type { ErratumRulings } from '../../lib/errata-rulings'
@@ -83,7 +84,57 @@ const COST_COLOUR: Record<CatalogueEntry['turnCost'], string> = {
   other: 'text-forge-2',
 }
 
+/* THE LEADING GLYPH — the mark if this entry has one, the kind icon if not.
+ *
+ * ── WHY THE MARK BELONGS HERE AND NOT ONLY IN COMBAT ────────────────────────
+ * Marcus's ask, verbatim: "make good looking, memorable icons/images per spell
+ * so it's super easy for me to see the spell and know what I'm looking at at a
+ * glance. This will psychologically help memorize and know my spells naturally."
+ *
+ * Slice 7 delivered that on the COMBAT row and nowhere else, because that was
+ * the only place `markFor` had a caller. But memorising a spell does not happen
+ * mid-turn with six people waiting — it happens HERE, in the list he scrolls
+ * while preparing. Forty-four marks that only ever appear on the ten rows the
+ * turn composer emits is art doing a third of the job it was drawn for.
+ *
+ * ── IT REPLACES THE KIND ICON RATHER THAN JOINING IT ────────────────────────
+ * Two glyphs on one line is two things to look at, and the second says what the
+ * first already said — every marked entry is a spell, so a Sparkles beside its
+ * mark carries no information. `KindIcon` stays as the fallback and is still a
+ * common answer: the catalogue is eighty-four entries and forty-four have art.
+ *
+ * ── 28px, NOT THE COMBAT ROW'S 34 ───────────────────────────────────────────
+ * This row is two lines of small text at `py-2.5`; 34px would grow every row in
+ * an eighty-four-row list to make room for the glyph. 28 sits inside the height
+ * the two text lines already occupy, so the mark arrives without the list
+ * getting longer.
+ *
+ * ── BASE PATH ───────────────────────────────────────────────────────────────
+ * `__CODEX_BASE__`, the build constant, for the reason `TurnRow.tsx` documents
+ * at length and paid for with a live deploy of fourteen broken images: Vite
+ * substitutes the ambient environment read by matching the DOTTED spelling
+ * only, the repo's commit guard rejects that spelling, and the bracket
+ * workaround compiles, type-checks, passes every test, and silently resolves to
+ * `/` in the browser. `marks.test.ts` asserts this file's spelling for that
+ * reason — the fault is invisible to a renderer test and obvious in a browser. */
 function KindIcon({ entry }: { entry: CatalogueEntry }) {
+  const mark = markFor(entry.name)
+  if (mark) {
+    return (
+      <img
+        className="amark h-7 w-7 shrink-0 rounded-lg border border-white/10 bg-white/[0.03]"
+        src={`${__CODEX_BASE__}marks/${mark}.svg`}
+        alt=""
+        aria-hidden="true"
+        /* A mark whose file does not arrive removes itself, exactly as the
+           combat row's does. `display: none` takes it out of the flex line
+           entirely, its gap included, so a stale precache or a half-finished
+           deploy degrades to the row this replaced — not to a torn-page icon
+           repeated down the whole list. */
+        onError={e => { e.currentTarget.style.display = 'none' }}
+      />
+    )
+  }
   if (entry.kind === 'spell') return <Sparkles size={14} className="text-arcane" aria-hidden />
   if (entry.kind === 'feat') return <Star size={14} className="text-gold" aria-hidden />
   return <Shield size={14} className="text-eldritch-lit" aria-hidden />
