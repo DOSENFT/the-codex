@@ -35,10 +35,23 @@ interface GeminiModelPickerProps {
   variant?: 'list' | 'chips'
 }
 
-const AUTOMATIC: GeminiModel = {
+/** AUTOMATIC IS NOT "THE NEWEST ONE". It used to say that, and that sentence is
+ *  the reason Marcus said "gemini just sucks. Not even worth having on it."
+ *
+ *  `rankGeminiModels` sorts by TIER before version: flash → flash-lite → other
+ *  flash → pro. That is the right default and it is deliberate — flash has the
+ *  most generous free quota, so it is the one that still answers at 9pm — but
+ *  it means Automatic will pick an OLDER flash over a NEWER pro, every time.
+ *  He has been talking to the cheap model all along and the control told him he
+ *  was on the newest thing available.
+ *
+ *  So the copy now says which trade it is making, and names the way out of it:
+ *  Pro is sitting in the same list, one tap below. Exported because a claim in
+ *  the UI about how the ranking behaves has to be pinned to the ranking. */
+export const AUTOMATIC: GeminiModel = {
   id: '',
   label: 'Automatic',
-  description: 'The newest one your key can reach',
+  description: 'Fast, with the biggest free quota. Pick Pro below for stronger answers.',
 }
 
 type LoadState = 'idle' | 'loading' | 'ok' | 'error'
