@@ -664,6 +664,31 @@ export async function fetchOllamaModels(
    correctness fix; removing it restores a silent failure that reports success. */
 const OLLAMA_NUM_CTX = 32768
 
+/* ─── `keep_alive`, and the four-and-a-half minute wait ───────────────────────
+
+   OLLAMA UNLOADS A MODEL AFTER FIVE MINUTES IDLE, and reloading a 27B off the
+   external USB drive it lives on takes 4m30s — measured, not estimated. Five
+   minutes is shorter than a turn of play. Read the room description, argue
+   about what to do, roll, come back: the model is gone, and the next message
+   sits on a spinner for four and a half minutes with no indication that it is
+   loading rather than hung.
+
+   That is a worse failure than it looks, because it is INTERMITTENT BY CLOCK.
+   Fast when he is typing quickly, catastrophic the moment a scene slows down —
+   so it reads as "the AI is flaky again", which is the exact complaint that
+   started this whole change. Local was never slow; it was unloading.
+
+   An hour, not `-1`. `-1` pins the model in VRAM forever, and it is holding
+   18.7 GB of a 24 GB card — so "never unload" means his GPU is permanently
+   half-gone and the next game stutters for a reason he would have no way to
+   connect to a D&D app he closed yesterday. An hour outlasts any real gap in
+   play and still gives the card back on its own.
+
+   Same reasoning as `num_ctx` for why it is in the request and not
+   OLLAMA_KEEP_ALIVE on the server: a server env var is a setting that exists on
+   one desktop and silently isn't there on any other host he points this at. */
+const OLLAMA_KEEP_ALIVE = '1h'
+
 const ollamaOptions = (temperature: number) => ({ temperature, num_ctx: OLLAMA_NUM_CTX })
 
 async function queryOllama(cfg: AIConfig, systemPrompt: string, userMessage: string, temperature: number, signal?: AbortSignal): Promise<string> {
@@ -681,6 +706,7 @@ async function queryOllama(cfg: AIConfig, systemPrompt: string, userMessage: str
         ],
         stream: false,
         options: ollamaOptions(temperature),
+        keep_alive: OLLAMA_KEEP_ALIVE,
       }),
     })
     b.touch()
@@ -1734,11 +1760,13 @@ async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: st
           { role: 'user', content: userMessage },
         ],
         stream: true,
-        /* Same `num_ctx` as the blocking path, and it must stay that way. The
-           streaming path is the one the roleplay card uses, so a fix applied to
-           only one of these is a fix he gets on some screens — the exact split
-           that let the 503 die in his face while the retry worked elsewhere. */
+        /* Same `num_ctx` and `keep_alive` as the blocking path, and it must stay
+           that way. The streaming path is the one the roleplay card uses, so a
+           fix applied to only one of these is a fix he gets on some screens —
+           the exact split that let the 503 die in his face while the retry
+           worked elsewhere. */
         options: ollamaOptions(temperature),
+        keep_alive: OLLAMA_KEEP_ALIVE,
       }),
     })
     b.touch()

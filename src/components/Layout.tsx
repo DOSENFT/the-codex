@@ -6,7 +6,7 @@ import { SPRING_SNAP } from '../lib/motion-utils'
 import { Sheet } from './ui/Sheet'
 import type { Character, RosterEntry } from '../lib/character'
 import { Badge } from './ui/Badge'
-import { DiceRoller } from './DiceRoller'
+import { RollCapture } from './RollCapture'
 import { CharacterSheet } from './CharacterSheet'
 import { MechanicsDrawer } from './MechanicsDrawer'
 import { ToyboxPanel } from './ToyboxPanel'
@@ -517,8 +517,8 @@ export function Layout({
       </button>
       )}
 
-      {/* ─── Dice Roller Panel ─── */}
-      <DiceRoller
+      {/* ─── Roll Capture Panel ─── */}
+      <RollCapture
         isOpen={diceOpen}
         onClose={() => { setDiceOpen(false); onClearDicePrefill?.() }}
         character={character}

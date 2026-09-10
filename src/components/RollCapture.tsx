@@ -1,31 +1,76 @@
-import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { ChevronDown, ChevronRight, Minus, Plus, X } from 'lucide-react'
 import { motion } from 'motion/react'
 import { cn } from '../lib/cn'
 import { SPRING_SETTLE, SHEET_EXIT } from '../lib/motion-utils'
-import { useMotionPreference } from '../hooks/useReducedMotion'
 import { useInertWhenClosed } from '../hooks/useInertWhenClosed'
-
-/* GPU dice stage — lazy so three.js loads only when the roller is first used */
-const DiceStage = lazy(() => import('./dice/DiceStage'))
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 import { GlassCard } from './ui/GlassCard'
 import { OrnateHeader } from './ui/OrnateHeader'
-import { DiceAnimation } from './DiceAnimation'
-import { secureDie, rollDice, formatRollNotation } from '../lib/dice'
-import type { DieType, AdvantageState, RollResult } from '../lib/dice'
+import { formatRollNotation } from '../lib/dice'
+import type { DieType, AdvantageState } from '../lib/dice'
 import { attackBonus, abilityModifier, savingThrowBonus } from '../lib/character'
 import type { Character, Weapon, AbilityKey } from '../lib/character'
 import { ALL_ABILITIES, ABILITY_NAMES } from '../lib/dnd-rules'
 
+/* ─────────────────────────────────────────────────────────────────────────────
+ * RollCapture — was `DiceRoller`, and the rename is the whole point.
+ *
+ * Marcus rolls physical dice. Every time, without exception. The old component
+ * shipped a three.js stage that tumbled a GPU-rendered d20 he has never once
+ * watched — 230 KB gzipped, 31% of the app's total JavaScript, for an
+ * impression of an object already sitting on the table in front of him.
+ *
+ * So the model inverted. He owns the randomness; the app owns the arithmetic.
+ * A d20 is an excellent random number generator and a terrible calculator, and
+ * the calculator is the half that goes wrong under a clock — the app already
+ * knows his attack bonus is +8, so asking him to add 8 to a 14 in his head,
+ * mid-fight, is the app declining to do the one part it is better at.
+ *
+ * What that leaves is genuinely most of this file. Die type, quantity,
+ * modifier, advantage, the character presets — all of those describe WHAT to
+ * roll, which is exactly the right thing for an app to say to someone holding
+ * dice. Only the button that pretended to roll them is gone, replaced by a box
+ * that takes the number his die actually showed.
+ *
+ * DELETED WITH IT, and not coming back quietly: `secureDie`, `rollDice`,
+ * `RollResult`, `DiceStage.tsx`, `DiceAnimation.tsx`, `three`,
+ * `@react-three/fiber`. Nothing downstream consumed a roll result — no damage
+ * application, no HP, no slot spend read it — which is what made the removal
+ * safe rather than merely desirable.
+ * ────────────────────────────────────────────────────────────────────────── */
+
 /* ─── Types ─── */
 
-interface DiceRollerProps {
+interface RollCaptureProps {
   isOpen: boolean
   onClose: () => void
   character?: Character
   prefill?: { notation: string; label: string } | null
+}
+
+/** One roll, already made with real dice, written down.
+ *
+ *  `faces` is what the dice showed and `total` is what it comes to; the two are
+ *  stored side by side rather than one derived on read, because the arithmetic
+ *  is the service this panel provides and a stored answer is one that can be
+ *  checked against the dice still lying on the table. */
+interface Capture {
+  id: number
+  dieType: DieType
+  quantity: number
+  modifier: number
+  advantage: AdvantageState
+  /** One entry normally. Two on a d20 with advantage or disadvantage, because
+   *  that is the one case where a hand genuinely reads two dice separately
+   *  instead of scooping up a fistful and reading the sum. */
+  faces: number[]
+  /** The face that counts — higher on advantage, lower on disadvantage. Equal
+   *  to `faces[0]` in every other case. */
+  kept: number
+  total: number
+  label: string | null
 }
 
 /* ─── Constants ─── */
@@ -47,23 +92,46 @@ const MIN_QUANTITY = 1
 const MAX_MODIFIER = 20
 const MIN_MODIFIER = -20
 const MAX_HISTORY = 5
-/* Matches the GPU dice settle time so the number lands as the die comes to rest */
-const ROLL_ANIMATION_MS = 700
 
 interface QuickPreset {
   label: string
   dieType: DieType
   quantity: number
   modifier: number
-  advantage: AdvantageState
-  immediate: boolean
 }
 
 const QUICK_PRESETS: QuickPreset[] = [
-  { label: 'd20', dieType: 20, quantity: 1, modifier: 0, advantage: 'normal', immediate: true },
-  { label: 'd20+mod', dieType: 20, quantity: 1, modifier: 0, advantage: 'normal', immediate: false },
-  { label: '2d6', dieType: 6, quantity: 2, modifier: 0, advantage: 'normal', immediate: true },
+  { label: 'd20', dieType: 20, quantity: 1, modifier: 0 },
+  { label: '1d8', dieType: 8, quantity: 1, modifier: 0 },
+  { label: '2d6', dieType: 6, quantity: 2, modifier: 0 },
 ]
+
+/* ─── Roll arithmetic (no randomness anywhere in this file) ─── */
+
+/** The lowest and highest a set of dice can physically show.
+ *
+ *  This exists to refuse a typo before it becomes a wrong number on the DM's
+ *  side of the table. 2d8 cannot be 19. A box that accepts 19 is a box that
+ *  will eventually cost a fight, and the cost lands minutes later when nobody
+ *  can reconstruct where it came from.
+ *
+ *  The modifier is deliberately OUTSIDE this range: you type the dice, the app
+ *  adds the bonus. Folding the modifier in would mean the one number he enters
+ *  is the one number he had to do mental arithmetic on first. */
+export function faceRange(dieType: DieType, quantity: number): [number, number] {
+  return [quantity, quantity * dieType]
+}
+
+/** How many number boxes this roll needs. See `Capture.faces`. */
+export function boxCount(dieType: DieType, advantage: AdvantageState): number {
+  return dieType === 20 && advantage !== 'normal' ? 2 : 1
+}
+
+/** The face that counts, once both d20s are in. */
+export function keptFace(faces: number[], advantage: AdvantageState): number {
+  if (faces.length < 2) return faces[0]
+  return advantage === 'disadvantage' ? Math.min(...faces) : Math.max(...faces)
+}
 
 /* ─── Sub-Components ─── */
 
@@ -226,163 +294,218 @@ function AdvantageToggle({
   )
 }
 
-function RollResultDisplay({
-  result,
-  animatingTotal,
-  isAnimating,
-}: {
-  result: RollResult
-  animatingTotal: number | null
-  isAnimating: boolean
-}) {
-  const displayTotal = animatingTotal !== null ? animatingTotal : result.total
-  const isNat20 = result.dieType === 20 && result.keptDice.length === 1 && result.keptDice[0] === 20
-  const isNat1 = result.dieType === 20 && result.keptDice.length === 1 && result.keptDice[0] === 1
-  const { shouldReduceMotion } = useMotionPreference()
+/* ─── The capture strip ─── */
 
-  const fallbackChip = (
-    <DiceAnimation
-      value={displayTotal}
-      dieType={result.dieType}
-      isAnimating={isAnimating}
-    />
+/** `you rolled [ 14 ] +8 → 22`.
+ *
+ *  SPLIT OUT AND EXPORTED SO IT CAN BE PROVED, for the reason
+ *  `RetaliationCapture` gives about its own confirm strip: this repo has no
+ *  jsdom, component claims are made with `renderToStaticMarkup`, and a strip
+ *  that only appears after typing would otherwise be the one part of this
+ *  panel the unit suite could never see. It is also the part that carries the
+ *  arithmetic, which is the entire product. */
+export function CaptureStrip({
+  dieType,
+  quantity,
+  modifier,
+  advantage,
+  faces,
+  onFaceChange,
+  onCommit,
+  firstFaceRef,
+}: {
+  dieType: DieType
+  quantity: number
+  modifier: number
+  advantage: AdvantageState
+  /** Raw text, one per box — never numbers. A half-typed "1" on the way to
+   *  "14" is a valid thing to be holding, and a number type cannot hold it. */
+  faces: string[]
+  onFaceChange: (index: number, value: string) => void
+  onCommit: () => void
+  firstFaceRef?: React.Ref<HTMLInputElement>
+}) {
+  const [lo, hi] = faceRange(dieType, quantity)
+  const boxes = boxCount(dieType, advantage)
+
+  const parsed = faces.slice(0, boxes).map(f => Number.parseInt(f, 10))
+  const allEntered = parsed.length === boxes && parsed.every(n => Number.isFinite(n))
+  const inRange = allEntered && parsed.every(n => n >= lo && n <= hi)
+
+  const kept = inRange ? keptFace(parsed, advantage) : null
+  const total = kept === null ? null : kept + modifier
+
+  /* The refusal names the range rather than saying "invalid", because the
+     number that is wrong is sitting in front of him and the useful sentence is
+     the one that tells him which of the two — the dice or the typing — to look
+     at again. */
+  const refusal =
+    allEntered && !inRange
+      ? `${formatRollNotation(quantity, dieType, 0)} can only show ${lo}–${hi}.`
+      : null
+
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-gold/30 bg-void-2/60 px-3 py-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-forge-2">
+          you rolled
+        </span>
+
+        {Array.from({ length: boxes }, (_, i) => (
+          <input
+            key={`face-${i}`}
+            ref={i === 0 ? firstFaceRef : undefined}
+            type="text"
+            inputMode="numeric"
+            value={faces[i] ?? ''}
+            onChange={event => onFaceChange(i, event.target.value)}
+            aria-label={
+              boxes === 2
+                ? `${advantage === 'advantage' ? 'Advantage' : 'Disadvantage'} d20, die ${i + 1} of 2`
+                : `The number your ${formatRollNotation(quantity, dieType, 0)} showed`
+            }
+            className="min-h-[48px] w-16 rounded-lg border border-gold/40 bg-void-1 px-2 text-center font-mono text-lg text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          />
+        ))}
+
+        {modifier !== 0 && (
+          <span className="font-mono text-lg text-ember tabular-nums">
+            {modifier > 0 ? `+${modifier}` : modifier}
+          </span>
+        )}
+
+        {total !== null && (
+          <>
+            <span className="text-forge-2" aria-hidden>=</span>
+            <output
+              className="font-display text-3xl font-bold tabular-nums text-gold"
+              aria-label={`Total ${total}`}
+            >
+              {total}
+            </output>
+          </>
+        )}
+
+        <Button
+          variant="primary"
+          size="md"
+          className="ml-auto"
+          onClick={onCommit}
+          disabled={total === null}
+          aria-label="Write this roll down"
+        >
+          Log it
+        </Button>
+      </div>
+
+      {/* Which d20 the app is going to use, said out loud before he commits —
+          a silent choice between two numbers he can both see is the kind of
+          thing that erodes trust in every other number on the screen. */}
+      {boxes === 2 && kept !== null && (
+        <p className="text-xs text-forge-2">
+          Taking the {advantage === 'advantage' ? 'higher' : 'lower'}: <span className="font-mono text-forge-0">{kept}</span>
+        </p>
+      )}
+
+      {refusal && (
+        <p role="status" className="text-xs leading-snug text-ember">
+          {refusal}
+        </p>
+      )}
+    </div>
   )
+}
+
+/* ─── Result & history ─── */
+
+function CaptureResult({ capture }: { capture: Capture }) {
+  const single = capture.dieType === 20 && capture.quantity === 1
+  const isNat20 = single && capture.kept === 20
+  const isNat1 = single && capture.kept === 1
 
   return (
     <div className="flex flex-col items-center gap-3 py-3">
-      {/* The die itself — GPU stage, CSS chip when motion is reduced or WebGL is absent */}
-      {shouldReduceMotion ? (
-        fallbackChip
-      ) : (
-        <Suspense fallback={fallbackChip}>
-          <DiceStage
-            dieType={result.dieType}
-            count={result.keptDice.length}
-            rollId={result.id}
-            isRolling={isAnimating}
-            fallback={fallbackChip}
-          />
-        </Suspense>
+      {capture.label && (
+        <Badge variant="arcane" className="text-sm px-3 py-1">
+          {capture.label}
+        </Badge>
       )}
 
-      {/* Total */}
       <div
         className={cn(
-          'stat-frame font-display text-5xl font-bold tabular-nums transition-all duration-200 ease-forge px-6 py-2',
+          'stat-frame font-display text-5xl font-bold tabular-nums px-6 py-2',
           isNat20 && 'text-verdant drop-shadow-[0_0_16px_rgba(57,217,138,0.6)]',
           isNat1 && 'text-red-400 drop-shadow-[0_0_16px_rgba(248,113,113,0.6)]',
           !isNat20 && !isNat1 && 'text-forge-0',
         )}
-        aria-live="assertive"
-        aria-label={`Roll result: ${result.total}`}
+        aria-live="polite"
+        aria-label={`Total ${capture.total}`}
       >
-        {displayTotal}
+        {capture.total}
       </div>
 
-      {/* Nat 20 / Nat 1 label */}
       {isNat20 && (
-        <Badge variant="verdant" className="animate-pulse-glow text-xs">
+        <Badge variant="verdant" className="text-xs">
           Natural 20!
         </Badge>
       )}
       {isNat1 && (
-        <Badge
-          variant="neutral"
-          className="border-red-400/40 bg-red-400/15 text-red-400 text-xs"
-        >
+        <Badge variant="neutral" className="border-red-400/40 bg-red-400/15 text-red-400 text-xs">
           Natural 1
         </Badge>
       )}
 
-      {/* Individual dice */}
+      {/* The working, shown. Kept faces lit, the discarded d20 struck through —
+          the same treatment the old roller gave its own dropped die, and it
+          means more here because these are numbers he can look down and check
+          against the table. */}
       <div className="flex flex-wrap items-center justify-center gap-1.5">
-        {result.keptDice.map((value, i) => {
-          const isD20Nat20 = result.dieType === 20 && value === 20
-          const isD20Nat1 = result.dieType === 20 && value === 1
-
+        {capture.faces.map((value, i) => {
+          const dropped = capture.faces.length > 1 && value !== capture.kept
           return (
             <span
-              key={`kept-${i}`}
+              key={`face-${i}`}
               className={cn(
                 'inline-flex items-center justify-center min-w-[44px] h-8 px-2',
                 'rounded-lg font-mono text-sm font-semibold',
-                'animate-fade-in',
-                isD20Nat20 && 'bg-verdant/20 text-verdant border border-verdant/30',
-                isD20Nat1 && 'bg-red-400/20 text-red-400 border border-red-400/30',
-                !isD20Nat20 && !isD20Nat1 && 'bg-arcane/10 text-arcane border border-arcane/20',
+                dropped && 'bg-gold/[0.03] text-forge-2/60 border border-bronze/15 line-through',
+                !dropped && 'bg-arcane/10 text-arcane border border-arcane/20',
               )}
-              style={{ animationDelay: `${i * 60}ms` }}
+              aria-label={dropped ? `Dropped die: ${value}` : undefined}
             >
               {value}
             </span>
           )
         })}
 
-        {/* Show dropped dice in advantage/disadvantage mode */}
-        {result.droppedDice.map((value, i) => (
-          <span
-            key={`dropped-${i}`}
-            className={cn(
-              'inline-flex items-center justify-center min-w-[44px] h-8 px-2',
-              'rounded-lg font-mono text-sm font-medium',
-              'bg-gold/[0.03] text-forge-2/60 border border-bronze/15 line-through',
-              'animate-fade-in',
-            )}
-            style={{ animationDelay: `${(result.keptDice.length + i) * 60}ms` }}
-            aria-label={`Dropped die: ${value}`}
-          >
-            {value}
-          </span>
-        ))}
-
-        {/* Modifier display */}
-        {result.modifier !== 0 && (
-          <span
-            className="stat-frame inline-flex items-center h-8 px-2 font-mono text-sm font-semibold text-ember animate-fade-in"
-            style={{ animationDelay: `${(result.keptDice.length + result.droppedDice.length) * 60}ms` }}
-          >
-            {result.modifier > 0 ? `+${result.modifier}` : result.modifier}
+        {capture.modifier !== 0 && (
+          <span className="stat-frame inline-flex items-center h-8 px-2 font-mono text-sm font-semibold text-ember">
+            {capture.modifier > 0 ? `+${capture.modifier}` : capture.modifier}
           </span>
         )}
       </div>
 
-      {/* Notation */}
       <span className="text-xs text-forge-2 font-mono">
-        {formatRollNotation(result.quantity, result.dieType, result.modifier)}
-        {result.advantage === 'advantage' && ' (adv)'}
-        {result.advantage === 'disadvantage' && ' (disadv)'}
+        {formatRollNotation(capture.quantity, capture.dieType, capture.modifier)}
+        {capture.advantage === 'advantage' && ' (adv)'}
+        {capture.advantage === 'disadvantage' && ' (disadv)'}
       </span>
     </div>
   )
 }
 
-function HistoryCard({ result }: { result: RollResult }) {
-  const isNat20 = result.dieType === 20 && result.keptDice.length === 1 && result.keptDice[0] === 20
-  const isNat1 = result.dieType === 20 && result.keptDice.length === 1 && result.keptDice[0] === 1
-  const notation = formatRollNotation(result.quantity, result.dieType, result.modifier)
+function HistoryCard({ capture }: { capture: Capture }) {
+  const notation = formatRollNotation(capture.quantity, capture.dieType, capture.modifier)
 
   return (
-    <div
-      className={cn(
-        'combat-card flex items-center justify-between px-3 py-2 rounded-lg',
-        'animate-fade-in',
-      )}
-    >
+    <div className="combat-card flex items-center justify-between px-3 py-2 rounded-lg">
       <span className="font-mono text-xs text-forge-2">
+        {capture.label ? `${capture.label} · ` : ''}
         {notation}
-        {result.advantage === 'advantage' && ' adv'}
-        {result.advantage === 'disadvantage' && ' dis'}
+        {capture.advantage === 'advantage' && ' adv'}
+        {capture.advantage === 'disadvantage' && ' dis'}
       </span>
-      <span
-        className={cn(
-          'font-mono text-sm font-bold',
-          isNat20 && 'text-verdant',
-          isNat1 && 'text-red-400',
-          !isNat20 && !isNat1 && 'text-forge-0',
-        )}
-      >
-        = {result.total}
-      </span>
+      <span className="font-mono text-sm font-bold text-forge-0">= {capture.total}</span>
     </div>
   )
 }
@@ -433,14 +556,26 @@ function DisclosureSection({
 
 /* ─── Character Presets Section ─── */
 
+/** His numbers, as buttons. Tapping one no longer rolls anything — it sets up
+ *  the capture strip with the right die and the right bonus already filled in,
+ *  so the only thing left for him to supply is the thing only the table knows.
+ *
+ *  This section survived the removal intact and gets MORE useful without the
+ *  roller, not less: `attackBonus`, `savingThrowBonus` and `weaponDamageMod`
+ *  were always the honest part of this panel, and they were previously in
+ *  service of a fake die. */
 function CharacterPresets({
   character,
-  onRoll,
-  isRolling,
+  onPick,
 }: {
   character: Character
-  onRoll: (dieType: DieType, quantity: number, modifier: number, advantage: AdvantageState) => void
-  isRolling: boolean
+  onPick: (
+    dieType: DieType,
+    quantity: number,
+    modifier: number,
+    advantage: AdvantageState,
+    label: string,
+  ) => void
 }) {
   /** Parse damage dice string like "2d8" into { quantity, dieType } */
   function parseDamageDice(dice: string): { quantity: number; dieType: DieType } | null {
@@ -448,7 +583,6 @@ function CharacterPresets({
     if (!match) return null
     const quantity = parseInt(match[1], 10)
     const sides = parseInt(match[2], 10)
-    // Validate it's a valid die type
     if ([4, 6, 8, 10, 12, 20, 100].includes(sides)) {
       return { quantity, dieType: sides as DieType }
     }
@@ -466,8 +600,7 @@ function CharacterPresets({
     'min-h-[44px] px-3 py-2 rounded-xl',
     'text-xs font-semibold text-left',
     'transition-all duration-200 ease-forge',
-    'enabled:active:scale-95',
-    'disabled:opacity-40 disabled:cursor-not-allowed',
+    'active:scale-95',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
   )
 
@@ -486,8 +619,7 @@ function CharacterPresets({
               <button
                 key={`attack-${weapon.name}`}
                 type="button"
-                disabled={isRolling}
-                onClick={() => onRoll(20, 1, bonus, 'normal')}
+                onClick={() => onPick(20, 1, bonus, 'normal', weapon.name)}
                 className={cn(
                   presetButtonClass,
                   'bg-arcane/10 text-arcane border border-arcane/25',
@@ -506,8 +638,7 @@ function CharacterPresets({
           {/* Spell Attack */}
           <button
             type="button"
-            disabled={isRolling}
-            onClick={() => onRoll(20, 1, character.spellAttackBonus, 'normal')}
+            onClick={() => onPick(20, 1, character.spellAttackBonus, 'normal', 'Spell Attack')}
             className={cn(
               presetButtonClass,
               'bg-eldritch/10 text-eldritch-lit border border-eldritch/25',
@@ -533,8 +664,7 @@ function CharacterPresets({
               <button
                 key={`save-${ability}`}
                 type="button"
-                disabled={isRolling}
-                onClick={() => onRoll(20, 1, bonus, 'normal')}
+                onClick={() => onPick(20, 1, bonus, 'normal', `${ABILITY_NAMES[ability]} Save`)}
                 className={cn(
                   presetButtonClass,
                   'text-center',
@@ -569,8 +699,9 @@ function CharacterPresets({
                 <button
                   key={`damage-${weapon.name}`}
                   type="button"
-                  disabled={isRolling}
-                  onClick={() => onRoll(parsed.dieType, parsed.quantity, damageMod, 'normal')}
+                  onClick={() =>
+                    onPick(parsed.dieType, parsed.quantity, damageMod, 'normal', `${weapon.name} damage`)
+                  }
                   className={cn(
                     presetButtonClass,
                     'bg-ember/10 text-ember border border-ember/25',
@@ -595,41 +726,58 @@ function CharacterPresets({
 /* ─── Main Component ─── */
 
 /**
- * DiceRoller — slide-up panel for rolling D&D 5e (2024) dice.
+ * RollCapture — slide-up panel for writing down a roll you already made.
  *
- * Renders a full-featured dice rolling interface with die type selection,
- * quantity and modifier controls, advantage/disadvantage toggle for d20,
- * animated roll results, roll history, and quick-roll presets.
+ * Die type, quantity, modifier and advantage describe what to reach for; the
+ * character presets fill all four from the sheet. The capture strip takes the
+ * number the dice showed and adds the bonus the app already knows.
  *
- * When a character is provided, shows character-aware preset sections for
- * attacks, saving throws, and damage rolls.
- *
- * The parent component (Layout.tsx) controls visibility via `isOpen` and
- * provides an `onClose` callback. This component manages all roller state
- * internally.
+ * The parent (`Layout.tsx`) controls visibility via `isOpen` and provides
+ * `onClose`. All roll state is internal.
  */
-export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerProps) {
-  /* ── Roller State ── */
+export function RollCapture({ isOpen, onClose, character, prefill }: RollCaptureProps) {
+  /* ── Roll shape ── */
   const [dieType, setDieType] = useState<DieType>(20)
   const [quantity, setQuantity] = useState(1)
   const [modifier, setModifier] = useState(0)
   const [advantage, setAdvantage] = useState<AdvantageState>('normal')
-  const [currentResult, setCurrentResult] = useState<RollResult | null>(null)
-  const [history, setHistory] = useState<RollResult[]>([])
-  const [isRolling, setIsRolling] = useState(false)
-  const [animatingTotal, setAnimatingTotal] = useState<number | null>(null)
-  const [prefillLabel, setPrefillLabel] = useState<string | null>(null)
+  const [label, setLabel] = useState<string | null>(null)
 
-  const rollIdRef = useRef(0)
+  /* ── What the dice showed ── */
+  const [faces, setFaces] = useState<string[]>([''])
+  const [lastCapture, setLastCapture] = useState<Capture | null>(null)
+  const [history, setHistory] = useState<Capture[]>([])
+
+  const captureIdRef = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
-  const animationFrameRef = useRef<number | null>(null)
-  const rollButtonRef = useRef<HTMLButtonElement>(null)
+  const firstFaceRef = useRef<HTMLInputElement>(null)
+
+  /** Any change to the SHAPE of the roll invalidates the faces — they described
+   *  a different roll. Silently keeping "14" while the die switches from d20 to
+   *  d6 would produce a number that passes every check and means nothing. */
+  const reshape = useCallback(
+    (next: {
+      dieType?: DieType
+      quantity?: number
+      modifier?: number
+      advantage?: AdvantageState
+      label?: string | null
+    }) => {
+      if (next.dieType !== undefined) setDieType(next.dieType)
+      if (next.quantity !== undefined) setQuantity(next.quantity)
+      if (next.modifier !== undefined) setModifier(next.modifier)
+      if (next.advantage !== undefined) setAdvantage(next.advantage)
+      if (next.label !== undefined) setLabel(next.label)
+      setFaces([''])
+    },
+    [],
+  )
 
   /* ── Prefill Handler ── */
   useEffect(() => {
     if (!isOpen || !prefill) {
-      if (!isOpen) setPrefillLabel(null)
+      if (!isOpen) setLabel(null)
       return
     }
 
@@ -641,27 +789,28 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
     const sides = parseInt(match[2], 10)
     const mod = match[3] ? parseInt(match[3], 10) : 0
 
-    // Validate die type
     const validDice: DieType[] = [4, 6, 8, 10, 12, 20, 100]
     if (validDice.includes(sides as DieType)) {
-      setDieType(sides as DieType)
-      setQuantity(qty)
-      setModifier(mod)
-      setAdvantage('normal')
-      setPrefillLabel(prefill.label)
+      reshape({
+        dieType: sides as DieType,
+        quantity: qty,
+        modifier: mod,
+        advantage: 'normal',
+        label: prefill.label,
+      })
 
-      // Auto-focus the roll button on next frame
+      /* Focus the number box, NOT a button. He arrived here holding dice that
+         have already stopped moving; the next thing he does is type. */
       requestAnimationFrame(() => {
-        rollButtonRef.current?.focus()
+        firstFaceRef.current?.focus()
       })
     }
-  }, [isOpen, prefill])
+  }, [isOpen, prefill, reshape])
 
   /* ── Focus Trap ── */
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement
-      // Focus the panel on next frame so the transition starts
       requestAnimationFrame(() => {
         panelRef.current?.focus()
       })
@@ -699,7 +848,7 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
   }, [isOpen])
 
   /* ── Closed means closed (Slice 15) ── */
-  // Mounted-and-slid-off-screen, so its 22 controls stay tabbable without this.
+  // Mounted-and-slid-off-screen, so its controls stay tabbable without this.
   useInertWhenClosed(panelRef, isOpen)
 
   /* ── Escape Key ── */
@@ -716,102 +865,68 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  /* ── Cleanup animation frame on unmount ── */
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-    }
+  /* ── Face entry ── */
+  const handleFaceChange = useCallback((index: number, value: string) => {
+    setFaces(prev => {
+      const next = [...prev]
+      while (next.length <= index) next.push('')
+      next[index] = value
+      return next
+    })
   }, [])
 
-  /* ── Roll Logic ── */
-  const executeRoll = useCallback(
-    (
-      overrideDie?: DieType,
-      overrideQty?: number,
-      overrideMod?: number,
-      overrideAdv?: AdvantageState,
-    ) => {
-      if (isRolling) return
+  /* ── Commit ── */
+  const handleCommit = useCallback(() => {
+    const boxes = boxCount(dieType, advantage)
+    const [lo, hi] = faceRange(dieType, quantity)
+    const parsed = faces.slice(0, boxes).map(f => Number.parseInt(f, 10))
 
-      const d = overrideDie ?? dieType
-      const q = overrideQty ?? quantity
-      const m = overrideMod ?? modifier
-      const a = overrideAdv ?? (d === 20 ? advantage : 'normal')
+    if (parsed.length !== boxes) return
+    if (!parsed.every(n => Number.isFinite(n) && n >= lo && n <= hi)) return
 
-      setIsRolling(true)
+    const kept = keptFace(parsed, advantage)
+    captureIdRef.current += 1
 
-      const result = rollDice(d, q, m, a)
-      rollIdRef.current += 1
-      const newResult: RollResult = { ...result, id: rollIdRef.current }
+    const capture: Capture = {
+      id: captureIdRef.current,
+      dieType,
+      quantity,
+      modifier,
+      advantage,
+      faces: parsed,
+      kept,
+      total: kept + modifier,
+      label,
+    }
 
-      // Animation using DiceAnimation + number cycling
-      const startTime = performance.now()
-      const maxRandom = d * q + Math.abs(m)
-
-      function animate(now: number) {
-        const elapsed = now - startTime
-        if (elapsed < ROLL_ANIMATION_MS) {
-          // Show random numbers while "rolling" using secureDie for randomness
-          const randomTotal = secureDie(maxRandom || 1)
-          setAnimatingTotal(randomTotal)
-          animationFrameRef.current = requestAnimationFrame(animate)
-        } else {
-          // Land on actual result
-          setAnimatingTotal(null)
-          setCurrentResult(newResult)
-          setHistory((prev) => [newResult, ...prev].slice(0, MAX_HISTORY))
-          setIsRolling(false)
-          animationFrameRef.current = null
-        }
-      }
-
-      // Set a placeholder result immediately so the result area renders
-      setCurrentResult(newResult)
-      setAnimatingTotal(0)
-      animationFrameRef.current = requestAnimationFrame(animate)
-    },
-    [isRolling, dieType, quantity, modifier, advantage],
-  )
+    setLastCapture(capture)
+    setHistory(prev => [capture, ...prev].slice(0, MAX_HISTORY))
+    setFaces([''])
+  }, [dieType, quantity, modifier, advantage, faces, label])
 
   /* ── Quick Preset Handler ── */
   const handleQuickPreset = useCallback(
     (preset: QuickPreset) => {
-      setDieType(preset.dieType)
-      setQuantity(preset.quantity)
-      if (preset.label !== 'd20+mod') {
-        setModifier(preset.modifier)
-      }
-      setAdvantage(preset.advantage)
-
-      if (preset.immediate) {
-        executeRoll(preset.dieType, preset.quantity, preset.modifier, preset.advantage)
-      }
-      // For 'd20+mod', we just set the state so the user can pick their modifier then roll
+      reshape({
+        dieType: preset.dieType,
+        quantity: preset.quantity,
+        modifier: preset.modifier,
+        advantage: 'normal',
+        label: null,
+      })
     },
-    [executeRoll],
-  )
-
-  /* ── Character Preset Roll Handler ── */
-  const handleCharacterRoll = useCallback(
-    (die: DieType, qty: number, mod: number, adv: AdvantageState) => {
-      executeRoll(die, qty, mod, adv)
-    },
-    [executeRoll],
+    [reshape],
   )
 
   /* ── Die Type Change Handler ── */
-  const handleDieTypeChange = useCallback((die: DieType) => {
-    setDieType(die)
-    // Reset advantage when switching away from d20
-    if (die !== 20) {
-      setAdvantage('normal')
-    }
-  }, [])
-
-  /* ── Dynamic roll button label ── */
-  const rollButtonLabel = `Roll ${formatRollNotation(quantity, dieType, modifier)}`
+  const handleDieTypeChange = useCallback(
+    (die: DieType) => {
+      // Advantage is a d20 concept. Leaving it set on a d8 would put a second
+      // number box on a roll that has no second die.
+      reshape({ dieType: die, advantage: die === 20 ? undefined : 'normal', label: null })
+    },
+    [reshape],
+  )
 
   /* ── Render ── */
 
@@ -845,7 +960,7 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Dice Roller"
+        aria-label="Roll capture"
         tabIndex={-1}
         initial={false}
         animate={isOpen ? { y: 0 } : { y: '100%' }}
@@ -855,7 +970,6 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
           'max-h-[90dvh] overflow-y-auto overscroll-contain',
           'glass-card rounded-t-2xl border-b-0',
           'outline-none',
-          // Prevent interaction when hidden
           !isOpen && 'pointer-events-none',
         )}
       >
@@ -865,7 +979,7 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
         <div className="flex justify-end px-4 pb-1">
           <button
             type="button"
-            aria-label="Close dice roller"
+            aria-label="Close roll capture"
             onClick={onClose}
             className={cn(
               'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl',
@@ -880,27 +994,53 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
         </div>
 
         <div className="px-4 pb-6 safe-bottom flex flex-col gap-5">
-          <OrnateHeader>Dice Roller</OrnateHeader>
+          <OrnateHeader>Your Roll</OrnateHeader>
 
-          {/* ── Quick Roll Presets ── */}
+          {/* ── The capture strip, first thing under the header ──
+              It is the reason the panel opens. Everything below it is the
+              setup for it, and setup does not go above the thing it sets up. */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-forge-1 select-none">Quick Roll</span>
+            {label && (
+              <Badge variant="arcane" className="self-start text-sm px-3 py-1">
+                {label}
+              </Badge>
+            )}
+            <CaptureStrip
+              dieType={dieType}
+              quantity={quantity}
+              modifier={modifier}
+              advantage={advantage}
+              faces={faces}
+              onFaceChange={handleFaceChange}
+              onCommit={handleCommit}
+              firstFaceRef={firstFaceRef}
+            />
+          </div>
+
+          {/* ── Last logged roll ── */}
+          {lastCapture && (
+            <GlassCard className="animate-slide-up">
+              <CaptureResult capture={lastCapture} />
+            </GlassCard>
+          )}
+
+          {/* ── Quick shapes ── */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-forge-1 select-none">Quick Set</span>
             <div className="flex gap-2">
               {QUICK_PRESETS.map((preset) => (
                 <button
                   key={preset.label}
                   type="button"
-                  aria-label={`Quick roll ${preset.label}`}
+                  aria-label={`Set up ${preset.label}`}
                   onClick={() => handleQuickPreset(preset)}
-                  disabled={isRolling}
                   className={cn(
                     'flex-1 min-h-[44px] px-3 rounded-xl',
                     'font-mono text-sm font-semibold',
                     'bg-eldritch/10 text-eldritch-lit border border-eldritch/25',
                     'transition-all duration-200 ease-forge',
-                    'enabled:hover:bg-eldritch/20 enabled:hover:border-eldritch/40',
-                    'enabled:active:scale-95',
-                    'disabled:opacity-40 disabled:cursor-not-allowed',
+                    'hover:bg-eldritch/20 hover:border-eldritch/40',
+                    'active:scale-95',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
                   )}
                 >
@@ -914,8 +1054,9 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
           {character && (
             <CharacterPresets
               character={character}
-              onRoll={handleCharacterRoll}
-              isRolling={isRolling}
+              onPick={(d, q, m, a, name) =>
+                reshape({ dieType: d, quantity: q, modifier: m, advantage: a, label: name })
+              }
             />
           )}
 
@@ -941,14 +1082,14 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
               value={quantity}
               min={MIN_QUANTITY}
               max={MAX_QUANTITY}
-              onChange={setQuantity}
+              onChange={(v) => reshape({ quantity: v })}
             />
             <StepperControl
               label="Modifier"
               value={modifier}
               min={MIN_MODIFIER}
               max={MAX_MODIFIER}
-              onChange={setModifier}
+              onChange={(v) => reshape({ modifier: v })}
               formatValue={(v) => (v >= 0 ? `+${v}` : `${v}`)}
             />
           </div>
@@ -956,53 +1097,22 @@ export function DiceRoller({ isOpen, onClose, character, prefill }: DiceRollerPr
           {/* ── Advantage/Disadvantage Toggle (d20 only) ── */}
           {dieType === 20 && (
             <div className="animate-fade-in">
-              <AdvantageToggle value={advantage} onChange={setAdvantage} />
-            </div>
-          )}
-
-          {/* ── Prefill Label ── */}
-          {prefillLabel && (
-            <div className="text-center animate-fade-in">
-              <Badge variant="arcane" className="text-sm px-3 py-1">
-                {prefillLabel}
-              </Badge>
-            </div>
-          )}
-
-          {/* ── ROLL Button ── */}
-          <Button
-            ref={rollButtonRef}
-            variant="primary"
-            size="lg"
-            className="w-full text-base font-bold tracking-wide"
-            onClick={() => { executeRoll(); setPrefillLabel(null) }}
-            disabled={isRolling}
-            loading={isRolling}
-            aria-label={rollButtonLabel}
-          >
-            {isRolling ? 'Rolling...' : rollButtonLabel}
-          </Button>
-
-          {/* ── Roll Result Display ── */}
-          {currentResult && (
-            <GlassCard className="animate-slide-up">
-              <RollResultDisplay
-                result={currentResult}
-                animatingTotal={animatingTotal}
-                isAnimating={isRolling}
+              <AdvantageToggle
+                value={advantage}
+                onChange={(v) => reshape({ advantage: v })}
               />
-            </GlassCard>
+            </div>
           )}
 
-          {/* ── Roll History ── */}
+          {/* ── History ── */}
           {history.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-forge-2 select-none">
                 Recent Rolls
               </span>
               <div className="flex flex-col gap-1">
-                {history.map((roll) => (
-                  <HistoryCard key={roll.id} result={roll} />
+                {history.map((capture) => (
+                  <HistoryCard key={capture.id} capture={capture} />
                 ))}
               </div>
             </div>

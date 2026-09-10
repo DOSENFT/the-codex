@@ -11,6 +11,9 @@
  * WHY NOT chunkSizeWarningLimit. Two chunks (index, DiceStage) were already over
  * Vite's default before canon existed. Raising the limit to accommodate canon
  * would have silenced a pre-existing warning while appearing to add rigour.
+ * DiceStage is gone as of 2026-09-09 — it was three.js, and it was 31% of the
+ * app's JavaScript for dice Marcus never rolled. `index` is still over on its
+ * own, so the reasoning above stands with one chunk instead of two.
  *
  * Exits non-zero when a budget is exceeded, so it can gate a release later. It
  * is NOT wired into `npm test`, because the test suite must run without a build.
@@ -29,7 +32,13 @@ const ASSETS = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'asse
  * decision rather than a drift. */
 const BUDGETS = [
   { name: 'canon', match: /^canon-.*\.js$/, gzipKb: 70, measured: '51.6KB on 2026-08-26' },
-  { name: 'total JS', match: /\.js$/, gzipKb: 700, measured: '635.0KB on 2026-08-26' },
+  /* LOWERED from 700 when the dice came out. 700 was set against a 635 KB
+     build; after the removal the real number is 497.9, and a ceiling 200 KB
+     above the floor is not a ceiling — it is 200 KB of silent room for
+     accidents. Lowering a budget removes no feature and blocks no work: it
+     only means the next big arrival has to be argued for out loud, which is
+     the entire job of this file. */
+  { name: 'total JS', match: /\.js$/, gzipKb: 550, measured: '497.9KB on 2026-09-09' },
   { name: 'total CSS', match: /\.css$/, gzipKb: 40, measured: '25.2KB on 2026-08-26' },
 ]
 

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { rollDice } from '../../lib/dice'
 import { tallyLine, type RetaliationDie, type RetaliationTally } from '../../lib/turn/retaliation'
 
 /* ============================================================================
@@ -10,19 +9,23 @@ import { tallyLine, type RetaliationDie, type RetaliationTally } from '../../lib
    the sheet; this one is evidence of a die that came up 7, and if it is not
    written down as it happens it is gone.
 
-   ── THE APP ROLLS, AND MARCUS CAN CORRECT IT ────────────────────────────────
-   His decision, and it is the reason this is a two-step control rather than a
-   one-tap +7. Half the time the die that decides this is a real d10 on a real
-   table, and the app has no way to see it. So the tap rolls, and then shows the
-   result IN A TEXT FIELD:
+   ── MARCUS ROLLS. THE APP WRITES IT DOWN ────────────────────────────────────
+   This used to read "the app rolls, and Marcus can correct it": the tap called
+   `rollDice`, pre-filled the field with a 7, and left him to type over it on
+   the turns the real die disagreed. That was hedging on a question he has
+   since answered plainly — he rolls physical dice, every time, without
+   exception — so the pre-filled number was wrong on every single turn and
+   right on none of them. It is now an empty box:
 
-       rolled  [ 7 ]  Fire        [ Add ]  [ Cancel ]
+       rolled  [   ]  Fire        [ Add ]  [ Cancel ]
 
-   Type over the 7 and Add records what the table actually rolled. It costs one
-   extra tap on the turns the app's own roll stands, and it is the difference
-   between a tally that is true and a tally that is merely plausible — which,
-   for a number whose entire purpose is to be shown to the DM, is the whole
-   value of having it.
+   Which is the same two-step control, minus a guess. The die that decides this
+   is a real d10 on a real table and the app has no way to see it; the honest
+   move is to ask rather than to invent and hope he corrects it. For a number
+   whose entire purpose is to be shown to the DM, a tally that is true beats
+   one that is merely plausible, and that is the whole value of having it.
+
+   `RollCapture` made the same turn for the same reason. See `lib/dice.ts`.
 
    The field is `type="text"` with `inputMode="numeric"` rather than
    `type="number"`: it brings up the same keypad on his phone, and a number
@@ -99,12 +102,7 @@ export interface RetaliationCaptureProps {
   /** The reducer's own words for why the last event was turned down. Painted
    *  only after this control's Add is the thing that was refused. */
   refusal?: string | null
-  /** Injected by tests. The app rolls the die canon named. */
-  roll?: (die: RetaliationDie) => number
 }
-
-const defaultRoll = (die: RetaliationDie) =>
-  rollDice(die.dieType, die.quantity, 0, 'normal').total
 
 /* 48, NOT 40 — measured, not reviewed. `prove-slice5.mjs` put the standing
    button on D's card at 182×40 and called it: `tokens.css` V-5b sets a 48px
@@ -192,7 +190,6 @@ export function RetaliationCapture({
   refusal = null,
   onUndo,
   undoLabel = null,
-  roll = defaultRoll,
 }: RetaliationCaptureProps) {
   /* A STRING, not a number. It is what is in the field, and mid-edit that is
      legitimately "" or "1" on the way to "12". Parsing at the boundary keeps
@@ -207,7 +204,10 @@ export function RetaliationCapture({
 
   const begin = () => {
     setRejected(false)
-    setPending(String(roll(die)))
+    /* EMPTY, not a rolled number. His die already has the answer; the box is
+       waiting for it. `valid` is false until he types, so Add stays disabled
+       and nothing can be recorded by a stray tap. */
+    setPending('')
   }
 
   const add = () => {

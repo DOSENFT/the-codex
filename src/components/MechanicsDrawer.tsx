@@ -149,7 +149,7 @@ function EmptyState({ hasSearch }: { hasSearch: boolean }) {
 
 /**
  * MechanicsDrawer — slide-up panel for browsing and searching D&D 2024 game
- * mechanics. Follows the same pattern as DiceRoller: backdrop + fixed bottom
+ * mechanics. Follows the same pattern as RollCapture: backdrop + fixed bottom
  * panel with glass-card styling.
  */
 export function MechanicsDrawer({ isOpen, onClose }: MechanicsDrawerProps) {

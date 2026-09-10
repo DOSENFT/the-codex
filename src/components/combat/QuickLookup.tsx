@@ -61,6 +61,13 @@ export function QuickLookup({ isOpen, onClose, character, onRollDice }: QuickLoo
 
   const handleClose = () => { onClose(); setSearch(''); setSelectedItem(null) }
 
+  /* `overflow-y-hidden` below, not `overflow-hidden`: tailwind-merge files the
+     two under different keys, so the shorthand does NOT displace the
+     primitive's `overflow-y-auto`, and the panel stays a second scroller
+     competing with the results list. `svh` for the same reason the primitive
+     uses it — `vh` is the tall viewport and this panel is positioned against
+     the layout one. Same pair of traps as CharacterSheet, found while fixing
+     that; harmless here only because the flex column happens to fit exactly. */
   return (
     <Sheet
       isOpen={isOpen}
@@ -68,7 +75,7 @@ export function QuickLookup({ isOpen, onClose, character, onRollDice }: QuickLoo
       label="Quick Grimoire lookup"
       z={55}
       backdropClassName="bg-void-0/60 backdrop-blur-sm"
-      panelClassName="max-h-[70vh] flex flex-col overflow-hidden"
+      panelClassName="max-h-[70svh] flex flex-col overflow-y-hidden"
     >
         {/* Header */}
         <div className="flex items-center gap-2 p-4 border-b border-white/5 shrink-0">

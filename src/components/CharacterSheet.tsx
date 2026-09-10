@@ -464,7 +464,41 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
   ]
 
   return (
-    <Sheet isOpen={isOpen} onClose={onClose} label="Character sheet">
+    /* ── One scroller, always the same size ────────────────────────────────
+       Reported by Marcus 2026-09-10, twice: "I can't scroll down at all",
+       then "Skills scrolls. They should all scroll. They don't."
+
+       Both reports are the same defect. The sheet used to be its own
+       scroller at `max-h-[92svh]` — meaning its height was decided by
+       whichever tab was open. Skills is eighteen rows, overshoots the cap,
+       and scrolls. Stats is six; Saves, Arms and Gear are shorter still.
+       Those never reach the cap, so `overflow-y-auto` has nothing to do and
+       the panel simply sits at whatever height it happens to be, bottom edge
+       pinned to `bottom-0` — which is the LAYOUT viewport's bottom, i.e.
+       underneath the phone's browser toolbar. Content beneath the toolbar,
+       and a drag gesture that does nothing, because there is genuinely
+       nothing to scroll. At the table that is indistinguishable from the app
+       being frozen, which is why it got reported as "can't scroll" first.
+
+       Fixed height, not max-height, and the scroll moves off the panel and
+       onto one inner region. Now every tab gets the identical scroller and
+       the shortest tab is as reachable as the longest. Two things fall out
+       of it for free: the header and the tab row stop sliding up and down
+       the screen as you switch tabs, and the tail spacer below guarantees
+       the last row clears any bottom chrome up to ~96px whether the content
+       scrolls or not.
+
+       `overflow-y-hidden` rather than `overflow-hidden` on purpose —
+       tailwind-merge files those under different keys, so `overflow-hidden`
+       would NOT displace the primitive's `overflow-y-auto` and the panel
+       would stay a second, competing scroller. */
+    <Sheet
+      isOpen={isOpen}
+      onClose={onClose}
+      label="Character sheet"
+      panelClassName="h-[92svh] flex flex-col overflow-y-hidden"
+    >
+      <div className="shrink-0">
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1" aria-hidden>
           <div className="w-10 h-1 rounded-full bg-forge-2/40" />
@@ -551,8 +585,10 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
           </div>
         </div>
 
-        {/* Section content */}
-        <div className="px-4 pb-8 safe-bottom">
+        </div>
+
+        {/* Section content — the one and only scroller */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pb-4">
           {activeSection === 'abilities' && (
             <div className="flex flex-col gap-3">
               <OrnateHeader>Ability Scores</OrnateHeader>
@@ -585,6 +621,15 @@ export function CharacterSheet({ isOpen, onClose, character, onUpdate }: Charact
               <EquipmentList character={character} onUpdate={onUpdate} />
             </div>
           )}
+
+          {/* Tail. Padding would be the obvious way and it is the wrong one:
+              `safe-bottom` also sets `padding-bottom`, so the two would land
+              in the same declaration and the loser would be decided by which
+              rule the cascade happened to reach last. A spacer element just
+              adds. 96px is above any phone browser's bottom toolbar, plus the
+              notch inset on top of it, so the final row of the longest tab
+              can always be scrolled clear of the chrome. */}
+          <div className="h-24 safe-bottom" aria-hidden />
         </div>
     </Sheet>
   )

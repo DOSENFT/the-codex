@@ -27,7 +27,7 @@ interface SheetProps {
  * This component declares `role="dialog" aria-modal="true"`, which is a promise
  * to a keyboard or screen-reader user that the rest of the page is inert and
  * that Escape gets them out. It was keeping neither half. MechanicsDrawer,
- * DiceRoller, ToyboxPanel, ActionMenu and the editors all hand-roll Escape and
+ * RollCapture, ToyboxPanel, ActionMenu and the editors all hand-roll Escape and
  * a Tab trap; the three surfaces that were migrated onto this shared primitive
  * — the Settings drawer, the character sheet, and combat quick-lookup — lost
  * both in the move, silently, because losing a behaviour looks like nothing.
@@ -99,6 +99,25 @@ export function Sheet({
     return () => document.removeEventListener('keydown', onTab)
   }, [isOpen])
 
+  // ── The page behind does not move ──
+  // `MechanicsDrawer` and `RollCapture` have both locked the body since they
+  // were written; the three surfaces that migrated onto this shared primitive —
+  // Settings, the character sheet, Quick Lookup — silently lost it in the move,
+  // the same way they lost Escape and the Tab trap (see the header). It belongs
+  // here for the same reason those do.
+  //
+  // It matters most on the tabs where the panel is SHORTER than its box and so
+  // is not a scroller at all: with nothing to scroll, a drag chains straight
+  // through to the document, and the document's scroller is `<main>`, which is
+  // behind the backdrop. The gesture reaches something real and invisible, and
+  // reads as the sheet ignoring you.
+  useEffect(() => {
+    if (!isOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [isOpen])
+
   const closed = reduced
     ? { opacity: 0 }
     : side === 'bottom'
@@ -139,7 +158,7 @@ export function Sheet({
    * lands on screen is unchanged. The three sheets that share this primitive —
    * Settings, the character sheet, Quick Lookup — all get it at once.
    *
-   * The hand-rolled sheets do NOT get it: ActionMenu, DiceRoller,
+   * The hand-rolled sheets do NOT get it: ActionMenu, RollCapture,
    * MechanicsDrawer, ToyboxPanel and the Grimoire/Spellbook editors each build
    * their own overlay. The ones Layout renders are already outside `<main>` and
    * are unaffected either way; the ones a page renders are not, and that is
@@ -170,7 +189,36 @@ export function Sheet({
             style={{ zIndex: z + 1 }}
             className={cn(
               side === 'bottom'
-                ? 'fixed inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto overscroll-contain glass-card rounded-t-2xl border-b-0 outline-none'
+                /* ── 92dvh → 92svh: sized against the viewport that is actually
+                   on screen ──────────────────────────────────────────────────
+                   `bottom-0` anchors to the LAYOUT viewport. `dvh` measures the
+                   DYNAMIC one. On iOS those are the same number only while the
+                   browser toolbar is hidden; the moment it is showing, the two
+                   disagree by the toolbar's height and the panel is sized for
+                   the short viewport while being positioned against the tall
+                   one. Its bottom strip lands under the toolbar.
+
+                   That failure is silent in the worst way, because the content
+                   still fits inside the panel's own box: `scrollHeight` equals
+                   `clientHeight`, so `overflow-y-auto` never engages and there
+                   is nothing to scroll. The reader sees a sheet cut off at the
+                   bottom and a drag gesture that does nothing at all — which is
+                   indistinguishable, at the table, from the app being frozen.
+
+                   `svh` is the SMALL viewport: the height with browser chrome
+                   shown, which is the conservative floor and cannot be
+                   invalidated by the toolbar appearing later. The cost is up to
+                   ~8% less panel when the toolbar happens to be hidden. That is
+                   the right trade: a slightly shorter sheet that always scrolls
+                   beats a taller one whose last inch is unreachable.
+
+                   Reported by Marcus 2026-09-10 on the character sheet. NOT
+                   reproduced in automation — desktop Chrome has no separate
+                   visual viewport, and the phone viewport could not be
+                   simulated here, so this is reasoned from the CSS rather than
+                   measured. It is reversible in one token if the phone says
+                   otherwise. */
+                ? 'fixed inset-x-0 bottom-0 max-h-[92svh] overflow-y-auto overscroll-contain glass-card rounded-t-2xl border-b-0 outline-none'
                 : 'fixed inset-y-0 right-0 w-full max-w-md overflow-y-auto bg-void-1 border-l border-white/[0.08] shadow-2xl outline-none',
               panelClassName,
             )}

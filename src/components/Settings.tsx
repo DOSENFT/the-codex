@@ -26,9 +26,11 @@ import { loadAIConfig, updateAIConfig, fetchOllamaModels, getDefaultOllamaUrl, g
 import { GeminiModelPicker } from './GeminiModelPicker'
 import { OpenRouterModelPicker } from './OpenRouterModelPicker'
 import { useAI } from '../hooks/useAI'
-import { shortRest, longRest, generateId, type Character, type RosterEntry, computePaladinResources } from '../lib/character'
+import { shortRest, longRest, generateId, type Character, type CampaignData, type RosterEntry, computePaladinResources } from '../lib/character'
 import { resolveCharacter, storableOf, changedNumbers } from '../lib/rules-2024/derive'
 import { parseCharacterFile, formatList } from '../lib/import-character'
+import { downloadCharacterFile } from '../lib/export-character'
+import { saveCampaign } from '../lib/campaign'
 import { findSessionRollback, describeRollback, type RollbackEntry } from '../lib/session-rollback'
 import { ASTERA_PERSONA } from '../lib/dnd-data'
 import { Button } from './ui/Button'
@@ -307,7 +309,13 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
      older export" notice still has to fire after he confirms — the two facts
      are independent and he is entitled to both. */
   const [pendingImport, setPendingImport] = useState<
-    { character: Character; warnings: string[]; repairs: string[]; rollback: RollbackEntry[] } | null
+    {
+      character: Character
+      warnings: string[]
+      repairs: string[]
+      rollback: RollbackEntry[]
+      campaign: CampaignData | null
+    } | null
   >(null)
   /* And if he goes ahead anyway, he is told a SECOND time, in the past tense,
      by a notice that does not self-dismiss. Not belt-and-braces: the warning
@@ -316,26 +324,32 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
      precisely the question the silent version left him unable to answer. */
   const [importRolledBack, setImportRolledBack] = useState<RollbackEntry[]>([])
 
-  const handleExport = useCallback(() => {
-    const data = JSON.stringify(character, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    const safeName = character.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
-    a.href = url
-    a.download = `codex-${safeName}-lvl${character.level}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }, [character])
+  // One implementation, shared with CharacterPage. See lib/export-character.
+  const handleExport = useCallback(() => downloadCharacterFile(character), [character])
 
   /* The write, and everything he is told about it. Split out of handleImport so
      that the R-10 confirm can reach the exact same path — a second, parallel
      "apply" written for the confirm button is how the confirm branch quietly
      stops matching the plain branch. */
   const applyImport = useCallback(
-    (next: { character: Character; warnings: string[]; repairs: string[]; rollback?: RollbackEntry[] }) => {
+    (next: {
+      character: Character
+      warnings: string[]
+      repairs: string[]
+      rollback?: RollbackEntry[]
+      campaign?: CampaignData | null
+    }) => {
+      /* The campaign lands FIRST. `character.campaignId` already points at it
+         by the time the parse returns, so writing the character before the
+         campaign leaves a window — however short — in which the app holds a
+         character whose campaign key does not exist yet. Every screen that
+         reads the party does so through `loadCampaign(character.campaignId)`,
+         and a re-render inside that window renders the empty state.
+
+         Only when the file actually carried one. A null here means an older
+         export that has nothing to say about the campaign, and the campaign
+         already on this device is none of its business — see ImportResult. */
+      if (next.campaign) saveCampaign(next.campaign)
       onCharacterUpdate(next.character)
       const rolled = next.rollback ?? []
       setImportRolledBack(rolled)
@@ -394,6 +408,7 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
             warnings: result.warnings,
             repairs: result.repairs,
             rollback,
+            campaign: result.campaign,
           })
           return
         }

@@ -86,7 +86,8 @@ export type CombatEvent =
    *  The first event in this union that carries a number the app could not have
    *  derived. Every other variant describes something the app can recompute
    *  from the sheet; this one carries evidence of a die that has already been
-   *  rolled, whether by `DiceRoller` or by Marcus's hand at the table.
+   *  rolled — by Marcus's hand at the table, which since the dice removal is
+   *  the only way any number in this app gets rolled at all.
    *
    *  `source` is the feature canon hung the die off, and it is stored rather
    *  than looked up for the reason `TakenOption` gives above: the log outlives

@@ -1,4 +1,5 @@
-import { normalizeCharacter, type Character } from './character'
+import { normalizeCharacter, type Character, type CampaignData } from './character'
+import { normalizeCampaign } from './campaign'
 import { resolveCharacter } from './rules-2024/derive'
 
 /**
@@ -24,7 +25,19 @@ import { resolveCharacter } from './rules-2024/derive'
  *      cannot be told apart in the roster.
  */
 export type ImportResult =
-  | { ok: true; character: Character; warnings: string[]; repairs: string[] }
+  | {
+      ok: true
+      character: Character
+      warnings: string[]
+      repairs: string[]
+      /* null means the file said NOTHING about a campaign — every export
+         written before 2026-09-10 — and the caller must leave whatever is on
+         the device alone. An object means the file carries one and it is
+         entitled to be written. Defaulting the first case to an empty campaign
+         would wipe Marcus's party every time he re-imported an older file to
+         check that a session took. */
+      campaign: CampaignData | null
+    }
   | { ok: false; error: string }
 
 export function parseCharacterFile(text: string): ImportResult {
@@ -44,7 +57,7 @@ export function parseCharacterFile(text: string): ImportResult {
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     return { ok: false, error: 'That file does not contain a character.' }
   }
-  const raw = parsed as Partial<Character> & { species?: string }
+  const raw = parsed as Partial<Character> & { species?: string; campaign?: unknown }
 
   // An empty object is what a failed export writes, and Marcus has two of them
   // in his Downloads folder. Naming that exactly is the difference between "the
@@ -90,8 +103,23 @@ export function parseCharacterFile(text: string): ImportResult {
      work out. Before this, an old export carried its own `spellSaveDC` in and the
      app believed it. `normalizeCharacter` has already written the plain-language
      line into `repairs` saying which numbers it stopped believing. */
+  /* Lifted off `raw` BEFORE normalising, and deleted, so the campaign cannot
+     ride into the character as a stray field on an object the whole app then
+     stores and re-exports. `normalizeCharacter` builds its result explicitly
+     rather than spreading, so this is belt-and-braces — but the belt is what
+     keeps it true if someone ever adds the spread. */
+  const campaign = normalizeCampaign(raw.campaign)
+  delete raw.campaign
+
   const character = resolveCharacter(normalizeCharacter(raw, undefined, repairs))
-  return { ok: true, character, warnings, repairs }
+
+  /* The character points at the campaign that actually arrived, not at the id
+     it happened to be carrying. Those differ whenever the campaign was re-homed
+     — a file whose campaign had no id gets a fresh one minted — and an id that
+     resolves to nothing is the exact failure this whole change is closing. */
+  if (campaign) character.campaignId = campaign.id
+
+  return { ok: true, character, warnings, repairs, campaign }
 }
 
 /** "weapons, equipment and spells" — for reading a warning list out loud. */

@@ -1599,6 +1599,50 @@ describe('Ollama num_ctx — the silent truncation', () => {
   })
 })
 
+/* ─── keep_alive: the wait that only happens when play slows down ─────────── */
+
+describe('Ollama keep_alive — the four-and-a-half minute reload', () => {
+  it('asks the server to hold the model, on the blocking path', async () => {
+    /* Ollama evicts after five minutes idle and reloading the 27B off the
+       external drive takes 4m30s (measured). Five minutes is shorter than a
+       turn of play, so the wait lands exactly when a scene slows down — which
+       reads as "the AI is flaky", the complaint that caused this whole change. */
+    stubFetch(() => ollamaSaid('ok'))
+    await queryAI('sys', 'msg', OLLAMA)
+    expect(bodyOf(calls[0]).keep_alive).toBe('1h')
+  })
+
+  it('asks on the streaming path as well', async () => {
+    // The roleplay card streams. A fix on only one path is a fix he gets on
+    // some screens, which is indistinguishable from the bug still being there.
+    stubFetch(() => trickle(['streamed'], 1))
+    await queryAIStream('sys', 'msg', () => {}, OLLAMA)
+    expect(bodyOf(calls[0]).stream).toBe(true)
+    expect(bodyOf(calls[0]).keep_alive).toBe('1h')
+  })
+
+  it('does not pin the card forever', async () => {
+    /* `-1` would mean "never unload", and this model holds 18.7 GB of a 24 GB
+       card. His GPU would be permanently half-gone, and the next game would
+       stutter for a reason nobody could trace back to a closed D&D app. It has
+       to be a duration that expires on its own. */
+    stubFetch(() => ollamaSaid('ok'))
+    await queryAI('sys', 'msg', OLLAMA)
+    const ka = bodyOf(calls[0]).keep_alive
+    expect(ka).not.toBe(-1)
+    expect(ka).not.toBe(0)
+    expect(String(ka)).toMatch(/^\d+[smh]$/)
+  })
+
+  it('is in the API CALL, not left to OLLAMA_KEEP_ALIVE on the box', async () => {
+    // Same argument as num_ctx: a server env var exists on one desktop and is
+    // silently absent on any other host the app is ever pointed at.
+    stubFetch(() => ollamaSaid('ok'))
+    await queryAIStructured('sys', 'msg', OLLAMA).catch(() => {})
+    expect(bodyOf(calls[0])).toHaveProperty('keep_alive')
+  })
+})
+
 /* ─── temperature: two settings, because there are two audiences ─────────── */
 
 describe('temperature — a parser reads one of these, a person reads the other', () => {

@@ -39,6 +39,7 @@ import {
   upsertWeapon,
   generateId,
 } from '../lib/character'
+import { downloadCharacterFile } from '../lib/export-character'
 import { SKILL_ABILITIES, ABILITY_NAMES } from '../lib/dnd-rules'
 import { SKILL_GUIDE, ABILITY_GUIDE, WEAPON_PROPERTY_GUIDE, FEAT_SYNERGIES, WEAPON_MASTERY_OPTIONS, characterSkillRating } from '../lib/skill-guide'
 import { GlassCard } from './ui/GlassCard'
@@ -398,19 +399,8 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
     }
   }, [featEffects.length])
 
-  // Export
-  const handleExport = useCallback(() => {
-    const data = JSON.stringify(character, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `codex-${character.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}-lvl${character.level}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }, [character])
+  // Export — one implementation, shared with Settings. See lib/export-character.
+  const handleExport = useCallback(() => downloadCharacterFile(character), [character])
 
   return (
     <section className="flex flex-col gap-4 animate-fade-in" aria-label="Character">

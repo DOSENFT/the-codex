@@ -82,10 +82,16 @@ export interface RetaliationTally {
 
 const NONE: RetaliationTally = { total: 0, hits: 0 }
 
-/* `rollDice` takes a DieType, not any integer, and that is a constraint worth
-   honouring rather than casting past. Canon could name a die this app cannot
-   roll — d3, or something a future package invents — and the honest answer to
-   that is no button, not a button that rolls the wrong solid. */
+/* `DieType` is a union of seven numbers, not any integer, and that is a
+   constraint worth honouring rather than casting past. Canon could name a die
+   this app has no word for — d3, or something a future package invents — and
+   the honest answer to that is no button, not a button labelled with the wrong
+   solid.
+
+   The constraint outlived the function that motivated it. This used to read
+   "`rollDice` takes a DieType"; `rollDice` is gone and Marcus rolls the die
+   himself, but a d3 he owns is still a d3 this app cannot name, and a prompt
+   that asks him for "1d4 Fire" when canon said d3 is worse than no prompt. */
 const ROLLABLE: readonly number[] = [4, 6, 8, 10, 12, 20, 100]
 
 /** "1d10 Fire damage in retaliation" → the parts needed to roll it.

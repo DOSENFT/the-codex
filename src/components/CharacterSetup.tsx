@@ -27,9 +27,10 @@ import { cn } from '../lib/cn'
 import { useAI } from '../hooks/useAI'
 import { loadAIConfig, updateAIConfig, queryAI, fetchOllamaModels, getDefaultOllamaUrl, getDefaultProvider, ollamaBlockedReason, type AIConfig, type AIProvider } from '../lib/ai'
 import { GeminiModelPicker } from './GeminiModelPicker'
-import { generateId, type Character, type CharacterBase, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
+import { generateId, type Character, type CharacterBase, type CampaignData, type Spell, type ClassFeature, type SpellSlots, type RosterEntry, type AbilityScores } from '../lib/character'
 import { resolveCharacter } from '../lib/rules-2024/derive'
 import { parseCharacterFile, formatList } from '../lib/import-character'
+import { saveCampaign } from '../lib/campaign'
 import {
   CLASSES,
   RACES,
@@ -127,8 +128,26 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
      damaged and I altered it on the way in". Marcus is told before he accepts
      it, because a silent coercion is a quieter way of losing his data. */
   const [pendingImport, setPendingImport] = useState<
-    { character: Character; warnings: string[]; repairs: string[] } | null
+    { character: Character; warnings: string[]; repairs: string[]; campaign: CampaignData | null } | null
   >(null)
+
+  /* Both roads out of an import — straight through, and through the "that file
+     is thin, accept anyway?" confirm — go through here. Written as one function
+     rather than two calls for the reason `Settings.applyImport` gives: a second
+     accept path written for the confirm button is how the confirm branch
+     quietly stops matching the plain one.
+
+     The campaign is written BEFORE the character for the ordering reason spelt
+     out in `Settings.applyImport`, and null is left strictly alone: an older
+     export says nothing about the campaign, which is not the same as saying it
+     is empty. */
+  const acceptImport = useCallback(
+    (character: Character, campaign: CampaignData | null) => {
+      if (campaign) saveCampaign(campaign)
+      onComplete(character)
+    },
+    [onComplete],
+  )
 
   const handleImportCharacter = useCallback(() => {
     setImportError(null)
@@ -154,17 +173,17 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
           return
         }
         if (result.warnings.length > 0 || result.repairs.length > 0) {
-          const { character, warnings, repairs } = result
-          setPendingImport({ character, warnings, repairs })
+          const { character, warnings, repairs, campaign } = result
+          setPendingImport({ character, warnings, repairs, campaign })
           return
         }
-        onComplete(result.character)
+        acceptImport(result.character, result.campaign)
       }
       reader.onerror = () => setImportError('That file could not be read off the device.')
       reader.readAsText(file)
     }
     input.click()
-  }, [onComplete])
+  }, [acceptImport])
 
   // Form state
   const [name, setName] = useState('')
@@ -992,7 +1011,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => onComplete(pendingImport.character)}
+                  onClick={() => acceptImport(pendingImport.character, pendingImport.campaign)}
                   className="flex-1"
                 >
                   Import anyway
