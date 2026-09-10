@@ -38,7 +38,6 @@ import { GlassCard } from './ui/GlassCard'
 import { ParchmentCard } from './ui/ParchmentCard'
 import { OrnateHeader } from './ui/OrnateHeader'
 import { Input } from './ui/Input'
-import { CampaignEditor } from './CampaignEditor'
 import { TableCovenant } from './safety/TableCovenant'
 
 /* ------------------------------------------------------------------ */
@@ -1319,8 +1318,14 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
       <TableCovenant />
       {renderAIConfig()}
       {renderCharacterInfo()}
-      {/* Campaign & World */}
-      <CampaignEditor character={character} onCharacterUpdate={onCharacterUpdate} />
+      {/* Campaign & World moved out of here on 2026-09-10 and onto the
+          Character tab. Marcus: "there's no one good solid page for any of the
+          character, party, world, campaign details, it's spread out in
+          different locations. Campaign and world is in the settings. Weird."
+          He is right, and it was never a decision — the editor was written
+          during a Settings slice and stayed where it was born. His party,
+          his world, his quest and sixteen sessions of notes were filed beside
+          the theme toggle and the API key. See CharacterPage. */}
       {renderRestManagement()}
       {renderAbout()}
     </div>

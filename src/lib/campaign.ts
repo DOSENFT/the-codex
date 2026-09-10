@@ -34,6 +34,34 @@ export function deleteCampaign(id: string): void {
   localStorage.removeItem(CAMPAIGN_PREFIX + id)
 }
 
+/* ── What the editor should show when it opens ───────────────────────────────
+   Pure on purpose, with the load already done by the caller. This decision
+   used to live inside `CampaignEditor`'s mount effect, which meant the one
+   branch that matters could not be reached by a test — this repo has no jsdom,
+   so anything behind a `useEffect` is behind a wall.
+
+   The branch that matters is the middle one. A character carrying a
+   `campaignId` that resolves to NOTHING is a character whose world has already
+   been lost; the editor cannot undo that, but it decides whether the loss is
+   recoverable. Minting a fresh id and repointing the character — which is what
+   it did until 2026-09-10 — makes it permanent, because the campaign that
+   turns up later under the ORIGINAL id can never be found again. That is
+   precisely how Marcus's Vault import disappeared twice over: the server build
+   was too old to store the campaign the file carried, and then opening this
+   editor repointed him away from the very id the file had just set.
+
+   Reusing the id makes the empty campaign a placeholder at the address the
+   character already knows, so importing the file again lands on top of it.
+   `repoint` is only true when there was no id to keep. */
+export function campaignToShow(
+  campaignId: string | undefined,
+  loaded: CampaignData | null,
+): { campaign: CampaignData; repoint: boolean } {
+  if (loaded) return { campaign: loaded, repoint: false }
+  if (campaignId) return { campaign: { ...createDefaultCampaign(), id: campaignId }, repoint: false }
+  return { campaign: createDefaultCampaign(), repoint: true }
+}
+
 // ---------------------------------------------------------------------------
 // Reading a campaign off a file that is not ours
 // ---------------------------------------------------------------------------

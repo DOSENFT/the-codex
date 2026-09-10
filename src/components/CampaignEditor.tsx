@@ -16,7 +16,7 @@ import {
 import { cn } from '../lib/cn'
 import type { Character, CampaignData, PartyMember, CampaignNPC, SessionNote } from '../lib/character'
 import { generateId } from '../lib/character'
-import { createDefaultCampaign, saveCampaign, loadCampaign } from '../lib/campaign'
+import { saveCampaign, loadCampaign, campaignToShow } from '../lib/campaign'
 import { GlassCard } from './ui/GlassCard'
 import { OrnateHeader } from './ui/OrnateHeader'
 import { Button } from './ui/Button'
@@ -111,14 +111,32 @@ const textareaClasses = cn(
 
 export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorProps) {
   const [campaign, setCampaign] = useState<CampaignData | null>(null)
+  /* Party first and open, basics last and shut. The old order was the order the
+     fields happened to be written in — name, then world, then quest, then the
+     people — which put the campaign's TITLE above the party. Marcus does not
+     need the app to remind him what his campaign is called; he needs to know
+     who is standing next to him. Anything he can answer without opening the
+     app belongs at the bottom. */
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    basics: true,
-    world: false,
-    quest: false,
-    party: false,
+    party: true,
+    quest: true,
     npcs: false,
     sessions: false,
+    world: false,
+    basics: false,
   })
+
+  /* ── Auto-save has to be visible ──────────────────────────────────────────
+     Reported by Marcus 2026-09-10: "there's no way to save it". There is no
+     Save button because there is no save STEP — every edit is written 600ms
+     later. But a control that isn't there cannot be found, and the absence of
+     one reads as a half-built form rather than as a promise already kept. He
+     was right to distrust it: he had just imported a file that genuinely had
+     not been stored, and the screen looked exactly the same either way.
+
+     So the promise is stated. 'saving' the moment a key is pressed, 'saved'
+     when the write has actually happened — not when it was scheduled. */
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
 
   // Party member add form
   const [newPartyMember, setNewPartyMember] = useState<PartyMember>({
@@ -146,32 +164,38 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
 
   /* ------ Load campaign on mount / when character changes ------ */
   useEffect(() => {
-    if (character.campaignId) {
-      const loaded = loadCampaign(character.campaignId)
-      if (loaded) {
-        setCampaign(loaded)
-        return
-      }
-    }
-    // Auto-create a new campaign for this character
-    const newCampaign = createDefaultCampaign()
-    saveCampaign(newCampaign)
-    const updated = { ...character, campaignId: newCampaign.id }
+    /* The decision itself is `campaignToShow` in lib/campaign — pure, so the
+       branch that matters is reachable by a test. Read its comment before
+       changing anything here; the "keep the id you were given" rule is what
+       stops a lost campaign from becoming an unrecoverable one. */
+    const loaded = character.campaignId ? loadCampaign(character.campaignId) : null
+    const { campaign: next, repoint } = campaignToShow(character.campaignId, loaded)
+
+    setCampaign(next)
+    if (loaded) return
+
+    saveCampaign(next)
+    if (!repoint) return
+
     /* A-19: `onCharacterUpdate` IS the save path. It was followed by a raw
        `saveCharacter(updated)`, so this one mount wrote the same key twice —
        the second write unguarded, and behind the hook's back. That is how a
        stale tab erased another tab's spends by doing nothing but opening
        Settings. One writer; same data, same key. */
-    onCharacterUpdate(updated)
-    setCampaign(newCampaign)
+    onCharacterUpdate({ ...character, campaignId: next.id })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [character.id])
 
   /* ------ Debounced auto-save ------ */
   const debouncedSave = useCallback((updated: CampaignData) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    setSaveState('saving')
     saveTimerRef.current = setTimeout(() => {
       saveCampaign(updated)
+      /* After the write, not before it. A "saved" that appears when the timer
+         is SET rather than when it fires is the same lie the missing button
+         was telling, in a more confident font. */
+      setSaveState('saved')
     }, 600)
   }, [])
 
@@ -267,78 +291,34 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
   /* ------ Render ------ */
   return (
     <GlassCard>
-      <OrnateHeader className="mb-5">Campaign & World</OrnateHeader>
+      <div className="flex items-baseline justify-between gap-3 mb-1">
+        <OrnateHeader>{campaign.name.trim() || 'Campaign & World'}</OrnateHeader>
+        {/* aria-live so the promise is also made to a screen reader, and
+            `polite` so it waits for a gap rather than interrupting typing. */}
+        <span
+          aria-live="polite"
+          className={cn(
+            'shrink-0 text-xs tabular-nums transition-opacity duration-200',
+            saveState === 'idle' ? 'opacity-0' : 'opacity-100',
+            saveState === 'saved' ? 'text-eldritch' : 'text-forge-2',
+          )}
+        >
+          {saveState === 'saved' ? 'Saved' : saveState === 'saving' ? 'Saving…' : ''}
+        </span>
+      </div>
+
+      {/* The counts, before anything is opened. Every section below is
+          collapsed by default except the party, so without this the page
+          cannot tell the difference between "no NPCs" and "NPCs, behind a
+          chevron" — which is the same ambiguity that made a lost campaign
+          look like an empty one for three weeks. */}
+      <p className="mb-5 text-xs text-forge-2">
+        {campaign.partyMembers.length} in the party · {campaign.notableNPCs.length} NPCs ·{' '}
+        {campaign.sessionNotes.length} session{campaign.sessionNotes.length === 1 ? '' : 's'} recorded
+        {campaign.sessionNotes[0]?.date ? `, latest ${campaign.sessionNotes[0].date}` : ''}
+      </p>
 
       <div className="flex flex-col gap-3">
-        {/* Basics Section */}
-        <Section
-          title="Campaign Basics"
-          icon={Globe}
-          open={openSections.basics}
-          onToggle={() => toggleSection('basics')}
-        >
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-forge-1">Campaign Name</label>
-              <input
-                type="text"
-                value={campaign.name}
-                onChange={e => updateCampaign({ name: e.target.value })}
-                placeholder="e.g., Curse of Strahd"
-                className={inputClasses}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-forge-1">Setting</label>
-              <input
-                type="text"
-                value={campaign.setting}
-                onChange={e => updateCampaign({ setting: e.target.value })}
-                placeholder="e.g., Forgotten Realms, Eberron, Homebrew"
-                className={inputClasses}
-              />
-            </div>
-          </div>
-        </Section>
-
-        {/* World Details Section */}
-        <Section
-          title="World Details"
-          icon={Scroll}
-          open={openSections.world}
-          onToggle={() => toggleSection('world')}
-        >
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-forge-1">World Lore & Context</label>
-            <textarea
-              value={campaign.worldDetails}
-              onChange={e => updateCampaign({ worldDetails: e.target.value })}
-              placeholder="Key world details the AI should know about (nations, factions, magic systems, key history...)"
-              rows={4}
-              className={textareaClasses}
-            />
-          </div>
-        </Section>
-
-        {/* Current Quest Section */}
-        <Section
-          title="Current Quest"
-          icon={BookOpen}
-          open={openSections.quest}
-          onToggle={() => toggleSection('quest')}
-        >
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-forge-1">Active Quest / Objective</label>
-            <textarea
-              value={campaign.currentQuest}
-              onChange={e => updateCampaign({ currentQuest: e.target.value })}
-              placeholder="What is the party currently doing? What's the objective?"
-              rows={3}
-              className={textareaClasses}
-            />
-          </div>
-        </Section>
-
         {/* Party Members Section */}
         <Section
           title="Party Members"
@@ -435,6 +415,25 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
                 Add Party Member
               </Button>
             )}
+          </div>
+        </Section>
+
+        {/* Current Quest Section */}
+        <Section
+          title="Current Quest"
+          icon={BookOpen}
+          open={openSections.quest}
+          onToggle={() => toggleSection('quest')}
+        >
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-forge-1">Active Quest / Objective</label>
+            <textarea
+              value={campaign.currentQuest}
+              onChange={e => updateCampaign({ currentQuest: e.target.value })}
+              placeholder="What is the party currently doing? What's the objective?"
+              rows={3}
+              className={textareaClasses}
+            />
           </div>
         </Section>
 
@@ -640,6 +639,56 @@ export function CampaignEditor({ character, onCharacterUpdate }: CampaignEditorP
             {campaign.sessionNotes.length === 0 && !showSessionForm && (
               <p className="text-xs text-forge-2 text-center py-2">No session notes yet.</p>
             )}
+          </div>
+        </Section>
+
+        {/* World Details Section */}
+        <Section
+          title="World Details"
+          icon={Scroll}
+          open={openSections.world}
+          onToggle={() => toggleSection('world')}
+        >
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-forge-1">World Lore & Context</label>
+            <textarea
+              value={campaign.worldDetails}
+              onChange={e => updateCampaign({ worldDetails: e.target.value })}
+              placeholder="Key world details the AI should know about (nations, factions, magic systems, key history...)"
+              rows={4}
+              className={textareaClasses}
+            />
+          </div>
+        </Section>
+
+        {/* Basics Section */}
+        <Section
+          title="Campaign Basics"
+          icon={Globe}
+          open={openSections.basics}
+          onToggle={() => toggleSection('basics')}
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-forge-1">Campaign Name</label>
+              <input
+                type="text"
+                value={campaign.name}
+                onChange={e => updateCampaign({ name: e.target.value })}
+                placeholder="e.g., Curse of Strahd"
+                className={inputClasses}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-forge-1">Setting</label>
+              <input
+                type="text"
+                value={campaign.setting}
+                onChange={e => updateCampaign({ setting: e.target.value })}
+                placeholder="e.g., Forgotten Realms, Eberron, Homebrew"
+                className={inputClasses}
+              />
+            </div>
           </div>
         </Section>
       </div>

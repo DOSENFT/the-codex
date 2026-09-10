@@ -42,6 +42,7 @@ import {
 import { downloadCharacterFile } from '../lib/export-character'
 import { SKILL_ABILITIES, ABILITY_NAMES } from '../lib/dnd-rules'
 import { SKILL_GUIDE, ABILITY_GUIDE, WEAPON_PROPERTY_GUIDE, FEAT_SYNERGIES, WEAPON_MASTERY_OPTIONS, characterSkillRating } from '../lib/skill-guide'
+import { CampaignEditor } from './CampaignEditor'
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
@@ -2156,6 +2157,21 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
           )}
         </div>
       </Section>
+
+      {/* ─── The rest of the table ───────────────────────────────────────────
+          Party, quest, NPCs, sessions and the world. Moved here from Settings
+          on 2026-09-10 — Marcus: "there's no one good solid page for any of
+          the character, party, world, campaign details, it's spread out in
+          different locations. Campaign and world is in the settings. Weird."
+
+          It was never a decision. The editor was written during a Settings
+          slice and stayed where it was born, so his party and sixteen sessions
+          of notes were filed beside the theme toggle.
+
+          Below the character and above Export: this page answers "who am I"
+          first and "who am I with" second, and export is the end of the page
+          in the same way it is the end of the errand. */}
+      <CampaignEditor character={character} onCharacterUpdate={onCharacterUpdate} />
 
       {/* ─── Export ─── */}
       <div className="flex gap-2">
