@@ -87,13 +87,10 @@ export type AIProvider = 'gemini' | 'ollama' | 'openrouter'
    (newest flash → flash-lite → pro), and a 404 that names its own replacement
    is retried once against that name. See `resolveGeminiModel`. */
 
-/** The three clocks, in milliseconds.
+/** The clocks, in milliseconds.
  *
- *  CONNECT is short and unforgiving: a machine that is going to answer answers
- *  its headers fast, and a machine that is asleep never answers at all. Eight
- *  seconds is long enough for a cold 27B model to be loaded off disk by the
- *  server process and short enough that a wrong URL is a blip rather than an
- *  outage.
+ *  CONNECT is short and unforgiving for a CLOUD provider: Google's front door
+ *  answers its headers in well under a second or it is not going to.
  *
  *  IDLE is generous, and it is an IDLE clock rather than a total one on
  *  purpose: a long answer is a feature, silence is the failure. It restarts on
@@ -101,8 +98,52 @@ export type AIProvider = 'gemini' | 'ollama' | 'openrouter'
  *  no matter how much it has to say.
  *
  *  RETRY_CAP bounds Gemini's own "retry after N seconds" advice, which arrives
- *  from the network and must not be trusted with the app's responsiveness. */
-export const AI_TIMEOUTS = { connectMs: 8_000, idleMs: 30_000, retryCapMs: 20_000 } as const
+ *  from the network and must not be trusted with the app's responsiveness.
+ *
+ *  OLLAMA_CONNECT IS THE ONE THAT IS DIFFERENT, AND IT IS DIFFERENT BECAUSE OF
+ *  A MEASUREMENT. This constant used to be a single 8_000 shared by all three
+ *  providers, above a comment asserting that eight seconds "is long enough for
+ *  a cold 27B model to be loaded off disk by the server process." On 2026-09-09
+ *  that claim was put on a stopwatch against Marcus's actual rig — gemma3-27b,
+ *  16.5 GB, through his own Tailscale https tunnel, model deliberately unloaded
+ *  first with `keep_alive: 0`:
+ *
+ *      TTFB 13.70s   total 14.74s   (of which load_duration 14.18s)
+ *
+ *  The claim was false by 5.7 seconds, and that gap is the whole of "ollama
+ *  keeps falling back to gemini". Nothing was wrong with his server, his tunnel
+ *  or his CORS — all three were verified good in the same sitting. The app was
+ *  hanging up on a machine that was already answering.
+ *
+ *  A LONG CLOCK HERE DOES NOT MAKE A WRONG ADDRESS SLOW. That is the trade the
+ *  old comment thought it was making, and it isn't one: a refused port, a bad
+ *  host or an offline server makes `fetch` REJECT, which lands in `explain` as
+ *  a network error immediately and never touches this clock. The only thing
+ *  this budget is ever spent on is a server that accepted the connection and is
+ *  busy — which, for a local model, means loading.
+ *
+ *  Thirty seconds is a hair over 2× his measured cold load, and under the
+ *  half-minute where waiting stops feeling like loading. It is not sized to
+ *  cover the 4m30s USB-drive reload described at `OLLAMA_KEEP_ALIVE`; nothing
+ *  reasonable is. That case is what `keep_alive` exists to prevent. */
+export const AI_TIMEOUTS = {
+  connectMs: 8_000,
+  ollamaConnectMs: 30_000,
+  idleMs: 30_000,
+  retryCapMs: 20_000,
+} as const
+
+/** How long to wait for headers, given who we are waiting on.
+ *
+ *  Exported and pure because the bug it fixes was invisible in every test that
+ *  existed: the clock was correct, the provider was correct, and the pairing of
+ *  the two was never asked about. An explicit `connectTimeoutMs` still wins —
+ *  the fallback chain sets one to stay inside its budget, and tests set one to
+ *  have something they can watch tick. */
+export function connectMsFor(provider: AIProvider | undefined, cfg: AIConfig): number {
+  if (cfg.connectTimeoutMs !== undefined) return cfg.connectTimeoutMs
+  return provider === 'ollama' ? AI_TIMEOUTS.ollamaConnectMs : AI_TIMEOUTS.connectMs
+}
 
 /** How much EXTRA wall-clock the fallback chain is allowed to spend after the
  *  provider he chose has already failed.
@@ -488,10 +529,19 @@ interface Bound {
  *  Two clocks in sequence, not one total budget: `connectMs` until the headers
  *  arrive, then `idleMs` restarted on every chunk of body. A 27B model writing
  *  three paragraphs is not a failure and must not be cut off at some arbitrary
- *  total; silence is the failure, and silence is what is measured. */
-function bound(cfg: AIConfig, external?: AbortSignal): Bound {
+ *  total; silence is the failure, and silence is what is measured.
+ *
+ *  `provider` is passed EXPLICITLY and is deliberately not read off `cfg`. The
+ *  config carries the provider Marcus CHOSE, and a fallback call is by
+ *  definition made to a provider he didn't choose: `cfg.provider === 'ollama'`
+ *  while this very request goes to Google is the normal case, not the odd one.
+ *  Reading it from the config would hand Gemini the cold-model budget and
+ *  Ollama the cloud one — the same bug this fix is for, mirrored. It is
+ *  REQUIRED rather than optional so the compiler asks the question at every new
+ *  request site instead of letting a default answer it wrongly in silence. */
+function bound(cfg: AIConfig, external: AbortSignal | undefined, provider: AIProvider): Bound {
   const controller = new AbortController()
-  const connectMs = cfg.connectTimeoutMs ?? AI_TIMEOUTS.connectMs
+  const connectMs = connectMsFor(provider, cfg)
   const idleMs = cfg.idleTimeoutMs ?? AI_TIMEOUTS.idleMs
   let ended: 'timeout' | 'cancelled' | null = null
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -647,7 +697,7 @@ export async function fetchOllamaModels(
   // alone — listing tags is instant on a reachable host, and the default is
   // generous on purpose because "reachable" over a tunnel on cellular is not
   // the same as reachable on the desk.
-  const b = bound({ provider: 'ollama', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal)
+  const b = bound({ provider: 'ollama', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal, 'ollama')
   try {
     const response = await fetch(`${url}/api/tags`, { signal: b.signal })
     b.touch()
@@ -721,7 +771,7 @@ const OLLAMA_KEEP_ALIVE = '1h'
 const ollamaOptions = (temperature: number) => ({ temperature, num_ctx: OLLAMA_NUM_CTX })
 
 async function queryOllama(cfg: AIConfig, systemPrompt: string, userMessage: string, temperature: number, signal?: AbortSignal): Promise<string> {
-  const b = bound(cfg, signal)
+  const b = bound(cfg, signal, 'ollama')
   try {
     const response = await fetch(`${cfg.ollamaUrl}/api/chat`, {
       method: 'POST',
@@ -988,7 +1038,7 @@ export async function listGeminiModels(
   signal?: AbortSignal,
   timeoutMs: number = AI_TIMEOUTS.connectMs,
 ): Promise<string[]> {
-  const b = bound({ provider: 'gemini', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal)
+  const b = bound({ provider: 'gemini', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal, 'gemini')
   try {
     const response = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
@@ -1193,7 +1243,7 @@ async function queryGemini(
   signal?: AbortSignal,
   attempt = 0,
 ): Promise<string> {
-  const b = bound(cfg, signal)
+  const b = bound(cfg, signal, 'gemini')
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -1415,7 +1465,7 @@ export async function listOpenRouterModels(
   signal?: AbortSignal,
   timeoutMs: number = AI_TIMEOUTS.connectMs,
 ): Promise<OpenRouterModel[]> {
-  const b = bound({ provider: 'openrouter', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal)
+  const b = bound({ provider: 'openrouter', connectTimeoutMs: timeoutMs, idleTimeoutMs: timeoutMs }, signal, 'openrouter')
   try {
     const response = await fetch(`${OPENROUTER_BASE}/models`, {
       method: 'GET',
@@ -1545,7 +1595,7 @@ async function queryOpenRouter(
   signal?: AbortSignal,
   attempt = 0,
 ): Promise<string> {
-  const b = bound(cfg, signal)
+  const b = bound(cfg, signal, 'openrouter')
   try {
     const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
       method: 'POST',
@@ -1632,9 +1682,18 @@ const ask = async (cfg: AIConfig, provider: AIProvider, systemPrompt: string, us
  *  Only the connect clock. The idle clock is deliberately untouched — see
  *  `AI_FALLBACK_BUDGET_MS`. Shrinking it would cut off a fallback provider that
  *  is genuinely mid-sentence, which is the failure this file has spent eleven
- *  slices refusing to commit: silence is the failure, slowness is not. */
-function withinBudget(cfg: AIConfig, remainingMs: number): AIConfig {
-  return { ...cfg, connectTimeoutMs: Math.min(cfg.connectTimeoutMs ?? AI_TIMEOUTS.connectMs, remainingMs) }
+ *  slices refusing to commit: silence is the failure, slowness is not.
+ *
+ *  The provider is passed in for the same reason `bound` demands one: the clock
+ *  being clamped belongs to the provider being TRIED, not to the one in the
+ *  config. Note what that means for a cold Ollama reached as a FALLBACK — the
+ *  chain's budget is 20s, so it gets 20s and not its own 30s, and a model that
+ *  has to come off disk will not make it. That is the right answer rather than
+ *  a gap: he has already spent a full clock on the provider he chose, and a
+ *  second half-minute stacked on top is the frozen panel this budget exists to
+ *  refuse. Ollama earns its long clock by being the one he picked. */
+function withinBudget(cfg: AIConfig, remainingMs: number, provider: AIProvider): AIConfig {
+  return { ...cfg, connectTimeoutMs: Math.min(connectMsFor(provider, cfg), remainingMs) }
 }
 
 /** Walk the fallback chain. Returns the answer, or null when nothing answered.
@@ -1662,7 +1721,7 @@ async function walkChain(
     // fourth dead address is a minute of frozen panel, not resilience.
     if (remaining <= 0) break
     try {
-      const text = await attempt(withinBudget(cfg, remaining), provider)
+      const text = await attempt(withinBudget(cfg, remaining, provider), provider)
       return { provider, text }
     } catch (err) {
       if (err instanceof AIError && err.kind === 'cancelled') throw err
@@ -1776,7 +1835,7 @@ const openrouterDelta = (line: string): string | undefined => {
 }
 
 async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: string, temperature: number, onText: (t: string) => void, signal?: AbortSignal): Promise<string> {
-  const b = bound(cfg, signal)
+  const b = bound(cfg, signal, 'ollama')
   try {
     const response = await fetch(`${cfg.ollamaUrl}/api/chat`, {
       method: 'POST',
@@ -1809,7 +1868,7 @@ async function streamOllama(cfg: AIConfig, systemPrompt: string, userMessage: st
 }
 
 async function streamGemini(cfg: AIConfig, model: string, systemPrompt: string, userMessage: string, temperature: number, onText: (t: string) => void, signal?: AbortSignal, attempt = 0): Promise<string> {
-  const b = bound(cfg, signal)
+  const b = bound(cfg, signal, 'gemini')
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
@@ -1849,7 +1908,7 @@ async function streamOpenRouter(
   signal?: AbortSignal,
   attempt = 0,
 ): Promise<string> {
-  const b = bound(cfg, signal)
+  const b = bound(cfg, signal, 'openrouter')
   try {
     const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
       method: 'POST',
