@@ -204,7 +204,14 @@ export function CatalogueRow({
                 Level {entry.lockedUntil}
               </span>
             )}
-            {entry.alwaysPrepared && (
+            {/* Suppressed while locked, rather than tensed the way the detail
+                panel tenses its version. This row is the SCAN surface — 34px on
+                a phone, read at a glance — and a gold ALWAYS touching a dashed
+                LEVEL 9 is a contradiction settled by whichever chip the eye
+                lands on first. The lock chip immediately to the left already
+                carries the whole truth for a locked entry, and the panel says
+                the rest once he opens it. See `detail.ts:160`. */}
+            {entry.alwaysPrepared && !locked && (
               <span className="rounded border border-arcane/50 bg-arcane/10 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-arcane-lit">
                 Always
               </span>

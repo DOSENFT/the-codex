@@ -169,8 +169,16 @@ describe.skipIf(!nix)('entryDetail — the sub-line and the tags', () => {
   })
 
   it('always-prepared beats prepared, because they are not the same claim', () => {
-    const always = catalogue.find(e => e.alwaysPrepared)
-    expect(always, 'his oath grants at least one always-prepared spell').toBeDefined()
+    /* `lockedUntil === null` is load-bearing, not defensive. This used to be a
+       bare `find(e => e.alwaysPrepared)` and passed only because canon happens
+       to list the six unlocked oath spells before the six locked ones — the
+       first re-order would have handed it Fireball, whose tag is deliberately
+       `Always prepared at 9` and never the bare string asserted below. That is
+       a test failing for being pointed at the wrong entry rather than for the
+       claim in its name, which is the most expensive kind of red there is.
+       The locked half of this is `locked-claims.test.ts`. */
+    const always = catalogue.find(e => e.alwaysPrepared && e.lockedUntil === null)
+    expect(always, 'his oath grants at least one always-prepared spell he can cast now').toBeDefined()
     const labels = entryDetail(always!, nix!).tags.map(t => t.label)
     expect(labels).toContain('Always prepared')
     expect(labels).not.toContain('Prepared')

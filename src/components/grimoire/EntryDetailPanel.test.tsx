@@ -6,6 +6,7 @@ import { CatalogueRow } from './CatalogueRow'
 import { entryDetail, type EntryDetail } from '../../lib/catalogue/detail'
 import { buildCatalogue } from '../../lib/catalogue/build'
 import { normalizeName } from '../../lib/canon/lookup'
+import { NIX } from '../../lib/turn/fixtures/nix'
 import type { CanonBands } from '../../lib/canon/bands'
 import type { CatalogueEntry } from '../../lib/catalogue/types'
 import type { Character } from '../../lib/character'
@@ -337,5 +338,60 @@ describe.skipIf(!nix)('CatalogueRow — a locked row opens to everything', () =>
     const html = row(find('Searing Smite'), false)
     expect(html).not.toContain('data-band="1"')
     expect(html).toContain('Searing Smite')
+  })
+})
+
+/* ── The ALWAYS badge, against the CHECKED-IN sheet ──────────────────────────
+   Deliberately not in the block above. Everything up there hangs off the
+   Downloads export behind `skipIf(!nix)`, which is the right trade for what it
+   asserts and the wrong one for a regression — the day that file is tidied
+   away, a suite that skips is a suite that passes. This uses the fixture that
+   lives in the repo, so it runs or it fails; it never quietly abstains.
+
+   The claim: canon marks six of his oath spells BOTH `alwaysPrepared` and
+   locked until 9, 13 or 17. The row painted the gold ALWAYS chip — the one
+   Divine Smite wears to mean "live, right now" — a few pixels from the dashed
+   LEVEL 13 chip. `locked-claims.test.ts` owns that bug in the tag model; this
+   owns it in the markup, because the row reads `entry.alwaysPrepared` itself
+   rather than going through `entryDetail`, and fixing one has never once fixed
+   the other. */
+describe('CatalogueRow — the ALWAYS badge does not survive a lock', () => {
+  const CHAR = NIX as Character
+  const entries = buildCatalogue(CHAR)
+  const paintRow = (entry: CatalogueEntry) =>
+    paint(
+      <CatalogueRow
+        entry={entry}
+        detail={entryDetail(entry, CHAR)}
+        expanded={false}
+        mode="session"
+        onToggleExpand={() => {}}
+        onRollDice={() => {}}
+      />,
+    )
+
+  const lockedAlways = entries.filter(e => e.lockedUntil !== null && e.alwaysPrepared)
+  const openAlways = entries.filter(e => e.lockedUntil === null && e.alwaysPrepared)
+
+  it('the fixture holds both kinds, or the two tests below prove nothing', () => {
+    expect(lockedAlways.length).toBeGreaterThan(0)
+    expect(openAlways.length).toBeGreaterThan(0)
+  })
+
+  it('a locked always-prepared row shows its lock and no ALWAYS', () => {
+    for (const e of lockedAlways) {
+      const html = paintRow(e)
+      expect(html, e.name).toContain(`data-lock-chip="${e.lockedUntil}"`)
+      expect(html, e.name).not.toContain('>Always<')
+    }
+  })
+
+  it('an unlocked always-prepared row still shows ALWAYS', () => {
+    /* The narrowness check. Suppressing the badge everywhere would "fix" the
+       contradiction by deleting the fact, and Divine Smite would stop saying
+       the one thing about it worth saying at a glance. */
+    for (const e of openAlways) {
+      expect(paintRow(e), e.name).toContain('>Always<')
+    }
   })
 })

@@ -164,8 +164,27 @@ function tagsFor(entry: CatalogueEntry): DetailTag[] {
   if (entry.lockedUntil !== null) {
     tags.push({ label: `Level ${entry.lockedUntil}`, tone: 'locked' })
   }
-  if (entry.alwaysPrepared) tags.push({ label: 'Always prepared', tone: 'always' })
-  else if (entry.prepared) tags.push({ label: 'Prepared', tone: 'prepared' })
+  /* ── "Lock first, because it changes what the rest of them mean" — and this
+     is the one it changes most, so it is tensed rather than just re-ordered.
+
+     `alwaysPrepared` is a property of the SPELL, not of his level: canon marks
+     Fireball always-prepared and unlocked at 9, so at 7 the honest reading is
+     "will be", not "is". Left in the present tense it renders a `Level 9` chip
+     and an `Always prepared` chip touching each other, each true about a
+     different year, and the pair says something neither one says alone.
+
+     `build.ts:252` already forces `prepared: false` while locked, so the
+     `else` branch below cannot fire on a locked entry — always-prepared is the
+     only way the contradiction gets on screen, which is why only it is tensed.
+     `group.ts:148` caught the same trap in the grouping and guarded there;
+     these two chips and the row's `ALWAYS` badge were the rest of it. */
+  if (entry.alwaysPrepared) {
+    tags.push(
+      entry.lockedUntil !== null
+        ? { label: `Always prepared at ${entry.lockedUntil}`, tone: 'locked' }
+        : { label: 'Always prepared', tone: 'always' },
+    )
+  } else if (entry.prepared) tags.push({ label: 'Prepared', tone: 'prepared' })
 
   if (entry.canonSpell?.concentration) tags.push({ label: 'Concentration', tone: 'concentration' })
   if (entry.canonSpell?.ritual) tags.push({ label: 'Ritual', tone: 'free' })
