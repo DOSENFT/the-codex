@@ -276,18 +276,47 @@ export function isLocallyServed(): boolean {
 /** Why Ollama is not on offer here, in one sentence for a person who does not
  *  write software — or `null` when it IS on offer and there is nothing to say.
  *
- *  Two sentences rather than one because there are two genuinely different
- *  situations and telling someone the wrong one is worse than telling them
- *  nothing. A page served over https CANNOT reach a local Ollama and no typing
- *  will fix it. A page served over plain http from another machine on the LAN
- *  can, given the address — so it gets told that instead of being shut out. */
-export function ollamaBlockedReason(): string | null {
+ *  ── WHY THIS TAKES THE URL, 2026-09-10 ────────────────────────────────────
+ *  It used to answer from `window.location.protocol` alone, and on an https
+ *  page it said, flatly, that a page served that way "is not allowed to reach
+ *  an Ollama server running on your own machine" — then sent him to Gemini.
+ *
+ *  That contradicted this same file. `loadAIConfig` above drops a saved
+ *  loopback or private-LAN address on an https page and DELIBERATELY KEEPS an
+ *  https one, in as many words: "a tunnel that really does proxy Ollama is his
+ *  call to make, and this function does not get to second-guess it". So the
+ *  config layer already knew an https page can reach an https Ollama — which is
+ *  not a browser quirk but the definition of the rule, since there is no
+ *  http request anywhere in that pair to object to. The sentence a person
+ *  actually reads was the one place still denying it, and it denied it hardest
+ *  to the person who had already done the work of standing a tunnel up.
+ *
+ *  Passing the URL is what lets the two agree. The question was never "what
+ *  protocol is this page?" — it is "can this page reach THAT address?", and the
+ *  address is half of it.
+ *
+ *  Note what is NOT hedged here: `http://localhost` from an https page is a
+ *  genuine browser-by-browser disagreement, and none of the copy below mentions
+ *  it, because `loadAIConfig` has already cleared any such address before this
+ *  function can be asked about it. A case that cannot arrive needs no sentence.
+ *
+ *  @param url The Ollama address currently configured or being typed. Absent or
+ *             empty is treated as "none yet", which is a blocked state on https
+ *             rather than an unknown one — there is nothing there to reach. */
+export function ollamaBlockedReason(url?: string): string | null {
   if (typeof window === 'undefined') return null
   if (isLocallyServed()) return null
-  if (window.location.protocol === 'https:') {
-    return 'This page is served over https, and a page served that way is not allowed to reach an Ollama server running on your own machine. On this device, use a free Gemini key instead.'
+
+  if (window.location.protocol !== 'https:') {
+    return 'This page is not being served from your own machine, so there is no Ollama address it can work out for you. Type the address of your Ollama server below, or use a free Gemini key instead.'
   }
-  return 'This page is not being served from your own machine, so there is no Ollama address it can work out for you. Type the address of your Ollama server below, or use a free Gemini key instead.'
+
+  /* An https address is reachable from an https page, so there is nothing to
+     warn about and the warning is not shown. Trimmed because this is fed
+     straight from an input he is still typing into. */
+  if (/^https:\/\//i.test((url ?? '').trim())) return null
+
+  return 'This page is served over https, so it can only reach an Ollama server that is also on https — a plain http address on your own machine will not open from here. Put an https address below if you have one, or use a free Gemini key instead.'
 }
 
 /** The provider a device gets before anyone has chosen one. */

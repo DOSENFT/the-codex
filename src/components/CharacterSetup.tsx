@@ -736,7 +736,7 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                   >
                     {p === 'gemini'
                       ? 'Gemini (Free)'
-                      : ollamaBlockedReason() ? 'Ollama (not here)' : 'Ollama (Local)'}
+                      : ollamaBlockedReason(ollamaUrl) ? 'Ollama (not here)' : 'Ollama (Local)'}
                   </button>
                 ))}
               </div>
@@ -803,10 +803,10 @@ export function CharacterSetup({ onComplete, roster, onSelectCharacter }: Charac
                 {/* First-run setup is the worst place to be handed a control
                     that cannot work — he has no context yet for why it failed.
                     Say it here, plainly, before he types. */}
-                {ollamaBlockedReason() && (
+                {ollamaBlockedReason(ollamaUrl) && (
                   <div className="flex items-start gap-2 p-3 rounded-lg bg-ember/10 border border-ember/25">
                     <AlertTriangle size={16} className="text-ember shrink-0 mt-0.5" aria-hidden />
-                    <p className="text-xs text-ember">{ollamaBlockedReason()}</p>
+                    <p className="text-xs text-ember">{ollamaBlockedReason(ollamaUrl)}</p>
                   </div>
                 )}
                 <Input

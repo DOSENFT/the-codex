@@ -285,3 +285,87 @@ describe('ollamaBlockedReason — honest rather than silently broken', () => {
     expect(getDefaultProvider()).toBe('ollama')
   })
 })
+
+/* ─── the tunnel it used to call impossible ──────────────────────────────────
+
+   `ollamaBlockedReason` answered from `window.location.protocol` alone and told
+   an https page, flatly, that it could not reach "an Ollama server running on
+   your own machine" — full stop, use Gemini.
+
+   `loadAIConfig` in the same file disagreed, and said so out loud. Its
+   migration drops a saved loopback or private-LAN address on an https page and
+   deliberately keeps an https one: "a tunnel that really does proxy Ollama is
+   his call to make, and this function does not get to second-guess it." One
+   function preserved the setup; the other told him it was impossible.
+
+   The config layer had it right. https→https contains no http request for a
+   browser to object to, so there is nothing there to block — this is the
+   definition of the rule rather than a quirk of one browser, which is why it
+   can be asserted here at all. The two now answer from the same fact, and the
+   warning is worst-case wrong in the safe direction: it appears when there is
+   no address, and clears only for a scheme that genuinely works.
+   ========================================================================== */
+
+describe('ollamaBlockedReason — an https tunnel is not blocked', () => {
+  it('says nothing when the configured address is itself https', () => {
+    servedFrom(DEPLOYED)
+    expect(ollamaBlockedReason('https://ollama.example.ts.net')).toBeNull()
+  })
+
+  it('agrees with the migration that keeps that address', () => {
+    /* The two halves of the old contradiction, asserted together so they can
+       never drift apart again. If a future migration starts dropping https
+       tunnels, or this warning starts denying them, one of these goes red. */
+    const tunnel = 'https://ollama.example.ts.net'
+    servedFrom(DEPLOYED)
+    withStorage({ provider: 'ollama', ollamaUrl: tunnel, ollamaModel: 'llama3' })
+    expect(loadAIConfig().ollamaUrl, 'the migration keeps it').toBe(tunnel)
+    expect(ollamaBlockedReason(tunnel), 'so the warning must not deny it').toBeNull()
+  })
+
+  it('still blocks a plain http address on an https page', () => {
+    /* The narrowness check. The scheme is the whole test — this is the case
+       that really cannot work, and a fix that cleared the warning for any
+       non-empty string would have made the app lie in the other direction. */
+    servedFrom(DEPLOYED)
+    const reason = ollamaBlockedReason('http://192.168.1.50:11434')
+    expect(reason).toBeTruthy()
+    expect(reason).toMatch(/https/i)
+  })
+
+  it('still blocks when there is no address at all', () => {
+    /* Absent is not unknown. On https with nothing configured there is nothing
+       to reach, so the sentence stays — and `undefined` and `''` are the same
+       answer, since one is a fresh config and the other is an emptied input. */
+    servedFrom(DEPLOYED)
+    expect(ollamaBlockedReason()).toBeTruthy()
+    expect(ollamaBlockedReason('')).toBeTruthy()
+    expect(ollamaBlockedReason('   ')).toBeTruthy()
+  })
+
+  it('reads the scheme case-insensitively and ignores what he is still typing around it', () => {
+    servedFrom(DEPLOYED)
+    expect(ollamaBlockedReason('HTTPS://ollama.example.ts.net')).toBeNull()
+    expect(ollamaBlockedReason('  https://ollama.example.ts.net  ')).toBeNull()
+  })
+
+  it('is not fooled by an address that merely CONTAINS https', () => {
+    /* `http://evil/?next=https://` is an http request. The check is anchored at
+       the start of the string for that reason, and this is the test that keeps
+       it anchored — a substring match here would clear the warning on exactly
+       the address it exists to warn about. */
+    servedFrom(DEPLOYED)
+    expect(ollamaBlockedReason('http://box.local/proxy?to=https://ollama')).toBeTruthy()
+  })
+
+  it('the URL never overrides where the page is served from', () => {
+    /* On the machine running the model there is nothing to say regardless, and
+       on the LAN the sentence is about the missing address rather than the
+       scheme. Neither may be turned back on by what is in the box. */
+    servedFrom(DESKTOP)
+    expect(ollamaBlockedReason('http://192.168.1.50:11434')).toBeNull()
+
+    servedFrom('http://192.168.1.50:5173/the-codex/')
+    expect(ollamaBlockedReason('https://ollama.example.ts.net')).toMatch(/type the address/i)
+  })
+})

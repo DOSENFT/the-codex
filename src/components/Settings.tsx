@@ -516,10 +516,15 @@ export function Settings({ character, onCharacterUpdate, onResetCharacter, roste
   }, [character, onCharacterUpdate])
 
   /* ------ sections ------ */
-  /* `null` on the desktop that runs the model; a plain sentence anywhere else.
-     Computed per render rather than stored, because it is a fact about the URL
-     bar and nothing in this component can change it. */
-  const ollamaBlocked = ollamaBlockedReason()
+  /* `null` on the desktop that runs the model, and now also null on the
+     deployed site once he has put an https tunnel address in — which is the
+     one case the old protocol-only version got wrong, and got wrong at the
+     worst moment, since reaching it meant he had already stood the tunnel up.
+
+     Still computed per render rather than stored, and now that is doing more
+     work than it was: `ollamaUrl` is the live input value, so the warning
+     clears as he finishes typing `https://` rather than on save. */
+  const ollamaBlocked = ollamaBlockedReason(ollamaUrl)
 
   /* ------ the fallback chain, as the screen has to describe it ------ */
   /* Fallback used to be a pair, so the UI could say "the other one" and be
