@@ -1,0 +1,579 @@
+{
+  "recon": {
+    "tabs": [
+      "Combat",
+      "Grimoire",
+      "Roleplay"
+    ],
+    "sections": [
+      {
+        "label": "Combat Helper",
+        "box": {
+          "x": 16,
+          "y": 72,
+          "w": 358,
+          "h": 2479
+        }
+      },
+      {
+        "label": "Your turn options",
+        "box": {
+          "x": 16,
+          "y": 163,
+          "w": 358,
+          "h": 268
+        }
+      },
+      {
+        "label": "Your reactions",
+        "box": {
+          "x": 16,
+          "y": 447,
+          "w": 358,
+          "h": 329
+        }
+      },
+      {
+        "label": "Everything else you could do",
+        "box": {
+          "x": 16,
+          "y": 792,
+          "w": 358,
+          "h": 43
+        }
+      },
+      {
+        "label": "Rules flags on your sheet",
+        "box": {
+          "x": 16,
+          "y": 2444,
+          "w": 358,
+          "h": 43
+        }
+      },
+      {
+        "label": "Turn deck",
+        "box": {
+          "x": 0,
+          "y": 478,
+          "w": 390,
+          "h": 302
+        }
+      }
+    ],
+    "expandables": [
+      {
+        "label": null,
+        "text": "Your reactions2",
+        "expanded": "true",
+        "box": {
+          "x": 29,
+          "y": 460,
+          "w": 332,
+          "h": 17
+        }
+      },
+      {
+        "label": null,
+        "text": "Everything else8",
+        "expanded": "false",
+        "box": {
+          "x": 29,
+          "y": 805,
+          "w": 332,
+          "h": 17
+        }
+      },
+      {
+        "label": null,
+        "text": "Active ConditionsNone",
+        "expanded": "false",
+        "box": {
+          "x": 37,
+          "y": 2167,
+          "w": 316,
+          "h": 48
+        }
+      },
+      {
+        "label": null,
+        "text": "Rules flags6 · 6 unanswered",
+        "expanded": "false",
+        "box": {
+          "x": 29,
+          "y": 2457,
+          "w": 332,
+          "h": 17
+        }
+      },
+      {
+        "label": "Minimise turn deck",
+        "text": "",
+        "expanded": "true",
+        "box": {
+          "x": 274,
+          "y": 490,
+          "w": 48,
+          "h": 48
+        }
+      },
+      {
+        "label": "Show exact amounts",
+        "text": "",
+        "expanded": "false",
+        "box": {
+          "x": 330,
+          "y": 662,
+          "w": 48,
+          "h": 48
+        }
+      },
+      {
+        "label": null,
+        "text": "Attacks",
+        "expanded": "false",
+        "box": {
+          "x": 9,
+          "y": 1079,
+          "w": 372,
+          "h": 44
+        }
+      },
+      {
+        "label": null,
+        "text": "Saving Throws",
+        "expanded": "false",
+        "box": {
+          "x": 9,
+          "y": 1131,
+          "w": 372,
+          "h": 44
+        }
+      },
+      {
+        "label": null,
+        "text": "Damage",
+        "expanded": "false",
+        "box": {
+          "x": 9,
+          "y": 1183,
+          "w": 372,
+          "h": 44
+        }
+      },
+      {
+        "label": "Expand: How do I make an attack roll?",
+        "text": "How do I make an attack roll?Roll d20 + ability modifier + p",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 1086,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How do critical hits work?",
+        "text": "How do critical hits work?On a natural 20, the attack hits a",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 1225,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does multiattack work?",
+        "text": "How does multiattack work?Extra Attack lets you attack multi",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 1363,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does opportunity attack work?",
+        "text": "How does opportunity attack work?When an enemy leaves your r",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 1502,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How do saving throws work?",
+        "text": "How do saving throws work?Roll d20 + ability modifier + prof",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 1640,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: What is an ability check?",
+        "text": "What is an ability check?Roll d20 + ability modifier + profi",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 1779,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does advantage/disadvantage work?",
+        "text": "How does advantage/disadvantage work?Roll 2d20. With advanta",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 1917,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: What is proficiency bonus?",
+        "text": "What is proficiency bonus?A bonus that scales with your tota",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 2056,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: What happens at 0 HP?",
+        "text": "What happens at 0 HP?You fall unconscious and start making d",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 2194,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How do death saves work?",
+        "text": "How do death saves work?Roll d20 at the start of your turn: ",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 2333,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does healing work?",
+        "text": "How does healing work?Healing restores HP up to your maximum",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 2471,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: What is temporary HP?",
+        "text": "What is temporary HP?Extra buffer HP that absorbs damage fir",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 2610,
+          "w": 354,
+          "h": 144
+        }
+      },
+      {
+        "label": "Expand: How do conditions work?",
+        "text": "How do conditions work?Conditions impose specific mechanical",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 2768,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does grappling work?",
+        "text": "How does grappling work?Use an attack to grab: your Athletic",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 2906,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does cover work?",
+        "text": "How does cover work?Half cover: +2 AC/DEX saves. Three-quart",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 3045,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: What are the action types in combat?",
+        "text": "What are the action types in combat?Each turn: 1 Action + 1 ",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 3183,
+          "w": 354,
+          "h": 144
+        }
+      },
+      {
+        "label": "Expand: How do bonus actions work?",
+        "text": "How do bonus actions work?You get one per turn, but only if ",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 3341,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How do reactions work?",
+        "text": "How do reactions work?One per round (resets at your turn sta",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 3480,
+          "w": 354,
+          "h": 144
+        }
+      },
+      {
+        "label": "Expand: What is the Help action?",
+        "text": "What is the Help action?Give one ally advantage on their nex",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 3638,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does Dodge action work?",
+        "text": "How does Dodge action work?Until your next turn, attacks aga",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 3776,
+          "w": 354,
+          "h": 144
+        }
+      },
+      {
+        "label": "Expand: How does concentration work?",
+        "text": "How does concentration work?Only one concentration spell at ",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 3934,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How do spell slots work?",
+        "text": "How do spell slots work?Spell slots are your fuel for castin",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 4073,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How does spellcasting work?",
+        "text": "How does spellcasting work?Know or prepare spells, expend a ",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 4211,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: What is spell save DC?",
+        "text": "What is spell save DC?8 + proficiency bonus + spellcasting a",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 4350,
+          "w": 354,
+          "h": 125
+        }
+      },
+      {
+        "label": "Expand: How do prepared spells work?",
+        "text": "How do prepared spells work?After a long rest, choose spells",
+        "expanded": "false",
+        "box": {
+          "x": 18,
+          "y": 4488,
+          "w": 354,
+          "h": 125
+        }
+      }
+    ],
+    "dialogs": [
+      {
+        "label": "Dice Roller",
+        "box": {
+          "x": 0,
+          "y": 844,
+          "w": 390,
+          "h": 729
+        }
+      },
+      {
+        "label": "Mechanics Reference",
+        "box": {
+          "x": 0,
+          "y": 844,
+          "w": 390,
+          "h": 760
+        }
+      }
+    ],
+    "vitals": [
+      {
+        "word": "Save DC",
+        "found": true,
+        "value": "14",
+        "box": {
+          "x": 29,
+          "y": 85,
+          "w": 62,
+          "h": 49
+        }
+      },
+      {
+        "word": "AC",
+        "found": true,
+        "value": "AC",
+        "box": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "word": "Init",
+        "found": true,
+        "value": "Init",
+        "box": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "word": "Prof",
+        "found": true,
+        "value": "Prof",
+        "box": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "word": "Sp Atk",
+        "found": true,
+        "value": "+6",
+        "box": {
+          "x": 299,
+          "y": 85,
+          "w": 62,
+          "h": 49
+        }
+      }
+    ],
+    "mainBox": {
+      "x": 0,
+      "y": 56,
+      "w": 390,
+      "h": 421
+    },
+    "scrollH": 844,
+    "optionRows": [
+      {
+        "text": "LongswordAction+7 to hit · 1d8+4 Slashing · 5 ft▸",
+        "box": {
+          "x": 29,
+          "y": 201,
+          "w": 332,
+          "h": 56
+        },
+        "detailBtn": "Longsword — details"
+      },
+      {
+        "text": "Sacred FlameAction · no slot2d8 Radiant · DC 14 DEX · 60 ft · negates▸",
+        "box": {
+          "x": 29,
+          "y": 262,
+          "w": 332,
+          "h": 56
+        },
+        "detailBtn": "Sacred Flame — details"
+      },
+      {
+        "text": "Hearthfire ManifestBonus action30 feet▸",
+        "box": {
+          "x": 29,
+          "y": 324,
+          "w": 332,
+          "h": 56
+        },
+        "detailBtn": "Hearthfire Manifest — details"
+      }
+    ],
+    "reactionRows": [
+      {
+        "text": "Opportunity Attack — Longsword ReactionWHEN a creature you can see leaves your reach+7 to hit · 1d8+4 Slashing",
+        "box": {
+          "x": 29,
+          "y": 485,
+          "w": 332,
+          "h": 98
+        }
+      },
+      {
+        "text": "Flaming Cloak Reaction · 1/2 useswhen not stated — record one in Rules flags10 temp HP · 1d10 Fire retaliation",
+        "box": {
+          "x": 29,
+          "y": 589,
+          "w": 332,
+          "h": 174
+        }
+      }
+    ],
+    "deckText": "ActionBonusReactionMoveSPELL SLOTS1st2ndLAY ON HANDS35/35Heal 5Heal 10CHANNEL DIVINITY"
+  },
+  "errors": []
+}

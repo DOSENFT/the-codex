@@ -1,0 +1,21 @@
+[32m── play/Combat > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── play/Combat > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── play/Combat(in combat) > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── play/Combat(in combat) > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── play/Grimoire > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── play/Grimoire > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── play/Roleplay > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── play/Roleplay > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Character > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Character > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Grimoire > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Grimoire > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Persona > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Persona > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Academy > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[32m── prep/Academy > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+
+===== 0 TRAPPED of 448 controls, across 16 opened overlay(s) =====
+64 of those sat inside a nested scroller and were brought into view along its own axis first, then swept.
+0 overlay(s) could not be opened or located — UNPROVEN. 8 opener(s) absent on their screen.
+ERROR FLOOR: clean

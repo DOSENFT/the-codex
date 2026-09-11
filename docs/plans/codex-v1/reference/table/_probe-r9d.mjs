@@ -1,0 +1,32 @@
+import { chromium, LOCAL, PHONE, importFile, watch, drain, goScreen, SCREENS } from './rig.mjs';
+import { realCopy } from './families.mjs';
+const FILE = realCopy('full');
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: PHONE, deviceScaleFactor: 3 });
+await ctx.addInitScript(() => localStorage.setItem('codex-sw-off', '1'));
+const page = await ctx.newPage(); watch(page);
+await page.goto(LOCAL, { waitUntil: 'networkidle' });
+await importFile(page, FILE);
+const snap = () => page.evaluate(() => {
+  const k = Object.keys(localStorage).find(k => k.startsWith('codex-character-'));
+  const c = k ? JSON.parse(localStorage.getItem(k)) : null;
+  return { pool: c?.paladinResources?.layOnHands?.current, at: c?.updatedAt };
+});
+await page.getByRole('button', { name: /^Heal 5$/i }).first().click();
+await page.waitForTimeout(700);
+console.log('after spend   :', JSON.stringify(await snap()));
+// go to PREP so CombatHelper is unmounted, then import again
+await goScreen(page, SCREENS.find(s => s.id === 'prep/Character'));
+await page.getByRole('button', { name: /Open settings/i }).first().click();
+await page.waitForTimeout(600);
+const chooser = page.waitForEvent('filechooser', { timeout: 10000 }).catch(() => null);
+await page.getByRole('button', { name: /^Import$/ }).first().click();
+const c = await chooser; if (c) await c.setFiles(FILE);
+await page.waitForTimeout(1500);
+console.log('import 2 (prep):', JSON.stringify(await snap()));
+await page.waitForTimeout(2000);
+console.log('+2s           :', JSON.stringify(await snap()));
+await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(1200);
+console.log('after reload  :', JSON.stringify(await snap()));
+console.log('errs          :', JSON.stringify(await drain(page)));
+await ctx.close(); await b.close();

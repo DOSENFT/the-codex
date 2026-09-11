@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marks pilot — does the silhouette survive?</title>
+<style>
+  :root { --void-0:#0a0a08; --void-1:#12110e; --arcane:#d4a74a; --cream:#f0e6d3; --dim:#979182; --bronze:#8b7355; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--void-0); color:var(--cream); font-family:system-ui,sans-serif; padding:24px; }
+  h2 { font-size:15px; color:var(--arcane); margin:22px 0 8px; font-weight:600; }
+  .sub { font-size:11px; color:var(--dim); margin-bottom:12px; }
+  .strip { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  .mark { border-radius:9px; flex-shrink:0; overflow:hidden;
+          border:1px solid rgba(212,167,74,.22);
+          background:linear-gradient(160deg,#1c1a15,#100f0c); }
+  .mark img { display:block; width:100%; height:100%; }
+  .s34 { width:34px; height:34px; }
+  .s72 { width:72px; height:72px; border-radius:16px; }
+  .s128 { width:128px; height:128px; border-radius:20px; }
+  .cap { font-size:10px; color:var(--bronze); text-align:center; margin-top:5px; }
+  .cell { text-align:center; }
+  .row { background:var(--void-1); border:1px solid #26231c; border-radius:10px;
+         padding:11px 14px; margin-bottom:7px; display:flex; align-items:center; gap:12px; max-width:420px; }
+  .row .name { font-size:15px; }
+  .row .detail { font-size:12px; color:var(--dim); margin-top:3px; }
+</style>
+</head>
+<body>
+
+<h2>128px — what the generator actually drew</h2>
+<div class="strip">
+  <div class="cell"><div class="mark s128"><img src="./1-hearthbrand.svg"></div><div class="cap">hearthbrand</div></div>
+  <div class="cell"><div class="mark s128"><img src="./2-sacred-flame.svg"></div><div class="cap">sacred-flame</div></div>
+  <div class="cell"><div class="mark s128"><img src="./3-cure-wounds.svg"></div><div class="cap">cure-wounds</div></div>
+  <div class="cell"><div class="mark s128"><img src="./4-interception.svg"></div><div class="cap">interception</div></div>
+</div>
+
+<h2>72px — top of the expanded card</h2>
+<div class="strip">
+  <div class="cell"><div class="mark s72"><img src="./1-hearthbrand.svg"></div></div>
+  <div class="cell"><div class="mark s72"><img src="./2-sacred-flame.svg"></div></div>
+  <div class="cell"><div class="mark s72"><img src="./3-cure-wounds.svg"></div></div>
+  <div class="cell"><div class="mark s72"><img src="./4-interception.svg"></div></div>
+</div>
+
+<h2>34px — the size that actually has to work</h2>
+<div class="sub">If it fails here, it fails. This is the one he scans mid-fight.</div>
+<div class="strip">
+  <div class="cell"><div class="mark s34"><img src="./1-hearthbrand.svg"></div></div>
+  <div class="cell"><div class="mark s34"><img src="./2-sacred-flame.svg"></div></div>
+  <div class="cell"><div class="mark s34"><img src="./3-cure-wounds.svg"></div></div>
+  <div class="cell"><div class="mark s34"><img src="./4-interception.svg"></div></div>
+</div>
+
+<h2>34px, in the real row</h2>
+<div class="row"><div class="mark s34"><img src="./1-hearthbrand.svg"></div>
+  <div><div class="name">Hearthbrand</div><div class="detail">+8 to hit · 1d8+4 slashing · 10 ft</div></div></div>
+<div class="row"><div class="mark s34"><img src="./2-sacred-flame.svg"></div>
+  <div><div class="name">Sacred Flame</div><div class="detail">DC 15 Dex save · 2d8 radiant · 60 ft</div></div></div>
+<div class="row"><div class="mark s34"><img src="./3-cure-wounds.svg"></div>
+  <div><div class="name">Cure Wounds</div><div class="detail">Restores 2d8 + 4 · Touch</div></div></div>
+<div class="row"><div class="mark s34"><img src="./4-interception.svg"></div>
+  <div><div class="name">Interception</div><div class="detail">Reduce damage by 1d10 + 3 · 10 ft</div></div></div>
+
+</body>
+</html>

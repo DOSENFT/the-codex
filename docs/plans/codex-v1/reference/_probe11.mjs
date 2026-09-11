@@ -1,0 +1,33 @@
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import { readdirSync } from 'node:fs';
+import { loadNix } from './nix-seed.mjs';
+const req = createRequire(import.meta.url);
+const npxRoot = 'C:/Users/marcu/AppData/Local/npm-cache/_npx';
+const paths = [process.cwd(), ...readdirSync(npxRoot).map(d => `${npxRoot}/${d}/node_modules`)];
+const pw = await import(pathToFileURL(req.resolve('playwright', { paths })).href);
+const chromium = pw.chromium ?? pw.default?.chromium;
+const NIX = await loadNix();
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
+await ctx.addInitScript(([id, seed]) => {
+  localStorage.setItem('codex-character-' + id, seed);
+  localStorage.setItem('codex-active-id', id);
+  localStorage.setItem('codex-sw-off', '1');
+}, [NIX.id, JSON.stringify(NIX)]);
+const p = await ctx.newPage();
+await p.goto('http://localhost:4173/the-codex/', { waitUntil: 'networkidle' });
+await p.getByRole('button', { name: 'Start Combat' }).click();
+await p.waitForTimeout(400);
+const dump = () => p.evaluate(() => {
+  const id = localStorage.getItem('codex-active-id');
+  const ch = JSON.parse(localStorage.getItem('codex-character-' + id) || '{}');
+  const cb = JSON.parse(localStorage.getItem('codex-combat-' + id) || '{}');
+  return { charSlots: ch.spellSlots, combatSlots: cb.spellSlots };
+});
+console.log('BEFORE', JSON.stringify(await dump()));
+await p.getByRole('button', { name: '1st slot 1: expend' }).click();
+await p.waitForTimeout(500);
+console.log('AFTER ', JSON.stringify(await dump()));
+console.log('LABELS', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('button')].map(x=>x.getAttribute('aria-label')).filter(l=>l&&l.includes('slot')))));
+await b.close();

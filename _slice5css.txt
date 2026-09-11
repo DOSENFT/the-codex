@@ -1,0 +1,54 @@
+
+/* ---- a row that carries its own control (slice 5, item 7) -----------------
+   One row on this screen is not just a thing you press — it is a thing you
+   press AND a place you record what just happened to you. The card therefore
+   splits: `.acthit` is the part that opens the sheet, `.actx` is the part that
+   belongs to the reaction itself.
+
+   `.acthit` is a bare button, stripped back to the block it replaces, because
+   the card's own padding and border already draw the row. Two rules here are
+   load-bearing and must not be tidied:
+
+   - `min-height: var(--d-touch-goal)` — V-5b. The hit target shrank to the
+     text when the padding moved to the card, and a 34px row is not a thing you
+     hit on the first try under a six second clock.
+
+   - `.act.hasx.blocked { opacity: 1 }` — the card must NOT dim as a whole.
+     Hearthfire Manifest is most often blocked precisely BECAUSE the reaction
+     was spent, and the moment it is spent is the moment there is a hit to
+     record. Dimming the card would grey out the one control that still works
+     at the one moment it is needed, so the dimming is pushed down onto the hit
+     target alone. */
+.dturn .acthit > span { display: block; }
+.dturn button.acthit {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--d-touch-goal);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.dturn button.acthit:disabled { cursor: default; }
+.dturn button.acthit:focus-visible {
+  outline: 2px solid var(--d-gold);
+  outline-offset: 2px;
+}
+.dturn .act.hasx.blocked { opacity: 1; }
+.dturn .act.hasx.blocked > .acthit { opacity: 0.62; }
+
+/* The hairline that joins the extra to its card, so the capture reads as part
+   of the reaction rather than as a loose control that happens to sit under it. */
+.dturn .act.hasx > .actx {
+  margin-top: var(--d-s2);
+  padding-top: var(--d-s2);
+  border-top: 1px solid var(--d-rule);
+}

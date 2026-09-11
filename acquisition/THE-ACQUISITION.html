@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Acquisition — The Codex &amp; The Vault</title>
+<meta name="description" content="What I would actually do, having bought The Codex and The Vault. An audit, a critique, a strategy, and one working proof.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   TACTICAL GRIMOIRE
+   Tokens lifted verbatim from AESTHETIC_POSITION.md. Every one of the ten
+   items on that document's Forbidden List is honoured here — no backdrop-blur,
+   no purple/blue gradient highlights, no spring physics, no radius over 16px,
+   no box-shadow used for depth, no animation on idle elements, no decorative
+   stock iconography. Depth is value steps and hairlines, as specified.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ash-deep:oklch(0.12 0.01 60);
+  --ash-warm:oklch(0.155 0.012 65);
+  --ash-mid:oklch(0.215 0.013 68);
+  --ash-light:oklch(0.265 0.013 70);
+
+  --ink-primary:oklch(0.92 0.02 80);
+  --ink-secondary:oklch(0.78 0.022 82);
+  --ink-muted:oklch(0.55 0.018 80);
+  --ink-ghost:oklch(0.36 0.012 78);
+
+  --gold:oklch(0.72 0.10 80);
+  --gold-bright:oklch(0.79 0.11 82);
+  --gold-dim:oklch(0.56 0.065 78);
+  --gold-ghost:oklch(0.42 0.04 78);
+
+  --blood:oklch(0.53 0.19 26);
+  --ember:oklch(0.72 0.14 55);
+  --verdant:oklch(0.78 0.16 155);
+  --radiant:oklch(0.75 0.11 83);
+
+  --rule:color-mix(in oklch, var(--gold) 16%, transparent);
+  --rule-soft:color-mix(in oklch, var(--gold) 8%, transparent);
+
+  --ease-snap:cubic-bezier(0.2,0,0,1);
+  --ease-settle:cubic-bezier(0.22,1,0.36,1);
+  --ease-ceremony:cubic-bezier(0.65,0,0.35,1);
+
+  --t-micro:80ms; --t-state:150ms; --t-transition:280ms; --t-ceremony:480ms;
+
+  --display:'Cinzel','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --body:'IBM Plex Sans','Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;
+
+  --gut:clamp(20px,5vw,72px);
+  --measure:68ch;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+body{
+  margin:0;
+  background:var(--ash-deep);
+  color:var(--ink-secondary);
+  font-family:var(--body);
+  font-size:clamp(15px,0.42vw + 14px,17px);
+  line-height:1.62;
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+::selection{background:color-mix(in oklch,var(--gold) 32%,transparent);color:var(--ink-primary)}
+
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink-primary);font-weight:600;line-height:1.08;margin:0;letter-spacing:-0.005em}
+p{margin:0 0 1.05em}
+strong{color:var(--ink-primary);font-weight:600}
+em{font-style:italic;color:var(--ink-primary)}
+a{color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold-ghost);transition:border-color var(--t-state) var(--ease-snap),color var(--t-state) var(--ease-snap)}
+a:hover{color:var(--gold-bright);border-bottom-color:var(--gold)}
+code,.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:0.92em}
+
+/* ── page frame ──────────────────────────────────────────────────────────── */
+.wrap{max-width:1240px;margin:0 auto;padding:0 var(--gut)}
+/* padding-BLOCK, not the shorthand. `.folio` is set on the same element as
+   `.wrap` on eleven of thirteen sections, and it is declared after it, so a
+   `padding: X 0` here silently zeroed every gutter on the page — text flush to
+   the glass at 390px and at 1440px alike. The same collision ate the cover's
+   gutter. Longhand, so the two rules compose instead of fighting. */
+.folio{position:relative;padding-block:clamp(56px,9vh,120px);border-top:1px solid var(--rule-soft)}
+.folio:first-of-type{border-top:0}
+
+.eyebrow{
+  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--gold-dim);margin:0 0 18px;display:block;
+}
+.sect-no{
+  font-family:var(--display);font-size:12px;letter-spacing:0.3em;color:var(--gold);
+  text-transform:uppercase;display:inline-block;margin:0 0 14px;
+}
+.sect-no::after{content:'';display:block;width:28px;height:1px;background:var(--gold-ghost);margin-top:10px}
+
+h2{font-size:clamp(28px,4.2vw,52px);letter-spacing:-0.015em;max-width:20ch}
+h3{font-size:clamp(19px,1.7vw,25px);margin:0 0 10px}
+h4{font-family:var(--body);font-weight:600;font-size:14px;letter-spacing:0.09em;text-transform:uppercase;color:var(--gold-dim);margin:0 0 12px}
+
+.lede{font-size:clamp(17px,1.35vw,21px);line-height:1.55;color:var(--ink-primary);max-width:52ch;font-weight:300;margin-top:22px}
+.prose{max-width:var(--measure)}
+.prose p+p{margin-top:0}
+
+/* ── cover ───────────────────────────────────────────────────────────────── */
+.cover{
+  min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  position:relative;padding:clamp(48px,10vh,110px) var(--gut) clamp(40px,8vh,80px);
+  border-top:0;overflow:hidden;
+}
+.cover-mark{
+  position:absolute;right:-14vw;top:50%;translate:0 -50%;
+  width:min(96vh,900px);aspect-ratio:1;color:var(--gold);opacity:0.055;
+  pointer-events:none;
+}
+.cover-mark svg{width:100%;height:100%}
+.cover-mark svg g{stroke-width:0.4}
+.cover-inner{position:relative;z-index:1}
+.cover h1{
+  font-size:clamp(44px,9.5vw,132px);line-height:0.92;letter-spacing:-0.03em;
+  font-weight:700;margin:0 0 6px;
+}
+.cover h1 .amp{color:var(--gold);font-weight:400;font-style:italic}
+.cover .sub{
+  font-family:var(--display);font-size:clamp(15px,1.9vw,26px);color:var(--gold);
+  letter-spacing:0.14em;text-transform:uppercase;font-weight:400;margin:20px 0 0;
+}
+.standfirst{max-width:56ch;margin-top:clamp(32px,5vh,54px);font-size:clamp(16px,1.15vw,19px);line-height:1.6}
+.standfirst::first-letter{
+  font-family:var(--display);float:left;font-size:3.55em;line-height:0.78;
+  padding:0.07em 0.14em 0 0;color:var(--gold);font-weight:700;
+}
+.cover-meta{
+  display:flex;flex-wrap:wrap;gap:0 38px;margin-top:clamp(34px,5vh,56px);
+  padding-top:20px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-muted);
+}
+.cover-meta b{color:var(--gold-dim);font-weight:500}
+
+/* ── slabs & grids ───────────────────────────────────────────────────────── */
+.grid{display:grid;gap:clamp(16px,2vw,26px)}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(28px,4vw,64px)}
+@media(min-width:900px){.split{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}}
+
+.card{
+  background:var(--ash-warm);border:1px solid var(--rule-soft);border-radius:3px;
+  padding:clamp(20px,2.2vw,30px);
+}
+.card.raise{background:var(--ash-mid)}
+
+/* Ritual Frame — reserved, per spec, for the single most consequential block */
+.ritual{position:relative;background:var(--ash-warm);border:1px solid var(--rule);border-radius:2px;padding:clamp(26px,3.4vw,48px)}
+.ritual::before,.ritual::after{
+  content:'';position:absolute;width:16px;height:16px;border:1px solid var(--gold);
+}
+.ritual::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.ritual::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+
+.stat{border-top:1px solid var(--rule);padding-top:14px}
+.stat .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(24px,2.9vw,38px);color:var(--ink-primary);font-weight:500;line-height:1;display:block;letter-spacing:-0.02em}
+.stat .v.gold{color:var(--gold)}
+.stat .v.red{color:var(--blood)}
+.stat .k{display:block;margin-top:9px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-muted);font-family:var(--mono)}
+.stat .n{display:block;margin-top:6px;font-size:13.5px;color:var(--ink-muted);line-height:1.45}
+
+/* ── ledger ──────────────────────────────────────────────────────────────── */
+.ledger{width:100%;border-collapse:collapse;font-size:14.5px}
+.ledger th{
+  text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:0.17em;
+  text-transform:uppercase;color:var(--gold-dim);font-weight:500;
+  padding:0 14px 11px 0;border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+.ledger td{padding:14px 14px 14px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;color:var(--ink-secondary)}
+.ledger tr:last-child td{border-bottom:0}
+.ledger td:first-child{color:var(--ink-primary);font-weight:500}
+.ledger .num{color:var(--ink-primary);white-space:nowrap}
+.sev{font-family:var(--mono);font-size:10px;letter-spacing:0.13em;text-transform:uppercase;padding:3px 8px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
+.sev.crit{color:var(--blood)}
+.sev.high{color:var(--ember)}
+.sev.med{color:var(--gold-dim)}
+.sev.ok{color:var(--verdant)}
+
+/* A four-column ledger at 390px is a table you scroll sideways to read, which is
+   a table nobody reads. Below 720px the audit ledger stops being a grid and
+   becomes what it always was underneath — a list of findings, each with its own
+   severity, location and consequence. The financial table in §XI is NOT given
+   this treatment: a two-year comparison is genuinely tabular and stacking it
+   would destroy the one thing it exists to show. */
+@media(max-width:720px){
+  .ledger.stack,.ledger.stack tbody,.ledger.stack tr,.ledger.stack td{display:block;width:auto}
+  .ledger.stack thead{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .ledger.stack tr{
+    display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+    padding:20px 0;border-bottom:1px solid var(--rule-soft);
+  }
+  .ledger.stack tr:last-child{border-bottom:0;padding-bottom:0}
+  .ledger.stack td{padding:0;border-bottom:0}
+  .ledger.stack td:nth-child(1){order:1;font-size:16.5px;line-height:1.3;letter-spacing:-0.005em}
+  .ledger.stack td:nth-child(3){order:2}
+  .ledger.stack td:nth-child(2){order:3;font-size:12.5px}
+  .ledger.stack td:nth-child(4){order:4;font-size:14.5px;line-height:1.62}
+  .ledger.stack .num{white-space:normal;overflow-wrap:anywhere;color:var(--ink-muted)}
+}
+
+.rows{list-style:none;margin:0;padding:0}
+.rows li{padding:15px 0 15px 20px;border-left:2px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+.rows li:last-child{border-bottom:0}
+.rows li.red{border-left-color:var(--blood)}
+.rows li.green{border-left-color:var(--verdant)}
+.rows li.gold{border-left-color:var(--gold)}
+.rows b{display:block;color:var(--ink-primary);font-weight:600;margin-bottom:4px;font-size:15.5px}
+.rows span{font-size:14.5px;color:var(--ink-muted);line-height:1.5}
+.rows .src{font-family:var(--mono);font-size:11.5px;color:var(--gold-dim);display:inline-block;margin-top:6px}
+
+/* ── pull quote ──────────────────────────────────────────────────────────── */
+.pull{
+  border-left:2px solid var(--gold);padding:6px 0 6px 26px;margin:34px 0;
+  font-family:var(--display);font-size:clamp(19px,2.3vw,30px);line-height:1.34;
+  color:var(--ink-primary);max-width:30ch;font-weight:500;
+}
+.pull cite{display:block;font-family:var(--mono);font-size:11px;font-style:normal;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold-dim);margin-top:16px}
+
+/* ── quadrant diagram ────────────────────────────────────────────────────── */
+.quad{position:relative;aspect-ratio:1/0.86;width:100%;border:1px solid var(--rule);border-radius:2px;background:var(--ash-warm)}
+.quad .ax{position:absolute;background:var(--rule)}
+.quad .ax.h{left:0;right:0;top:50%;height:1px}
+.quad .ax.v{top:0;bottom:0;left:50%;width:1px}
+.quad .lbl{position:absolute;font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-muted)}
+.quad .lbl.t{top:10px;left:50%;translate:-50% 0}
+.quad .lbl.b{bottom:10px;left:50%;translate:-50% 0}
+.quad .lbl.l{left:12px;top:50%;translate:0 -50%;writing-mode:vertical-rl;rotate:180deg}
+.quad .lbl.r{right:12px;top:50%;translate:0 -50%;writing-mode:vertical-rl}
+.quad .pin{position:absolute;translate:-50% -50%;font-size:12.5px;color:var(--ink-muted);text-align:center;line-height:1.3;white-space:nowrap}
+.quad .pin::before{content:'';display:block;width:5px;height:5px;background:var(--ink-ghost);border-radius:50%;margin:0 auto 7px}
+.quad .pin.us{color:var(--gold);font-weight:600;font-size:14px}
+.quad .pin.us::before{width:9px;height:9px;background:var(--gold)}
+.quad .pin.dead{color:var(--blood);text-decoration:line-through;text-decoration-thickness:1px}
+.quad .pin.dead::before{background:none;border:1px solid var(--blood);width:6px;height:6px;border-radius:0;rotate:45deg}
+.quad .empty{
+  position:absolute;left:50%;top:50%;width:50%;height:50%;
+  background:color-mix(in oklch,var(--gold) 6%,transparent);
+  border:1px dashed var(--gold-ghost);
+}
+
+/* ═══ THE PROOF — spell slot sigils ═══════════════════════════════════════ */
+.proof{background:var(--ash-warm);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.bench{
+  background:var(--ash-deep);border:1px solid var(--rule);border-radius:3px;
+  padding:clamp(20px,2.6vw,34px);
+}
+.bench-head{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--rule-soft);padding-bottom:14px;margin-bottom:22px}
+.bench-head .who{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold-dim)}
+
+.slotrow{display:flex;align-items:center;gap:16px;padding:9px 0}
+.slotrow em{
+  font-family:var(--mono);font-style:normal;font-size:11px;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--ink-muted);width:34px;flex:0 0 34px;text-align:right;
+}
+.pip-row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* the shipped control, reproduced honestly: TurnRail.tsx:196-233 */
+.pip-tap{
+  appearance:none;background:transparent;border:0;padding:8px;margin:-8px;cursor:pointer;
+  min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:2px;
+}
+.pip-tap i{
+  display:block;width:13px;height:13px;border-radius:50%;
+  border:1.5px solid var(--gold);background:var(--gold);
+  transition:background var(--t-state) var(--ease-snap),border-color var(--t-state) var(--ease-snap);
+}
+.pip-tap[data-slot="spent"] i{background:transparent;border-color:var(--ink-ghost)}
+.pip-tap:focus-visible,.sigil:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px}
+
+/* the sigil */
+.sigil{
+  appearance:none;background:transparent;border:0;cursor:pointer;padding:6px;margin:-6px;
+  position:relative;min-width:44px;min-height:44px;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-primary);
+  transition:color 200ms var(--ease-snap);
+  -webkit-tap-highlight-color:transparent;border-radius:2px;
+}
+.sigil[data-state="spent"]{color:var(--ink-ghost)}
+.sigil:active{scale:0.96}
+.sigil-svg{width:30px;height:30px;display:block;position:relative;z-index:2}
+.bench.lg .sigil-svg{width:38px;height:38px}
+
+.sigil .ember{
+  position:absolute;inset:0;margin:auto;width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle,color-mix(in oklch,var(--ember) 55%,transparent) 0%,transparent 68%);
+  opacity:0;pointer-events:none;z-index:1;
+}
+.sigil .wisp{
+  position:absolute;left:50%;top:16%;width:2px;height:13px;translate:-50% 0;
+  background:linear-gradient(to top,color-mix(in oklch,var(--ink-muted) 62%,transparent),transparent);
+  border-radius:2px;opacity:0;pointer-events:none;z-index:1;filter:blur(1px);
+}
+.sigil .sweep{
+  position:absolute;inset:4px;overflow:hidden;pointer-events:none;z-index:3;opacity:0;
+}
+.sigil .sweep::after{
+  content:'';position:absolute;top:0;bottom:0;width:5px;left:-8px;
+  background:linear-gradient(to right,transparent,color-mix(in oklch,var(--gold-bright) 42%,transparent),transparent);
+}
+
+.sigil.burning .ember{animation:emberFlash 150ms var(--ease-snap) forwards}
+.sigil.burning .wisp{animation:wispRise 400ms var(--ease-settle) 60ms forwards}
+.sigil.kindling .sweep{opacity:1}
+.sigil.kindling .sweep::after{animation:sweepAcross 300ms var(--ease-settle) forwards}
+
+@keyframes emberFlash{0%{opacity:0;scale:0.6}35%{opacity:1;scale:1}100%{opacity:0;scale:1.15}}
+@keyframes wispRise{0%{opacity:0;translate:-50% 0}30%{opacity:0.65}100%{opacity:0;translate:-50% -13px}}
+@keyframes sweepAcross{from{left:-8px}to{left:calc(100% + 8px)}}
+
+.bench-ctl{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--rule-soft)}
+.btn{
+  appearance:none;font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  background:transparent;color:var(--gold);border:1px solid var(--gold-ghost);border-radius:2px;
+  padding:0 18px;min-height:44px;cursor:pointer;
+  transition:background var(--t-micro) var(--ease-snap),border-color var(--t-micro) var(--ease-snap),color var(--t-micro) var(--ease-snap);
+}
+.btn:hover{border-color:var(--gold);background:color-mix(in oklch,var(--gold) 8%,transparent)}
+.btn:active{scale:0.97}
+.btn[aria-pressed="true"]{background:var(--gold);color:var(--ash-deep);border-color:var(--gold)}
+.btn.ghost{color:var(--ink-muted);border-color:var(--rule)}
+.btn.ghost:hover{color:var(--ink-primary);border-color:var(--gold-ghost)}
+
+.readout{
+  font-family:var(--mono);font-size:12px;color:var(--ink-muted);margin-top:16px;
+  min-height:1.4em;letter-spacing:0.04em;
+}
+.readout b{color:var(--gold);font-weight:500}
+
+.chart{display:grid;grid-template-columns:repeat(9,1fr);gap:clamp(6px,1vw,14px);margin-top:8px}
+.chart figure{margin:0;text-align:center}
+.chart .cap{font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-top:8px;letter-spacing:0.08em}
+@media(max-width:640px){.chart{grid-template-columns:repeat(5,1fr)}}
+
+/* ── timeline ────────────────────────────────────────────────────────────── */
+.tl{list-style:none;margin:0;padding:0;counter-reset:tl}
+.tl li{position:relative;padding:0 0 clamp(26px,3.4vw,42px) clamp(46px,5vw,70px);border-left:1px solid var(--rule)}
+.tl li:last-child{border-left-color:transparent;padding-bottom:0}
+.tl li::before{
+  counter-increment:tl;content:counter(tl);position:absolute;left:0;top:-4px;translate:-50% 0;
+  width:34px;height:34px;border-radius:50%;background:var(--ash-deep);border:1px solid var(--gold-ghost);
+  color:var(--gold);font-family:var(--mono);font-size:13px;display:grid;place-items:center;
+}
+.tl .when{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold-dim);display:block;margin-bottom:7px}
+
+/* ── bars ────────────────────────────────────────────────────────────────── */
+.bars{display:grid;gap:0}
+.bars .bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--rule-soft)}
+.bars .bar:last-child{border-bottom:0}
+.bars .bar b{color:var(--ink-primary);font-weight:500;font-size:15.5px;display:block}
+.bars .bar span{font-size:13.5px;color:var(--ink-muted);display:block;margin-top:3px;line-height:1.45}
+.bars .bar .t{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--gold);font-size:14px;white-space:nowrap;text-align:right}
+
+/* ── reveal (entrance only — nothing animates at idle) ───────────────────── */
+.rv{opacity:0;translate:0 14px;transition:opacity var(--t-ceremony) var(--ease-settle),translate var(--t-ceremony) var(--ease-settle)}
+.rv.in{opacity:1;translate:0 0}
+@media (prefers-reduced-motion:reduce){
+  .rv{opacity:1;translate:0 0;transition:none}
+  .sigil,.sigil .ember,.sigil .wisp,.sigil .sweep{transition:none!important;animation:none!important}
+  .sigil .ember,.sigil .wisp,.sigil .sweep{display:none}
+}
+
+/* ── footer ──────────────────────────────────────────────────────────────── */
+footer{border-top:1px solid var(--rule);padding:clamp(40px,6vh,72px) 0 clamp(48px,7vh,90px);font-size:14px;color:var(--ink-muted)}
+footer .sig{font-family:var(--display);color:var(--ink-primary);font-size:17px;margin-bottom:6px}
+
+/* ── print → PDF ─────────────────────────────────────────────────────────── */
+@media print{
+  @page{size:A4;margin:15mm}
+  :root{--gut:0}
+  body{background:#fff;color:#1a1a18;font-size:10.5pt;line-height:1.45}
+  h1,h2,h3,h4,strong,em,.rows b,.bars .bar b,.stat .v{color:#0c0c0a}
+  .cover{min-height:auto;padding:0 0 14mm;break-after:page}
+  .cover-mark{opacity:0.08;filter:invert(1)}
+  .folio{break-inside:avoid;padding:10mm 0;border-top:0.5pt solid #bbb}
+  .card,.ritual,.bench{background:#fafaf8;border-color:#ccc}
+  .rv{opacity:1;translate:0 0}
+  .btn,.bench-ctl,.readout,.noprint{display:none!important}
+  a{color:#6b5420;border:0}
+  .sev{border-color:currentColor}
+  .pull{color:#0c0c0a}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ COVER ══════════════════════════════════ -->
+<header class="folio cover wrap" id="top">
+  <div class="cover-mark" id="cover-mark"></div>
+  <div class="cover-inner">
+    <span class="eyebrow">Acquisition memorandum · 11 September 2026 · Confidential to the buyer</span>
+    <h1>The Codex<br><span class="amp">&amp;</span> The&nbsp;Vault</h1>
+    <p class="sub">What I would actually do, having bought both</p>
+
+    <p class="standfirst">I have read every line of the two things I just bought, and I am not going to open with what they could be. I am going to open with what they <em>are</em> — including the part where the single feature the product was staked on has never been written, and the part where the last serious evaluation of this venture scored it 17 out of 35 and said no. Both of those are true. Neither of them is the reason to walk away, and I will show you why with measurements, not adjectives.</p>
+
+    <div class="cover-meta">
+      <span><b>Assets</b> The Codex · dwk-vault</span>
+      <span><b>Audited</b> 327 files · 107,584 lines</span>
+      <span><b>Proof</b> §VIII is live, not rendered</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ══════════════════════════════ I ══════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">I — The assets</span>
+  <h2>Two products, one player, built four years apart</h2>
+  <p class="lede">Neither was built to be sold. That is the first thing worth paying for: every decision in both was made by someone who had to sit down at a table on Friday and use it.</p>
+
+  <div class="grid g2" style="margin-top:clamp(32px,4vw,52px)">
+    <article class="card">
+      <h4>Asset one</h4>
+      <h3>The Codex</h3>
+      <p style="font-size:14.5px;color:var(--ink-muted)">React 18 · TypeScript strict · Vite 6 · Tailwind 4 · Vitest. Zero backend. localStorage only. Offline-first PWA, installed to a home screen, live at <a href="https://dosenft.github.io/the-codex/">dosenft.github.io/the-codex</a>.</p>
+      <div class="grid g2" style="margin-top:20px;gap:18px">
+        <div class="stat"><span class="v">107,584</span><span class="k">lines in src/</span></div>
+        <div class="stat"><span class="v">142</span><span class="k">components</span></div>
+        <div class="stat"><span class="v">2,201</span><span class="k">modules · build passes</span></div>
+        <div class="stat"><span class="v">358<small style="font-size:0.5em;letter-spacing:0.05em"> KB</small></span><span class="k">gzipped bundle</span></div>
+      </div>
+      <p style="margin-top:22px;font-size:14.5px">Two modes, seven tabs, and one real idea: <strong>what you need at the table is not what you need between sessions.</strong> PLAY is Combat, Grimoire, Roleplay. PREP is Character, Grimoire, Persona, Academy. The Grimoire collapses spells, class features and racial abilities into one list, because no player has ever thought <em>“is this a spell or a feature?”</em> — they think <em>“what can my character do?”</em></p>
+    </article>
+
+    <article class="card">
+      <h4>Asset two</h4>
+      <h3>The Vault <span style="font-family:var(--mono);font-size:12px;color:var(--ink-muted);letter-spacing:0.1em">DOSENFT/dwk-vault</span></h3>
+      <p style="font-size:14.5px;color:var(--ink-muted)">One file. A 1MB hand-built <code>index.html</code> compiled from five sources by <code>build.py</code>, served from GitHub Pages with a service worker and a manifest. Supabase behind it, append-only.</p>
+      <div class="grid g2" style="margin-top:20px;gap:18px">
+        <div class="stat"><span class="v">1,010,039</span><span class="k">bytes · single file</span></div>
+        <div class="stat"><span class="v">85</span><span class="k">regression checks</span></div>
+        <div class="stat"><span class="v gold">0</span><span class="k">UPDATE / DELETE policies</span></div>
+        <div class="stat"><span class="v">8.8<small style="font-size:0.5em;letter-spacing:0.05em"> MB</small></span><span class="k">real session audio</span></div>
+      </div>
+      <p style="margin-top:22px;font-size:14.5px">The <code>vault_edits</code> table has no UPDATE and no DELETE policy. Undo is a compensating row. That is not a limitation someone shipped around — it is a campaign log that <strong>physically cannot be rewritten</strong>, which is exactly the property a shared table record needs and exactly the property no competitor offers.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ II ═════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">II — The audit, part one</span>
+  <h2>What is real</h2>
+  <p class="lede">This is the part of the diligence where I stopped negotiating. Not because the product is finished — it isn't — but because of <em>how</em> it is unfinished.</p>
+
+  <div class="split" style="margin-top:clamp(32px,4vw,52px)">
+    <div>
+      <ul class="rows">
+        <li class="green"><b>It survives the things that actually happen at a table</b><span>Dead network. A deliberately poisoned cache with the origin unreachable. A full disk. A second tab racing the first. A 12MB junk file. A binary renamed <code>.json</code>. All handled, all graded.</span><span class="src">TABLE-READY.md · run of record, one build, no cherry-picking</span></li>
+        <li class="green"><b>84 renders + 119 wrong-type renders, zero faults</b><span>Every one of seven screens, loaded with the real character export and with every hostile variant of it that could be constructed.</span><span class="src">TABLE-READY.md</span></li>
+        <li class="green"><b>Nothing under 12px, 4.5:1, or a 44px target</b><span>Turn controls are 48px. Measured off the <em>painted pixels</em> at 390×844 — not read off the stylesheet. That distinction is the whole difference between an accessibility claim and an accessibility fact.</span><span class="src">TABLE-READY.md · V-series</span></li>
+        <li class="green"><b>Four hours of play does not degrade it</b><span>200 actions: 0% heap growth, zero net DOM nodes, and action 200 is as fast as action 10.</span><span class="src">TABLE-READY.md</span></li>
+        <li class="gold"><b>The rules engine is a fortress</b><span><code>src/lib/turn/</code> alone carries characterization tests, equivalence tests, extra-attack, reactions, retaliation, temp-HP and open-world suites. The 2024 ruleset, the catalogue, the seed-gate resolution and the session rollback are all covered.</span><span class="src">verified across src/lib/turn/, rules-2024/, catalogue/, toybox-seed/</span></li>
+      </ul>
+    </div>
+
+    <aside>
+      <div class="ritual">
+        <h4>The reason I paid</h4>
+        <p class="pull" style="margin-top:0;border:0;padding:0;max-width:none">“The honest version of ‘it&nbsp;s fine’ is a red row with the evidence next to it, not a green row I talked myself into.”<cite>AT-THE-TABLE.md, closing line</cite></p>
+        <p style="font-size:14.5px;margin-bottom:0">Two of the seven failing rows in this product's own report card are failing <strong>because the graders broke, not the app</strong> — and they were left red anyway rather than fixed on the day their verdict was needed. One of them reads gold buttons as 1.04:1 because it cannot see a gradient; photographed off the actual screen they are <span class="num" style="color:var(--gold)">8.61:1</span>.</p>
+        <p style="font-size:14.5px;margin-top:14px;margin-bottom:0">You cannot buy that disposition. You can only buy a codebase that already has it, and this one does. Every number on this page is checkable because the previous owner made checkability the house style.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ III ════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">III — The audit, part two</span>
+  <h2>What is vapor</h2>
+  <p class="lede">Priced into the purchase, in order of what it costs to fix. Nothing here was hidden from me; most of it is documented by the people who wrote it. That does not make it free.</p>
+
+  <div style="overflow-x:auto;margin-top:clamp(30px,3.6vw,48px)">
+  <table class="ledger stack">
+    <thead><tr><th>Finding</th><th>Where</th><th>Cost</th><th style="width:38%">Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td>The signature feature does not exist</td><td class="num">THE_ONE_WEIRD_THING.md</td><td><span class="sev crit">Critical</span></td><td>8KB of specification, 0 bytes of code. No <code>SpellSlotSigils.tsx</code>, no <code>assets/sigils/</code>. Spell slots ship as <code>&lt;i/&gt;</code> dots inside <code>.pip-tap</code> at <code>TurnRail.tsx:196</code>. The entire differentiation argument rests on a document. <strong>§VIII settles this.</strong></td></tr>
+      <tr><td>52MB binary committed to the repo</td><td class="num">cloudflared.exe</td><td><span class="sev crit">Critical</span></td><td>A tunnelling binary in version control. Bloats every clone forever, and it is the kind of artifact that fails the first real security review a buyer runs.</td></tr>
+      <tr><td>551 <code>useState</code>, no store</td><td class="num">App.tsx:92-169</td><td><span class="sev high">High</span></td><td>A seven-layer prop drill from the root. Every new surface pays a tax to reach state that should be one hook away. This is the single biggest brake on shipping speed.</td></tr>
+      <tr><td>Three components over 1,600 lines</td><td class="num">DialogueBank · CharacterPage · ToyboxPanel</td><td><span class="sev high">High</span></td><td>2,334 / 2,185 / 1,659 lines. DialogueBank alone holds 39 <code>useState</code> calls. These are the three files nobody will want to touch in twelve months.</td></tr>
+      <tr><td>The UI is faith-based</td><td class="num">~15 tests / 105 component files</td><td><span class="sev high">High</span></td><td>The rules engine is exhaustively tested and the interface on top of it is almost not tested at all. Logic correctness is proven; <em>what the player sees</em> is not.</td></tr>
+      <tr><td>18 <code>backdrop-blur</code> violations</td><td class="num">shipped CSS</td><td><span class="sev high">High</span></td><td>Glassmorphism is item six on the project's own Forbidden List. The design system is ~85% honoured; the 15% that isn't is concentrated in exactly the effect the position paper bans by name.</td></tr>
+      <tr><td>The README describes a dead design system</td><td class="num">README.md</td><td><span class="sev med">Medium</span></td><td>It still says “Arcane Glass” — cyan, purple, glass. <code>AESTHETIC_POSITION.md</code> and the shipped CSS both say Tactical Grimoire. The front door of the repo is wrong about what the product looks like.</td></tr>
+      <tr><td>No schema versioning on saved characters</td><td class="num">localStorage</td><td><span class="sev med">Medium</span></td><td>Every stored sheet is an unversioned blob. The first migration that isn't purely additive has no safe path, and the data lives only on the player's device.</td></tr>
+      <tr><td>~3s cold start</td><td class="num">sw.js:132</td><td><span class="sev med">Medium</span></td><td>Known, located, named, and deliberately not fixed the week of a session. Correct call then. Not correct twice.</td></tr>
+      <tr><td>There is no undo</td><td class="num">criterion S-4</td><td><span class="sev high">High</span></td><td>Reported UNPROVEN “because there is nothing to grade.” At a table with five people waiting, a mis-tapped spell slot is the most common failure in the product and the one with no recovery gesture. <em>The Vault already solved this with compensating rows.</em></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ IV ═════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">IV — The critique</span>
+  <h2>Three things I would say out loud in the first meeting</h2>
+
+  <div class="grid g3" style="margin-top:clamp(30px,3.6vw,48px)">
+    <article class="card raise">
+      <h4>One</h4>
+      <h3>You wrote the differentiator down instead of building it</h3>
+      <p style="font-size:14.5px">The acceptance test in <code>THE_ONE_WEIRD_THING.md</code> is perfect: <em>“a player who has never seen The Codex should describe it to a friend by mentioning the spell slots are runes that burn to ash.”</em> It scored itself 10/10 on differentiation and then never shipped. Meanwhile the roadmap grew Waves 1–3 of <em>secondary</em> signature elements. Specification is the cheapest form of progress and the most convincing kind of stall.</p>
+    </article>
+    <article class="card raise">
+      <h4>Two</h4>
+      <h3>The two assets have never met</h3>
+      <p style="font-size:14.5px">The Codex knows everything about one character and forgets the campaign. The Vault remembers the campaign and knows nothing about the character. They were built by the same hand for the same table and there is not one line of integration between them. That gap is not a defect — <strong>it is the product</strong>, and nobody has built it.</p>
+    </article>
+    <article class="card raise">
+      <h4>Three</h4>
+      <h3>The best work is buried behind the least differentiated work</h3>
+      <p style="font-size:14.5px">The Persona Engine, Dialogue Bank, Accent Coach, Impulse Engine, Scene Coach and the improv drills are the parts of this product that <em>no competitor has at all</em>. They sit behind a character sheet — the one thing five well-funded companies already do. The homepage argues on the axis where the product is weakest.</p>
+    </article>
+  </div>
+
+  <p class="pull">Every serious problem in this acquisition is a sequencing problem. Not one of them is a capability problem.</p>
+</section>
+
+<!-- ══════════════════════════════ V ══════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">V — The Everweave question</span>
+  <h2>You asked about becoming the next, much better Everweave. My answer is no, and here is the scoreboard.</h2>
+
+  <div class="split" style="margin-top:clamp(30px,3.6vw,48px)">
+    <div class="prose">
+      <p>Everweave is a solo AI Dungeon Master. It <em>replaces</em> the table. It has around <strong>860,000 Android installs</strong> and a <strong>2.12 / 5</strong> rating that has fallen as it scaled. On iOS the written reviews sit at <strong>3.6</strong> against a tap-rating of 4.3 — the gap between people who clicked stars and people who typed sentences. Trustpilot: <strong>2.8</strong>, with <strong>34% one-star</strong>. The word <em>predatory</em> appears in reviews across three separate platforms. And in the hobby's own discourse it has close to zero presence except as a thing people wish did not exist.</p>
+      <p>Being “a better Everweave” means entering the paid-acquisition mobile-games market, pricing metered LLM calls against a hobby whose ceiling is about <span class="num">$6</span>/month, and solving the long-term memory problem that nobody in the category has solved. You would be fighting for the player who <strong>cannot get to a table</strong>.</p>
+      <p><strong>The Codex and the Vault serve the player who has one.</strong> That is not a smaller market wearing a brave face — it is the market where physical attendance is the retention mechanism, where the DM is already invested, and where you never have to simulate a person.</p>
+      <p>Everweave is still useful to us for exactly one reason: it is <em>proof of demand for D&amp;D on a phone</em> at a scale nobody disputes. We inherit the proof and decline the war.</p>
+    </div>
+
+    <aside>
+      <div class="card">
+        <h4>The incumbent clock</h4>
+        <p style="font-size:14.5px">D&amp;D Beyond's own roadmap (post #2223, 18 Aug 2026) commits to a player app <em>“focused on in-person play”</em> for <strong>early 2027</strong>. It lists <strong>zero</strong> roleplay features.</p>
+        <div class="stat" style="margin-top:18px"><span class="v gold">~6 mo</span><span class="k">the window</span><span class="n">Long enough to own the category. Not long enough to spend on a rewrite.</span></div>
+        <div class="stat" style="margin-top:18px"><span class="v red">2.12</span><span class="k">Everweave · Android</span><span class="n">860k installs and falling as it scales.</span></div>
+        <div class="stat" style="margin-top:18px"><span class="v">17 / 35</span><span class="k">the prior verdict</span><span class="n">Threshold was &gt;20. Its stated reason: “Phases 2–5 hasn't been built… 6–12 months before there's anything to sell.” That premise is now factually obsolete — the product shipped and is installed on a phone.</span></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="ritual" style="margin-top:clamp(34px,4vw,54px)">
+    <h4>The corpse in the room — and the test every plan on this page has to pass</h4>
+    <div class="split" style="margin-top:18px">
+      <div class="prose" style="max-width:none">
+        <p>Everweave is not the cautionary tale. <strong>Project Sigil is.</strong></p>
+        <p>Hasbro built a D&amp;D virtual tabletop with the IP, effectively unlimited capital, and <span class="num">30 million</span> registered D&amp;D&nbsp;Beyond accounts pointed straight at it. It launched to the wider Beyond community in <strong>February 2025</strong>. In <strong>March 2025</strong> roughly thirty people — about <strong>90% of the Sigil team</strong> — were laid off, ending active development weeks after launch. It was <strong>sunset in October 2025</strong>. The servers go dark at the end of <strong>October 2026</strong>, and every piece of user-created Sigil content goes with them. Master-tier subscribers were compensated in store credit, not cash.</p>
+        <p>The stated reason, in the reporting: the <em>“distinct monetization path”</em> for the VTT <strong>never materialised</strong>. Rascal News' verdict was harsher and, I think, correct — it was <em>“the video-game-ification of D&amp;D,”</em> built by leadership that <em>“never quite seemed to grasp exactly what people love about playing tabletop games.”</em></p>
+        <p style="margin-bottom:0">So the test is not “is this a good app.” The test is: <strong>why does this survive what killed Sigil?</strong> Three reasons, and they are architectural, not aspirational. Sigil needed servers, 3D assets and a microtransaction economy to justify itself; <strong>we have no backend and a marginal cost per user of approximately zero.</strong> Sigil competed in the VTT category against four entrenched incumbents and one very expensive corpse; <strong>we are not a VTT and we do not want the screen to be the table.</strong> Sigil took the player's created content onto servers it then switched off; <strong>our storage is local-first and our shared log cannot be rewritten by us or anyone else.</strong> §VII, Law Three, is not a value statement. It is the post-mortem.</p>
+      </div>
+      <aside>
+        <ul class="rows">
+          <li class="red"><b>Feb 2025</b><span>Sigil launches to the D&amp;D Beyond community.</span></li>
+          <li class="red"><b>Mar 2025</b><span>~30 laid off — ~90% of the team. Development ends.</span></li>
+          <li class="red"><b>Oct 2025</b><span>Officially sunset.</span></li>
+          <li class="red"><b>Oct 2026</b><span>Servers off. User content becomes inaccessible.</span></li>
+          <li class="gold"><b>The lesson we are buying</b><span>The dominant play mode, by WotC's own framing, is <strong>hybrid — about 60%</strong> (May 2023): digital tools used <em>alongside</em> a physical table, not replacing it. Hasbro spent the money on the other half of that sentence.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ VI ═════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">VI — The position</span>
+  <h2>The quadrant is empty, and it is the one you already built</h2>
+
+  <div class="split" style="margin-top:clamp(30px,3.6vw,48px)">
+    <div>
+      <div class="quad">
+        <div class="ax h"></div><div class="ax v"></div>
+        <div class="empty"></div>
+        <span class="lbl t">Serves the GM</span>
+        <span class="lbl b">Serves the player</span>
+        <span class="lbl l">Replaces the table</span>
+        <span class="lbl r">Augments the table</span>
+        <span class="pin" style="left:25%;top:25%">Foundry · Roll20</span>
+        <span class="pin dead" style="left:24%;top:44%">Project Sigil</span>
+        <span class="pin" style="left:29%;top:68%">Everweave</span>
+        <span class="pin" style="left:70%;top:22%">World Anvil · Kanka</span>
+        <span class="pin" style="left:71%;top:39%">D&amp;D Beyond <span style="font-size:11px;color:var(--ink-ghost)">(→ 2027)</span></span>
+        <span class="pin us" style="left:74%;top:71%">The Codex + The Vault</span>
+      </div>
+      <p style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;color:var(--ink-muted);margin-top:14px;text-transform:uppercase">Four independent research passes · no occupant found · Sigil: servers off Oct 2026</p>
+    </div>
+
+    <div class="prose">
+      <h3>Player-side · at the physical table · performance and roleplay · with memory between sessions</h3>
+      <p>The state of the art in shipped player-roleplay support is a pay-what-you-want PDF with two ratings. That is not a gap in the market. That is the market not existing yet, next to a hobby with millions of players.</p>
+      <p>The demand is already loud and it is <strong>an anxiety market</strong>. Roughly <span class="num">8 million</span> cumulative YouTube views cluster around the same handful of words: <em>shy</em>, <em>cringe</em>, <em>terrible at it</em>, <em>bad at roleplay</em>. Today that demand monetises as ad revenue and $20 books. Nobody has made it monetise as software, because everyone who tried built a GM tool.</p>
+      <p>The Codex already contains the answer: Persona Engine, Dialogue Bank, Scene Response Bank, Accent Coach, Impulse Engine, Scene Coach, Conversation Drill, spaced-repetition flashcards. That is a performance coach for a nervous player, and it is <em>already written</em>.</p>
+      <p>The Vault supplies the other half nobody has: a shared, tamper-proof, audio-backed record of what actually happened, so the app can open on Friday knowing what your character said last Friday.</p>
+      <p style="margin-bottom:0"><strong>One honest caveat, because it cuts both ways.</strong> The in-person-versus-virtual split is not reliably measured. The last large-sample behavioural survey of it ran in <strong>April 2023</strong> and nothing has replaced it — the Orr Group Industry Report, the most-cited dataset in the hobby, stopped publishing after Q4&nbsp;2021 and was never revived. Anyone handing you a 2026 percentage is extrapolating. The strongest defensible statement is WotC's own: the dominant mode is <em>hybrid</em>, around <span class="num">60%</span>, digital <em>alongside</em> the table. I am betting the company on that sentence and I want you to know it is a sentence, not a spreadsheet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ VII ════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">VII — The thesis</span>
+  <h2>The digital is an accent on the physical. Three laws, and I will hold the product to them.</h2>
+
+  <div class="grid g3" style="margin-top:clamp(30px,3.6vw,48px)">
+    <div class="card">
+      <h4>Law one</h4>
+      <h3>The screen never gets the moment</h3>
+      <p style="font-size:14.5px">Anything that makes a player look down while another human is talking is a defect, regardless of how good it is. The app's job is to end the look-down faster than it began. Every table-facing interaction gets a measured budget, and the budget is the acceptance criterion.</p>
+    </div>
+    <div class="card">
+      <h4>Law two</h4>
+      <h3>Preparation is where the technology is allowed to be ambitious</h3>
+      <p style="font-size:14.5px">Drills, coaching, accent work, dialogue rehearsal, recall — all of it belongs to the week, not the table. At the table the product is a fast, quiet instrument. Between sessions it is a studio. That split already exists in the code as PLAY and PREP; it becomes the governing law of the company.</p>
+    </div>
+    <div class="card">
+      <h4>Law three</h4>
+      <h3>We never claim the work</h3>
+      <p style="font-size:14.5px">Every death in this category came from touching the player's creations — AI Dungeon reading private stories, Kanka's entity cap, World Anvil “holding my work at ransom,” and now Sigil switching off the servers that hold it. Local-first storage and export-anything are not features here. They are the licence to operate, and the append-only Vault log is the architecture that proves it.</p>
+      <p style="font-size:14.5px;margin-bottom:0">This audience learned the lesson in public. In January 2023 the OGL 1.1 draft tried to de-authorise a licence the hobby was built on, and within <strong>22 days</strong> WotC reversed entirely and put the SRD under <strong>Creative Commons, irrevocably</strong> — then did it again in 2025 for the 2024 rules. Companies do not permanently surrender control over modest churn. <em>That</em> is the measure of how hard this audience will push back, and it is the reason our position on their data has to be architectural rather than promised.</p>
+    </div>
+  </div>
+
+  <div class="ritual" style="margin-top:clamp(28px,3.4vw,44px)">
+    <h4>And one rule about how we talk</h4>
+    <p style="max-width:70ch;margin-bottom:0;font-size:15.5px">We never lead with AI. Not once. The ENNIEs ban it, DriveThruRPG bans it, Kickstarter requires disclosure, Magic formally banned generative AI in final products after admitting <em>“we made a mistake,”</em> a seventeen-year WotC artist quit over it, and in June 2026 the Magic&nbsp;Arena developers won a union election in which <strong>guardrails on generative AI were a named grievance</strong>. The people who make this hobby have voted, repeatedly and on the record. We sell the outcome — <em>you will be good at the table on Friday</em> — and the machinery stays where machinery belongs: under the hood, offline-capable, optional, and never named in the pitch.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ VIII ═══════════════════════════════════ -->
+<section class="folio proof" id="proof">
+  <div class="wrap rv">
+    <span class="sect-no">VIII — The proof</span>
+    <h2>I stopped writing and built the thing the document promised</h2>
+    <p class="lede">The Spell Slot Sigils have been specified since the beginning and have never existed. Here they are, working, to the letter of the spec — nine unique marks, level carried by structure and never by a numeral, ink that burns to ash and is rekindled by a rest.</p>
+
+    <div class="split" style="margin-top:clamp(32px,4vw,52px)">
+      <div>
+        <div class="bench lg">
+          <div class="bench-head">
+            <span class="who">Combat · spell slots · live</span>
+            <span class="who" id="mode-label">Sigils</span>
+          </div>
+          <div id="slots"></div>
+          <div class="bench-ctl noprint">
+            <button class="btn" id="btn-mode" aria-pressed="true" type="button">Sigils</button>
+            <button class="btn ghost" id="btn-pips" aria-pressed="false" type="button">Shipped pips</button>
+            <button class="btn ghost" id="btn-rest" type="button">Long rest</button>
+            <button class="btn ghost" id="btn-spend" type="button">Cast something</button>
+          </div>
+          <p class="readout" id="readout">Tap a mark to expend it. Right-click or tap a spent mark to restore.</p>
+        </div>
+
+        <p style="font-size:14px;color:var(--ink-muted);margin-top:18px">Toggle between the two. The shipped control is reproduced honestly from <code>TurnRail.tsx:196-233</code> — same 44px target, same expend/restore gesture, same right-click-to-restore. Only the mark changes. That is the entire point: <strong>this is a drop-in, and the interface it replaces is <code>onExpendSlot(level)</code> / <code>onRestoreSlot(level)</code>, unchanged.</strong></p>
+      </div>
+
+      <aside>
+        <h4>The nine</h4>
+        <div class="chart" id="chart"></div>
+        <p style="font-size:14px;color:var(--ink-muted);margin-top:22px">Each mark is drawn from primitives — rings, lobes, spokes, points — under a <em>seeded</em> quill jitter, so no line is vector-perfect and no sigil is ever different twice. Level is structure: one stroke, a bilateral pair, a trefoil, a quartering, five lobes, a hex rosette, seven radials, a double ring, a mandala. Every mark above the first carries one deliberate off-axis flourish so nothing closes cleanly.</p>
+        <ul class="rows" style="margin-top:8px">
+          <li class="green"><b>Forbidden list honoured</b><span>No Elder Futhark. No pentagram. Ink, never gold. <code>currentColor</code> throughout, so the state change is a colour transition and nothing else.</span></li>
+          <li class="green"><b>Motion budget honoured</b><span>Ember flash 150ms · ink→ghost 200ms · wisp 400ms (decorative, non-blocking) · restore sweep 300ms · long rest 50ms stagger, 480ms ceremony.</span></li>
+          <li class="green"><b>Degrades correctly</b><span><code>prefers-reduced-motion</code> removes the wisp, the ember and the sweep. The marks still render — they carry information, not decoration.</span></li>
+          <li class="gold"><b>Cost to integrate</b><span>One file, no dependencies, identical props. <span class="num" style="color:var(--gold)">~4.5KB</span> of geometry generated at runtime instead of nine commissioned SVGs.</span></li>
+        </ul>
+      </aside>
+    </div>
+
+    <p class="pull" style="margin-top:clamp(34px,4vw,54px)">The acceptance test was: a stranger describes the product to a friend by saying the spell slots are runes that burn to ash. You cannot pass that test with a document.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ IX ═════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">IX — What ships</span>
+  <h2>One system, named for what it does to your Friday</h2>
+  <p class="lede">Not a merge. A loop. The Codex owns the week and the table; the Vault owns what the table leaves behind; each one opens holding what the other put down.</p>
+
+  <ol class="tl" style="margin-top:clamp(32px,4vw,52px)">
+    <li>
+      <span class="when">Release 1 · weeks 1–4 · “The Mark”</span>
+      <h3>Ship the sigils. Kill the debt that blocks everything after them.</h3>
+      <p>§VIII drops in. In the same release: <code>cloudflared.exe</code> out of history, the 18 <code>backdrop-blur</code> violations removed, the README rewritten to describe the design system that actually shipped, and schema versioning added to every stored character before a single migration is needed. Four weeks, no new surfaces, and the product finally looks like the only product that looks like it.</p>
+    </li>
+    <li>
+      <span class="when">Release 2 · weeks 5–8 · “Undo”</span>
+      <h3>The Vault's append-only log becomes the Codex's session spine.</h3>
+      <p>Every expend, restore, rest and roleplay beat writes a row. Undo is a compensating row, exactly as the Vault already does it — which means undo arrives, the session becomes replayable, and two tabs stop being a caveat. This is one architecture answering the highest-severity player-facing defect in the ledger and the integration gap in one move.</p>
+    </li>
+    <li>
+      <span class="when">Release 3 · weeks 9–12 · “Friday”</span>
+      <h3>The performance layer comes to the front of the product.</h3>
+      <p>Persona, Dialogue Bank, Accent Coach and the improv drills stop being a tab behind a character sheet and become the reason the app exists. The Codex opens on Friday already knowing what your character said last Friday, because the Vault told it. The character sheet becomes the supporting act it always should have been.</p>
+    </li>
+    <li>
+      <span class="when">Beyond · the studio</span>
+      <h3>Ash &amp; Archive becomes the house, not a fifth project.</h3>
+      <p>The studio's landing page is built and Phases 2–5 never were. Good. They should not be — the DM Training Academy, the Toy Method and the world-building engine are the <em>second</em> product, sold to the person who already bought the first one. The Codex proved the training thesis works on a player. Ash &amp; Archive sells the same thesis to the DM, on top of a codebase that already shipped, with a customer list that already exists. That is the sequence that turns 17/35 into a business; building the studio first is the sequence that scored 17/35.</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ══════════════════════════════ X ══════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">X — The bars</span>
+  <h2>The bars I hold to, stated as numbers so you can fail me on them</h2>
+  <p class="lede">Every one of these is measurable off the painted pixels or off the clock. None of them is a feeling. That is the standard this codebase set before I arrived, and I am not lowering it.</p>
+
+  <div class="bars" style="margin-top:clamp(30px,3.6vw,48px)">
+    <div class="bar"><div><b>Cold start, from icon to a readable sheet</b><span>The current 3s is the single worst moment in the product and it happens when the DM says your name. <code>sw.js:132</code> is the named cause.</span></div><span class="t">&lt; 1200ms</span></div>
+    <div class="bar"><div><b>Any table-facing tap to painted response</b><span>Combat interactions are micro or state tier only. One spend in thirty currently takes 136ms; the other twenty-nine take 40ms. The tail is the bar, not the median.</span></div><span class="t">&lt; 100ms · p99</span></div>
+    <div class="bar"><div><b>Look-down time for a full turn</b><span>Open, decide, act, close. Measured on video at a real table, not in a lab.</span></div><span class="t">&lt; 6s</span></div>
+    <div class="bar"><div><b>Undo, for any destructive action</b><span>Currently unbounded, because it does not exist.</span></div><span class="t">1 gesture</span></div>
+    <div class="bar"><div><b>Component test coverage on player-facing surfaces</b><span>From ~15 tests across 105 component files. The rules engine's standard applied to the interface.</span></div><span class="t">≥ 70%</span></div>
+    <div class="bar"><div><b>Contrast, type size, touch target</b><span>Held exactly where the previous owner put it, measured the same way: off the painted pixels at 390×844.</span></div><span class="t">4.5:1 · 12px · 44px</span></div>
+    <div class="bar"><div><b>Forbidden List violations in shipped CSS</b><span>From 18 <code>backdrop-blur</code>. A design position that is 85% enforced is a preference; at 100% it is a brand.</span></div><span class="t">0</span></div>
+    <div class="bar"><div><b>Works with the network completely dead</b><span>Non-negotiable and already true. It stays true through every release above, or the release does not go out.</span></div><span class="t">100%</span></div>
+    <div class="bar"><div><b>Player data reachable without us</b><span>Export everything, in a format that opens without the app. The licence to operate in this category.</span></div><span class="t">always</span></div>
+    <div class="bar"><div><b>Times “AI” appears in customer-facing copy</b><span>We sell the outcome. The machinery is never the pitch.</span></div><span class="t">0</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ XI ═════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">XI — The number</span>
+  <h2>About doubling the profits</h2>
+
+  <div class="prose" style="margin-top:clamp(26px,3vw,40px);max-width:74ch">
+    <p>I am going to be straight with you, because the brief asked for tangible results and not snake oil: <strong>you cannot double a profit that is currently zero.</strong> Both assets are free, neither has ever taken a payment, and any deck that draws you a 2× on this P&amp;L is charting nothing. The real objective is not a multiple. It is <em>the first one</em> — and then the second one, which is the multiple.</p>
+    <p>Before the model, four numbers that should discipline it. I went looking for reasons this fails and I found them, so they go on the page.</p>
+  </div>
+
+  <div class="grid g4" style="margin-top:clamp(28px,3.4vw,44px)">
+    <div class="stat"><span class="v">$270–350<small style="font-size:0.45em;letter-spacing:0.05em">M</small></span><span class="k">D&amp;D · annual</span><span class="n">Triangulated by three independent analysts. Hasbro has <em>never</em> broken D&amp;D out. It is 13–16% of a WotC segment whose growth is Magic, not D&amp;D. This is a mid-hundreds-of-millions business, not a multi-billion one.</span></div>
+    <div class="stat"><span class="v">$5.99</span><span class="k">the actual ceiling</span><span class="n">D&amp;D Beyond's <em>top</em> tier, monthly. Entry is $2.99. Books are not included at any level. The category leader, owned by Hasbro, with 30M accounts, cannot charge more than coffee money.</span></div>
+    <div class="stat"><span class="v red">0</span><span class="k">premium content</span><span class="n">Owned by the <em>median</em> Foundry user, per Foundry's own 2026 review. They paid $50 once and bought nothing ever again. This is the clearest willingness-to-pay signal in the hobby.</span></div>
+    <div class="stat"><span class="v red">$0</span><span class="k">digital tools · crowdfunding</span><span class="n">No TTRPG digital tool has ever raised $1M. The entire ≥$100K TTRPG crowdfunding market is ~$37–48M a year and it is <em>books</em>. Players fund books enthusiastically and software reluctantly.</span></div>
+  </div>
+
+  <div class="split" style="margin-top:clamp(32px,4vw,52px)">
+    <div class="prose">
+      <h3>Two structural moves, and they both fall out of that evidence</h3>
+      <p><strong>One: we sell to the player, not the GM.</strong> Every incumbent monetises the Dungeon Master. Roll20, Foundry and D&amp;D Beyond's Master tier all share content downward to the group, which means the industry has collectively priced for roughly <em>one payer per five-person table</em>. We are the only product in the quadrant whose customer is the player. At half D&amp;D Beyond's price, two paying players at a table beat one paying GM — and there are five of them.</p>
+      <p><strong>Two: we charge once for the thing that costs nothing to run, and monthly only for the thing with a server bill.</strong> The Codex has no backend — it is a static PWA with localStorage, and it will keep working if we disappear. Charging rent for that would be dishonest and, per the Foundry evidence, commercially wrong. So the Codex is bought, once, like a book, because <em>a book is what this audience has proven it will pay for.</em> The Vault genuinely costs money to run — Supabase, audio storage, bandwidth — so the Vault is the only thing with a subscription, and it is optional, per table, and priced below everyone.</p>
+      <p style="margin-bottom:0">That is also the answer to the Sigil test. Sigil needed a monetisation path to justify a server-and-3D-asset cost base and never found one. <strong>Our cost base is approximately zero and our price is not trying to cover it.</strong> The same is true against Everweave: every metered LLM call they serve is a cost that scales with their success. Ours does not, because the AI layer stays optional, local-capable and bring-your-own-key. That is not a philosophical position. It is the margin.</p>
+    </div>
+
+    <aside>
+      <div class="ritual">
+        <h4>The model · assumptions on the outside</h4>
+        <table class="ledger" style="font-size:14px">
+          <thead><tr><th></th><th style="text-align:right">Year 1</th><th style="text-align:right">Year 2</th></tr></thead>
+          <tbody>
+            <tr><td>Codex licence · $39 once</td><td class="num" style="text-align:right">1,000</td><td class="num" style="text-align:right">2,400</td></tr>
+            <tr><td>Vault · $36/yr per table</td><td class="num" style="text-align:right">150</td><td class="num" style="text-align:right">500</td></tr>
+            <tr><td>Licence revenue</td><td class="num" style="text-align:right">$39,000</td><td class="num" style="text-align:right">$93,600</td></tr>
+            <tr><td>Subscription revenue</td><td class="num" style="text-align:right">$5,400</td><td class="num" style="text-align:right">$18,000</td></tr>
+            <tr><td><strong>Total</strong></td><td class="num" style="text-align:right;color:var(--gold)"><strong>$44,400</strong></td><td class="num" style="text-align:right;color:var(--gold)"><strong>$111,600</strong></td></tr>
+            <tr><td>Marginal cost per licence</td><td class="num" style="text-align:right">≈ $0</td><td class="num" style="text-align:right">≈ $0</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:14px;margin-top:18px;margin-bottom:0"><strong>2.5×, and the double comes from the licence base compounding — not from raising the price on anyone.</strong> Nobody who bought in year one pays again in year two, and that is the point: it is the shape of a business that can be trusted by an audience that has watched Sigil's servers get switched off and read the words <em>“held my work at ransom.”</em></p>
+      </div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-top:16px">A model, not a forecast. 1,000 licences is a target I am choosing to be held to, not a projection from conversion data we do not have. The funnel exists — roughly <span class="num">8 million</span> cumulative views on content about being bad at roleplay — but views are not people, and I am not going to pretend a view-to-licence rate I cannot measure.</p>
+    </aside>
+  </div>
+
+  <div class="card" style="margin-top:clamp(28px,3.4vw,44px);border-left:2px solid var(--blood)">
+    <h4 style="color:var(--blood)">And the way this fails</h4>
+    <p style="max-width:76ch;margin-bottom:0;font-size:15px">Stated plainly so it is on the record before anyone spends a month on it. <strong>The willingness-to-pay evidence is genuinely bad.</strong> Software in this hobby monetises poorly, one-time-biased, and concentrated in the GM — and we are proposing to sell software, to the player, in a category where no digital tool has ever raised a million dollars. The $39 licence has to feel like buying a beautiful book, not subscribing to a tool, or it does not sell at all. If Release 1 and Release 2 ship and a hundred players will not pay $39, that is a real answer and we take it. What I will not do is discover that in month eighteen because nobody wrote the failure condition down in month one.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ XII ════════════════════════════════════ -->
+<section class="folio wrap rv">
+  <span class="sect-no">XII — Verdict</span>
+  <h2>Buy it. Then finish the one thing you wrote down and never built.</h2>
+
+  <div class="prose" style="margin-top:clamp(26px,3vw,40px);max-width:72ch">
+    <p>The last evaluation gave this venture <strong>17 out of 35</strong> against a threshold of 20, and its stated reason was that Phases 2–5 had not been built and there would be nothing to sell for six to twelve months. That was a correct assessment of a landing page. It is not an assessment of what exists now.</p>
+    <p>What exists now is <span class="num">107,584</span> lines of a product that survives a dead network, a poisoned cache and a full disk; that has been measured against 60 criteria by someone who left the failures red on purpose; that is installed on a phone and was used at a real table; and that contains — already written, already tested — the only serious answer anyone has built to the loudest unmet need in this hobby.</p>
+    <p>And beside it, a second product whose central architectural decision is a shared record that cannot be rewritten.</p>
+    <p>The gap between them is the company. Nobody is in that quadrant. The incumbent has told us in writing that it will not arrive until early 2027 and will bring no roleplay features when it does. The would-be giant in the adjacent space is at 2.12 stars and falling, and is teaching a very large audience that software should not be trusted with their table.</p>
+    <p><strong>The single user comes first, and the single user is you.</strong> Release 1 is not a market play. It is four weeks that make your Friday better: the marks burn when you cast, undo exists, the cold start stops embarrassing you when the DM says your name. If that does not land for one player at one table, none of the rest of this is worth building — and if it does, the rest of it is mostly distribution.</p>
+    <p style="margin-bottom:0">That is what I would do. The sigils in §VIII are not a mockup of it. They are the first four weeks, started.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <p class="sig">The bar is the red row with the evidence next to it.</p>
+  <p style="margin-bottom:18px">Acquisition memorandum · The Codex &amp; dwk-vault · 11 September 2026.<br>
+  Every figure on this page is traceable to a file in the two repositories or to a named public source. Where a number is a model rather than a measurement, it says so on the page.</p>
+  <p style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 14px">
+    Internal · TABLE-READY.md · AT-THE-TABLE.md · AESTHETIC_POSITION.md · THE_ONE_WEIRD_THING.md · src/components/turn/TurnRail.tsx · DOSENFT/dwk-vault · ash_&amp;_archive.md · 04-ASH-AND-ARCHIVE-EVALUATION.md
+  </p>
+  <p style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-muted);margin:0">
+    External · Hasbro SEC 8-K FY2023–FY2025 · dndbeyond.com/en/subscribe (fetched 11 Sep 2026) · Foundry VTT Year in Review 2024/2025/2026 · ICv2 GAMA Expo 2026 white paper · blog.owlbear.rodeo “Let's talk about subscriptions” (2022) · TTRPG Insider crowdfunding analyses 2025–Q1 2026 · PC Gamer &amp; Rascal News on Project Sigil · CWA / United Wizards of the Coast (23 Jun 2026) · D&amp;D Beyond forum post #2223 (18 Aug 2026)
+  </p>
+  <p style="font-size:13px;color:var(--ink-ghost);margin-top:16px;max-width:72ch">Three figures commonly quoted in this category are <em>deliberately absent</em> from this page because they do not survive checking: WotC's “50 million fans” (a marketing constant unchanged since 2019, never methodologically published), “13.7 million active players” (no traceable origin), and any post-2023 in-person-versus-VTT percentage (no survey exists). Where a claim here is a vendor statement rather than a measurement, the page says so.</p>
+  <p class="noprint" style="margin-top:22px;font-size:13px;color:var(--ink-ghost)">Print this page to PDF for the offline version — the layout is set for A4 and the live bench is omitted.</p>
+</footer>
+
+<script src="sigils.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.Sigils;
+  var LEVELS = [
+    {level:1, max:4, current:4},
+    {level:2, max:3, current:3},
+    {level:3, max:3, current:2},
+    {level:4, max:2, current:2},
+    {level:5, max:1, current:1}
+  ];
+  var LABELS = (S && S.LEVEL_LABELS) || ['','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+  var mode = 'sigil';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var slotsEl = document.getElementById('slots');
+  var readout = document.getElementById('readout');
+  var modeLabel = document.getElementById('mode-label');
+
+  function say(html){ if(readout) readout.innerHTML = html; }
+
+  /* ── the cover mark: the 9th-level sigil, same generator ──────────────── */
+  if (S) {
+    var cm = document.getElementById('cover-mark');
+    if (cm) cm.innerHTML = S.sigilSVG(9);
+    var chart = document.getElementById('chart');
+    if (chart) {
+      var out = '';
+      for (var l = 1; l <= 9; l++) {
+        out += '<figure><span class="sigil" style="pointer-events:none;color:var(--ink-secondary)">' +
+               S.sigilSVG(l) + '</span><figcaption class="cap">' + LABELS[l] + '</figcaption></figure>';
+      }
+      chart.innerHTML = out;
+    }
+  }
+
+  /* ── render ───────────────────────────────────────────────────────────── */
+  function render(){
+    if (!slotsEl) return;
+    var html = '';
+    LEVELS.forEach(function(s){
+      html += '<div class="slotrow"><em>' + LABELS[s.level] + '</em><div class="pip-row">';
+      for (var i = 0; i < s.max; i++) {
+        var full = i < s.current;
+        var state = full ? 'full' : 'spent';
+        var label = (full ? 'Expend ' : 'Restore ') + LABELS[s.level] + ' level spell slot';
+        if (mode === 'sigil' && S) {
+          html += '<button type="button" class="sigil" data-slot="' + state + '" data-state="' + state +
+                  '" data-level="' + s.level + '" data-i="' + i + '" aria-label="' + label + '">' +
+                  '<span class="ember"></span><span class="wisp"></span>' +
+                  S.sigilSVG(s.level) +
+                  '<span class="sweep"></span></button>';
+        } else {
+          html += '<button type="button" class="pip-tap" data-slot="' + state +
+                  '" data-level="' + s.level + '" data-i="' + i + '" aria-label="' + label + '"><i></i></button>';
+        }
+      }
+      html += '</div></div>';
+    });
+    slotsEl.innerHTML = html;
+  }
+
+  function find(level){
+    for (var i=0;i<LEVELS.length;i++) if (LEVELS[i].level === level) return LEVELS[i];
+    return null;
+  }
+
+  /* Animate in place, then re-render. Expending always burns the RIGHTMOST
+     full mark and restoring always rekindles the LEFTMOST spent one, so the
+     mark that moves is the mark you touched. */
+  function setState(btn, state){
+    if (!btn) return;
+    btn.setAttribute('data-state', state);
+    btn.setAttribute('data-slot', state);
+    if (reduced) return;
+    btn.classList.remove('burning','kindling');
+    void btn.offsetWidth;
+    btn.classList.add(state === 'spent' ? 'burning' : 'kindling');
+  }
+
+  function expend(level, btn){
+    var s = find(level);
+    if (!s || s.current <= 0) return;
+    s.current--;
+    if (navigator.vibrate && !reduced) { try { navigator.vibrate(15); } catch(e){} }
+    setState(btn, 'spent');
+    say('Expended a <b>' + LABELS[level] + '</b> level slot. ' + s.current + ' of ' + s.max + ' remaining.');
+    sync();
+  }
+
+  function restore(level, btn){
+    var s = find(level);
+    if (!s || s.current >= s.max) return;
+    s.current++;
+    setState(btn, 'full');
+    say('Restored a <b>' + LABELS[level] + '</b> level slot. ' + s.current + ' of ' + s.max + ' remaining.');
+    sync();
+  }
+
+  /* keep the DOM order honest with the model without destroying the node
+     that is mid-animation */
+  function sync(){
+    LEVELS.forEach(function(s){
+      var row = slotsEl.querySelector('[data-level="' + s.level + '"]');
+      if (!row) return;
+      var nodes = slotsEl.querySelectorAll('[data-level="' + s.level + '"]');
+      for (var i = 0; i < nodes.length; i++) {
+        var want = i < s.current ? 'full' : 'spent';
+        var n = nodes[i];
+        if (n.getAttribute('data-state') !== want && n.getAttribute('data-slot') !== want) {
+          n.setAttribute('data-state', want);
+          n.setAttribute('data-slot', want);
+        } else {
+          n.setAttribute('data-state', want);
+          n.setAttribute('data-slot', want);
+        }
+        n.setAttribute('aria-label', (want === 'full' ? 'Expend ' : 'Restore ') + LABELS[s.level] + ' level spell slot');
+      }
+    });
+  }
+
+  slotsEl && slotsEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.sigil, .pip-tap');
+    if (!btn) return;
+    var level = parseInt(btn.getAttribute('data-level'), 10);
+    var s = find(level);
+    if (!s) return;
+    var idx = parseInt(btn.getAttribute('data-i'), 10);
+    if (idx < s.current) expend(level, btn); else restore(level, btn);
+  });
+
+  slotsEl && slotsEl.addEventListener('contextmenu', function(e){
+    var btn = e.target.closest('.sigil, .pip-tap');
+    if (!btn) return;
+    e.preventDefault();
+    restore(parseInt(btn.getAttribute('data-level'), 10), btn);
+  });
+
+  /* ── long rest: staggered cascade, 50ms apart, 480ms ceremony ─────────── */
+  document.getElementById('btn-rest').addEventListener('click', function(){
+    var order = [];
+    LEVELS.forEach(function(s){
+      var nodes = slotsEl.querySelectorAll('[data-level="' + s.level + '"]');
+      for (var i = 0; i < nodes.length; i++) {
+        if (i >= s.current) order.push(nodes[i]);
+      }
+      s.current = s.max;
+    });
+    if (!order.length) { say('Nothing to restore. Every slot is already full.'); return; }
+    order.forEach(function(n, i){
+      setTimeout(function(){ setState(n, 'full'); }, reduced ? 0 : i * 50);
+    });
+    say(order.length === 0
+      ? '<b>Long rest.</b> Nothing to rekindle — every mark was already inked.'
+      : '<b>Long rest.</b> ' + order.length + (order.length === 1 ? ' slot' : ' slots')
+        + ' rekindled in a ' + (order.length * 50) + 'ms cascade.');
+  });
+
+  document.getElementById('btn-spend').addEventListener('click', function(){
+    for (var i = LEVELS.length - 1; i >= 0; i--) {
+      var s = LEVELS[i];
+      if (s.current > 0) {
+        var nodes = slotsEl.querySelectorAll('[data-level="' + s.level + '"]');
+        var btn = nodes[s.current - 1];
+        expend(s.level, btn);
+        return;
+      }
+    }
+    say('Every slot is spent. That is what a long rest is for.');
+  });
+
+  var btnMode = document.getElementById('btn-mode');
+  var btnPips = document.getElementById('btn-pips');
+  function setMode(m){
+    mode = m;
+    btnMode.setAttribute('aria-pressed', String(m === 'sigil'));
+    btnPips.setAttribute('aria-pressed', String(m === 'pip'));
+    btnMode.classList.toggle('ghost', m !== 'sigil');
+    btnPips.classList.toggle('ghost', m !== 'pip');
+    modeLabel.textContent = m === 'sigil' ? 'Sigils' : 'Shipped pips · TurnRail.tsx:196';
+    render();
+    say(m === 'sigil'
+      ? 'Sigils. Nine marks, level carried by structure. Tap to burn.'
+      : 'The shipped control, reproduced honestly. Identical gesture, identical target size, identical props. Only the mark is different.');
+  }
+  btnMode.addEventListener('click', function(){ setMode('sigil'); });
+  btnPips.addEventListener('click', function(){ setMode('pip'); });
+
+  render();
+
+  /* ── entrance reveal · nothing animates at idle ───────────────────────── */
+  if (!reduced && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+    document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
+</body>
+</html>

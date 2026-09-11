@@ -1,0 +1,278 @@
+{
+  "id": "vault-driftwood-kin",
+  "name": "Driftwood Kin",
+  "setting": "",
+  "worldDetails": "The Driftwood Kin's world, as the Vault has it across 16 recorded sessions.\nFuller entries — and the audio — live in the Vault: https://dosenft.github.io/dwk-vault/\n\nDriftwood Kin (faction) — The party. Now known by name to Umari's organization and accumulating faction allies (Oud, Umari, the Arcanists, the priest of Idis).\nCallestus (nation) — Referenced as a nation that would be destabilized; Arcanist composition includes a Callestian (Ood).\nCauberos (nation) — Vast, wealthy nation and Bayward's homeland; positioned to \"swoop in and fill the void\" if the Northern Alliance is destabilized. Bayward has now forsaken it.\nVattenheim (place) — City of the Wild. Stucco buildings in earthen cream and muted blues, rooftop gardens, built into a cave system with Cave Side (Sky, Falls, Den Districts) and Bright Side (Dawn, Sh…\nThe Northern Alliance (nation) — Primary antagonist faction with multiple footholds across the island and currently the most likely to win any war. Destabilizing them is the party's primary strategic goal.\nThe Arcanists (faction) — United against the Northern Alliance but divided on the endgame — no consensus on who should ultimately control the island. Dakar is the most visionary; Bayward was the most confl…\nWilder Temple (place) — Site of Ponzi's divine vision; an attendant enforces protocol before Dayune's throne room, which is reached by vision or spiritual transport.\nCaramel (place) — Octagonal-walled fortress pouring thick dull orange spores like smokestacks, main gate barricaded from inside, a breach blown outward from the wall's inside base. Now effectively…\nUros (asterum) — Named on the loot table as the subject of the books/tomes Ruel bought (\"Books/Tomes (Urus)\", light reading on local lore and Festival of Oaths topics). Source spelling \"Urus\"; app…\nVa (place) — Referenced as the region or campaign world holding multiple orc tribes; the note itself marks the name as uncertain (\"likely the campaign world\").\nOlama (place) — Small city — the city of the blind. Horse stable on the outskirts, general goods store, tattoo shop, two temples. No apothecary and no magic item shop.\nEnchantment Breaker Ring (item) — Given to Ponzi by the Banshee after the sea hag was defeated. Properties unknown.\nVeins of Yavanna (item) — Red root with iron content and primal magic that touches the life force of a person. Workable into potions replicating Hold Person, Paralyze, Charm Person, Suggestion and Geas. Pl…\nEthereal Leaf and Distillery (place) — The party's base in Vattenheim, containing a hidden ethereal meeting space accessible via wisp drinks, with smoke elemental attendants wrapped in silk.\nPonzi's Sand Hand (item) — Regrown from sand after Ponzi severed his infected hand. Can be heated — it made the ground iron radiate heat with a blackened glow.\nFausti (place) — The city the party returns to before nightfall to trade with Fosse.\nDawson's vault (place) — Where Nix is held in a cell and branded, and where Scar is put to sleep by a drow woman.\nMirth in Valor (place) — The tavern where the party reunites and spends the evening drumming up excitement for the delve.\nbook of the tender (item) — A small, leather-bound book with metallic green embossing, enchanted so Scar can understand its contents.\namulet, proof against detection and location (item) — Offered for sale to Runewillow by Ulf at his shop.\nParyton antlers (item) — The trophy the party was specifically hunting for; harvested with claws and other trophies.\nNastra Antheon (place) — The Driftwood Kin's new keep: a stained glass greenhouse with a stone tower attached, the tower having a basement and three circular levels about 50 feet across, in disrepair but…\nEden Moor (place) — City where miners are disappearing, currently ruled by Callestus alongside Tostrain, with tunnels running roughly 2.5 miles beneath it.\nMine Outside Eden Moor (place) — Located east and slightly south of Eden Moor, about a day and a half from Nastra Antheon, at the edge of woods where there's a level change in topography; several dozen tents, cra…\nTunnel System (place) — Beyond a false ending and tight switchback, a straight dark path lit by sparse oil lanterns and wide enough for carts, extending about 2.5 miles toward Eden Moor and opening into…\nGiovanni's Tavern (place) — Where the Driftwood Kin's performance in the trials built the reputation that brought Vera to them.\nCourt of Blades (faction) — The guard of Eden Moor, whose emblem the mine guards wear; involved in the operation beneath the city and connected to the disappearances of miners and stonemasons.\nTostrain (faction) — One of the five nations; rules Eden Moor alongside Callestus, and one of the lands Talon traveled through.\nEscana (faction) — One of the five nations named alongside Callestus, Tostrain, Va and Caberos.\nHowjaws (faction) — Formerly a danger in the plains along with wolves; Ponzi theorizes they have scattered after losing their central figure but could regroup.",
+  "currentQuest": "Eight souls swear the Grand Rebirth over an Arcanist feast, then walk into Caramel's spores and find every track leading down to a Feywild gate Vesh sealed shut.",
+  "partyMembers": [
+    {
+      "name": "Ponzi",
+      "class": "Rogue",
+      "race": "Tiefling",
+      "personality": "Rogue/Tiefling. Cast Light again at the wisp ritual. Picked the fortress cellar door, found the second hatch (Perception 18), rode the broken enchanted lift down to the barge, and had his daggers consecrated as the Black Sand Verdict.",
+      "relationshipToPC": "Driftwood Kin — at the table with Nix for 14 of 16 recorded sessions."
+    },
+    {
+      "name": "Runewillow",
+      "class": "Wizard",
+      "race": "Half-Elf",
+      "personality": "Bard/Arcane. Gave the session's oath speech, invented the Runic language, found the iron ring hatch (Investigation 22), identified the Feywild gate (Arcana 15), and re-entered the spores alone to collect samples. Ignores her first point of exhaustion (racial).",
+      "relationshipToPC": "Driftwood Kin — at the table with Nix for 15 of 16 recorded sessions."
+    },
+    {
+      "name": "Talon",
+      "class": "Bard",
+      "race": "Rock Gnome",
+      "personality": "Cleric/Bard. Proposed rule by the people, built the rebreather mask and the spore reliquary with Ood, found and identified the tower teleportation circle, and fell unconscious from poison and exhaustion.",
+      "relationshipToPC": "Driftwood Kin — at the table with Nix for 15 of 16 recorded sessions."
+    },
+    {
+      "name": "Scar",
+      "class": "",
+      "race": "",
+      "personality": "Alive — torn in half and buried breathing in Driftwood Keep's greenhouse by the magic of the Tender. The ground rises and falls with his chest. His presence is what drew the keep to the grove.",
+      "relationshipToPC": "Driftwood Kin — at the table with Nix for 1 of 16 recorded sessions."
+    },
+    {
+      "name": "Ketsa",
+      "class": "",
+      "race": "",
+      "personality": "Remains in a tree shooting arrows through most of the combat; avoids being associated with the party at the vault; paints runes on patrons' hands.",
+      "relationshipToPC": "Driftwood Kin — at the table with Nix for 1 of 16 recorded sessions."
+    }
+  ],
+  "notableNPCs": [
+    {
+      "name": "Vesh",
+      "role": "creature",
+      "notes": "The fungal entity, felt through Nix's connection rather than physically present. His consciousness is \"slow burn\" near Caramel. His anger is directed at the Feywild gate, not the people — he fears the gate and deliberately sealed it."
+    },
+    {
+      "name": "Dawson",
+      "role": "npc",
+      "notes": "Tracking the party through \"six different things\" and was within a day of Alama before the keep's teleport gave them distance. Actively hunting."
+    },
+    {
+      "name": "Giovanni",
+      "role": "npc",
+      "notes": "Alive, in subtle but mounting danger, looking for his next venture. Holds the paired sending stone and is now reachable by Pocket Wind. Replied with \"Quest of Elmore\" — the Voyagers' motto."
+    },
+    {
+      "name": "Tom",
+      "role": "npc",
+      "notes": "Present for the physical fight; bloodied but victorious."
+    },
+    {
+      "name": "Wolfgang",
+      "role": "npc",
+      "notes": "Charlatan and former \"Dawson\" (top criminal) of his region who took Ponzi in at 13-14 and taught him sleight of hand. May now be trying to kill him; possibly on this island."
+    },
+    {
+      "name": "Rose",
+      "role": "npc",
+      "notes": "Ponzi's deceased wife. Carried an adamantine-ornamented dagger sheath and stopped mid-attack as if receiving divine command; Ponzi never saw her worship any Esterum."
+    },
+    {
+      "name": "Madam Asalia",
+      "role": "npc",
+      "notes": "Owner of the Sky District bathhouse where the party cleaned up. Not directly described."
+    },
+    {
+      "name": "Dakar the Farsighted",
+      "role": "npc",
+      "notes": "Aarakocra Arcanist leader from a land of warring peoples. Warned this move will be the inciting incident for island-wide war, then proposed the Grand Rebirth. Helped Rune Willow complete the Runic language and jokingly named it \"Rubik\"."
+    },
+    {
+      "name": "Dion",
+      "role": "npc",
+      "notes": "Arranged the Total Honesty agreement with Ponzi and told Nix to be honest with the party. Connected to Umari."
+    },
+    {
+      "name": "Parrytons",
+      "role": "creature",
+      "notes": "Also given as Perringtons. Creatures the party fights and hunts for their antlers (spelled \"Paryton antlers\" in the source)."
+    },
+    {
+      "name": "giant badgers",
+      "role": "creature",
+      "notes": "Join the Parryton fight, attacking Runewillow and Talon."
+    },
+    {
+      "name": "Fosse",
+      "role": "npc",
+      "notes": "Merchant in Fausti who buys the party's monster parts and pays in magic items and enchantment."
+    },
+    {
+      "name": "Ulf",
+      "role": "npc",
+      "notes": "Shop owner who gifts Scar the \"book of the tender\" and offers Runewillow an amulet."
+    },
+    {
+      "name": "Jephth",
+      "role": "npc",
+      "notes": "A man Ponzi returns a viola to, telling him \"your father says he's proud of you,\" which moves him to tears."
+    },
+    {
+      "name": "Vera",
+      "role": "npc",
+      "notes": "Also given as Virag Zik, full name Suresnya Verag. Half-orc with dark hair, green skin and small tusks, listed in the party roster as a guest character and in the NPC index as a temporary ally seeking the party's help; fights with a large round buckler and heavy flail."
+    },
+    {
+      "name": "Tycerus",
+      "role": "npc",
+      "notes": "Elf with pale skin, sunken eyes and cheeks raised by thick scars; Barrow Captain of Callestus, leader of the operation beneath Eden Moor. Used a mace and chain whip he could animate, and ordered the tunnels collapsed when defeated."
+    },
+    {
+      "name": "Josh",
+      "role": "npc",
+      "notes": "Guard at the mine entrance, loyal to the Court of Blades; deceived by the party."
+    },
+    {
+      "name": "Priests",
+      "role": "npc",
+      "notes": "Multiple priests working in the tunnels, wearing white robes and casting radiant magic including Spirit Guardians."
+    },
+    {
+      "name": "Vayon",
+      "role": "npc",
+      "notes": "The greenhouse and tower at Nastra Antheon previously belonged to Vayon; the greenhouse was a sanctuary of Vayon and floral dryads blessed by Vayon returned to it."
+    },
+    {
+      "name": "The Blood Father",
+      "role": "npc",
+      "notes": "Connected to the Howjaws; the party possesses his letters and used his name to bluff their way into the mine."
+    },
+    {
+      "name": "The Night Hag",
+      "role": "creature",
+      "notes": "Fed on traumatic memory. Killed this session."
+    },
+    {
+      "name": "Lady Shaelra (S-H-A-E-L-R-A)",
+      "role": "npc",
+      "notes": "Tall with slightly inhuman stretched proportions, sharp points at elbows and shoulders, beautiful but terrible. Wielded all four elements simultaneously. Depicted in her downfall — burned, frostbitten, windburned. Alignment, origin and true role unknown."
+    },
+    {
+      "name": "The Dwarven Diviner",
+      "role": "npc",
+      "notes": "Dwarven skeleton kneeling in disheveled robes, jaw agape, faintly screaming even in death. Foresaw Vesh's rise, painted prophetic warnings through his own tower, and wailed himself to death. Reanimated as the Woe-Born Flame Skull."
+    },
+    {
+      "name": "The Wound",
+      "role": "npc",
+      "notes": "Referenced only in the recap — retrieved a reborn staff, made breakfast, facilitated the backstory sharing. The note says not present this session, or not named as an active party member."
+    },
+    {
+      "name": "Woe-Born Flame Skull",
+      "role": "creature",
+      "notes": "The reanimated diviner: flying, fire rays, Gaze of Woe, and lair actions that swap with the ensnared spells in the air. Killed by Ponzi's sneak attack through the eye socket for 21."
+    },
+    {
+      "name": "Mycanoid Radix",
+      "role": "creature",
+      "notes": "Two spawned from the prophetic paintings alongside the Flame Skull. Slam attack and Frightening Spores forcing a Con save or frightened."
+    },
+    {
+      "name": "Animated Rug of Smothering",
+      "role": "creature",
+      "notes": "A 20×20-foot black canvas drape in the painting gallery, triggered when Rune Willow lifted a cloth. Defeated by Cloud of Daggers and blade work."
+    },
+    {
+      "name": "Algovan (Alvgan)",
+      "role": "npc",
+      "notes": "Ancient bronze dragon with a scarred stomach from past shame. Keeper of the Mantle of Potential. Speaks in draconic when making personal agreements. Recognized Asus. Gave bronze bars for the Diviner Stone and three broken scales to Nix, and agreed a mutual call with the party."
+    },
+    {
+      "name": "Sylvari Kallis (Silvari Callis)",
+      "role": "npc",
+      "notes": "Half-elf of the first wave of settlers, died at Vore Banner investigating skulls near the Roiling Cloud. Revived by Rune Willow. Scarred, tattered armor, bright green eyes, speaks haltingly, repeats \"I died. I won't waste it.\" Left in the care of Sorcerer Casein and Mason Oos."
+    },
+    {
+      "name": "The Solemn Keeper of the Prisons",
+      "role": "npc",
+      "notes": "Also \"the Final Pronouncement.\" A figure on a dark throne reachable only through Ponzi's vision. Holds the Book of Fates, flips a coin, called Ponzi \"Asher,\" and will not meet him again until the coin rings at his feet."
+    }
+  ],
+  "sessionNotes": [
+    {
+      "id": "vault-caremall-recon-and-grand-rebirth-pact",
+      "date": "2026-05-28",
+      "summary": "A pact sworn, a gate smothered — Eight souls swear the Grand Rebirth over an Arcanist feast, then walk into Caramel's spores and find every track leading down to a Feywild gate Vesh sealed shut."
+    },
+    {
+      "id": "vault-city-festival-arrival",
+      "date": "2026-05-19",
+      "summary": "Oaths, honesty, and a stranger's chessboard — A festival day of celebration, confession and shopping ends with the Driftwood Kin decoding a map to the Feywild and meeting a spymaster over chess."
+    },
+    {
+      "id": "vault-ponzis-oath-and-feywild-quest",
+      "date": "2026-05-19",
+      "summary": "Guilt set down, porcelain replaced with iron — Ponzi trades vengeance for justice and loses a hand to gain one, and Rune Willow survives the Asterium's trial to be claimed by the Rose."
+    },
+    {
+      "id": "vault-festival-planning-night-before",
+      "date": "2026-05-05",
+      "summary": "Iron veins in porcelain beneath the storm — The party spent the night before the Festival of Oaths at the Trifold Tavern, swore oaths at their Esterum temples, then fought Aurovail at the Seven Pillars."
+    },
+    {
+      "id": "vault-journey-to-vattenheim-misty-fortress",
+      "date": "2026-05-02",
+      "summary": "One yes, three maybes, a storm coming — The Driftwood Kin clean up for the Feast of Oaths, drink their way into the Arcanists' pocket dimension, and pitch a sanctuary city — Ude alone says yes."
+    },
+    {
+      "id": "vault-pocket-wind-introduction-and-testing",
+      "date": "2026-04-23",
+      "summary": "The keep followed its friend home — A wind in a pocket, a dome of living water, a keep that walked to Scar — and a fortress full of spores that killed Periwink on contact."
+    },
+    {
+      "id": "vault-chess-piece-secret-society",
+      "date": "2026-04-13",
+      "summary": "A knight passed, a scar shared — Runewillow hands Ponzi the chess society's knight, a priestess in Olama takes his pain into her own hand, and a whistling shrine stops them in the hills."
+    },
+    {
+      "id": "vault-divine-sense-and-curse-detection",
+      "date": "2026-04-13",
+      "summary": "One hand warm, one hand cold — On night watch Nix finds Ponsey's hand unnaturally cold, and five points of Lay on Hands burn pale green without warming it."
+    },
+    {
+      "id": "vault-rescue-mission-planning-recap",
+      "date": "2026-04-09",
+      "summary": "Three barrels, one arrow, a declaration of war — The Driftwood Kin burn an orc stronghold to rescue Ponzi, kill Dawson's assassin Axes, and post a taunt to Dawson using his own signet ring."
+    },
+    {
+      "id": "vault-fort-assault-planning",
+      "date": "2026-04-02",
+      "summary": "He winked, said boom, and lit the fuse — The party buries napalm barrels, scouts the orc stronghold by bat, and Nix talks the chief into marching his war party straight into the kill zone."
+    },
+    {
+      "id": "vault-sea-hag-battle-and-trials-completion",
+      "date": "2026-02-19",
+      "summary": "A city where everyone carries a blade — The trials end, the party hits Level 7 and walks into Olama — where they learn the root in Ponzi's pocket is something the whole city fears."
+    },
+    {
+      "id": "vault-combat-encounter-magical-weapon",
+      "date": "2026-02-05",
+      "summary": "Four trials, four rooms, nobody together — Each of the Driftwood Kin passes a solo trial in Algovan's Tower and walks out with a magical item, a revived settler, and Ponzi's real name spoken aloud by a stranger on a throne."
+    },
+    {
+      "id": "vault-character-backstories-tower-investigation",
+      "date": "2026-01-19",
+      "summary": "Spells frozen mid-air like insects in amber — The party breaks into a doorless arcane tower where every spell they cast misfires, and finds inside it the name of the lich who is their endgame."
+    },
+    {
+      "id": "vault-phantasma-night-hag-dream",
+      "date": "2025-12-31",
+      "summary": "The Night Hag in Talon's Memory — Trapped inside Talon's worst memory, the party fights a Night Hag from both sides of a dream at once."
+    },
+    {
+      "id": "vault-dwk-book-2-chapter-1",
+      "date": "2025-12-07",
+      "summary": "A new keep, a tunnel under Eden Moor — The Kin claim Nastra Antheon, then follow a half-orc's tip into a staged mine and free chained prisoners as Callestus's tunnels beneath Eden Moor detonate."
+    },
+    {
+      "id": "vault-session-8-what-grows-in-the-vault",
+      "date": "2025-09-12",
+      "summary": "A brand, a debt, a note at dawn — The Driftwood Kin win a bloody hunt for Parryton antlers while Nix is captured and branded by Dawson, binding the party to a debt."
+    }
+  ]
+}

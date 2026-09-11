@@ -1,0 +1,100 @@
+{
+  "bandFound": 1,
+  "rowCount": 4,
+  "rows": [
+    {
+      "name": "Hearthfire Manifest",
+      "box": [
+        29,
+        882,
+        332,
+        191
+      ],
+      "trigger": "WHEN you are hit by a melee attack, the creature takes 1d10 Fire damage in retaliation.",
+      "triggerBox": [
+        305,
+        33
+      ],
+      "leaves": [
+        "Hearthfire Manifest",
+        "Reaction",
+        "WHEN",
+        "10 temp HP · 1d10 Fire retaliation (free)",
+        "⚑ Canon lists 4 errata on this feature",
+        "▸",
+        "+1d10 retaliation",
+        "none yet"
+      ]
+    },
+    {
+      "name": "Sentinel · takes the Disengage action",
+      "box": [
+        29,
+        1079,
+        332,
+        115
+      ],
+      "trigger": "WHEN a creature within 5 feet of you takes the Disengage action",
+      "triggerBox": [
+        305,
+        33
+      ],
+      "leaves": [
+        "Sentinel · takes the Disengage action",
+        "Reaction",
+        "WHEN",
+        "you can take an Opportunity Attack against it.",
+        "▸"
+      ]
+    },
+    {
+      "name": "Sentinel · attacks a target other than you",
+      "box": [
+        29,
+        1200,
+        332,
+        151
+      ],
+      "trigger": "WHEN a creature within 5 feet of you attacks a target other than you",
+      "triggerBox": [
+        305,
+        33
+      ],
+      "leaves": [
+        "Sentinel · attacks a target other than you",
+        "Reaction",
+        "WHEN",
+        "you can take a Reaction to make one melee attack against the attacker.",
+        "▸"
+      ]
+    },
+    {
+      "name": "Opportunity Attack — The Dawn Guardian",
+      "box": [
+        29,
+        1356,
+        332,
+        118
+      ],
+      "trigger": "WHEN a creature you can see leaves your reach",
+      "triggerBox": [
+        305,
+        17
+      ],
+      "leaves": [
+        "Opportunity Attack — The Dawn Guardian",
+        "Reaction",
+        "WHEN",
+        "+7 to hit · 1d10+4 Slashing · 10 ft · Magical",
+        "▸"
+      ]
+    }
+  ],
+  "interceptionOnTab": [],
+  "sheet": {
+    "seeded": "1601f8ced8883a17",
+    "after": "1601f8ced8883a17",
+    "identical": true
+  },
+  "noise": []
+}

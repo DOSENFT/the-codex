@@ -1,0 +1,191 @@
+[31m── play/Combat > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m8 TRAPPED[0m
+   [31mXX[0m "Saving Throws"  button.flex.items-center.gap-1.5  372x44
+        blocked by: div
+   [31mXX[0m "Select d4"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d6"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d8"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d10"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d12"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d20"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d100"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+[32m── play/Combat > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[31m── play/Grimoire > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m8 TRAPPED[0m
+   [31mXX[0m "Saving Throws"  button.flex.items-center.gap-1.5  372x44
+        blocked by: div
+   [31mXX[0m "Select d4"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d6"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d8"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d10"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d12"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d20"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d100"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+[32m── play/Grimoire > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[31m── play/Roleplay > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m8 TRAPPED[0m
+   [31mXX[0m "Saving Throws"  button.flex.items-center.gap-1.5  372x44
+        blocked by: div
+   [31mXX[0m "Select d4"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d6"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d8"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d10"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d12"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d20"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d100"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+[32m── play/Roleplay > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[31m── prep/Character > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m8 TRAPPED[0m
+   [31mXX[0m "Saving Throws"  button.flex.items-center.gap-1.5  372x44
+        blocked by: div
+   [31mXX[0m "Select d4"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d6"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d8"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d10"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d12"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d20"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d100"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+[32m── prep/Character > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[31m── prep/Grimoire > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m8 TRAPPED[0m
+   [31mXX[0m "Saving Throws"  button.flex.items-center.gap-1.5  372x44
+        blocked by: div
+   [31mXX[0m "Select d4"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d6"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d8"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d10"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d12"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d20"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d100"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+[32m── prep/Grimoire > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[31m── prep/Persona > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m8 TRAPPED[0m
+   [31mXX[0m "Saving Throws"  button.flex.items-center.gap-1.5  372x44
+        blocked by: div
+   [31mXX[0m "Select d4"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d6"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d8"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d10"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d12"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d20"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d100"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+[32m── prep/Persona > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+[31m── prep/Academy > dice[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=0px  21 controls (0 inside a nested scroller, driven)  [1m8 TRAPPED[0m
+   [31mXX[0m "Saving Throws"  button.flex.items-center.gap-1.5  372x44
+        blocked by: div
+   [31mXX[0m "Select d4"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d6"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d8"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d10"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d12"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d20"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+   [31mXX[0m "Select d100"  button.min-h-[44px].min-w-[44px].w-[44px]  44x44
+        blocked by: div
+[32m── prep/Academy > mechanics[0m  <div.fixed.inset-x-0.bottom-0> scroller <div.fixed.inset-x-0.bottom-0> room=3010px  35 controls (8 inside a nested scroller, driven)  [1m0 TRAPPED[0m
+
+===== 56 TRAPPED of 392 controls, across 14 opened overlay(s) =====
+56 of those sat inside a nested scroller and were brought into view along its own axis first, then swept.
+0 overlay(s) could not be opened or located — UNPROVEN. 7 opener(s) absent on their screen.
+
+findings:
+  · play/Combat>dice: Saving Throws (372x44) — div
+  · play/Combat>dice: Select d4 (44x44) — div
+  · play/Combat>dice: Select d6 (44x44) — div
+  · play/Combat>dice: Select d8 (44x44) — div
+  · play/Combat>dice: Select d10 (44x44) — div
+  · play/Combat>dice: Select d12 (44x44) — div
+  · play/Combat>dice: Select d20 (44x44) — div
+  · play/Combat>dice: Select d100 (44x44) — div
+  · play/Grimoire>dice: Saving Throws (372x44) — div
+  · play/Grimoire>dice: Select d4 (44x44) — div
+  · play/Grimoire>dice: Select d6 (44x44) — div
+  · play/Grimoire>dice: Select d8 (44x44) — div
+  · play/Grimoire>dice: Select d10 (44x44) — div
+  · play/Grimoire>dice: Select d12 (44x44) — div
+  · play/Grimoire>dice: Select d20 (44x44) — div
+  · play/Grimoire>dice: Select d100 (44x44) — div
+  · play/Roleplay>dice: Saving Throws (372x44) — div
+  · play/Roleplay>dice: Select d4 (44x44) — div
+  · play/Roleplay>dice: Select d6 (44x44) — div
+  · play/Roleplay>dice: Select d8 (44x44) — div
+  · play/Roleplay>dice: Select d10 (44x44) — div
+  · play/Roleplay>dice: Select d12 (44x44) — div
+  · play/Roleplay>dice: Select d20 (44x44) — div
+  · play/Roleplay>dice: Select d100 (44x44) — div
+  · prep/Character>dice: Saving Throws (372x44) — div
+  · prep/Character>dice: Select d4 (44x44) — div
+  · prep/Character>dice: Select d6 (44x44) — div
+  · prep/Character>dice: Select d8 (44x44) — div
+  · prep/Character>dice: Select d10 (44x44) — div
+  · prep/Character>dice: Select d12 (44x44) — div
+  · prep/Character>dice: Select d20 (44x44) — div
+  · prep/Character>dice: Select d100 (44x44) — div
+  · prep/Grimoire>dice: Saving Throws (372x44) — div
+  · prep/Grimoire>dice: Select d4 (44x44) — div
+  · prep/Grimoire>dice: Select d6 (44x44) — div
+  · prep/Grimoire>dice: Select d8 (44x44) — div
+  · prep/Grimoire>dice: Select d10 (44x44) — div
+  · prep/Grimoire>dice: Select d12 (44x44) — div
+  · prep/Grimoire>dice: Select d20 (44x44) — div
+  · prep/Grimoire>dice: Select d100 (44x44) — div
+  · prep/Persona>dice: Saving Throws (372x44) — div
+  · prep/Persona>dice: Select d4 (44x44) — div
+  · prep/Persona>dice: Select d6 (44x44) — div
+  · prep/Persona>dice: Select d8 (44x44) — div
+  · prep/Persona>dice: Select d10 (44x44) — div
+  · prep/Persona>dice: Select d12 (44x44) — div
+  · prep/Persona>dice: Select d20 (44x44) — div
+  · prep/Persona>dice: Select d100 (44x44) — div
+  · prep/Academy>dice: Saving Throws (372x44) — div
+  · prep/Academy>dice: Select d4 (44x44) — div
+  · prep/Academy>dice: Select d6 (44x44) — div
+  · prep/Academy>dice: Select d8 (44x44) — div
+  · prep/Academy>dice: Select d10 (44x44) — div
+  · prep/Academy>dice: Select d12 (44x44) — div
+  · prep/Academy>dice: Select d20 (44x44) — div
+  · prep/Academy>dice: Select d100 (44x44) — div
+ERROR FLOOR: clean
+
+[32mSELF-TEST PASSED — the planted occluder was caught 56 time(s). This probe can still convict.[0m

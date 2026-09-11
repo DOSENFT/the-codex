@@ -1,0 +1,79 @@
+
+/* ---- the rail (slice 4) ---------------------------------------------------
+   RECONSTRUCTED FROM THE COMPILED BUNDLE. The authored comments for this block
+   were lost when turn-d.css was truncated during slice 5's mutation testing;
+   every declaration below was recovered rule-for-rule from dist and verified
+   by diffing the compiled rule sets, so the behaviour is exact and only the
+   prose is a rewrite. Nothing here is a guess about what the rules should be.
+
+   The rail is the one strip that must never scroll away: dice, look-up, slot
+   pips, reset, start/end combat, Lay on Hands and Channel Divinity. V-6 says a
+   turn-critical spend control is always visible, and this is where that rule
+   is actually paid for. It wraps rather than scrolls, because a control that
+   has slid off the side of a strip is a control you cannot find in six
+   seconds — wrapping costs a row of height and loses nothing. */
+.dturn .rail {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--d-s2) var(--d-s3);
+  padding: var(--d-s2) var(--pad);
+  border-top: 1px solid var(--d-rule);
+  background: var(--d-e1);
+}
+.dturn .rail .rverbs,
+.dturn .rail .rslots,
+.dturn .rail .rpools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--d-s2) var(--d-s3);
+}
+
+/* V-5b in BOTH dimensions: a rail button is 48px tall AND 48px wide at its
+   smallest, so the dice button — which is an icon and has no text to pad it
+   out — is still a thumb-sized target rather than a 24px glyph. */
+.dturn .rail .rbtn {
+  min-height: var(--d-touch-goal);
+  min-width: var(--d-touch-goal);
+  padding: 0 var(--d-s3);
+  border-radius: var(--d-radius);
+  border: 1px solid var(--d-rule-lit);
+  background: transparent;
+  font-size: var(--d-fs-body);
+  color: var(--d-gold);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dturn .rail .rbtn:hover:enabled { border-color: var(--d-gold); }
+.dturn .rail .rbtn:disabled { color: var(--d-dim); cursor: not-allowed; }
+
+/* Ending combat is amber, not gold: it is the one control on the rail that
+   throws state away, and it should not read as just another verb. */
+.dturn .rail .rbtn.end { color: var(--d-amber); }
+
+/* A spend button carries a number ("Spend 5 Lay on Hands"), so it takes the
+   mono face and the label size — it is a quantity, not a verb. */
+.dturn .rail .rbtn.spend {
+  padding: 0 var(--d-s2);
+  font-size: var(--d-fs-label);
+  font-family: var(--d-font-mono);
+}
+.dturn .rail .slotrow,
+.dturn .rail .rpool { display: flex; align-items: center; gap: 6px; }
+.dturn .rail .slotrow em {
+  font-style: normal;
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-label);
+  color: var(--d-dim);
+}
+.dturn .rail .rpool .k { font-size: var(--d-fs-label); color: var(--d-dim); white-space: nowrap; }
+/* V-3: a pool's remaining count is a numeral you read under pressure, so it
+   takes the 7:1 gold rather than the dim its label uses. */
+.dturn .rail .rpool .v {
+  font-family: var(--d-font-mono);
+  font-size: var(--d-fs-mono);
+  color: var(--d-gold);
+}
+.dturn .rail .rpool .v.spent { color: var(--d-dim); }

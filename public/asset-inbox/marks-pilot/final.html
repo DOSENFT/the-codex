@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>All 17 marks — 34px row size and 72px card size</title>
+<style>
+  :root { --void-0:#0a0a08; --arcane:#d4a74a; --cream:#f0e6d3; --dim:#979182; --bronze:#8b7355; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--void-0); color:var(--cream); font-family:system-ui,sans-serif; padding:20px; }
+  h2 { font-size:13px; color:var(--arcane); margin:18px 0 10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+  .strip { display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+  .mark { border-radius:9px; flex-shrink:0; overflow:hidden;
+          border:1px solid rgba(212,167,74,.22);
+          background:linear-gradient(160deg,#1c1a15,#100f0c); }
+  .mark img { display:block; width:100%; height:100%; }
+  .s34 { width:34px; height:34px; }
+  .s72 { width:72px; height:72px; border-radius:16px; }
+  .cap { font-size:9px; color:var(--bronze); text-align:center; margin-top:4px; max-width:76px; }
+  .cell { text-align:center; }
+</style>
+</head>
+<body>
+<h2>34px — the row size, where the finding happens</h2>
+<div class="strip" id="s34"></div>
+<h2>72px — the card size</h2>
+<div class="strip" id="s72"></div>
+<script>
+const SLUGS = ['bless','channel-divinity','cure-wounds','divine-sense','divine-smite','flaming-cloak',
+'hearthbrand','hearthfire-manifest','interception','javelin','lay-on-hands','misty-step',
+'opportunity-attack','sacred-flame','sentinel','shield-of-faith','warding-bond']
+for (const [id, cls] of [['s34','s34'],['s72','s72']]) {
+  document.getElementById(id).innerHTML = SLUGS.map(s =>
+    `<div class="cell"><div class="mark ${cls}"><img src="/the-codex/marks/${s}.svg"></div><div class="cap">${s}</div></div>`
+  ).join('')
+}
+</script>
+</body>
+</html>

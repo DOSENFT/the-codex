@@ -1,0 +1,284 @@
+
+████ PHONE 390×844 — V-6b ████
+
+══ play/Combat @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=1456  clientHeight=356  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 1100px
+   • «Deafened: Can't hear; auto-fail hearing chec»  y=463 h=48
+       covered by button.w-full.min-h-[56px] < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Exhaustion: -2 per level to D20 Tests; speed»  y=463 h=48
+       covered by button.w-full.min-h-[56px] < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Frightened: Disadvantage while source visibl»  y=517 h=48
+       covered by button.min-h-[48px].flex-1 < div.flex.gap-2 < div.flex.items-center
+       TRAPPED — no scroll left this way
+   • «Grappled: Speed 0; can escape with DC check»  y=517 h=48
+       covered by button.min-h-[48px].flex-1 < div.flex.gap-2 < div.flex.items-center
+       TRAPPED — no scroll left this way
+   • «Incapacitated: Can't take Actions, Bonus Act»  y=571 h=48
+       covered by span.text-xs.font-mono < div.flex.items-center < div.flex.items-center
+       TRAPPED — no scroll left this way
+   • «Invisible: Can't be seen; attacks have Advan»  y=571 h=48
+       covered by button.pip-tap < div.pip-row < div.flex.items-center
+       TRAPPED — no scroll left this way
+   • «Paralyzed: Incapacitated; auto-fail STR/DEX »  y=625 h=48
+       covered by i < button.pip-tap < div.pip-row
+       TRAPPED — no scroll left this way
+   • «Petrified: Turned to stone; weight x10; resi»  y=625 h=48
+       covered by button.pip-tap < div.pip-row < div.flex.items-center
+       TRAPPED — no scroll left this way
+   • «Poisoned: Disadvantage on attacks and abilit»  y=679 h=48
+       covered by span.text-xs.font-semibold < div.flex.items-center < div.px-3.pt-2.5
+       TRAPPED — no scroll left this way
+   • «Prone: Crawl to move; melee hits have Advant»  y=679 h=48
+       covered by button.min-h-[48px].px-3 < div.flex.items-center < div.px-3.pt-2.5
+       TRAPPED — no scroll left this way
+   • «Restrained: Speed 0; attacks have Disadvanta»  y=733 h=48
+       covered by div.flex.items-center < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Stunned: Incapacitated; auto-fail STR/DEX sa»  y=733 h=48
+       covered by div.flex.items-center < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Unconscious: Drop prone; Incapacitated; auto»  y=787 h=48
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (1100px down)
+
+══ play/Combat @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=1100  scrollHeight=1456  clientHeight=356  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 1100px · down 0px
+   • «Damage Log»  y=6 h=48
+       covered by div.flex.items-center < header.fixed.top-0 < div.flex.flex-col
+       escapable (1100px up)
+
+══ play/Grimoire @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=1904  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 1180px
+   • «Hearthfire ManifestFeatureActionLvl 3»  y=819 h=64
+       covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch
+       TRAPPED — no scroll left this way
+
+══ play/Grimoire @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=1180  scrollHeight=1904  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 1180px · down 0px
+   • «Faerie FireSpellAction60 feetConc1stSlots:4/»  y=12 h=86
+       covered by div.flex.items-center < header.fixed.top-0 < div.flex.flex-col
+       escapable (1180px up)
+
+══ play/Roleplay @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=2322  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 1598px
+   • «Burn clean, and quickly.»  y=785 h=48
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (1598px down)
+
+══ play/Roleplay @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=1598  scrollHeight=2322  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 1598px · down 0px
+   • «One does not buy loyalty, mister merchant. O»  y=14 h=78
+       covered by div.flex.items-center < header.fixed.top-0 < div.flex.flex-col
+       escapable (1598px up)
+
+══ prep/Character @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=4416  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 3692px
+   • «Acrobatics: not proficient. Tap to change.»  y=789 h=44
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (3692px down)
+   • «Acrobatics(DEX)»  y=789 h=44
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (3692px down)
+
+══ prep/Grimoire @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=2161  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 1437px
+   • «BlessSpellAction30 feetConc1stSlots:4/4»  y=813 h=112
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (1437px down)
+   • «Unprepare Bless»  y=795 h=44
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (1437px down)
+
+══ prep/Persona @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=4070  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 3346px
+   • «BUTTON»  y=465 h=48
+       covered by div.flex.gap-2 < div.flex.flex-col < div.glass-card.p-5
+       TRAPPED — no scroll left this way
+   • «Remove slow to trust, but deeply loyal once »  y=744 h=44
+       covered by button.fixed.z-50 < div.flex.flex-col < div
+       TRAPPED — no scroll left this way
+   • «Remove values simple, hard labor»  y=810 h=44
+       covered by svg.[object.SVGAnimatedString] < button.relative.flex-1 < div.flex.items-stretch
+       TRAPPED — no scroll left this way
+
+══ prep/Academy @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=1760  scrollHeight=2484  clientHeight=724  vh=844
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 1760px · down 0px
+   • «Start One-Shot Adventure»  y=37 h=48
+       covered by span.text-xs.font-mono < div.flex.items-center < header.fixed.top-0
+       escapable (1760px up)
+
+████ TABLET 834×1112 — V-6c ████
+
+══ play/Combat @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=1404  clientHeight=680  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 724px
+   • «Unconscious: Drop prone; Incapacitated; auto»  y=787 h=48
+       covered by button.w-full.min-h-[56px] < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Concentration»  y=872 h=48
+       covered by button.pip-tap < div.pip-row < div.flex.items-center
+       TRAPPED — no scroll left this way
+   • «Bless»  y=975 h=44
+       covered by div.flex.items-center < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Command»  y=975 h=44
+       covered by div.flex.items-center < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Faerie Fire»  y=975 h=44
+       covered by button.min-h-[48px].px-3 < div.flex.items-center < div.px-3.pt-2.5
+       TRAPPED — no scroll left this way
+   • «Warding Bond»  y=975 h=44
+       covered by div.flex.items-center < div.px-3.pt-2.5 < section.fixed.inset-x-0
+       TRAPPED — no scroll left this way
+   • «Damage Log»  y=1054 h=48
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (724px down)
+
+══ play/Combat @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=724  scrollHeight=1404  clientHeight=680  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 724px · down 0px
+   • «Restrained: Speed 0; attacks have Disadvanta»  y=9 h=48
+       covered by header.fixed.top-0 < div.flex.flex-col < div
+       escapable (724px up)
+   • «Stunned: Incapacitated; auto-fail STR/DEX sa»  y=9 h=48
+       covered by button.min-h-[44px].min-w-[44px] < div.flex.items-center < header.fixed.top-0
+       escapable (724px up)
+
+══ play/Grimoire @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=804  scrollHeight=1796  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 804px · down 0px
+   • «BlessSpellAction30 feetConc1stSlots:4/4»  y=44 h=86
+       covered by header.fixed.top-0 < div.flex.flex-col < div
+       escapable (804px up)
+
+══ play/Roleplay @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=2114  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 1122px
+   • «A warmth… not entirely natural. Show me the »  y=1085 h=48
+       covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch
+       TRAPPED — no scroll left this way
+
+══ play/Roleplay @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=1122  scrollHeight=2114  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 1122px · down 0px
+   • «This place remembers a hearth. A good sign, »  y=17 h=48
+       covered by header.fixed.top-0 < div.flex.flex-col < div
+       escapable (1122px up)
+
+══ prep/Character @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=4163  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 3171px
+   • «Insight: not proficient. Tap to change.»  y=1092 h=44
+       covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch
+       TRAPPED — no scroll left this way
+   • «Insight(WIS)»  y=1092 h=44
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (3171px down)
+
+══ prep/Character @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=3171  scrollHeight=4163  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 3171px · down 0px
+   • «+ New pool»  y=2 h=48
+       covered by header.fixed.top-0 < div.flex.flex-col < div
+       escapable (3171px up)
+
+══ prep/Grimoire @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=881  scrollHeight=1873  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 881px · down 0px
+   • «CommandSpellAction60 feetConc1stSlots:4/4»  y=55 h=86
+       covered by header.fixed.top-0 < div.flex.flex-col < div
+       escapable (881px up)
+   • «Unprepare Command»  y=50 h=44
+       covered by header.fixed.top-0 < div.flex.flex-col < div
+       escapable (881px up)
+
+══ prep/Persona @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=3533  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 2541px
+   • «BUTTON»  y=399 h=48
+       covered by div.flex.gap-2 < div.flex.flex-col < div.glass-card.p-5
+       TRAPPED — no scroll left this way
+   • «BUTTON»  y=673 h=48
+       covered by div.flex.gap-2 < div.flex.flex-col < div.glass-card.p-5
+       TRAPPED — no scroll left this way
+   • «BUTTON»  y=947 h=48
+       covered by div.flex.gap-2 < div.flex.flex-col < div.glass-card.p-5
+       TRAPPED — no scroll left this way
+   • «Remove losing those they've gathered close»  y=1094 h=44
+       covered by span.text-xs.font-medium < button.relative.flex-1 < div.flex.items-stretch
+       TRAPPED — no scroll left this way
+   • «Remove being seen as 'just' a changeling, no»  y=1094 h=44
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (2541px down)
+
+══ prep/Persona @bottom ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=2541  scrollHeight=3533  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 2541px · down 0px
+   • «“A little warmth for the chill in your bones»  y=41 h=65
+       covered by header.fixed.top-0 < div.flex.flex-col < div
+       escapable (2541px up)
+   • «BUTTON»  y=264 h=66
+       covered by div.flex.gap-2 < div.flex.flex-col < div.glass-card.p-5
+       escapable (2541px up)
+
+══ prep/Academy @top ══
+   scroller main.fixed.left-0.right-0
+   scrollTop=0  scrollHeight=2179  clientHeight=992  vh=1112
+   padding-top=0px  padding-bottom=80px
+   room to scroll: up 0px · down 1187px
+   • «Random Catchphrase»  y=1054 h=48
+       covered by button.relative.flex-1 < div.flex.items-stretch < nav.fixed.bottom-0
+       escapable (1187px down)
+

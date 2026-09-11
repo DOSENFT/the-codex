@@ -1,0 +1,40 @@
+{
+  "expanded": {
+    "deckH": "302px",
+    "mainH": 421,
+    "mainTop": 56,
+    "mainBottom": 477,
+    "fab": {
+      "top": 406,
+      "bottom": 462,
+      "left": 318
+    },
+    "fabInsideMain": true,
+    "fabOverhangIntoContent": 71,
+    "rowsFit": 2,
+    "rowsTotal": 5,
+    "coveredText": [
+      "▸"
+    ]
+  },
+  "minimisedVia": "Minimise turn deck",
+  "minimised": {
+    "deckH": "186px",
+    "mainH": 537,
+    "mainTop": 56,
+    "mainBottom": 593,
+    "fab": {
+      "top": 522,
+      "bottom": 578,
+      "left": 318
+    },
+    "fabInsideMain": true,
+    "fabOverhangIntoContent": 71,
+    "rowsFit": 3,
+    "rowsTotal": 5,
+    "coveredText": [
+      "Reaction",
+      "▸"
+    ]
+  }
+}

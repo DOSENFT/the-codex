@@ -1,0 +1,951 @@
+{
+  "chrome": {
+    "viewport": {
+      "w": 390,
+      "h": 844
+    },
+    "deckVar": "302px",
+    "fab": {
+      "top": 406,
+      "bottom": 462,
+      "left": 318,
+      "right": 374,
+      "w": 56,
+      "h": 56
+    },
+    "fabPosition": "fixed",
+    "fabZ": "50",
+    "main": {
+      "top": 56,
+      "bottom": 477,
+      "left": 0,
+      "right": 390,
+      "w": 390,
+      "h": 421
+    },
+    "mainPosition": "fixed",
+    "deck": null
+  },
+  "tabs": [
+    "Combat",
+    "Grimoire",
+    "Roleplay"
+  ],
+  "positions": {
+    "top": {
+      "scrollY": 245,
+      "rows": [
+        {
+          "name": "Sentinel",
+          "text": "you can take an Opportunity Attack against it.",
+          "box": {
+            "top": 161,
+            "bottom": 177,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": true,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                169
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                169
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                169
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                169
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                169
+              ],
+              "hit": "self",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Sentinel",
+          "text": "you can take a Reaction to make one melee attack against the",
+          "box": {
+            "top": 279,
+            "bottom": 312,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": true,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                296
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                296
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                296
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                296
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                296
+              ],
+              "hit": "self",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Interception",
+          "text": "you can take a Reaction to reduce that damage by 1d10 plus y",
+          "box": {
+            "top": 415,
+            "bottom": 464,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": true,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                439
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                439
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                439
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                439
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                439
+              ],
+              "hit": "BUTTON.fixed.z-50.right-4",
+              "fixed": "BUTTON.fixed.z-50.right-4"
+            }
+          ]
+        },
+        {
+          "name": "Opportunity Attack — Longsword",
+          "text": "+7 to hit · 1d8+4 Slashing · 5 ft",
+          "box": {
+            "top": 550,
+            "bottom": 566,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                558
+              ],
+              "hit": "DIV.flex.items-center.gap-x-3",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                558
+              ],
+              "hit": "DIV.flex.items-center.gap-1.5",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                558
+              ],
+              "hit": "BUTTON.pip-tap",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                558
+              ],
+              "hit": "BUTTON.pip-tap",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                558
+              ],
+              "hit": "BUTTON.pip-tap",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            }
+          ]
+        },
+        {
+          "name": "Flaming Cloak",
+          "text": "⚑ Canon lists 4 errata on this feature",
+          "box": {
+            "top": 673,
+            "bottom": 688,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                680
+              ],
+              "hit": "SPAN.text-xs.font-semibold.tracking-wide",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                680
+              ],
+              "hit": "SPAN.text-xs.font-semibold.tracking-wide",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                680
+              ],
+              "hit": "BUTTON.min-h-[48px].px-3.rounded-xl",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                680
+              ],
+              "hit": "BUTTON.min-h-[48px].px-3.rounded-xl",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                680
+              ],
+              "hit": "DIV.flex.items-center.gap-2",
+              "fixed": "SECTION.fixed.inset-x-0.z-30"
+            }
+          ]
+        }
+      ]
+    },
+    "bottom": {
+      "scrollY": 498,
+      "rows": [
+        {
+          "name": "Sentinel",
+          "text": "you can take an Opportunity Attack against it.",
+          "box": {
+            "top": -92,
+            "bottom": -76,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                -84
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                -84
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                -84
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                -84
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                -84
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Sentinel",
+          "text": "you can take a Reaction to make one melee attack against the",
+          "box": {
+            "top": 26,
+            "bottom": 59,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                43
+              ],
+              "hit": "BUTTON.px-2.min-h-[44px].text-xs",
+              "fixed": "HEADER.fixed.top-0.inset-x-0"
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                43
+              ],
+              "hit": "BUTTON.px-2.min-h-[44px].text-xs",
+              "fixed": "HEADER.fixed.top-0.inset-x-0"
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                43
+              ],
+              "hit": "DIV.flex.items-center.gap-2",
+              "fixed": "HEADER.fixed.top-0.inset-x-0"
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                43
+              ],
+              "hit": "BUTTON.min-h-[44px].min-w-[44px].flex",
+              "fixed": "HEADER.fixed.top-0.inset-x-0"
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                43
+              ],
+              "hit": "BUTTON.min-h-[44px].min-w-[44px].flex",
+              "fixed": "HEADER.fixed.top-0.inset-x-0"
+            }
+          ]
+        },
+        {
+          "name": "Interception",
+          "text": "you can take a Reaction to reduce that damage by 1d10 plus y",
+          "box": {
+            "top": 162,
+            "bottom": 211,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": true,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                186
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                186
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                186
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                186
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                186
+              ],
+              "hit": "self",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Opportunity Attack — Longsword",
+          "text": "+7 to hit · 1d8+4 Slashing · 5 ft",
+          "box": {
+            "top": 297,
+            "bottom": 313,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": true,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                305
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                305
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                305
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                305
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                305
+              ],
+              "hit": "self",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Flaming Cloak",
+          "text": "⚑ Canon lists 4 errata on this feature",
+          "box": {
+            "top": 420,
+            "bottom": 435,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": true,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                427
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                427
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                427
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                427
+              ],
+              "hit": "self",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                427
+              ],
+              "hit": "BUTTON.fixed.z-50.right-4",
+              "fixed": "BUTTON.fixed.z-50.right-4"
+            }
+          ]
+        }
+      ]
+    },
+    "end": {
+      "scrollY": 2368,
+      "rows": [
+        {
+          "name": "Sentinel",
+          "text": "you can take an Opportunity Attack against it.",
+          "box": {
+            "top": -1962,
+            "bottom": -1946,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                -1954
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                -1954
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                -1954
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                -1954
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                -1954
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Sentinel",
+          "text": "you can take a Reaction to make one melee attack against the",
+          "box": {
+            "top": -1844,
+            "bottom": -1811,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                -1827
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                -1827
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                -1827
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                -1827
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                -1827
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Interception",
+          "text": "you can take a Reaction to reduce that damage by 1d10 plus y",
+          "box": {
+            "top": -1708,
+            "bottom": -1659,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                -1684
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                -1684
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                -1684
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                -1684
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                -1684
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Opportunity Attack — Longsword",
+          "text": "+7 to hit · 1d8+4 Slashing · 5 ft",
+          "box": {
+            "top": -1573,
+            "bottom": -1557,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                -1565
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                -1565
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                -1565
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                -1565
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                -1565
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            }
+          ]
+        },
+        {
+          "name": "Flaming Cloak",
+          "text": "⚑ Canon lists 4 errata on this feature",
+          "box": {
+            "top": -1450,
+            "bottom": -1435,
+            "left": 43,
+            "right": 348
+          },
+          "inClip": false,
+          "hits": [
+            {
+              "f": 0.1,
+              "at": [
+                74,
+                -1443
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.25,
+              "at": [
+                119,
+                -1443
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.5,
+              "at": [
+                196,
+                -1443
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.75,
+              "at": [
+                272,
+                -1443
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            },
+            {
+              "f": 0.9,
+              "at": [
+                318,
+                -1443
+              ],
+              "hit": "OFFSCREEN",
+              "fixed": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "fabSweep": {
+    "play (band at top)": {
+      "fab": {
+        "top": 406,
+        "left": 318,
+        "right": 374,
+        "bottom": 462
+      },
+      "covered": [
+        {
+          "text": "you can take a Reaction to reduce that damage by 1",
+          "tag": "P",
+          "cls": "mt-0.5.text-xs",
+          "rect": {
+            "t": 415,
+            "l": 43
+          }
+        }
+      ]
+    },
+    "play (scrolled to end)": {
+      "fab": {
+        "top": 406,
+        "left": 318,
+        "right": 374,
+        "bottom": 462
+      },
+      "covered": []
+    }
+  }
+}
