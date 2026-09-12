@@ -1,0 +1,331 @@
+  tapped: Create New Character
+  shot: setup-create-step1-name-390.png
+
+>>> STEP 1: Step 1 of 11 | 9% | Name |  | What do they call you? |  | Character Name | Next
+   input: "Thalindra, Grog, etc." null
+--- step1 (1) ---
+  btn: "Next"
+  shot: setup-create-s1-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Probe Wizard
+·
+Barbarian
+   clicking: Next
+
+>>> STEP 2: Step 2 of 11 | 18% | Class |  | Choose your calling |  | Class | Barbarian
+   select -> Barbarian | Bard | Cleric | Druid | Fighter | Monk | Paladin | Ranger | Rogue | Sorcerer | Warlock | Wizard 
+--- step2 (2) ---
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s2-390.png
+Step 2 of 11
+18%
+Class
+Choose your calling
+Class
+Barbarian
+Bard
+Cleric
+Druid
+Fighter
+Monk
+Paladin
+Ranger
+Rogue
+Sorcerer
+Warlock
+Wizard
+Back
+Next
+Probe Wizard
+·
+Barbarian
+   -> selected Wizard
+   clicking: Next
+
+>>> STEP 3: Step 3 of 11 | 27% | Subclass |  | Specialize your path |  | Subclass | Abjurer
+   select -> Abjurer | Diviner | Evoker | Illusionist | Custom (Homebrew) 
+--- step3 (2) ---
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s3-390.png
+Step 3 of 11
+27%
+Subclass
+Specialize your path
+Subclass
+Abjurer
+Diviner
+Evoker
+Illusionist
+Custom (Homebrew)
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+   clicking: Next
+
+>>> STEP 4: Step 4 of 11 | 36% | Race |  | Choose your lineage |  | Race | Aasimar
+   select -> Aasimar | Changeling | Dragonborn | Dwarf | Elf | Gnome | Goliath | Halfling | Human | Orc | Tiefling 
+--- step4 (2) ---
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s4-390.png
+Step 4 of 11
+36%
+Race
+Choose your lineage
+Race
+Aasimar
+Changeling
+Dragonborn
+Dwarf
+Elf
+Gnome
+Goliath
+Halfling
+Human
+Orc
+Tiefling
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+   clicking: Next
+
+>>> STEP 5: Step 5 of 11 | 45% | Identity |  | Gender & pronouns |  | Gender | Male
+   input: "Or type your own..." null
+   input: "Or type your own..." null
+--- step5 (8) ---
+  btn: "Male"
+  btn: "Female"
+  btn: "Non-binary"
+  btn: "he/him"
+  btn: "she/her"
+  btn: "they/them"
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s5-390.png
+Step 5 of 11
+45%
+Identity
+Gender & pronouns
+Gender
+Male
+Female
+Non-binary
+Pronouns
+he/him
+she/her
+they/them
+Optional. Helps the AI use correct pronouns when referring to your character.
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+   clicking: Next
+
+>>> STEP 6: Step 6 of 11 | 55% | Level |  | How seasoned are you? |  | Level | -
+   input: "Level slider" range
+--- step6 (4) ---
+  btn: "-"
+  btn: "+"
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s6-390.png
+Step 6 of 11
+55%
+Level
+How seasoned are you?
+Level
+-
+5
++
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+·
+Lvl 5
+   clicking: Next
+
+>>> STEP 7: Step 7 of 11 | 64% | Spell Save DC |  | Your spell difficulty |  | Spell Save DC | Back
+   input: "e.g. 13" number
+--- step7 (2) ---
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s7-390.png
+Step 7 of 11
+64%
+Spell Save DC
+Your spell difficulty
+Spell Save DC
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+·
+Lvl 5
+   clicking: Next
+
+>>> STEP 8: Step 8 of 11 | 73% | Spell Attack |  | Your spell attack bonus |  | Spell Attack Bonus | Back
+   input: "e.g. +5" number
+--- step8 (2) ---
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s8-390.png
+Step 8 of 11
+73%
+Spell Attack
+Your spell attack bonus
+Spell Attack Bonus
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+·
+Lvl 5
+   clicking: Next
+
+>>> STEP 9: Step 9 of 11 | 82% | Armor Class |  | Your defensive ward |  | Armor Class | Back
+   input: "e.g. 16" number
+--- step9 (2) ---
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s9-390.png
+Step 9 of 11
+82%
+Armor Class
+Your defensive ward
+Armor Class
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+·
+Lvl 5
+   clicking: Next
+
+>>> STEP 10: Step 10 of 11 | 91% | Hit Points |  | Your vitality |  | Max Hit Points | Back
+   input: "e.g. 45" number
+--- step10 (2) ---
+  btn: "Back"
+  btn: "Next"
+  shot: setup-create-s10-390.png
+Step 10 of 11
+91%
+Hit Points
+Your vitality
+Max Hit Points
+Back
+Next
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+·
+Lvl 5
+   clicking: Next
+
+>>> STEP 11: Step 11 of 11 | 100% | AI Connection |  | Power your companion |  | Provider | Gemini (Free)
+   input: "http://localhost:11434" null
+--- step11 (6) ---
+  btn: "Gemini (Free)"
+  btn: "Ollama (Local)"
+  btn: "gemma3-27b-abliterated 27.0B"
+  btn: "Test Connection"
+  btn: "Back"
+  btn: "Forge Character"
+  shot: setup-create-s11-390.png
+Step 11 of 11
+100%
+AI Connection
+Power your companion
+Provider
+Gemini (Free)
+Ollama (Local)
+Ollama URL
+Model
+gemma3-27b-abliterated
+27.0B
+Test Connection
+Back
+Forge Character
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+·
+Lvl 5
+   NO NEXT BUTTON — stopping
+  shot: setup-create-final-390.png
+
+=== FINAL ===
+Step 11 of 11
+100%
+AI Connection
+Power your companion
+Provider
+Gemini (Free)
+Ollama (Local)
+Ollama URL
+Model
+gemma3-27b-abliterated
+27.0B
+Test Connection
+Back
+Forge Character
+Probe Wizard
+·
+Wizard
+·
+Abjurer
+·
+Aasimar
+·
+Lvl 5
+saved: NO CHARACTER SAVED

@@ -1,0 +1,26 @@
+  tapped Training
+  tapped Generate Scene
+[Generate Scene] ANSWER in 12086ms :: "THE SCENE | The air in Old Man Hemlock’s smokehouse hangs thick and sweet with the scent of brine, alderwood, and something vaguely…off. Sunlight streams through gaps in the weathered planks, illuminating motes of dust dancing above rows of hanging sausages and fish. Hemlock, a wiry man with a beard perpetually stained crimson from berry juice, grumbles at his daughter, Elara, a woman barely older than Nix but already bearing the weariness of a lifetime spent salting meat. Elara is arguing with a newcomer – a half-orc merchant named Grug, whose booming voice echoes off the wooden walls as he insists the smoked boar Hemlock is offering is “too lean, barely worth a copper!” Grug gestures with "
+
+  shot: prep-academy-scene-coach-390.png
+  tapped Quizzes
+  tapped Generate Question
+[Generate Question] ANSWER in 12076ms :: "Generate New Question | Apprentice | spells | multiple choice | Nix casts *Bless* on himself and two allies. What is the duration of the spell, and what benefit do the recipients gain? | A | 1 round; recipients gain advantage on attack rolls. | B | 1 minute; recipients gain a +1d4 to attack rolls and saving throws. | C | Concentration, up to 1 hour; recipients gain advantage on attack rolls. | D | 10 minutes; recipients gain +2 to attack rolls and saving throws."
+
+  shot: prep-academy-quiz-question-390.png
+  tapped Training
+  tapped Start Drill
+[Start Drill] ANSWER in 9061ms :: "THE SCENE | You and the party arrive at a small, smoke-choked village ravaged by gnoll raiders. An elderly woman, clutching a half-burnt wooden doll, insists the gnolls didn't kill her son – they *dragged* him away, still alive, towards the Whispering Cairns, a sacred (and often feared) burial ground. She pleads with you to rescue him, but the villagers believe he was tainted by a gnoll shaman and is best left to rest with his ancestors. | What does your character SAY? | What does your character DO? | Grade Me"
+
+  shot: prep-academy-improv-drill-390.png
+  tapped Training
+  tapped Start One-Shot Adventure
+[Start One-Shot Adventure] TIMEOUT in 220270ms :: ""
+
+  shot: prep-academy-oneshot-390.png
+
+===== Condition Drill =====
+  tapped Quizzes
+  tapped Start Drill
+Generating condition scenario...
+  shot: prep-academy-condition-drill-390.png

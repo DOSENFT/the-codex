@@ -1,0 +1,223 @@
+
+
+===== AI-2 Persona: AI Suggest Traits =====
+  tapped: AI Suggest Traits
+[AI Suggest Traits] ANSWER 10588ms :: "22 | Last edited: 9/11/2026 | occasionally lapses into Vä dialect when stressed | carries a quiet, simmering grief | to atone for Selis's death | losing those he loves | fire consuming everything"
+  shot: prep-persona-ai-traits-390.png
+
+
+===== AI-3 Persona: AI Suggest (combat) dialogue =====
+  tapped: AI Suggest \(combat\)
+[AI Suggest combat] ANSWER 6035ms :: "16 lines | “Just… stay back. Let me handle this.” | “Another one falls to the warmth. Selis would have liked that.” | “Don't mistake kindness for weakness. I *will* burn them.” | 16"
+  shot: prep-persona-ai-dialogue-390.png
+
+
+===== PREP / Academy =====
+  shot: prep-academy-top-390.png
+PLAY
+PREP
+3/67
+Nix
+Level
+1
+0 XP
+100 XP
+0
+Best: 0
+0 sessions
+Complete quizzes and drills to earn XP and track progress
+Training
+Quizzes
+Accent
+ROLEPLAY COACH
+Study
+In-Session
+Persona Quick Reference
+PHYSICAL TICS
+SCENE INSTINCTS
+SCENE COACH
+Generate an immersive scene, then respond in character. The AI will coach your performance.
+Generate Scene
+Improv Drills
+Conversation
+Start One-Shot Adventure
+IMPROV DRILLS
+Apprentice
+Journeyman
+Master
+Start Drill
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does multiattack work?
+Extra Attack lets you attack multiple times when you take the Attack action. Each is a separate roll.
+Attack
+How does opportunity attack work?
+When an enemy leaves your reach without Disengaging, you can use your reaction to make one melee attack.
+Attack
+How do saving throws work?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the DC to resist the effect.
+Saving Throw
+What is an ability check?
+Roll d20 + ability modifier + proficiency bonus (if proficient in the relevant skill). Meet or beat the DC.
+Ability Check
+How does advantage/disadvantage work?
+Roll 2d20. With advantage, take the higher. With disadvantage, take the lower. They cancel each other out.
+Ability Check
+What is proficiency bonus?
+A bonus that scales with your total character level: +2 at levels 1-4, increasing to +6 at levels 17-20.
+Ability Check
+What happens at 0 HP?
+You fall unconscious and start making death saving throws at th
+--- academy (78) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "Training"
+  btn: "Quizzes"
+  btn: "Accent"
+  btn: "Study"
+  btn: "In-Session"
+  btn: "Persona Quick Reference"
+  btn: "Generate Scene"
+  btn: "Improv Drills"
+  btn: "Conversation"
+  btn: "Start One-Shot Adventure"
+  btn: "Apprentice"
+  btn: "Journeyman"
+  btn: "Master"
+  btn: "Start Drill"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Character"
+  btn: "Grimoire"
+  btn: "Persona"
+  btn: "Academy"
+  tapped: ^Training
+
+-- ^Training --
+   
+  shot: prep-academy-training-390.png
+  tapped: ^Quizzes
+
+-- ^Quizzes --
+   QUIZ ARENA | 0/0 | Spell Knowledge | Combat Tactics | Rules Mastery | Class Features | Dice Rolls | Generate Question | Select a quiz mode and generate a question to test your D&D 2024 knowledge for Nix. | CONDITION DRILL | Test your knowledge of D&D conditions using Nix’s actual spells and abilities. How many can you get in a row? | Add persona traits (physical tics, scene instincts, quiet texture) to Nix to generate flashcards for spaced repetition practice.
+  shot: prep-academy-quizzes-390.png
+  tapped: ^Accent
+
+-- ^Accent --
+   Library | Rapid | Forge | Train | Accent Library | Browse and select an accent to practice | Fantasy | Real-World | Beginner | Advanced | Dwarven (Scottish-Inspired) | Fantasy | Gruff, rolling Rs, clipped consonants. Think Gimli meets a Highland warrior. | Easy | gruff | rolling-r | clipped | hearty | ANCHOR | Short "o" as in "stone" — round and solid, monophthong /oː/ instead of diphthong | Elvish (Welsh/Ethereal) | Fantasy | Melodic, flowing vowels, soft consonants. Timeless and slightly distant. | Moderate | melodic | flowing | ethereal | formal | ANCHOR | Long "ah" as in "star" — open and resonant, held longer than natural | Orcish (Guttural) | Fantasy | Deep, guttural, emphasis on hard consonants. Raw power in every word. | Easy | guttural | aggressive | primal | direct | ANCHOR | Short "uh" as in "blood" — guttural and primal, pulled deep into the throat | Noble Court (RP English) 
+  shot: prep-academy-accent-390.png
+  NOT FOUND/offscreen: ^Study
+  NOT FOUND/offscreen: ^In-Session
+  NOT FOUND/offscreen: ^Apprentice
+  NOT FOUND/offscreen: ^Journeyman
+  NOT FOUND/offscreen: ^Master
+  NOT FOUND/offscreen: ^Conversation
+
+
+===== AI-4 Academy generators =====
+  NOT FOUND/offscreen: Generate Scene
+MISSING: Generate Scene
+  NOT FOUND/offscreen: Generate Question
+MISSING: Generate Question
+  NOT FOUND/offscreen: Start Drill
+MISSING: Start Drill
+  NOT FOUND/offscreen: Start One-Shot Adventure
+MISSING: Start One-Shot Adventure
+  NOT FOUND/offscreen: Generate Scenario
+MISSING: Generate Scenario

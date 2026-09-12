@@ -1,0 +1,28 @@
+import { chromium, shot } from './_pw.mjs';
+import { boot, goTab } from './_boot.mjs';
+const browser = await chromium.launch();
+const { ctx, page } = await boot(browser);
+const body = () => page.evaluate(()=>document.body.innerText);
+const diff=(a,b,n=800)=>{const p=a.split('\n');return b.split('\n').filter(l=>l.trim()&&!p.includes(l)).join(' | ').slice(0,n);};
+const store = () => page.evaluate(()=>{const id=localStorage.getItem('codex-active-id');const c=JSON.parse(localStorage.getItem('codex-character-'+id)||'{}');return JSON.stringify(c.sceneResponses||c.persona?.sceneResponses||'NONE').slice(0,300);});
+await goTab(page,'prep','Persona'); await page.waitForTimeout(1500);
+const cat = page.getByRole('button',{name:/Betrayal/i}).first();
+console.log('Betrayal toggle:', await cat.count());
+await cat.scrollIntoViewIfNeeded(); await cat.click(); await page.waitForTimeout(900);
+const adds = page.getByRole('button',{name:/^Add a .* response$/i});
+console.log('add buttons now:', await adds.count(), await adds.first().getAttribute('aria-label').catch(()=>''));
+const pre = await body();
+console.log('store before:', await store());
+const inp = page.locator('input:visible, textarea:visible').filter({hasNot:page.locator('[placeholder*="1d20"]')});
+const vis = await page.evaluate(()=>[...document.querySelectorAll('input,textarea')].filter(i=>{const r=i.getBoundingClientRect();return r.width&&r.height&&r.top<innerHeight*2&&r.bottom>-500;}).map(i=>i.placeholder||i.ariaLabel||i.type).join(' ~ '));
+console.log('visible inputs:', vis);
+const ta = page.getByPlaceholder(/what does .* say|response|betrayal/i).first();
+if (await ta.count()) { await ta.scrollIntoViewIfNeeded(); await ta.fill('I plant my feet between them and the door.'); await page.waitForTimeout(400); console.log('filled:', await ta.getAttribute('placeholder')); }
+else console.log('no obvious response input');
+await adds.first().scrollIntoViewIfNeeded();
+await adds.first().click({timeout:8000}).catch(e=>console.log('fail',String(e).slice(0,50)));
+await page.waitForTimeout(1200);
+await shot(page,'prep-persona-scene-response-added-390');
+console.log('after:', diff(pre, await body()));
+console.log('store after:', await store());
+await ctx.close(); await browser.close();

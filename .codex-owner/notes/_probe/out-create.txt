@@ -1,0 +1,123 @@
+
+
+===== Create New Character — step 0 =====
+  tapped: Create New Character
+  shot: setup-create-step0-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+--- step0 (1) ---
+  btn: "Next"
+--- selects/inputs ---
+  input: "Thalindra, Grog, etc." type=null
+
+>>> step 0: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step1-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+
+>>> step 1: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step2-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+
+>>> step 2: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step3-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+
+>>> step 3: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step4-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+
+>>> step 4: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step5-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+
+>>> step 5: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step6-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+
+>>> step 6: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step7-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+
+>>> step 7: clicking "Next"
+  click err TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting
+  shot: setup-create-step8-390.png
+Step 1 of 11
+9%
+Name
+What do they call you?
+Character Name
+Next
+Barbarian
+  shot: setup-create-final-390.png
+
+localStorage: codex-sw-off

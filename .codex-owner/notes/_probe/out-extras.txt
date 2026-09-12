@@ -1,0 +1,303 @@
+
+
+===== errata band =====
+  tapped: Your sheet and the 2024 rules disagree
+  shot: play-errata-band-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+Oath of the Hearth
+Round 1
+Roll
+Look up
+Reset
+Start Combat
+3 / 67
+AC 18
+Bloodied
+Damage
+Heal
+Temp HP
+ACTIVE CONDITIONS
+None
+Aura of Protection
+You radiate an aura that makes you and friendly creatures within 10 feet of y...
+Aura of Solace
+You and allies within your Aura of Protection have resistance to Fire, Cold, ...
+1st
+2nd
+3rd
+Your sheet and the 2024 rules disagree on 1 thing
+Spell slots
+YOUR SHEET
+1st ×4 · 2nd ×3 · 3rd ×2
+2024 RULES
+1st ×4 · 2nd ×3
+A level 7 Paladin is a half-caster. Feats, items or your DM can legitimately change this — the app has no way to know.
+Nothing has been changed. The app does not know which of these is right for your table — that is yours and your DM's call.
+Use the 2024 slots
+1ST ×4 · 2ND ×3 · 3RD ×2 → 1ST ×4 · 2ND ×3
+YOUR TURN
+14 ready
+ACTION
+7 ready
+0 of 2 used
+OPEN
+−
+The Dawn Guardian
+Action
++7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · Graze
+Hearthfire Manifest
+Action
+See description · At will
+Bless
+competes
+Action · 1st-level slot
+30 ft · Conc 1 min · a Holy Symbol worth 5+ GP
+Burning Hands
+competes
+Action · 1st-level slot
+3d6 Fire · DC 14 DEX · 15-ft Cone
+Faerie Fire
+competes
+Action · 1st-level slot
+DC 14 DEX · 60 ft · Conc 1 min · negates
+Scorching Ray
+competes
+Action · 2nd-level slot
++6 · 2d6 Fire · 120 ft
+Warding Bond
+competes
+Action · 2nd-level slot
+Touch · 1 hr
+5 of these compete — you get one
+They want the same slot — and only one levelled spell slot leaves your hands pe
+
+
+===== DAMAGE LOG =====
+  tapped: ^DAMAGE LOG
+  shot: play-extras-damage-log-390.png
+14 
+SAVE DC 
+18 
+AC 
++1 
+INIT 
++3 
+PROF 
++6 
+SP ATK 
+CONCENTRATION 
+CONCENTRATION 
+Bless 
+Faerie Fire 
+Shield of Faith 
+Warding Bond 
+DAMAGE LOG 
+DAMAGE TRACKER 
+COMBAT ADVISOR 
+BASIC ACTIONS — THE RULES 
+RULES FLAGS 
+6 · 6 unanswered 
+REST MANAGEMENT 
+CHARACTER PERSONA
+  tapped: ^DAMAGE LOG
+
+
+===== COMBAT ADVISOR =====
+  tapped: ^COMBAT ADVISOR
+  shot: play-extras-combat-advisor-390.png
+14 
+SAVE DC 
+18 
+AC 
++1 
+INIT 
++3 
+PROF 
++6 
+SP ATK 
+CONCENTRATION 
+CONCENTRATION 
+Bless 
+Faerie Fire 
+Shield of Faith 
+Warding Bond 
+DAMAGE LOG 
+COMBAT ADVISOR 
+COMBAT ADVISOR 
+BASIC ACTIONS — THE RULES 
+RULES FLAGS 
+6 · 6 unanswered 
+REST MANAGEMENT 
+CHARACTER PERSONA
+  tapped: ^COMBAT ADVISOR
+
+
+===== BASIC ACTIONS =====
+  tapped: ^BASIC ACTIONS
+  shot: play-extras-basic-actions-390.png
+BASIC ACTIONS — THE RULES 
+The rules-of-the-game actions anyone can take — they are on no character sheet, so they are not in your turn list. Tap one to ask the advisor about it. 
+Attack 
+Action 
+Make one melee or ranged attack (or more with Extra Attack). 
+Cast a Spell 
+Action 
+Cast a spell with a casting time of 1 Action. 
+Dash 
+Action 
+Double your movement speed for this turn. 
+Disengage 
+Action 
+Your movement doesn't provoke Opportunity Attacks for the rest of the turn. 
+Dodge 
+Action 
+Attack rolls against you have Disadvantage, and you have Advantage on DEX saves until your next turn. 
+Help 
+Action 
+Give an ally Advantage on their next ability check or attack roll against a target within 5ft of you. 
+Hide 
+Action 
+Make a Stealth check to become Hidden. 
+Influence 
+Action 
+Make a Charisma check to influence a creature's attitude. 
+Magic 
+Action 
+Use a magic item or interact with a magical effect. 
+Ready 
+Action 
+Prepare an action to trigger on a specific condition (uses your Reaction). 
+Search 
+Action 
+Make a Perception or Investigation check to find something. 
+Study 
+Action 
+Make a check to recall or discern information. 
+Utilize 
+Action 
+Use a non-magical object or interact with the environment. 
+Opportunity Attack 
+Reaction 
+When an enemy leaves your reach, make one melee attack as a Reaction.
+  tapped: ^BASIC ACTIONS
+
+
+===== RULES FLAGS =====
+  tapped: ^RULES FLAGS
+  shot: play-extras-rules-flags-390.png
+RULES FLAGS 
+6 · 6 unanswered 
+Canon flags places where this subclass does not work as written. Nothing here is changed or enforced — record how your table ruled it. 
+HEARTHFIRE MANIFEST 
+HIGH 
+HEARTH-03 
+level 3 · your sheet 
+The cloak is activated 'As a Reaction' but no trigger is defined. 2024 requires every Reaction to state its trigger: 'A Reaction is a special action taken in response to a trigger defined in the Reaction's description.' Without a trigger the feature cannot be legally used. 
+▸ WHAT CANON SAYS TO DO ABOUT IT 
+HOW YOUR TABLE RULED IT 
+NOT ASKED YET 
+CANON'S FIX 
+MY DM RULED 
+HEARTHFIRE MANIFEST 
+HIGH 
+HEARTH-04 
+level 3 · your sheet 
+The cloak lasts 'until the Temporary Hit Points are depleted'. In 2024 Temporary Hit Points DO NOT STACK - when you gain new Temporary Hit Points you choose to keep the old pool or take the new one. Taking any other source of Temporary Hit Points (Heroism, Inspiring Leader, Orc Adrenaline Rush, a Chef treat, Aid does not apply) REPLACES the cloak's pool, which by the feature's own wording ends the cloak. 
+▸ WHAT CANON SAYS TO DO ABOUT IT 
+HOW YOUR TABLE RULED IT 
+NOT ASKED YET 
+CANON'S FIX 
+MY DM RULED 
+HEARTHFIRE MANIFEST 
+MEDIUM 
+HEARTH-05 
+level 3 · your sheet 
+The retaliation clause has no limit on frequency. 'When you are hit by a melee attack, the creature takes 1d10 Fire damage' triggers on every melee hit, with no once-per-turn or once-per-round cap and no Reaction cost. 
+▸ WHAT CANON SAYS TO DO ABOUT IT 
+HOW YOUR TABLE RULED IT 
+NOT ASKED YET 
+CANON'S FIX 
+MY DM RULED 
+HEARTHFIRE MANIFEST 
+MEDIUM 
+HEARTH-06 
+level 3 · your sheet 
+Unclear whether the manifestation must be summoned before the cloak can be used, and whether summoning it costs a separate Bonus Action from the Reaction that activates the cloak. Also undefined: how the manifestation moves, whether it occupies a space, whether it can be attacked or targeted, and whether it provides light while worn as a cloak. 
+▸ WHAT CANON SAYS TO DO ABOUT IT 
+HOW YOUR TABLE RULED IT 
+NOT ASKED YET 
+CANON'S FIX 
+MY DM RULED 
+AURA OF SOLACE 
+MEDIUM 
+HEARTH-07 
+level 7 · your sheet 
+The text says 'You and your allies have Resistance to Fire, Cold, and Psychic da
+  tapped: ^RULES FLAGS
+
+
+===== REST MANAGEMENT =====
+  tapped: ^REST MANAGEMENT
+  shot: play-extras-rest-management-390.png
+14 
+SAVE DC 
+18 
+AC 
++1 
+INIT 
++3 
+PROF 
++6 
+SP ATK 
+CONCENTRATION 
+CONCENTRATION 
+Bless 
+Faerie Fire 
+Shield of Faith 
+Warding Bond 
+DAMAGE LOG 
+COMBAT ADVISOR 
+BASIC ACTIONS — THE RULES 
+RULES FLAGS 
+6 · 6 unanswered 
+REST MANAGEMENT 
+Short Rest 
+Long Rest 
+CHARACTER PERSONA
+  tapped: ^REST MANAGEMENT
+
+
+===== CHARACTER PERSONA =====
+  tapped: ^CHARACTER PERSONA
+  shot: play-extras-character-persona-390.png
+14 
+SAVE DC 
+18 
+AC 
++1 
+INIT 
++3 
+PROF 
++6 
+SP ATK 
+CONCENTRATION 
+CONCENTRATION 
+Bless 
+Faerie Fire 
+Shield of Faith 
+Warding Bond 
+DAMAGE LOG 
+COMBAT ADVISOR 
+BASIC ACTIONS — THE RULES 
+RULES FLAGS 
+6 · 6 unanswered 
+REST MANAGEMENT 
+CHARACTER PERSONA 
+DEFAULT STATE 
+PATRON 
+—
+  tapped: ^CHARACTER PERSONA

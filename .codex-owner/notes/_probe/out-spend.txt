@@ -1,0 +1,231 @@
+
+===== baseline =====
+{"hp":{"max":67,"current":3},"tempHP":0,"slots":{"1":{"max":4,"current":4},"2":{"max":3,"current":2},"3":{"max":2,"current":2}},"conds":[],"combatKeys":[]} [
+  'ACTION 7 ready 0 of 2 used OPEN −',
+  'BONUS 3 ready OPEN −',
+  'REACTION 4 ready OPEN −',
+  'MOVEMENT 0 ready OPEN −'
+]
+  tapped: ^Start Combat$
+
+===== A. Attack: open Dawn Guardian card, tap Spend =====
+  tapped: The Dawn Guardian
+  shot: play-option-card-390.png
+--- card buttons (110) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 2nd level spell slot"
+  btn: "Expend 2nd level spell slot"
+  btn: "Restore 2nd level spell slot"
+  btn: "Expend 3rd level spell slot"
+  btn: "Expend 3rd level spell slot"
+  btn: "Your sheet and the 2024 rules disagree on 1 thing"
+  btn: "ACTION 7 ready 0 of 2 used OPEN −"
+  btn: "The Dawn Guardian Action +7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · M"
+  btn: "1d20+7 TO HIT"
+  btn: "1d10+4 ROLL SLASHING"
+  btn: "2d10+4 ON A CRIT"
+  btn: "Spend ACTION"
+  btn: "Edit strategic tip"
+  btn: "CLOSE"
+  btn: "Hearthfire Manifest Action See description · At will"
+  btn: "Bless competes Action · 1st-level slot 30 ft · Conc 1 min · a Holy Symbol worth "
+  btn: "Burning Hands competes Action · 1st-level slot 3d6 Fire · DC 14 DEX · 15-ft Cone"
+  btn: "Faerie Fire competes Action · 1st-level slot DC 14 DEX · 60 ft · Conc 1 min · ne"
+  btn: "Scorching Ray competes Action · 2nd-level slot +6 · 2d6 Fire · 120 ft"
+  btn: "Warding Bond competes Action · 2nd-level slot Touch · 1 hr"
+  btn: "BONUS 3 ready OPEN −"
+  btn: "Divine Smite Bonus action 2d8 Radiant · +1d8 Fiend/Undead"
+  btn: "Hearthfire Manifest Bonus action It can be summoned or dismissed as a Bonus Acti"
+  btn: "Shield of Faith Bonus action · 1st-level slot 60 ft · Conc 10 min"
+  btn: "REACTION 4 ready OPEN −"
+  btn: "Hearthfire Manifest Reaction When you are hit by a melee attack, the creature ta"
+  btn: "+1D10 RETALIATION"
+  btn: "Sentinel Reaction When a creature within 5 feet of you takes the Disengage actio"
+  btn: "Sentinel Reaction When a creature within 5 feet of you attacks a target other th"
+  btn: "Opportunity Attack — The Dawn Guardian Reaction When a creature you can see leav"
+  btn: "ONE REACTION IS MISSING You chose a Fighting Style at level 2 and this app has n"
+  btn: "MOVEMENT 0 ready OPEN −"
+  btn: "DAMAGE LOG"
+  btn: "COMBAT ADVISOR"
+  btn: "BASIC ACTIONS — THE RULES"
+  btn: "RULES FLAGS 6 · 6 unanswered"
+  btn: "REST MANAGEMENT"
+  btn: "CHARACTER PERSONA"
+  btn: "Action"
+  btn: "Bonus"
+  btn: "Reaction"
+  btn: "Move"
+  btn: "Undo Start of combat"
+  btn: "End turn"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+  tapped: ^Spend 
+bands: [
+  'ACTION 1 ready 1 of 2 used OPEN −',
+  'BONUS 3 ready OPEN −',
+  'REACTION 4 ready OPEN −',
+  'MOVEMENT 0 ready OPEN −'
+]
+{"hp":{"max":67,"current":3},"tempHP":0,"slots":{"1":{"max":4,"current":4},"2":{"max":3,"current":2},"3":{"max":2,"current":2}},"conds":[],"combatKeys":["codex-combat-b4816f64-24a7-4df2-bc9f-9078e07af95d","codex-combat-log-b4816f64-24a7-4df2-bc9f-9078e07af95d"]}
+  shot: play-action-1of2-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+Oath of the Hearth
+Round 1
+Roll
+Look up
+Reset
+End combat
+3 / 67
+AC 18
+Bloodied
+Damage
+Heal
+Temp HP
+ACTIVE CONDITIONS
+None
+Aura of Protection
+You radiate an aura that makes you and friendly creatures within 10 feet of y...
+Aura of Solace
+You and allies within your Aura of Protection have resistance to Fire, Cold, ...
+1st
+2nd
+3rd
+Your sheet and the 2024 rules disagree on 1 thing
+YOUR TURN
+8 ready
+ACTION
+1 ready
+1 of 2 used
+OPEN
+−
+The Dawn Guardian
+Action
++7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · Graze
+1 attack left
+SWING AGAIN
+Hea
+
+===== B. Second attack (Extra Attack, 2 uses) =====
+  tapped: The Dawn Guardian
+  tapped: ^Spend 
+bands: [
+  'ACTION 0 ready 2 of 2 used SPENT −',
+  'BONUS 3 ready OPEN −',
+  'REACTION 4 ready OPEN −',
+  'MOVEMENT 0 ready OPEN −'
+]
+  shot: play-action-2of2-390.png
+
+===== C. Cast Bless — slot spend =====
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 8000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /^Bless/i }).first()[22m
+[2m    - locator resolved to <button disabled type="button" class="act blocked">…</button>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is not enabled[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is not enabled[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    15 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is not enabled[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+    at tap (C:\Users\marcu\Documents\Powerhouse\projects\the-codex\.codex-owner\notes\_probe\_boot.mjs:59:13)
+    at async file:///C:/Users/marcu/Documents/Powerhouse/projects/the-codex/.codex-owner/notes/_probe/p6-spend.mjs:43:1 {
+  log: [
+    "  - waiting for getByRole('button', { name: /^Bless/i }).first()",
+    '    - locator resolved to <button disabled type="button" class="act blocked">…</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not enabled',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not enabled',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    15 × waiting for element to be visible, enabled and stable',
+    '       - element is not enabled',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.13.0

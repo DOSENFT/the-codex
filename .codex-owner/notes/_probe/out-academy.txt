@@ -1,0 +1,364 @@
+  shot: prep-academy-390.png
+PLAY
+PREP
+3/67
+Nix
+Level
+1
+0 XP
+100 XP
+0
+Best: 0
+0 sessions
+Complete quizzes and drills to earn XP and track progress
+Training
+Quizzes
+Accent
+ROLEPLAY COACH
+Study
+In-Session
+Persona Quick Reference
+PHYSICAL TICS
+SCENE INSTINCTS
+SCENE COACH
+Generate an immersive scene, then respond in character. The AI will coach your performance.
+Generate Scene
+Improv Drills
+Conversation
+Start One-Shot Adventure
+IMPROV DRILLS
+Apprentice
+Journeyman
+Master
+Start Drill
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does multiattack work?
+Extra Attack lets you attack multiple times when you take the Attack action. Each is a separate roll.
+Attack
+How does opportunity attack work?
+When an enemy leaves your reach without Disengaging, you can use your reaction to make one melee attack.
+Attack
+How do saving throws work?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the DC to resist the effect.
+Saving Throw
+What is an ability check?
+Roll d20 + ability modifier + proficiency bonus (if proficient in the relevant skill). Meet or beat the DC.
+Ability Check
+How does advantage/disadvantage work?
+Roll 2d20. With advantage, take the higher. With disadvantage, take the lower. They cancel each other out.
+Ability Check
+What is proficiency bonus?
+A bonus that scales with your total character level: +2 at levels 1-4, increasing to +6 at levels 17-20.
+Ability Check
+What happens at 0 HP?
+You fall unconscious and start making death saving throws at the start of each turn.
+Damage
+How do death saves work?
+Roll d20 at the start of your turn: 10+ is a success, 9 or below is a failure. 3 successes = stable, 3 failures = death.
+Damage
+How does healing work?
+Healing restores HP up to your maximum. It cannot exceed max HP. Healing from 0 HP makes you conscious again.
+Damage
+What is temporary HP?
+Extra buffer HP that absorbs damage first. Does not stack (use highest). Cannot be healed. Lasts until depleted or rest.
+Damage
+How do conditions work?
+Conditions impose specific mechanical effects. They last until cured, dispelled, or their duration ends.
+Conditions
+How does grappling work?
+Use an attack to grab: your Athletics vs. their Athletics or Acrobatics. Success sets their speed to 0.
+Conditions
+How does cover work?
+Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DEX saves. Total cover: Cannot be targeted directly.
+Conditions
+What are the action types in combat?
+Each turn: 1 Action + 1 Bonus Action + 1 Reaction + Movement. Free interactions (open door, draw weapon) also available.
+Action Economy
+How do bonus actions work?
+You get one per turn, but only if a feature or spell explicitly grants one. Cannot replace an action.
+Action Economy
+How do reactions work?
+One per round (resets at your turn start). Triggered by a specific event. Common: opportunity attack, Shield, Counterspell.
+Action Economy
+What is the Help action?
+Give one ally advantage on their next ability check or attack roll against a target within 5 ft of you.
+Action Economy
+How does Dodge action work?
+Until your next turn, attacks against you have disadvantage and you have advantage on DEX saves. Ends if incapacitated or speed drops to 0.
+Action Economy
+How does concentration work?
+Only one concentration spell at a time. Take damage = CON save (DC 10 or half damage, whichever is higher) or lose it.
+Spellcasting
+How do spell slots work?
+Spell slots are your fuel for casting. Each non-cantrip spell costs one slot of its level or higher. Slots return 
+--- buttons ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "Training"
+  btn: "Quizzes"
+  btn: "Accent"
+  btn: "Study"
+  btn: "In-Session"
+  btn: "Persona Quick Reference"
+  btn: "Generate Scene"
+  btn: "Improv Drills"
+  btn: "Conversation"
+  btn: "Start One-Shot Adventure"
+  btn: "Apprentice"
+  btn: "Journeyman"
+  btn: "Master"
+  btn: "Start Drill"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "Conditions"
+  btn: "Action Economy"
+  btn: "Spellcasting"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficienc"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatica"
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times"
+  btn: "How does opportunity attack work? When an enemy leaves your reach with"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency b"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bo"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take "
+  btn: "What is proficiency bonus? A bonus that scales with your total charact"
+  btn: "What happens at 0 HP? You fall unconscious and start making death savi"
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a "
+  btn: "How does healing work? Healing restores HP up to your maximum. It cann"
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does "
+  btn: "How do conditions work? Conditions impose specific mechanical effects."
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. the"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Act"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature"
+  btn: "How do reactions work? One per round (resets at your turn start). Trig"
+  btn: "What is the Help action? Give one ally advantage on their next ability"
+  btn: "How does Dodge action work? Until your next turn, attacks against you "
+  btn: "How does concentration work? Only one concentration spell at a time. T"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each n"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to c"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability mo"
+  btn: "How do prepared spells work? After a long rest, choose spells from you"
+  btn: "Character"
+  btn: "Grimoire"
+  btn: "Persona"
+  btn: "Academy"
+
+>>> clicking Quiz
+  shot: prep-academy-quiz-390.png
+PLAY
+PREP
+3/67
+Nix
+Level
+1
+0 XP
+100 XP
+0
+Best: 0
+0 sessions
+Complete quizzes and drills to earn XP and track progress
+Training
+Quizzes
+Accent
+QUIZ ARENA
+0/0
+Spell Knowledge
+Combat Tactics
+Rules Mastery
+Class Features
+Dice Rolls
+Generate Question
+Select a quiz mode and generate a question to test your D&D 2024 knowledge for Nix.
+CONDITION DRILL
+Test your knowledge of D&D conditions using Nix’s actual spells and abilities. How many can you get in a row?
+Start Drill
+Add persona traits (physical tics, scene instincts, quiet texture) to Nix to generate flashcards for spaced repetition practice.
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does multiattack work?
+Extra Attack lets you attack multiple times when you take the Attack action. Each is a separate roll.
+Attack
+How does opportunity attack work?
+When an enemy leaves your reach without Disengaging, you can use your reaction to make one melee attack.
+Attack
+How do saving throws work?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the DC to resist the effect.
+Saving T
+
+>>> no button: Flashcards
+
+>>> clicking Conditions
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /^Conditions/i }).first()[22m
+[2m    - locator resolved to <button type="button" aria-pressed="false" class="shrink-0 min-h-[48px] px-3.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.95] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1">Conditions</button>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - element is outside of the viewport[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - element is outside of the viewport[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    58 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - element is outside of the viewport[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+    at C:\Users\marcu\Documents\Powerhouse\projects\the-codex\.codex-owner\notes\_probe\p4-academy.mjs:16:13 {
+  log: [
+    "  - waiting for getByRole('button', { name: /^Conditions/i }).first()",
+    '    - locator resolved to <button type="button" aria-pressed="false" class="shrink-0 min-h-[48px] px-3.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 ease-forge active:scale-[0.95] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold bg-void-2/60 text-forge-2 border border-bronze/15 hover:bg-void-2/60 hover:text-forge-1">Conditions</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - element is outside of the viewport',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - element is outside of the viewport',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    58 × waiting for element to be visible, enabled and stable',
+    '       - element is visible, enabled and stable',
+    '       - scrolling into view if needed',
+    '       - done scrolling',
+    '       - element is outside of the viewport',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.13.0

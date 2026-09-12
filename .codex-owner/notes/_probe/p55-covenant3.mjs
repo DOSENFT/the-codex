@@ -1,0 +1,28 @@
+import { chromium, shot } from './_pw.mjs';
+import { boot } from './_boot.mjs';
+const browser = await chromium.launch();
+const { ctx, page } = await boot(browser);
+const body = () => page.evaluate(()=>document.body.innerText);
+const diff=(a,b,n=700)=>{const p=a.split('\n');return b.split('\n').filter(l=>l.trim()&&!p.includes(l)).join(' | ').slice(0,n);};
+const ks = () => page.evaluate(()=>JSON.stringify(Object.keys(localStorage).filter(k=>/covenant|safety/i.test(k)).map(k=>[k,(localStorage.getItem(k)||'').slice(0,300)])));
+await page.getByRole('button',{name:/Open settings/i}).click(); await page.waitForTimeout(1000);
+const inp = page.getByRole('textbox',{name:/A new line or veil/i}).first();
+const add = page.getByRole('button',{name:/Add to the covenant/i}).first();
+await inp.scrollIntoViewIfNeeded();
+await inp.fill('No harm to animals on screen'); await page.waitForTimeout(400);
+let pre = await body();
+console.log('add btn enabled:', await add.isEnabled());
+await add.click({timeout:8000}).catch(e=>console.log('fail',String(e).slice(0,50)));
+await page.waitForTimeout(1200);
+console.log('after add LINE:', diff(pre, await body()));
+// now a veil
+await page.getByRole('button',{name:/Veil\s*[—-]\s*happens off-screen/i}).first().click();
+await inp.fill('Torture'); await page.waitForTimeout(300);
+pre = await body();
+await add.click({timeout:8000}).catch(()=>{});
+await page.waitForTimeout(1200);
+await shot(page,'chrome-table-covenant-added-390');
+console.log('after add VEIL:', diff(pre, await body()));
+console.log('storage:', await ks());
+console.log('export contains covenant?', await page.evaluate(()=>{const id=localStorage.getItem('codex-active-id');return /covenant/i.test(localStorage.getItem('codex-character-'+id)||'');}));
+await ctx.close(); await browser.close();

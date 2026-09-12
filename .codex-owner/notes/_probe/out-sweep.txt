@@ -1,0 +1,1587 @@
+
+
+===== A. Roleplay React + Land the moment (equality check) =====
+  tapped: Start the scene
+  tapped: That’s the scene
+  tapped: ^React
+[React] loadingDone=12175ms changed=true deltaLen=198
+  new lines: "→ THE DM FROM THE BANK Written offline, so this one is not tailored to tonight — but it works. Tap Another to try live again. Something just arrived, the table has gone quiet, and you have about four seconds before someone calls for initiative and the roleplay window closes for the night. Move your "
+  shot: play-roleplay-react-390.png
+  tapped: ^Land the moment
+[Land the moment] loadingDone=11375ms changed=true deltaLen=-313
+  new lines: "→ THE CIRCLE LIVE Scar is clearly anxious about someone coming through the door, and the tension is building. Nix wants to subtly reassure Scar while also assessing the newcomers. Reach across the table and cover Scar's hand with your own, giving a quick, firm squeeze. Just breathe, Scar. Whatever w"
+  shot: play-roleplay-land-the-moment-390.png
+
+
+===== A2. Session Timeline + End Session =====
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+A crowded riverside tavern, rain outside
+Tense. Scar is watching the door.
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+→ THE CIRCLE
+LIVE
+USE IT WHEN
+Scar is clearly anxious about someone coming through the door, and the tension is building. Nix wants to subtly reassure Scar while also assessing the newcomers.
+THE MOVE
+DO
+Reach across the table and cover Scar's hand with your own, giving a quick, firm squeeze.
+SAY
+Just breathe, Scar. Whatever walks in, we've seen worse.
+ASK
+Rune, you've got the best eye for detail. What kind of folk are these, do you reckon?
+WHAT IT’S FOR
+This beat establishes Nix's protective nature towards Scar, grounds Scar in the present moment, and invites Rune to contribute to the assessment of the newcomers. It subtly shows Nix 
+  tapped: ^End Session
+  shot: play-roleplay-end-session-390.png
+--- after End Session ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+A crowded riverside tavern, rain outside
+Tense. Scar is watching the door.
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+→ THE CIRCLE
+LIVE
+USE IT WHEN
+Scar is clearly anxious about someone coming through the door, and the tension is building. Nix wants to subtly reassure Scar while also assessing the newcomers.
+THE MOVE
+DO
+Reach across the table and cover Scar's hand with your own, giving a quick, firm squeeze.
+SAY
+Just breathe, Scar. Whatever walks in, we've seen worse.
+ASK
+Rune, you've got the best eye for detail. What kind of folk are these, do you reckon?
+WHAT IT’S FOR
+This beat establishes Nix's protective nature towards Scar, grounds Scar in the present moment, and invites Rune to contribute to the assessment of the newcomers. It subtly shows Nix isn't *as* worried as Scar, while still acknowledging the potential threat.
+IF THEY BITE
+Wait for Ru
+
+
+===== B. PLAY / Grimoire interactions =====
+  shot: play-grimoire-list-390.png
+PLAY
+PREP
+3/67
+Nix
+Grimoire
+84
+All (84)
+Spells (62)
+Features (22)
+Filters
+Prepared
+2
+OF 7 USED
+5
+FREE TO PREPARE
+4
+GRANTED FREE
+7
+PALADIN LEVEL
+The rules
+GROUP BY
+Level
+Source
+Turn cost
+Ready
+SPELL SLOTS
+1ST
+4/4
+2ND
+2/3
+3RD
+2/2
+Level 1 spells
+19
+Bless
+PREPARED
+Level 1 Enchantment · Paladin · PHB 2024
+Action
+Burning Hands
+ALWAYS
+Level 1 Evocation · Oath of the Hearth · PHB 2024
+Action
+Command
+Level 1 Enchantment · Paladin · PHB 2024
+Action
+Compelled Duel
+Level 1 Enchantment · Paladin · PHB 2024
+Bonus
+Cure Wounds
+Level 1 Abjuration · Paladin · PHB 2024
+Action
+Detect Evil and Good
+Level 1 Divination · Paladin · PHB 2024
+Action
+Detect Magic
+Level 1 Divination · Paladin · PHB 2024
+Action
+Detect Poison and Disease
+Level 1 Divination · Paladin · PHB 2024
+Action
+Divine Favor
+Level 1 Transmutation · Paladin · PHB 2024
+Bonus
+Divine Smite
+ALWAYS
+Level 1 Evocation · Paladin · PHB 2024
+Bonus
+Faerie Fire
+ALWAYS
+Level 1 Evocation · Oath of the Hearth · PHB 2024
+Action
+Heroism
+Level 1 Enchantment · Paladin · PHB 2024
+Action
+Protection from Evil and Good
+Level 1 Abjuration · Paladin · PHB 2024
+Action
+Purify Food and Drink
+Level 1 Transmutation · Paladin · PHB 2024
+Action
+Searing Smite
+Level 1 Evocation · Paladin · PHB 2024
+Bonus
+Shield of Faith
+PREPARED
+Level 1 Abjuration · Paladin · PHB 2024
+Bonus
+Thunderous Smite
+Level 1 Evocation · Paladin · PHB 2024
+Bonus
+Wardaway
+Level 1 Abjuration · Paladin · Forgotten Realms: Heroes of Faerun (FRHoF)
+Action
+Wrathful Smite
+Level 1 Necromancy · Paladin · PHB 2024
+Bonus
+Level 2 spells
+13
+Aid
+Level 2 Abjuration · Paladin · PHB 2024
+Action
+Find Steed
+ALWA
+--- grimoire (166) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "All (84)"
+  btn: "Spells (62)"
+  btn: "Features (22)"
+  btn: "Filters"
+  btn: "Prepared"
+  btn: "The rules"
+  btn: "Level"
+  btn: "Source"
+  btn: "Turn cost"
+  btn: "Ready"
+  btn: "Expend 1st slot"
+  btn: "Expend 1st slot"
+  btn: "Expend 1st slot"
+  btn: "Expend 1st slot"
+  btn: "Expend 2nd slot"
+  btn: "Expend 2nd slot"
+  btn: "Restore 2nd slot"
+  btn: "Expend 3rd slot"
+  btn: "Expend 3rd slot"
+  btn: "Bless PREPARED Level 1 Enchantment · Paladin · PHB 2024 Action"
+  btn: "Burning Hands ALWAYS Level 1 Evocation · Oath of the Hearth · PHB 2024 Action"
+  btn: "Command Level 1 Enchantment · Paladin · PHB 2024 Action"
+  btn: "Compelled Duel Level 1 Enchantment · Paladin · PHB 2024 Bonus"
+  btn: "Cure Wounds Level 1 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Detect Evil and Good Level 1 Divination · Paladin · PHB 2024 Action"
+  btn: "Detect Magic Level 1 Divination · Paladin · PHB 2024 Action"
+  btn: "Detect Poison and Disease Level 1 Divination · Paladin · PHB 2024 Action"
+  btn: "Divine Favor Level 1 Transmutation · Paladin · PHB 2024 Bonus"
+  btn: "Divine Smite ALWAYS Level 1 Evocation · Paladin · PHB 2024 Bonus"
+  btn: "Faerie Fire ALWAYS Level 1 Evocation · Oath of the Hearth · PHB 2024 Action"
+  btn: "Heroism Level 1 Enchantment · Paladin · PHB 2024 Action"
+  btn: "Protection from Evil and Good Level 1 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Purify Food and Drink Level 1 Transmutation · Paladin · PHB 2024 Action"
+  btn: "Searing Smite Level 1 Evocation · Paladin · PHB 2024 Bonus"
+  btn: "Shield of Faith PREPARED Level 1 Abjuration · Paladin · PHB 2024 Bonus"
+  btn: "Thunderous Smite Level 1 Evocation · Paladin · PHB 2024 Bonus"
+  btn: "Wardaway Level 1 Abjuration · Paladin · Forgotten Realms: Heroes of Faerun (FRHo"
+  btn: "Wrathful Smite Level 1 Necromancy · Paladin · PHB 2024 Bonus"
+  btn: "Aid Level 2 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Find Steed ALWAYS Level 2 Conjuration · Paladin · PHB 2024 Action"
+  btn: "Gentle Repose Level 2 Necromancy · Paladin · PHB 2024 Action"
+  btn: "Lesser Restoration Level 2 Abjuration · Paladin · PHB 2024 Bonus"
+  btn: "Locate Object Level 2 Divination · Paladin · PHB 2024 Action"
+  btn: "Magic Weapon Level 2 Transmutation · Paladin · PHB 2024 Bonus"
+  btn: "Prayer of Healing Level 2 Abjuration · Paladin · PHB 2024"
+  btn: "Protection from Poison Level 2 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Scorching Ray ALWAYS Level 2 Evocation · Oath of the Hearth · PHB 2024 Action"
+  btn: "Searing Orb Level 2 Evocation · Paladin · Post-launch official digital release ("
+  btn: "Shining Smite Level 2 Transmutation · Paladin · PHB 2024 Bonus"
+  btn: "Warding Bond ALWAYS Level 2 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Zone of Truth Level 2 Enchantment · Paladin · PHB 2024 Action"
+  btn: "Aura of Vitality Level 9 Level 3 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Beacon of Hope Level 9 Level 3 Abjuration · Oath of the Hearth · PHB 2024 Action"
+  btn: "Blinding Smite Level 9 Level 3 Evocation · Paladin · PHB 2024 Bonus"
+  btn: "Create Food and Water Level 9 Level 3 Conjuration · Paladin · PHB 2024 Action"
+  btn: "Crusader's Mantle Level 9 Level 3 Evocation · Paladin · PHB 2024 Action"
+  btn: "Daylight Level 9 Level 3 Evocation · Paladin · PHB 2024 Action"
+  btn: "Dispel Magic Level 9 Level 3 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Elemental Weapon Level 9 Level 3 Transmutation · Paladin · PHB 2024 Action"
+  btn: "Fireball Level 9 Level 3 Evocation · Oath of the Hearth · PHB 2024 Action"
+  btn: "Magic Circle Level 9 Level 3 Abjuration · Paladin · PHB 2024"
+  btn: "Remove Curse Level 9 Level 3 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Revivify Level 9 Level 3 Necromancy · Paladin · PHB 2024 Action"
+  btn: "Aura of Life Level 13 Level 4 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Aura of Purity Level 13 Level 4 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Banishment Level 13 Level 4 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Death Ward Level 13 Level 4 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Fire Shield Level 13 Level 4 Evocation · Oath of the Hearth · PHB 2024 Action"
+  btn: "Locate Creature Level 13 Level 4 Divination · Paladin · PHB 2024 Action"
+  btn: "Staggering Smite Level 13 Level 4 Enchantment · Paladin · PHB 2024 Bonus"
+  btn: "Wall of Fire Level 13 Level 4 Evocation · Oath of the Hearth · PHB 2024 Action"
+  btn: "Banishing Smite Level 17 Level 5 Conjuration · Paladin · PHB 2024 Bonus"
+  btn: "Circle of Power Level 17 Level 5 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Destructive Wave Level 17 Level 5 Evocation · Paladin · PHB 2024 Action"
+  btn: "Dispel Evil and Good Level 17 Level 5 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Flame Strike Level 17 Level 5 Evocation · Oath of the Hearth · PHB 2024 Action"
+  btn: "Geas Level 17 Level 5 Enchantment · Paladin · PHB 2024"
+  btn: "Greater Restoration Level 17 Level 5 Abjuration · Paladin · PHB 2024 Action"
+  btn: "Hallow Level 17 Level 5 Abjuration · Oath of the Hearth · PHB 2024"
+  btn: "Raise Dead Level 17 Level 5 Necromancy · Paladin · PHB 2024"
+  btn: "Summon Celestial Level 17 Level 5 Conjuration · Paladin · PHB 2024 Action"
+  btn: "Abjure Foes Level 9 Paladin · from Paladin level 9 Action"
+  btn: "Aura Expansion Level 18 Paladin · from Paladin level 18"
+  btn: "Aura of Courage Level 10 Paladin · from Paladin level 10"
+  btn: "Aura of Protection PREPARED Paladin · from Paladin level 6"
+  btn: "Aura of Solace PREPARED Oath of the Hearth · from Paladin level 7"
+  btn: "Channel Divinity PREPARED Paladin · from Paladin level 3"
+  btn: "Divine Sense PREPARED Paladin · from Paladin level 3 Bonus"
+  btn: "Epic Boon Level 19 Paladin · from Paladin level 19"
+  btn: "Extra Attack PREPARED Paladin · from Paladin level 5"
+  btn: "Faithful Steed PREPARED Paladin · from Paladin level 5"
+  btn: "Fighting Style PREPARED Paladin · from Paladin level 2"
+  btn: "Hearth Warden Level 20 Oath of the Hearth · from Paladin level 20 Bonus"
+  btn: "Hearthfire Manifest PREPARED Oath of the Hearth · from Paladin level 3 Reaction"
+  btn: "Lay On Hands PREPARED Paladin · from Paladin level 1 Bonus"
+  btn: "Lucky PREPARED Feat"
+  btn: "Paladin's Smite PREPARED Paladin · from Paladin level 2"
+  btn: "Radiant Strikes Level 11 Paladin · from Paladin level 11"
+  btn: "Restoring Touch Level 14 Paladin · from Paladin level 14"
+  btn: "Sentinel PREPARED Feat Reaction"
+  btn: "Smoldering Smite Level 15 Oath of the Hearth · from Paladin level 15 Action"
+  btn: "Spellcasting PREPARED Paladin · from Paladin level 1"
+  btn: "Weapon Mastery PREPARED Paladin · from Paladin level 1"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+  NOT FOUND/offscreen: ^Level
+  NOT FOUND/offscreen: ^Source
+  NOT FOUND/offscreen: ^Turn cost
+  NOT FOUND/offscreen: ^Ready
+  NOT FOUND/offscreen: ^Filters
+  tapped: ^The rules
+  shot: play-grimoire-the-rules-390.png
+
+-- ^The rules --
+PLAY
+PREP
+3/67
+Nix
+Grimoire
+84
+All (84)
+Spells (62)
+Features (22)
+Filters
+Prepared
+2
+OF 7 USED
+5
+FREE TO PREPARE
+4
+GRANTED FREE
+7
+PALADIN LEVEL
+The rules
+1
+You prepare a list of level 1+ Paladin spells. The number is set by the Prepared Spells column, not by your slots.
+2
+Every prepared spell must be of a level for which you have spell slots.
+3
+You may replace ONE prepared spell with another Paladin spell whenever you finish a Long Rest.
+4
+Spells granted by a Paladin feature as 'always prepared' do NOT count against the Prepared Spells number, but they do count as Paladin spells for you.
+5
+Cantrips gained from Blessed Warrior do not count against the Prepared Spells number.
+GROUP BY
+Level
+So
+
+
+===== B2. spell detail =====
+  tapped: ^Bless
+  shot: play-grimoire-spell-detail-390.png
+
+-- ^Bless --
+PLAY
+PREP
+3/67
+Nix
+Grimoire
+84
+All (84)
+Spells (62)
+Features (22)
+Filters
+Prepared
+2
+OF 7 USED
+5
+FREE TO PREPARE
+4
+GRANTED FREE
+7
+PALADIN LEVEL
+The rules
+1
+You prepare a list of level 1+ Paladin spells. The number is set by the Prepared Spells column, not by your slots.
+2
+Every prepared spell must be of a level for which you have spell slots.
+3
+You may replace ONE prepared spell with another Paladin spell whenever you finish a Long Rest.
+4
+Spells granted by a Paladin feature as 'always prepared' do NOT count against the Prepared Spells number, but they do count as Paladin spells for you.
+5
+Cantrips gained from Blessed Warrior do not count against the Prepared Spells number.
+GROUP BY
+Level
+Source
+Turn cost
+Ready
+SPELL SLOTS
+1ST
+4/4
+2ND
+2/3
+3RD
+2/2
+Level 1 spells
+19
+Bless
+PREPARED
+Level 1 Enchantment · Paladin · PHB 2024
+Action
+PREPARED
+CONCENTRATION
+1
+AT A GLANCE
+Action
+LEVEL
+Level 1 Enchantment
+RANGE
+30 feet
+COMPONENTS
+V, S, M (a Holy Symbol worth 5+ GP)
+DURATION
+Concentration, up to 1 minute
+CONCENTRATION
+Yes — one at a time
+SLOT
+1st — you have 4 of 4
+2
+FULL TEXT
+Up to three creatures you can see add 1d4 to every attack roll and every saving throw they make for the duration. You must hold Concentration to keep it running.
+CAST WITH A HIGHER SLOT
+Target one additional creature for each slot level above 1.
+PHB 2024 · Level 1 Enchantment · Paladin · PHB 2024
+3
+HOW TO USE IT
+Canon
+
+
+===== C. PREP / Character interactions =====
+  shot: prep-character-full-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+Changeling Paladin (Oath of the Hearth) · Level 7
+AC
+18
+HP
+3/67
+PROF
++3
+Ability Scores
+STR
+18
++4
+Save
+DEX
+12
++1
+Save
+CON
+14
++2
+Save
+INT
+9
+-1
+Save
+WIS
+13
++1
+Save
+CHA
+16
++3
+Save
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+(CHA)
++3
+Investigation
+(INT)
+-1
+Medicine
+(WIS)
++1
+Nature
+(INT)
+-1
+Perception
+(WIS)
++1
+Performance
+(CHA)
++3
+Persuasion
+(CHA)
++6
+Religion
+(INT)
+-1
+Sleight of Hand
+(DEX)
++1
+Stealth
+(DEX)
++1
+Survival
+(WIS)
++1
+Character Insight
+ABILITY SCORES
+STR
+18
++4
+DEX
+12
++1
+CON
+14
++2
+INT
+9
+-1
+WIS
+13
++1
+CHA
+16
++3
+COMBAT PROFILE
+ATTACK TYPE
+Melee-focused
+BEST ATTACK
++7 (weapon)
+TOP DAMAGE
+1d10+4 Slashing
+AC 18 / HP 67
+Well-armored
+SKILL CLUSTERS
+Combat
+1/2
+Best
+Social
+1/4
+Knowledge
+0/4
+Gap
+Awareness
+0/8
+SAVING THROWS
+STR
++4
+DEX
++1
+CON
++2
+INT
+-1
+WIS
++1
+CHA
++3
+Vulnerable saves: Intelligence. Consider Resilient or ability increases.
+Weapons
+1
+The Dawn Guardian
+Magical
+melee
+10 ft
+Radiant swing: Skip 1 attack = light
++7 to hit(STR +4 +prof)
+1d10+4 Slashing
+Two-Handed
+Reach
+Graze
+SPECIAL ABILITIES
+Radiant Swing
+Add Weapon
+Equipment & Supplies
+EQUIPMENT
+Shield
+Dawn Guardian
+SUPPLIES
+Resources
+0
+POOLS
+Nothing countable yet. A pool is anything you spend — points, uses or dice.
++ New pool
+CONDITIONS
+The fifteen conditions of the 2024 rules are already known. This is for the ones your table invented.
++ New condition
+Feats
+2
+Sentinel
+PHB
+When you hit a creature with an Opportunity Attack, its speed drops to 0 for the rest of the turn. Creatures provoke Opportunity Attacks from you even if they Disengage.
+Polearm Master (OA when enemies enter your 10 ft reach)
+Reach weapons (Glaive, Halberd) for a massive control zone
+Fighters, Paladins, and other frontliners who want to lock enemies down
+TACTICAL NOTE
+Positio
+--- prep-character (151) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "Ability Scores"
+  btn: "STR 18 +4"
+  btn: "Save"
+  btn: "Study Strength"
+  btn: "DEX 12 +1"
+  btn: "Save"
+  btn: "Study Dexterity"
+  btn: "CON 14 +2"
+  btn: "Save"
+  btn: "Study Constitution"
+  btn: "INT 9 -1"
+  btn: "Save"
+  btn: "Study Intelligence"
+  btn: "WIS 13 +1"
+  btn: "Save"
+  btn: "Study Wisdom"
+  btn: "CHA 16 +3"
+  btn: "Save"
+  btn: "Study Charisma"
+  btn: "Skills 2 prof"
+  btn: "Acrobatics: not proficient. Tap to change."
+  btn: "Acrobatics (DEX)"
+  btn: "Animal Handling: not proficient. Tap to change."
+  btn: "Animal Handling (WIS)"
+  btn: "Arcana: not proficient. Tap to change."
+  btn: "Arcana (INT)"
+  btn: "Athletics: proficient. Tap to change."
+  btn: "Athletics (STR)"
+  btn: "Deception: not proficient. Tap to change."
+  btn: "Deception (CHA)"
+  btn: "History: not proficient. Tap to change."
+  btn: "History (INT)"
+  btn: "Insight: not proficient. Tap to change."
+  btn: "Insight (WIS)"
+  btn: "Intimidation: not proficient. Tap to change."
+  btn: "Intimidation (CHA)"
+  btn: "Investigation: not proficient. Tap to change."
+  btn: "Investigation (INT)"
+  btn: "Medicine: not proficient. Tap to change."
+  btn: "Medicine (WIS)"
+  btn: "Nature: not proficient. Tap to change."
+  btn: "Nature (INT)"
+  btn: "Perception: not proficient. Tap to change."
+  btn: "Perception (WIS)"
+  btn: "Performance: not proficient. Tap to change."
+  btn: "Performance (CHA)"
+  btn: "Persuasion: proficient. Tap to change."
+  btn: "Persuasion (CHA)"
+  btn: "Religion: not proficient. Tap to change."
+  btn: "Religion (INT)"
+  btn: "Sleight of Hand: not proficient. Tap to change."
+  btn: "Sleight of Hand (DEX)"
+  btn: "Stealth: not proficient. Tap to change."
+  btn: "Stealth (DEX)"
+  btn: "Survival: not proficient. Tap to change."
+  btn: "Survival (WIS)"
+  btn: "Character Insight"
+  btn: "Weapons 1"
+  btn: "Edit The Dawn Guardian"
+  btn: "Delete The Dawn Guardian"
+  btn: "Two-Handed"
+  btn: "Reach"
+  btn: "Graze"
+  btn: "Radiant Swing"
+  btn: "Add Weapon"
+  btn: "Equipment & Supplies"
+  btn: "Shield"
+  btn: "Dawn Guardian"
+  btn: "Add equipment"
+  btn: "Add supply"
+  btn: "Resources 0"
+  btn: "+ New pool"
+  btn: "+ New condition"
+  btn: "Feats 2"
+  btn: "Study Sentinel"
+  btn: "Delete Sentinel"
+  btn: "Study Lucky"
+  btn: "Delete Lucky"
+  btn: "Add Feat"
+  btn: "Party Members"
+  btn: "Add Party Member"
+  btn: "Current Quest"
+  btn: "Notable NPCs"
+  btn: "Session Notes"
+  btn: "World Details"
+  btn: "Campaign Basics"
+  btn: "Export Character"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Character"
+  btn: "Grimoire"
+  btn: "Persona"
+  btn: "Academy"
+  tapped: Add Weapon
+  shot: prep-character-add-weapon-390.png
+
+-- Add Weapon --
+PLAY
+PREP
+3/67
+Nix
+Nix
+Changeling Paladin (Oath of the Hearth) · Level 7
+AC
+18
+HP
+3/67
+PROF
++3
+Ability Scores
+STR
+18
++4
+Save
+DEX
+12
++1
+Save
+CON
+14
++2
+Save
+INT
+9
+-1
+Save
+WIS
+13
++1
+Save
+CHA
+16
++3
+Save
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+(CHA)
++3
+Investigation
+(INT)
+-1
+Medicine
+(WIS)
++1
+Nature
+(INT)
+-1
+Perception
+(WIS)
++1
+Performance
+(CHA)
++3
+Persuasion
+(CHA)
++6
+Religion
+(INT)
+-1
+Sleight of Hand
+(DEX)
++1
+Stealth
+(DEX)
++1
+Survival
+(WIS)
++1
+Character Insight
+ABILITY SCORES
+STR
+18
++4
+DEX
+12
++1
+CON
+14
++2
+INT
+9
+-1
+WIS
+13
++1
+CHA
+16
++3
+COMBAT PROFILE
+ATTACK TYPE
+Melee-focused
+BEST ATTACK
++7 (weapon)
+TOP DAMAGE
+1d10+4 Slashing
+AC 18 / HP 67
+W
+  tapped: Add Feat
+  shot: prep-character-add-feat-390.png
+
+-- Add Feat --
+PLAY
+PREP
+3/67
+Nix
+Nix
+Changeling Paladin (Oath of the Hearth) · Level 7
+AC
+18
+HP
+3/67
+PROF
++3
+Ability Scores
+STR
+18
++4
+Save
+DEX
+12
++1
+Save
+CON
+14
++2
+Save
+INT
+9
+-1
+Save
+WIS
+13
++1
+Save
+CHA
+16
++3
+Save
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+(CHA)
++3
+Investigation
+(INT)
+-1
+Medicine
+(WIS)
++1
+Nature
+(INT)
+-1
+Perception
+(WIS)
++1
+Performance
+(CHA)
++3
+Persuasion
+(CHA)
++6
+Religion
+(INT)
+-1
+Sleight of Hand
+(DEX)
++1
+Stealth
+(DEX)
++1
+Survival
+(WIS)
++1
+Character Insight
+ABILITY SCORES
+STR
+18
++4
+DEX
+12
++1
+CON
+14
++2
+INT
+9
+-1
+WIS
+13
++1
+CHA
+16
++3
+COMBAT PROFILE
+ATTACK TYPE
+Melee-focused
+BEST ATTACK
++7 (weapon)
+TOP DAMAGE
+1d10+4 Slashing
+AC 18 / HP 67
+W
+  tapped: New pool
+  shot: prep-character-new-pool-390.png
+
+-- New pool --
+PLAY
+PREP
+3/67
+Nix
+Nix
+Changeling Paladin (Oath of the Hearth) · Level 7
+AC
+18
+HP
+3/67
+PROF
++3
+Ability Scores
+STR
+18
++4
+Save
+DEX
+12
++1
+Save
+CON
+14
++2
+Save
+INT
+9
+-1
+Save
+WIS
+13
++1
+Save
+CHA
+16
++3
+Save
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+(CHA)
++3
+Investigation
+(INT)
+-1
+Medicine
+(WIS)
++1
+Nature
+(INT)
+-1
+Perception
+(WIS)
++1
+Performance
+(CHA)
++3
+Persuasion
+(CHA)
++6
+Religion
+(INT)
+-1
+Sleight of Hand
+(DEX)
++1
+Stealth
+(DEX)
++1
+Survival
+(WIS)
++1
+Character Insight
+ABILITY SCORES
+STR
+18
++4
+DEX
+12
++1
+CON
+14
++2
+INT
+9
+-1
+WIS
+13
++1
+CHA
+16
++3
+COMBAT PROFILE
+ATTACK TYPE
+Melee-focused
+BEST ATTACK
++7 (weapon)
+TOP DAMAGE
+1d10+4 Slashing
+AC 18 / HP 67
+W
+  tapped: New condition
+  shot: prep-character-new-condition-390.png
+
+-- New condition --
+PLAY
+PREP
+3/67
+Nix
+Nix
+Changeling Paladin (Oath of the Hearth) · Level 7
+AC
+18
+HP
+3/67
+PROF
++3
+Ability Scores
+STR
+18
++4
+Save
+DEX
+12
++1
+Save
+CON
+14
++2
+Save
+INT
+9
+-1
+Save
+WIS
+13
++1
+Save
+CHA
+16
++3
+Save
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+(CHA)
++3
+Investigation
+(INT)
+-1
+Medicine
+(WIS)
++1
+Nature
+(INT)
+-1
+Perception
+(WIS)
++1
+Performance
+(CHA)
++3
+Persuasion
+(CHA)
++6
+Religion
+(INT)
+-1
+Sleight of Hand
+(DEX)
++1
+Stealth
+(DEX)
++1
+Survival
+(WIS)
++1
+Character Insight
+ABILITY SCORES
+STR
+18
++4
+DEX
+12
++1
+CON
+14
++2
+INT
+9
+-1
+WIS
+13
++1
+CHA
+16
++3
+COMBAT PROFILE
+ATTACK TYPE
+Melee-focused
+BEST ATTACK
++7 (weapon)
+TOP DAMAGE
+1d10+4 Slashing
+AC 18 / HP 67
+W
+  tapped: Export Character
+  shot: prep-character-export-character-390.png
+
+-- Export Character --
+PLAY
+PREP
+3/67
+Nix
+Nix
+Changeling Paladin (Oath of the Hearth) · Level 7
+AC
+18
+HP
+3/67
+PROF
++3
+Ability Scores
+STR
+18
++4
+Save
+DEX
+12
++1
+Save
+CON
+14
++2
+Save
+INT
+9
+-1
+Save
+WIS
+13
++1
+Save
+CHA
+16
++3
+Save
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+(CHA)
++3
+Investigation
+(INT)
+-1
+Medicine
+(WIS)
++1
+Nature
+(INT)
+-1
+Perception
+(WIS)
++1
+Performance
+(CHA)
++3
+Persuasion
+(CHA)
++6
+Religion
+(INT)
+-1
+Sleight of Hand
+(DEX)
++1
+Stealth
+(DEX)
++1
+Survival
+(WIS)
++1
+Character Insight
+ABILITY SCORES
+STR
+18
++4
+DEX
+12
++1
+CON
+14
++2
+INT
+9
+-1
+WIS
+13
++1
+CHA
+16
++3
+COMBAT PROFILE
+ATTACK TYPE
+Melee-focused
+BEST ATTACK
++7 (weapon)
+TOP DAMAGE
+1d10+4 Slashing
+AC 18 / HP 67
+W
+  tapped: Character Insight
+  shot: prep-character-character-insight-390.png
+
+-- Character Insight --
+PLAY
+PREP
+3/67
+Nix
+Nix
+Changeling Paladin (Oath of the Hearth) · Level 7
+AC
+18
+HP
+3/67
+PROF
++3
+Ability Scores
+STR
+18
++4
+Save
+DEX
+12
++1
+Save
+CON
+14
++2
+Save
+INT
+9
+-1
+Save
+WIS
+13
++1
+Save
+CHA
+16
++3
+Save
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+(CHA)
++3
+Investigation
+(INT)
+-1
+Medicine
+(WIS)
++1
+Nature
+(INT)
+-1
+Perception
+(WIS)
++1
+Performance
+(CHA)
++3
+Persuasion
+(CHA)
++6
+Religion
+(INT)
+-1
+Sleight of Hand
+(DEX)
++1
+Stealth
+(DEX)
++1
+Survival
+(WIS)
++1
+Character Insight
+Weapons
+1
+The Dawn Guardian
+Magical
+melee
+10 ft
+Radiant swing: Skip 1 attack = light
++7 to hit(STR +4 +prof)
+1d10+4 Slashing
+Two-Handed
+Reach
+Graze
+SPECIAL ABILITIES
+Radiant Swing
+N
+  NOT FOUND/offscreen: Campaign Editor

@@ -1,0 +1,447 @@
+
+
+===== DAMAGE LOG > DAMAGE TRACKER =====
+  tapped: ^DAMAGE LOG
+  tapped: DAMAGE TRACKER
+  shot: play-damage-tracker-390.png
+Roll
+Look up
+Reset
+Start Combat
+3 / 67
+AC 18
+Bloodied
+Damage
+Heal
+Temp HP
+ACTIVE CONDITIONS
+None
+Aura of Protection
+You radiate an aura that makes you and friendly creatures within 10 feet of y...
+Aura of Solace
+You and allies within your Aura of Protection have resistance to Fire, Cold, ...
+1st
+2nd
+3rd
+Your sheet and the 2024 rules disagree on 1 thing
+YOUR TURN
+14 ready
+ACTION
+7 ready
+0 of 2 used
+OPEN
+−
+The Dawn Guardian
+Action
++7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · Graze
+Hearthfire Manifest
+Action
+See description · At will
+Bless
+competes
+Action · 1st-level slot
+30 ft · Conc 1 min · a Holy Symbol worth 5+ GP
+Burning Hands
+competes
+Action · 1st-level slot
+3d6 Fire · DC 14 DEX · 15-ft Cone
+Faerie Fire
+competes
+Action · 1st-level slot
+DC 14 DEX · 60 ft · Conc 1 min · negates
+Scorching Ray
+competes
+Action · 2nd-level slot
++6 · 2d6 Fire · 120 ft
+Warding Bond
+competes
+Action · 2nd-level slot
+Touch · 1 hr
+5 of these compete — you get one
+They want the same slot — and only one levelled spell slot leaves your hands per turn.
+BONUS
+3 ready
+OPEN
+−
+Divine Smite
+Bonus action
+2d8 Radiant · +1d8 Fiend/Undead
+Hearthfire Manifest
+Bonus action
+It can be summoned or dismissed as a Bonus Action.
+Shield of Faith
+Bonus action · 1st-level slot
+60 ft · Conc 10 min
+REACTION
+4 ready
+OPEN
+−
+Hearthfire Manifest
+Reaction
+When you are hit by a melee attack, the creature takes 1d10 Fire damage in retaliation. · As a Reaction, you can expend one use of your Channel Divinity and issue a command word, causing the Essence of the Hearth to transform into a flaming cloak. The cloak immediately grants you Temporary Hit Points equal to your Paladin level plus your spellcasting ability modifier. This effect lasts until the Temporary Hit Points are depleted.Not on your turn
++1D10 RETALIATION
+none yet
+Sentinel
+Reaction
+When a creature within 5 feet of you takes the Disengage action · you can take an Opportunity Attack against it.Not on your turn
+Sentinel
+Reaction
+When a creature within 5 feet of you attacks a target other than you · you can take a Reaction to make one melee attack against the attacker.Not on your turn
+Opportunity Attack — The Dawn Guardian
+Reaction
+When a creature you can see leaves your reach · +7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · GrazeNot on your turn
+ONE REACTION IS MISSING
+You chose a Fighting Style at level 2 and this app has never been told which. If it is Interception, it is a Reaction — and it belongs in this band.
+Tell it which →
+MOVEMENT
+0 ready
+OPEN
+−
+Nothing on your sheet c
+--- damage tracker (83) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "CONCENTRATION"
+  btn: "Bless"
+  btn: "Faerie Fire"
+  btn: "Shield of Faith"
+  btn: "Warding Bond"
+  btn: "DAMAGE LOG"
+  btn: "DAMAGE TRACKER"
+  btn: "Crit"
+  btn: "Log Damage"
+  btn: "COMBAT HISTORY"
+  btn: "COMBAT ADVISOR"
+  btn: "BASIC ACTIONS — THE RULES"
+  btn: "RULES FLAGS 6 · 6 unanswered"
+  btn: "REST MANAGEMENT"
+  btn: "CHARACTER PERSONA"
+  btn: "Action"
+  btn: "Bonus"
+  btn: "Reaction"
+  btn: "Move"
+  btn: "Undo"
+  btn: "End turn"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+  tapped: DAMAGE TRACKER
+  tapped: ^DAMAGE LOG
+
+
+===== COMBAT ADVISOR (nested) =====
+  tapped: ^COMBAT ADVISOR
+--- advisor-level1 (80) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "CONCENTRATION"
+  btn: "Bless"
+  btn: "Faerie Fire"
+  btn: "Shield of Faith"
+  btn: "Warding Bond"
+  btn: "DAMAGE LOG"
+  btn: "COMBAT ADVISOR"
+  btn: "Send combat question"
+  btn: "BASIC ACTIONS — THE RULES"
+  btn: "RULES FLAGS 6 · 6 unanswered"
+  btn: "REST MANAGEMENT"
+  btn: "CHARACTER PERSONA"
+  btn: "Action"
+  btn: "Bonus"
+  btn: "Reaction"
+  btn: "Move"
+  btn: "Undo"
+  btn: "End turn"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+  tapped: COMBAT ADVISOR
+  shot: play-combat-advisor-390.png
+Roll
+Look up
+Reset
+Start Combat
+3 / 67
+AC 18
+Bloodied
+Damage
+Heal
+Temp HP
+ACTIVE CONDITIONS
+None
+Aura of Protection
+You radiate an aura that makes you and friendly creatures within 10 feet of y...
+Aura of Solace
+You and allies within your Aura of Protection have resistance to Fire, Cold, ...
+1st
+2nd
+3rd
+Your sheet and the 2024 rules disagree on 1 thing
+YOUR TURN
+14 ready
+ACTION
+7 ready
+0 of 2 used
+OPEN
+−
+The Dawn Guardian
+Action
++7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · Graze
+Hearthfire Manifest
+Action
+See description · At will
+Bless
+competes
+Action · 1st-level slot
+30 ft · Conc 1 min · a Holy Symbol worth 5+ GP
+Burning Hands
+competes
+Action · 1st-level slot
+3d6 Fire · DC 14 DEX · 15-ft Cone
+Faerie Fire
+competes
+Action · 1st-level slot
+DC 14 DEX · 60 ft · Conc 1 min · negates
+Scorching Ray
+competes
+Action · 2nd-level slot
++6 · 2d6 Fire · 120 ft
+Warding Bond
+competes
+Action · 2nd-level slot
+Touch · 1 hr
+5 of these compete — you get one
+They want the same slot — and only one levelled spell slot leaves your hands per turn.
+BONUS
+3 ready
+OPEN
+−
+Divine Smite
+Bonus action
+2d8 Radiant · +1d8 Fiend/Undead
+Hearthfire Manifest
+Bonus action
+It can be summoned or dismissed as a Bonus Action.
+Shield of Faith
+Bonus action · 1st-level slot
+60 ft · Conc 10 min
+REACTION
+4 ready
+OPEN
+−
+Hearthfire Manifest
+Reaction
+When you are hit by a melee attack, the creature takes 1d10 Fire damage in retaliation. · As a Reaction, you can expend one use of your Channel Divinity and issue a command word, causing the Essence of the Hearth to transform into a flaming cloak. The cloak immediately grants you Temporary Hit Points equal to your Paladin level plus your spellcasting ability modifier. This effect lasts until the Temporary Hit Points are depleted.Not on your turn
++1D10 RETALIATION
+none yet
+Sentinel
+Reaction
+When a creature within 5 feet of you takes the Disengage action · you can take an Opportunity Attack against it.Not on your turn
+Sentinel
+Reaction
+When a creature within 5 feet of you attacks a target other than you · you can take a Reaction to make one melee attack against the attacker.Not on your turn
+Opportunity Attack — The Dawn Guardian
+Reaction
+When a creature you can see leaves your reach · +7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · GrazeNot on your turn
+ONE REACTION IS MISSING
+You chose a Fighting Style at level 2 and this app has never been told which. If it is Interception, it is a Reaction — and it belongs in this band.
+Tell it which →
+MOVEMENT
+0 ready
+OPEN
+−
+Nothing on your sheet c
+--- advisor-open (79) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "CONCENTRATION"
+  btn: "Bless"
+  btn: "Faerie Fire"
+  btn: "Shield of Faith"
+  btn: "Warding Bond"
+  btn: "DAMAGE LOG"
+  btn: "COMBAT ADVISOR"
+  btn: "BASIC ACTIONS — THE RULES"
+  btn: "RULES FLAGS 6 · 6 unanswered"
+  btn: "REST MANAGEMENT"
+  btn: "CHARACTER PERSONA"
+  btn: "Action"
+  btn: "Bonus"
+  btn: "Reaction"
+  btn: "Move"
+  btn: "Undo"
+  btn: "End turn"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"

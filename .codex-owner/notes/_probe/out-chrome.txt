@@ -1,0 +1,371 @@
+
+
+===== Dice roller =====
+  tapped /Open dice roller/i
+  shot: chrome-dice-roller-390.png
+
+  MISSING /^d20$/
+  MISSING /^Advantage$/
+  shot: chrome-dice-roller-filled-390.png
+  MISSING /^Log it$/
+  shot: chrome-dice-logged-390.png
+after log it: = | 17
+  tapped /Close roll capture/i
+
+
+===== Mechanics reference search =====
+  tapped /Open mechanics reference/i
+  shot: chrome-mechanics-search-390.png
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How does concentration work?
+
+Only one concentration spell at a time. Take damage = CON save (DC 10 or half damage, whichever is higher) or lose it.
+
+Spellcasting
+Combat
+Grimoire
+Roleplay
+  tapped /Close mechanics reference/i
+
+
+===== Toybox =====
+  [console.error] Warning: validateDOMNesting(...): %s cannot appear as a descendant of <%s>.%s <button> button 
+    at button
+    at button
+    at div
+    at ComboCard (http://localhost:5191/the-codex/src/components/toybox/ComboCard.tsx:158:3)
+    at div
+    at div
+    at div
+    at ToyboxPanel (http://localhost:519
+  tapped /Open The Toybox/i
+  shot: chrome-toybox-390.png
+The Toybox | Suggest | Combos | Tactics | Persona | Burst | Sustained | Defensive | AoE | Utility | Hearth Wall | 3 steps | One Slot, Spent Right | 2 steps | Faerie Fire Opening | 3 steps | The Cone at the Door | 2 steps | Nothing In Reach | 3 steps | Make It About You | 3 steps | Bless Before the Door | 3 steps | The Slot That Lasts a Minute | 2 steps | Wearing the Attention | 3 steps | Damage Relocation | 2 steps | The Smites That Aren’t Damage | 2 steps | Pick Them Up | 3 steps | The Bonus-Action Rescue | 2 steps | Before the Door Opens | 3 steps | The Sentinel Gate | 3 steps | Three People Stand Up | 3 steps | The Free Crit | 3 steps | The Second Swing Is Not Wasted | 3 steps | Through the Door | 3 steps | Bearings and the Backward Walk | 3 steps | One Silver Piece of Fire | 3 steps | The Shield Round | 3 steps | Drop the Glaive | 3 steps | The Caster Killer | 3 steps
+--- toybox (153) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "Roll"
+  btn: "Look up"
+  btn: "Reset"
+  btn: "Start Combat"
+  btn: "Damage"
+  btn: "Heal"
+  btn: "Temp HP"
+  btn: "ACTIVE CONDITIONS None"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 2nd level spell slot"
+  btn: "Expend 2nd level spell slot"
+  btn: "Restore 2nd level spell slot"
+  btn: "Expend 3rd level spell slot"
+  btn: "Expend 3rd level spell slot"
+  btn: "Your sheet and the 2024 rules disagree on 1 thing"
+  btn: "ACTION 7 ready 0 of 2 used OPEN −"
+  btn: "The Dawn Guardian Action +7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · M"
+  btn: "Hearthfire Manifest Action See description · At will"
+  btn: "Bless competes Action · 1st-level slot 30 ft · Conc 1 min · a Holy Symbol worth "
+  btn: "Burning Hands competes Action · 1st-level slot 3d6 Fire · DC 14 DEX · 15-ft Cone"
+  btn: "Faerie Fire competes Action · 1st-level slot DC 14 DEX · 60 ft · Conc 1 min · ne"
+  btn: "Scorching Ray competes Action · 2nd-level slot +6 · 2d6 Fire · 120 ft"
+  btn: "Warding Bond competes Action · 2nd-level slot Touch · 1 hr"
+  btn: "BONUS 3 ready OPEN −"
+  btn: "Divine Smite Bonus action 2d8 Radiant · +1d8 Fiend/Undead"
+  btn: "Hearthfire Manifest Bonus action It can be summoned or dismissed as a Bonus Acti"
+  btn: "Shield of Faith Bonus action · 1st-level slot 60 ft · Conc 10 min"
+  btn: "REACTION 4 ready OPEN −"
+  btn: "Hearthfire Manifest Reaction When you are hit by a melee attack, the creature ta"
+  btn: "+1D10 RETALIATION"
+  btn: "Sentinel Reaction When a creature within 5 feet of you takes the Disengage actio"
+  btn: "Sentinel Reaction When a creature within 5 feet of you attacks a target other th"
+  btn: "Opportunity Attack — The Dawn Guardian Reaction When a creature you can see leav"
+  btn: "ONE REACTION IS MISSING You chose a Fighting Style at level 2 and this app has n"
+  btn: "MOVEMENT 0 ready OPEN −"
+  btn: "CONCENTRATION"
+  btn: "Bless"
+  btn: "Faerie Fire"
+  btn: "Shield of Faith"
+  btn: "Warding Bond"
+  btn: "DAMAGE LOG"
+  btn: "COMBAT ADVISOR"
+  btn: "BASIC ACTIONS — THE RULES"
+  btn: "RULES FLAGS 6 · 6 unanswered"
+  btn: "REST MANAGEMENT"
+  btn: "CHARACTER PERSONA"
+  btn: "Action"
+  btn: "Bonus"
+  btn: "Reaction"
+  btn: "Move"
+  btn: "Undo"
+  btn: "End turn"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "Suggest"
+  btn: "Close The Toybox"
+  btn: "Combos"
+  btn: "Tactics"
+  btn: "Persona"
+  btn: "All"
+  btn: "Burst"
+  btn: "Sustained"
+  btn: "Defensive"
+  btn: "AoE"
+  btn: "Utility"
+  btn: "Hearth Wall 3 steps"
+  btn: "Add to favorites"
+  btn: "One Slot, Spent Right 2 steps"
+  btn: "Add to favorites"
+  btn: "Faerie Fire Opening 3 steps"
+  btn: "Add to favorites"
+  btn: "The Cone at the Door 2 steps"
+  btn: "Add to favorites"
+  btn: "Nothing In Reach 3 steps"
+  btn: "Add to favorites"
+  btn: "Make It About You 3 steps"
+  btn: "Add to favorites"
+  btn: "Bless Before the Door 3 steps"
+  btn: "Add to favorites"
+  btn: "The Slot That Lasts a Minute 2 steps"
+  btn: "Add to favorites"
+  btn: "Wearing the Attention 3 steps"
+  btn: "Add to favorites"
+  btn: "Damage Relocation 2 steps"
+  btn: "Add to favorites"
+  btn: "The Smites That Aren’t Damage 2 steps"
+  btn: "Add to favorites"
+  btn: "Pick Them Up 3 steps"
+  btn: "Add to favorites"
+  btn: "The Bonus-Action Rescue 2 steps"
+  btn: "Add to favorites"
+  btn: "Before the Door Opens 3 steps"
+  btn: "Add to favorites"
+  btn: "The Sentinel Gate 3 steps"
+  btn: "Add to favorites"
+  btn: "Three People Stand Up 3 steps"
+  btn: "Add to favorites"
+  btn: "The Free Crit 3 steps"
+  btn: "Add to favorites"
+  btn: "The Second Swing Is Not Wasted 3 steps"
+  btn: "Add to favorites"
+  btn: "Through the Door 3 steps"
+  btn: "Add to favorites"
+  btn: "Bearings and the Backward Walk 3 steps"
+  btn: "Add to favorites"
+  btn: "One Silver Piece of Fire 3 steps"
+  btn: "Add to favorites"
+  btn: "The Shield Round 3 steps"
+  btn: "Add to favorites"
+  btn: "Drop the Glaive 3 steps"
+  btn: "Add to favorites"
+  btn: "The Caster Killer 3 steps"
+  btn: "Add to favorites"
+  btn: "Create new combo"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+
+
+===== Settings drawer =====
+  tapped /Open settings/i
+  shot: chrome-settings-390.png
+Settings | × | SETTINGS | THE TABLE COVENANT | Agreed once, changed any time. The Veil button in the corner of every screen works whether or not anything is written here. | Nothing written down yet. | Line — never happens | Veil — happens off-screen | ANYTHING ELSE THE TABLE SHOULD KNOW | AI CONFIGURATION | Provider | Gemini | OpenRouter | Ollama | Ollama URL | Model | gemma3-27b-abliterated:latest | 27.0B | Auto-Fallback | When Ollama fails, try the others — but none of them are set up yet. Add one below. | Fallback is on but nothing is behind it. Fill in one of the boxes below — both keys are free, and having two of them is the point: two free tiers do not run out at the same moment. | FALLBACK 1: GEMINI | Model | Automatic | Add your key above and this list fills in from Google. Each model has its own free quota. | FALLBACK 2: OPENROUTER | Model | Automatic | This list comes from OpenRouter and needs no key to read. Free models are listed first. | Test Connection | Save | CHARACTER INFO | Name | Class | Paladin (Oath of the Hearth) | Race | Changeling | Level | 7 | Level Up to 8 | Upgrade to Combat-Ready | Adds Paladin resource tracking (Lay on Hands, Channel Divinity) and character persona for roleplay. | Export | Import | BACKSTORY TRANSFER | Copy Backstory | Paste Backstory | Copy backstory on one device, text it to yourself, paste on the other. Only backstory is affected — nothing else changes. | Switch Character | New Character | Delete Character | Short Rest | Restores class features that recharge on a short rest (e.g., Channel Divinity, Second Wind). Does not restore spell slots or HP. | Long Rest | Restores HP to maximum, all spell slots, and all class features (both short and long rest). | ABOUT | The Codex V1.0 | D&D 2024 Combat Companion | Part of Ash & Archive | This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Com
+
+
+===== Character switcher / roster =====
+  MISSING /^Nix$/
+  shot: chrome-character-switcher-390.png
+
+--- switcher (93) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "Roll"
+  btn: "Look up"
+  btn: "Reset"
+  btn: "Start Combat"
+  btn: "Damage"
+  btn: "Heal"
+  btn: "Temp HP"
+  btn: "ACTIVE CONDITIONS None"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 1st level spell slot"
+  btn: "Expend 2nd level spell slot"
+  btn: "Expend 2nd level spell slot"
+  btn: "Restore 2nd level spell slot"
+  btn: "Expend 3rd level spell slot"
+  btn: "Expend 3rd level spell slot"
+  btn: "Your sheet and the 2024 rules disagree on 1 thing"
+  btn: "ACTION 7 ready 0 of 2 used OPEN −"
+  btn: "The Dawn Guardian Action +7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · M"
+  btn: "Hearthfire Manifest Action See description · At will"
+  btn: "Bless competes Action · 1st-level slot 30 ft · Conc 1 min · a Holy Symbol worth "
+  btn: "Burning Hands competes Action · 1st-level slot 3d6 Fire · DC 14 DEX · 15-ft Cone"
+  btn: "Faerie Fire competes Action · 1st-level slot DC 14 DEX · 60 ft · Conc 1 min · ne"
+  btn: "Scorching Ray competes Action · 2nd-level slot +6 · 2d6 Fire · 120 ft"
+  btn: "Warding Bond competes Action · 2nd-level slot Touch · 1 hr"
+  btn: "BONUS 3 ready OPEN −"
+  btn: "Divine Smite Bonus action 2d8 Radiant · +1d8 Fiend/Undead"
+  btn: "Hearthfire Manifest Bonus action It can be summoned or dismissed as a Bonus Acti"
+  btn: "Shield of Faith Bonus action · 1st-level slot 60 ft · Conc 10 min"
+  btn: "REACTION 4 ready OPEN −"
+  btn: "Hearthfire Manifest Reaction When you are hit by a melee attack, the creature ta"
+  btn: "+1D10 RETALIATION"
+  btn: "Sentinel Reaction When a creature within 5 feet of you takes the Disengage actio"
+  btn: "Sentinel Reaction When a creature within 5 feet of you attacks a target other th"
+  btn: "Opportunity Attack — The Dawn Guardian Reaction When a creature you can see leav"
+  btn: "ONE REACTION IS MISSING You chose a Fighting Style at level 2 and this app has n"
+  btn: "MOVEMENT 0 ready OPEN −"
+  btn: "CONCENTRATION"
+  btn: "Bless"
+  btn: "Faerie Fire"
+  btn: "Shield of Faith"
+  btn: "Warding Bond"
+  btn: "DAMAGE LOG"
+  btn: "COMBAT ADVISOR"
+  btn: "BASIC ACTIONS — THE RULES"
+  btn: "RULES FLAGS 6 · 6 unanswered"
+  btn: "REST MANAGEMENT"
+  btn: "CHARACTER PERSONA"
+  btn: "Action"
+  btn: "Bonus"
+  btn: "Reaction"
+  btn: "Move"
+  btn: "Undo"
+  btn: "End turn"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+
+
+===== Reopen: reload and confirm persistence =====
+  shot: reopen-after-reload-390.png
+same top after reload: true
+PLAY
+PREP
+3/67
+Nix
+Nix
+Oath of the Hearth
+Round 1
+Roll
+Look up
+Reset
+Start Combat
+3 / 67
+AC 18
+Bloodied
+Damage
+Heal
+Temp HP
+ACTIVE CONDITIONS
+None
+Aura of Protection
+You radiate an aura that makes you and friendly creatures within 10 feet of y...
+Aura of Solace
+You and allies within your Aura of Protection have resistance to Fire, Cold, ...
+1st
+2nd
+3rd
+Your sheet and the 2024 rules disagree on 1 thing
+YOUR TURN
+14 ready
+ACTION
+7 ready
+0 of 2 used
+OPEN
+−
+The Dawn Guardian
+Action
++7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · Graze
+Hearthfire Manifest
+Action
+See description · At will
+Bless
+competes
+Action · 1st-level slot
+30 ft · Conc 1 min · a Holy Symbol worth 5+ GP
+Burning Hands
+competes
+Action · 1st-level slot
+3d6 Fire · DC 14 DEX · 15-ft Cone
+Faerie Fire
+competes
+Action · 1st-level slot
+DC 14 DEX · 60 ft · Conc 1 min · negates
+Scorching Ray
+compet
+active id: b4816f64-24a7-4df2-bc9f-9078e07af95d

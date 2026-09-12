@@ -1,0 +1,84 @@
+
+
+===== Dice roller / Roll Capture detail =====
+visible buttons: Switch to session mode ~ Switch to prep mode ~ Open settings ~ Open The Toybox ~ Open mechanics reference ~ Open character sheet for Nix, Paladin ~ Open dice roller ~ Look up ~ Reset action economy ~ Start Combat ~ Apply damage ~ Apply healing ~ Set temporary hit points ~ ACTIVE CONDITIONS None ~ Expend 1st level spell slot ~ Expend 1st level spell slot ~ Expend 1st level spell slot ~ Expend 1st level spell slot ~ Expend 2nd level spell slot ~ Expend 2nd level spell slot ~ Restore 2nd level spell slot ~ Expend 3rd level spell slot ~ Expend 3rd level spell slot ~ Your sheet and the 2024 rules disagree o ~ ACTION 7 ready 0 of 2 used OPEN − ~ The Dawn Guardian Action +7 to hit (STR  ~ Action: available ~ Bonus: available ~ Reaction: available ~ Move: available ~ Undo ~ End turn ~ Close roll capture ~ Write this roll down ~ Set up d20 ~ Set up 1d8 ~ Set up 2d6 ~ Attacks ~ Saving Throws ~ Damage ~ Select d4 ~ Select d6 ~ Select d8 ~ Select d10 ~ Select d12 ~ Select d20 ~ Select d100 ~ Decrease number of dice ~ Increase number of dice ~ Decrease modifier ~ Increase modifier ~ Normal ~ Advantage ~ Disadvantage ~ Combat ~ Grimoire ~ Roleplay
+  shot: chrome-dice-roller-390.png
+inputs now: The number your 1d20 showed
+  shot: chrome-dice-roller-filled-390.png
+capture region: YOUR ROLL | YOU ROLLED | = | 17 | Log it | Quick Set | d20 | 1d8 | 2d6 | Character Presets | Attacks | Saving Throws | Damage | Die Type | d4 | d6 | d8 | d10 | d12 | d20 | d100 | Number of dice | 1 | Modifier | +0 | Roll Mode | Normal | Advantage | Disadvantage | MECHANICS REFERENCE | All | Attack | Saving Throw | Ability Check | Damage | Conditions | Action Economy | Spellcasting | How do I make an attack roll? |  | Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit. |  | Attack | How do critical hits work? |  | On a natural 20, the 
+Log it enabled: true
+  shot: chrome-dice-logged-390.png
+after log: YOUR ROLL | YOU ROLLED | Log it | 17 | 17 | 1d20 | Quick Set | d20 | 1d8 | 2d6 | Character Presets | Attacks | Saving Throws | Damage | Die Type | d4 | d6 | d8 | d10 | d12 | d20 | d100 | Number of dice | 1 | Modifier | +0 | Roll Mode | Normal | Advantage | Disadvantage | Recent Rolls | 1d20 | = 17 | MECHANICS REFERENCE | All | Attack | Saving Throw | Ability Check | Damage | Conditions | Action Economy | Spellcasting | How do I make an attack roll? |  | Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit. |  | Attack | How do critical hits
+
+
+===== Character switcher =====
+switcher label: Open character sheet for Nix, Paladin | Nix
+err TimeoutError: locator.click: Timeout 30000ms excee
+  shot: chrome-character-switcher-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+Oath of the Hearth
+Round 1
+Roll
+Look up
+Reset
+Start Combat
+3 / 67
+AC 18
+Bloodied
+Damage
+Heal
+Temp HP
+ACTIVE CONDITIONS
+None
+Aura of Protection
+You radiate an aura that makes you and friendly creatures within 10 feet of y...
+Aura of Solace
+You and allies within your Aura of Protection have resistance to Fire, Cold, ...
+1st
+2nd
+3rd
+Your sheet and the 2024 rules disagree on 1 thing
+YOUR TURN
+14 ready
+ACTION
+7 ready
+0 of 2 used
+OPEN
+−
+The Dawn Guardian
+Action
++7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · Graze
+Hearthfire Manifest
+Action
+See description · At will
+Bless
+competes
+Action · 1st-level slot
+30 ft · Conc 1 min · a Holy Symbol worth 5+ GP
+Burning Hands
+competes
+Action · 1st-level slot
+3d6 Fire · DC 14 DEX · 15-ft Cone
+Faerie Fire
+competes
+Action · 1st-level slot
+DC 14 DEX · 60 ft · Conc 1 min · negates
+Scorching Ray
+compet
+
+
+===== WIDE 1280x800 =====
+  shot: play-turn-1280.png
+  shot: play-grimoire-1280.png
+  shot: play-roleplay-1280.png
+  shot: prep-character-1280.png
+  shot: prep-grimoire-1280.png
+  shot: prep-persona-1280.png
+  shot: prep-academy-1280.png
+
+
+===== WIDE: character record / print sheet =====

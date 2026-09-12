@@ -1,0 +1,337 @@
+  tapped: Start the scene
+
+
+===== scene form inputs =====
+  field: "Around the campfire, first night out"
+  field: "Everyone is still being polite. Nobody has said the real thing."
+  field: "What's happening? What do you want to do?"
+  field: "Add a player"
+  field: "Describe the scene or leave blank for a general prompt..."
+  field: "The number your 1d20 showed"
+  field: "Search mechanics..."
+  filled both scene fields
+  shot: play-roleplay-scene-form-390.png
+  tapped: That’s the scene
+  shot: play-roleplay-scene-live-390.png
+
+--- scene live ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+A crowded riverside tavern, rain outside
+Tense. Scar is watching the door.
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+Impulse
+8
+Recall
+28
+Engage
+19
+What would I say?
+Session Timeline
+0 moments
+Your RP timeline builds as you play
+End Session
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does multiattack work?
+Extra Attack lets you attack multiple times when you take the Attack action. Each is a separate roll.
+Attack
+How does opportunity att
+opening beat generation took 7096 ms
+  shot: play-roleplay-opening-beat-390.png
+
+--- opening beat ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+A crowded riverside tavern, rain outside
+Tense. Scar is watching the door.
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+→ THE CIRCLE
+LIVE
+USE IT WHEN
+The party is taking a short rest in a relatively safe location – a tavern common room, a forest clearing, a ship’s hold. Nix hasn’t really *settled* yet, still scanning the room.
+THE MOVE
+DO
+Nix pulls a small, worn wooden carving of a bird from his pack. He runs a thumb over its smooth wings, then sets it on the table between himself and the closest party member – Rune, if she's there.
+SAY
+Just… trying to make this feel a little less temporary.
+WHAT IT’S FOR
+This beat establishes Nix’s need for a sense of ‘home’ and offers a small, comforting gesture to build rapport with a party member. It subtly reveals his changeling habit of collecting small objects and hints at his underlying insecurity.
+IF THEY BITE
+If the party member responds with a question or comment, Nix can elaborate on the carving or his need for comfort. If they don't, he can continue scanning the room, looking for potential threats or points of interest.
+WHERE IT CAN GO
+↗
+Warmer — Comfort
+↗
+Wider — Threat
+↗
+Darker — Memory
+IF IT LANDS FLAT
+If the gesture is ignored, Nix can simply continue his scan of the room, muttering something about ‘always being on guard’.
+I played it
+Another
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+Impulse
+8
+Recall
+28
+Engage
+19
+What would I say?
+Session Timeline
+0 m
+  tapped: ^Give me a beat
+
+[Give me a beat] ANSWER in 15645ms len=1126 :: "Scar is clearly focused on the door, and the tension in the tavern is building. Nix wants to subtly assess the room while appearing casual. Nix slowly runs a finger around the rim of his tankard, tracing the small chip in the ceramic. He doesn't look at Scar, but his gaze sweeps across the faces in the tavern. Just trying to figure out who's likely to spill their ale on me firs"
+  shot: play-roleplay-give-me-a-beat-390.png
+  tapped: ^React
+
+[React] TIMEOUT in 200154ms len=0 :: ""
+  shot: play-roleplay-react-390.png
+  tapped: ^Raise the stakes
+
+[Raise the stakes] ANSWER in 16636ms len=1112 :: "Scar is clearly focused on the tavern door, anticipating trouble. The party has been discussing the missing ember sap shipments, and Nix wants to suggest a more direct approach to finding the source. Nix slowly reaches across the table and takes a small, half-eaten apple from Scar, polishing it on his sleeve. Less talking, more… visiting. Let’s pay a little call on whoever’s be"
+  shot: play-roleplay-raise-the-stakes-390.png
+  tapped: ^Land the moment
+
+[Land the moment] TIMEOUT in 200065ms len=0 :: ""
+  shot: play-roleplay-land-the-moment-390.png
+  tapped: ^Pull someone in
+
+[Pull someone in] ANSWER in 15643ms len=1084 :: "Scar is intensely focused on the tavern door, and the tavern is getting crowded. Nix wants to draw someone *in* to the group, a distraction for Scar and a potential ally. Nix spots a woman nursing a drink at the bar, looking a little lost. He subtly shifts his posture to mimic hers – a slight slump of the shoulders, a hand resting on her knee. Rough night for travel. You look l"
+  shot: play-roleplay-pull-someone-in-390.png
+
+
+===== AskBar / what would I say =====
+  field now: "What's happening? What do you want to do?"
+  field now: "Add a player"
+  field now: "Describe the scene or leave blank for a general prompt..."
+  field now: "Search mechanics..."
+
+
+===== Session Timeline / End Session =====
+--- rp-final (103) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "A crowded riverside tavern, rain outside Tense. Scar is watching the door."
+  btn: "Pull someone in"
+  btn: "Start the scene"
+  btn: "React"
+  btn: "Raise the stakes"
+  btn: "Land the moment"
+  btn: "Give me a beat"
+  btn: "I played it"
+  btn: "Another"
+  btn: "NEW"
+  btn: "Add player"
+  btn: "All"
+  btn: "Combat"
+  btn: "Social"
+  btn: "Discovery"
+  btn: "Perform 13"
+  btn: "Impulse 8"
+  btn: "Recall 28"
+  btn: "Engage 19"
+  btn: "Delete hook: Bring up Scar — what do they m"
+  btn: "Delete hook: Bring up Fate — what do they m"
+  btn: "Delete hook: Ask someone nearby about how y"
+  btn: "Delete hook: Ask someone nearby about what"
+  btn: "Delete hook: *Notice collects small, comfor"
+  btn: "Delete hook: *Notice subtly mimics the post"
+  btn: "Delete hook: *Your hands move instinctively"
+  btn: "Delete hook: *Your hands move instinctively"
+  btn: "Delete hook: Share a quiet moment of honest"
+  btn: "Delete hook: Ask the party what they plan t"
+  btn: "Delete hook: Mention something from your pa"
+  btn: "Delete hook: *Your protective of those he c"
+  btn: "Delete hook: *Your values practicality over"
+  btn: "Delete hook: *Offer to stand watch so other"
+  btn: "Delete hook: *Offer to heal someone who loo"
+  btn: "Delete hook: *Think about Selis and the Pen"
+  btn: "Delete hook: *Think about Rysanna's Disappe"
+  btn: "Delete hook: *Losing the warmth of his hear"
+  btn: "Delete hook: *Being seen as 'other' crosses"
+  btn: "What would I say?"
+  btn: "End Session"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+  shot: play-roleplay-timeline-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+A crowded riverside tavern, rain outside
+Tense. Scar is watching the door.
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+→ THE CIRCLE
+LIVE
+USE IT WHEN
+Scar is intensely focused on the tavern door, and the tavern is getting crowded. Nix wants to draw someone *in* to the group, a distraction for Scar and a potential ally.
+THE MOVE
+DO
+Nix spots a woman nursing a drink at the bar, looking a little lost. He subtly shifts his posture to mimic hers – a slight slump of the shoulders, a hand resting on her knee.
+SAY
+Rough night for travel. You look like you could use a dry spot and a warm cup.
+ASK
+You headed somewhere specific, or just letting the river decide?
+WHAT IT’S FOR
+This beat establishes Nix's protective nature and subtly tests the woman's openness. It also gives Scar a moment to relax his intense focus and allows the party to potentially gain an ally. The mimicry shows Nix's comfort in blending in.
+IF THEY BITE
+If she responds positively, ask about her destination and offer assistance. If she seems wary, offer a small comforting object from his collection (a smooth stone, a dried flower).
+WHERE IT CAN GO
+↗
+Wider — Alliance
+↗
+Darker — Suspicion
+↗
+Warmer — Comfort
+IF IT LANDS FLAT
+If she gives a short, dismissive answer, simply nod and say 'Fai

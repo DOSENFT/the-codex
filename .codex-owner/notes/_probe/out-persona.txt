@@ -1,0 +1,287 @@
+
+
+===== PREP / Persona — top level =====
+  shot: prep-persona-top-390.png
+PLAY
+PREP
+3/67
+Nix
+Identity
+9
+Persona Engine
+Last edited: 8/26/2026
+AI Suggest Traits
+Color Traits (flavor tics)
+collects small, comforting objects
+subtly mimics the posture of people he likes
+Core Traits (defining behaviors)
+protective of those he considers 'home'
+values practicality over ceremony
+Wants (motivations)
+to create a safe haven for others
+to discover the truth about his changeling heritage
+Fears (anxieties)
+losing the warmth of his hearth
+being seen as 'other'
+Losing those he loves; family
+Pressure Response
+Relationships
+Rival and slave to Dawson
+Decision Tree
+Default State
+DIALOGUE BANK
+13 lines
+Library
+Practice
+Quick-Draw
+Rehearsal
+Warmup
+Journal
+Combat
+Social
+Discovery
+Emotional
+Quiet
+AI Suggest (combat)
+QUICK ACCESS
+“Feel the warmth of the Hearth, and *burn*!”
+Tap to copy
+“A little fire to ease your passing, perhaps?”
+Tap to copy
+“Another ember to ash. Let's see if you can withstand the heat.”
+Tap to copy
+“The hearth protects those who stand with it. Don't falter!”
+Tap to copy
+SCENE RESPONSES
+Banked
+0
+Betrayal
+0 responses
+Victory
+0 responses
+Loss
+0 responses
+Discovery
+0 responses
+Confrontation
+0 responses
+Mercy
+0 responses
+Fear
+0 responses
+Joy
+0 responses
+Dialogue
+13
+Story
+27
+Voice
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does multiattack work?
+Extra Attack lets you attack multiple times when you take the Attack action. Each is a separate roll.
+Attack
+How does opportunity attack work?
+When an enemy leaves your reach without Disengaging, you can use your reaction to make one melee attack.
+Attack
+How do saving throws work?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the DC to resist
+--- persona (107) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "Identity 9"
+  btn: "AI Suggest Traits"
+  btn: "Remove collects small, comforting objects"
+  btn: "Remove subtly mimics the posture of people he likes"
+  btn: "Add to Color Traits (flavor tics)"
+  btn: "Remove protective of those he considers 'home'"
+  btn: "Remove values practicality over ceremony"
+  btn: "Add to Core Traits (defining behaviors)"
+  btn: "Remove to create a safe haven for others"
+  btn: "Remove to discover the truth about his changeling heritage"
+  btn: "Add to Wants (motivations)"
+  btn: "Remove losing the warmth of his hearth"
+  btn: "Remove being seen as 'other'"
+  btn: "Remove Losing those he loves; family"
+  btn: "Add to Fears (anxieties)"
+  btn: "Remove Rival and slave to Dawson"
+  btn: "Add to Relationships"
+  btn: "Library"
+  btn: "Practice"
+  btn: "Quick-Draw"
+  btn: "Rehearsal"
+  btn: "Combat"
+  btn: "Social"
+  btn: "Discovery"
+  btn: "Emotional"
+  btn: "Quiet"
+  btn: "AI Suggest (combat)"
+  btn: "“Feel the warmth of the Hearth, and *burn*!” Tap to copy"
+  btn: "“A little fire to ease your passing, perhaps?” Tap to copy"
+  btn: "“Another ember to ash. Let's see if you can withstand the heat.” Tap to copy"
+  btn: "“The hearth protects those who stand with it. Don't falter!” Tap to copy"
+  btn: "Add a combat line"
+  btn: "Betrayal 0 responses"
+  btn: "Victory 0 responses"
+  btn: "Loss 0 responses"
+  btn: "Discovery 0 responses"
+  btn: "Confrontation 0 responses"
+  btn: "Mercy 0 responses"
+  btn: "Fear 0 responses"
+  btn: "Joy 0 responses"
+  btn: "Dialogue 13"
+  btn: "Story 27"
+  btn: "Voice"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Character"
+  btn: "Grimoire"
+  btn: "Persona"
+  btn: "Academy"
+  NOT FOUND/offscreen: ^Dialogue Bank
+  tapped: ^Library
+
+-- ^Library --
+   
+  shot: prep-persona-library-390.png
+  tapped: ^Practice
+
+-- ^Practice --
+   Generate Scenario
+  shot: prep-persona-practice-390.png
+  tapped: ^Quick-Draw
+
+-- ^Quick-Draw --
+   Start Quick-Draw
+  shot: prep-persona-quick-draw-390.png
+  tapped: ^Rehearsal
+
+-- ^Rehearsal --
+   Guided | Solo | Improv | Select a line to get full coaching, then practice and rate yourself. | “Feel the warmth of the Hearth, and *burn*!” | “A little fire to ease your passing, perhaps?” | “Another ember to ash. Let's see if you can withstand the heat.” | “The hearth protects those who stand with it. Don't falter!”
+  shot: prep-persona-rehearsal-390.png
+  tapped: ^Warmup
+
+-- ^Warmup --
+   Pre-Session Warmup | A quick 5-step routine to get you into character before your session. | Start Warmup
+  shot: prep-persona-warmup-390.png
+  tapped: ^Journal
+
+-- ^Journal --
+   USAGE OVERVIEW | Lines practiced | Unused | Day streak | Warmups done | GROWTH | Total practices | Best streak | Guided+ | Improv level | AI Coaching Insight | Practice some lines first to get AI coaching insights. | BADGES | First Social Line | Practice your first social dialogue line | Battle Cry | Practice 3 combat lines | Consistent | Practice 5 days in a row | Masterful | Get a line to Improv level | Versatile | Practice lines in 4 different contexts | Gold Standard | Get 5 "Nailed It" ratings in a row | Warming Up | Complete your first warmup | Dedicated | Complete 10 warmups
+  shot: prep-persona-journal-390.png
+  NOT FOUND/offscreen: ^Scene Responses
+  tapped: ^Story
+
+-- ^Story --
+   BACKSTORY BUILDER | AI Generate Backstory | Origin | Where are you from? Family? Formative event? | Key Memories | 8 | 10 | Unresolved Threads | Personality Seeds | 10
+  shot: prep-persona-story-390.png
+  tapped: ^Voice
+
+-- ^Voice --
+   ACCENT LIBRARY | Choose an accent to practice for your character | Dwarven (Scottish-Inspired) | 6 rules | Gruff, rolling Rs, clipped consonants. Think Gimli meets a Highland warrior. | Practice this accent | Elvish (Welsh/Ethereal) | 6 rules | Melodic, flowing vowels, soft consonants. Timeless and slightly distant. | Practice this accent | Orcish (Guttural) | 6 rules | Deep, guttural, emphasis on hard consonants. Raw power in every word. | Practice this accent | Noble Court (RP English) | 6 rules | Crisp received pronunciation, measured delivery, effortless authority. | Practice this accent | Pirate (West Country) | 6 rules | Swashbuckling, rolling Rs, dropped Hs, playful menace. | Practice this accent | Fey (Ethereal/Whimsical) | 6 rules | Airy, playful, unpredictable. Singsong quality with sudden shifts. | Practice this accent | Infernal/Tiefling (Eastern European) | 6 rules | Dark, p
+  shot: prep-persona-voice-390.png
+  NOT FOUND/offscreen: ^Accent
+  NOT FOUND/offscreen: ^Backstory
+
+
+===== Persona AI buttons =====
+  NOT FOUND/offscreen: AI Suggest Traits
+  NOT FOUND/offscreen: AI Suggest
+  NOT FOUND/offscreen: Suggest Traits
+  NOT FOUND/offscreen: Generate

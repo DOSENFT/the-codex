@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5191",
+      "localStorage": [
+        {
+          "name": "codex-sw-off",
+          "value": "1"
+        }
+      ]
+    }
+  ]
+}

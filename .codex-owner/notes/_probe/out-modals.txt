@@ -1,0 +1,94 @@
+  tapped: Add Weapon
+
+-- Add Weapon -- new UI (23 lines):
+   NEW WEAPON | BASIC | Melee | Ranged | DAMAGE | PROPERTIES | Finesse | Heavy | Light | Versatile | Thrown | Ammunition | Loading | Special | Nick | Topple | Vex | Cleave | Push | Slow | Sap | ADVANCED | Cancel
+   inputs: Weapon name ~ select-one ~ select-one ~ Damage dice (1d8) ~ Damage type ~ Range (e.g. 5 ft, 20/60 ft) ~ Custom property... ~ Add equipment... ~ Add supply... ~ What is the party currently doing? What's the objective? ~ The number your 1d20 showed ~ Search mechanics...
+  shot: prep-character-add-weapon-390.png
+  tapped: Cancel
+  tapped: Add Feat
+
+-- Add Feat -- new UI (14 lines):
+   NEW FEAT | NAME | DESCRIPTION | SOURCE | Xanathar's | Tasha's | Homebrew | Homebrew | EFFECTS | ABILITY INCREASE (OPTIONAL) | None | PREREQUISITES (OPTIONAL) | TACTICAL NOTE (OPTIONAL) | Cancel
+   inputs: Add equipment... ~ Add supply... ~ Feat name (e.g. Sentinel) ~ What does this feat do? ~ select-one ~ checkbox ~ Add an effect... ~ select-one ~ e.g. STR 13, Proficiency with heavy armor ~ How to use this feat in combat... ~ What is the party currently doing? What's the objective? ~ The number your 1d20 showed ~ Search mechanics...
+  shot: prep-character-add-feat-390.png
+  tapped: Cancel
+  tapped: New pool
+
+-- New pool -- new UI (18 lines):
+   New pool | points · long rest | NAME | CURRENT | MAX | UNIT | points | uses | dice | RECHARGES ON | short rest | long rest | dawn | never | NOTE | Shown wherever this pool is, including at the table. | A pool needs a name before it can be saved. | Cancel
+   inputs: Add equipment... ~ Add supply... ~ Hearthfire ~ text ~ text ~ textarea ~ What is the party currently doing? What's the objective? ~ The number your 1d20 showed ~ Search mechanics...
+  shot: prep-character-new-pool-390.png
+  tapped: Cancel
+  tapped: New condition
+
+-- New condition -- new UI (15 lines):
+   New condition | NAME | WHAT IT DOES | Shown verbatim at the table, whether or not the app can enforce it. | IT STOPS YOU TAKING | action | bonus | reaction | move | Anything chosen here really is refused while the condition is on you. | AND IT ALSO | disadvantage on your attacks | advantage against you | A condition needs a name before it can be saved. | Cancel
+   inputs: Add equipment... ~ Add supply... ~ Hearthbound ~ textarea ~ What is the party currently doing? What's the objective? ~ The number your 1d20 showed ~ Search mechanics...
+  shot: prep-character-new-condition-390.png
+  tapped: Cancel
+  *** DOWNLOAD: codex-nix-lvl7.json
+   save err Error: download.saveAs: canceled
+  tapped: Export Character
+
+-- Export Character -- new UI (0 lines):
+   
+   inputs: Add equipment... ~ Add supply... ~ What is the party currently doing? What's the objective? ~ The number your 1d20 showed ~ Search mechanics...
+  shot: prep-character-export-character-390.png
+  NOT FOUND/offscreen: Cancel
+  CLICK FAILED: Close TimeoutError: locator.click: Timeout 8000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /Close/i
+  NOT FOUND/offscreen: Done
+  NOT FOUND/offscreen: ^Back
+
+
+===== Skill cycling: tap Acrobatics bonus 3x =====
+  now: Acrobatics: proficient. Tap to change.
+  now: Acrobatics: expertise. Tap to change.
+  now: Acrobatics: not proficient. Tap to change.
+  shot: prep-character-skill-cycled-390.png
+  persisted: {"prof":["Athletics","Persuasion"],"exp":[]}
+
+
+===== Study Strength / study a skill =====
+  tapped: Study Strength
+  shot: prep-character-study-strength-390.png
+Strength saving throws (resisting being pushed, restrained, or knocked prone)
+Carrying capacity and push/drag/lift limits
+Jump distance
+HOW TO INCREASE
+Ability Score Improvement (ASI) at class-specific levels
+Half-feats that grant +1 STR (e.g., Tavern Brawler, Heavy Armor Master)
+Magic items (Gauntlets of Ogre Power, Belt of Giant Strength)
+Spells: Enhance Ability (Bull's Strength), enlarge effect
+Passive Perception: 11
+Spell DC: 14
+Spell Atk: +6
+Skills
+2 prof
+
+Tap the bonus to cycle: none → proficient → expertise. Tap the skill name to study it.
+
+Acrobatics
+(DEX)
++1
+Animal Handling
+(WIS)
++1
+Arcana
+(INT)
+-1
+Athletics
+(STR)
++7
+Deception
+(CHA)
++3
+History
+(INT)
+-1
+Insight
+(WIS)
++1
+Intimidation
+

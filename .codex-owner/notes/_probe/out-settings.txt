@@ -1,0 +1,86 @@
+
+
+===== baseline =====
+{"hp":{"max":67,"current":3},"slots":{"1":{"max":4,"current":4},"2":{"max":3,"current":2},"3":{"max":2,"current":2}}}
+
+
+===== Settings > Long Rest =====
+  shot: chrome-settings-long-rest-390.png
+after Long Rest: {"hp":{"max":67,"current":3},"slots":{"1":{"max":4,"current":4},"2":{"max":3,"current":2},"3":{"max":2,"current":2}}}
+
+
+===== Settings > Short Rest =====
+after Short Rest: {"hp":{"max":67,"current":3},"slots":{"1":{"max":4,"current":4},"2":{"max":3,"current":2},"3":{"max":2,"current":2}}}
+
+
+===== Settings > Level Up to 8 =====
+  shot: chrome-settings-level-up-390.png
+after Level Up: {"level":8,"hp":{"max":67,"current":3},"slots":{"1":{"max":4,"current":4},"2":{"max":3,"current":2},"3":{"max":2,"current":2}}}
+
+
+===== Settings > Copy/Paste Backstory + Export/Import present =====
+BACKSTORY TRANSFER |  | Copy Backstory | Paste Backstory |  | Copy backstory on one device, text it to yourself, paste on the other. Only backstory is affected — nothing else changes. |  | Switch Character | New Character | Delete Character | REST MANAGEMENT | Short Rest |  | Restores class features that recharge on a short rest (e.g., Channel Divinity, Second Wind). Does n
+
+
+===== Close settings, open character sheet (print record) =====
+  shot: chrome-character-sheet-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+Oath of the Hearth
+Round 1
+Roll
+Look up
+Reset
+Start Combat
+3 / 67
+AC 18
+Bloodied
+Damage
+Heal
+Temp HP
+ACTIVE CONDITIONS
+None
+Aura of Protection
+You radiate an aura that makes you and friendly creatures within 10 feet of y...
+Aura of Solace
+You and allies within your Aura of Protection have resistance to Fire, Cold, ...
+1st
+2nd
+3rd
+Your sheet and the 2024 rules disagree on 1 thing
+YOUR TURN
+14 ready
+ACTION
+7 ready
+0 of 2 used
+OPEN
+−
+The Dawn Guardian
+Action
++7 to hit (STR +4 + prof) · 1d10+4 Slashing · 10 ft · Magical · Two-Handed · Reach · Graze
+Hearthfire Manifest
+Action
+See description · At will
+Bless
+competes
+Action · 1st-level slot
+30 ft · Conc 1 min · a Holy Symbol worth 5+ GP
+Burning Hands
+competes
+Action · 1st-level slot
+3d6 Fire · DC 14 DEX · 15-ft Cone
+Faerie Fire
+competes
+Action · 1st-level slot
+DC 14 DEX · 60 ft · Conc 1 min · negates
+Scorching Ray
+competes
+Action · 2nd-level slot
++6 · 2d6 Fire · 120 ft
+Warding Bond
+competes
+Action · 2nd-level slot
+Touch

@@ -1,0 +1,699 @@
+
+
+===== PLAY / Roleplay cockpit =====
+  shot: play-roleplay-cockpit-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+WHERE ARE YOU
+WHAT THE ROOM FEELS LIKE
+That’s the scene
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+Ask for a beat and you get a whole move — when to use it, what to say or do, what it’s for, where to take it next, and how to get out if it lands flat.
+Add the people at your table below and it will aim them at whoever has been quiet longest.
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+Impulse
+8
+Recall
+28
+Engage
+19
+What would I say?
+Session Timeline
+0 moments
+Your RP timeline builds as you play
+End Session
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does multiattack work?
+Extra Attack lets you attack multiple times when you take the Attack action. Each is a separate roll.
+Attack
+How does opportunity attack work?
+When an enemy leaves your reach without Disengaging, you can use your reaction to make one melee attack.
+Attack
+How do saving throws work?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the DC to resist the effect.
+Saving Throw
+What is an ability check?
+Roll d20 + ability modifier + proficiency bonus (if proficient in the relevant skill). Meet or beat the DC.
+Ability Check
+How does advantage/disadvantage work?
+Roll 2d20. With advantage, take the higher. With disadvantage, take the lower. They cancel each other out.
+Ability Check
+What is proficiency bonus?
+A bonus that scales with your total character level: +2 at levels 1-4, increasing to +6 at levels 17-20.
+Ability Check
+What happens at 0 HP?
+You fall unconscious and start m
+--- roleplay (101) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "That’s the scene"
+  btn: "Pull someone in"
+  btn: "Start the scene"
+  btn: "React"
+  btn: "Raise the stakes"
+  btn: "Land the moment"
+  btn: "Give me a beat"
+  btn: "NEW"
+  btn: "Add player"
+  btn: "All"
+  btn: "Combat"
+  btn: "Social"
+  btn: "Discovery"
+  btn: "Perform 13"
+  btn: "Impulse 8"
+  btn: "Recall 28"
+  btn: "Engage 19"
+  btn: "Delete hook: Bring up Scar — what do they m"
+  btn: "Delete hook: Bring up Fate — what do they m"
+  btn: "Delete hook: Ask someone nearby about how y"
+  btn: "Delete hook: Ask someone nearby about what"
+  btn: "Delete hook: *Notice collects small, comfor"
+  btn: "Delete hook: *Notice subtly mimics the post"
+  btn: "Delete hook: *Your hands move instinctively"
+  btn: "Delete hook: *Your hands move instinctively"
+  btn: "Delete hook: Share a quiet moment of honest"
+  btn: "Delete hook: Ask the party what they plan t"
+  btn: "Delete hook: Mention something from your pa"
+  btn: "Delete hook: *Your protective of those he c"
+  btn: "Delete hook: *Your values practicality over"
+  btn: "Delete hook: *Offer to stand watch so other"
+  btn: "Delete hook: *Offer to heal someone who loo"
+  btn: "Delete hook: *Think about Selis and the Pen"
+  btn: "Delete hook: *Think about Rysanna's Disappe"
+  btn: "Delete hook: *Losing the warmth of his hear"
+  btn: "Delete hook: *Being seen as 'other' crosses"
+  btn: "What would I say?"
+  btn: "End Session"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+  tapped: Start the scene
+  shot: play-roleplay-scene-started-390.png
+
+--- after start ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+WHERE ARE YOU
+WHAT THE ROOM FEELS LIKE
+That’s the scene
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+Impulse
+8
+Recall
+28
+Engage
+19
+What would I say?
+Session Timeline
+0 moments
+Your RP timeline builds as you play
+End Session
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does multiattack work?
+Extra Attack lets you attack multiple times when you take the Attack action. Each is a separate roll.
+Attack
+How does opportunity attack work?
+When an enemy leaves your reach without Disengaging, you can use your reaction to make one melee attack.
+Attack
+How do saving throws work?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the DC to resist the effect.
+Saving Throw
+What is an ability check?
+Roll d20 + ability modifier + proficiency bonus (if proficient in the relevant skill). Meet or beat the DC.
+Ability Check
+How does advantage/disadvantage work?
+Roll 2d20. With advantage, take the higher. With disadvantage, take the lower. They cancel each other out.
+Ability Check
+What is proficiency bonus?
+A bonus that sca
+--- after-start (101) ---
+  btn: "PLAY"
+  btn: "PREP"
+  btn: "Open settings"
+  btn: "Open The Toybox"
+  btn: "Open mechanics reference"
+  btn: "Nix"
+  btn: "That’s the scene"
+  btn: "Pull someone in"
+  btn: "Start the scene"
+  btn: "React"
+  btn: "Raise the stakes"
+  btn: "Land the moment"
+  btn: "Give me a beat"
+  btn: "NEW"
+  btn: "Add player"
+  btn: "All"
+  btn: "Combat"
+  btn: "Social"
+  btn: "Discovery"
+  btn: "Perform 13"
+  btn: "Impulse 8"
+  btn: "Recall 28"
+  btn: "Engage 19"
+  btn: "Delete hook: Bring up Scar — what do they m"
+  btn: "Delete hook: Bring up Fate — what do they m"
+  btn: "Delete hook: Ask someone nearby about how y"
+  btn: "Delete hook: Ask someone nearby about what"
+  btn: "Delete hook: *Notice collects small, comfor"
+  btn: "Delete hook: *Notice subtly mimics the post"
+  btn: "Delete hook: *Your hands move instinctively"
+  btn: "Delete hook: *Your hands move instinctively"
+  btn: "Delete hook: Share a quiet moment of honest"
+  btn: "Delete hook: Ask the party what they plan t"
+  btn: "Delete hook: Mention something from your pa"
+  btn: "Delete hook: *Your protective of those he c"
+  btn: "Delete hook: *Your values practicality over"
+  btn: "Delete hook: *Offer to stand watch so other"
+  btn: "Delete hook: *Offer to heal someone who loo"
+  btn: "Delete hook: *Think about Selis and the Pen"
+  btn: "Delete hook: *Think about Rysanna's Disappe"
+  btn: "Delete hook: *Losing the warmth of his hear"
+  btn: "Delete hook: *Being seen as 'other' crosses"
+  btn: "What would I say?"
+  btn: "End Session"
+  btn: "Open dice roller"
+  btn: "Close roll capture"
+  btn: "Log it"
+  btn: "d20"
+  btn: "1d8"
+  btn: "2d6"
+  btn: "Attacks"
+  btn: "Saving Throws"
+  btn: "Damage"
+  btn: "d4"
+  btn: "d6"
+  btn: "d8"
+  btn: "d10"
+  btn: "d12"
+  btn: "d20"
+  btn: "d100"
+  btn: "Decrease number of dice"
+  btn: "Increase number of dice"
+  btn: "Decrease modifier"
+  btn: "Increase modifier"
+  btn: "Normal"
+  btn: "Advantage"
+  btn: "Disadvantage"
+  btn: "Close mechanics reference"
+  btn: "All"
+  btn: "Attack"
+  btn: "Saving Throw"
+  btn: "Ability Check"
+  btn: "Damage"
+  btn: "How do I make an attack roll? Roll d20 + ability modifier + proficiency bonus (i"
+  btn: "How do critical hits work? On a natural 20, the attack hits automatically. Roll "
+  btn: "How does multiattack work? Extra Attack lets you attack multiple times when you "
+  btn: "How does opportunity attack work? When an enemy leaves your reach without Diseng"
+  btn: "How do saving throws work? Roll d20 + ability modifier + proficiency bonus (if p"
+  btn: "What is an ability check? Roll d20 + ability modifier + proficiency bonus (if pr"
+  btn: "How does advantage/disadvantage work? Roll 2d20. With advantage, take the higher"
+  btn: "What is proficiency bonus? A bonus that scales with your total character level: "
+  btn: "What happens at 0 HP? You fall unconscious and start making death saving throws "
+  btn: "How do death saves work? Roll d20 at the start of your turn: 10+ is a success, 9"
+  btn: "How does healing work? Healing restores HP up to your maximum. It cannot exceed "
+  btn: "What is temporary HP? Extra buffer HP that absorbs damage first. Does not stack "
+  btn: "How do conditions work? Conditions impose specific mechanical effects. They last"
+  btn: "How does grappling work? Use an attack to grab: your Athletics vs. their Athleti"
+  btn: "How does cover work? Half cover: +2 AC/DEX saves. Three-quarters cover: +5 AC/DE"
+  btn: "What are the action types in combat? Each turn: 1 Action + 1 Bonus Action + 1 Re"
+  btn: "How do bonus actions work? You get one per turn, but only if a feature or spell "
+  btn: "How do reactions work? One per round (resets at your turn start). Triggered by a"
+  btn: "What is the Help action? Give one ally advantage on their next ability check or "
+  btn: "How does Dodge action work? Until your next turn, attacks against you have disad"
+  btn: "How does concentration work? Only one concentration spell at a time. Take damage"
+  btn: "How do spell slots work? Spell slots are your fuel for casting. Each non-cantrip"
+  btn: "How does spellcasting work? Know or prepare spells, expend a slot to cast, use y"
+  btn: "What is spell save DC? 8 + proficiency bonus + spellcasting ability modifier. Th"
+  btn: "How do prepared spells work? After a long rest, choose spells from your class li"
+  btn: "Combat"
+  btn: "Grimoire"
+  btn: "Roleplay"
+  DISABLED: ^Give me a beat
+SKIP (absent/disabled): Give me a beat
+  DISABLED: ^React
+SKIP (absent/disabled): React
+  DISABLED: ^Raise the stakes
+SKIP (absent/disabled): Raise the stakes
+  DISABLED: ^Land the moment
+SKIP (absent/disabled): Land the moment
+  DISABLED: ^Pull someone in
+SKIP (absent/disabled): Pull someone in
+
+
+===== Roleplay sub-panels =====
+  NOT FOUND/offscreen: ^The table
+  tapped: ^Perform
+  shot: play-roleplay-perform-390.png
+
+--- ^Perform ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+WHERE ARE YOU
+WHAT THE ROOM FEELS LIKE
+That’s the scene
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+DIALOGUE LINES
+Feel the warmth of the Hearth, and *burn*!
+A little fire to ease your passing, perhaps?
+Another ember to ash. Let's see if you can withstand the heat.
+The hearth protects those who stand with it. Don't falter!
+Don't worry, friend. A warm hearth is always open to those who seek it.
+My oath compels me to offer comfort. Tell me, what troubles you?
+The hearth compels me to offer comfort. Tell me, what troubles you?
+I may shift my face, but my word is as solid as the stone of a good hearth.
+Sometimes, shifting faces feels like losing *myself* a little more each time. It’s exhausting, honestly.
+They thought we were lost, abandoned. But the hearth always welcomes those who return, doesn't it? It *should*.
+Just… a moment. Let me feel the warmth of the hearth.
+The 
+  tapped: ^Impulse
+  shot: play-roleplay-impulse-390.png
+
+--- ^Impulse ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+WHERE ARE YOU
+WHAT THE ROOM FEELS LIKE
+That’s the scene
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+Impulse
+8
+Ambush!
+Betrayal!
+Gift!
+Insult!
+Revelation!
+Death!
+Victory!
+Request!
+Recall
+28
+Engage
+19
+What would I say?
+Session Timeline
+0 moments
+Your RP timeline builds as you play
+End Session
+YOUR ROLL
+YOU ROLLED
+Log it
+Quick Set
+d20
+1d8
+2d6
+Character Presets
+Attacks
+Saving Throws
+Damage
+Die Type
+d4
+d6
+d8
+d10
+d12
+d20
+d100
+Number of dice
+1
+Modifier
++0
+Roll Mode
+Normal
+Advantage
+Disadvantage
+MECHANICS REFERENCE
+All
+Attack
+Saving Throw
+Ability Check
+Damage
+Conditions
+Action Economy
+Spellcasting
+How do I make an attack roll?
+Roll d20 + ability modifier + proficiency bonus (if proficient). Meet or beat the target's AC to hit.
+Attack
+How do critical hits work?
+On a natural 20, the attack hits automatically. Roll all damage dice twice, then add modifiers once.
+Attack
+How does m
+  tapped: ^Recall
+  shot: play-roleplay-recall-390.png
+
+--- ^Recall ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+WHERE ARE YOU
+WHAT THE ROOM FEELS LIKE
+That’s the scene
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+Impulse
+8
+Recall
+28
+RELATIONSHIPS
+Rival and slave to Dawson
+Selis (Childhood best friend, fellow changeling — taught him self-acceptance. Died in the fire he started.)
+Rysanna Lochai (Mother — changeling con artist whose manipulations shaped his distrust. Disappeared; body found in the woods, but doubts remain.)
+Scar (Found and saved a brain-damaged goliath. Partner, moral compass, grounding force. Unwavering loyalty. Only person besides the party who knows Nix is a changeling.)
+Fate (Wildfire spirit born from Selis's burning pendant. Part companion, part burden — reflects Nix's inner turmoil. Impulsive and mischievous, sometimes destructive.)
+The Silent Druid (Mysterious figure who saved Nix from the inferno and trained him in druidic magic. Motives unknown. Never spoke
+  tapped: ^Engage
+  shot: play-roleplay-engage-390.png
+
+--- ^Engage ---
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+WHERE ARE YOU
+WHAT THE ROOM FEELS LIKE
+That’s the scene
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+The table
+0
+NEW
+BETWEEN SCENES
+All
+Combat
+Social
+Discovery
+Emotional
+Perform
+13
+Impulse
+8
+Recall
+28
+Engage
+19
+ALL
+ASK
+OBSERVE
+CONNECT
+OFFER
+MUSE
+Add Hook
+Bring up Scar — what do they mean to you now?
+Bring up Fate — what do they mean to you now?
+Ask someone nearby about how you handle doubt in your oath
+Ask someone nearby about what justice means to you on the road
+*Notice collects small, comforting objects*
+*Notice subtly mimics the posture of people he likes*
+*Your hands move instinctively, remembering Selis and the Pendant*
+*Your hands move instinctively, remembering Rysanna's Disappearance*
+Share a quiet moment of honesty with someone in the group
+Ask the party what they plan to do when this is all over
+Mention something from your past that connects to the current situation
+*Your protective of those he considers 'home' nature moves you — offer t
+  NOT FOUND/offscreen: ^Session Timeline
+  NOT FOUND/offscreen: ^Timeline
+
+
+===== End Session =====
+  tapped: ^End Session
+  shot: play-roleplay-end-session-390.png
+PLAY
+PREP
+3/67
+Nix
+Nix
+protective of those he considers 'home'
+values practicality over ceremony
+WHERE ARE YOU
+WHAT THE ROOM FEELS LIKE
+That’s the scene
+Pull someone in
+Start the scene
+React
+Raise the stakes
+Land the moment
+Give me a beat
+→ THE CIRCLE
+LIVE
+USE IT WHEN
+The party has just entered a relatively quiet, slightly rundown tavern. There's a low hum of conversation and the smell of stale ale.
+THE MOVE
+DO
+Nix scans the room, subtly mimicking the slumped posture of a weary-looking dwarf nursing a drink in the corner. He then walks to the bar, placing his shield against the counter with a soft thud.
+SAY
+Strong ale. Something that tastes like it's seen a few seasons.
+ASK
+Anything interesting happen here lately, barkeep?
+WHAT IT’S FOR
+This beat establishes Nix's observant nature and subtly hints at his changeling ability (mimicry). It also opens a line of inquiry to learn about the local area and potential problems, fitting his protective nature. It's a low-pressure opening that invites information.
+IF THEY BITE
+If the barkeep responds with a story, ask follow-up questions about the details. If the barkeep is gruff, offer to buy a round for the whole bar to loosen their tongues.
+
