@@ -1,0 +1,7 @@
+# raw dumps and slice images from one-off probe runs; the conclusions they
+# produced are in the notes, and the scripts beside this file reproduce them
+*.txt
+*.json
+out-b/
+slices/
+dl/

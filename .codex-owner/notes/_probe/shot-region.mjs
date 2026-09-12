@@ -1,0 +1,24 @@
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import { readdirSync } from 'node:fs';
+const req = createRequire(import.meta.url);
+const npxRoot = 'C:/Users/marcu/AppData/Local/npm-cache/_npx';
+const paths = [process.cwd(), ...readdirSync(npxRoot).map(d => `${npxRoot}/${d}/node_modules`)];
+const pw = await import(pathToFileURL(req.resolve('playwright', { paths })).href);
+const chromium = pw.chromium ?? pw.default?.chromium;
+const f = pathToFileURL('C:/Users/marcu/Documents/Powerhouse/projects/the-codex/docs/owner-plan/index.html').href;
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 1280, height: 1000 }, deviceScaleFactor: 1 });
+const p = await ctx.newPage();
+await p.goto(f, { waitUntil: 'load' });
+await p.waitForTimeout(500);
+const box = await p.evaluate(() => {
+  const s = document.querySelector('#s2'), fig = document.querySelector('figure.shots');
+  const a = s.getBoundingClientRect(), c = fig.getBoundingClientRect();
+  return { sectionRight: Math.round(a.right), figRight: Math.round(c.right), figLeft: Math.round(c.left), wrapRight: Math.round(document.querySelector('.wrap').getBoundingClientRect().right) };
+});
+console.log(JSON.stringify(box));
+await p.evaluate(() => document.querySelector('#s2').scrollIntoView());
+await p.waitForTimeout(300);
+await p.screenshot({ path: '.codex-owner/notes/_probe/slices/region-s2.png' });
+await b.close();
