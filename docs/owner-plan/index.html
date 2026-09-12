@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The Codex, run 1: what I found in the code, the vault and the Studio documents, the product I am pointing it at, the eleven-milestone roadmap, and the five questions only the owner can answer.">
+<title>The Codex: owner's plan, run 1</title>
+<style>
+  @font-face { font-family: "Cinzel"; src: url("fonts/cinzel-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+  @font-face { font-family: "Plex"; src: url("fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Plex"; src: url("fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+  @font-face { font-family: "Mono"; src: url("fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+
+  :root {
+    --void-0: #0a0a08;
+    --void-1: #12110e;
+    --void-2: #1c1a15;
+    --ink: #f0e6d3;
+    --ink-2: #bfb5a0;
+    --ink-3: #979182;
+    --gold: #d4a74a;
+    --gold-lit: #e8c87a;
+    --ember: #e8924a;
+    --verdant: #39d98a;
+    --bronze: #a48c66;
+    --rule: #2a2620;
+    --sans: "Plex", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Cinzel", Georgia, serif;
+    --mono: "Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--void-0);
+    background-image: radial-gradient(120% 60% at 50% -10%, #1a1712 0%, #0a0a08 62%);
+    background-repeat: no-repeat;
+    color: var(--ink-2);
+    font: 400 17px/1.66 var(--sans);
+    letter-spacing: 0.003em;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px 120px; }
+
+  /* ---- masthead ---- */
+  header.top { padding: 64px 0 0; border-bottom: 1px solid var(--rule); }
+  .eyebrow {
+    font: 400 12px/1 var(--mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--bronze);
+    margin: 0 0 22px;
+  }
+  h1 {
+    font: 600 clamp(34px, 6vw, 54px)/1.06 var(--display);
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 0 0 18px;
+    max-width: 17ch;
+  }
+  .standfirst { font-size: clamp(18px, 2.4vw, 21px); line-height: 1.55; color: var(--ink-2); max-width: 54ch; margin: 0 0 34px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px 28px; padding: 0 0 26px; font: 400 13px/1.5 var(--mono); color: var(--ink-3); }
+  .meta b { color: var(--ink-2); font-weight: 400; }
+  .meta .flag { color: var(--gold); }
+
+  /* ---- layout ---- */
+  .cols { display: block; }
+  nav.toc { border-bottom: 1px solid var(--rule); padding: 26px 0 30px; }
+  nav.toc p { font: 400 12px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--bronze); margin: 0 0 16px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px 32px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); counter-reset: toc; }
+  nav.toc a { color: var(--ink-2); text-decoration: none; display: block; font-size: 15px; padding: 6px 0; border-bottom: 1px solid transparent; }
+  nav.toc li { counter-increment: toc; }
+  nav.toc li a::before { content: counter(toc) "  "; font-family: var(--mono); font-size: 12px; color: var(--bronze); }
+  nav.toc li:last-child a::before { content: "-  "; }
+  nav.toc a:hover { color: var(--gold-lit); }
+
+  @media (min-width: 1080px) {
+    .cols { display: grid; grid-template-columns: 216px minmax(0, 1fr); gap: 72px; align-items: start; }
+    nav.toc { position: sticky; top: 0; border-bottom: 0; padding: 44px 0 0; }
+    nav.toc ol { grid-template-columns: 1fr; gap: 11px; }
+  }
+
+  /* ---- sections ---- */
+  section { padding: 58px 0 4px; border-top: 1px solid var(--rule); max-width: 68ch; }
+  section:first-of-type { border-top: 0; }
+  h2 { font: 600 clamp(24px, 3.4vw, 31px)/1.2 var(--display); color: var(--ink); margin: 0 0 26px; letter-spacing: -0.005em; }
+  h2 .n { font-family: var(--mono); font-size: 13px; color: var(--gold); letter-spacing: 0.14em; display: block; margin-bottom: 12px; font-weight: 400; }
+  h3 { font: 600 18px/1.4 var(--sans); color: var(--ink); margin: 38px 0 12px; }
+  p { margin: 0 0 18px; }
+  strong { color: var(--ink); font-weight: 600; }
+  em { color: var(--ink); font-style: italic; }
+  a { color: var(--gold-lit); text-decoration: none; border-bottom: 1px solid rgba(212, 167, 74, 0.35); }
+  a:hover { border-bottom-color: var(--gold-lit); }
+  a:focus-visible { outline: 2px solid var(--gold-lit); outline-offset: 3px; border-bottom-color: transparent; }
+  code { font: 400 0.87em/1.4 var(--mono); color: var(--ink-2); background: var(--void-2); padding: 1px 5px; border-radius: 2px; }
+  ul { margin: 0 0 18px; padding: 0 0 0 20px; }
+  li { margin: 0 0 9px; }
+  li::marker { color: var(--bronze); }
+
+  .lede { font-size: 20px; line-height: 1.5; color: var(--ink); max-width: 46ch; }
+
+  .verdict { border-left: 2px solid var(--gold); padding: 4px 0 4px 24px; margin: 0 0 30px; }
+  .verdict p:last-child { margin-bottom: 0; }
+
+  blockquote.one-sentence {
+    margin: 30px 0 34px; padding: 0 0 0 24px; border-left: 2px solid var(--gold);
+    font: 600 clamp(19px, 2.6vw, 23px)/1.42 var(--display); color: var(--ink); letter-spacing: -0.005em;
+  }
+
+  .tally { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 0 0 30px; }
+  .tally div { background: var(--void-1); padding: 16px 18px; }
+  .tally .v { font: 400 27px/1 var(--mono); color: var(--gold); display: block; margin-bottom: 8px; }
+  .tally .k { font-size: 13px; line-height: 1.4; color: var(--ink-3); }
+  .tally .bad .v { color: var(--ember); }
+  .tally .good .v { color: var(--verdant); }
+
+  figure { margin: 32px 0; }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); background: var(--void-1); }
+  figure.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
+  figure.shots figcaption { grid-column: 1 / -1; }
+  /* Above 1204px the right-hand column is exactly 844px wide, so the three phone
+     captures can step outside the 68ch reading measure and render nearer their
+     real size. Below that they stay inside it, because breaking out would push
+     them past the viewport. Either way each one links to the full-size file. */
+  @media (min-width: 1204px) { figure.shots { width: 844px; max-width: none; } }
+  figcaption { font: 400 13px/1.55 var(--mono); color: var(--ink-3); margin-top: 12px; }
+  figcaption b { color: var(--ink-2); font-weight: 400; }
+  .pair { display: grid; gap: 18px; }
+  .pair figure { margin: 0; }
+  @media (min-width: 620px) {
+    .pair { grid-template-columns: 1fr 1fr; align-items: start; }
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 0 0 28px; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 11px 14px 11px 0; border-bottom: 1px solid var(--rule); }
+  th { font: 400 12px/1.3 var(--mono); letter-spacing: 0.13em; text-transform: uppercase; color: var(--bronze); padding-top: 0; }
+  td.num, th.num { font-family: var(--mono); font-size: 13px; color: var(--gold); white-space: nowrap; width: 1%; padding-right: 18px; }
+  tbody + tbody tr:first-child td { border-top: 2px solid var(--bronze); }
+  .scroll { overflow-x: auto; }
+  .scroll table { min-width: 560px; }
+  #s4 th:first-child { width: 9ch; }
+  #s4 th:nth-child(2) { width: 11ch; }
+  #s5 th:last-child { width: 32%; }
+  #appendix th:first-child { width: 52%; }
+  /* Below 620px there is no room to scroll a table to: let it reflow instead of
+     silently cutting the column that carries the argument. */
+  @media (max-width: 620px) {
+    .scroll table { min-width: 0; }
+    th { width: auto; }
+    th, td, td code { overflow-wrap: anywhere; }
+    td.num, th.num { white-space: normal; width: auto; }
+    th, td { padding-right: 12px; }
+  }
+
+  .sums { font-family: var(--mono); font-size: 15px; line-height: 1.9; color: var(--ink); background: var(--void-1); border: 1px solid var(--rule); padding: 18px 20px; margin: 0 0 26px; white-space: pre; overflow-x: auto; }
+
+  .empty { border: 1px dashed var(--bronze); padding: 28px 24px; color: var(--ink-3); }
+
+  ol.q { list-style: none; margin: 0; padding: 0; counter-reset: q; }
+  ol.q li { counter-increment: q; border-top: 1px solid var(--rule); padding: 20px 0 20px 46px; position: relative; margin: 0; }
+  ol.q li::before { content: counter(q); position: absolute; left: 0; top: 20px; font: 400 13px/1.6 var(--mono); color: var(--gold); }
+  ol.q b { display: block; color: var(--ink); font-weight: 600; font-size: 17px; margin-bottom: 5px; }
+  ol.q span { font: 400 13px/1.5 var(--mono); color: var(--ink-3); }
+
+  .tag { font: 400 12px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 7px; border: 1px solid var(--rule); color: var(--ink-3); white-space: nowrap; }
+  .tag.wrong { color: var(--ember); border-color: rgba(232, 146, 74, 0.4); }
+  .tag.ok { color: var(--verdant); border-color: rgba(57, 217, 138, 0.35); }
+  .tag.unk { color: var(--bronze); }
+
+  footer { border-top: 1px solid var(--rule); margin-top: 64px; padding-top: 26px; font: 400 13px/1.7 var(--mono); color: var(--ink-3); max-width: 68ch; }
+
+  /* Printed, this page has to survive Chrome's default "background graphics: off",
+     so nothing may rely on a dark panel behind it. Every rule that hard-sets a light
+     colour for the screen is answered here; otherwise the headings, the bold claims,
+     the table headers and the captions all print near-white on white. */
+  @media print {
+    body { background: #fff; background-image: none; color: #1a1a1a; }
+    a, nav.toc a { color: #000; border-bottom-color: #999; }
+    h1, h2, h3, strong, em, .lede, blockquote.one-sentence, .sums,
+    ol.q b, td strong, td em, figcaption em { color: #000; }
+    .standfirst, figcaption, figcaption b, .meta, .meta b, footer, .empty,
+    ol.q span, .tally .k, code { color: #333; }
+    .eyebrow, th, nav.toc p { color: #4a4a4a; }
+    h2 .n, td.num, th.num, .meta .flag, .tally .v, .tally .bad .v, .tally .good .v,
+    ol.q li::before, nav.toc li a::before, li::marker { color: #555; }
+    .tag, .tag.wrong, .tag.ok, .tag.unk { color: #000; border-color: #999; }
+    .tally div, .sums, code, figure img { background: transparent; }
+    .tally, .tally div, .sums, .empty, figure img { border-color: #bbb; }
+    .verdict, blockquote.one-sentence { border-left-color: #555; }
+    th, td, section, nav.toc, header.top, footer { border-color: #ccc; }
+    nav.toc, .cols { display: block; }
+    nav.toc { position: static; }
+    section { break-inside: avoid; border-top: 1px solid #ccc; }
+    figure, tr { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">The Codex owner's plan · run 1 of many</p>
+  <h1>What I found, what I'm building, and what it costs.</h1>
+  <p class="standfirst">This run I read the code, ran the app, read your Studio documents and looked at everyone else who wants this job. No features built. Here is the plan, waiting for your yes.</p>
+  <div class="meta">
+    <span>11 September 2026</span>
+    <span>branch <b>owner/build</b></span>
+    <span>main <b>unchanged</b></span>
+    <span class="flag">roadmap waiting for approval</span>
+  </div>
+</header>
+
+<div class="cols">
+
+<nav class="toc">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#s1">Verdict</a></li>
+    <li><a href="#s2">What's here</a></li>
+    <li><a href="#s3">The product</a></li>
+    <li><a href="#s4">Where we win</a></li>
+    <li><a href="#s5">The roadmap</a></li>
+    <li><a href="#s6">How this fails</a></li>
+    <li><a href="#s7">Progress</a></li>
+    <li><a href="#s8">Questions for you</a></li>
+    <li><a href="#appendix">Claims and sources</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="s1">
+  <h2><span class="n">One</span>Verdict</h2>
+  <div class="verdict">
+    <p class="lede">It is much further along than "half-built". It is pointed at the wrong finish line, and nobody but you can get in the front door.</p>
+  </div>
+  <p>Of 59 features I could find and drive, <strong>48 work well</strong>. The turn screen is the best thing in the building: it reads the 2024 rules properly, counts your Extra Attack, greys out a second levelled spell because the rule says so. Real, tested work, not in danger.</p>
+  <p>Three things are broken and one is fatal: <strong>you cannot make a character</strong> unless the app can reach a model over the network. I tried twice; it timed out and saved nothing. Import is the only way in. The app has exactly one possible user, and he wrote it.</p>
+  <p>So the work isn't rescue. It's <strong>finishing</strong>, in an order that turns one person's instrument into something a stranger can buy. Eleven milestones, each one run. The first makes your next Friday better; the last two are yours, with four strangers' money as the test.</p>
+  <p>The direction I'm taking, and the one thing you must agree with, is in <a href="#s3">§3</a>: this is <em>a practice room</em>, sold once for $29, to the player; not a subscription, not to the dungeon master.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="n">Two</span>What's here</h2>
+  <p>Every number below came from running the app at 390×844 with a copy of your saved character, Nix. The feature-by-feature list is in <code>.codex-owner/notes/inventory.md</code>, a capture for each.</p>
+
+  <div class="tally">
+    <div class="good"><span class="v">48</span><span class="k">features work well</span></div>
+    <div><span class="v">8</span><span class="k">half-built</span></div>
+    <div class="bad"><span class="v">3</span><span class="k">broken</span></div>
+    <div><span class="v">2,098</span><span class="k">of the app's own tests pass</span></div>
+  </div>
+
+  <figure class="shots">
+    <a href="captures/play-turn-390.png"><img src="captures/play-turn-390.png" width="780" height="1688" decoding="async" alt="The Codex turn screen on a phone: action, bonus, reaction and movement bands with live counts."></a>
+    <a href="captures/prep-academy-top-390.png"><img src="captures/prep-academy-top-390.png" width="780" height="1688" decoding="async" alt="The practice panel showing the headings Physical Tics and Scene Instincts with nothing underneath them."></a>
+    <a href="captures/setup-forge-fail-390.png"><img src="captures/setup-forge-fail-crop-390.png" width="780" height="1220" decoding="async" alt="The character creation wizard's final step: the connection tests green, then a red banner says the model did not answer in time."></a>
+    <figcaption><b>The turn screen.</b> Works, and is why this is worth finishing. <b>The practice panel</b> prints two headings with nothing under them; traits are saved under one field name, read back under another. <b>The last step of making a character.</b> The connection tests green; the forge never returned. <em>Open a shot for full size.</em></figcaption>
+  </figure>
+
+  <h3>The safety net, built first</h3>
+  <p>Before touching anything I wrote <strong>15 flows and 97 checks</strong> that drive the real app in a real browser the way you do at the table: start combat, spend a slot, take damage, roll death saves, reopen it. Plus 5 that your saved character still opens field by field. All pass on untouched code, and from now on a change that breaks them gets undone. It runs on a <em>copy</em>; your original was never opened for writing.</p>
+
+  <h3>The vault and the Studio</h3>
+  <p>The vault cloned on the second attempt (the first died on 378&nbsp;MB of audio; the exact error is in <code>notes/vault.md</code>). It holds 20 real sessions of your game. A 499-line importer to read it already exists, with <strong>no script and no caller</strong>, aimed at a stale 16-session copy. It is wired to nothing, and I left it read-only.</p>
+  <p>The Studio documents contradict each other and the app: four pricing schemes 0×-16× apart, and the customer is the dungeon master in one and the player in another. <strong>Revenue to date: zero</strong>, in your own acquisition memo. Users, installs, signups: none found. Not a criticism: nothing has been disproved yet, so we choose.</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">Three</span>The product</h2>
+
+  <blockquote class="one-sentence">Every other D&amp;D tool remembers your character for you. The Codex is the only one that rehearses you into him: a practice room between sessions, and a six-second instrument at the table.</blockquote>
+
+  <p>"The only one" is load-bearing, so I checked it. Of the five products you named plus the two that really hold this job, <strong>none has a roleplay, voice or improv feature</strong>. <a href="https://www.dndbeyond.com/posts/2223-mid-year-update-d-d-beyonds-2026-development">D&amp;D Beyond's August 2026 roadmap</a> runs eight sections; <em>roleplay</em>, <em>voice</em>, <em>improv</em> and <em>narration</em> appear in none of them. They all store. Nobody practises.</p>
+
+  <h3>Who it's for: the player</h3>
+  <p>Specifically <strong>the player who is fine at the rules and freezes at the roleplay</strong>. The app is already a player's instrument and good at it; the market gap is on the player's side of the table; and you are that player. The counter-evidence is in <a href="#s6">§6</a>, and it is strong.</p>
+
+  <h3>The moment someone tells a friend</h3>
+  <p class="lede">The dungeon master turns and says your name, and you are already talking.</p>
+  <p>Nobody tells a friend about a screen. They tell a friend that <em>you</em> were good. Thursday: twenty minutes in the practice room: a scene, an aim, the voice, a line you say out loud. Friday: your turn arrives, the screen already knows what you can do, the mark burns, six seconds, head back up. The tellable thing is <strong>that you never looked down for long</strong>.</p>
+
+  <h3>The price: $29, once</h3>
+  <p>This argues with you, so here is the evidence. Every product that does what we do charges once: <a href="https://apps.apple.com/us/app/fight-club-5th-edition/id901057473">Fight Club 5e at $2.99</a>, <a href="https://apps.apple.com/us/app/fifth-edition-character-sheet/id967650851">Fifth Edition Character Sheet at $2.99</a>, <a href="https://foundryvtt.com/purchase/">Foundry at $50 perpetual</a>. The subscription band is $3-$5 a month and already has six occupants. Donations don't fund tools here either: on Patreon, Czepeku sell battle <em>maps</em> to <strong>16,554 paying patrons</strong>; <a href="https://www.owlbear.rodeo/">Owlbear Rodeo</a>, a working virtual tabletop, has <strong>33</strong>.</p>
+  <p>A subscription is also a promise of ongoing cost, and we have none: no server, nothing that gets dearer as more people use it. Charging rent for a house we don't heat is what killed the last two of these (<a href="#s6">§6</a>).</p>
+
+  <div class="sums">  $29.00   price
+×       4   strangers per month
+= $116.00   per month</div>
+  <p>Four sales a month clears your $100 goal. At an unverified 3% conversion that's about 133 visits a month, four or five a day, reachable from one well-received forum post. The subscription route to the same money is <strong>20 subscribers at $4.99 who all stay</strong>, re-earned every month forever. Worse odds, same money.</p>
+  <p>So: <strong>sell the instrument once, sell the practice repeatedly.</strong> The recurring line is accent packs, scene banks, a season of drills, bought when wanted, owned forever, no server. Same shape as the thing with 16,554 patrons. Whether anyone buys practice is untested, which is why milestone 10 is a paid test, not a launch.</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">Four</span>Where we win</h2>
+  <p>Two of your nine positions don't survive their sources, and one correction changes who we fight.</p>
+
+
+  <h3>The incumbent is not who you think</h3>
+  <div class="pair">
+    <figure>
+      <img src="ref/fightclub5e-appstore.png" width="1280" height="1000" decoding="async" alt="Apple App Store listing for Fight Club 5th Edition showing a 4.7 star rating and a one-time price.">
+      <figcaption><b>The real opponent.</b> Fight Club 5e: offline, no account, $2.99 once, 4.7★ from 3.9K ratings. <a href="https://apps.apple.com/us/app/fight-club-5th-edition/id901057473">Apple App Store</a>.</figcaption>
+    </figure>
+    <figure>
+      <img src="ref/dndbeyond-roadmap-2223-midyear.png" width="1280" height="1000" decoding="async" alt="D&amp;D Beyond's mid-year 2026 development roadmap post.">
+      <figcaption><b>The giant, scheduling itself out.</b> A player app "focused on making in-person play simpler", "likely early 2027", no roleplay anywhere in it. <a href="https://www.dndbeyond.com/posts/2223-mid-year-update-d-d-beyonds-2026-development">D&amp;D Beyond</a>, 18 Aug 2026.</figcaption>
+    </figure>
+  </div>
+  <p>You told me not to fight D&amp;D Beyond head-on. Half right, and the wrong half matters: it <em>isn't</em> the incumbent for this job; it has given itself another year and committed to no roleplay at all. The opponent we must beat is a <strong>$2.99 offline character sheet with 4.7 stars</strong>: cheap, fast, trusted, already on the phone. Every milestone in <a href="#s5">§5</a> names a comparator on those terms.</p>
+  <p>Meanwhile <a href="https://blog.roll20.net/posts/were-retiring-the-roll20-mobile-app-to-build-something-better-heres-why/">Roll20 retired its companion app</a> in February 2026 ("the current experience sucks"), and <a href="https://foundryvtt.com/article/faq/">Foundry says</a> it "does not support mobile devices as part of the core software". The phone, at a physical table, is vacant ground.</p>
+
+  <h3>Two of your numbers</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th scope="col">Your input</th><th scope="col">Verdict</th><th scope="col">What the source actually says</th></tr></thead>
+    <tbody>
+    <tr><td class="num">Hybrid play is 60%</td><td><span class="tag wrong">Wrong</span></td><td>The figure is real; the meaning isn't. Wizards' line is that 60% "switch between playing the game physically or online": people who <em>alternate modes</em>, not people using a phone beside a table. Don't use it. <a href="https://www.geekwire.com/2023/dungeons-dragons-in-2023-wizards-of-the-coast-reveals-planescape-revival-and-more/">GeekWire, May 2023</a></td></tr>
+    <tr><td class="num">A giant at 2.12 stars</td><td><span class="tag wrong">Wrong</span></td><td>Not true of any candidate you'd have meant. It's <a href="https://play.google.com/store/apps/details?id=com.endgame.everweave">Everweave on Google Play only</a> (2.1★); the <a href="https://apps.apple.com/us/app/everweave/id6747261740">same product is 4.3★ on Apple</a>. Drop the decimals and name the platform, or it falls over the first time someone checks.</td></tr>
+    <tr><td class="num">Beyond's roadmap</td><td><span class="tag ok">Confirmed</span></td><td>Post #2223, 18 Aug 2026, exactly as you said. <a href="https://www.dndbeyond.com/posts/2223-mid-year-update-d-d-beyonds-2026-development">Source</a></td></tr>
+    <tr><td class="num">Sigil as the warning</td><td><span class="tag ok">Confirmed</span></td><td>Both quoted phrases are in <a href="https://www.rascal.news/sigil-suffered-a-slow-ignoble-death/">Rascal News</a>; the shutdown terms are in <a href="https://dndbeyond-support.wizards.com/hc/en-us/articles/42550438974868-Sigil-Sunset-FAQ">Wizards' own notice</a>.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Your instincts held up better than your numbers. The marks burning, the undo, the cold start are all right, and two are further along than you think. The marks exist and are already cached for offline use; undo works, but is wired to one corner of the screen instead of the thing you mis-tap in the dark.</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">Five</span>The roadmap</h2>
+  <p>Eleven milestones. Each is one run's work, names the code it touches, names the thing it must beat with a saved picture, and carries eight checks. Nine are mine; the last two are yours, by hand. Full text in <code>ROADMAP.md</code>.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th scope="col" class="num">#</th><th scope="col">What you get</th><th scope="col">What it must beat</th></tr></thead>
+    <tbody>
+    <tr><td class="num">M1</td><td><strong>Take it back.</strong> Mis-tap a slot in the dark, one tap puts it back: every spend, not just reactions.</td><td>A pencil and the official spell sheet</td></tr>
+    <tr><td class="num">M2</td><td><strong>Open before you look at it.</strong> Cold start under a second, landing on your live turn.</td><td>A paper sheet already lying open</td></tr>
+    <tr><td class="num">M3</td><td><strong>A character you can make at the kitchen table.</strong> Start to finish in airplane mode, with the scores you chose.</td><td>Fifth Edition Character Sheet, $2.99</td></tr>
+    <tr><td class="num">M4</td><td><strong>Not just Paladins.</strong> All twelve classes, so your friends can use it.</td><td>Fight Club 5e, 4.7★</td></tr>
+    </tbody>
+    <tbody>
+    <tr><td class="num">M5</td><td><strong>The practice room remembers you.</strong> What you write shows up where you rehearse, and practice counts.</td><td>The personality box on the paper sheet</td></tr>
+    <tr><td class="num">M6</td><td><strong>Practice with no signal.</strong> It works on a bus, in a basement, on a plane.</td><td><a href="https://www.dndbeyond.com/forums/d-d-beyond-general/d-d-beyond-feedback/d-d-beyond-mobile-app-feedback/177353-offline-access-really-needs-to-improve-mobile">Beyond's offline story, in its users' words</a></td></tr>
+    <tr><td class="num">M7</td><td><strong>Rehearse the voice.</strong> Twenty minutes Thursday, not fumbling Friday. Nobody else sells this.</td><td>Handwritten 3×5 character cards</td></tr>
+    <tr><td class="num">M8</td><td><strong>A log nobody can rewrite.</strong> Your table's record is yours permanently, including from us.</td><td><a href="#s4">Sigil's ending</a></td></tr>
+    <tr><td class="num">M9</td><td><strong>A stranger can install it.</strong> Someone who's never met you is playing in five minutes.</td><td>Beyond's player-app first run</td></tr>
+    </tbody>
+    <tbody>
+    <tr><td class="num">M10</td><td><strong>Take money from four strangers.</strong> <em>Yours.</em> Price it, post it once, stop at four sales or four weeks.</td><td>$116 a month</td></tr>
+    <tr><td class="num">M11</td><td><strong>Real tables, real reviewers.</strong> <em>Yours.</em> Five tables, one session watched in silence, three reviewers smallest first.</td><td>Zero users, zero reviews</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h3>Milestone 1 in full, because it's the one you feel this week</h3>
+  <div class="pair">
+    <figure>
+      <a href="captures/play-undo-390.png"><img src="captures/play-undo-crop-390.png" width="780" height="828" decoding="async" alt="The bottom of the Codex turn screen: an Undo Bless control beside End Turn."></a>
+      <figcaption><b>What exists.</b> A working undo engine, narrowed to retaliations. The slot you mis-tap isn't covered.</figcaption>
+    </figure>
+    <figure>
+      <img src="ref/byhand-spell-sheet-slots.png" width="1070" height="1070" decoding="async" alt="The official 2024 spellcasting sheet, cropped to the Total and Expended spell-slot boxes.">
+      <figcaption><b>What it must beat.</b> Rubbing out a pencil tick in the "Expended" boxes. <a href="https://media.dndbeyond.com/compendium-images/phb/downloads/DnD_2024_Character-Sheet.pdf">Official 2024 sheet</a>, page 2.</figcaption>
+    </figure>
+  </div>
+  <p>It undoes slot spends, action, bonus, reaction and movement, damage, healing and temporary hit points. It says what it will undo before you press: "Undo Bless", never a bare "Undo". One tap, no scrolling, under 100 milliseconds, still working after a reload. Then two judges who've seen nothing else pick between our screen and the pencil, and ours wins twice.</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">Six</span>How this fails</h2>
+
+  <h3>1. The player doesn't open his wallet (the biggest one)</h3>
+  <p>Money here concentrates in the dungeon master. Wizards' then-president told investors most purchases come from DMs, "despite the fact that dungeon masters account for only 20% of the game's overall user base" (<a href="https://www.cnbc.com/2023/01/13/hasbro-delays-new-dungeons-dragons-licensing-rules.html">CNBC</a>). Three competitors price to exactly that: <a href="https://foundryvtt.com/article/faq/">Foundry</a> ("only one person (the host) needs to purchase"), <a href="https://www.dndbeyond.com/en/subscribe">D&amp;D Beyond</a> (one purchase, twelve players), <a href="https://www.owlbear.rodeo/pricing">Owlbear Rodeo</a> ("Perfect for DMs…"). One payer per table; everyone else rides free.</p>
+  <p>I'm taking that risk deliberately, because the evidence is about buying <em>content</em>, not <em>improvement</em>. Nobody has tested whether a player will pay to get better, because nobody has offered it. <span class="tag unk">Unverified</span> until M10 puts a price on a page. If four strangers don't buy, the answer isn't "market harder"; it's that we sell to the dungeon master, and M5-M7 change shape.</p>
+
+  <h3>2. The practice market may not exist</h3>
+  <p>No product sells roleplay practice today, so there is nothing to point at. That cuts both ways: <span class="tag unk">Unverified</span>. M10 tests it cheaply, before we build content for it.</p>
+
+
+  <h3>3. D&amp;D Beyond ships its player app early</h3>
+  <p>They've said early 2027 and said nothing about roleplay, but they have the licence, the audience and the books. If they ship in-person play well, M2, M3 and M9 stop being differences. M5-M7 still stand: the argument that the practice room is the point, not the accessory.</p>
+
+  <h3>4. The parts that use AI</h3>
+  <p>Twenty-seven files call a language model. Against your own local model, no keys, no fallback, <strong>21 of 21 features returned a usable, in-character result</strong>, in 6 to 26 seconds each. Two failures matter more than that score:</p>
+  <ul>
+    <li><strong>Character creation failed 2 of 2</strong>, timing out past 30 seconds and saving nothing. The one AI-gated path every new user must walk is the one that doesn't work. M3 removes the model from that path entirely.</li>
+    <li>The combat advisor told me Burning Hands uses a spell attack roll. It's a saving throw. Its answers aren't checked against the rules the rest of the app already knows. Recorded as a candidate, because nothing at the table should be asking a model anything.</li>
+  </ul>
+  <p>There is a larger risk in it. This hobby's institutions have turned against generative tools: the <a href="https://ennie-awards.com/revised-policy-on-generative-ai-usage/">ENNIE awards ban AI content outright</a>, <a href="https://help.drivethrurpg.com/hc/en-us/articles/12723312467095-General-Content-Guidelines">DriveThruRPG bans AI text and requires disclosure</a>, <a href="https://foundryvtt.com/article/ai-policy/">Foundry requires prepared content to be human-made</a>, <a href="https://dnd-support.wizards.com/hc/en-us/articles/26243094975252-Generative-AI-art-FAQ">Wizards tells its own creatives to refrain</a>, a long-standing D&amp;D artist <a href="https://www.dexerto.com/magic-the-gathering/mtg-and-dd-artist-dave-rapoza-quits-amid-wizards-ai-controversy-2463656/">quit over it</a>, and the Magic Arena team <a href="https://www.geekwire.com/2026/magic-the-gathering-arena-development-team-announces-its-successfully-unionized/">unionised partly over mandated AI usage</a>. You were right, and it is now policy: <strong>the pitch never mentions AI, the table never needs it, and every model-backed feature lives in preparation, is optional, and fails gracefully.</strong> Where it can't fail gracefully it gets removed, which is what M3 and M6 do.</p>
+
+  <h3>5. The pattern that ended the last four projects</h3>
+  <p>One person, eleven milestones, a history of half-built things. The defence is structural, not motivational: each milestone is one run with eight checks written before the work starts, and one that fails three times is marked blocked, leaving the app working. The safety net means the 48 things that work today can't quietly stop working while we build the rest.</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">Seven</span>Progress</h2>
+  <p class="empty">Nothing finished yet. This run was for understanding, protecting what works, and choosing a direction. From the next run on, every finished milestone appears here with before and after pictures and its measured numbers.</p>
+</section>
+
+<section id="s8">
+  <h2><span class="n">Eight</span>Questions for you</h2>
+  <p>Five things only you can decide. Each takes one word.</p>
+  <ol class="q">
+    <li><b>Approve the roadmap and its order?</b><span>yes / no / reorder</span></li>
+    <li><b>$29, paid once, no subscription?</b><span>yes / no / a number</span></li>
+    <li><b>Who we build for and price to, if the evidence stays ambiguous.</b><span>player / table / master</span></li>
+    <li><b>What name goes on the storefront? The app is "The Codex" and the Studio documents call it "Ash &amp; Archive".</b><span>Codex / Ash / other</span></li>
+    <li><b>May I read your vault's 20 real sessions into the app, still without writing to it?</b><span>yes / no / later</span></li>
+  </ol>
+</section>
+
+<section id="appendix">
+  <h2><span class="n">Appendix</span>Claims and sources</h2>
+  <p>Every factual claim on this page and where it came from. Local paths are in the repository.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th scope="col">Claim</th><th scope="col">Source</th></tr></thead>
+    <tbody>
+    <tr><td>48 features work well, 8 half-built, 3 broken, of 59 found</td><td><code>notes/inventory.md</code>, each with a capture and a code path</td></tr>
+    <tr><td>2,098 of the app's own tests pass on untouched code</td><td><code>npx vitest run</code>, 11 Sep 2026, in <code>inventory.md</code></td></tr>
+    <tr><td>Safety net: 15 flows, 97 browser checks, 5 saved-data checks, all passing</td><td><code>tests/safety-net/</code>, <code>npm run test:safety</code></td></tr>
+    <tr><td>Character creation failed twice, timing out past 30s, saving nothing</td><td><code>inventory.md</code>:735; <code>setup-forge-fail-390.png</code></td></tr>
+    <tr><td>The practice panel is empty: traits written and read under different field names</td><td><code>inventory.md</code>:592; <code>prep-academy-top-390.png</code></td></tr>
+    <tr><td>The vault holds 20 sessions; its importer has no caller and a stale target</td><td><code>notes/vault.md</code></td></tr>
+    <tr><td>Revenue zero; no users or signups found; four price schemes 0×-16× apart</td><td><code>notes/studio.md</code> §3, §6.1 (your acquisition memo)</td></tr>
+    <tr><td>No named competitor has a roleplay, voice or improv feature</td><td><code>notes/field.md</code>; every product's own pages, linked there</td></tr>
+    <tr><td>Beyond's player app is "likely early 2027" and lists no roleplay features</td><td><a href="https://www.dndbeyond.com/posts/2223-mid-year-update-d-d-beyonds-2026-development">dndbeyond.com/posts/2223</a></td></tr>
+    <tr><td>Roll20 retired its companion app in Feb 2026: "the current experience sucks"</td><td><a href="https://blog.roll20.net/posts/were-retiring-the-roll20-mobile-app-to-build-something-better-heres-why/">blog.roll20.net</a></td></tr>
+    <tr><td>Foundry "does not support mobile devices"; one host buys for the group</td><td><a href="https://foundryvtt.com/article/faq/">foundryvtt.com/article/faq</a></td></tr>
+    <tr><td>Fight Club 5e: offline, $2.99 once, 4.7★ from 3.9K ratings</td><td><a href="https://apps.apple.com/us/app/fight-club-5th-edition/id901057473">Apple App Store</a></td></tr>
+    <tr><td>Everweave is 2.1★ on Google Play and 4.3★ on Apple (same product)</td><td><a href="https://play.google.com/store/apps/details?id=com.endgame.everweave">Google Play</a> · <a href="https://apps.apple.com/us/app/everweave/id6747261740">Apple</a></td></tr>
+    <tr><td>The 60% "hybrid" figure means players who alternate physical and online play</td><td><a href="https://www.geekwire.com/2023/dungeons-dragons-in-2023-wizards-of-the-coast-reveals-planescape-revival-and-more/">GeekWire</a>, on Wizards' May 2023 briefing</td></tr>
+    <tr><td>Czepeku: 16,554 paying patrons for maps. Owlbear Rodeo, a full virtual tabletop: 33</td><td>Patreon public counts, 11 Sep 2026; <code>field.md</code></td></tr>
+    <tr><td>Foundry $50 perpetual; the subscription band is $3-$5 across six products</td><td><a href="https://foundryvtt.com/purchase/">foundryvtt.com/purchase</a>; <code>ref/SOURCES.md</code></td></tr>
+    <tr><td>Purchases concentrate in dungeon masters, who are 20% of players</td><td><a href="https://www.cnbc.com/2023/01/13/hasbro-delays-new-dungeons-dragons-licensing-rules.html">CNBC</a>, on Wizards' investor briefing</td></tr>
+    <tr><td>Sigil: "the video-game-ification of D&amp;D"; content inaccessible after shutdown</td><td><a href="https://www.rascal.news/sigil-suffered-a-slow-ignoble-death/">Rascal News</a> · <a href="https://dndbeyond-support.wizards.com/hc/en-us/articles/42550438974868-Sigil-Sunset-FAQ">Wizards</a></td></tr>
+    <tr><td>The hobby's institutions have turned against generative tools</td><td>Six primary sources, linked in <a href="#s6">§6</a></td></tr>
+    <tr><td>A player will pay $29 to get better at the table</td><td><span class="tag unk">Unverified</span> No comparable exists. M10 tests it.</td></tr>
+    <tr><td>Practice content will sell repeatedly</td><td><span class="tag unk">Unverified</span> Inferred from the Patreon gap, not measured.</td></tr>
+    <tr><td>Creators at Critical Role's level would recommend it</td><td><span class="tag unk">Unverified</span> No path found. No milestone depends on it.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Every capture, its URL and its fetch date is in <code>.codex-owner/ref/SOURCES.md</code>, including the pages that failed to load and were thrown away rather than kept.</p>
+</section>
+
+<footer>
+  <p>Written 11 September 2026 on branch <b>owner/build</b>. main unchanged; nothing pushed, published or spent.<br>
+  This page opens from the file system with no network. Every picture on it is a screen that was really running, or a page that was really fetched.</p>
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>
