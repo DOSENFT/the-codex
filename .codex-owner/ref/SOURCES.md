@@ -72,6 +72,38 @@ noted in the source-type column.
 | `foundryvtt-ai-policy.png` | https://foundryvtt.com/article/ai-policy/ | 2026-09-11 | **Claim 4G** — "Prepared content must be human-made", the "Zero AI" tag, and the carve-out that "Improvised content may be AI-generated… at runtime in direct response to end-user prompts" | Official platform policy |
 | `cnbc-dnd-undermonetized.png` | https://www.cnbc.com/2023/01/13/hasbro-delays-new-dungeons-dragons-licensing-rules.html | 2026-09-11 | **PART D** — the single best willingness-to-pay source: WotC President Cynthia Williams telling investors the brand is "really under-monetized" and that the vast majority of D&D purchases come from DMs, who are only 20% of the user base | Press report of a first-party investor briefing (403 to plain fetch; headless capture) |
 
+## By-hand comparator captures (what a table does today, on paper)
+
+The comparator set for "how a table does this today, by hand". Nothing here is drawn, mocked
+up or synthesised — every image is a render of an official Wizards of the Coast PDF, or a
+real photograph published on a public tabletop blog. PDF pages were rendered with pdf.js in
+headless Chromium at 1600px page width (crops at 2600px page width, then cropped — no upscaling,
+no retouching). Photo captures are screenshots of the source page itself so the byline and
+article title are visible inside the image as provenance.
+
+| File | Exact URL | Fetched | Job it illustrates | Source type |
+|---|---|---|---|---|
+| `byhand-official-character-sheet.png` | https://media.dndbeyond.com/compendium-images/phb/downloads/DnD_2024_Character-Sheet.pdf (page 1) | 2026-09-11 | The **current official** WotC character sheet, page 1 — the stats/combat page. Everything the hobby tracks by hand today: ability scores, proficiency, saves, skills, AC, HP, death saves, weapons, class features, species traits, feats. Linked as "2024 Character Sheet" from D&D Beyond's official Character Sheets resource page (https://www.dndbeyond.com/resources/1779-d-d-character-sheets); `dnd.wizards.com/resources/character-sheets` 301-redirects there | Official WotC PDF (2024 PHB downloads) |
+| `byhand-official-sheet-personality.png` | https://media.dndbeyond.com/compendium-images/phb/downloads/DnD_2024_Character-Sheet.pdf (page 2, right-hand column) | 2026-09-11 | **The roleplay comparator.** The entire roleplay real estate the current official sheet gives a player: three boxes — APPEARANCE, BACKSTORY & PERSONALITY (with a single `Alignment` line inside it), LANGUAGES. Note precisely: the 2024 sheet **collapsed** the old four named roleplay fields into one "Backstory & Personality" box. Who the character *is* gets one blank box; the combat math on page 1 gets a full page | Official WotC PDF (2024 PHB downloads), cropped panel |
+| `byhand-5e-sheet-personality-panel.png` | https://media.wizards.com/2022/dnd/downloads/DnD_5E_CharacterSheet_FormFillable.pdf (page 1, right-hand column) — same file also served as https://media.dndbeyond.com/compendium-images/marketing/dnd_5e_charactersheet_formfillable.pdf | 2026-09-11 | Supplementary. The **literal** PERSONALITY TRAITS / IDEALS / BONDS / FLAWS panel, as named on the official 5e (2014) sheet — the fields the hobby still speaks in, and the ones the 2024 sheet folded away. Four empty boxes, filled once at character creation in pencil, then rarely touched again: the by-hand baseline our practice features are measured against | Official WotC PDF (5e sheet set) |
+| `byhand-spell-sheet.png` | https://media.dndbeyond.com/compendium-images/phb/downloads/DnD_2024_Character-Sheet.pdf (page 2) | 2026-09-11 | The **official spellcasting page**: SPELL SLOTS levels 1–9 as Total/Expended diamond boxes (ticked and erased in pencil, every short/long rest) plus the CANTRIPS & PREPARED SPELLS table with per-row Concentration / Ritual / Material diamonds. This is the hand-tracked resource loop | Official WotC PDF (2024 PHB downloads) |
+| `byhand-index-card-npc.png` | https://slyflourish.com/3x5_campaign_design.html | 2026-09-11 | **Real photograph, not a mock-up**: Mike Shea's (Sly Flourish) own handwritten 3×5 prep cards spread on a table, in the article "3x5 Card Campaign Design" (7 January 2013). The NPC cards are legible and show the exact pattern — NPC name, then a bracketed *voice/inspiration* handle and a one-line descriptor: `Alice (Waitress)`, `Alexander Steelgrip (Paul)`, `Bonnie Blades (Middle)`, `Veris (Byron) — Wood Elf Ranger`, `Malosi (c.53)`. The article's own text: "We can use them for treasure cards, NPC notes, and even as an initiative tracker." This is the by-hand version of a character-voice card, and it is one line of pencil on a card that gets shuffled and lost | Public tabletop blog (Sly Flourish / Mike Shea), photo captured in its source page so byline and title are visible |
+
+Notes on what was *not* found, and what was checked, for the index-card capture:
+
+- Searched for public photos/scans of NPC or character-voice index cards across: `slyflourish.com`
+  ("Ten Ways to Use Index Cards", "3x5 Card Campaign Design", "Paizo Face Cards for the Lazy
+  Dungeon Master"), `gnomestew.com` ("Index Cards for Prep", "Tools of the Trade: Index Cards"),
+  `critical-hits.com` ("The Index Card Method Codex, Part 1"), `mapandkey.net` ("The Magic of
+  Index Cards"), `rpgready.com` ("The Efficient GM — Index Card Game Prep"), plus Wikimedia
+  Commons and Flickr.
+- Of those, **only `slyflourish.com/3x5_campaign_design.html` carried an actual photograph of
+  real handwritten cards.** Every other article was text-only or illustrated with book covers,
+  stock photos of empty card boxes, and product shots. Those are recorded here as checked-and-
+  rejected, not used.
+- Reddit (incl. `old.reddit.com`) remains blocked to this agent, as noted at the bottom of this
+  file. No Reddit content was used.
+
 ## Capture attempts that failed (recorded, not kept)
 
 | URL | Result |

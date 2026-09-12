@@ -13,3 +13,7 @@ tsconfig.tsbuildinfo
 cloudflared.exe
 dist-before
 dist-slice1
+
+# scratch capture scripts from the takeover run; the saved captures they
+# produced live in .codex-owner/ref/ and are what the notes cite
+_tmp
