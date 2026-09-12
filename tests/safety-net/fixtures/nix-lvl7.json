@@ -1,0 +1,500 @@
+{
+  "id": "b4816f64-24a7-4df2-bc9f-9078e07af95d",
+  "name": "Nix",
+  "class": "Paladin",
+  "subclass": "Oath of the Hearth",
+  "race": "Changeling",
+  "level": 7,
+  "spellcastingAbility": "Charisma",
+  "spellSaveDC": 14,
+  "spellAttackBonus": 6,
+  "proficiencyBonus": 3,
+  "armorClass": 18,
+  "hitPoints": {
+    "max": 67,
+    "current": 3
+  },
+  "conditions": [],
+  "deathSaves": {
+    "successes": 0,
+    "failures": 0
+  },
+  "tempHP": 0,
+  "spells": [
+    {
+      "name": "Bless",
+      "level": 1,
+      "school": "Enchantment",
+      "castingTime": "1 Action",
+      "range": "30 feet",
+      "components": "V, S, M (a pinch of salt and holy water)",
+      "duration": "1 minute",
+      "concentration": true,
+      "ritual": false,
+      "description": "Each creature you touch gains a d4 to attack rolls and saving throws.",
+      "higherLevels": "When you cast this spell using a spell slot of 2nd level or higher, the d4 becomes a d6, d8, d10, or d12.",
+      "prepared": true,
+      "source": "PHB 2024"
+    },
+    {
+      "name": "Burning Hands",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "1 Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "description": "A cone of flame erupts from your outstretched hand...",
+      "higherLevels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st.",
+      "prepared": true,
+      "source": "Homebrew"
+    },
+    {
+      "name": "Cure Wounds",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "1 Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "description": "You touch a creature and restore hit points...",
+      "higherLevels": "When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st.",
+      "prepared": false,
+      "source": "PHB 2024"
+    },
+    {
+      "name": "Faerie Fire",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "1 Action",
+      "range": "60 feet",
+      "components": "V, S, M (a pinch of phosphor)",
+      "duration": "1 minute",
+      "concentration": true,
+      "ritual": false,
+      "description": "A burst of colored light illuminates creatures...",
+      "higherLevels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st.",
+      "prepared": true,
+      "source": "Homebrew"
+    },
+    {
+      "name": "Shield of Faith",
+      "level": 1,
+      "school": "Abjuration",
+      "castingTime": "1 Bonus Action",
+      "range": "60 feet",
+      "components": "V, S, M (a small parchment with holy text)",
+      "duration": "10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "description": "A shimmering field appears around a creature...",
+      "prepared": true,
+      "source": "PHB 2024"
+    },
+    {
+      "name": "Scorching Ray",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "1 Action",
+      "range": "120 feet",
+      "components": "V, S, M (a tiny crystal)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "description": "You create up to three rays of searing light...",
+      "higherLevels": "When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d6 for each slot level above 2nd.",
+      "prepared": true,
+      "source": "Homebrew"
+    },
+    {
+      "name": "Warding Bond",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "1 Action",
+      "range": "30 feet",
+      "components": "V, S, M (a silver cord)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "description": "You create a mystical bond between yourself and another creature...",
+      "higherLevels": "When you cast this spell using a spell slot of 3rd level or higher, the amount of damage transferred increases by 1d6 for each slot level above 2nd.",
+      "prepared": true,
+      "source": "Homebrew"
+    }
+  ],
+  "spellSlots": {
+    "1": {
+      "max": 4,
+      "current": 4
+    },
+    "2": {
+      "max": 3,
+      "current": 2
+    },
+    "3": {
+      "max": 2,
+      "current": 2
+    }
+  },
+  "canPrepareSpells": true,
+  "maxPreparedSpells": 7,
+  "features": [
+    {
+      "name": "Divine Smite",
+      "level": 2,
+      "description": "When you hit with a melee weapon attack, you can expend a spell slot to deal extra radiant damage..."
+    },
+    {
+      "name": "Hearthfire Manifest",
+      "level": 3,
+      "description": "A manifestation (floating ember, dancing flame, or spirit) sheds bright light 10ft, dim light 10ft more. Range 30ft or extinguished. Summon/dismiss as Bonus Action. As a Reaction, expend one Channel Divinity use to transform it into a flaming cloak: gain Temporary HP equal to Paladin level + spellcasting ability modifier. While active, creatures hitting you with melee attacks take 1d10 Fire damage. Lasts until temp HP is depleted."
+    },
+    {
+      "name": "Aura of Protection",
+      "level": 6,
+      "description": "You radiate an aura that makes you and friendly creatures within 10 feet of you more resilient."
+    },
+    {
+      "name": "Aura of Solace",
+      "level": 7,
+      "description": "You and allies within your Aura of Protection have resistance to Fire, Cold, and Psychic damage."
+    }
+  ],
+  "homebrewNotes": "HOMEBREW SUBCLASS: Oath of the Hearth (Paladin)\nSource: Homebrew — patron Astera is Aesis the Shepherd.\nTenets: Tend the hearth with holy effort. Gather those in need of warmth and rest. Guard the hearth with flame within and without.\n\nOATH SPELLS (always prepared):\n- Level 3: Faerie Fire, Burning Hands\n- Level 5: Scorching Ray, Warding Bond\n- Level 9: Fireball, Beacon of Hope\n- Level 13: Wall of Fire, Fire Shield\n- Level 17: Flame Strike, Hallow\n\nSUBCLASS FEATURES:\nLevel 3 — Hearthfire Manifest: A manifestation (floating ember, dancing flame, or spirit) sheds bright light 10ft, dim light 10ft more. Range 30ft or extinguished. Summon/dismiss as Bonus Action. As a Reaction, expend one Channel Divinity use to transform it into a flaming cloak: gain Temporary HP equal to Paladin level + spellcasting ability modifier. While active, creatures hitting you with melee attacks take 1d10 Fire damage. Lasts until temp HP is depleted.\n\nLevel 7 — Aura of Solace: You and allies within your Aura of Protection have resistance to Fire, Cold, and Psychic damage.\n\nLevel 15 — Smoldering Smite: When you use a Magic action to cast Divine Smite, add 1d8 Fire damage to each smite. This Fire damage ignores resistance and immunity to Fire damage.\n\nLevel 20 — Hearth Warden: As a Bonus Action, imbue your Aura of Protection with blazing flames for 10 minutes (1/Long Rest, or restore by expending a level 5 spell slot, no action required).\n  - Edge of Flame: Once per turn, choose one creature within your Aura (including yourself) to regain 10 HP.\n  - Punishing Flame: Any creature you choose within your aura may add Fire damage equal to your Charisma modifier to their weapon attacks.\n  - Swift Flame: Whenever you cast a spell with a casting time of an Action, you can cast it using a Bonus Action instead.",
+  "abilityScores": {
+    "STR": 18,
+    "DEX": 12,
+    "CON": 14,
+    "INT": 9,
+    "WIS": 13,
+    "CHA": 16
+  },
+  "skillProficiencies": [
+    "Athletics",
+    "Persuasion"
+  ],
+  "skillExpertise": [],
+  "savingThrowProficiencies": [],
+  "weapons": [
+    {
+      "name": "The Dawn Guardian",
+      "attackType": "melee",
+      "abilityMod": "STR",
+      "proficient": true,
+      "damageDice": "1d10",
+      "damageType": "Slashing",
+      "properties": [
+        "Two-Handed",
+        "Reach",
+        "Graze"
+      ],
+      "magical": true,
+      "description": "Radiant swing:\nSkip 1 attack = light",
+      "range": "10 ft",
+      "specialAbilities": [
+        {
+          "name": "Radiant Swing",
+          "trigger": "",
+          "effect": "DC = 15\nMiss = half damage\n\nDawn / Dusk = +1d6 fire damage",
+          "damageDice": "3d6",
+          "damageType": "Radiant"
+        }
+      ]
+    }
+  ],
+  "gender": "Male",
+  "pronouns": "he/him",
+  "equipment": [
+    "Shield",
+    "Dawn Guardian"
+  ],
+  "supplies": [],
+  "createdAt": "2026-05-27T21:16:49.640Z",
+  "updatedAt": "2026-08-28T05:34:33.549Z",
+  "identities": [],
+  "campaignId": "f48a4bc0-5c92-4e6f-a5ab-6d8988b3fe2a",
+  "persona": {
+    "defaultState": "",
+    "decisionTree": "",
+    "physicalTics": [],
+    "sceneInstincts": [],
+    "quietTexture": [],
+    "patron": {
+      "name": "",
+      "domains": [],
+      "symbol": "",
+      "rpNotes": ""
+    },
+    "colorTraits": [
+      {
+        "text": "collects small, comforting objects",
+        "category": "color"
+      },
+      {
+        "text": "subtly mimics the posture of people he likes",
+        "category": "color"
+      }
+    ],
+    "coreTraits": [
+      {
+        "text": "protective of those he considers 'home'",
+        "category": "core"
+      },
+      {
+        "text": "values practicality over ceremony",
+        "category": "core"
+      }
+    ],
+    "wants": [
+      "to create a safe haven for others",
+      "to discover the truth about his changeling heritage"
+    ],
+    "fears": [
+      "losing the warmth of his hearth",
+      "being seen as 'other'",
+      "Losing those he loves; family"
+    ],
+    "pressureResponse": "Becomes very still and observant, then offers a pragmatic solution",
+    "lastEditedAt": "2026-08-26T19:07:13.765Z",
+    "dialogueBank": [
+      {
+        "text": "Feel the warmth of the Hearth, and *burn*!",
+        "context": "combat",
+        "favorite": true
+      },
+      {
+        "text": "A little fire to ease your passing, perhaps?",
+        "context": "combat",
+        "favorite": true
+      },
+      {
+        "text": "Another ember to ash. Let's see if you can withstand the heat.",
+        "context": "combat",
+        "favorite": true
+      },
+      {
+        "text": "The hearth protects those who stand with it. Don't falter!",
+        "context": "combat",
+        "favorite": true
+      },
+      {
+        "text": "Don't worry, friend. A warm hearth is always open to those who seek it.",
+        "context": "social",
+        "favorite": true
+      },
+      {
+        "text": "My oath compels me to offer comfort. Tell me, what troubles you?",
+        "context": "social",
+        "favorite": true
+      },
+      {
+        "text": "The hearth compels me to offer comfort. Tell me, what troubles you?",
+        "context": "social",
+        "favorite": true
+      },
+      {
+        "text": "I may shift my face, but my word is as solid as the stone of a good hearth.",
+        "context": "social",
+        "favorite": true
+      },
+      {
+        "text": "Sometimes, shifting faces feels like losing *myself* a little more each time. It’s exhausting, honestly.",
+        "context": "emotional",
+        "favorite": true
+      },
+      {
+        "text": "They thought we were lost, abandoned. But the hearth always welcomes those who return, doesn't it? It *should*.",
+        "context": "emotional",
+        "favorite": true
+      },
+      {
+        "text": "Just… a moment. Let me feel the warmth of the hearth.",
+        "context": "quiet",
+        "favorite": true
+      },
+      {
+        "text": "The flames speak, if you listen closely.",
+        "context": "quiet",
+        "favorite": true
+      },
+      {
+        "text": "Quiet now. There’s comfort in stillness.",
+        "context": "quiet",
+        "favorite": true
+      }
+    ],
+    "relationships": [
+      "Rival and slave to Dawson"
+    ]
+  },
+  "backstory": {
+    "origin": "Born Khaonn Lochai in a remote Vä village. His mother, Rysanna Lochai, was a changeling con artist who fled her deceptions and sought sanctuary in the village — but the villagers treated her with suspicion and disdain, branding her son \"Nix,\" a slur meaning nothingness or bringer of misfortune.\n\nNix's only solace was Selis, a fellow changeling orphan whose secret nature only he knew. Small, frail, with a limp — but kind, free-spirited, and deeply attuned to nature. She taught him to see beauty in his changeling gifts: \"You just have to come as you are.\" She wore a brass pendant etched with an unfamiliar sigil that she was always fiddling with. Their bond became a devotion, an oath.\n\nWhen Rysanna disappeared — her body found in the woods — Nix spiraled. He drifted toward a group of wealthy, arrogant \"single-skins\" who shared his disdain for convention. He pulled away from Selis, ignored her, and finally rejected her.\n\nOne night, trying to prove himself to the group, Nix set fire to a field of crops as a \"joke.\" The fire consumed everything — fields, the group, nearly the village. A mysterious silent druid appeared and shielded Nix with magic, but Selis — who had limped toward the inferno to save him — perished just beyond the barrier's edge. Her hand was still reaching for him.\n\nFrom her burning pendant, which seared its sigil into Nix's palm, emerged Fate — a wildfire spirit of ash and flame. The silent druid pulled Nix from the ruins and trained him in druidic magic, though their motives remained unknowable. Eventually Nix fled, taking only the scar on his palm and the spirit that haunted him.\n\nHe found Scar — a goliath left for dead after a raid, brain-damaged into childlike simplicity — and chose to save him. Together they became \"freelance problem-solvers,\" walking the line between justice and mischief, helping outcasts and the weak as penance. Later, Nix took the Oath of the Hearth, swearing to tend, gather, and guard — the values Selis embodied and he failed to honor.",
+    "keyMemories": [
+      {
+        "id": "d33dd435-6baf-4e48-b3b4-1ce2200daca8",
+        "title": "Selis and the Pendant",
+        "description": "Selis fiddling with her brass pendant, tracing its sigil like it held a quiet secret. The two of them sitting together in the village — her teaching Nix to see beauty in what he was. 'You just have to come as you are.' The meaning was always lost on him then.",
+        "emotionalCore": "hope",
+        "npcInvolved": "Selis"
+      },
+      {
+        "id": "c21d44c5-7a1b-4c55-8f12-1cf7fbbbd863",
+        "title": "Rysanna's Disappearance",
+        "description": "One morning, his mother left for supplies and never returned. Her body was found in the woods with signs of a struggle. The villagers believed her past had caught up to her. But something nagged — 'the body was unmistakably Rysanna's… at least…' Nix never investigated further, consumed by grief.",
+        "emotionalCore": "loss",
+        "npcInvolved": "Rysanna Lochai"
+      },
+      {
+        "id": "f1334da1-ad0d-4f43-a3d0-6eec9b4bb7ce",
+        "title": "The Inferno",
+        "description": "Nix set fire to a crop field to impress the village outcasts. The fire consumed the fields, the group, and nearly the village. Frozen in the center of the blaze, he watched it spiral — mirroring his mother, selfish and destructive. A silent druid appeared and shielded him with magic. But Selis, who had limped toward the fire to save him, lay crumpled just beyond the barrier. Her hand was still reaching for him.",
+        "emotionalCore": "grief",
+        "npcInvolved": "Selis"
+      },
+      {
+        "id": "0e589b99-89ce-4cc4-9b4b-68d147d1209a",
+        "title": "Birth of Fate",
+        "description": "Clutching Selis's burning pendant as it seared into his palm, the brass melted and twisted. From the ember emerged a small flickering firefly — a spirit of ash and flame. Nix stared at it through tears. The same fire that took her. The same fire that should have taken him. He whispered: 'Fate.'",
+        "emotionalCore": "grief",
+        "npcInvolved": "Fate"
+      },
+      {
+        "id": "a7da7a2a-77ed-486f-8ba8-2ca4c9062343",
+        "title": "The Name of Nothing",
+        "description": "That night Khaonn abandoned his name, embracing 'Nix' — the villagers' cruel slur meaning nothing, empty. He carried the pendant's brand seared into his palm as penance. Under the silent druid's guidance he learned nature magic, but their silence was impenetrable, their motives impossible to read. Why save him? Why teach him? The questions festered until he fled.",
+        "emotionalCore": "shame",
+        "npcInvolved": "The Silent Druid"
+      },
+      {
+        "id": "65f92487-7d3b-4238-ab94-fc10b41d306a",
+        "title": "Finding Scar",
+        "description": "A goliath left for dead after a raid, brain-damaged into childlike simplicity and unwavering loyalty. Nix chose to save him when no one else would. Scar's black-and-white morality became the compass Nix wasn't sure he had anymore. Together they became freelance problem-solvers — Nix's penance given a partner.",
+        "emotionalCore": "hope",
+        "npcInvolved": "Scar"
+      },
+      {
+        "id": "b4be3d30-d2e2-47b1-bea8-661a51f310d7",
+        "title": "Joining the Voyage",
+        "description": "A botched job at a manor — borrowing clothes, tiny fires as a distraction, Scar yelling, Nix running, Fate thrilled. They fled to the docks where Nix fast-talked their way onto a ship's manifest. But their names were already signed. Weeks ago, Fate had pulled Nix from bed, led him to that ledger in the night, and without knowing why — he signed.",
+        "emotionalCore": "wonder",
+        "npcInvolved": "Fate"
+      },
+      {
+        "id": "555d53a7-e1b1-42ea-9962-2241d97dab0a",
+        "title": "Rejecting Selis",
+        "description": "After his mother's disappearance, Nix drifted toward a group of arrogant wealthy youths who offered him belonging. Selis warned him against their influence but he ignored her, ashamed of the guilt her words stirred. The moments of peace with her grew fewer as he pulled away, then ignored her, then finally rejected her. The last person who truly saw him.",
+        "emotionalCore": "shame",
+        "npcInvolved": "Selis"
+      }
+    ],
+    "relationships": [
+      {
+        "name": "Selis",
+        "relation": "Childhood best friend, fellow changeling — taught him self-acceptance. Died in the fire he started.",
+        "status": "dead"
+      },
+      {
+        "name": "Rysanna Lochai",
+        "relation": "Mother — changeling con artist whose manipulations shaped his distrust. Disappeared; body found in the woods, but doubts remain.",
+        "status": "unknown"
+      },
+      {
+        "name": "Scar",
+        "relation": "Found and saved a brain-damaged goliath. Partner, moral compass, grounding force. Unwavering loyalty. Only person besides the party who knows Nix is a changeling.",
+        "status": "alive"
+      },
+      {
+        "name": "Fate",
+        "relation": "Wildfire spirit born from Selis's burning pendant. Part companion, part burden — reflects Nix's inner turmoil. Impulsive and mischievous, sometimes destructive.",
+        "status": "alive"
+      },
+      {
+        "name": "The Silent Druid",
+        "relation": "Mysterious figure who saved Nix from the inferno and trained him in druidic magic. Motives unknown. Never spoke. Nix eventually fled from them.",
+        "status": "unknown"
+      },
+      {
+        "name": "Rune Willow",
+        "relation": "Party member (Wizard) — quiet, inquisitive, knowledge-hungry. A calming presence.",
+        "status": "alive"
+      },
+      {
+        "name": "Ponzi",
+        "relation": "Party member (Rogue) — observant, reserved. Recognized Scar's voice as someone named 'Hopscotch' from his past.",
+        "status": "alive"
+      },
+      {
+        "name": "Ketza",
+        "relation": "Party member (Ranger) — young wood elf. Searching for her missing father in the Drinkswood.",
+        "status": "alive"
+      },
+      {
+        "name": "Talon",
+        "relation": "Party member (Bard) — rock gnome with cowboy aesthetic, tinker. Doug's character.",
+        "status": "alive"
+      },
+      {
+        "name": "Aesis the Shepherd",
+        "relation": "Patron deity — guidance comes as warmth, a gut feeling to tend what needs tending. Nix feels the pull rather than hearing a voice.",
+        "status": "alive"
+      }
+    ],
+    "unresolvedThreads": [
+      "Was Rysanna's death real? The body was 'unmistakably hers… at least.' Could a changeling have faked it?",
+      "Who is the Silent Druid? Why did they save Nix? Why teach him? Were they connected to Selis's pendant?",
+      "What was the sigil on Selis's pendant? Where did she get it? What connection does it have to Fate?",
+      "Scar may be 'Hopscotch' — someone Ponzi knew who was supposedly killed by a mind flayer. What happened to Scar's true identity?",
+      "The Hidden Kingdom — Nix's long-term ambition to build a shadow nation for outcasts and the forgotten. 'While the nations war for power, we build what comes after.'",
+      "The Bloodfather — a mysterious figure commanding werewolves to harvest ember sap in the Drinkswood. Connected to Ketza's missing father.",
+      "Nix's changeling secret — only Scar knows. What happens when the party discovers the truth?",
+      "The pendant is lost — Nix dropped it when he fled the Silent Druid. The scar on his palm is all that remains. Could it be recovered?",
+      "Aesis the Shepherd and the Oath of the Hearth — how does Nix reconcile his destructive past with his oath to tend, gather, and guard?"
+    ],
+    "personalitySeeds": [
+      "Uses humor and charm as armor — quick wit masks deep emotional scars and self-loathing",
+      "Carries crushing guilt over Selis's death; everything he does for the weak is penance, not virtue",
+      "Hides his changeling nature out of fear and shame — Rysanna's manipulations taught him that revealing the truth leads to pain",
+      "Selis taught him 'come as you are' but he can't — he wears masks because he believes his true self is unworthy",
+      "Tends to flee when things get emotionally heavy, then hates himself for running",
+      "Scar's childlike moral clarity grounds him — Nix tries to be good 'for Scar' when he can't do it for himself",
+      "Views Fate as both punishment and companion — the fire that killed Selis now lives on his shoulder",
+      "Resourceful and observant — always looking for leverage, reading people, finding angles. A survivor's instinct.",
+      "Dreams of building something lasting for the forgotten — not ruling, but preparing the way. The Hidden Kingdom.",
+      "Never changes his eyes — polished silver, changeling. Claims it's a rare half-elf defect. The one truth he can't hide."
+    ]
+  },
+  "customHooks": [],
+  "feats": [
+    {
+      "name": "Sentinel",
+      "description": "When you hit a creature with an Opportunity Attack, its speed drops to 0 for the rest of the turn. Creatures provoke Opportunity Attacks from you even if they Disengage.",
+      "source": "PHB",
+      "isHomebrew": false,
+      "effects": [
+        "Polearm Master (OA when enemies enter your 10 ft reach)",
+        "Reach weapons (Glaive, Halberd) for a massive control zone",
+        "Fighters, Paladins, and other frontliners who want to lock enemies down"
+      ],
+      "tacticalNote": "Position yourself between enemies and your backline. With Polearm Master, enemies trigger your OA at 10 feet and get stopped before they can reach your allies."
+    },
+    {
+      "name": "Lucky",
+      "description": "You have a number of Luck Points equal to your Proficiency Bonus. Spend one to roll an extra d20 on an attack, ability check, or save and choose which die to use.",
+      "source": "PHB",
+      "isHomebrew": false,
+      "effects": [
+        "Every class and build — Lucky is universally powerful",
+        "Characters who make many important rolls (Rogues, Fighters)",
+        "Pairs with Halfling Luck for extreme reroll redundancy"
+      ],
+      "tacticalNote": "Save Luck Points for saving throws against devastating effects (Stun, Dominate, Banishment). Using them on attacks is fine but defensive use is higher value."
+    }
+  ],
+  "resourcePools": [],
+  "customConditions": [],
+  "tempHPSource": null
+}

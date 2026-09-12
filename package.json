@@ -9,6 +9,7 @@
     "preview": "vite preview --host",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:safety": "vitest run tests/safety-net && node tests/safety-net/run-flows.mjs",
     "budget": "npm run build && node scripts/bundle-budget.mjs"
   },
   "dependencies": {
