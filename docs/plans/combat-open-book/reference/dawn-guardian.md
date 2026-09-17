@@ -1,5 +1,10 @@
 # The Dawn Guardian — the DM's own words
 
+> **STATUS 2026-09-17 — ITEMS 2 AND 3 ARE NOW ON THE SHEET.** Everything below was
+> written when the sheet carried neither. It is kept unedited as the record of what
+> was missing and why; read [§ What was written in, and the rulings that shaped
+> it](#what-was-written-in-2026-09-17) at the foot of this file for the current state.
+
 Given by Marcus 2026-09-08, transcribed verbatim before any interpretation:
 
 > Dawn Guardian Glaive: 1d10, 2h, graze, reach. +1, +2 dawn to dusk.
@@ -115,3 +120,69 @@ Slice 6 uses the reach sentence and nothing else. Items 2 and 3 get written up a
 their own piece of work with their own Gate 1, because both of them are about the
 sheet carrying facts it does not carry — and neither is fixed by giving the combat
 page a better card.
+
+---
+
+## What was written in (2026-09-17)
+
+Marcus supplied the DM's text again, fuller than the 09-08 transcription:
+
+> +1 attack, +2 between dawn and dusk.
+> Guardian: Martial abilities with this weapon are effective up to 10ft
+>
+> Radiant swing (once a day): when you take the attack action, you may forgo one
+> attack to send a wave brilliant light, 15ft cone. DC 15 Dex save, 3d6 Radiant
+> (+ 1d6 fire damage between dawn and dusk (the pyrilings), 1/2 damage on save.
+
+Two new facts this version settles that the first did not: the bonus is **to
+attack**, and the half-damage is **on the save**. It also spells the creatures
+**pyrilings**; the 09-08 note wrote "pyreling". His spelling is used.
+
+### An error was found, not just a gap
+
+The sheet's Radiant Swing read **`Miss = half damage`**. That is an attack-roll
+reading of a saving throw. There is no miss on a DC 15 Dex save — the half applies
+when the target *succeeds*. Corrected, and stated explicitly in the effect text so
+the wrong reading cannot be re-derived from the new one.
+
+### Rulings Marcus gave, because neither was the app's to infer
+
+**The +1 is to attack rolls only.** `bonusToHit: 1`, `bonusDamage` left unset. This
+**contradicts an assumption already written into this repo**:
+`src/lib/character.weapons.test.ts:12-20` says *"his Dawn Guardian glaive is a +1
+weapon… '1d10+4' where they say 1d10+5"*, i.e. it read the +1 as hitting damage
+too. That comment is now known to be wrong about his damage. The test itself is
+unaffected — it sets `bonusToHit`/`bonusDamage` explicitly to exercise
+`upsertWeapon`, and asserts nothing about his real sheet — but the prose should not
+be trusted as a statement about the item.
+
+His attack goes **+7 → +8**. His damage stays **1d10+4**.
+
+**The field carries the +1 floor, not the daytime +2.** The app still has no
+concept of time of day, and §2 above is still the reason why. Rather than invent a
+clock, the number the sheet computes is the one that is never too high, and the
+dawn-to-dusk +2 is written in the weapon description where he reads it and adds it
+himself. A number that is silently low is bad; a number that is silently *high* is
+worse, because it is the one he cannot notice at the table.
+
+### Where it landed
+
+Both copies, because they drift otherwise:
+
+- **his live sheet** — `localStorage['codex-character-b4816f64…']`, the save the
+  app actually opens. Verified after a reload: Combat tab prints `+8 to hit (STR +4
+  + prof +1 magic) · 1d10+4 Slashing`, and both abilities render.
+- **`public/_seed.json`** — the repo's copy of that save.
+
+`tests/safety-net/fixtures/nix-lvl7.json` was **deliberately not touched.** It is
+the frozen byte-record of what a saved character meant on 2026-09-11, and freezing
+is its entire job. 27 tests across the safety net, weapons and reach still pass.
+
+### Still not modelled, and still deliberately so
+
+`Guardian` and `Radiant Swing` are on the weapon as **text he reads**, not as
+mechanics the app runs. Radiant Swing does not appear as a turn option in the
+Action list, because the three net-new mechanics named in §3 — an ability whose
+cost is *an attack*, a cone on a weapon, and a pool that recharges *at dawn* — are
+still unbuilt. The sheet now carries the fact; the economy still does not model it.
+That remains its own piece of work.

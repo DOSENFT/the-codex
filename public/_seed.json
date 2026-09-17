@@ -193,13 +193,19 @@
         "Graze"
       ],
       "magical": true,
-      "description": "Radiant swing:\nSkip 1 attack = light",
+      "bonusToHit": 1,
+      "description": "+1 to attack rolls. BETWEEN DAWN AND DUSK IT IS +2 — the sheet carries the +1 floor because the app has no clock, so add the second point yourself in daylight.\n\nDamage is not modified: the bonus is to attack only.",
       "range": "10 ft",
       "specialAbilities": [
         {
+          "name": "Guardian",
+          "trigger": "Passive",
+          "effect": "Martial abilities used with this weapon are effective up to 10 ft — Opportunity Attack, Sentinel and Interception all reach ten, not the five canon prints."
+        },
+        {
           "name": "Radiant Swing",
-          "trigger": "",
-          "effect": "DC = 15\nMiss = half damage\n\nDawn / Dusk = +1d6 fire damage",
+          "trigger": "1/day · at dawn",
+          "effect": "On your Attack action, forgo one attack to send out a wave of brilliant light in a 15 ft cone.\n\nDC 15 DEX save. Half damage on a SUCCESSFUL SAVE — this is a saving throw, not an attack roll, so there is no miss.\n\nBetween dawn and dusk, add 1d6 Fire (the pyrilings).",
           "damageDice": "3d6",
           "damageType": "Radiant"
         }
