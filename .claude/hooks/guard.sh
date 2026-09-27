@@ -4,15 +4,21 @@
 # Windows backslash paths and POSIX forward-slash paths (slash-only variants let Windows
 # '\.env' / 'memory\' writes through — this version closes that). A false block is safe.
 # Exit 2 = blocked; exit 0 = allowed.
+# D-014 (2026-09-27): two needless blocks removed, every protection kept. Code that READS
+# environment variables (os.environ, process.env, import.meta.env) is not a .env file, and Claude
+# Code's own auto-memory notebook (~/.claude/projects/<project>/memory/) is not the sacred memory/.
 payload="$(cat)"
 block(){ echo "BLOCKED by Atlas guard: $1" >&2; exit 2; }
 # Protect the sacred (non-env). Separator-agnostic.
-echo "$payload" | grep -Eiq 'soul\.md|memory[\\/]|identity\.md|user\.md' \
+sacred="$(echo "$payload" | sed -E 's#\.claude[\\/]+projects[\\/]+[^\\/"]+[\\/]+memory[\\/]+##g')"
+echo "$sacred" | grep -Eiq 'soul\.md|memory[\\/]|identity\.md|user\.md' \
   && block "touches a protected/sacred path (soul.md / memory/ / identity / user)"
 # Protect .env files (ALLOWLIST, not denylist): block bare .env and ANY .env.* EXCEPT
 # .env.example / .env.sample / .env.template. (ERE has no negative lookahead -> extract every
 # .env[.suffix] token, drop the allowed example files, block if anything remains.)
-if echo "$payload" | grep -Eio '\.env(\.[a-z0-9_]+)?' \
+# Code idioms that read env VARIABLES are dropped first (D-014); a real file path still blocks.
+envscan="$(echo "$payload" | sed -E 's/(os|process|import\.meta)\.env(iron)?//gI')"
+if echo "$envscan" | grep -Eio '\.env(\.[a-z0-9_]+)?' \
      | grep -Eiv '^\.env\.(example|sample|template)$' | grep -q .; then
   block "touches a protected .env file (only .env.example / .env.sample / .env.template allowed)"
 fi
