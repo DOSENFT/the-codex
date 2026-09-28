@@ -4,6 +4,8 @@
 # Windows backslash paths and POSIX forward-slash paths (slash-only variants let Windows
 # '\.env' / 'memory\' writes through — this version closes that). A false block is safe.
 # Exit 2 = blocked; exit 0 = allowed.
+# D-015 (2026-09-27): the sacred-folder rule no longer fires on a quoted word (an escaped quote is a
+# backslash in the JSON payload); a real path separator there is '/' or a doubled backslash.
 # D-014 (2026-09-27): two needless blocks removed, every protection kept. Code that READS
 # environment variables (os.environ, process.env, import.meta.env) is not a .env file, and Claude
 # Code's own auto-memory notebook (~/.claude/projects/<project>/memory/) is not the sacred memory/.
@@ -11,7 +13,7 @@ payload="$(cat)"
 block(){ echo "BLOCKED by Atlas guard: $1" >&2; exit 2; }
 # Protect the sacred (non-env). Separator-agnostic.
 sacred="$(echo "$payload" | sed -E 's#\.claude[\\/]+projects[\\/]+[^\\/"]+[\\/]+memory[\\/]+##g')"
-echo "$sacred" | grep -Eiq 'soul\.md|memory[\\/]|identity\.md|user\.md' \
+echo "$sacred" | grep -Eiq 'soul\.md|memory(/|\\\\)|identity\.md|user\.md' \
   && block "touches a protected/sacred path (soul.md / memory/ / identity / user)"
 # Protect .env files (ALLOWLIST, not denylist): block bare .env and ANY .env.* EXCEPT
 # .env.example / .env.sample / .env.template. (ERE has no negative lookahead -> extract every
