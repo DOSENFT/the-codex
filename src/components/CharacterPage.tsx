@@ -43,6 +43,7 @@ import { downloadCharacterFile } from '../lib/export-character'
 import { SKILL_ABILITIES, ABILITY_NAMES } from '../lib/dnd-rules'
 import { SKILL_GUIDE, ABILITY_GUIDE, WEAPON_PROPERTY_GUIDE, FEAT_SYNERGIES, WEAPON_MASTERY_OPTIONS, characterSkillRating } from '../lib/skill-guide'
 import { CampaignEditor } from './CampaignEditor'
+import { MagicItems } from './MagicItems'
 import { GlassCard } from './ui/GlassCard'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
@@ -1555,6 +1556,9 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
       {/* ─── Equipment & Supplies ─── */}
       <Section id="equipment" title="Equipment & Supplies" icon={Package} characterId={character.id}>
         <div className="space-y-4">
+          {/* Magic items — the gear combat actually reads (2026-11-12) */}
+          <MagicItems character={character} onCharacterUpdate={onCharacterUpdate} />
+
           {/* Equipment */}
           <div>
             <h4 className="text-xs font-semibold text-forge-2 uppercase tracking-wider mb-2">Equipment</h4>

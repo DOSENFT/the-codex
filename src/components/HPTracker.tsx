@@ -10,6 +10,8 @@ import {
   ShieldAlert,
   ChevronDown,
   ChevronUp,
+  Shield,
+  ShieldOff,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useCollapsible } from '../hooks/useCollapsible'
@@ -24,6 +26,7 @@ import {
   resetDeathSaves,
 } from '../lib/character'
 import { tempHPReplacement, replacementWarning, tempHPGrantors } from '../lib/rules-2024/temp-hp'
+import { defensesOf, damageAfterDefenses, type DamageType } from '../lib/rules-2024/defenses'
 import { activeRetaliation, type RetaliationDie } from '../lib/turn/retaliation'
 import { featureContextOf } from '../lib/turn/overlay'
 import { RetaliationCapture } from './combat/RetaliationCapture'
@@ -169,6 +172,12 @@ export function HPTracker({
      three rounds later. NOT reset by `setAmount`, because correcting a typo is
      not a change of mind about what granted it. */
   const [tempSource, setTempSource] = useState<string | null>(null)
+  /* 2026-11-12. The damage type, asked ONLY when it changes the answer: the
+     chips offered are the types he has a defense against, nothing else. Null
+     means "full damage", which is every hit that is not one of those. Reset by
+     `beginInput` like everything else that belongs to one entry. */
+  const [damageType, setDamageType] = useState<DamageType | null>(null)
+  const defenses = useMemo(() => defensesOf(character), [character])
 
   // Derived state
   const currentHP = character.hitPoints.current
@@ -223,6 +232,16 @@ export function HPTracker({
     [character],
   )
 
+  /* What the typed number actually does once his defenses apply, or null when
+     no type is picked (full damage, nothing to explain). Live, so the answer is
+     on the glass before the press. */
+  const outcome = useMemo(() => {
+    if (inputMode !== 'damage' || !damageType) return null
+    const amount = parseInt(inputValue, 10)
+    if (isNaN(amount) || amount <= 0) return null
+    return damageAfterDefenses(character, amount, damageType)
+  }, [inputMode, damageType, inputValue, character])
+
   const handleApply = useCallback(() => {
     const amount = parseInt(inputValue, 10)
     if (isNaN(amount) || amount <= 0) {
@@ -253,7 +272,9 @@ export function HPTracker({
     let updated: Character
     switch (inputMode) {
       case 'damage':
-        updated = applyDamage(character, amount)
+        // Defenses first, then temp HP, then HP (2024 order). With no type
+        // picked this is exactly the old full-damage path.
+        updated = applyDamage(character, damageAfterDefenses(character, amount, damageType).taken)
         break
       case 'heal':
         updated = applyHealing(character, amount)
@@ -276,6 +297,7 @@ export function HPTracker({
     setInputValue('')
     setArmed(false)
     setTempSource(null)
+    setDamageType(null)
     setOffered(retaliating)
   }, [
     inputValue,
@@ -286,6 +308,7 @@ export function HPTracker({
     armed,
     onRetaliate,
     tempSource,
+    damageType,
   ])
 
   /* One writer for the amount, so arming can be cleared in one place. A changed
@@ -307,6 +330,7 @@ export function HPTracker({
     setInputValue('')
     setArmed(false)
     setTempSource(null)
+    setDamageType(null)
   }, [])
 
   const handleCancel = useCallback(() => {
@@ -314,6 +338,7 @@ export function HPTracker({
     setInputValue('')
     setArmed(false)
     setTempSource(null)
+    setDamageType(null)
   }, [])
 
   const handleToggleCondition = useCallback(
@@ -486,7 +511,11 @@ export function HPTracker({
               placeholder="0"
               autoFocus
               className={cn(
-                'min-h-[44px] flex-1 rounded-xl px-4',
+                /* `min-w-0 w-0`: a number input has an intrinsic width of ~20
+                   characters, so `flex-1` alone left it 45px wider than a
+                   412px phone and the 1/5/10 buttons slid the page sideways
+                   (measured 2026-11-12). It now takes only the room left. */
+                'min-h-[44px] flex-1 min-w-0 w-0 rounded-xl px-4',
                 'bg-void-2/60 text-forge-0 placeholder:text-forge-2',
                 'border border-bronze/25 font-mono text-lg',
                 'transition-all duration-200 ease-forge',
@@ -526,6 +555,61 @@ export function HPTracker({
                  to ask about, and asking anyway would train him to ignore it. */}
           {inputMode === 'temp' && (
             <TempHPSource sources={grantors} value={tempSource} onChange={setTempSource} />
+          )}
+
+          {/* ── "What kind of damage?" — only the kinds that matter ──
+                 Every chip here is a type he is immune or resistant to; any
+                 other hit is full damage and needs no answer, so a sword blow
+                 costs no extra tap. Tapping a picked chip un-picks it. */}
+          {inputMode === 'damage' && defenses.damage.length > 0 && (
+            <div className="space-y-1.5">
+              <span className="block text-xs font-semibold text-forge-1">
+                Is it one of these? Skip for anything else.
+              </span>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label="Damage type you are protected against">
+                {defenses.damage.map(d => {
+                  const picked = damageType === d.damageType
+                  return (
+                    <button
+                      key={d.damageType}
+                      type="button"
+                      onClick={() => setDamageType(picked ? null : d.damageType)}
+                      aria-pressed={picked}
+                      aria-label={`${d.damageType} damage: you are ${d.kind === 'immune' ? 'immune' : 'resistant'}, from ${d.sources.join(' and ')}`}
+                      className={cn(
+                        'min-h-[44px] px-3 rounded-xl border text-xs font-semibold',
+                        'inline-flex items-center gap-1.5',
+                        'transition-all duration-200 ease-forge active:scale-[0.96]',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+                        picked
+                          ? 'bg-verdant/20 border-verdant/60 text-verdant'
+                          : 'bg-void-2/60 border-bronze/25 text-forge-1 hover:border-verdant/40',
+                      )}
+                    >
+                      <Shield size={13} aria-hidden />
+                      {d.damageType}
+                      <span className={cn('font-normal', picked ? 'text-verdant' : 'text-forge-1')}>
+                        {d.kind === 'immune' ? 'immune' : 'half'}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+              {outcome && (
+                <div
+                  role="status"
+                  className="flex items-start gap-2 rounded-xl px-3 py-2 border border-verdant/30 bg-verdant/10 text-xs leading-relaxed text-forge-0"
+                >
+                  <Shield size={14} className="mt-0.5 shrink-0 text-verdant" aria-hidden />
+                  <span>
+                    {outcome.kind === 'immune'
+                      ? `Immune to ${damageType}: you take 0.`
+                      : `Resistant to ${damageType}: ${outcome.rolled} becomes ${outcome.taken}.`}{' '}
+                    <span className="text-forge-1">From {outcome.sources.join(' and ')}.</span>
+                  </span>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Canon HEARTH-04's mandatory warning. Rendered live — it is on the
@@ -572,7 +656,9 @@ export function HPTracker({
                   11-point pool is the bug HEARTH-04 describes. */}
               {armed && replacement
                 ? `Replace ${replacement.losing} with ${replacement.incoming}`
-                : 'Apply'}
+                : outcome
+                  ? `Take ${outcome.taken}`
+                  : 'Apply'}
             </Button>
 
             <Button variant="ghost" size="sm" onClick={handleCancel} aria-label="Cancel">
@@ -712,6 +798,36 @@ export function HPTracker({
           Default CLOSED, and that is the one place this differs from every
           other fold in the app. Everywhere else the content is the point;
           here the summary genuinely carries it. */}
+      {/* ── Defenses — what can't hurt him, and why ── 2026-11-12.
+             One readout, sources named, so "why did that do nothing?" is
+             answered on the glass. Absent entirely for a sheet with none. */}
+      {(defenses.damage.length > 0 || defenses.conditions.length > 0 || defenses.inactive.length > 0) && (
+        <div className="pt-2 border-t border-bronze/15 space-y-1" aria-label="Your defenses">
+          <div className="flex items-start gap-2 text-xs leading-relaxed">
+            <Shield size={14} className="mt-0.5 shrink-0 text-verdant" aria-hidden />
+            <span className="font-semibold text-forge-1 uppercase tracking-wider shrink-0">Defenses</span>
+            <span className="text-forge-0 min-w-0">
+              {[
+                ...(['immune', 'resist'] as const).flatMap(kind => {
+                  const list = defenses.damage.filter(d => d.kind === kind)
+                  if (list.length === 0) return []
+                  return [`${kind === 'immune' ? 'Immune' : 'Resist'}: ${list.map(d => d.damageType).join(', ')}`]
+                }),
+                ...(defenses.conditions.length > 0
+                  ? [`Can't be ${defenses.conditions.map(c => c.condition).join(', ')}`]
+                  : []),
+              ].join(' · ') || 'None right now'}
+            </span>
+          </div>
+          {defenses.inactive.map(off => (
+            <div key={off.source} className="flex items-start gap-2 text-xs leading-relaxed text-ember-lit">
+              <ShieldOff size={14} className="mt-0.5 shrink-0" aria-hidden />
+              <span>{off.source} is {off.reason}.</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="space-y-3 pt-2 border-t border-bronze/15">
         <button
           type="button"
@@ -746,6 +862,30 @@ export function HPTracker({
         <div className="grid grid-cols-2 gap-1.5">
           {CONDITIONS.map(condition => {
             const isActive = character.conditions.includes(condition.name)
+            /* An immunity refuses the ADD (toggleCondition enforces it too, so
+               no other writer can sneak one past). An already-active condition
+               stays clearable, so this only locks an INACTIVE chip. */
+            const immuneFrom = defenses.conditions.find(c => c.condition === condition.name)?.sources
+            const locked = !isActive && !!immuneFrom
+
+            if (locked) {
+              return (
+                <div
+                  key={condition.name}
+                  role="note"
+                  aria-label={`${condition.name}: you are immune, from ${immuneFrom!.join(' and ')}`}
+                  className="min-h-[48px] rounded-xl px-3 py-2 text-left border border-verdant/30 bg-verdant/10"
+                >
+                  <span className="flex items-center gap-1 text-xs font-semibold leading-tight text-verdant">
+                    <Shield size={11} aria-hidden />
+                    {condition.name}
+                  </span>
+                  <span className="block text-xs leading-tight mt-0.5 text-forge-1">
+                    Immune · {immuneFrom!.join(', ')}
+                  </span>
+                </div>
+              )
+            }
 
             return (
               <button

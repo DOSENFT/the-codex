@@ -7,6 +7,8 @@ import { paladinResourcesFor } from './rules-2024/pools'
 // loads first and it must not wait on the rules layer to initialise.
 import { rechargePools, type ResourcePool } from './rules-2024/resources'
 import type { CustomCondition } from './rules-2024/conditions'
+// Same arrangement as pools.ts: defenses.ts imports Character only as a TYPE.
+import { normalizeMagicItems, conditionImmunitySources, type MagicItem } from './rules-2024/defenses'
 
 // Re-export for convenience
 export type { AbilityKey, SkillName }
@@ -357,6 +359,10 @@ export interface CharacterBase {
   // Inventory
   equipment: string[]         // general gear (rope, torch, rations, etc.)
   supplies: string[]          // consumables with optional qty ("Health Potion x3")
+  /** Magic items that DO something: each carries the immunities and
+   *  resistances it grants, which `defensesOf` (rules-2024/defenses.ts) reads.
+   *  Optional, so every sheet saved before 2026-11-12 reads back as "none". */
+  magicItems?: MagicItem[]
 
   // Character persona for roleplay (optional)
   persona?: CharacterPersona
@@ -1076,6 +1082,10 @@ function normalizeInner(parsed: Partial<Character>, fallbackId?: string): Charac
          Character screen. Coerced rather than trusted: the file is not ours. */
       equipment: toStringList(parsed.equipment),
       supplies: toStringList(parsed.supplies),
+      /* Only written when the file says something, so an older sheet comes back
+         byte-for-byte the shape it went in. When present it is cleaned, never
+         trusted: unknown damage types are dropped rather than guessed. */
+      ...(parsed.magicItems !== undefined && { magicItems: normalizeMagicItems(parsed.magicItems) }),
       identities: records<CharacterIdentity>(parsed.identities, 'An identity').map(i => ({
         ...i,
         id: text(i.id, generateId(), 'An identity id'),
@@ -1560,7 +1570,11 @@ export function setTempHP(
 
 /** Toggle a condition on/off. */
 export function toggleCondition(character: Character, condition: string): Character {
-  const conditions = character.conditions.includes(condition)
+  const active = character.conditions.includes(condition)
+  // An immunity (the Periapt's "can't be Poisoned") refuses the ADD and never
+  // the removal: a condition that is somehow already on must stay clearable.
+  if (!active && conditionImmunitySources(character, condition)) return character
+  const conditions = active
     ? character.conditions.filter(c => c !== condition)
     : [...character.conditions, condition]
   return { ...character, conditions }

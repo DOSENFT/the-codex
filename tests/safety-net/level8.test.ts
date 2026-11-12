@@ -45,6 +45,11 @@ function expectLevel8(nix: Character) {
   expect(nix.abilityScores?.CON).toBe(16)
   expect(nix.proficiencyBonus).toBe(3)
   expect(nix.spellSaveDC).toBe(14)
+  // Marcus, 2026-11-12: "I do not have 3rd lvl spells". A level-8 Paladin has
+  // 4 first- and 3 second-level slots and nothing higher until level 9.
+  expect(nix.spellSlots[1]?.max).toBe(4)
+  expect(nix.spellSlots[2]?.max).toBe(3)
+  expect(nix.spellSlots[3]).toBeUndefined()
   const feats = (nix.feats ?? []).map(f => f.name)
   expect(feats).toContain('Tough')
   expect(feats).not.toContain('Lucky')

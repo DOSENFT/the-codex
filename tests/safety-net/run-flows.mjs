@@ -27,6 +27,10 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(HERE, '..', '..')
 const PORT = Number(env.CODEX_SAFETY_PORT ?? 5199)
 const EXTERNAL = env.CODEX_SAFETY_URL ?? null
+/* Set CODEX_SAFETY_CHANNEL=msedge to drive the installed Edge instead of
+   Playwright's own downloaded Chromium (which this PC may not have). Only the
+   two channels Playwright names for installed browsers are accepted. */
+const CHANNEL = ['msedge', 'chrome'].includes(env.CODEX_SAFETY_CHANNEL ?? '') ? env.CODEX_SAFETY_CHANNEL : null
 const BASE = EXTERNAL ?? `http://localhost:${PORT}/the-codex/`
 
 const show = v => (typeof v === 'string' ? JSON.stringify(v) : (JSON.stringify(v) ?? String(v)))
@@ -151,7 +155,7 @@ let totalChecks = 0
 try {
   server = await startServer()
   const chromium = await loadChromium()
-  browser = await chromium.launch()
+  browser = await chromium.launch(CHANNEL ? { channel: CHANNEL } : {})
 
   console.log('')
   console.log(`safety net — ${flows.length} flows, driving the real app at ${BASE}`)

@@ -134,10 +134,6 @@
     "2": {
       "max": 3,
       "current": 2
-    },
-    "3": {
-      "max": 2,
-      "current": 2
     }
   },
   "canPrepareSpells": true,

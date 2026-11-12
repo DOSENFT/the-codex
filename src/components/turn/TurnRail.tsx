@@ -1,6 +1,20 @@
+import { useEffect, useRef, useState, type KeyboardEvent, type Ref } from 'react'
 import { useDiceDock } from '../DiceControl'
 import { EndCombatDoor } from './EndCombatD'
 import type { SpellSlotLine, TurnResource } from '../../lib/turn/types'
+
+/** One thing a single use of a pool can buy. Shape only — the rail does not
+ *  know these are Channel Divinity options; `TurnLive` hands them over from
+ *  `channelDivinityOptions()` in src/lib. */
+export interface PoolChoice {
+  id: string
+  name: string
+  actionLabel: string
+  summary: string
+  facts?: string
+  detail?: string
+  sourceLabel?: string
+}
 
 /* ============================================================================
    TurnRail — the card's one strip of chrome, and the thing that finally makes
@@ -155,6 +169,122 @@ export interface TurnRailProps {
    *  the same write to the same clamped setter, and two props would be two
    *  chances to clamp them differently. */
   onSpendResource?: (poolId: string, amount: number) => void
+  /** What one use of a pool can buy, keyed by pool id. When a pool has
+   *  choices, tapping a FULL pip opens a short list instead of spending
+   *  blind (Marcus, 2026-11-12: "if I press the channel divinity buttons, it
+   *  can come up with a quick list of things I can use the channel divinity
+   *  for"). A spent pip still restores in one tap. Absent or empty → the pip
+   *  spends directly, exactly as before. */
+  poolChoices?: Readonly<Record<string, readonly PoolChoice[]>>
+}
+
+/* ============================================================================
+   PoolChoicePanel — the list a full pip opens.
+   ----------------------------------------------------------------------------
+   Inline, under the pools, not a modal: it pushes the list down rather than
+   covering the card, so the HP and the round stay readable while he picks.
+   Every spend goes through the SAME `onSpendResource` the pip uses, so the
+   count can never disagree with the pips beside it. Undo is the same verb with
+   a negative amount. Exported so its markup can be tested without a renderer.
+   ========================================================================== */
+export interface PoolChoicePanelProps {
+  pool: TurnResource
+  choices: readonly PoolChoice[]
+  /** Name of what was just paid for; null while choosing. '' = "just one". */
+  used: string | null
+  onUse: (name: string) => void
+  onSpendPlain: () => void
+  onUndo: () => void
+  onClose: () => void
+  panelRef?: Ref<HTMLDivElement>
+}
+
+export function PoolChoicePanel({
+  pool,
+  choices,
+  used,
+  onUse,
+  onSpendPlain,
+  onUndo,
+  onClose,
+  panelRef,
+}: PoolChoicePanelProps) {
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      onClose()
+    }
+  }
+  const left = `${pool.current} of ${pool.max} left`
+  return (
+    <div
+      ref={panelRef}
+      className="rchoice"
+      role="group"
+      aria-label={`${pool.name} options`}
+      onKeyDown={onKeyDown}
+    >
+      {used !== null ? (
+        <div className="rchoice-done">
+          <p className="rchoice-msg" role="status">
+            <b>{used || `1 ${pool.name}`}</b> — {left}
+          </p>
+          <div className="rchoice-doors">
+            <button type="button" className="rbtn" onClick={onUndo} aria-label={`Undo — give the ${pool.name} use back`}>
+              Undo
+            </button>
+            <button type="button" className="rbtn" onClick={onClose}>
+              Close
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="rchoice-head">
+            <span className="k">Spend 1 {pool.name} on</span>
+            <span className={`v${pool.current === 0 ? ' spent' : ''}`}>{pool.current}/{pool.max}</span>
+          </div>
+          <ul className="rchoice-list">
+            {choices.map(choice => (
+              <li key={choice.id} className="rchoice-item">
+                <div className="rchoice-text">
+                  <div className="rchoice-top">
+                    <span className="rchoice-name">{choice.name}</span>
+                    <span className="rchoice-chip">{choice.actionLabel}</span>
+                  </div>
+                  {choice.facts && <div className="rchoice-facts">{choice.facts}</div>}
+                  <p className="rchoice-sum">{choice.summary}</p>
+                </div>
+                <button
+                  type="button"
+                  className="rbtn rchoice-use"
+                  onClick={() => onUse(choice.name)}
+                  disabled={pool.current < 1}
+                  aria-label={`Use ${choice.name} — spends 1 ${pool.name}`}
+                >
+                  Use
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="rchoice-doors">
+            <button
+              type="button"
+              className="rbtn"
+              onClick={onSpendPlain}
+              disabled={pool.current < 1}
+              aria-label={`Just spend 1 ${pool.name}`}
+            >
+              Just spend one
+            </button>
+            <button type="button" className="rbtn" onClick={onClose}>
+              Close
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
 }
 
 export function TurnRail({
@@ -163,12 +293,46 @@ export function TurnRail({
   onExpendSlot,
   onRestoreSlot,
   onSpendResource,
+  poolChoices,
 }: TurnRailProps) {
   /* Pools split by the ONE thing that decides how they are drawn. `points` is a
      quantity you spend some of; everything else is a countable use, and a use
      is a pip. Read once and named, so the two loops below cannot disagree. */
   const counters = resources.filter(r => r.unit === 'points')
   const uses = resources.filter(r => r.unit !== 'points')
+
+  /* The open choice list, if any. Local, not lifted: it is a transient view of
+     a pool, it spends only through `onSpendResource`, and a reload closing it
+     loses nothing. */
+  const [menu, setMenu] = useState<{ poolId: string; used: string | null } | null>(null)
+  const openerRef = useRef<HTMLButtonElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
+
+  const menuPool = menu ? uses.find(r => r.id === menu.poolId) : undefined
+  const menuChoices = menu ? poolChoices?.[menu.poolId] ?? [] : []
+  const menuOpen = !!(menu && menuPool && menuChoices.length > 0)
+
+  // Focus follows the panel: first control on open, the message's first door
+  // after a spend. Close hands focus back to the pip that opened it.
+  useEffect(() => {
+    if (!menuOpen) return
+    panelRef.current?.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus()
+  }, [menuOpen, menu?.used])
+
+  const closeMenu = () => {
+    setMenu(null)
+    openerRef.current?.focus()
+  }
+  const spendFromMenu = (name: string) => {
+    if (!menu) return
+    onSpendResource?.(menu.poolId, 1)
+    setMenu({ poolId: menu.poolId, used: name })
+  }
+  const undoFromMenu = () => {
+    if (!menu) return
+    onSpendResource?.(menu.poolId, -1)
+    setMenu({ poolId: menu.poolId, used: null })
+  }
 
   return (
     <section className="rail" aria-label="Turn controls">
@@ -266,33 +430,64 @@ export function TurnRail({
               ))}
             </div>
           ))}
-          {uses.map(r => (
-            <div key={r.id} className="rpool">
-              <span className="k">{r.name}</span>
-              <div className="pip-row">
-                {Array.from({ length: r.max }).map((_, i) => {
-                  const available = i < r.current
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => onSpendResource?.(r.id, available ? 1 : -1)}
-                      disabled={!onSpendResource}
-                      aria-label={
-                        available ? `Expend ${r.name} use` : `Restore ${r.name} use`
-                      }
-                      className="pip-tap"
-                      data-tone="ember"
-                      data-slot={available ? 'full' : 'spent'}
-                    >
-                      <i />
-                    </button>
-                  )
-                })}
+          {uses.map(r => {
+            const choices = poolChoices?.[r.id] ?? []
+            const hasChoices = choices.length > 0
+            const isOpen = menuOpen && menu?.poolId === r.id
+            return (
+              <div key={r.id} className="rpool">
+                <span className="k">{r.name}</span>
+                <div className="pip-row">
+                  {Array.from({ length: r.max }).map((_, i) => {
+                    const available = i < r.current
+                    const opensMenu = available && hasChoices
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={e => {
+                          if (opensMenu) {
+                            openerRef.current = e.currentTarget
+                            setMenu(isOpen && menu?.used === null ? null : { poolId: r.id, used: null })
+                            return
+                          }
+                          onSpendResource?.(r.id, available ? 1 : -1)
+                        }}
+                        disabled={!onSpendResource}
+                        aria-label={
+                          opensMenu
+                            ? `Use ${r.name}: choose what to spend it on`
+                            : available
+                              ? `Expend ${r.name} use`
+                              : `Restore ${r.name} use`
+                        }
+                        {...(opensMenu ? { 'aria-expanded': isOpen } : {})}
+                        className="pip-tap"
+                        data-tone="ember"
+                        data-slot={available ? 'full' : 'spent'}
+                      >
+                        <i />
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
+      )}
+
+      {menuOpen && menuPool && menu && (
+        <PoolChoicePanel
+          panelRef={panelRef}
+          pool={menuPool}
+          choices={menuChoices}
+          used={menu.used}
+          onUse={spendFromMenu}
+          onSpendPlain={() => spendFromMenu('')}
+          onUndo={undoFromMenu}
+          onClose={closeMenu}
+        />
       )}
     </section>
   )

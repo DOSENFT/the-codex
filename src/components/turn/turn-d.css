@@ -675,6 +675,67 @@
 }
 .dturn .rail .rpool .v.spent { color: var(--d-dim); }
 
+/* ── THE POOL CHOICE LIST — 2026-11-12 ───────────────────────────────────────
+   "if I press the channel divinity buttons, it can come up with a quick list
+   of things I can use the channel divinity for" (Marcus). A full-width child
+   of `.rail`, like `.endc` is of `.rverbs`: it pushes the card down instead of
+   covering it, so HP and the round stay readable while he picks.
+   Ember appears only as the 1px border — `--d-ember` is 4.68:1 and marked
+   >=16px — so every word in the panel is cream, tally, gold or dim. */
+.dturn .rchoice {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--d-s2);
+  padding: var(--d-s2) var(--d-s3);
+  border: 1px solid var(--d-ember);
+  border-radius: var(--d-radius-lg);
+  background: color-mix(in srgb, var(--d-ember) 7%, var(--d-e1));
+}
+.dturn .rchoice-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--d-s2); }
+.dturn .rchoice-head .k { font-size: var(--d-fs-label); color: var(--d-dim); letter-spacing: 0.04em; text-transform: uppercase; }
+.dturn .rchoice-head .v { font-family: var(--d-font-mono); font-size: var(--d-fs-mono); color: var(--d-gold); }
+.dturn .rchoice-head .v.spent { color: var(--d-dim); }
+.dturn .rchoice-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--d-s2); }
+.dturn .rchoice-item {
+  display: flex;
+  align-items: center;
+  gap: var(--d-s3);
+  padding: var(--d-s2) 0;
+  border-top: 1px solid var(--d-rule-lit);
+}
+.dturn .rchoice-item:first-child { border-top: 0; padding-top: 0; }
+.dturn .rchoice-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.dturn .rchoice-top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px var(--d-s2); }
+.dturn .rchoice-name { font-size: var(--d-fs-body); font-weight: 600; color: var(--d-cream); }
+.dturn .rchoice-chip {
+  font-size: var(--d-fs-label);
+  color: var(--d-gold);
+  border: 1px solid var(--d-rule-lit);
+  border-radius: 999px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+.dturn .rchoice-facts { font-family: var(--d-font-mono); font-size: var(--d-fs-mono); color: var(--d-tally); }
+.dturn .rchoice-sum {
+  margin: 0;
+  font-size: var(--d-fs-body);
+  line-height: var(--d-lh-body);
+  color: var(--d-cream);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.dturn .rchoice-use { flex: 0 0 auto; min-width: 64px; color: var(--d-amber); border-color: var(--d-gold); font-weight: 600; }
+.dturn .rchoice-doors { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--d-s2); }
+.dturn .rchoice-done { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--d-s2) var(--d-s3); }
+.dturn .rchoice-msg { flex: 1 1 12rem; margin: 0; font-size: var(--d-fs-body); line-height: var(--d-lh-body); color: var(--d-cream); }
+.dturn .rchoice-msg b { color: var(--d-amber); font-weight: 600; }
+.dturn .rchoice .rbtn { transition: transform var(--d-dur-tap) var(--d-ease), border-color var(--d-dur-tap) var(--d-ease); }
+.dturn .rchoice .rbtn:active:enabled { transform: scale(0.97); }
+.dturn .rchoice .rbtn:focus-visible { outline: 2px solid var(--d-amber); outline-offset: 2px; }
+
 /* ---- edge -----------------------------------------------------------------
    Slice 7: a row inside `.pinned`, not a region of its own. Its padding and
    its top rule moved to the parent, and the safe-area inset went with them —

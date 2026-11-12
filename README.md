@@ -150,6 +150,12 @@ Selecting an action marks it as used, expends the slot if needed, sets concentra
 ### HP Tracking
 
 - Damage: enter amount, tap Apply — temp HP absorbs first, then current HP
+- Damage types you're protected against appear as chips under the amount. Pick one and the
+  button reads "Take 0" (immune) or "Take 8" (half, rounded down), naming the item or feature
+  that protects you. Any other hit: skip the chips, full damage.
+- **Defenses** line: what you're immune or resistant to right now (worn magic items plus Aura of
+  Solace, which switches off while you're Incapacitated). A condition you're immune to shows as
+  locked in the conditions grid and can't be added.
 - Healing: same flow, capped at max
 - Temp HP: set directly (doesn't stack per 2024 rules)
 - Death saves: tracked automatically, reset when healed from 0
@@ -172,10 +178,15 @@ Full skill list with proficiency markers (* for proficient, ** for expertise) an
 Each weapon shows attack bonus, damage notation, damage type, and properties. Magical weapons are flagged.
 
 ### Equipment & Supplies
-Badge-style display of your inventory. Quick reference at the table.
+**Magic items** come first: add an item (or use Quick fill, e.g. Periapt of Proof against Poison),
+tap damage types to cycle half → immune → off, pick conditions it stops, and mark it Worn or In
+pack. Only worn items protect you, and combat reads them. Equipment and Supplies below are a plain
+badge list for reference.
 
 ### Class Resources
 Visual trackers for Lay on Hands (progress bar with HP pool), Channel Divinity (pip tracker), and Aura Range.
+A DM-granted extra use (`poolBonuses` on the sheet, e.g. `{ "channel-divinity": 1 }`) is added on top
+of the class table and survives level-ups; values outside 1–10 are ignored.
 
 ### Export
 Download your character as a JSON file for backup or transfer between devices.

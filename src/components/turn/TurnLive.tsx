@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Character } from '../../lib/character'
 import { expendSpellSlot, restoreSpellSlot } from '../../lib/character'
 import { findPool, setPoolCurrent } from '../../lib/rules-2024/resources'
+import { CHANNEL_DIVINITY_POOL, channelDivinityOptions } from '../../lib/rules-2024/channel-divinity'
 import { CombatProvider, useCombat } from './CombatProvider'
 import { TurnScreenD } from './TurnScreenD'
 import { TurnRail, TurnVerbs } from './TurnRail'
@@ -423,6 +424,9 @@ function Screen({
      deck's pips have always been, and the reason they answer to right-click. */
   const handleExpendSlot = (level: number) => onCharacterUpdate(expendSpellSlot(character, level))
   const handleRestoreSlot = (level: number) => onCharacterUpdate(restoreSpellSlot(character, level))
+  /* What one Channel Divinity charge buys. Pure and cheap; memoised so the
+     rail's list keeps its identity between unrelated renders. */
+  const cdChoices = useMemo(() => channelDivinityOptions(character), [character])
   const handleSpendResource = (poolId: string, amount: number) => {
     const pool = findPool(character, poolId)
     /* A pool that is gone is not an error and not a throw — the sheet may have
@@ -531,6 +535,9 @@ function Screen({
             onExpendSlot={handleExpendSlot}
             onRestoreSlot={handleRestoreSlot}
             onSpendResource={handleSpendResource}
+            /* Marcus, 2026-11-12: a Channel Divinity pip opens what a charge
+               can buy instead of spending blind. Empty list → old behaviour. */
+            poolChoices={cdChoices.length > 0 ? { [CHANNEL_DIVINITY_POOL]: cdChoices } : undefined}
           />
           {/* ── THE SHEET-VS-2024 FLAG — slice 9, and the whole of its wiring ──
               A label belongs ON the thing it labels. `TurnRail` paints the nine
