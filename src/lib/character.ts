@@ -330,6 +330,13 @@ export interface CharacterBase {
   // this field; it does not migrate away from it. See rules-2024/resources.ts.
   paladinResources?: PaladinResources
 
+  /** Extra uses a DM granted on top of the class table, keyed by pool id
+   *  ('channel-divinity', 'lay-on-hands'). Canon still owns the base maximum;
+   *  this is added to it by `applyPoolMaxima`, so levelling up keeps the gift.
+   *  Nix's brazier blessing (session "Rings of the Divine Foundry", 2026-11) is
+   *  `{ 'channel-divinity': 1 }`. Non-integer or out-of-range values are ignored. */
+  poolBonuses?: Partial<Record<'channel-divinity' | 'lay-on-hands', number>>
+
   // Homebrew resources and conditions Marcus authored in the app (Slice 6b).
   // Both are optional and both default to [] on load, so every character saved
   // before 6b existed reads back as "has none" rather than "is broken".

@@ -152,6 +152,34 @@ export function paladinResourcesFor(level: number, className = 'Paladin'): Palad
   }
 }
 
+/** Largest DM bonus the app will honour on one pool. A typo like 30 instead of
+ *  3 must not hand Marcus thirty Channel Divinity uses at the table. */
+export const MAX_POOL_BONUS = 10
+
+/** The DM-granted bonus for a pool, or 0 when absent or not a sane number.
+ *  Only whole numbers 1..MAX_POOL_BONUS count; anything else is ignored. */
+export function poolBonusFor(
+  bonuses: CharacterBase['poolBonuses'] | undefined,
+  poolId: ScaledPoolId,
+): number {
+  const raw = bonuses?.[poolId]
+  if (typeof raw !== 'number' || !Number.isInteger(raw)) return 0
+  if (raw < 1 || raw > MAX_POOL_BONUS) return 0
+  return raw
+}
+
+/** Canon's maximum plus any DM bonus the sheet carries; null when canon cannot say. */
+function poolMaxWithBonus(
+  poolId: ScaledPoolId,
+  className: string,
+  level: number,
+  bonuses: CharacterBase['poolBonuses'] | undefined,
+): number | null {
+  const max = poolMaxFor(poolId, className, level)
+  if (max === null) return null
+  return max + poolBonusFor(bonuses, poolId)
+}
+
 /** Clamp a spent value into a pool that may have changed size. Down, never up. */
 function clampCurrent(current: number, max: number): number {
   return Math.max(0, Math.min(max, current))
@@ -180,7 +208,7 @@ export function applyPoolMaxima<T extends CharacterBase>(base: T): T {
     let poolsMoved = false
     for (const key of ['layOnHands', 'channelDivinity'] as const) {
       const id: ScaledPoolId = key === 'layOnHands' ? 'lay-on-hands' : 'channel-divinity'
-      const max = poolMaxFor(id, className, level)
+      const max = poolMaxWithBonus(id, className, level, base.poolBonuses)
       const pool = next[key]
       if (max === null || !pool) continue
       const current = clampCurrent(pool.current, max)
@@ -209,7 +237,9 @@ export function applyPoolMaxima<T extends CharacterBase>(base: T): T {
     if (feature.usesMax === undefined || feature.usesCurrent === undefined) continue
     const id = poolIdFor(feature.name)
     if (!id) continue
-    const max = poolMaxFor(id, className, level)
+    const max = id in POOL_MAX_COLUMN
+      ? poolMaxWithBonus(id as ScaledPoolId, className, level, base.poolBonuses)
+      : poolMaxFor(id, className, level)
     if (max === null) continue
     const current = clampCurrent(feature.usesCurrent, max)
     if (max === feature.usesMax && current === feature.usesCurrent) continue
