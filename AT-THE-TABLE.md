@@ -30,17 +30,20 @@ it, the app boots and shows your sheet with the network completely dead.
 
 The app starts empty. Your character comes from an export file.
 
-The one to use is **`codex-nix-lvl7 (1).json`** — the full sheet. (You also
-have `codex-nix-lvl7.json`, which is a thinner earlier export. It loads fine,
-it just has less in it.) It is in your Downloads folder on the desktop, so:
-email or AirDrop it to yourself, or put it in iCloud/Drive, so the phone can
-reach it.
+The one to use is **`codex-nix-lvl8.json`** — Nix at level 8 (2026-11-12:
+Tough for Lucky, CON 16, 102 HP, the brazier's third Channel Divinity and
+Turn Undead). Download it on the phone from
+**https://dosenft.github.io/the-codex/codex-nix-lvl8.json** (if it shows as
+text: ⋮ → the ↓ download icon). A copy is also in `Documents\Tabletop`.
+Export from the phone first (⚙ Settings → Export) so the old copy is kept.
 
 Then, in the app: **⚙ Settings → Import → pick the file.**
 
-**Check one number before you trust it.** Open **PLAY → Combat** and confirm
-you see **67/67** hit points and **LAY ON HANDS 35/35**. If those two are
-right, the import took.
+**Check two numbers before you trust it.** Open **PLAY → Combat** and confirm
+you see **102/102** hit points, **LAY ON HANDS 40/40** and **Channel Divinity
+3/3**. If those are right, the import took. (The app will say the sheet and
+the 2024 rules disagree on one thing: the two 3rd-level spell slots, which a
+level-8 Paladin doesn't normally have. Ask the DM.)
 
 ### Do this too: export a fresh copy from the phone
 
