@@ -1749,17 +1749,20 @@ export function CharacterPage({ character, onCharacterUpdate }: CharacterPagePro
 
             return (
               <GlassCard key={`${feat.name}-${i}`} className="p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  {/* `min-w-0 flex-1` + a wrapping badge: a long source label
+                      ("PHB 2024 (origin feat, replaced Lucky at level 8)") pushed
+                      the Delete button off a 375px screen (verifier, 2026-11-12). */}
+                  <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
                     <span className="text-sm font-semibold text-forge-0">{feat.name}</span>
-                    <Badge variant={feat.isHomebrew ? 'eldritch' : 'arcane'}>
+                    <Badge variant={feat.isHomebrew ? 'eldritch' : 'arcane'} className="whitespace-normal break-words text-left max-w-full">
                       {feat.isHomebrew ? 'Homebrew' : feat.source || 'PHB'}
                     </Badge>
                     {feat.abilityIncrease && (
                       <Badge variant="verdant">+{feat.abilityIncrease.amount} {feat.abilityIncrease.ability}</Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => setStudyingProperty(isStudying ? null : `feat-detail:${i}`)}
                       className={cn(

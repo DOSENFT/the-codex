@@ -5,7 +5,8 @@ import { findPool, setPoolCurrent } from '../../lib/rules-2024/resources'
 import { CHANNEL_DIVINITY_POOL, channelDivinityOptions } from '../../lib/rules-2024/channel-divinity'
 import { CombatProvider, useCombat } from './CombatProvider'
 import { TurnScreenD } from './TurnScreenD'
-import { TurnRail, TurnVerbs } from './TurnRail'
+import { TurnRail, TurnVerbs, type ChoiceUseResult, type PoolChoice } from './TurnRail'
+import { allOptions } from '../../lib/turn/reactions'
 import { QuickLookup } from '../combat/QuickLookup'
 import { InlineOptionCard } from '../combat/InlineOptionCard'
 import { RetaliationCapture } from '../combat/RetaliationCapture'
@@ -437,6 +438,20 @@ function Screen({
     if (!pool) return
     onCharacterUpdate(setPoolCurrent(character, poolId, pool.current - amount))
   }
+  /* A choice that GRANTS something (the flaming cloak's 11 temp HP) is paid
+     through the turn engine's own option for it, so the grant lands, the
+     Reaction is marked used, and Undo takes all three back together. Found by
+     the verifier, 2026-11-12: Use spent the charge but left temp HP at 0.
+     Everything else stays a plain pool spend (null). Matched by SHAPE — same
+     pool, same temp-HP number — never by name. */
+  const handleUseChoice = (poolId: string, choice: PoolChoice): ChoiceUseResult => {
+    if (!choice.grantsTempHP || !combat.inCombat) return null
+    const option = allOptions(combat.turn).find(
+      o => o.cost.resourcePoolId === poolId && o.grantsTempHP === choice.grantsTempHP,
+    )
+    if (!option) return null
+    return combat.take(option) ? 'took' : 'refused'
+  }
   const handleReset = () =>
     combat.updateCombat(prev => ({
       ...prev,
@@ -538,6 +553,8 @@ function Screen({
             /* Marcus, 2026-11-12: a Channel Divinity pip opens what a charge
                can buy instead of spending blind. Empty list → old behaviour. */
             poolChoices={cdChoices.length > 0 ? { [CHANNEL_DIVINITY_POOL]: cdChoices } : undefined}
+            onUseChoice={handleUseChoice}
+            onUndoChoice={combat.undoLast}
           />
           {/* ── THE SHEET-VS-2024 FLAG — slice 9, and the whole of its wiring ──
               A label belongs ON the thing it labels. `TurnRail` paints the nine

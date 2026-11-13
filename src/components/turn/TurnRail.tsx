@@ -14,7 +14,14 @@ export interface PoolChoice {
   facts?: string
   detail?: string
   sourceLabel?: string
+  /** Set when the choice grants temporary HP (the flaming cloak). */
+  grantsTempHP?: number
 }
+
+/** How a choice's Use was paid. 'took' = the turn engine recorded it (and Undo
+ *  must go through the engine's undo); 'refused' = the engine said no, nothing
+ *  was spent; null = not the engine's to handle, so spend one from the pool. */
+export type ChoiceUseResult = 'took' | 'refused' | null
 
 /* ============================================================================
    TurnRail — the card's one strip of chrome, and the thing that finally makes
@@ -176,6 +183,11 @@ export interface TurnRailProps {
    *  for"). A spent pip still restores in one tap. Absent or empty → the pip
    *  spends directly, exactly as before. */
   poolChoices?: Readonly<Record<string, readonly PoolChoice[]>>
+  /** Optional: lets the screen pay for a choice through the turn engine (the
+   *  cloak's temp HP). Return null to fall back to a plain pool spend. */
+  onUseChoice?: (poolId: string, choice: PoolChoice) => ChoiceUseResult
+  /** Undo for a choice the engine took. */
+  onUndoChoice?: () => void
 }
 
 /* ============================================================================
@@ -192,7 +204,7 @@ export interface PoolChoicePanelProps {
   choices: readonly PoolChoice[]
   /** Name of what was just paid for; null while choosing. '' = "just one". */
   used: string | null
-  onUse: (name: string) => void
+  onUse: (choice: PoolChoice) => void
   onSpendPlain: () => void
   onUndo: () => void
   onClose: () => void
@@ -258,7 +270,7 @@ export function PoolChoicePanel({
                 <button
                   type="button"
                   className="rbtn rchoice-use"
-                  onClick={() => onUse(choice.name)}
+                  onClick={() => onUse(choice)}
                   disabled={pool.current < 1}
                   aria-label={`Use ${choice.name} — spends 1 ${pool.name}`}
                 >
@@ -294,6 +306,8 @@ export function TurnRail({
   onRestoreSlot,
   onSpendResource,
   poolChoices,
+  onUseChoice,
+  onUndoChoice,
 }: TurnRailProps) {
   /* Pools split by the ONE thing that decides how they are drawn. `points` is a
      quantity you spend some of; everything else is a countable use, and a use
@@ -304,7 +318,7 @@ export function TurnRail({
   /* The open choice list, if any. Local, not lifted: it is a transient view of
      a pool, it spends only through `onSpendResource`, and a reload closing it
      loses nothing. */
-  const [menu, setMenu] = useState<{ poolId: string; used: string | null } | null>(null)
+  const [menu, setMenu] = useState<{ poolId: string; used: string | null; viaEngine?: boolean } | null>(null)
   const openerRef = useRef<HTMLButtonElement | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
 
@@ -323,14 +337,24 @@ export function TurnRail({
     setMenu(null)
     openerRef.current?.focus()
   }
-  const spendFromMenu = (name: string) => {
+  const spendFromMenu = (choice: PoolChoice) => {
+    if (!menu) return
+    const result = onUseChoice?.(menu.poolId, choice) ?? null
+    // Refused: the engine has already said why on screen; nothing was spent,
+    // so the list stays open and "Just spend one" is still there.
+    if (result === 'refused') return
+    if (result === null) onSpendResource?.(menu.poolId, 1)
+    setMenu({ poolId: menu.poolId, used: choice.name, viaEngine: result === 'took' })
+  }
+  const spendPlain = () => {
     if (!menu) return
     onSpendResource?.(menu.poolId, 1)
-    setMenu({ poolId: menu.poolId, used: name })
+    setMenu({ poolId: menu.poolId, used: '' })
   }
   const undoFromMenu = () => {
     if (!menu) return
-    onSpendResource?.(menu.poolId, -1)
+    if (menu.viaEngine && onUndoChoice) onUndoChoice()
+    else onSpendResource?.(menu.poolId, -1)
     setMenu({ poolId: menu.poolId, used: null })
   }
 
@@ -484,7 +508,7 @@ export function TurnRail({
           choices={menuChoices}
           used={menu.used}
           onUse={spendFromMenu}
-          onSpendPlain={() => spendFromMenu('')}
+          onSpendPlain={spendPlain}
           onUndo={undoFromMenu}
           onClose={closeMenu}
         />

@@ -245,7 +245,7 @@ export function MagicItems({ character, onCharacterUpdate }: MagicItemsProps) {
                   <button
                     key={p.name}
                     type="button"
-                    onClick={() => setDraft({ ...draftOf({ ...p, equipped: true }), id: null })}
+                    onClick={() => { setDraft({ ...draftOf({ ...p, equipped: true }), id: null }); setError(null) }}
                     className={cn(chipBase, 'bg-white/[0.03] border-white/10 text-forge-0 hover:border-arcane/40')}
                   >
                     <Gem size={13} className="text-arcane" aria-hidden />

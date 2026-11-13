@@ -47,6 +47,10 @@ export interface ChannelDivinityOption {
   detail?: string
   /** Where it comes from, in words: "Paladin", "Oath of the Hearth", "DM gift…". */
   sourceLabel: string
+  /** Temporary HP this choice grants (the flaming cloak), worked out from level
+   *  and Charisma. Lets the screen route Use through the turn engine's own
+   *  option, which applies the grant and undoes it with the charge. */
+  grantsTempHP?: number
 }
 
 const MENU_PREFIX = /^\s*channel\s+divinity\s*[:\-–—]\s*/i
@@ -135,6 +139,7 @@ function canonOptions(character: Character): ChannelDivinityOption[] {
         summary: parts.join(' · '),
         detail: at >= 0 ? raw.slice(at) : raw || undefined,
         sourceLabel,
+        ...(tempHP > 0 ? { grantsTempHP: tempHP } : {}),
       })
       continue
     }

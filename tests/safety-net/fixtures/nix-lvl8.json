@@ -508,7 +508,7 @@
     {
       "name": "Tough",
       "description": "Your Hit Point maximum increases by twice your character level (+16 at level 8), and by 2 more every time you gain a level.",
-      "source": "PHB 2024 (origin feat, replaced Lucky at level 8)",
+      "source": "PHB 2024",
       "isHomebrew": false,
       "effects": [
         "+16 max HP at level 8",

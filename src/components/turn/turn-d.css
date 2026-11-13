@@ -722,10 +722,9 @@
   font-size: var(--d-fs-body);
   line-height: var(--d-lh-body);
   color: var(--d-cream);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  /* No line clamp: the verifier caught Divine Sense cut off at "Celestial,
+     Fiend, or…" — the clamp hid the very word (Undead) he is choosing it for.
+     The texts are two sentences at most; the panel scrolls with its column. */
 }
 .dturn .rchoice-use { flex: 0 0 auto; min-width: 64px; color: var(--d-amber); border-color: var(--d-gold); font-weight: 600; }
 .dturn .rchoice-doors { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--d-s2); }
@@ -779,6 +778,12 @@
      resources that colC was showing, and two copies is item 6 rebuilt. */
   .dturn.has-rail .body { grid-template-columns: 300px minmax(0, 1fr); }
   .dturn .colA, .dturn .colC { display: flex; flex-direction: column; }
+  /* colA is its OWN scroll region (2026-11-12). The Channel Divinity choice
+     panel grows the rail, and focusing its first Use button below colA's edge
+     made the browser scroll the nearest scrollable ancestor — `.body`, which is
+     overflow-hidden — so the whole spread jumped 472px with no wheel to undo
+     it. Same treatment colB already has, one column over. */
+  .dturn .colA { overflow-y: auto; overscroll-behavior: contain; }
   /* On the tablet the SCROLL MOVES ONE LEVEL UP, for the same reason it moved
      on the phone: with .list no longer its own scroll region, the middle
      column is what scrolls, in one continuous surface, while vitals and

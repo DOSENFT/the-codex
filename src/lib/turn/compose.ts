@@ -290,6 +290,45 @@ function grantingFaceEconomy(feature: CanonFeature | undefined): EconomyFiling |
  *  `compose.temphp.test.ts` pins every side of this, because getting it
  *  backwards is a bug that would ship looking like a feature.
  *  Table Truth slice 10d · Held Reaction slice 3. */
+/** "expend one use of your Channel Divinity" — the price sentence, not the noun. */
+const SPENDS_CHANNEL_DIVINITY = /\bexpend\s+(?:one|a|1)\s+use\s+of\s+(?:your\s+)?channel\s+divinity\b/i
+
+/** The pool a FACE of a feature charges, when canon's sentence for that face
+ *  says so and the feature row itself declares no pool.
+ *
+ *  Found 2026-11-12 (verifier): Hearthfire Manifest's Reaction face — "As a
+ *  Reaction, you can expend one use of your Channel Divinity…" — granted its 11
+ *  temp HP and charged NOTHING, because his sheet carries the feature with no
+ *  pool binding and `costOf` only looks at the feature. So every cloak raised
+ *  from the reaction row was a free Channel Divinity use.
+ *
+ *  Shape, never a name: the face whose own text carries the spend sentence, on
+ *  a sheet that has the pool. A feature with an explicit binding keeps it.
+ *  Returns the cost unchanged otherwise, plus the empty-pool reason (if any)
+ *  so the row greys out instead of failing on the tap. */
+function withFacePoolCost(
+  option: OverlaidOption,
+  cost: OptionCost,
+  character: Character,
+): { cost: OptionCost; emptyReason?: string } {
+  if (option.type !== 'feature' || cost.resourcePoolId) return { cost }
+  const faces = facesOf(featureByName(option.name))
+  if (faces.length < 2) return { cost }
+  const face = faces.find(f => f.economy === cost.slot)
+  if (!face || !SPENDS_CHANNEL_DIVINITY.test(face.text)) return { cost }
+  const pool = findPool(character, 'channel-divinity')
+  if (!pool) return { cost }
+  return {
+    cost: {
+      ...cost,
+      resourcePoolId: pool.id,
+      resourceAmount: 1,
+      label: `${ECONOMY_LABEL[cost.slot]} · ${pool.current}/${pool.max} ${pool.unit}`,
+    },
+    ...(pool.current < 1 ? { emptyReason: `No ${pool.name} uses left` } : {}),
+  }
+}
+
 function tempHPGrantOf(
   option: OverlaidOption,
   cost: OptionCost,
@@ -524,7 +563,7 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
   const build = (option: OverlaidOption, slot: EconomySlot): TurnOption => {
     const weapon = option.type === 'weapon' ? weaponsByName.get(option.name) : undefined
     const feature = option.type === 'feature' ? featuresByName.get(option.name) : undefined
-    const cost = costOf(option, slot, feature, character)
+    const { cost, emptyReason } = withFacePoolCost(option, costOf(option, slot, feature, character), character)
 
     // PRECEDENCE: say the reason that OUTLIVES THE TURN.
     //
@@ -545,6 +584,9 @@ export function composeTurn(input: ComposeInput): ComposedTurn {
       blockedReason = `You are ${blamed}`
     } else if (option.unaffordableReason) {
       blockedReason = option.unaffordableReason
+    } else if (emptyReason) {
+      // An empty pool outlives the turn, so it sits with the other lasting reasons.
+      blockedReason = emptyReason
     } else if (!yourTurn && slot !== 'reaction' && slot !== 'free') {
       // Slice 7, and it sits HERE for the same reason the rest of this chain is
       // ordered the way it is. It is below a condition and below an empty pool,

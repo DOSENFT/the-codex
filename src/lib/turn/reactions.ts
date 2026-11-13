@@ -168,7 +168,7 @@ export function disambiguateHeadings(rows: ReactionRow[]): ReactionRow[] {
  *  `ranked` first, then `rest`, then the faces of each mutex group — which is
  *  reading order on screen, so a reaction that IS ranked (off your turn) keeps
  *  the priority the engine gave it. */
-function allOptions(turn: ComposedTurn): TurnOption[] {
+export function allOptions(turn: ComposedTurn): TurnOption[] {
   const seen = new Set<string>()
   const out: TurnOption[] = []
   for (const option of [...turn.ranked, ...turn.rest, ...turn.mutex.flatMap(g => g.faces)]) {

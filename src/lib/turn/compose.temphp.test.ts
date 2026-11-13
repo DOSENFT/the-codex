@@ -212,12 +212,20 @@ describe('slice 3 — the grant reaches a sheet nobody split by hand', () => {
     expect(HIS_SHAPE.resourcePools).toEqual([])
   })
 
-  it('composes three rows for the one feature, and NO row derives a pool', () => {
+  it('composes three rows for the one feature; no row derives a pool FROM THE FEATURE', () => {
     // The premise of the old gate, measured rather than assumed. Every one of
     // these had `grantsTempHP === undefined` before this slice.
+    //
+    // AMENDED 2026-11-12, deliberately. This used to assert that NO row carries
+    // a pool at all — which was also the bug: the cloak granted its temp HP and
+    // charged no Channel Divinity. The Reaction face now charges the pool its
+    // OWN canon sentence names ("expend one use of your Channel Divinity",
+    // `withFacePoolCost`). The premise this test exists for still holds for the
+    // other two rows: nothing is derived from the feature itself.
     const rows = hearthRows()
     expect(rows.map(r => r.cost.slot).sort()).toEqual(['action', 'bonusAction', 'reaction'])
-    expect(rows.every(r => r.cost.resourcePoolId === undefined)).toBe(true)
+    expect(rows.filter(r => r.cost.slot !== 'reaction').every(r => r.cost.resourcePoolId === undefined)).toBe(true)
+    expect(rows.find(r => r.cost.slot === 'reaction')?.cost.resourcePoolId).toBe('channel-divinity')
   })
 
   it('the Reaction row grants 10, with an empty pool list', () => {
